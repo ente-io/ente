@@ -1,7 +1,11 @@
 import React, { useContext, useState, useEffect } from 'react';
 import constants from 'utils/strings/constants';
 import { GalleryContext } from 'pages/gallery';
-import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
+import {
+    ARCHIVE_SECTION,
+    DUMMY_UNCATEGORIZED_SECTION,
+    TRASH_SECTION,
+} from 'constants/collection';
 import { CollectionSummaries } from 'types/collection';
 import ShortcutButton from './ShortcutButton';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
@@ -22,8 +26,12 @@ export default function ShortcutSection({
         useState<number>();
     useEffect(() => {
         const main = async () => {
-            const unCategorisedCollection = await getUncategorizedCollection();
-            setUncategorizedCollectionID(unCategorisedCollection.id);
+            const unCategorizedCollection = await getUncategorizedCollection();
+            if (unCategorizedCollection) {
+                setUncategorizedCollectionID(unCategorizedCollection.id);
+            } else {
+                setUncategorizedCollectionID(DUMMY_UNCATEGORIZED_SECTION);
+            }
         };
         main();
     }, []);

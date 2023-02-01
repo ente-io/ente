@@ -1,5 +1,6 @@
 export const ARCHIVE_SECTION = -1;
 export const TRASH_SECTION = -2;
+export const DUMMY_UNCATEGORIZED_SECTION = -3;
 export const ALL_SECTION = 0;
 export enum CollectionType {
     folder = 'folder',

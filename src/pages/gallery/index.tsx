@@ -61,7 +61,9 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     CollectionType,
+    DUMMY_UNCATEGORIZED_SECTION,
     TRASH_SECTION,
+    UNCATEGORIZED_COLLECTION_NAME,
 } from 'constants/collection';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/error';
@@ -327,6 +329,8 @@ export default function Gallery() {
                 collectionURL += constants.ARCHIVE;
             } else if (activeCollection === TRASH_SECTION) {
                 collectionURL += constants.TRASH;
+            } else if (activeCollection === DUMMY_UNCATEGORIZED_SECTION) {
+                collectionURL += UNCATEGORIZED_COLLECTION_NAME;
             } else {
                 collectionURL += activeCollection;
             }
@@ -409,7 +413,7 @@ export default function Gallery() {
         const archivedCollections = getArchivedCollections(collections);
         setArchivedCollections(archivedCollections);
 
-        const collectionSummaries = getCollectionSummaries(
+        const collectionSummaries = await getCollectionSummaries(
             user,
             collections,
             files,

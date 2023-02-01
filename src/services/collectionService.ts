@@ -40,6 +40,7 @@ import {
     CollectionSummaryType,
     UNCATEGORIZED_COLLECTION_NAME,
     FAVORITE_COLLECTION_NAME,
+    DUMMY_UNCATEGORIZED_SECTION,
 } from 'constants/collection';
 import {
     NEW_COLLECTION_MAGIC_METADATA,
@@ -498,7 +499,10 @@ export const removeFromCollection = async (
     files: EnteFile[]
 ) => {
     try {
-        const uncategorizedCollection = await getUncategorizedCollection();
+        let uncategorizedCollection = await getUncategorizedCollection();
+        if (!uncategorizedCollection) {
+            uncategorizedCollection = await createUnCategorizedCollection();
+        }
         const allFiles = await getLocalFiles();
         const groupiedFiles = groupFilesBasedOnID(allFiles);
         for (const file of files) {
@@ -830,12 +834,12 @@ function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
     }
 }
 
-export function getCollectionSummaries(
+export async function getCollectionSummaries(
     user: User,
     collections: Collection[],
     files: EnteFile[],
     archivedCollections: Set<number>
-): CollectionSummaries {
+): Promise<CollectionSummaries> {
     const collectionSummaries: CollectionSummaries = new Map();
     const collectionLatestFiles = getCollectionLatestFiles(
         files,
@@ -847,12 +851,15 @@ export function getCollectionSummaries(
     );
 
     for (const collection of collections) {
-        if (collectionFilesCount.get(collection.id)) {
+        if (
+            collectionFilesCount.get(collection.id) ||
+            collection.type === CollectionType.uncategorized
+        ) {
             collectionSummaries.set(collection.id, {
                 id: collection.id,
                 name: collection.name,
                 latestFile: collectionLatestFiles.get(collection.id),
-                fileCount: collectionFilesCount.get(collection.id),
+                fileCount: collectionFilesCount.get(collection.id) ?? 0,
                 updationTime: collection.updationTime,
                 type: isIncomingShare(collection, user)
                     ? CollectionSummaryType.incomingShare
@@ -865,6 +872,16 @@ export function getCollectionSummaries(
                     : CollectionSummaryType[collection.type],
             });
         }
+    }
+    const uncategorizedCollection = await getUncategorizedCollection(
+        collections
+    );
+
+    if (!uncategorizedCollection) {
+        collectionSummaries.set(
+            DUMMY_UNCATEGORIZED_SECTION,
+            getDummyUncategorizedCollectionSummaries()
+        );
     }
     collectionSummaries.set(
         ALL_SECTION,
@@ -933,6 +950,17 @@ function getAllCollectionSummaries(
     };
 }
 
+function getDummyUncategorizedCollectionSummaries(): CollectionSummary {
+    return {
+        id: ALL_SECTION,
+        name: UNCATEGORIZED_COLLECTION_NAME,
+        type: CollectionSummaryType.uncategorized,
+        latestFile: null,
+        fileCount: 0,
+        updationTime: 0,
+    };
+}
+
 function getArchivedCollectionSummaries(
     collectionFilesCount: CollectionFilesCount,
     collectionsLatestFile: CollectionLatestFiles
@@ -961,18 +989,20 @@ function getTrashedCollectionSummaries(
     };
 }
 
-export async function getUncategorizedCollection(): Promise<Collection> {
-    const collections = await getLocalCollections();
-    let uncategorizedCollection = collections.find(
+export async function getUncategorizedCollection(
+    collections?: Collection[]
+): Promise<Collection> {
+    if (!collections) {
+        collections = await getLocalCollections();
+    }
+    const uncategorizedCollection = collections.find(
         (collection) => collection.type === CollectionType.uncategorized
     );
-    if (!uncategorizedCollection) {
-        uncategorizedCollection = await createUnCategorizedCollection();
-    }
+
     return uncategorizedCollection;
 }
 
-async function createUnCategorizedCollection() {
+export async function createUnCategorizedCollection() {
     return createCollection(
         UNCATEGORIZED_COLLECTION_NAME,
         CollectionType.uncategorized
