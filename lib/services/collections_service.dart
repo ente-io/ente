@@ -159,6 +159,8 @@ class CollectionsService {
   void clearCache() {
     _localPathToCollectionID.clear();
     _collectionIDToCollections.clear();
+    cachedDefaultHiddenCollection = null;
+    cachedUncategorizedCollection = null;
     _cachedKeys.clear();
   }
 
