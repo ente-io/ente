@@ -164,6 +164,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                             pressedColor:
                                 getEnteColorScheme(context).fillFaintPressed,
                             borderRadius: 8,
+                            alwaysShowSuccessState: true,
                             onTap: () async {
                               for (var pathItem in paths) {
                                 if (pathItem.allowCacheClear) {

@@ -113,6 +113,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,
+                    surfaceExecutionStates: false,
                     onTap: () async {
                       await showPicker();
                     },
@@ -140,6 +141,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     onTap: () async {
                       await _showDeviceLimitPicker();
                     },
+                    surfaceExecutionStates: false,
                   ),
                   DividerWidget(
                     dividerType: DividerType.menuNoIcon,
@@ -225,6 +227,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     leadingIconColor: warning500,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     pressedColor: getEnteColorScheme(context).fillFaint,
+                    surfaceExecutionStates: false,
                     onTap: () async {
                       final bool result = await sharingActions.disableUrl(
                         context,

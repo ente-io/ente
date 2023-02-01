@@ -36,21 +36,13 @@ class CollectionActions {
     Collection collection, {
     bool enableCollect = false,
   }) async {
-    final dialog = createProgressDialog(
-      context,
-      "Creating link...",
-      isDismissible: true,
-    );
     try {
-      await dialog.show();
       await CollectionsService.instance.createShareUrl(
         collection,
         enableCollect: enableCollect,
       );
-      dialog.hide();
       return true;
     } catch (e) {
-      dialog.hide();
       if (e is SharingNotPermittedForFreeAccountsError) {
         _showUnSupportedAlert(context);
       } else {

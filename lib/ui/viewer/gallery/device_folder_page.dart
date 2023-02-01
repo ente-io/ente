@@ -238,6 +238,7 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
           borderRadius: 8.0,
           menuItemColor: getEnteColorScheme(context).fillFaint,
           leadingIcon: Icons.cloud_off_outlined,
+          alwaysShowSuccessState: true,
           onTap: () async {
             await _removeFilesFromIgnoredFiles(
               widget.filesInDeviceCollection,

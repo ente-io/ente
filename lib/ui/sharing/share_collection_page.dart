@@ -170,6 +170,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               leadingIcon: Icons.copy,
               menuItemColor: getEnteColorScheme(context).fillFaint,
               pressedColor: getEnteColorScheme(context).fillFaint,
+              showOnlyLoadingState: true,
               onTap: () async {
                 await Clipboard.setData(ClipboardData(text: url));
                 showShortToast(context, "Link copied to clipboard");
@@ -239,6 +240,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           menuItemColor: getEnteColorScheme(context).fillFaint,
           pressedColor: getEnteColorScheme(context).fillFaint,
           isBottomBorderRadiusRemoved: true,
+          showOnlyLoadingState: true,
           onTap: () async {
             final bool result =
                 await collectionActions.enableUrl(context, widget.collection);
@@ -259,6 +261,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           leadingIcon: Icons.link,
           menuItemColor: getEnteColorScheme(context).fillFaint,
           pressedColor: getEnteColorScheme(context).fillFaint,
+          showOnlyLoadingState: true,
           onTap: () async {
             final bool result = await collectionActions.enableUrl(
               context,

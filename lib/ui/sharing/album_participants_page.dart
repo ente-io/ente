@@ -160,7 +160,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           trailingIconIsMuted: true,
                           onTap: () async {
                             if (isOwner) {
-                              await _navigateToManageUser(currentUser);
+                              _navigateToManageUser(currentUser);
                             }
                           },
                           isTopBorderRadiusRemoved: listIndex > 0,
@@ -185,7 +185,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       pressedColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
-                        await _navigateToAddUser(false);
+                        _navigateToAddUser(false);
                       },
                       isTopBorderRadiusRemoved: collaborators.isNotEmpty,
                       borderRadius: 8,
@@ -259,7 +259,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       pressedColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
-                        await _navigateToAddUser(true);
+                        _navigateToAddUser(true);
                       },
                       isTopBorderRadiusRemoved: viewers.isNotEmpty,
                       borderRadius: 8,

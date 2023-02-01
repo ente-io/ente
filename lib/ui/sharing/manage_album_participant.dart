@@ -80,7 +80,6 @@ class _ManageIndividualParticipantState
                         widget.collection,
                         widget.user.email,
                         role: CollectionParticipantRole.collaborator,
-                        showProgress: true,
                       );
                       if ((result ?? false) && mounted) {
                         widget.user.role = CollectionParticipantRole
@@ -113,7 +112,6 @@ class _ManageIndividualParticipantState
                         widget.collection,
                         widget.user.email,
                         role: CollectionParticipantRole.viewer,
-                        showProgress: true,
                       );
                       if ((result ?? false) && mounted) {
                         widget.user.role =
@@ -139,6 +137,7 @@ class _ManageIndividualParticipantState
               leadingIconColor: warning500,
               menuItemColor: getEnteColorScheme(context).fillFaint,
               pressedColor: getEnteColorScheme(context).fillFaint,
+              surfaceExecutionStates: false,
               onTap: () async {
                 final result = await collectionActions.removeParticipant(
                   context,
