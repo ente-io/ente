@@ -54,7 +54,7 @@ class MenuItemWidget extends StatefulWidget {
     this.onDoubleTap,
     this.menuItemColor,
     this.alignCaptionedTextToLeft = false,
-    this.borderRadius = 4.0,
+    this.borderRadius = 8.0,
     this.pressedColor,
     this.expandableController,
     this.isBottomBorderRadiusRemoved = false,

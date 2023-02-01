@@ -72,7 +72,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         ),
         leadingIcon: Icons.add,
         menuItemColor: getEnteColorScheme(context).fillFaint,
-        borderRadius: 4.0,
         isTopBorderRadiusRemoved: _sharees.isNotEmpty,
         isBottomBorderRadiusRemoved: true,
         onTap: () async {
@@ -101,8 +100,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         ),
         leadingIcon: Icons.add,
         menuItemColor: getEnteColorScheme(context).fillFaint,
-        borderRadius: 4.0,
-        isTopBorderRadiusRemoved: _sharees.isNotEmpty,
+        isTopBorderRadiusRemoved: true,
         onTap: () async {
           routeToPage(context, AddParticipantPage(widget.collection, false))
               .then(
