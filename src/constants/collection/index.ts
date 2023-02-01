@@ -59,8 +59,6 @@ export const UPLOAD_NOT_ALLOWED_COLLECTION_TYPES = new Set([
     CollectionSummaryType.all,
     CollectionSummaryType.archive,
     CollectionSummaryType.incomingShare,
-    CollectionSummaryType.outgoingShare,
-    CollectionSummaryType.sharedOnlyViaLink,
     CollectionSummaryType.trash,
     CollectionSummaryType.uncategorized,
 ]);
