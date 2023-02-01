@@ -10,6 +10,7 @@ class TrailingWidget extends StatefulWidget {
   final Widget? trailingWidget;
   final bool trailingIconIsMuted;
   final double trailingExtraMargin;
+  final bool showExecutionStates;
   const TrailingWidget({
     required this.executionStateNotifier,
     this.trailingIcon,
@@ -17,6 +18,7 @@ class TrailingWidget extends StatefulWidget {
     this.trailingWidget,
     required this.trailingIconIsMuted,
     required this.trailingExtraMargin,
+    required this.showExecutionStates,
     super.key,
   });
   @override
@@ -27,7 +29,9 @@ class _TrailingWidgetState extends State<TrailingWidget> {
   Widget? trailingWidget;
   @override
   void initState() {
-    widget.executionStateNotifier.addListener(_executionStateListener);
+    widget.showExecutionStates
+        ? widget.executionStateNotifier.addListener(_executionStateListener)
+        : null;
     super.initState();
   }
 
@@ -39,7 +43,7 @@ class _TrailingWidgetState extends State<TrailingWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (trailingWidget == null) {
+    if (trailingWidget == null || !widget.showExecutionStates) {
       _setTrailingIcon();
     }
     return AnimatedSwitcher(

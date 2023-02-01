@@ -52,6 +52,8 @@ class MenuItemWidget extends StatefulWidget {
   ///loading state
   final bool showOnlyLoadingState;
 
+  final bool surfaceExecutionStates;
+
   const MenuItemWidget({
     required this.captionedTextWidget,
     this.isExpandable = false,
@@ -75,6 +77,7 @@ class MenuItemWidget extends StatefulWidget {
     this.isTopBorderRadiusRemoved = false,
     this.isGestureDetectorDisabled = false,
     this.showOnlyLoadingState = false,
+    this.surfaceExecutionStates = true,
     Key? key,
   }) : super(key: key);
 
@@ -178,6 +181,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
               trailingWidget: widget.trailingWidget,
               trailingIconIsMuted: widget.trailingIconIsMuted,
               trailingExtraMargin: widget.trailingExtraMargin,
+              showExecutionStates: widget.surfaceExecutionStates,
               key: ValueKey(widget.trailingIcon.hashCode),
             ),
         ],
