@@ -51,10 +51,11 @@ export function QuickOptions({
                 <Tooltip
                     title={
                         collectionSummaryType ===
-                            CollectionSummaryType.favorites ||
-                        collectionSummaryType ===
-                            CollectionSummaryType.uncategorized
-                            ? constants.DOWNLOAD_FAVOURITES
+                        CollectionSummaryType.favorites
+                            ? constants.DOWNLOAD_FAVORITES
+                            : collectionSummaryType ===
+                              CollectionSummaryType.uncategorized
+                            ? constants.DOWNLOAD_UNCATEGORIZED
                             : constants.DOWNLOAD_COLLECTION
                     }>
                     <IconButton

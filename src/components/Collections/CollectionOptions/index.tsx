@@ -90,10 +90,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 callback = confirmDeleteCollection;
                 break;
             case CollectionActions.DELETE_WITH_FILES:
-                callback = deleteCollection;
+                callback = deleteCollectionAlongWithFiles;
                 break;
             case CollectionActions.DELETE_BUT_KEEP_FILES:
-                callback = deleteButkeepFiles;
+                callback = deleteCollectionButKeepFiles;
                 break;
             case CollectionActions.SHOW_SHARE_DIALOG:
                 callback = showCollectionShareModal;
@@ -142,12 +142,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         }
     };
 
-    const deleteCollection = async () => {
+    const deleteCollectionAlongWithFiles = async () => {
         await CollectionAPI.deleteCollection(activeCollection.id, false);
         redirectToAll();
     };
 
-    const deleteButkeepFiles = async () => {
+    const deleteCollectionButKeepFiles = async () => {
         const allFiles = await getLocalFiles();
         const collectionFiles = allFiles.filter((file) => {
             return file.collectionID === activeCollection.id;
@@ -156,7 +156,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             activeCollection.id,
             collectionFiles
         );
-        console.log(collectionFiles);
         await CollectionAPI.deleteCollection(activeCollection.id, true);
         redirectToAll();
     };
@@ -280,12 +279,13 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                   CollectionSummaryType.favorites ? (
                     <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
-                        downloadOptionText={constants.DOWNLOAD_FAVOURITES}
+                        downloadOptionText={constants.DOWNLOAD_FAVORITES}
                     />
                 ) : collectionSummaryType ===
                   CollectionSummaryType.uncategorized ? (
                     <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
+                        downloadOptionText={constants.DOWNLOAD_UNCATEGORIZED}
                     />
                 ) : collectionSummaryType ===
                   CollectionSummaryType.incomingShare ? (

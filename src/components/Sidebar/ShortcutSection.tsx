@@ -18,17 +18,18 @@ export default function ShortcutSection({
     collectionSummaries,
 }: Iprops) {
     const galleryContext = useContext(GalleryContext);
-    const [unCategorizedCollectionId, setUncategorezedId] = useState<number>();
+    const [uncategorizedCollectionId, setUncategorizedCollectionID] =
+        useState<number>();
     useEffect(() => {
         const main = async () => {
             const unCategorisedCollection = await getUncategorizedCollection();
-            setUncategorezedId(unCategorisedCollection.id);
+            setUncategorizedCollectionID(unCategorisedCollection.id);
         };
         main();
     }, []);
 
     const openUncategorizedSection = () => {
-        galleryContext.setActiveCollection(unCategorizedCollectionId);
+        galleryContext.setActiveCollection(uncategorizedCollectionId);
         closeSidebar();
     };
 
@@ -48,7 +49,7 @@ export default function ShortcutSection({
                 label={constants.UNCATEGORIZED}
                 onClick={openUncategorizedSection}
                 count={
-                    collectionSummaries.get(unCategorizedCollectionId)
+                    collectionSummaries.get(uncategorizedCollectionId)
                         ?.fileCount
                 }
             />
