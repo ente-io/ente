@@ -40,7 +40,7 @@ export enum CollectionActions {
     ARCHIVE,
     UNARCHIVE,
     CONFIRM_DELETE,
-    DELETE,
+    DELETE_WITH_FILES,
     DELETE_BUT_KEEP_FILES,
     SHOW_SHARE_DIALOG,
     CONFIRM_EMPTY_TRASH,
@@ -89,7 +89,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.CONFIRM_DELETE:
                 callback = confirmDeleteCollection;
                 break;
-            case CollectionActions.DELETE:
+            case CollectionActions.DELETE_WITH_FILES:
                 callback = deleteCollection;
                 break;
             case CollectionActions.DELETE_BUT_KEEP_FILES:
@@ -199,7 +199,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             content: constants.DELETE_COLLECTION_MESSAGE(),
             proceed: {
                 text: constants.DELETE_COLLECTION,
-                action: handleCollectionAction(CollectionActions.DELETE),
+                action: handleCollectionAction(
+                    CollectionActions.DELETE_WITH_FILES
+                ),
                 variant: 'danger',
             },
             secondary: {
