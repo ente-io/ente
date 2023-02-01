@@ -48,6 +48,10 @@ class MenuItemWidget extends StatefulWidget {
   /// disable gesture detector if not used
   final bool isGestureDetectorDisabled;
 
+  ///Success state will not be shown if this flag is set to true, only idle and
+  ///loading state
+  final bool showOnlyLoadingState;
+
   const MenuItemWidget({
     required this.captionedTextWidget,
     this.isExpandable = false,
@@ -70,6 +74,7 @@ class MenuItemWidget extends StatefulWidget {
     this.isBottomBorderRadiusRemoved = false,
     this.isTopBorderRadiusRemoved = false,
     this.isGestureDetectorDisabled = false,
+    this.showOnlyLoadingState = false,
     Key? key,
   }) : super(key: key);
 
@@ -192,10 +197,14 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         .onError((error, stackTrace) => _debouncer.cancelDebounce());
     _debouncer.cancelDebounce();
     if (executionStateNotifier.value == ExecutionState.inProgress) {
-      executionStateNotifier.value = ExecutionState.successful;
-      Future.delayed(const Duration(seconds: 2), () {
+      if (widget.showOnlyLoadingState) {
         executionStateNotifier.value = ExecutionState.idle;
-      });
+      } else {
+        executionStateNotifier.value = ExecutionState.successful;
+        Future.delayed(const Duration(seconds: 2), () {
+          executionStateNotifier.value = ExecutionState.idle;
+        });
+      }
     }
   }
 
