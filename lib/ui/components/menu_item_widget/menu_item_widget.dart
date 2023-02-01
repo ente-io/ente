@@ -54,6 +54,10 @@ class MenuItemWidget extends StatefulWidget {
 
   final bool surfaceExecutionStates;
 
+  ///To show success state even when execution time < debouce time, set this
+  ///flag to true. If the loading state needs to be shown and success state not,
+  ///set the showOnlyLoadingState flag to true, setting this flag to false won't
+  ///help.
   final bool alwaysShowSuccessState;
 
   const MenuItemWidget({
