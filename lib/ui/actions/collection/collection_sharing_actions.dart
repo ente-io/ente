@@ -302,8 +302,9 @@ class CollectionActions {
               await moveFilesFromCurrentCollection(bContext, collection, files);
               // collection should be empty on server now
               await collectionsService.trashEmptyCollection(collection);
-            } catch (e) {
-              logger.severe("Failed to keep photos and delete collection", e);
+            } catch (e, s) {
+              logger.severe(
+                  "Failed to keep photos and delete collection", e, s);
               rethrow;
             }
           },
