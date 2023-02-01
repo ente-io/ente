@@ -273,6 +273,14 @@ const PhotoFrame = ({
         };
         document.addEventListener('keydown', handleKeyDown, false);
         document.addEventListener('keyup', handleKeyUp, false);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown, false);
+            document.removeEventListener('keyup', handleKeyUp, false);
+        };
+    }, []);
+
+    useEffect(() => {
         router.events.on('hashChangeComplete', (url: string) => {
             const start = url.indexOf('#');
             const hash = url.slice(start !== -1 ? start : url.length);
@@ -285,11 +293,7 @@ const PhotoFrame = ({
                 setOpen(false);
             }
         });
-        return () => {
-            document.addEventListener('keydown', handleKeyDown, false);
-            document.addEventListener('keyup', handleKeyUp, false);
-        };
-    }, []);
+    }, [router.events]);
 
     useEffect(() => {
         if (!isNaN(search?.file)) {
