@@ -363,25 +363,11 @@ class CollectionActions {
     BuildContext context,
     Collection collection,
   ) async {
-    final ButtonAction? result = await showActionSheet(
-      context: context,
-      buttons: [
-        const ButtonWidget(
-          buttonType: ButtonType.critical,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          labelText: "Delete album",
-        ),
-        const ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: "Cancel",
-        )
-      ],
+    final ButtonAction? result = await showChoiceActionSheet(
+      context,
+      isCritical: true,
       title: "Delete shared album?",
+      firstButtonLabel: "Delete album",
       body: "The album will be deleted for everyone\n\nYou will lose access to "
           "shared photos in this album that are owned by others",
     );
