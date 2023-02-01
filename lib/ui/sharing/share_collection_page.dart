@@ -72,7 +72,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         ),
         leadingIcon: Icons.add,
         menuItemColor: getEnteColorScheme(context).fillFaint,
-        pressedColor: getEnteColorScheme(context).fillFaint,
         borderRadius: 4.0,
         isTopBorderRadiusRemoved: _sharees.isNotEmpty,
         isBottomBorderRadiusRemoved: true,
@@ -102,7 +101,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         ),
         leadingIcon: Icons.add,
         menuItemColor: getEnteColorScheme(context).fillFaint,
-        pressedColor: getEnteColorScheme(context).fillFaint,
         borderRadius: 4.0,
         isTopBorderRadiusRemoved: _sharees.isNotEmpty,
         onTap: () async {
@@ -132,9 +130,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         height: 24,
       ),
       MenuSectionTitle(
-        title: hasUrl
-            ? "Public link enabled"
-            : (_sharees.isEmpty ? "Or share a link" : "Share a link"),
+        title: hasUrl ? "Public link enabled" : "Share a link",
         iconData: Icons.public,
       ),
     ]);
@@ -149,7 +145,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             leadingIcon: Icons.error_outline,
             leadingIconColor: getEnteColorScheme(context).warning500,
             menuItemColor: getEnteColorScheme(context).fillFaint,
-            pressedColor: getEnteColorScheme(context).fillFaint,
             onTap: () async {},
             isBottomBorderRadiusRemoved: true,
           ),
@@ -169,7 +164,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               ),
               leadingIcon: Icons.copy,
               menuItemColor: getEnteColorScheme(context).fillFaint,
-              pressedColor: getEnteColorScheme(context).fillFaint,
               showOnlyLoadingState: true,
               onTap: () async {
                 await Clipboard.setData(ClipboardData(text: url));
@@ -188,7 +182,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               ),
               leadingIcon: Icons.adaptive.share,
               menuItemColor: getEnteColorScheme(context).fillFaint,
-              pressedColor: getEnteColorScheme(context).fillFaint,
               onTap: () async {
                 shareText(url);
               },
@@ -213,7 +206,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             leadingIcon: Icons.link,
             trailingIcon: Icons.navigate_next,
             menuItemColor: getEnteColorScheme(context).fillFaint,
-            pressedColor: getEnteColorScheme(context).fillFaint,
             trailingIconIsMuted: true,
             onTap: () async {
               routeToPage(
@@ -238,7 +230,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           ),
           leadingIcon: Icons.link,
           menuItemColor: getEnteColorScheme(context).fillFaint,
-          pressedColor: getEnteColorScheme(context).fillFaint,
           isBottomBorderRadiusRemoved: true,
           showOnlyLoadingState: true,
           onTap: () async {
@@ -249,9 +240,17 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             }
           },
         ),
-        DividerWidget(
-          dividerType: DividerType.menu,
-          bgColor: getEnteColorScheme(context).fillFaint,
+        _sharees.isEmpty
+            ? const MenuSectionDescriptionWidget(
+                content: "Share with non-ente users",
+              )
+            : const SizedBox.shrink(),
+        const SizedBox(
+          height: 24,
+        ),
+        const MenuSectionTitle(
+          title: "Collaborative link",
+          iconData: Icons.public,
         ),
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
@@ -260,7 +259,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           ),
           leadingIcon: Icons.link,
           menuItemColor: getEnteColorScheme(context).fillFaint,
-          pressedColor: getEnteColorScheme(context).fillFaint,
           showOnlyLoadingState: true,
           onTap: () async {
             final bool result = await collectionActions.enableUrl(
@@ -273,15 +271,14 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             }
           },
         ),
+        _sharees.isEmpty
+            ? const MenuSectionDescriptionWidget(
+                content:
+                    "Create a link to allow people to add and view photos in "
+                    "your shared album without needing an ente app or account. Great for collecting event photos.",
+              )
+            : const SizedBox.shrink(),
       ]);
-      if (_sharees.isEmpty && !hasUrl) {
-        children.add(
-          const MenuSectionDescriptionWidget(
-            content:
-                "Links allow people without an ente account to view and add photos to your shared albums.",
-          ),
-        );
-      }
     }
 
     return Scaffold(
@@ -300,6 +297,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               padding:
                   const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: children,
               ),
             ),
@@ -338,7 +336,6 @@ class EmailItemWidget extends StatelessWidget {
             ),
             leadingIconSize: 24,
             menuItemColor: getEnteColorScheme(context).fillFaint,
-            pressedColor: getEnteColorScheme(context).fillFaint,
             trailingIconIsMuted: true,
             trailingIcon: Icons.chevron_right,
             onTap: () async {
@@ -364,7 +361,6 @@ class EmailItemWidget extends StatelessWidget {
             ),
             leadingIcon: Icons.people_outline,
             menuItemColor: getEnteColorScheme(context).fillFaint,
-            pressedColor: getEnteColorScheme(context).fillFaint,
             trailingIconIsMuted: true,
             trailingIcon: Icons.chevron_right,
             onTap: () async {

@@ -18,6 +18,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/common/rename_dialog.dart';
+import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -138,21 +139,37 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<dynamic> _leaveAlbum(BuildContext context) async {
-    final result = await showChoiceDialog(
-      context,
-      title: "Leave shared album",
-      body: "You will leave the album, and it will stop being visible to you",
-      firstButtonLabel: "Yes, leave",
-      isCritical: true,
-      firstButtonOnTap: () async {
-        await CollectionsService.instance.leaveAlbum(widget.collection!);
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
-      },
+    final ButtonAction? result = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: "Leave album",
+          onTap: () async {
+            await CollectionsService.instance.leaveAlbum(widget.collection!);
+          },
+        ),
+        const ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: "Cancel",
+        )
+      ],
+      title: "Leave shared album?",
+      body: "Photos added by you will be removed from the album",
     );
-    if (result == ButtonAction.error) {
-      showGenericErrorDialog(context: context);
+    if (result != null && mounted) {
+      if (result == ButtonAction.error) {
+        showGenericErrorDialog(context: context);
+      } else if (result == ButtonAction.first) {
+        Navigator.of(context).pop();
+      }
     }
   }
 

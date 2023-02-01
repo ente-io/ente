@@ -155,14 +155,15 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             currentUserID: currentUserID,
                           ),
                           menuItemColor: getEnteColorScheme(context).fillFaint,
-                          pressedColor: getEnteColorScheme(context).fillFaint,
                           trailingIcon: isOwner ? Icons.chevron_right : null,
                           trailingIconIsMuted: true,
-                          onTap: () async {
-                            if (isOwner) {
-                              _navigateToManageUser(currentUser);
-                            }
-                          },
+                          onTap: isOwner
+                              ? () async {
+                                  if (isOwner) {
+                                    _navigateToManageUser(currentUser);
+                                  }
+                                }
+                              : null,
                           isTopBorderRadiusRemoved: listIndex > 0,
                           isBottomBorderRadiusRemoved: true,
                           borderRadius: 8,
@@ -183,7 +184,6 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       ),
                       leadingIcon: Icons.add_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
-                      pressedColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
                         _navigateToAddUser(false);
                       },
@@ -229,14 +229,15 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             currentUserID: currentUserID,
                           ),
                           menuItemColor: getEnteColorScheme(context).fillFaint,
-                          pressedColor: getEnteColorScheme(context).fillFaint,
                           trailingIcon: isOwner ? Icons.chevron_right : null,
                           trailingIconIsMuted: true,
-                          onTap: () async {
-                            if (isOwner) {
-                              await _navigateToManageUser(currentUser);
-                            }
-                          },
+                          onTap: isOwner
+                              ? () async {
+                                  if (isOwner) {
+                                    await _navigateToManageUser(currentUser);
+                                  }
+                                }
+                              : null,
                           isTopBorderRadiusRemoved: listIndex > 0,
                           isBottomBorderRadiusRemoved: !isLastItem,
                           borderRadius: 8,
@@ -257,7 +258,6 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       ),
                       leadingIcon: Icons.add_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
-                      pressedColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
                         _navigateToAddUser(true);
                       },

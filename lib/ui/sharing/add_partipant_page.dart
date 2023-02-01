@@ -187,11 +187,11 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                               context,
                               widget.collection,
                               emailToAdd,
-                              role: widget.isAddingViewer
+                              widget.isAddingViewer
                                   ? CollectionParticipantRole.viewer
                                   : CollectionParticipantRole.collaborator,
                             );
-                            if (result != null && result && mounted) {
+                            if (result && mounted) {
                               Navigator.of(context).pop(true);
                             }
                           },
