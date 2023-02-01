@@ -76,6 +76,7 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
 
   Widget _buildMenuItemWidget(DirectoryStat? stat, Object? err) {
     return MenuItemWidget(
+      key: UniqueKey(),
       alignCaptionedTextToLeft: true,
       captionedTextWidget: CaptionedTextWidget(
         title: widget.item.title,
@@ -102,6 +103,7 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
       menuItemColor: getEnteColorScheme(context).fillFaint,
       isBottomBorderRadiusRemoved: widget.removeBottomRadius,
       isTopBorderRadiusRemoved: widget.removeTopRadius,
+      showOnlyLoadingState: true,
       onTap: () async {
         if (kDebugMode) {
           await Clipboard.setData(ClipboardData(text: widget.item.path));
