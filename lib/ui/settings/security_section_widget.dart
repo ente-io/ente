@@ -119,6 +119,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
+        showOnlyLoadingState: true,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(

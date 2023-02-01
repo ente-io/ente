@@ -85,19 +85,16 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
           onTap: () async {
-            final dialog = createProgressDialog(context, "Calculating...");
-            await dialog.show();
             BackupStatus status;
             try {
               status = await SyncService.instance.getBackupStatus();
             } catch (e) {
-              await dialog.hide();
               showGenericErrorDialog(context: context);
               return;
             }
 
-            await dialog.hide();
             if (status.localIDs.isEmpty) {
               showErrorDialog(
                 context,
@@ -121,20 +118,17 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
           onTap: () async {
-            final dialog = createProgressDialog(context, "Calculating...");
-            await dialog.show();
             List<DuplicateFiles> duplicates;
             try {
               duplicates =
                   await DeduplicationService.instance.getDuplicateFiles();
             } catch (e) {
-              await dialog.hide();
               showGenericErrorDialog(context: context);
               return;
             }
 
-            await dialog.hide();
             if (duplicates.isEmpty) {
               showErrorDialog(
                 context,

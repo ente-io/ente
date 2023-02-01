@@ -39,6 +39,7 @@ class AccountSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -75,6 +76,7 @@ class AccountSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -101,6 +103,7 @@ class AccountSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
