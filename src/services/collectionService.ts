@@ -238,7 +238,8 @@ export const getCollection = async (
         );
         return collectionWithSecrets;
     } catch (e) {
-        logError(e, 'failed to get collection', { collectionID });
+        logError(e, 'failed to get collection');
+        throw e;
     }
 };
 

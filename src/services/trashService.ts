@@ -30,7 +30,13 @@ export async function getLocalTrash() {
 export async function getLocalDeletedCollections() {
     const trashedCollections: Array<Collection> =
         (await localForage.getItem<Collection[]>(DELETED_COLLECTION)) || [];
-    return trashedCollections;
+    const nonUndefinedCollections = trashedCollections.filter(
+        (collection) => !!collection
+    );
+    if (nonUndefinedCollections.length !== trashedCollections.length) {
+        await localForage.setItem(DELETED_COLLECTION, nonUndefinedCollections);
+    }
+    return nonUndefinedCollections;
 }
 
 export async function cleanTrashCollections(fileTrash: Trash) {
