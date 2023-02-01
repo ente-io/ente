@@ -178,6 +178,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
               trailingWidget: widget.trailingWidget,
               trailingIconIsMuted: widget.trailingIconIsMuted,
               trailingExtraMargin: widget.trailingExtraMargin,
+              key: ValueKey(widget.trailingIcon.hashCode),
             ),
         ],
       ),
