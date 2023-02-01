@@ -54,6 +54,8 @@ class MenuItemWidget extends StatefulWidget {
 
   final bool surfaceExecutionStates;
 
+  final bool alwaysShowSuccessState;
+
   const MenuItemWidget({
     required this.captionedTextWidget,
     this.isExpandable = false,
@@ -78,6 +80,7 @@ class MenuItemWidget extends StatefulWidget {
     this.isGestureDetectorDisabled = false,
     this.showOnlyLoadingState = false,
     this.surfaceExecutionStates = true,
+    this.alwaysShowSuccessState = false,
     Key? key,
   }) : super(key: key);
 
@@ -197,10 +200,21 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         },
       ),
     );
-    await widget.onTap
-        ?.call()
-        .onError((error, stackTrace) => _debouncer.cancelDebounce());
+    await widget.onTap?.call().then(
+      (value) {
+        widget.alwaysShowSuccessState
+            ? executionStateNotifier.value = ExecutionState.successful
+            : null;
+      },
+      onError: (error, stackTrace) => _debouncer.cancelDebounce(),
+    );
     _debouncer.cancelDebounce();
+    if (widget.alwaysShowSuccessState) {
+      Future.delayed(const Duration(seconds: 2), () {
+        executionStateNotifier.value = ExecutionState.idle;
+      });
+      return;
+    }
     if (executionStateNotifier.value == ExecutionState.inProgress) {
       if (widget.showOnlyLoadingState) {
         executionStateNotifier.value = ExecutionState.idle;
