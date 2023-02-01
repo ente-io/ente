@@ -2,6 +2,16 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_child_widgets.dart';
+import 'package:photos/utils/debouncer.dart';
+
+enum ExecutionState {
+  idle,
+  inProgress,
+  error,
+  successful;
+}
+
+typedef FutureVoidCallback = Future<void> Function();
 
 class MenuItemWidget extends StatefulWidget {
   final Widget captionedTextWidget;
@@ -25,7 +35,7 @@ class MenuItemWidget extends StatefulWidget {
 
   /// If provided, add this much extra spacing to the right of the trailing icon.
   final double trailingExtraMargin;
-  final VoidCallback? onTap;
+  final FutureVoidCallback? onTap;
   final VoidCallback? onDoubleTap;
   final Color? menuItemColor;
   final bool alignCaptionedTextToLeft;
@@ -68,6 +78,10 @@ class MenuItemWidget extends StatefulWidget {
 }
 
 class _MenuItemWidgetState extends State<MenuItemWidget> {
+  final _debouncer = Debouncer(const Duration(milliseconds: 300));
+  ValueNotifier<ExecutionState> executionStateNotifier =
+      ValueNotifier(ExecutionState.idle);
+
   Color? menuItemColor;
 
   @override
@@ -92,6 +106,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     if (widget.expandableController != null) {
       widget.expandableController!.dispose();
     }
+    executionStateNotifier.dispose();
     super.dispose();
   }
 
@@ -100,7 +115,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     return widget.isExpandable || widget.isGestureDetectorDisabled
         ? menuItemWidget(context)
         : GestureDetector(
-            onTap: widget.onTap,
+            onTap: _onTap,
             onDoubleTap: widget.onDoubleTap,
             onTapDown: _onTapDown,
             onTapUp: _onTapUp,
@@ -152,6 +167,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
             )
           else
             TrailingWidget(
+              executionStateNotifier: executionStateNotifier,
               trailingIcon: widget.trailingIcon,
               trailingIconColor: widget.trailingIconColor,
               trailingWidget: widget.trailingWidget,
@@ -161,6 +177,26 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         ],
       ),
     );
+  }
+
+  Future<void> _onTap() async {
+    _debouncer.run(
+      () => Future(
+        () {
+          executionStateNotifier.value = ExecutionState.inProgress;
+        },
+      ),
+    );
+    await widget.onTap
+        ?.call()
+        .onError((error, stackTrace) => _debouncer.cancelDebounce());
+    _debouncer.cancelDebounce();
+    if (executionStateNotifier.value == ExecutionState.inProgress) {
+      executionStateNotifier.value = ExecutionState.successful;
+      Future.delayed(const Duration(seconds: 2), () {
+        executionStateNotifier.value = ExecutionState.idle;
+      });
+    }
   }
 
   void _onTapDown(details) {

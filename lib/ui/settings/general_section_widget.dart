@@ -34,7 +34,7 @@ class GeneralSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () {
+          onTap: () async {
             _onManageSubscriptionTapped(context);
           },
         ),
@@ -46,7 +46,7 @@ class GeneralSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () {
+          onTap: () async {
             _onFamilyPlansTapped(context);
           },
         ),
@@ -58,7 +58,7 @@ class GeneralSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () {
+          onTap: () async {
             _onAdvancedTapped(context);
           },
         ),

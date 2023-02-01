@@ -98,7 +98,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                               ),
                               borderRadius: 8,
                               alignCaptionedTextToLeft: true,
-                              onTap: () {
+                              onTap: () async {
                                 routeToPage(context, const AppStorageViewer());
                               },
                             ),

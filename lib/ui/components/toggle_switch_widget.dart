@@ -9,12 +9,12 @@ enum ExecutionState {
   successful,
 }
 
-typedef FutureVoidCallBack = Future<void> Function();
+typedef FutureVoidCallback = Future<void> Function();
 typedef BoolCallBack = bool Function();
 
 class ToggleSwitchWidget extends StatefulWidget {
   final BoolCallBack value;
-  final FutureVoidCallBack onChanged;
+  final FutureVoidCallback onChanged;
   const ToggleSwitchWidget({
     required this.value,
     required this.onChanged,

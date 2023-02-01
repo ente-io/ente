@@ -128,7 +128,7 @@ class AccountSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () {
+          onTap: () async {
             _onLogoutTapped(context);
           },
         ),
@@ -140,7 +140,7 @@ class AccountSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () {
+          onTap: () async {
             routeToPage(context, const DeleteAccountPage());
           },
         ),

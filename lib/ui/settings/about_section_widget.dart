@@ -113,7 +113,7 @@ class AboutMenuItemWidget extends StatelessWidget {
       pressedColor: getEnteColorScheme(context).fillFaint,
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
-      onTap: () {
+      onTap: () async {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) {

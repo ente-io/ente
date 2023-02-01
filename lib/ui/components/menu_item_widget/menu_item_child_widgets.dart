@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 
 class TrailingWidget extends StatefulWidget {
+  final ValueNotifier executionStateNotifier;
   final IconData? trailingIcon;
   final Color? trailingIconColor;
   final Widget? trailingWidget;
   final bool trailingIconIsMuted;
   final double trailingExtraMargin;
   const TrailingWidget({
+    required this.executionStateNotifier,
     this.trailingIcon,
     this.trailingIconColor,
     this.trailingWidget,
@@ -20,23 +24,70 @@ class TrailingWidget extends StatefulWidget {
 }
 
 class _TrailingWidgetState extends State<TrailingWidget> {
+  Widget? trailingWidget;
+  @override
+  void initState() {
+    widget.executionStateNotifier.addListener(_executionStateListener);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.executionStateNotifier.removeListener(_executionStateListener);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (trailingWidget == null) {
+      _setTrailingIcon();
+    }
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 175),
+      switchInCurve: Curves.easeInExpo,
+      switchOutCurve: Curves.easeOutExpo,
+      child: trailingWidget,
+    );
+  }
+
+  void _executionStateListener() {
     final colorScheme = getEnteColorScheme(context);
+    setState(() {
+      if (widget.executionStateNotifier.value == ExecutionState.idle) {
+        _setTrailingIcon();
+      } else if (widget.executionStateNotifier.value ==
+          ExecutionState.inProgress) {
+        trailingWidget = EnteLoadingWidget(
+          color: colorScheme.strokeMuted,
+        );
+      } else if (widget.executionStateNotifier.value ==
+          ExecutionState.successful) {
+        trailingWidget = Icon(
+          Icons.check_outlined,
+          size: 22,
+          color: colorScheme.primary500,
+        );
+      } else {
+        trailingWidget = const SizedBox.shrink();
+      }
+    });
+  }
+
+  void _setTrailingIcon() {
     if (widget.trailingIcon != null) {
-      return Padding(
+      trailingWidget = Padding(
         padding: EdgeInsets.only(
           right: widget.trailingExtraMargin,
         ),
         child: Icon(
           widget.trailingIcon,
           color: widget.trailingIconIsMuted
-              ? colorScheme.strokeMuted
+              ? getEnteColorScheme(context).strokeMuted
               : widget.trailingIconColor,
         ),
       );
     } else {
-      return widget.trailingWidget ?? const SizedBox.shrink();
+      trailingWidget = widget.trailingWidget ?? const SizedBox.shrink();
     }
   }
 }

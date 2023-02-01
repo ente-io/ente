@@ -49,7 +49,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
-        onTap: () {
+        onTap: () async {
           routeToPage(
             context,
             const BackupFolderSelectionPage(
@@ -66,7 +66,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
-        onTap: () {
+        onTap: () async {
           routeToPage(
             context,
             const BackupSettingsScreen(),
