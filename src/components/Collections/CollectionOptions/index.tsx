@@ -197,7 +197,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             title: constants.DELETE_COLLECTION_TITLE,
             content: constants.DELETE_COLLECTION_MESSAGE(),
             proceed: {
-                text: constants.DELETE_COLLECTION,
+                text: constants.DELETE_PHOTOS,
                 action: handleCollectionAction(
                     CollectionActions.DELETE_WITH_FILES
                 ),

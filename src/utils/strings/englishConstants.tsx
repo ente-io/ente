@@ -372,7 +372,8 @@ const englishConstants = {
     DELETE_COLLECTION_MESSAGE: () => (
         <p>
             Also delete the photos (and videos) present in this album from
-            <strong> all </strong> other albums they are part of?
+            <span style={{ color: '#fff' }}> all </span> other albums they are
+            part of?
         </p>
     ),
     DELETE_PHOTOS: 'Delete photos',
@@ -607,7 +608,7 @@ const englishConstants = {
     ADD: 'Add',
     SORT: 'Sort',
     REMOVE: 'Remove',
-    YES_REMOVE: 'Yes, Remove',
+    YES_REMOVE: 'Yes, remove',
     CONFIRM_REMOVE: 'Confirm removal',
     REMOVE_FROM_COLLECTION: 'Remove from album',
     TRASH: 'Trash',
