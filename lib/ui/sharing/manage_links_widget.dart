@@ -141,7 +141,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     isBottomBorderRadiusRemoved: true,
                     onTap: () async {
                       // await _showDeviceLimitPicker();
-                      routeToPage(context, PickerWidget(widget.collection!));
+                      routeToPage(context, PickerWidget(widget.collection!))
+                          .then((value) {
+                        setState(() {});
+                      });
                     },
                     surfaceExecutionStates: false,
                   ),
