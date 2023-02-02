@@ -503,9 +503,22 @@ export const removeFromCollection = async (
         if (!uncategorizedCollection) {
             uncategorizedCollection = await createUnCategorizedCollection();
         }
+        const user: User = getData(LS_KEYS.USER);
+        const nonUserFiles = [];
+        const userFiles = [];
+        for (const file of files) {
+            if (file.ownerID === user.id) {
+                userFiles.push(file);
+            } else {
+                nonUserFiles.push(file);
+            }
+        }
+        if (nonUserFiles.length > 0) {
+            await removeNonUserFiles(collectionID, nonUserFiles);
+        }
         const allFiles = await getLocalFiles();
         const groupiedFiles = groupFilesBasedOnID(allFiles);
-        for (const file of files) {
+        for (const file of userFiles) {
             if (groupiedFiles[file.id].length === 1) {
                 await moveToCollection(uncategorizedCollection, collectionID, [
                     file,
@@ -523,6 +536,26 @@ export const removeFromCollection = async (
         }
     } catch (e) {
         logError(e, 'remove from collection failed ');
+        throw e;
+    }
+};
+
+export const removeNonUserFiles = async (
+    collectionID: number,
+    nonUserFiles: EnteFile[]
+) => {
+    const fileIDs = nonUserFiles.map((f) => f.id);
+    try {
+        const token = getToken();
+
+        await HTTPService.delete(
+            `${ENDPOINT}/collections/v3/remove-files`,
+            null,
+            { collectionID, fileIDs },
+            { 'X-Auth-Token': token }
+        );
+    } catch (e) {
+        logError(e, 'delete collection failed ');
         throw e;
     }
 };
