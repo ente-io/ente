@@ -29,6 +29,7 @@ import {
     EncryptedCollection,
     CollectionMagicMetadata,
     CollectionMagicMetadataProps,
+    RemoveFromCollectionRequest,
 } from 'types/collection';
 import {
     COLLECTION_SORT_BY,
@@ -548,10 +549,15 @@ export const removeNonUserFiles = async (
     try {
         const token = getToken();
 
-        await HTTPService.delete(
+        const request: RemoveFromCollectionRequest = {
+            collectionID,
+            fileIDs,
+        };
+
+        await HTTPService.post(
             `${ENDPOINT}/collections/v3/remove-files`,
+            request,
             null,
-            { collectionID, fileIDs },
             { 'X-Auth-Token': token }
         );
     } catch (e) {
