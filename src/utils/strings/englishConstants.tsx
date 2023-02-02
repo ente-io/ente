@@ -449,7 +449,7 @@ const englishConstants = {
     ),
     NOT_FILE_OWNER: 'You cannot delete files in a shared album',
     ADD_TO_COLLECTION: 'Add to album',
-    SELECTED: 'Selected',
+    SELECTED: 'selected',
     VIDEO_PLAYBACK_FAILED: 'Video format not supported',
     VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD:
         'This video cannot be played on your browser',
@@ -906,6 +906,7 @@ const englishConstants = {
     ),
     ADD_X_PHOTOS: (x: number) => `Add ${x} ${x > 1 ? 'photos' : 'photo'}`,
     CHOSE_THEME: 'Choose theme',
+    YOURS: 'yours',
 };
 
 export default englishConstants;

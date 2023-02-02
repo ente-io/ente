@@ -35,6 +35,7 @@ interface Props {
     fixTimeHelper: () => void;
     downloadHelper: () => void;
     count: number;
+    ownCount: number;
     clearSelection: () => void;
     archiveFilesHelper: () => void;
     unArchiveFilesHelper: () => void;
@@ -54,6 +55,7 @@ const SelectedFileOptions = ({
     deleteFileHelper,
     downloadHelper,
     count,
+    ownCount,
     clearSelection,
     archiveFilesHelper,
     unArchiveFilesHelper,
@@ -123,7 +125,8 @@ const SelectedFileOptions = ({
                     <CloseIcon />
                 </IconButton>
                 <Box ml={1.5}>
-                    {count} {constants.SELECTED}
+                    {count} {constants.SELECTED}{' '}
+                    {ownCount !== count && `(${ownCount} ${constants.YOURS})`}
                 </Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>

@@ -5,6 +5,7 @@ import { EnteFile } from 'types/file';
 
 export type SelectedState = {
     [k: number]: boolean;
+    ownCount: number;
     count: number;
     collectionID: number;
 };
