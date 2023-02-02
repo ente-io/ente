@@ -400,28 +400,39 @@ function PhotoViewer(props: Iprops) {
     };
 
     const updateItems = (items = []) => {
-        if (photoSwipe) {
-            if (items.length === 0) {
-                photoSwipe.close();
-            }
-            photoSwipe.items.length = 0;
-            items.forEach((item) => {
-                photoSwipe.items.push(item);
-            });
-            photoSwipe.invalidateCurrItems();
-            if (isOpen) {
-                photoSwipe.updateSize(true);
-                if (photoSwipe.getCurrentIndex() >= photoSwipe.items.length) {
-                    photoSwipe.goTo(0);
+        try {
+            if (photoSwipe) {
+                if (items.length === 0) {
+                    photoSwipe.close();
+                }
+                photoSwipe.items.length = 0;
+                items.forEach((item) => {
+                    photoSwipe.items.push(item);
+                });
+
+                photoSwipe.invalidateCurrItems();
+                if (isOpen) {
+                    photoSwipe.updateSize(true);
+                    if (
+                        photoSwipe.getCurrentIndex() >= photoSwipe.items.length
+                    ) {
+                        photoSwipe.goTo(0);
+                    }
                 }
             }
+        } catch (e) {
+            logError(e, 'updateItems failed');
         }
     };
 
     const refreshPhotoswipe = () => {
-        photoSwipe.invalidateCurrItems();
-        if (isOpen) {
-            photoSwipe.updateSize(true);
+        try {
+            photoSwipe.invalidateCurrItems();
+            if (isOpen) {
+                photoSwipe.updateSize(true);
+            }
+        } catch (e) {
+            logError(e, 'refreshPhotoswipe failed');
         }
     };
 

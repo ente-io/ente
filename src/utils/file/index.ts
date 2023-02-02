@@ -592,15 +592,3 @@ export const copyFileToClipboard = async (fileUrl: string) => {
         .write([new ClipboardItem({ 'image/png': blobPromise })])
         .catch((e) => logError(e, 'failed to copy to clipboard'));
 };
-
-export const groupFilesBasedOnID = (files: EnteFile[]) => {
-    const groupedFiles = files.reduce((acc, file) => {
-        if (!acc[file.id]) {
-            acc[file.id] = [];
-        }
-        acc[file.id].push(file);
-        return acc;
-    }, {} as { [key: number]: EnteFile[] });
-
-    return groupedFiles;
-};
