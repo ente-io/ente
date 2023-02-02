@@ -23,6 +23,7 @@ class MenuItemWidget extends StatefulWidget {
   final Color? leadingIconColor;
 
   final Widget? leadingIconWidget;
+
   // leadIconSize deafult value is 20.
   final double leadingIconSize;
 
@@ -39,7 +40,13 @@ class MenuItemWidget extends StatefulWidget {
   final VoidCallback? onDoubleTap;
   final Color? menuItemColor;
   final bool alignCaptionedTextToLeft;
-  final double borderRadius;
+
+  // singleBorderRadius is applied to the border when it's a standalone menu item.
+  // Widget will apply singleBorderRadius if value of both isTopBorderRadiusRemoved
+  // and isBottomBorderRadiusRemoved is false. Otherwise, multipleBorderRadius will
+  // be applied
+  final double singleBorderRadius;
+  final double multipleBorderRadius;
   final Color? pressedColor;
   final ExpandableController? expandableController;
   final bool isBottomBorderRadiusRemoved;
@@ -76,7 +83,8 @@ class MenuItemWidget extends StatefulWidget {
     this.onDoubleTap,
     this.menuItemColor,
     this.alignCaptionedTextToLeft = false,
-    this.borderRadius = 4.0,
+    this.singleBorderRadius = 4.0,
+    this.multipleBorderRadius = 8.0,
     this.pressedColor,
     this.expandableController,
     this.isBottomBorderRadiusRemoved = false,
@@ -98,10 +106,15 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
       ValueNotifier(ExecutionState.idle);
 
   Color? menuItemColor;
+  late double borderRadius;
 
   @override
   void initState() {
     menuItemColor = widget.menuItemColor;
+    borderRadius =
+        (widget.isBottomBorderRadiusRemoved || widget.isTopBorderRadiusRemoved)
+            ? widget.multipleBorderRadius
+            : widget.singleBorderRadius;
     if (widget.expandableController != null) {
       widget.expandableController!.addListener(() {
         setState(() {});
@@ -140,15 +153,15 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   Widget menuItemWidget(BuildContext context) {
-    final borderRadius = Radius.circular(widget.borderRadius);
+    final circularRadius = Radius.circular(borderRadius);
     final isExpanded = widget.expandableController?.value;
     final bottomBorderRadius =
         (isExpanded != null && isExpanded) || widget.isBottomBorderRadiusRemoved
             ? const Radius.circular(0)
-            : borderRadius;
+            : circularRadius;
     final topBorderRadius = widget.isTopBorderRadiusRemoved
         ? const Radius.circular(0)
-        : borderRadius;
+        : circularRadius;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 20),
       width: double.infinity,

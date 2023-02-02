@@ -65,7 +65,7 @@ class BackupSettingsScreen extends StatelessWidget {
                                   );
                                 },
                               ),
-                              borderRadius: 8,
+                              singleBorderRadius: 8,
                               alignCaptionedTextToLeft: true,
                               isBottomBorderRadiusRemoved: true,
                               isGestureDetectorDisabled: true,
@@ -87,7 +87,7 @@ class BackupSettingsScreen extends StatelessWidget {
                                   !Configuration.instance.shouldBackupVideos(),
                                 ),
                               ),
-                              borderRadius: 8,
+                              singleBorderRadius: 8,
                               alignCaptionedTextToLeft: true,
                               isTopBorderRadiusRemoved: true,
                               isGestureDetectorDisabled: true,
@@ -115,7 +115,7 @@ class BackupSettingsScreen extends StatelessWidget {
                                         );
                                       },
                                     ),
-                                    borderRadius: 8,
+                                    singleBorderRadius: 8,
                                     alignCaptionedTextToLeft: true,
                                     isGestureDetectorDisabled: true,
                                   ),

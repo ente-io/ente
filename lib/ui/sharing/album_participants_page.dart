@@ -112,7 +112,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             ),
                             leadingIconSize: 24,
                             menuItemColor: colorScheme.fillFaint,
-                            borderRadius: 8,
+                            singleBorderRadius: 8,
                             isGestureDetectorDisabled: true,
                           ),
                         ],
@@ -166,7 +166,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                               : null,
                           isTopBorderRadiusRemoved: listIndex > 0,
                           isBottomBorderRadiusRemoved: true,
-                          borderRadius: 8,
+                          singleBorderRadius: 8,
                         ),
                         DividerWidget(
                           dividerType: DividerType.menu,
@@ -188,7 +188,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                         _navigateToAddUser(false);
                       },
                       isTopBorderRadiusRemoved: collaborators.isNotEmpty,
-                      borderRadius: 8,
+                      singleBorderRadius: 8,
                     );
                   }
                   return const SizedBox.shrink();
@@ -240,7 +240,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                               : null,
                           isTopBorderRadiusRemoved: listIndex > 0,
                           isBottomBorderRadiusRemoved: !isLastItem,
-                          borderRadius: 8,
+                          singleBorderRadius: 8,
                         ),
                         isLastItem
                             ? const SizedBox.shrink()
@@ -262,7 +262,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                         _navigateToAddUser(true);
                       },
                       isTopBorderRadiusRemoved: viewers.isNotEmpty,
-                      borderRadius: 8,
+                      singleBorderRadius: 8,
                     );
                   }
                   return const SizedBox.shrink();

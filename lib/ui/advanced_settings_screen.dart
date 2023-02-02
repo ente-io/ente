@@ -78,7 +78,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                   Icons.chevron_right_outlined,
                                   color: colorScheme.strokeBase,
                                 ),
-                                borderRadius: 8,
+                                singleBorderRadius: 8,
                                 alignCaptionedTextToLeft: true,
                                 // isBottomBorderRadiusRemoved: true,
                                 isGestureDetectorDisabled: true,
@@ -96,7 +96,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 Icons.chevron_right_outlined,
                                 color: colorScheme.strokeBase,
                               ),
-                              borderRadius: 8,
+                              singleBorderRadius: 8,
                               alignCaptionedTextToLeft: true,
                               onTap: () async {
                                 routeToPage(context, const AppStorageViewer());
