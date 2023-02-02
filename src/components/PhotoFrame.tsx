@@ -179,7 +179,10 @@ const PhotoFrame = ({
                         return false;
                     }
 
-                    if (isSharedFile(user, item) && !isSharedCollection) {
+                    if (
+                        isSharedFile(user, item) &&
+                        activeCollection !== item.collectionID
+                    ) {
                         return false;
                     }
                     if (activeCollection === TRASH_SECTION && !item.isTrashed) {
