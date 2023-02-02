@@ -12,7 +12,6 @@ import {
     isSharedFile,
     sortFiles,
     groupFilesBasedOnCollectionID,
-    groupFilesBasedOnID,
 } from 'utils/file';
 import {
     Collection,
@@ -496,31 +495,58 @@ const encryptWithNewCollectionKey = async (
 };
 export const removeFromCollection = async (
     collectionID: number,
-    files: EnteFile[]
+    toRemoveFiles: EnteFile[]
 ) => {
     try {
+        const allFiles = await getLocalFiles();
+
+        const toRemoveFilesIds = new Set(toRemoveFiles.map((f) => f.id));
+        const toRemoveFilesCopiesInOtherCollections = allFiles.filter((f) => {
+            if (f.collectionID === collectionID) {
+                return false;
+            }
+            return toRemoveFilesIds.has(f.id);
+        });
+        const groupiedFiles = groupFilesBasedOnCollectionID(
+            toRemoveFilesCopiesInOtherCollections
+        );
+
+        const collections = await getLocalCollections();
+        const collectionsMap = new Map(collections.map((c) => [c.id, c]));
+
+        for (const [toMoveCollectionID, files] of groupiedFiles.entries()) {
+            const toMoveFiles = files.filter((f) => {
+                if (toRemoveFilesIds.has(f.id)) {
+                    toRemoveFilesIds.delete(f.id);
+                    return true;
+                }
+                return false;
+            });
+            if (toMoveFiles.length === 0) {
+                continue;
+            }
+            await moveToCollection(
+                collectionsMap[toMoveCollectionID],
+                collectionID,
+                toMoveFiles
+            );
+        }
+        const leftFiles = toRemoveFiles.filter((f) =>
+            toRemoveFilesIds.has(f.id)
+        );
+
+        if (leftFiles.length === 0) {
+            return;
+        }
         let uncategorizedCollection = await getUncategorizedCollection();
         if (!uncategorizedCollection) {
             uncategorizedCollection = await createUnCategorizedCollection();
         }
-        const allFiles = await getLocalFiles();
-        const groupiedFiles = groupFilesBasedOnID(allFiles);
-        for (const file of files) {
-            if (groupiedFiles[file.id].length === 1) {
-                await moveToCollection(uncategorizedCollection, collectionID, [
-                    file,
-                ]);
-            } else {
-                const differentCollectionFile = groupiedFiles[file.id].find(
-                    (f) => f.collectionID !== collectionID
-                );
-                const collections = await getLocalCollections();
-                const collection = collections.find(
-                    (c) => c.id === differentCollectionFile?.collectionID
-                );
-                await moveToCollection(collection, collectionID, [file]);
-            }
-        }
+        await moveToCollection(
+            uncategorizedCollection,
+            collectionID,
+            leftFiles
+        );
     } catch (e) {
         logError(e, 'remove from collection failed ');
         throw e;
