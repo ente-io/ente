@@ -68,7 +68,7 @@ interface Iprops {
     favItemIds: Set<number>;
     deletedFileIds: Set<number>;
     setDeletedFileIds?: (value: Set<number>) => void;
-    isSharedCollection: boolean;
+    isIncomingSharedCollection: boolean;
     isTrashCollection: boolean;
     enableDownload: boolean;
     isSourceLoaded: boolean;
@@ -393,7 +393,11 @@ function PhotoViewer(props: Iprops) {
     };
 
     const confirmTrashFile = (file: EnteFile) => {
-        if (!file || props.isSharedCollection || props.isTrashCollection) {
+        if (
+            !file ||
+            props.isIncomingSharedCollection ||
+            props.isTrashCollection
+        ) {
             return;
         }
         appContext.setDialogMessage(getTrashFileMessage(() => trashFile(file)));
@@ -571,7 +575,7 @@ function PhotoViewer(props: Iprops) {
                                     <ContentCopy fontSize="small" />
                                 </button>
                             )}
-                            {!props.isSharedCollection &&
+                            {!props.isIncomingSharedCollection &&
                                 !props.isTrashCollection && (
                                     <button
                                         className="pswp__button pswp__button--custom"
@@ -593,7 +597,7 @@ function PhotoViewer(props: Iprops) {
                                 title={constants.TOGGLE_FULLSCREEN}
                             />
 
-                            {!props.isSharedCollection && (
+                            {!props.isIncomingSharedCollection && (
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     title={constants.INFO_OPTION}
@@ -601,7 +605,7 @@ function PhotoViewer(props: Iprops) {
                                     <InfoIcon fontSize="small" />
                                 </button>
                             )}
-                            {!props.isSharedCollection &&
+                            {!props.isIncomingSharedCollection &&
                                 !props.isTrashCollection && (
                                     <button
                                         title={
@@ -652,7 +656,7 @@ function PhotoViewer(props: Iprops) {
             </div>
             <FileInfo
                 isTrashCollection={props.isTrashCollection}
-                shouldDisableEdits={props.isSharedCollection}
+                shouldDisableEdits={props.isIncomingSharedCollection}
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}

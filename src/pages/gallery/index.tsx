@@ -727,7 +727,7 @@ export default function Gallery() {
                     deletedFileIds={deletedFileIds}
                     setDeletedFileIds={setDeletedFileIds}
                     activeCollection={activeCollection}
-                    isSharedCollection={
+                    isIncomingSharedCollection={
                         collectionSummaries[activeCollection] ===
                         CollectionSummaryType.incomingShare
                     }

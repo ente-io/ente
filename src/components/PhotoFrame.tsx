@@ -66,7 +66,7 @@ interface Props {
     deletedFileIds?: Set<number>;
     setDeletedFileIds?: (value: Set<number>) => void;
     activeCollection: number;
-    isSharedCollection?: boolean;
+    isIncomingSharedCollection?: boolean;
     enableDownload?: boolean;
     isDeduplicating?: boolean;
     resetSearch?: () => void;
@@ -95,7 +95,7 @@ const PhotoFrame = ({
     deletedFileIds,
     setDeletedFileIds,
     activeCollection,
-    isSharedCollection,
+    isIncomingSharedCollection,
     enableDownload,
     isDeduplicating,
 }: Props) => {
@@ -179,7 +179,10 @@ const PhotoFrame = ({
                         return false;
                     }
 
-                    if (isSharedFile(user, item) && !isSharedCollection) {
+                    if (
+                        isSharedFile(user, item) &&
+                        !isIncomingSharedCollection
+                    ) {
                         return false;
                     }
                     if (activeCollection === TRASH_SECTION && !item.isTrashed) {
@@ -499,7 +502,7 @@ const PhotoFrame = ({
                 file={files[index]}
                 updateURL={updateURL(files[index].id)}
                 onClick={onThumbnailClick(index)}
-                selectable={!isSharedCollection}
+                selectable={!isIncomingSharedCollection}
                 onSelect={handleSelect(files[index].id, index)}
                 selected={
                     selected.collectionID === activeCollection &&
@@ -714,7 +717,7 @@ const PhotoFrame = ({
                         favItemIds={favItemIds}
                         deletedFileIds={deletedFileIds}
                         setDeletedFileIds={setDeletedFileIds}
-                        isSharedCollection={isSharedCollection}
+                        isIncomingSharedCollection={isIncomingSharedCollection}
                         isTrashCollection={activeCollection === TRASH_SECTION}
                         enableDownload={enableDownload}
                         isSourceLoaded={isSourceLoaded}

@@ -77,7 +77,7 @@ export function getSelectedCollection(
     return collections.find((collection) => collection.id === collectionID);
 }
 
-export function isSharedCollection(
+export function isIncomingSharedCollection(
     collectionID: number,
     collections: Collection[]
 ) {

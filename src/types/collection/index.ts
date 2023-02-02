@@ -37,7 +37,7 @@ export interface Collection
     > {
     key: string;
     name: string;
-    isSharedCollection?: boolean;
+    isIncomingSharedCollection?: boolean;
     magicMetadata: CollectionMagicMetadata;
 }
 
