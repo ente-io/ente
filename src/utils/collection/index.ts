@@ -215,7 +215,10 @@ export const getArchivedCollections = (collections: Collection[]) => {
 export const hasNonSystemCollections = (
     collectionSummaries: CollectionSummaries
 ) => {
-    return collectionSummaries?.size > 3;
+    for (const collectionSummary of collectionSummaries.values()) {
+        if (!isSystemCollection(collectionSummary.type)) return true;
+    }
+    return false;
 };
 
 export const isUploadAllowedCollection = (type: CollectionSummaryType) => {
