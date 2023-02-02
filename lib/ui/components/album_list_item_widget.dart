@@ -37,7 +37,7 @@ class AlbumListItemWidget extends StatelessWidget {
                         ? ThumbnailWidget(
                             item.thumbnail,
                             showFavForAlbumOnly: true,
-                            shouldShowOwnerAvatar: true,
+                            shouldShowOwnerAvatar: false,
                           )
                         : const NoThumbnailWidget(
                             addBorder: false,

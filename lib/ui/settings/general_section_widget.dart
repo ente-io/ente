@@ -5,10 +5,9 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/advanced_settings_screen.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class GeneralSectionWidget extends StatelessWidget {
@@ -34,7 +33,7 @@ class GeneralSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () {
+          onTap: () async {
             _onManageSubscriptionTapped(context);
           },
         ),
@@ -46,8 +45,9 @@ class GeneralSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () {
-            _onFamilyPlansTapped(context);
+          showOnlyLoadingState: true,
+          onTap: () async {
+            await _onFamilyPlansTapped(context);
           },
         ),
         sectionOptionSpacing,
@@ -58,7 +58,7 @@ class GeneralSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () {
+          onTap: () async {
             _onAdvancedTapped(context);
           },
         ),
@@ -78,11 +78,8 @@ class GeneralSectionWidget extends StatelessWidget {
   }
 
   Future<void> _onFamilyPlansTapped(BuildContext context) async {
-    final dialog = createProgressDialog(context, "Please wait...");
-    await dialog.show();
     final userDetails =
         await UserService.instance.getUserDetailsV2(memoryCount: false);
-    await dialog.hide();
     BillingService.instance.launchFamilyPortal(context, userDetails);
   }
 
