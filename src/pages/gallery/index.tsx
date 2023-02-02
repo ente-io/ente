@@ -71,10 +71,8 @@ import { CustomError, ServerErrorCodes } from 'utils/error';
 import { PAGES } from 'constants/pages';
 import {
     COLLECTION_OPS_TYPE,
-    isSharedCollection,
     handleCollectionOps,
     getSelectedCollection,
-    isFavoriteCollection,
     getArchivedCollections,
     hasNonSystemCollections,
 } from 'utils/collection';
@@ -729,10 +727,10 @@ export default function Gallery() {
                     deletedFileIds={deletedFileIds}
                     setDeletedFileIds={setDeletedFileIds}
                     activeCollection={activeCollection}
-                    isSharedCollection={isSharedCollection(
-                        activeCollection,
-                        collections
-                    )}
+                    isSharedCollection={
+                        collectionSummaries[activeCollection] ===
+                        CollectionSummaryType.incomingShare
+                    }
                     enableDownload={true}
                     resetSearch={resetSearch}
                 />
@@ -778,10 +776,10 @@ export default function Gallery() {
                             count={selected.count}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
-                            isFavoriteCollection={isFavoriteCollection(
-                                activeCollection,
-                                collections
-                            )}
+                            isFavoriteCollection={
+                                collectionSummaries[activeCollection] ===
+                                CollectionSummaryType.favorites
+                            }
                             isUncategorizedCollection={
                                 collectionSummaries[activeCollection] ===
                                 CollectionSummaryType.uncategorized
