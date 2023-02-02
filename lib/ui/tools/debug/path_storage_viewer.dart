@@ -98,7 +98,7 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
             ),
       trailingIcon: err != null ? Icons.error_outline_outlined : null,
       trailingIconIsMuted: err != null,
-      borderRadius: 8,
+      singleBorderRadius: 8,
       menuItemColor: getEnteColorScheme(context).fillFaint,
       isBottomBorderRadiusRemoved: widget.removeBottomRadius,
       isTopBorderRadiusRemoved: widget.removeTopRadius,

@@ -113,7 +113,7 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
             children: [
               MenuItemWidget(
                 captionedTextWidget: const CaptionedTextWidget(title: "Backup"),
-                borderRadius: 8.0,
+                singleBorderRadius: 8.0,
                 menuItemColor: colorScheme.fillFaint,
                 alignCaptionedTextToLeft: true,
                 trailingWidget: ToggleSwitchWidget(
@@ -235,7 +235,7 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Reset ignored files",
           ),
-          borderRadius: 8.0,
+          singleBorderRadius: 8.0,
           menuItemColor: getEnteColorScheme(context).fillFaint,
           leadingIcon: Icons.cloud_off_outlined,
           onTap: () async {

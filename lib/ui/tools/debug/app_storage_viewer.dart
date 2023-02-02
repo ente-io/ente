@@ -161,7 +161,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                             ),
                             menuItemColor:
                                 getEnteColorScheme(context).fillFaint,
-                            borderRadius: 8,
+                            singleBorderRadius: 8,
                             onTap: () async {
                               for (var pathItem in paths) {
                                 if (pathItem.allowCacheClear) {
