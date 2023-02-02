@@ -16,9 +16,11 @@ import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
+import 'package:photos/ui/viewer/actions/picker_widget.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:tuple/tuple.dart';
 
@@ -138,7 +140,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     alignCaptionedTextToLeft: true,
                     isBottomBorderRadiusRemoved: true,
                     onTap: () async {
-                      await _showDeviceLimitPicker();
+                      // await _showDeviceLimitPicker();
+                      routeToPage(context, PickerWidget(widget.collection!));
                     },
                     surfaceExecutionStates: false,
                   ),
