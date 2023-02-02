@@ -436,10 +436,19 @@ export default function Gallery() {
             try {
                 setCollectionSelectorView(false);
                 const selectedFiles = getSelectedFiles(selected, files);
+                const toProcessFiles =
+                    ops === COLLECTION_OPS_TYPE.REMOVE
+                        ? selectedFiles
+                        : selectedFiles.filter(
+                              (file) => file.ownerID === user.id
+                          );
+                if (toProcessFiles.length === 0) {
+                    return;
+                }
                 await handleCollectionOps(
                     ops,
                     collection,
-                    selectedFiles,
+                    toProcessFiles,
                     selected.collectionID
                 );
                 clearSelection();
