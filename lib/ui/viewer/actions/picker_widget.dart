@@ -72,11 +72,13 @@ class ItemsWidget extends StatefulWidget {
 
 class _ItemsWidgetState extends State<ItemsWidget> {
   late int currentDeviceLimit;
+  late int initialDeviceLimit;
   List<Widget> items = [];
   bool isCustomLimit = false;
   @override
   void initState() {
     currentDeviceLimit = widget.collection.publicURLs!.first!.deviceLimit;
+    initialDeviceLimit = currentDeviceLimit;
     if (!deviceLimits.contains(currentDeviceLimit)) {
       isCustomLimit = true;
     }
@@ -88,43 +90,12 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     items.clear();
     if (isCustomLimit) {
       items.add(
-        MenuItemWidget(
-          key: ValueKey(currentDeviceLimit),
-          menuItemColor: getEnteColorScheme(context).fillFaint,
-          captionedTextWidget: CaptionedTextWidget(
-            title: "$currentDeviceLimit",
-          ),
-          trailingIcon: Icons.check,
-          alignCaptionedTextToLeft: true,
-          isTopBorderRadiusRemoved: true,
-          isBottomBorderRadiusRemoved: true,
-        ),
+        _menuItemForPicker(initialDeviceLimit),
       );
-      isCustomLimit = false;
     }
     for (int deviceLimit in deviceLimits) {
       items.add(
-        MenuItemWidget(
-          key: ValueKey(deviceLimit),
-          menuItemColor: getEnteColorScheme(context).fillFaint,
-          captionedTextWidget: CaptionedTextWidget(
-            title: "$deviceLimit",
-          ),
-          trailingIcon: currentDeviceLimit == deviceLimit ? Icons.check : null,
-          alignCaptionedTextToLeft: true,
-          isTopBorderRadiusRemoved: true,
-          isBottomBorderRadiusRemoved: true,
-          showOnlyLoadingState: true,
-          onTap: () async {
-            await _updateUrlSettings(context, {
-              'deviceLimit': deviceLimit,
-            }).then(
-              (value) => setState(() {
-                currentDeviceLimit = deviceLimit;
-              }),
-            );
-          },
-        ),
+        _menuItemForPicker(deviceLimit),
       );
     }
     items = addSeparators(
@@ -137,6 +108,30 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: items,
+    );
+  }
+
+  Widget _menuItemForPicker(int deviceLimit) {
+    return MenuItemWidget(
+      key: ValueKey(deviceLimit),
+      menuItemColor: getEnteColorScheme(context).fillFaint,
+      captionedTextWidget: CaptionedTextWidget(
+        title: "$deviceLimit",
+      ),
+      trailingIcon: currentDeviceLimit == deviceLimit ? Icons.check : null,
+      alignCaptionedTextToLeft: true,
+      isTopBorderRadiusRemoved: true,
+      isBottomBorderRadiusRemoved: true,
+      showOnlyLoadingState: true,
+      onTap: () async {
+        await _updateUrlSettings(context, {
+          'deviceLimit': deviceLimit,
+        }).then(
+          (value) => setState(() {
+            currentDeviceLimit = deviceLimit;
+          }),
+        );
+      },
     );
   }
 
