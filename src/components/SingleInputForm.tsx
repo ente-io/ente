@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import constants from 'utils/strings/constants';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, FormikHelpers, FormikState } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
 import TextField from '@mui/material/TextField';
@@ -14,7 +14,8 @@ interface formValues {
 export interface SingleInputFormProps {
     callback: (
         inputValue: string,
-        setFieldError: (errorMessage: string) => void
+        setFieldError: (errorMessage: string) => void,
+        resetForm: (nextState?: Partial<FormikState<formValues>>) => void
     ) => Promise<void>;
     fieldType: 'text' | 'email' | 'password';
     placeholder: string;
@@ -43,10 +44,11 @@ export default function SingleInputForm(props: SingleInputFormProps) {
         { setFieldError, resetForm }: FormikHelpers<formValues>
     ) => {
         SetLoading(true);
-        await props.callback(values.inputValue, (message) =>
-            setFieldError('inputValue', message)
+        await props.callback(
+            values.inputValue,
+            (message) => setFieldError('inputValue', message),
+            resetForm
         );
-        resetForm();
         SetLoading(false);
     };
 
