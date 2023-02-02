@@ -681,7 +681,10 @@ const PhotoFrame = ({
 
     return (
         <>
-            {!isFirstLoad && files.length === 0 && !isInSearchMode ? (
+            {!isFirstLoad &&
+            files.length === 0 &&
+            !isInSearchMode &&
+            activeCollection === ALL_SECTION ? (
                 <EmptyScreen openUploader={openUploader} />
             ) : (
                 <Container>
