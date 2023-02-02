@@ -103,49 +103,34 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.add(
       ChangeLogEntry(
-        "Quick links!",
-        "Select some photos, choose \"Create link\" from the selection "
-            "options, and, well, that's it! You'll get a link that you can "
-            "share, end-to-end encrypted and secure.\n\nYour quick links will "
-            "appear at the bottom of the share tab so that you can remove them "
-            "when they're no longer needed, or convert them to regular albums "
-            "by renaming them if you want them to stick around.\n\nDepending on the feedback, we'll iterate on this (automatically prune quick "
-            "links, directly open the photo if only a single photo is shared, "
-            "etc). So let us know which direction you wish us to head!",
+        "Collaborative albums ✨",
+        "Much awaited, they're here now - create albums where multiple ente "
+            "users can add photos!\n\nWhen sharing an album, you can specify if"
+            " you want to add someone as a viewer or a collaborator. Collaborators can add photos "
+            "to the shared album.\n\nAlbums can have both collaborators and viewers, and as many as "
+            "you like. Storage is only counted once, for the person who uploaded the photo."
+            "\n\nHead over to the sharing options for an album to start adding collaborators.",
       ),
     );
     items.add(
       ChangeLogEntry(
-        '''Filename search''',
-        "You can search for files by their names now.",
-      ),
-    );
-
-    items.add(
-      ChangeLogEntry(
-        '''Prune empty albums''',
-        "There is now a button on the albums tab to remove all empty albums in one go. This will help customers with many empty albums clear out their clutter, and will be visible if you have more than 3 empty albums.",
-      ),
-    );
-    items.add(
-      ChangeLogEntry(
-        '''Clear caches''',
-        "Under Settings > General > Advanced, you'll now see an option to "
-            "view and manage how ente uses temporary storage on your device."
-            "\n\nThe list will show a breakdown of cached files - Attaching a "
-            "screenshot of this would help if you feel the ente is using more"
-            " storage than expected.\n\nThere is also an option to clear all "
-            "these temporarily cached files to free up space on your device.",
+        "Uncategorized",
+        "You can now keep photos that do not belong to a specific album."
+            "\n\nThis will simplify deletion and make it safer since now ente "
+            "will have a place to put photos that don't belong to any album "
+            "instead of always deleting them.\n\nThis will also allow you to "
+            "choose between keeping vs deleting photos present in the album, "
+            "when deleting an album.\n\nUncategorized photos can be seen from "
+            "the bottom of the albums tab.",
       ),
     );
 
     items.add(
       ChangeLogEntry(
-        '''Reset ignored files''',
-        "We've added help text to clarify when a file in an on-device album "
-            "is ignored for backups because it was deleted from ente earlier,"
-            " and an option to reset this state.\n\nWe've also fixed a bug "
-            "where an on-device album would get unmarked from backups after using the free up space option within it.",
+        '''Cleaner album picker''',
+        "Among other improvements, the list of albums that is shown when adding "
+            "or moving photos gets a facelift, and an issue causing the photo "
+            "zoom to be reset after loading the full resolution photo has been fixed.",
         isFeature: false,
       ),
     );
