@@ -60,6 +60,7 @@ import Uploader from 'components/Upload/Uploader';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
+    CollectionSummaryType,
     CollectionType,
     DUMMY_UNCATEGORIZED_SECTION,
     TRASH_SECTION,
@@ -74,7 +75,6 @@ import {
     handleCollectionOps,
     getSelectedCollection,
     isFavoriteCollection,
-    isUncategorizedCollection,
     getArchivedCollections,
     hasNonSystemCollections,
 } from 'utils/collection';
@@ -782,10 +782,10 @@ export default function Gallery() {
                                 activeCollection,
                                 collections
                             )}
-                            isUncategorizedCollection={isUncategorizedCollection(
-                                activeCollection,
-                                collections
-                            )}
+                            isUncategorizedCollection={
+                                collectionSummaries[activeCollection] ===
+                                CollectionSummaryType.uncategorized
+                            }
                         />
                     )}
             </FullScreenDropZone>
