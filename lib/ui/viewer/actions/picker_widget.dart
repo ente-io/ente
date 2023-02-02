@@ -6,6 +6,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -19,6 +20,7 @@ class PickerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
+        primary: false,
         slivers: <Widget>[
           const TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
@@ -40,6 +42,11 @@ class PickerWidget extends StatelessWidget {
                         borderRadius:
                             const BorderRadius.all(Radius.circular(8)),
                         child: ItemsWidget(collection),
+                      ),
+                      const MenuSectionDescriptionWidget(
+                        content:
+                            "When set to the maximum (50), the device limit will be relaxed"
+                            " to allow for temporary spikes of large number of viewers.",
                       )
                     ],
                   ),
@@ -48,6 +55,7 @@ class PickerWidget extends StatelessWidget {
               childCount: 1,
             ),
           ),
+          const SliverPadding(padding: EdgeInsets.symmetric(vertical: 12)),
         ],
       ),
     );
@@ -94,9 +102,6 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       );
       isCustomLimit = false;
     }
-    // else {
-    //   items.clear();
-    // }
     for (int deviceLimit in deviceLimits) {
       items.add(
         MenuItemWidget(
