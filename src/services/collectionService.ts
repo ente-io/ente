@@ -532,6 +532,13 @@ export const deleteCollection = async (
     keepFiles: boolean
 ) => {
     try {
+        if (keepFiles) {
+            const allFiles = await getLocalFiles();
+            const collectionFiles = allFiles.filter((file) => {
+                return file.collectionID === collectionID;
+            });
+            await removeFromCollection(collectionID, collectionFiles);
+        }
         const token = getToken();
 
         await HTTPService.delete(

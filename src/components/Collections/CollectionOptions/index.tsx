@@ -22,7 +22,6 @@ import { OnlyDownloadCollectionOption } from './OnlyDownloadCollectionOption';
 import { QuickOptions } from './QuickOptions';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import { HorizontalFlex } from 'components/Container';
-import { getLocalFiles } from 'services/fileService';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -148,14 +147,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const deleteCollectionButKeepFiles = async () => {
-        const allFiles = await getLocalFiles();
-        const collectionFiles = allFiles.filter((file) => {
-            return file.collectionID === activeCollection.id;
-        });
-        await CollectionAPI.removeFromCollection(
-            activeCollection.id,
-            collectionFiles
-        );
         await CollectionAPI.deleteCollection(activeCollection.id, true);
         redirectToAll();
     };
