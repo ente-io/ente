@@ -12,9 +12,9 @@ import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/separators_util.dart';
 
-class PickerWidget extends StatelessWidget {
+class DeviceLimitPickerPage extends StatelessWidget {
   final Collection collection;
-  const PickerWidget(this.collection, {super.key});
+  const DeviceLimitPickerPage(this.collection, {super.key});
 
   @override
   Widget build(BuildContext context) {
