@@ -15,7 +15,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
@@ -238,6 +238,7 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
           singleBorderRadius: 8.0,
           menuItemColor: getEnteColorScheme(context).fillFaint,
           leadingIcon: Icons.cloud_off_outlined,
+          alwaysShowSuccessState: true,
           onTap: () async {
             await _removeFilesFromIgnoredFiles(
               widget.filesInDeviceCollection,

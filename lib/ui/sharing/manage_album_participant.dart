@@ -4,14 +4,12 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
-import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
-import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -84,7 +82,6 @@ class _ManageIndividualParticipantState
                         widget.collection,
                         widget.user.email,
                         CollectionParticipantRole.collaborator,
-                        showProgress: true,
                       );
                       if (result && mounted) {
                         widget.user.role = CollectionParticipantRole
@@ -107,53 +104,38 @@ class _ManageIndividualParticipantState
               leadingIconColor: getEnteColorScheme(context).strokeBase,
               menuItemColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: widget.user.isViewer ? Icons.check : null,
+              showOnlyLoadingState: true,
               onTap: widget.user.isViewer
                   ? null
                   : () async {
-                      final ButtonAction? result = await showActionSheet(
-                        context: context,
-                        buttons: [
-                          ButtonWidget(
-                            buttonType: ButtonType.critical,
-                            isInAlert: true,
-                            shouldStickToDarkTheme: true,
-                            buttonAction: ButtonAction.first,
-                            shouldSurfaceExecutionStates: true,
-                            labelText: "Yes, convert to viewer",
-                            onTap: () async {
-                              isConvertToViewSuccess =
-                                  await collectionActions.addEmailToCollection(
-                                context,
-                                widget.collection,
-                                widget.user.email,
-                                CollectionParticipantRole.viewer,
-                              );
-                            },
-                          ),
-                          const ButtonWidget(
-                            buttonType: ButtonType.secondary,
-                            buttonAction: ButtonAction.cancel,
-                            isInAlert: true,
-                            shouldStickToDarkTheme: true,
-                            labelText: "Cancel",
-                          )
-                        ],
+                      final ButtonAction? result = await showChoiceActionSheet(
+                        context,
                         title: "Change permissions?",
+                        firstButtonLabel: "Yes, convert to viewer",
                         body:
                             '${widget.user.email} will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them',
+                        isCritical: true,
                       );
                       if (result != null) {
-                        if (result == ButtonAction.error) {
-                          showGenericErrorDialog(context: context);
-                        }
-                        if (result == ButtonAction.first &&
-                            isConvertToViewSuccess &&
-                            mounted) {
-                          // reset value
-                          isConvertToViewSuccess = false;
-                          widget.user.role =
-                              CollectionParticipantRole.viewer.toStringVal();
-                          setState(() => {});
+                        if (result == ButtonAction.first) {
+                          try {
+                            isConvertToViewSuccess =
+                                await collectionActions.addEmailToCollection(
+                              context,
+                              widget.collection,
+                              widget.user.email,
+                              CollectionParticipantRole.viewer,
+                            );
+                          } catch (e) {
+                            showGenericErrorDialog(context: context);
+                          }
+                          if (isConvertToViewSuccess && mounted) {
+                            // reset value
+                            isConvertToViewSuccess = false;
+                            widget.user.role =
+                                CollectionParticipantRole.viewer.toStringVal();
+                            setState(() => {});
+                          }
                         }
                       }
                     },
@@ -174,6 +156,7 @@ class _ManageIndividualParticipantState
               leadingIcon: Icons.not_interested_outlined,
               leadingIconColor: warning500,
               menuItemColor: getEnteColorScheme(context).fillFaint,
+              surfaceExecutionStates: false,
               onTap: () async {
                 final result = await collectionActions.removeParticipant(
                   context,

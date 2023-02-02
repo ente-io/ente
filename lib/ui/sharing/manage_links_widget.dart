@@ -14,7 +14,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -112,6 +112,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,
+                    surfaceExecutionStates: false,
                     onTap: () async {
                       await showPicker();
                     },
@@ -139,6 +140,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     onTap: () async {
                       await _showDeviceLimitPicker();
                     },
+                    surfaceExecutionStates: false,
                   ),
                   DividerWidget(
                     dividerType: DividerType.menuNoIcon,
@@ -221,6 +223,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     leadingIcon: Icons.remove_circle_outline,
                     leadingIconColor: warning500,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
+                    surfaceExecutionStates: false,
                     onTap: () async {
                       final bool result = await sharingActions.disableUrl(
                         context,

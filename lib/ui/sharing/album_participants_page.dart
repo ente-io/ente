@@ -5,7 +5,7 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
@@ -160,7 +160,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           onTap: isOwner
                               ? () async {
                                   if (isOwner) {
-                                    await _navigateToManageUser(currentUser);
+                                    _navigateToManageUser(currentUser);
                                   }
                                 }
                               : null,
@@ -185,7 +185,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       leadingIcon: Icons.add_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
-                        await _navigateToAddUser(false);
+                        _navigateToAddUser(false);
                       },
                       isTopBorderRadiusRemoved: collaborators.isNotEmpty,
                       singleBorderRadius: 8,
@@ -259,7 +259,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       leadingIcon: Icons.add_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
-                        await _navigateToAddUser(true);
+                        _navigateToAddUser(true);
                       },
                       isTopBorderRadiusRemoved: viewers.isNotEmpty,
                       singleBorderRadius: 8,
