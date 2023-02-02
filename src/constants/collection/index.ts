@@ -61,6 +61,7 @@ export const UPLOAD_NOT_ALLOWED_COLLECTION_TYPES = new Set([
     CollectionSummaryType.archive,
     CollectionSummaryType.incomingShare,
     CollectionSummaryType.trash,
+    CollectionSummaryType.uncategorized,
 ]);
 
 export const OPTIONS_NOT_HAVING_COLLECTION_TYPES = new Set([
