@@ -495,10 +495,13 @@ const encryptWithNewCollectionKey = async (
 };
 export const removeFromCollection = async (
     collectionID: number,
-    toRemoveFiles: EnteFile[]
+    toRemoveFiles: EnteFile[],
+    allFiles?: EnteFile[]
 ) => {
     try {
-        const allFiles = await getLocalFiles();
+        if (!allFiles) {
+            allFiles = await getLocalFiles();
+        }
 
         const toRemoveFilesIds = new Set(toRemoveFiles.map((f) => f.id));
         const toRemoveFilesCopiesInOtherCollections = allFiles.filter((f) => {
@@ -563,7 +566,7 @@ export const deleteCollection = async (
             const collectionFiles = allFiles.filter((file) => {
                 return file.collectionID === collectionID;
             });
-            await removeFromCollection(collectionID, collectionFiles);
+            await removeFromCollection(collectionID, collectionFiles, allFiles);
         }
         const token = getToken();
 
