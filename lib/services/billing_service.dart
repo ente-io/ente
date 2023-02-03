@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/errors.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
@@ -32,7 +32,7 @@ class BillingService {
   static final BillingService instance = BillingService._privateConstructor();
 
   final _logger = Logger("BillingService");
-  final _enteDio = Network.instance.enteDio;
+  final _enteDio = NetworkClient.instance.enteDio;
 
   bool _isOnSubscriptionPage = false;
 

@@ -171,6 +171,10 @@ class LocalSyncService {
   }
 
   Future<bool> syncAll() async {
+    if (!Configuration.instance.isLoggedIn()) {
+      _logger.warning("syncCall called when user is not logged in");
+      return false;
+    }
     final stopwatch = EnteWatch("localSyncAll")..start();
 
     final localAssets = await getAllLocalAssets();

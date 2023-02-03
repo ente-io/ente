@@ -11,7 +11,7 @@ import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
@@ -129,7 +129,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   final file = item.file;
   Uint8List encryptedThumbnail;
   try {
-    encryptedThumbnail = (await Network.instance.getDio().get(
+    encryptedThumbnail = (await NetworkClient.instance.getDio().get(
               file.thumbnailUrl,
               options: Options(
                 headers: {"X-Auth-Token": Configuration.instance.getToken()},

@@ -16,13 +16,15 @@ extension CollectionFileActions on CollectionActions {
     BuildContext bContext,
     Collection collection,
     SelectedFiles selectedFiles,
+    bool removingOthersFile,
   ) async {
     final actionResult = await showActionSheet(
       context: bContext,
       buttons: [
         ButtonWidget(
-          labelText: "Yes, remove",
-          buttonType: ButtonType.neutral,
+          labelText: "Remove",
+          buttonType:
+              removingOthersFile ? ButtonType.critical : ButtonType.neutral,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
           isInAlert: true,
@@ -48,9 +50,11 @@ extension CollectionFileActions on CollectionActions {
           isInAlert: true,
         ),
       ],
-      title: "Remove from album?",
-      body: "Selected items will be removed from this album. Items which are "
-          "only in this album will be moved to Uncategorized.",
+      title: removingOthersFile ? "Remove from album?" : null,
+      body: removingOthersFile
+          ? "Some of the items you are removing were "
+              "added by other people, and you will lose access to them"
+          : "Selected items will be removed from this album",
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult != null && actionResult == ButtonAction.error) {

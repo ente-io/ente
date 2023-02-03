@@ -15,7 +15,7 @@ import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -44,8 +44,8 @@ class FileUploader {
   static const kFileUploadTimeout = Duration(minutes: 50);
 
   final _logger = Logger("FileUploader");
-  final _dio = Network.instance.getDio();
-  final _enteDio = Network.instance.enteDio;
+  final _dio = NetworkClient.instance.getDio();
+  final _enteDio = NetworkClient.instance.enteDio;
   final LinkedHashMap _queue = LinkedHashMap<String, FileUploadItem>();
   final _uploadLocks = UploadLocksDB.instance;
   final kSafeBufferForLockExpiry = const Duration(days: 1).inMicroseconds;
