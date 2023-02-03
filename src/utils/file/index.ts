@@ -234,19 +234,6 @@ export async function decryptFile(
     }
 }
 
-export const preservePhotoswipeProps =
-    (newFiles: EnteFile[]) =>
-    (currentFiles: EnteFile[]): EnteFile[] => {
-        const currentFilesMap = Object.fromEntries(
-            currentFiles.map((file) => [file.id, file])
-        );
-        const fileWithPreservedProperty = newFiles.map((file) => {
-            const currentFile = currentFilesMap[file.id];
-            return { ...currentFile, ...file };
-        });
-        return fileWithPreservedProperty;
-    };
-
 export function fileNameWithoutExtension(filename: string) {
     const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return filename;
@@ -567,3 +554,17 @@ export const copyFileToClipboard = async (fileUrl: string) => {
         .write([new ClipboardItem({ 'image/png': blobPromise })])
         .catch((e) => logError(e, 'failed to copy to clipboard'));
 };
+
+export function getLatestVersionFiles(files: EnteFile[]) {
+    const latestVersionFiles = new Map<string, EnteFile>();
+    files.forEach((file) => {
+        const uid = `${file.collectionID}-${file.id}`;
+        if (
+            !latestVersionFiles.has(uid) ||
+            latestVersionFiles.get(uid).updationTime < file.updationTime
+        ) {
+            latestVersionFiles.set(uid, file);
+        }
+    });
+    return Array.from(latestVersionFiles.values());
+}

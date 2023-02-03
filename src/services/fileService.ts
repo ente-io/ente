@@ -7,8 +7,8 @@ import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import {
     decryptFile,
+    getLatestVersionFiles,
     mergeMetadata,
-    preservePhotoswipeProps,
     sortFiles,
 } from 'utils/file';
 import { EnteFile, EncryptedEnteFile, TrashRequest } from 'types/file';
@@ -54,12 +54,12 @@ const setLocalFiles = async (files: EnteFile[]) => {
 export const syncFiles = async (
     collections: Collection[],
     setFiles: SetFiles
-) => {
+): Promise<void> => {
     const localFiles = await getLocalFiles();
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
         await setLocalFiles(files);
-        setFiles(preservePhotoswipeProps([...sortFiles(mergeMetadata(files))]));
+        setFiles(files);
     }
     for (const collection of collections) {
         if (!getToken()) {
@@ -72,38 +72,16 @@ export const syncFiles = async (
         if (collection.updationTime === lastSyncTime) {
             continue;
         }
-        const fetchedFiles =
-            (await getFiles(collection, lastSyncTime, files, setFiles)) ?? [];
-        files = [...files, ...fetchedFiles];
-        const latestVersionFiles = new Map<string, EnteFile>();
-        files.forEach((file) => {
-            const uid = `${file.collectionID}-${file.id}`;
-            if (
-                !latestVersionFiles.has(uid) ||
-                latestVersionFiles.get(uid).updationTime < file.updationTime
-            ) {
-                latestVersionFiles.set(uid, file);
-            }
-        });
-        files = [];
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (const [_, file] of latestVersionFiles) {
-            if (file.isDeleted) {
-                continue;
-            }
-            files.push(file);
-        }
+        const newFiles = await getFiles(collection, lastSyncTime, setFiles);
+        files = [...files, ...newFiles];
         await setLocalFiles(files);
         setCollectionLastSyncTime(collection, collection.updationTime);
-        setFiles(preservePhotoswipeProps([...sortFiles(mergeMetadata(files))]));
     }
-    return sortFiles(mergeMetadata(files));
 };
 
 export const getFiles = async (
     collection: Collection,
     sinceTime: number,
-    files: EnteFile[],
     setFiles: SetFiles
 ): Promise<EnteFile[]> => {
     try {
@@ -142,14 +120,13 @@ export const getFiles = async (
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime;
             }
-            setFiles(
-                preservePhotoswipeProps(
-                    sortFiles(
-                        mergeMetadata(
-                            [...(files || []), ...decryptedFiles].filter(
-                                (item) => !item.isDeleted
-                            )
-                        )
+            setFiles((files) =>
+                sortFiles(
+                    mergeMetadata(
+                        getLatestVersionFiles([
+                            ...(files || []),
+                            ...decryptedFiles,
+                        ]).filter((item) => !item.isDeleted)
                     )
                 )
             );

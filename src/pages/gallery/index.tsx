@@ -334,10 +334,8 @@ export default function Gallery() {
             !silent && startLoading();
             const collections = await syncCollections();
             setCollections(collections);
-            let files = await syncFiles(collections, setFiles);
-            const trash = await syncTrash(collections, setFiles, files);
-            files = [...files, ...getTrashedFiles(trash)];
-            setFiles(sortFiles(files));
+            await syncFiles(collections, setFiles);
+            await syncTrash(collections, setFiles);
         } catch (e) {
             logError(e, 'syncWithRemote failed');
             switch (e.message) {
