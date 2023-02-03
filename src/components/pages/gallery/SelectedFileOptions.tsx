@@ -42,6 +42,7 @@ interface Props {
     activeCollection: number;
     isFavoriteCollection: boolean;
     isUncategorizedCollection: boolean;
+    isIncomingSharedCollection: boolean;
 }
 
 const SelectedFileOptions = ({
@@ -62,6 +63,7 @@ const SelectedFileOptions = ({
     activeCollection,
     isFavoriteCollection,
     isUncategorizedCollection,
+    isIncomingSharedCollection,
 }: Props) => {
     const { setDialogMessage } = useContext(AppContext);
     const addToCollection = () =>
@@ -160,6 +162,11 @@ const SelectedFileOptions = ({
                     </>
                 ) : isUncategorizedCollection ? (
                     <>
+                        <Tooltip title={constants.DOWNLOAD}>
+                            <IconButton onClick={downloadHelper}>
+                                <DownloadIcon />
+                            </IconButton>
+                        </Tooltip>
                         <Tooltip title={constants.MOVE}>
                             <IconButton onClick={moveToCollection}>
                                 <MoveIcon />
@@ -171,6 +178,12 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </Tooltip>
                     </>
+                ) : isIncomingSharedCollection ? (
+                    <Tooltip title={constants.DOWNLOAD}>
+                        <IconButton onClick={downloadHelper}>
+                            <DownloadIcon />
+                        </IconButton>
+                    </Tooltip>
                 ) : (
                     <>
                         <Tooltip title={constants.FIX_CREATION_TIME}>
