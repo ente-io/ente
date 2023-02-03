@@ -450,9 +450,6 @@ const PhotoFrame = ({
     const handleSelect =
         (id: number, isOwnFile: boolean, index?: number) =>
         (checked: boolean) => {
-            if (selected.collectionID !== activeCollection) {
-                setSelected({ ownCount: 0, count: 0, collectionID: 0 });
-            }
             if (typeof index !== 'undefined') {
                 if (checked) {
                     setRangeStart(index);
@@ -460,37 +457,41 @@ const PhotoFrame = ({
                     setRangeStart(undefined);
                 }
             }
-
-            const handleCounter = (count: number) => {
-                if (selected[id] === checked) {
-                    return count;
+            setSelected((selected) => {
+                if (selected.collectionID !== activeCollection) {
+                    selected = { ownCount: 0, count: 0, collectionID: 0 };
                 }
-                if (checked) {
-                    return count + 1;
-                } else {
-                    return count - 1;
-                }
-            };
 
-            const handleAllCounter = () => {
-                if (isOwnFile) {
-                    return {
-                        ownCount: handleCounter(selected.ownCount),
-                        count: handleCounter(selected.count),
-                    };
-                } else {
-                    return {
-                        count: handleCounter(selected.count),
-                    };
-                }
-            };
+                const handleCounterChange = (count: number) => {
+                    if (selected[id] === checked) {
+                        return count;
+                    }
+                    if (checked) {
+                        return count + 1;
+                    } else {
+                        return count - 1;
+                    }
+                };
 
-            setSelected((selected) => ({
-                ...selected,
-                [id]: checked,
-                collectionID: activeCollection,
-                ...handleAllCounter(),
-            }));
+                const handleAllCounterChange = () => {
+                    if (isOwnFile) {
+                        return {
+                            ownCount: handleCounterChange(selected.ownCount),
+                            count: handleCounterChange(selected.count),
+                        };
+                    } else {
+                        return {
+                            count: handleCounterChange(selected.count),
+                        };
+                    }
+                };
+                return {
+                    ...selected,
+                    [id]: checked,
+                    collectionID: activeCollection,
+                    ...handleAllCounterChange(),
+                };
+            });
         };
     const onHoverOver = (index: number) => () => {
         setCurrentHover(index);
