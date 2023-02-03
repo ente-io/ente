@@ -413,7 +413,7 @@ class UploadManager {
     private updateUIFiles(decryptedFile: EnteFile) {
         this.existingFiles.push(decryptedFile);
         this.existingFiles = sortFiles(this.existingFiles);
-        this.setFiles((files) => [...files, decryptedFile]);
+        this.setFiles((files) => sortFiles([...files, decryptedFile]));
     }
 
     private updateElectronRemainingFiles(
