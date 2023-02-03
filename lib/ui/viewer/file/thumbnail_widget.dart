@@ -10,7 +10,6 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/extensions/string_ext.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -128,11 +127,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           );
         } else if (widget.file!.pubMagicMetadata!.uploaderName != null) {
           contentChildren.add(
-            // Use uploadName hashCode as userID so that different uploader
-            // get avatar color
+            // Use -1 as userID for enforcing black avatar color
             OwnerAvatarOverlayIcon(
               User(
-                id: widget.file!.pubMagicMetadata!.uploaderName.sumAsciiValues,
+                id: -1,
                 email: '',
                 name: widget.file!.pubMagicMetadata!.uploaderName,
               ),
