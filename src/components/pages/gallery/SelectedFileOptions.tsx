@@ -117,7 +117,7 @@ const SelectedFileOptions = ({
                 proceed: {
                     action: removeFromCollectionHelper,
                     text: constants.YES_REMOVE,
-                    variant: 'primary',
+                    variant: 'danger',
                 },
                 close: { text: constants.CANCEL },
             });
