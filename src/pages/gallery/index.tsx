@@ -785,6 +785,11 @@ export default function Gallery() {
                                     ?.type ===
                                 CollectionSummaryType.uncategorized
                             }
+                            isIncomingSharedCollection={
+                                collectionSummaries.get(activeCollection)
+                                    ?.type ===
+                                CollectionSummaryType.incomingShare
+                            }
                         />
                     )}
             </FullScreenDropZone>

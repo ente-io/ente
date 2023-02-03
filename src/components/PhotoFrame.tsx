@@ -504,7 +504,6 @@ const PhotoFrame = ({
                 file={files[index]}
                 updateURL={updateURL(files[index].id)}
                 onClick={onThumbnailClick(index)}
-                selectable={!isIncomingSharedCollection}
                 onSelect={handleSelect(files[index].id, index)}
                 selected={
                     selected.collectionID === activeCollection &&

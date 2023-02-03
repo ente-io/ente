@@ -20,7 +20,6 @@ interface IProps {
     file: EnteFile;
     updateURL: (url: string) => EnteFile;
     onClick: () => void;
-    selectable: boolean;
     selected: boolean;
     onSelect: (checked: boolean) => void;
     onHover: () => void;
@@ -203,7 +202,7 @@ export default function PreviewCard(props: IProps) {
         file,
         onClick,
         updateURL,
-        selectable,
+
         selected,
         onSelect,
         selectOnClick,
@@ -298,16 +297,15 @@ export default function PreviewCard(props: IProps) {
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!file?.msrc && !imgSrc}
-            {...(selectable ? useLongPress(longPressCallback, 500) : {})}>
-            {selectable && (
-                <Check
-                    type="checkbox"
-                    checked={selected}
-                    onChange={handleSelect}
-                    $active={isRangeSelectActive && isInsSelectRange}
-                    onClick={(e) => e.stopPropagation()}
-                />
-            )}
+            {...useLongPress(longPressCallback, 500)}>
+            <Check
+                type="checkbox"
+                checked={selected}
+                onChange={handleSelect}
+                $active={isRangeSelectActive && isInsSelectRange}
+                onClick={(e) => e.stopPropagation()}
+            />
+
             {(file?.msrc || imgSrc) && <img src={file?.msrc || imgSrc} />}
             {file?.metadata.fileType === 1 && <PlayCircleOutlineOutlinedIcon />}
             <SelectedOverlay selected={selected} />
