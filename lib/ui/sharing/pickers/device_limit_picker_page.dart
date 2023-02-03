@@ -79,7 +79,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   void initState() {
     currentDeviceLimit = widget.collection.publicURLs!.first!.deviceLimit;
     initialDeviceLimit = currentDeviceLimit;
-    if (!deviceLimits.contains(currentDeviceLimit)) {
+    if (!publicLinkDeviceLimits.contains(currentDeviceLimit)) {
       isCustomLimit = true;
     }
     super.initState();
@@ -93,7 +93,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         _menuItemForPicker(initialDeviceLimit),
       );
     }
-    for (int deviceLimit in deviceLimits) {
+    for (int deviceLimit in publicLinkDeviceLimits) {
       items.add(
         _menuItemForPicker(deviceLimit),
       );

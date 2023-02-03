@@ -56,4 +56,4 @@ const double restrictedMaxWidth = 430;
 
 const double mobileSmallThreshold = 336;
 
-const deviceLimits = [50, 25, 10, 5, 2, 1];
+const publicLinkDeviceLimits = [50, 25, 10, 5, 2, 1];
