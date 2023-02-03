@@ -76,8 +76,8 @@ export const syncFiles = async (
         files = getLatestVersionFiles([...files, ...newFiles]);
         await setLocalFiles(files);
         setCollectionLastSyncTime(collection, collection.updationTime);
-        return files;
     }
+    return files;
 };
 
 export const getFiles = async (

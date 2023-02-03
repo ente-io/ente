@@ -27,7 +27,6 @@ import { IsArchived } from 'utils/magicMetadata';
 import { isSameDayAnyYear, isInsideBox } from 'utils/search';
 import { Search } from 'types/search';
 import { logError } from 'utils/sentry';
-import { CustomError } from 'utils/error';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useMemo } from 'react';
@@ -136,9 +135,8 @@ const PhotoFrame = ({
             const user: User = getData(LS_KEYS.USER);
 
             const filteredData = files
-                .map((item, index) => ({
+                .map((item) => ({
                     ...item,
-                    dataIndex: index,
                     w: window.innerWidth,
                     h: window.innerHeight,
                     title: item.pubMagicMetadata?.data.caption,
@@ -324,54 +322,40 @@ const PhotoFrame = ({
         }
     }, [selected]);
 
-    const getFileIndexFromID = (files: EnteFile[], id: number) => {
-        const index = files.findIndex((file) => file.id === id);
-        if (index === -1) {
-            throw CustomError.FILE_ID_NOT_FOUND;
+    const updateURL = (index: number) => (url: string) => {
+        const file = filteredData[index];
+        file.msrc = url;
+        file.w = window.innerWidth;
+        file.h = window.innerHeight;
+
+        if (file.metadata.fileType === FILE_TYPE.VIDEO && !file.html) {
+            file.html = `
+                <div class="pswp-item-container">
+                    <img src="${url}" onContextMenu="return false;"/>
+                    <div class="spinner-border text-light" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            `;
+        } else if (
+            file.metadata.fileType === FILE_TYPE.LIVE_PHOTO &&
+            !file.html
+        ) {
+            file.html = `
+                <div class="pswp-item-container">
+                    <img src="${url}" onContextMenu="return false;"/>
+                    <div class="spinner-border text-light" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            `;
+        } else if (file.metadata.fileType === FILE_TYPE.IMAGE && !file.src) {
+            file.src = url;
         }
-        return index;
     };
 
-    const updateURL = (id: number) => (url: string) => {
-        const updateFile = (file: EnteFile) => {
-            file.msrc = url;
-            file.w = window.innerWidth;
-            file.h = window.innerHeight;
-
-            if (file.metadata.fileType === FILE_TYPE.VIDEO && !file.html) {
-                file.html = `
-                <div class="pswp-item-container">
-                    <img src="${url}" onContextMenu="return false;"/>
-                    <div class="spinner-border text-light" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-            `;
-            } else if (
-                file.metadata.fileType === FILE_TYPE.LIVE_PHOTO &&
-                !file.html
-            ) {
-                file.html = `
-                <div class="pswp-item-container">
-                    <img src="${url}" onContextMenu="return false;"/>
-                    <div class="spinner-border text-light" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-            `;
-            } else if (
-                file.metadata.fileType === FILE_TYPE.IMAGE &&
-                !file.src
-            ) {
-                file.src = url;
-            }
-            return file;
-        };
-        const index = getFileIndexFromID(files, id);
-        return updateFile(files[index]);
-    };
-
-    const updateSrcURL = async (id: number, srcURL: SourceURL) => {
+    const updateSrcURL = async (index: number, srcURL: SourceURL) => {
+        const file = filteredData[index];
         const {
             originalImageURL,
             convertedImageURL,
@@ -380,22 +364,23 @@ const PhotoFrame = ({
         } = srcURL;
         const isPlayable =
             convertedVideoURL && (await isPlaybackPossible(convertedVideoURL));
-        const updateFile = (file: EnteFile) => {
-            file.w = window.innerWidth;
-            file.h = window.innerHeight;
-            file.isSourceLoaded = true;
-            file.originalImageURL = originalImageURL;
-            file.originalVideoURL = originalVideoURL;
-            if (file.metadata.fileType === FILE_TYPE.VIDEO) {
-                if (isPlayable) {
-                    file.html = `
+
+        file.w = window.innerWidth;
+        file.h = window.innerHeight;
+        file.isSourceLoaded = true;
+        file.originalImageURL = originalImageURL;
+        file.originalVideoURL = originalVideoURL;
+
+        if (file.metadata.fileType === FILE_TYPE.VIDEO) {
+            if (isPlayable) {
+                file.html = `
             <video controls onContextMenu="return false;">
                 <source src="${convertedVideoURL}" />
                 Your browser does not support the video tag.
             </video>
         `;
-                } else {
-                    file.html = `
+            } else {
+                file.html = `
             <div class="pswp-item-container">
                 <img src="${file.msrc}" onContextMenu="return false;"/>
                 <div class="download-banner" >
@@ -404,10 +389,10 @@ const PhotoFrame = ({
                 </div>
             </div>
             `;
-                }
-            } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                if (isPlayable) {
-                    file.html = `
+            }
+        } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+            if (isPlayable) {
+                file.html = `
                 <div class = 'pswp-item-container'>
                     <img id = "live-photo-image-${file.id}" src="${convertedImageURL}" onContextMenu="return false;"/>
                     <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
@@ -416,8 +401,8 @@ const PhotoFrame = ({
                     </video>
                 </div>
                 `;
-                } else {
-                    file.html = `
+            } else {
+                file.html = `
                 <div class="pswp-item-container">
                     <img src="${file.msrc}" onContextMenu="return false;"/>
                     <div class="download-banner">
@@ -426,15 +411,11 @@ const PhotoFrame = ({
                     </div>
                 </div>
                 `;
-                }
-            } else {
-                file.src = convertedImageURL;
             }
-            return file;
-        };
+        } else {
+            file.src = convertedImageURL;
+        }
         setIsSourceLoaded(true);
-        const index = getFileIndexFromID(files, id);
-        return updateFile(files[index]);
     };
 
     const handleClose = (needUpdate) => {
@@ -537,7 +518,7 @@ const PhotoFrame = ({
                     selected[files[index].id] ?? false
                 }`}
                 file={files[index]}
-                updateURL={updateURL(files[index].id)}
+                updateURL={updateURL(index)}
                 onClick={onThumbnailClick(index)}
                 onSelect={handleSelect(
                     files[index].id,
@@ -602,15 +583,7 @@ const PhotoFrame = ({
                     }
                     galleryContext.thumbs.set(item.id, url);
                 }
-                const newFile = updateURL(item.id)(url);
-                item.msrc = newFile.msrc;
-                item.html = newFile.html;
-                item.src = newFile.src;
-                item.isSourceLoaded = newFile.isSourceLoaded;
-                item.originalImageURL = newFile.originalImageURL;
-                item.originalVideoURL = newFile.originalVideoURL;
-                item.w = newFile.w;
-                item.h = newFile.h;
+                updateURL(item.dataIndex)(url);
 
                 addLogLine(
                     `[${item.id}] calling invalidateCurrItems for thumbnail`
@@ -685,20 +658,13 @@ const PhotoFrame = ({
                     [convertedImageURL] = urls.converted;
                 }
                 setIsSourceLoaded(false);
-                const newFile = await updateSrcURL(item.id, {
+                await updateSrcURL(item.id, {
                     originalImageURL,
                     originalVideoURL,
                     convertedImageURL,
                     convertedVideoURL,
                 });
-                item.msrc = newFile.msrc;
-                item.html = newFile.html;
-                item.src = newFile.src;
-                item.isSourceLoaded = newFile.isSourceLoaded;
-                item.originalImageURL = newFile.originalImageURL;
-                item.originalVideoURL = newFile.originalVideoURL;
-                item.w = newFile.w;
-                item.h = newFile.h;
+
                 try {
                     addLogLine(
                         `[${item.id}] calling invalidateCurrItems for src`

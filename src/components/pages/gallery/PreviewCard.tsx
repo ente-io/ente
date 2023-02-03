@@ -18,7 +18,7 @@ import { formatDateRelative } from 'utils/time/format';
 
 interface IProps {
     file: EnteFile;
-    updateURL: (url: string) => EnteFile;
+    updateURL: (url: string) => void;
     onClick: () => void;
     selected: boolean;
     onSelect: (checked: boolean) => void;
@@ -221,7 +221,9 @@ export default function PreviewCard(props: IProps) {
             const main = async () => {
                 try {
                     let url;
-                    if (
+                    if (thumbs.has(file.id)) {
+                        url = thumbs.get(file.id);
+                    } else if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
                     ) {
                         url =
@@ -235,30 +237,13 @@ export default function PreviewCard(props: IProps) {
                     }
                     setImgSrc(url);
                     thumbs.set(file.id, url);
-                    const newFile = updateURL(url);
-                    file.msrc = newFile.msrc;
-                    file.html = newFile.html;
-                    file.src = newFile.src;
-                    file.w = newFile.w;
-                    file.h = newFile.h;
+                    updateURL(url);
                 } catch (e) {
                     logError(e, 'preview card useEffect failed');
                     // no-op
                 }
             };
-
-            if (thumbs.has(file.id)) {
-                const thumbImgSrc = thumbs.get(file.id);
-                setImgSrc(thumbImgSrc);
-                const newFile = updateURL(thumbImgSrc);
-                file.msrc = newFile.msrc;
-                file.html = newFile.html;
-                file.src = newFile.src;
-                file.w = newFile.w;
-                file.h = newFile.h;
-            } else {
-                main();
-            }
+            main();
         }
     }, [file, props.showPlaceholder]);
 
