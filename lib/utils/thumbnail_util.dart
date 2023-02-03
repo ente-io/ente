@@ -4,7 +4,6 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
@@ -151,7 +150,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   var data = await CryptoUtil.decryptChaCha(
     encryptedThumbnail,
     thumbnailDecryptionKey,
-    Sodium.base642bin(file.thumbnailDecryptionHeader!),
+    CryptoUtil.base642bin(file.thumbnailDecryptionHeader!),
   );
   final thumbnailSize = data.length;
   if (thumbnailSize > thumbnailDataLimit) {

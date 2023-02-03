@@ -170,6 +170,33 @@ class CryptoUtil {
     Sodium.init();
   }
 
+  static Uint8List base642bin(
+    String b64, {
+    String? ignore,
+    int variant = Sodium.base64VariantOriginal,
+  }) {
+    return Sodium.base642bin(b64, ignore: ignore, variant: variant);
+  }
+
+  static String bin2base64(
+    Uint8List bin, {
+    bool urlSafe = false,
+  }) {
+    return Sodium.bin2base64(
+      bin,
+      variant:
+          urlSafe ? Sodium.base64VariantUrlsafe : Sodium.base64VariantOriginal,
+    );
+  }
+
+  static String bin2hex(Uint8List bin) {
+    return Sodium.bin2hex(bin);
+  }
+
+  static Uint8List hex2bin(String hex) {
+    return Sodium.hex2bin(hex);
+  }
+
   static EncryptionResult encryptSync(Uint8List source, Uint8List key) {
     final nonce = Sodium.randombytesBuf(Sodium.cryptoSecretboxNoncebytes);
 
@@ -286,6 +313,10 @@ class CryptoUtil {
     Uint8List password,
     Uint8List salt,
   ) async {
+    assert(
+      Sodium.cryptoPwhashAlgArgon2id13 == Sodium.cryptoPwhashAlgDefault,
+      "mismatch in expected default pw hashing algo",
+    );
     final logger = Logger("pwhash");
     int memLimit = Sodium.cryptoPwhashMemlimitSensitive;
     int opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
@@ -302,6 +333,20 @@ class CryptoUtil {
       opsLimit = opsLimit * 2;
     }
     throw UnsupportedError("Cannot perform this operation on this device");
+  }
+
+  static Future<DerivedKeyResult> deriveInteractiveKey(
+    Uint8List password,
+    Uint8List salt,
+  ) async {
+    assert(
+      Sodium.cryptoPwhashAlgArgon2id13 == Sodium.cryptoPwhashAlgDefault,
+      "mismatch in expected default pw hashing algo",
+    );
+    final int memLimit = Sodium.cryptoPwhashMemlimitInteractive;
+    final int opsLimit = Sodium.cryptoPwhashOpslimitInteractive;
+    final key = await deriveKey(password, salt, memLimit, opsLimit);
+    return DerivedKeyResult(key, memLimit, opsLimit);
   }
 
   static Future<Uint8List> deriveKey(

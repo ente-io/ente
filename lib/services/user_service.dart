@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -569,11 +568,11 @@ class UserService {
         }
         recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
       }
-      secret = Sodium.bin2base64(
+      secret = CryptoUtil.bin2base64(
         await CryptoUtil.decrypt(
-          Sodium.base642bin(encryptedSecret),
-          Sodium.hex2bin(recoveryKey.trim()),
-          Sodium.base642bin(secretDecryptionNonce),
+          CryptoUtil.base642bin(encryptedSecret),
+          CryptoUtil.hex2bin(recoveryKey.trim()),
+          CryptoUtil.base642bin(secretDecryptionNonce),
         ),
       );
     } catch (e) {
@@ -675,16 +674,16 @@ class UserService {
     final dialog = createProgressDialog(context, "Verifying...");
     await dialog.show();
     final encryptionResult =
-        CryptoUtil.encryptSync(Sodium.base642bin(secret), recoveryKey);
+        CryptoUtil.encryptSync(CryptoUtil.base642bin(secret), recoveryKey);
     try {
       await _enteDio.post(
         "/users/two-factor/enable",
         data: {
           "code": code,
           "encryptedTwoFactorSecret":
-              Sodium.bin2base64(encryptionResult.encryptedData as Uint8List),
+              CryptoUtil.bin2base64(encryptionResult.encryptedData as Uint8List),
           "twoFactorSecretDecryptionNonce":
-              Sodium.bin2base64(encryptionResult.nonce as Uint8List),
+              CryptoUtil.bin2base64(encryptionResult.nonce as Uint8List),
         },
       );
       await dialog.hide();

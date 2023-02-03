@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -14,6 +13,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -33,7 +33,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
     await dialog.show();
     try {
       final String inputKey = _recoveryKey.text.trim();
-      final String recoveryKey = Sodium.bin2hex(
+      final String recoveryKey = CryptoUtil.bin2hex(
         await UserService.instance.getOrCreateRecoveryKey(context),
       );
       final String recoveryKeyWords = bip39.entropyToMnemonic(recoveryKey);
@@ -97,7 +97,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
     if (hasAuthenticated) {
       String recoveryKey;
       try {
-        recoveryKey = Sodium.bin2hex(
+        recoveryKey = CryptoUtil.bin2hex(
           await UserService.instance.getOrCreateRecoveryKey(context),
         );
         routeToPage(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
@@ -10,6 +9,7 @@ import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
+import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class DebugSectionWidget extends StatelessWidget {
@@ -83,7 +83,7 @@ class DebugSectionWidget extends StatelessWidget {
               "Key",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Text(Sodium.bin2base64(Configuration.instance.getKey()!)),
+            Text(CryptoUtil.bin2base64(Configuration.instance.getKey()!)),
             const Padding(padding: EdgeInsets.all(12)),
             const Text(
               "Encrypted Key",

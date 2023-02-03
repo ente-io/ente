@@ -2,7 +2,6 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
@@ -55,7 +54,7 @@ Future<io.File?> downloadAndDecrypt(
     await CryptoUtil.decryptFile(
       encryptedFilePath,
       decryptedFilePath,
-      Sodium.base642bin(file.fileDecryptionHeader!),
+      CryptoUtil.base642bin(file.fileDecryptionHeader!),
       decryptFileKey(file),
     );
     _logger.info("File decrypted: " + file.uploadedFileID.toString());
@@ -65,8 +64,8 @@ Future<io.File?> downloadAndDecrypt(
 }
 
 Uint8List decryptFileKey(ente.File file) {
-  final encryptedKey = Sodium.base642bin(file.encryptedKey!);
-  final nonce = Sodium.base642bin(file.keyDecryptionNonce!);
+  final encryptedKey = CryptoUtil.base642bin(file.encryptedKey!);
+  final nonce = CryptoUtil.base642bin(file.keyDecryptionNonce!);
   final collectionKey =
       CollectionsService.instance.getCollectionKey(file.collectionID!);
   return CryptoUtil.decryptSync(encryptedKey, collectionKey, nonce);

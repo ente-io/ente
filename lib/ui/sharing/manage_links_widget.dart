@@ -5,7 +5,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
@@ -458,24 +457,16 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   Future<Map<String, dynamic>> _getEncryptedPassword(String pass) async {
-    assert(
-      Sodium.cryptoPwhashAlgArgon2id13 == Sodium.cryptoPwhashAlgDefault,
-      "mismatch in expected default pw hashing algo",
-    );
-    final int memLimit = Sodium.cryptoPwhashMemlimitInteractive;
-    final int opsLimit = Sodium.cryptoPwhashOpslimitInteractive;
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
-    final result = await CryptoUtil.deriveKey(
+    final result = await CryptoUtil.deriveInteractiveKey(
       utf8.encode(pass) as Uint8List,
       kekSalt,
-      memLimit,
-      opsLimit,
     );
     return {
-      'passHash': Sodium.bin2base64(result),
-      'nonce': Sodium.bin2base64(kekSalt),
-      'memLimit': memLimit,
-      'opsLimit': opsLimit,
+      'passHash': CryptoUtil.bin2base64(result.key),
+      'nonce': CryptoUtil.bin2base64(kekSalt),
+      'memLimit': result.memLimit,
+      'opsLimit': result.opsLimit,
     };
   }
 

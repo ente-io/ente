@@ -3,12 +3,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
+import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:pinput/pin_put/pin_put.dart';
@@ -45,7 +45,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
     _imageProvider = Image.memory(
-      Sodium.base642bin(widget.qrCode),
+      CryptoUtil.base642bin(widget.qrCode),
       height: 180,
       width: 180,
     ).image;
@@ -269,7 +269,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
   }
 
   void _showSuccessPage() {
-    final recoveryKey = Sodium.bin2hex(Configuration.instance.getRecoveryKey());
+    final recoveryKey =
+        CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
     routeToPage(
       context,
       RecoveryKeyPage(

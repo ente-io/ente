@@ -3,7 +3,6 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:motionphoto/motionphoto.dart';
 import 'package:path/path.dart';
@@ -93,7 +92,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
 
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   await _decorateEnteFileData(file, asset);
-  fileHash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
+  fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
 
   if (file.fileType == FileType.livePhoto && io.Platform.isIOS) {
     final io.File? videoUrl = await Motionphoto.getLivePhotoFile(file.localID!);
@@ -104,7 +103,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
       throw InvalidFileUploadState(errMsg);
     }
     final String livePhotoVideoHash =
-        Sodium.bin2base64(await CryptoUtil.getHash(videoUrl));
+        CryptoUtil.bin2base64(await CryptoUtil.getHash(videoUrl));
     // imgHash:vidHash
     fileHash = '$fileHash$kLivePhotoHashSeparator$livePhotoVideoHash';
     final tempPath = Configuration.instance.getTempDirectory();
@@ -122,7 +121,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     }
     // new sourceFile which needs to be uploaded
     sourceFile = io.File(livePhotoPath);
-    zipHash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
+    zipHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
   }
 
   thumbnailData = await asset.thumbnailDataWithSize(
@@ -177,7 +176,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
   }
   try {
     thumbnailData = await getThumbnailFromInAppCacheFile(file);
-    final fileHash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
+    final fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
     return MediaUploadData(
       sourceFile,
       thumbnailData,

@@ -9,7 +9,6 @@ import 'package:collection/collection.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
@@ -411,13 +410,13 @@ class FileUploader {
         fileAttributes.key as Uint8List,
       );
       final fileDecryptionHeader =
-          Sodium.bin2base64(fileAttributes.header as Uint8List);
+          CryptoUtil.bin2base64(fileAttributes.header as Uint8List);
       final thumbnailDecryptionHeader =
-          Sodium.bin2base64(encryptedThumbnailData.header as Uint8List);
+          CryptoUtil.bin2base64(encryptedThumbnailData.header as Uint8List);
       final encryptedMetadata =
-          Sodium.bin2base64(encryptedMetadataData.encryptedData as Uint8List);
+          CryptoUtil.bin2base64(encryptedMetadataData.encryptedData as Uint8List);
       final metadataDecryptionHeader =
-          Sodium.bin2base64(encryptedMetadataData.header as Uint8List);
+          CryptoUtil.bin2base64(encryptedMetadataData.header as Uint8List);
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
       }
@@ -442,9 +441,9 @@ class FileUploader {
           CollectionsService.instance.getCollectionKey(collectionID),
         );
         final encryptedKey =
-            Sodium.bin2base64(encryptedFileKeyData.encryptedData as Uint8List);
+            CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData as Uint8List);
         final keyDecryptionNonce =
-            Sodium.bin2base64(encryptedFileKeyData.nonce as Uint8List);
+            CryptoUtil.bin2base64(encryptedFileKeyData.nonce as Uint8List);
         remoteFile = await _uploadFile(
           file,
           collectionID,

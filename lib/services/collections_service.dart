@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -310,7 +309,7 @@ class CollectionsService {
   ) async {
     final encryptedKey = CryptoUtil.sealSync(
       getCollectionKey(collectionID),
-      Sodium.base642bin(publicKey),
+      CryptoUtil.base642bin(publicKey),
     );
     try {
       final response = await _enteDio.post(
@@ -318,7 +317,7 @@ class CollectionsService {
         data: {
           "collectionID": collectionID,
           "email": email,
-          "encryptedKey": Sodium.bin2base64(encryptedKey),
+          "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
           "role": role.toStringVal()
         },
       );
@@ -474,7 +473,7 @@ class CollectionsService {
       "Compute collection decryption key for ${collection.id} source"
       " $source",
     );
-    final encryptedKey = Sodium.base642bin(collection.encryptedKey);
+    final encryptedKey = CryptoUtil.base642bin(collection.encryptedKey);
     Uint8List? collectionKey;
     if (collection.owner?.id == _config.getUserID()) {
       if (_config.getKey() == null) {
@@ -483,12 +482,12 @@ class CollectionsService {
       collectionKey = CryptoUtil.decryptSync(
         encryptedKey,
         _config.getKey(),
-        Sodium.base642bin(collection.keyDecryptionNonce!),
+        CryptoUtil.base642bin(collection.keyDecryptionNonce!),
       );
     } else {
       collectionKey = CryptoUtil.openSealSync(
         encryptedKey,
-        Sodium.base642bin(_config.getKeyAttributes()!.publicKey),
+        CryptoUtil.base642bin(_config.getKeyAttributes()!.publicKey),
         _config.getSecretKey()!,
       );
     }
@@ -511,8 +510,8 @@ class CollectionsService {
         "/collections/rename",
         data: {
           "collectionID": collection.id,
-          "encryptedName": Sodium.bin2base64(encryptedName.encryptedData!),
-          "nameDecryptionNonce": Sodium.bin2base64(encryptedName.nonce!)
+          "encryptedName": CryptoUtil.bin2base64(encryptedName.encryptedData!),
+          "nameDecryptionNonce": CryptoUtil.bin2base64(encryptedName.nonce!)
         },
       );
       // trigger sync to fetch the latest name from server
@@ -570,8 +569,8 @@ class CollectionsService {
         magicMetadata: MetadataRequest(
           version: currentVersion,
           count: jsonToUpdate.length,
-          data: Sodium.bin2base64(encryptedMMd.encryptedData!),
-          header: Sodium.bin2base64(encryptedMMd.header!),
+          data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+          header: CryptoUtil.bin2base64(encryptedMMd.header!),
         ),
       );
       await _enteDio.put(
@@ -689,9 +688,9 @@ class CollectionsService {
           final decryptionKey =
               _getAndCacheDecryptedKey(collection, source: "fetchCollection");
           final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-            Sodium.base642bin(collectionData['magicMetadata']['data']),
+            CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
             decryptionKey,
-            Sodium.base642bin(collectionData['magicMetadata']['header']),
+            CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
           );
           collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
           collection.mMdVersion = collectionData['magicMetadata']['version'];
@@ -721,10 +720,10 @@ class CollectionsService {
         CryptoUtil.encryptSync(utf8.encode(albumName) as Uint8List, key);
     final collection = await createAndCacheCollection(
       CreateRequest(
-        encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData!),
-        keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce!),
-        encryptedName: Sodium.bin2base64(encryptedName.encryptedData!),
-        nameDecryptionNonce: Sodium.bin2base64(encryptedName.nonce!),
+        encryptedKey: CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
+        keyDecryptionNonce: CryptoUtil.bin2base64(encryptedKeyData.nonce!),
+        encryptedName: CryptoUtil.bin2base64(encryptedName.encryptedData!),
+        nameDecryptionNonce: CryptoUtil.bin2base64(encryptedName.nonce!),
         type: CollectionType.album,
         attributes: CollectionAttributes(),
       ),
@@ -747,9 +746,9 @@ class CollectionsService {
           source: "fetchCollectionByID",
         );
         final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-          Sodium.base642bin(collectionData['magicMetadata']['data']),
+          CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
           decryptionKey,
-          Sodium.base642bin(collectionData['magicMetadata']['header']),
+          CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
         );
         collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
         collection.mMdVersion = collectionData['magicMetadata']['version'];
@@ -784,14 +783,14 @@ class CollectionsService {
         CryptoUtil.encryptSync(utf8.encode(path) as Uint8List, key);
     final collection = await createAndCacheCollection(
       CreateRequest(
-        encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData!),
-        keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce!),
-        encryptedName: Sodium.bin2base64(encryptedPath.encryptedData!),
-        nameDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce!),
+        encryptedKey: CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
+        keyDecryptionNonce: CryptoUtil.bin2base64(encryptedKeyData.nonce!),
+        encryptedName: CryptoUtil.bin2base64(encryptedPath.encryptedData!),
+        nameDecryptionNonce: CryptoUtil.bin2base64(encryptedPath.nonce!),
         type: CollectionType.folder,
         attributes: CollectionAttributes(
-          encryptedPath: Sodium.bin2base64(encryptedPath.encryptedData!),
-          pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce!),
+          encryptedPath: CryptoUtil.bin2base64(encryptedPath.encryptedData!),
+          pathDecryptionNonce: CryptoUtil.bin2base64(encryptedPath.nonce!),
           version: 1,
         ),
       ),
@@ -830,8 +829,8 @@ class CollectionsService {
         file.collectionID = collectionID;
         final encryptedKeyData =
             CryptoUtil.encryptSync(key, getCollectionKey(collectionID));
-        file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData!);
-        file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce!);
+        file.encryptedKey = CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+        file.keyDecryptionNonce = CryptoUtil.bin2base64(encryptedKeyData.nonce!);
         params["files"].add(
           CollectionFileItem(
             file.uploadedFileID!,
@@ -870,9 +869,9 @@ class CollectionsService {
         CryptoUtil.encryptSync(fileKey, getCollectionKey(destCollectionID));
 
     localFileToUpload.encryptedKey =
-        Sodium.bin2base64(encryptedKeyData.encryptedData!);
+        CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
     localFileToUpload.keyDecryptionNonce =
-        Sodium.bin2base64(encryptedKeyData.nonce!);
+        CryptoUtil.bin2base64(encryptedKeyData.nonce!);
 
     params["files"].add(
       CollectionFileItem(
@@ -917,8 +916,8 @@ class CollectionsService {
           file.localID = null;
         }
         final encryptedKeyData = CryptoUtil.encryptSync(key, toCollectionKey);
-        file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData!);
-        file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce!);
+        file.encryptedKey = CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+        file.keyDecryptionNonce = CryptoUtil.bin2base64(encryptedKeyData.nonce!);
         params["files"].add(
           CollectionFileItem(
             file.uploadedFileID!,
@@ -983,8 +982,8 @@ class CollectionsService {
         file.collectionID = toCollectionID;
         final encryptedKeyData =
             CryptoUtil.encryptSync(fileKey, getCollectionKey(toCollectionID));
-        file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData!);
-        file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce!);
+        file.encryptedKey = CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+        file.keyDecryptionNonce = CryptoUtil.bin2base64(encryptedKeyData.nonce!);
         params["files"].add(
           CollectionFileItem(
             file.uploadedFileID!,
@@ -1083,9 +1082,9 @@ class CollectionsService {
         final decryptionKey =
             _getAndCacheDecryptedKey(collection, source: "create");
         final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-          Sodium.base642bin(collectionData['magicMetadata']['data']),
+          CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
           decryptionKey,
-          Sodium.base642bin(collectionData['magicMetadata']['header']),
+          CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
         );
         collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
         collection.mMdVersion = collectionData['magicMetadata']['version'];
@@ -1116,9 +1115,9 @@ class CollectionsService {
         : _config.getKey();
     return utf8.decode(
       CryptoUtil.decryptSync(
-        Sodium.base642bin(collection.attributes.encryptedPath!),
+        CryptoUtil.base642bin(collection.attributes.encryptedPath!),
         key,
-        Sodium.base642bin(collection.attributes.pathDecryptionNonce!),
+        CryptoUtil.base642bin(collection.attributes.pathDecryptionNonce!),
       ),
     );
   }
@@ -1140,9 +1139,9 @@ class CollectionsService {
           source: "Name",
         );
         final result = CryptoUtil.decryptSync(
-          Sodium.base642bin(collection.encryptedName!),
+          CryptoUtil.base642bin(collection.encryptedName!),
           collectionKey,
-          Sodium.base642bin(collection.nameDecryptionNonce!),
+          CryptoUtil.base642bin(collection.nameDecryptionNonce!),
         );
         name = utf8.decode(result);
       } catch (e, s) {

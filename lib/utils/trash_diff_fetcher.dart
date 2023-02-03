@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/models/magic_metadata.dart';
@@ -53,27 +52,27 @@ class TrashDiffFetcher {
             item["file"]["metadata"]["decryptionHeader"];
         final fileDecryptionKey = decryptFileKey(trash);
         final encodedMetadata = await CryptoUtil.decryptChaCha(
-          Sodium.base642bin(item["file"]["metadata"]["encryptedData"]),
+          CryptoUtil.base642bin(item["file"]["metadata"]["encryptedData"]),
           fileDecryptionKey,
-          Sodium.base642bin(trash.metadataDecryptionHeader!),
+          CryptoUtil.base642bin(trash.metadataDecryptionHeader!),
         );
         final Map<String, dynamic> metadata =
             jsonDecode(utf8.decode(encodedMetadata));
         trash.applyMetadata(metadata);
         if (item["file"]['magicMetadata'] != null) {
           final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-            Sodium.base642bin(item["file"]['magicMetadata']['data']),
+            CryptoUtil.base642bin(item["file"]['magicMetadata']['data']),
             fileDecryptionKey,
-            Sodium.base642bin(item["file"]['magicMetadata']['header']),
+            CryptoUtil.base642bin(item["file"]['magicMetadata']['header']),
           );
           trash.mMdEncodedJson = utf8.decode(utfEncodedMmd);
           trash.mMdVersion = item["file"]['magicMetadata']['version'];
         }
         if (item["file"]['pubMagicMetadata'] != null) {
           final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-            Sodium.base642bin(item["file"]['pubMagicMetadata']['data']),
+            CryptoUtil.base642bin(item["file"]['pubMagicMetadata']['data']),
             fileDecryptionKey,
-            Sodium.base642bin(item["file"]['pubMagicMetadata']['header']),
+            CryptoUtil.base642bin(item["file"]['pubMagicMetadata']['header']),
           );
           trash.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
           trash.pubMmdVersion = item["file"]['pubMagicMetadata']['version'];

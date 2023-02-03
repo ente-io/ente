@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -104,8 +103,8 @@ class FileMagicService {
             magicMetadata: MetadataRequest(
               version: file.pubMmdVersion,
               count: jsonToUpdate.length,
-              data: Sodium.bin2base64(encryptedMMd.encryptedData!),
-              header: Sodium.bin2base64(encryptedMMd.header!),
+              data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+              header: CryptoUtil.bin2base64(encryptedMMd.header!),
             ),
           ),
         );
@@ -170,8 +169,8 @@ class FileMagicService {
               magicMetadata: MetadataRequest(
                 version: file.mMdVersion,
                 count: jsonToUpdate.length,
-                data: Sodium.bin2base64(encryptedMMd.encryptedData!),
-                header: Sodium.bin2base64(encryptedMMd.header!),
+                data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+                header: CryptoUtil.bin2base64(encryptedMMd.header!),
               ),
             ),
           );
