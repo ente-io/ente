@@ -60,6 +60,7 @@ import Uploader from 'components/Upload/Uploader';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
+    CollectionSummaryType,
     CollectionType,
     DUMMY_UNCATEGORIZED_SECTION,
     TRASH_SECTION,
@@ -70,11 +71,8 @@ import { CustomError, ServerErrorCodes } from 'utils/error';
 import { PAGES } from 'constants/pages';
 import {
     COLLECTION_OPS_TYPE,
-    isSharedCollection,
     handleCollectionOps,
     getSelectedCollection,
-    isFavoriteCollection,
-    isUncategorizedCollection,
     getArchivedCollections,
     hasNonSystemCollections,
 } from 'utils/collection';
@@ -739,10 +737,10 @@ export default function Gallery() {
                     deletedFileIds={deletedFileIds}
                     setDeletedFileIds={setDeletedFileIds}
                     activeCollection={activeCollection}
-                    isSharedCollection={isSharedCollection(
-                        activeCollection,
-                        collections
-                    )}
+                    isIncomingSharedCollection={
+                        collectionSummaries[activeCollection] ===
+                        CollectionSummaryType.incomingShare
+                    }
                     enableDownload={true}
                     resetSearch={resetSearch}
                 />
@@ -789,14 +787,14 @@ export default function Gallery() {
                             ownCount={selected.ownCount}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
-                            isFavoriteCollection={isFavoriteCollection(
-                                activeCollection,
-                                collections
-                            )}
-                            isUncategorizedCollection={isUncategorizedCollection(
-                                activeCollection,
-                                collections
-                            )}
+                            isFavoriteCollection={
+                                collectionSummaries[activeCollection] ===
+                                CollectionSummaryType.favorites
+                            }
+                            isUncategorizedCollection={
+                                collectionSummaries[activeCollection] ===
+                                CollectionSummaryType.uncategorized
+                            }
                         />
                     )}
             </FullScreenDropZone>

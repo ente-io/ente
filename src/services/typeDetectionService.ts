@@ -1,6 +1,9 @@
 import { FILE_TYPE } from 'constants/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
-import { FILE_TYPE_LIB_MISSED_FORMATS } from 'constants/upload';
+import {
+    FILE_TYPE_LIB_MISSED_FORMATS,
+    KNOWN_NON_MEDIA_FORMATS,
+} from 'constants/upload';
 import { CustomError } from 'utils/error';
 import { getFileExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -27,7 +30,7 @@ export async function getFileType(
         const mimTypeParts: string[] = typeResult.mime?.split('/');
 
         if (mimTypeParts?.length !== 2) {
-            throw Error(CustomError.TYPE_DETECTION_FAILED);
+            throw Error(CustomError.INVALID_MIME_TYPE(typeResult.mime));
         }
         switch (mimTypeParts[0]) {
             case TYPE_IMAGE:
@@ -37,7 +40,7 @@ export async function getFileType(
                 fileType = FILE_TYPE.VIDEO;
                 break;
             default:
-                fileType = FILE_TYPE.OTHERS;
+                throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         return {
             fileType,
@@ -45,6 +48,9 @@ export async function getFileType(
             mimeType: typeResult.mime,
         };
     } catch (e) {
+        if (e.message === CustomError.UNSUPPORTED_FILE_FORMAT) {
+            throw e;
+        }
         const fileFormat = getFileExtension(receivedFile.name);
         const formatMissedByTypeDetection = FILE_TYPE_LIB_MISSED_FORMATS.find(
             (a) => a.exactType === fileFormat
@@ -52,14 +58,13 @@ export async function getFileType(
         if (formatMissedByTypeDetection) {
             return formatMissedByTypeDetection;
         }
-        logError(e, CustomError.TYPE_DETECTION_FAILED, {
+        if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
+            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+        }
+        logError(e, 'type detection failed', {
             fileFormat,
         });
-        return {
-            fileType: FILE_TYPE.OTHERS,
-            exactType: fileFormat,
-            mimeType: receivedFile instanceof File ? receivedFile.type : null,
-        };
+        throw Error(CustomError.TYPE_DETECTION_FAILED(fileFormat));
     }
 }
 
@@ -78,18 +83,15 @@ async function extractElectronFileType(file: ElectronFile) {
 }
 
 async function getFileTypeFromBuffer(buffer: Uint8Array) {
-    try {
-        const result = await FileType.fromBuffer(buffer);
-        if (!result.mime) {
-            logError(
-                Error('mimetype missing from file type result'),
-                CustomError.TYPE_DETECTION_FAILED,
-                { result }
-            );
-            throw Error(CustomError.TYPE_DETECTION_FAILED);
+    const result = await FileType.fromBuffer(buffer);
+    if (!result?.mime) {
+        let logableInfo = '';
+        try {
+            logableInfo = `result: ${JSON.stringify(result)}`;
+        } catch (e) {
+            logableInfo = 'failed to stringify result';
         }
-        return result;
-    } catch (e) {
-        throw Error(CustomError.TYPE_DETECTION_FAILED);
+        throw Error(`mimetype missing from file type result - ${logableInfo}`);
     }
+    return result;
 }

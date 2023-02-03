@@ -12,7 +12,6 @@ import {
     isSharedFile,
     sortFiles,
     groupFilesBasedOnCollectionID,
-    groupFilesBasedOnID,
 } from 'utils/file';
 import {
     Collection,
@@ -497,48 +496,82 @@ const encryptWithNewCollectionKey = async (
 };
 export const removeFromCollection = async (
     collectionID: number,
-    files: EnteFile[]
+    toRemoveFiles: EnteFile[],
+    allFiles?: EnteFile[]
 ) => {
     try {
-        let uncategorizedCollection = await getUncategorizedCollection();
-        if (!uncategorizedCollection) {
-            uncategorizedCollection = await createUnCategorizedCollection();
-        }
         const user: User = getData(LS_KEYS.USER);
         const nonUserFiles = [];
         const userFiles = [];
-        for (const file of files) {
+        for (const file of toRemoveFiles) {
             if (file.ownerID === user.id) {
                 userFiles.push(file);
             } else {
                 nonUserFiles.push(file);
             }
         }
+
         if (nonUserFiles.length > 0) {
             await removeNonUserFiles(collectionID, nonUserFiles);
         }
-        const allFiles = await getLocalFiles();
-        const groupiedFiles = groupFilesBasedOnID(allFiles);
-        for (const file of userFiles) {
-            if (groupiedFiles[file.id].length === 1) {
-                await moveToCollection(uncategorizedCollection, collectionID, [
-                    file,
-                ]);
-            } else {
-                const differentCollectionFile = groupiedFiles[file.id].find(
-                    (f) => f.collectionID !== collectionID
-                );
-                const collections = await getLocalCollections();
-                const collection = collections.find(
-                    (c) => c.id === differentCollectionFile?.collectionID
-                );
-                await moveToCollection(collection, collectionID, [file]);
-            }
+        if (userFiles.length > 0) {
+            await removeUserFiles(collectionID, userFiles, allFiles);
         }
     } catch (e) {
         logError(e, 'remove from collection failed ');
         throw e;
     }
+};
+
+export const removeUserFiles = async (
+    collectionID: number,
+    toRemoveFiles: EnteFile[],
+    allFiles?: EnteFile[]
+) => {
+    if (!allFiles) {
+        allFiles = await getLocalFiles();
+    }
+    const toRemoveFilesIds = new Set(toRemoveFiles.map((f) => f.id));
+    const toRemoveFilesCopiesInOtherCollections = allFiles.filter((f) => {
+        if (f.collectionID === collectionID) {
+            return false;
+        }
+        return toRemoveFilesIds.has(f.id);
+    });
+    const groupiedFiles = groupFilesBasedOnCollectionID(
+        toRemoveFilesCopiesInOtherCollections
+    );
+
+    const collections = await getLocalCollections();
+    const collectionsMap = new Map(collections.map((c) => [c.id, c]));
+
+    for (const [toMoveCollectionID, files] of groupiedFiles.entries()) {
+        const toMoveFiles = files.filter((f) => {
+            if (toRemoveFilesIds.has(f.id)) {
+                toRemoveFilesIds.delete(f.id);
+                return true;
+            }
+            return false;
+        });
+        if (toMoveFiles.length === 0) {
+            continue;
+        }
+        await moveToCollection(
+            collectionsMap.get(toMoveCollectionID),
+            collectionID,
+            toMoveFiles
+        );
+    }
+    const leftFiles = toRemoveFiles.filter((f) => toRemoveFilesIds.has(f.id));
+
+    if (leftFiles.length === 0) {
+        return;
+    }
+    let uncategorizedCollection = await getUncategorizedCollection();
+    if (!uncategorizedCollection) {
+        uncategorizedCollection = await createUnCategorizedCollection();
+    }
+    await moveToCollection(uncategorizedCollection, collectionID, leftFiles);
 };
 
 export const removeNonUserFiles = async (
@@ -571,6 +604,13 @@ export const deleteCollection = async (
     keepFiles: boolean
 ) => {
     try {
+        if (keepFiles) {
+            const allFiles = await getLocalFiles();
+            const collectionFiles = allFiles.filter((file) => {
+                return file.collectionID === collectionID;
+            });
+            await removeFromCollection(collectionID, collectionFiles, allFiles);
+        }
         const token = getToken();
 
         await HTTPService.delete(
