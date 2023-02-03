@@ -384,7 +384,7 @@ export const removeFromFavorites = async (file: EnteFile) => {
         if (!favCollection) {
             throw Error(CustomError.FAV_COLLECTION_MISSING);
         }
-        await removeFromCollection(favCollection.id, [file], true);
+        await removeFromCollection(favCollection.id, [file]);
     } catch (e) {
         logError(e, 'remove from favorite failed');
     }
@@ -497,7 +497,6 @@ const encryptWithNewCollectionKey = async (
 export const removeFromCollection = async (
     collectionID: number,
     toRemoveFiles: EnteFile[],
-    isCollectionOwner: boolean,
     allFiles?: EnteFile[]
 ) => {
     try {
@@ -512,7 +511,7 @@ export const removeFromCollection = async (
             }
         }
 
-        if (nonUserFiles.length > 0 && isCollectionOwner) {
+        if (nonUserFiles.length > 0) {
             await removeNonUserFiles(collectionID, nonUserFiles);
         }
         if (userFiles.length > 0) {
@@ -610,12 +609,7 @@ export const deleteCollection = async (
             const collectionFiles = allFiles.filter((file) => {
                 return file.collectionID === collectionID;
             });
-            await removeFromCollection(
-                collectionID,
-                collectionFiles,
-                true,
-                allFiles
-            );
+            await removeFromCollection(collectionID, collectionFiles, allFiles);
         }
         const token = getToken();
 
