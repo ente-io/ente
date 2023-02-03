@@ -108,6 +108,7 @@ class ItemsWidget extends StatelessWidget {
       isTopBorderRadiusRemoved: true,
       isBottomBorderRadiusRemoved: true,
       alwaysShowSuccessState: true,
+      surfaceExecutionStates: expiryOpiton.item2 == -1 ? false : true,
       onTap: () async {
         int newValidTill = -1;
         final int expireAfterInMicroseconds = expiryOpiton.item2;
