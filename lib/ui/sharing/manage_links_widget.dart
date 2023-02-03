@@ -47,7 +47,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   ];
 
   late Tuple3<int, String, int> _selectedExpiry;
-  int _selectedDeviceLimitIndex = 0;
   final CollectionActions sharingActions =
       CollectionActions(CollectionsService.instance);
 
@@ -140,10 +139,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     alignCaptionedTextToLeft: true,
                     isBottomBorderRadiusRemoved: true,
                     onTap: () async {
-                      // await _showDeviceLimitPicker();
-                      routeToPage(context,
-                              DeviceLimitPickerPage(widget.collection!))
-                          .then((value) {
+                      routeToPage(
+                        context,
+                        DeviceLimitPickerPage(widget.collection!),
+                      ).then((value) {
                         setState(() {});
                       });
                     },
@@ -501,88 +500,5 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       await dialog.hide();
       await showGenericErrorDialog(context: context);
     }
-  }
-
-  Future<void> _showDeviceLimitPicker() async {
-    final List<Text> options = [];
-    for (int i = 50; i > 0; i--) {
-      options.add(
-        Text(i.toString(), style: Theme.of(context).textTheme.subtitle1),
-      );
-    }
-    return showCupertinoModalPopup(
-      context: context,
-      builder: (context) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.cupertinoPickerTopColor,
-                border: const Border(
-                  bottom: BorderSide(
-                    color: Color(0xff999999),
-                    width: 0.0,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  CupertinoButton(
-                    onPressed: () {
-                      Navigator.of(context).pop('cancel');
-                    },
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 5.0,
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: Theme.of(context).textTheme.subtitle1,
-                    ),
-                  ),
-                  CupertinoButton(
-                    onPressed: () async {
-                      await _updateUrlSettings(context, {
-                        'deviceLimit': int.tryParse(
-                          options[_selectedDeviceLimitIndex].data!,
-                        ),
-                      });
-                      setState(() {});
-                      Navigator.of(context).pop('');
-                    },
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 2.0,
-                    ),
-                    child: Text(
-                      'Confirm',
-                      style: Theme.of(context).textTheme.subtitle1,
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Container(
-              height: 220.0,
-              color: const Color(0xfff7f7f7),
-              child: CupertinoPicker(
-                backgroundColor:
-                    Theme.of(context).backgroundColor.withOpacity(0.95),
-                onSelectedItemChanged: (value) {
-                  _selectedDeviceLimitIndex = value;
-                },
-                magnification: 1.3,
-                useMagnifier: true,
-                itemExtent: 25,
-                diameterRatio: 1,
-                children: options,
-              ),
-            )
-          ],
-        );
-      },
-    );
   }
 }
