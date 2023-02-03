@@ -7,7 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
@@ -26,7 +26,7 @@ class FileMagicService {
 
   FileMagicService._privateConstructor() {
     _filesDB = FilesDB.instance;
-    _enteDio = Network.instance.enteDio;
+    _enteDio = NetworkClient.instance.enteDio;
   }
 
   static final FileMagicService instance =

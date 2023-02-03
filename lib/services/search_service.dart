@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/data/holidays.dart';
 import 'package:photos/data/months.dart';
 import 'package:photos/data/years.dart';
@@ -21,7 +21,7 @@ import 'package:tuple/tuple.dart';
 
 class SearchService {
   Future<List<File>>? _cachedFilesFuture;
-  final _enteDio = Network.instance.enteDio;
+  final _enteDio = NetworkClient.instance.enteDio;
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
@@ -115,8 +115,8 @@ class SearchService {
         break;
       }
 
-      if (!c.collection.isHidden() && c.collection.type != CollectionType
-          .uncategorized &&
+      if (!c.collection.isHidden() &&
+          c.collection.type != CollectionType.uncategorized &&
           c.collection.name!.toLowerCase().contains(
                 query.toLowerCase(),
               )) {

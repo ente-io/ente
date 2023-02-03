@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 // import 'package:open_file/open_file.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -183,7 +183,7 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
 
   Future<void> _downloadApk() async {
     try {
-      await Network.instance.getDio().download(
+      await NetworkClient.instance.getDio().download(
         widget.versionInfo!.url,
         _saveUrl,
         onReceiveProgress: (count, _) {
