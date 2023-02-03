@@ -528,58 +528,69 @@ export const removeUserFiles = async (
     toRemoveFiles: EnteFile[],
     allFiles?: EnteFile[]
 ) => {
-    if (!allFiles) {
-        allFiles = await getLocalFiles();
-    }
-    const toRemoveFilesIds = new Set(toRemoveFiles.map((f) => f.id));
-    const toRemoveFilesCopiesInOtherCollections = allFiles.filter((f) => {
-        if (f.collectionID === collectionID) {
-            return false;
+    try {
+        if (!allFiles) {
+            allFiles = await getLocalFiles();
         }
-        return toRemoveFilesIds.has(f.id);
-    });
-    const groupiedFiles = groupFilesBasedOnCollectionID(
-        toRemoveFilesCopiesInOtherCollections
-    );
-
-    const collections = await getLocalCollections();
-    const collectionsMap = new Map(collections.map((c) => [c.id, c]));
-
-    for (const [toMoveCollectionID, files] of groupiedFiles.entries()) {
-        const toMoveFiles = files.filter((f) => {
-            if (toRemoveFilesIds.has(f.id)) {
-                toRemoveFilesIds.delete(f.id);
-                return true;
+        const toRemoveFilesIds = new Set(toRemoveFiles.map((f) => f.id));
+        const toRemoveFilesCopiesInOtherCollections = allFiles.filter((f) => {
+            if (f.collectionID === collectionID) {
+                return false;
             }
-            return false;
+            return toRemoveFilesIds.has(f.id);
         });
-        if (toMoveFiles.length === 0) {
-            continue;
+        const groupiedFiles = groupFilesBasedOnCollectionID(
+            toRemoveFilesCopiesInOtherCollections
+        );
+
+        const collections = await getLocalCollections();
+        const collectionsMap = new Map(collections.map((c) => [c.id, c]));
+
+        for (const [toMoveCollectionID, files] of groupiedFiles.entries()) {
+            const toMoveFiles = files.filter((f) => {
+                if (toRemoveFilesIds.has(f.id)) {
+                    toRemoveFilesIds.delete(f.id);
+                    return true;
+                }
+                return false;
+            });
+            if (toMoveFiles.length === 0) {
+                continue;
+            }
+            await moveToCollection(
+                collectionsMap.get(toMoveCollectionID),
+                collectionID,
+                toMoveFiles
+            );
+        }
+        const leftFiles = toRemoveFiles.filter((f) =>
+            toRemoveFilesIds.has(f.id)
+        );
+
+        if (leftFiles.length === 0) {
+            return;
+        }
+        let uncategorizedCollection = await getUncategorizedCollection();
+        if (!uncategorizedCollection) {
+            uncategorizedCollection = await createUnCategorizedCollection();
         }
         await moveToCollection(
-            collectionsMap.get(toMoveCollectionID),
+            uncategorizedCollection,
             collectionID,
-            toMoveFiles
+            leftFiles
         );
+    } catch (e) {
+        logError(e, 'remove user files failed ');
+        throw e;
     }
-    const leftFiles = toRemoveFiles.filter((f) => toRemoveFilesIds.has(f.id));
-
-    if (leftFiles.length === 0) {
-        return;
-    }
-    let uncategorizedCollection = await getUncategorizedCollection();
-    if (!uncategorizedCollection) {
-        uncategorizedCollection = await createUnCategorizedCollection();
-    }
-    await moveToCollection(uncategorizedCollection, collectionID, leftFiles);
 };
 
 export const removeNonUserFiles = async (
     collectionID: number,
     nonUserFiles: EnteFile[]
 ) => {
-    const fileIDs = nonUserFiles.map((f) => f.id);
     try {
+        const fileIDs = nonUserFiles.map((f) => f.id);
         const token = getToken();
 
         const request: RemoveFromCollectionRequest = {
@@ -594,7 +605,7 @@ export const removeNonUserFiles = async (
             { 'X-Auth-Token': token }
         );
     } catch (e) {
-        logError(e, 'delete collection failed ');
+        logError(e, 'remove non user files failed ');
         throw e;
     }
 };
