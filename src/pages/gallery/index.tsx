@@ -728,7 +728,7 @@ export default function Gallery() {
                     setDeletedFileIds={setDeletedFileIds}
                     activeCollection={activeCollection}
                     isIncomingSharedCollection={
-                        collectionSummaries[activeCollection] ===
+                        collectionSummaries.get(activeCollection)?.type ===
                         CollectionSummaryType.incomingShare
                     }
                     enableDownload={true}
@@ -777,11 +777,12 @@ export default function Gallery() {
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
                             isFavoriteCollection={
-                                collectionSummaries[activeCollection] ===
-                                CollectionSummaryType.favorites
+                                collectionSummaries.get(activeCollection)
+                                    ?.type === CollectionSummaryType.favorites
                             }
                             isUncategorizedCollection={
-                                collectionSummaries[activeCollection] ===
+                                collectionSummaries.get(activeCollection)
+                                    ?.type ===
                                 CollectionSummaryType.uncategorized
                             }
                         />
