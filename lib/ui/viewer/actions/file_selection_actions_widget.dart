@@ -316,10 +316,13 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
+    final bool removingOthersFile =
+        isCollectionOwner && split.ownedByOtherUsers.isNotEmpty;
     await collectionActions.showRemoveFromCollectionSheetV2(
       context,
       widget.collection!,
       widget.selectedFiles,
+      removingOthersFile,
     );
   }
 
