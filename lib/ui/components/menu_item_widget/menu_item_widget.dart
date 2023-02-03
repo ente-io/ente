@@ -130,6 +130,12 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant MenuItemWidget oldWidget) {
+    menuItemColor = widget.menuItemColor;
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void dispose() {
     if (widget.expandableController != null) {
       widget.expandableController!.dispose();
