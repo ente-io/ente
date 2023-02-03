@@ -447,23 +447,6 @@ export function mergeMetadata(files: EnteFile[]): EnteFile[] {
         }
 
         return file;
-
-        // {
-        // ...file,
-        // metadata: {
-        //     ...file.metadata,
-        //     ...(file.pubMagicMetadata?.data
-        //         ? {
-        //               ...(file.pubMagicMetadata?.data.editedTime && {
-        //                   creationTime: file.pubMagicMetadata.data.editedTime,
-        //               }),
-        //               ...(file.pubMagicMetadata?.data.editedName && {
-        //                   title: file.pubMagicMetadata.data.editedName,
-        //               }),
-        //           }
-        //         : {}),
-        //     ...(file.magicMetadata?.data ? file.magicMetadata.data : {}),
-        // },
     });
 }
 
