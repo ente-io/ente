@@ -17,6 +17,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/sharing/device_limit_picker_page.dart';
+import 'package:photos/ui/sharing/link_expiry_picker_page.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -115,7 +116,13 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     menuItemColor: enteColorScheme.fillFaint,
                     surfaceExecutionStates: false,
                     onTap: () async {
-                      await showPicker();
+                      // await showPicker();
+                      routeToPage(
+                        context,
+                        LinkExpiryPickerPage(widget.collection!),
+                      ).then((value) {
+                        setState(() {});
+                      });
                     },
                   ),
                   url.hasExpiry
