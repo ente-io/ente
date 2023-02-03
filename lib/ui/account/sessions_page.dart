@@ -127,17 +127,19 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   Future<void> _fetchActiveSessions() async {
-    _sessions = await UserService.instance
-        .getActiveSessions()
-        .onError((error, stackTrace) {
-      showToast(context, "Failed to fetch active sessions");
-      throw error!;
+    _sessions = await UserService.instance.getActiveSessions().onError((e, s) {
+      _logger.severe("failed to fetch active sessions", e, s);
+      if (mounted) {
+        showToast(context, "Failed to fetch active sessions");
+      }
     });
     if (_sessions != null) {
       _sessions!.sessions.sort((first, second) {
         return second.lastUsedTime.compareTo(first.lastUsedTime);
       });
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     }
   }
 
