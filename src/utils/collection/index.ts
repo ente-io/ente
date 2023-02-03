@@ -44,6 +44,7 @@ export enum COLLECTION_OPS_TYPE {
 export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
     collection: Collection,
+    isCollectionOwner: boolean,
     selectedFiles: EnteFile[],
     selectedCollectionID: number
 ) {
@@ -59,7 +60,11 @@ export async function handleCollectionOps(
             );
             break;
         case COLLECTION_OPS_TYPE.REMOVE:
-            await removeFromCollection(collection.id, selectedFiles);
+            await removeFromCollection(
+                collection.id,
+                selectedFiles,
+                isCollectionOwner
+            );
             break;
         case COLLECTION_OPS_TYPE.RESTORE:
             await restoreToCollection(collection, selectedFiles);

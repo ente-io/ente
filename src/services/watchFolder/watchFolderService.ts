@@ -554,7 +554,7 @@ class watchFolderService {
                 collectionID,
                 filesToTrash,
             ] of groupFilesByCollectionId.entries()) {
-                await removeFromCollection(collectionID, filesToTrash);
+                await removeFromCollection(collectionID, filesToTrash, true);
             }
             this.syncWithRemote();
         } catch (e) {

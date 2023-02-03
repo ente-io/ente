@@ -446,6 +446,7 @@ export default function Gallery() {
                 await handleCollectionOps(
                     ops,
                     collection,
+                    collection.owner.id === user.id,
                     toProcessFiles,
                     selected.collectionID
                 );
