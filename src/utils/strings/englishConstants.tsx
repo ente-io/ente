@@ -140,7 +140,8 @@ const englishConstants = {
     CREATE: 'Create',
     DOWNLOAD: 'Download',
     DOWNLOAD_OPTION: 'Download (D)',
-    DOWNLOAD_FAVOURITES: 'Download favourites',
+    DOWNLOAD_FAVORITES: 'Download favorites',
+    DOWNLOAD_UNCATEGORIZED: 'Download uncategorized',
     COPY_OPTION: 'Copy as PNG (Ctrl/Cmd - C)',
     TOGGLE_FULLSCREEN: 'Toggle fullscreen (F)',
     ZOOM_IN_OUT: 'Zoom in/out',
@@ -368,8 +369,15 @@ const englishConstants = {
     DELETE_COLLECTION_TITLE: 'Delete album?',
     DELETE_COLLECTION: 'Delete album',
     DELETE_COLLECTION_FAILED: 'Album deletion failed, please try again',
-    DELETE_COLLECTION_MESSAGE:
-        'Files that are unique to this album will be moved to trash, and this album would be deleted.',
+    DELETE_COLLECTION_MESSAGE: () => (
+        <p>
+            Also delete the photos (and videos) present in this album from
+            <span style={{ color: '#fff' }}> all </span> other albums they are
+            part of?
+        </p>
+    ),
+    DELETE_PHOTOS: 'Delete photos',
+    KEEP_PHOTOS: 'Keep photos',
     SHARE: 'Share',
     SHARE_COLLECTION: 'Share album',
     SHARE_WITH_PEOPLE: 'Share with your loved ones',
@@ -587,6 +595,8 @@ const englishConstants = {
     THUMBNAIL_GENERATION_FAILED_INFO:
         'These files were uploaded, but unfortunately we could not generate the thumbnails for them.',
     UPLOAD_TO_COLLECTION: 'Upload to album',
+    UNCATEGORIZED: 'Uncategorized',
+    MOVE_TO_UNCATEGORIZED: 'Move to uncategorized',
     ARCHIVE: 'Archive',
     ARCHIVE_COLLECTION: 'Archive album',
     ARCHIVE_SECTION_NAME: 'Archive',
@@ -598,7 +608,9 @@ const englishConstants = {
     ADD: 'Add',
     SORT: 'Sort',
     REMOVE: 'Remove',
+    YES_REMOVE: 'Yes, remove',
     CONFIRM_REMOVE: 'Confirm removal',
+    REMOVE_FROM_COLLECTION: 'Remove from album',
     TRASH: 'Trash',
     MOVE_TO_TRASH: 'Move to trash',
     TRASH_FILES_MESSAGE:
@@ -622,9 +634,9 @@ const englishConstants = {
         'You will leave the album, and it will stop being visible to you.',
     CONFIRM_REMOVE_MESSAGE: () => (
         <>
-            <p>Are you sure you want to remove these files from the album?</p>
             <p>
-                All files that are unique to this album will be moved to trash
+                Selected items will be removed from this album. Items which are
+                only in this album will be moved to Uncategorized.
             </p>
         </>
     ),

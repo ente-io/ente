@@ -410,7 +410,7 @@ export default function PublicCollectionGallery() {
                     selected={{ count: 0, collectionID: null }}
                     isFirstLoad={true}
                     activeCollection={ALL_SECTION}
-                    isSharedCollection
+                    isIncomingSharedCollection
                     enableDownload={
                         publicCollection?.publicURLs?.[0]?.enableDownload ??
                         true

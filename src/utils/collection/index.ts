@@ -20,7 +20,6 @@ import {
 } from 'types/collection';
 import {
     CollectionSummaryType,
-    CollectionType,
     HIDE_FROM_COLLECTION_BAR_TYPES,
     OPTIONS_NOT_HAVING_COLLECTION_TYPES,
     SYSTEM_COLLECTION_TYPES,
@@ -75,31 +74,6 @@ export function getSelectedCollection(
     collections: Collection[]
 ) {
     return collections.find((collection) => collection.id === collectionID);
-}
-
-export function isSharedCollection(
-    collectionID: number,
-    collections: Collection[]
-) {
-    const user: User = getData(LS_KEYS.USER);
-
-    const collection = getSelectedCollection(collectionID, collections);
-    if (!collection) {
-        return false;
-    }
-    return collection?.owner.id !== user.id;
-}
-
-export function isFavoriteCollection(
-    collectionID: number,
-    collections: Collection[]
-) {
-    const collection = getSelectedCollection(collectionID, collections);
-    if (!collection) {
-        return false;
-    } else {
-        return collection.type === CollectionType.favorites;
-    }
 }
 
 export async function downloadAllCollectionFiles(collectionID: number) {
@@ -204,7 +178,10 @@ export const getArchivedCollections = (collections: Collection[]) => {
 export const hasNonSystemCollections = (
     collectionSummaries: CollectionSummaries
 ) => {
-    return collectionSummaries?.size > 3;
+    for (const collectionSummary of collectionSummaries.values()) {
+        if (!isSystemCollection(collectionSummary.type)) return true;
+    }
+    return false;
 };
 
 export const isUploadAllowedCollection = (type: CollectionSummaryType) => {

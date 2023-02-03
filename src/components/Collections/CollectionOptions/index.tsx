@@ -18,7 +18,7 @@ import OverflowMenu from 'components/OverflowMenu/menu';
 import { CollectionSummaryType } from 'constants/collection';
 import { TrashCollectionOption } from './TrashCollectionOption';
 import { SharedCollectionOption } from './SharedCollectionOption';
-import { FavoritiesCollectionOption } from './FavoritiesCollectionOption';
+import { OnlyDownloadCollectionOption } from './OnlyDownloadCollectionOption';
 import { QuickOptions } from './QuickOptions';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import { HorizontalFlex } from 'components/Container';
@@ -39,7 +39,8 @@ export enum CollectionActions {
     ARCHIVE,
     UNARCHIVE,
     CONFIRM_DELETE,
-    DELETE,
+    DELETE_WITH_FILES,
+    DELETE_BUT_KEEP_FILES,
     SHOW_SHARE_DIALOG,
     CONFIRM_EMPTY_TRASH,
     EMPTY_TRASH,
@@ -87,8 +88,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.CONFIRM_DELETE:
                 callback = confirmDeleteCollection;
                 break;
-            case CollectionActions.DELETE:
-                callback = deleteCollection;
+            case CollectionActions.DELETE_WITH_FILES:
+                callback = deleteCollectionAlongWithFiles;
+                break;
+            case CollectionActions.DELETE_BUT_KEEP_FILES:
+                callback = deleteCollectionButKeepFiles;
                 break;
             case CollectionActions.SHOW_SHARE_DIALOG:
                 callback = showCollectionShareModal;
@@ -137,8 +141,13 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         }
     };
 
-    const deleteCollection = async () => {
-        await CollectionAPI.deleteCollection(activeCollection.id);
+    const deleteCollectionAlongWithFiles = async () => {
+        await CollectionAPI.deleteCollection(activeCollection.id, false);
+        redirectToAll();
+    };
+
+    const deleteCollectionButKeepFiles = async () => {
+        await CollectionAPI.deleteCollection(activeCollection.id, true);
         redirectToAll();
     };
 
@@ -177,11 +186,20 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const confirmDeleteCollection = () => {
         setDialogMessage({
             title: constants.DELETE_COLLECTION_TITLE,
-            content: constants.DELETE_COLLECTION_MESSAGE,
+            content: constants.DELETE_COLLECTION_MESSAGE(),
             proceed: {
-                text: constants.DELETE_COLLECTION,
-                action: handleCollectionAction(CollectionActions.DELETE),
+                text: constants.DELETE_PHOTOS,
+                action: handleCollectionAction(
+                    CollectionActions.DELETE_WITH_FILES
+                ),
                 variant: 'danger',
+            },
+            secondary: {
+                text: constants.KEEP_PHOTOS,
+                action: handleCollectionAction(
+                    CollectionActions.DELETE_BUT_KEEP_FILES
+                ),
+                variant: 'primary',
             },
             close: {
                 text: constants.CANCEL,
@@ -250,8 +268,15 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     />
                 ) : collectionSummaryType ===
                   CollectionSummaryType.favorites ? (
-                    <FavoritiesCollectionOption
+                    <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
+                        downloadOptionText={constants.DOWNLOAD_FAVORITES}
+                    />
+                ) : collectionSummaryType ===
+                  CollectionSummaryType.uncategorized ? (
+                    <OnlyDownloadCollectionOption
+                        handleCollectionAction={handleCollectionAction}
+                        downloadOptionText={constants.DOWNLOAD_UNCATEGORIZED}
                     />
                 ) : collectionSummaryType ===
                   CollectionSummaryType.incomingShare ? (

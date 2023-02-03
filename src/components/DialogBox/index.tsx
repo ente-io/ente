@@ -96,6 +96,18 @@ export default function DialogBox({
                                 {attributes.proceed.text}
                             </Button>
                         )}
+                        {attributes.secondary && (
+                            <Button
+                                size="large"
+                                color={attributes.secondary?.variant}
+                                onClick={() => {
+                                    attributes.secondary.action();
+                                    onClose();
+                                }}
+                                disabled={attributes.secondary.disabled}>
+                                {attributes.secondary.text}
+                            </Button>
+                        )}
                     </>
                 </DialogActions>
             )}

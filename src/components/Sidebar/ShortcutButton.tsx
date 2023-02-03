@@ -20,12 +20,11 @@ const ShortcutButton: FC<ButtonProps<'button', Iprops>> = ({
             sx={{ fontWeight: 'normal' }}
             {...props}>
             {label}
-            {count > 0 && (
-                <Box sx={{ color: 'text.secondary' }}>
-                    <DotSeparator />
-                    {count}
-                </Box>
-            )}
+
+            <Box sx={{ color: 'text.secondary' }}>
+                <DotSeparator />
+                {count}
+            </Box>
         </SidebarButton>
     );
 };
