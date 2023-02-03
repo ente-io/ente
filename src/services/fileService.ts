@@ -54,7 +54,7 @@ const setLocalFiles = async (files: EnteFile[]) => {
 export const syncFiles = async (
     collections: Collection[],
     setFiles: SetFiles
-): Promise<void> => {
+): Promise<EnteFile[]> => {
     const localFiles = await getLocalFiles();
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
@@ -76,6 +76,7 @@ export const syncFiles = async (
         files = getLatestVersionFiles([...files, ...newFiles]);
         await setLocalFiles(files);
         setCollectionLastSyncTime(collection, collection.updationTime);
+        return files;
     }
 };
 
