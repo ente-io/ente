@@ -210,6 +210,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   Future<void> _onTap() async {
+    if (executionStateNotifier.value == ExecutionState.inProgress ||
+        executionStateNotifier.value == ExecutionState.successful) return;
     _debouncer.run(
       () => Future(
         () {
@@ -245,6 +247,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   void _onTapDown(details) {
+    if (executionStateNotifier.value == ExecutionState.inProgress ||
+        executionStateNotifier.value == ExecutionState.successful) return;
     setState(() {
       if (widget.pressedColor == null) {
         hasPassedGestureCallbacks()
@@ -261,6 +265,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   void _onTapUp(details) {
+    if (executionStateNotifier.value == ExecutionState.inProgress ||
+        executionStateNotifier.value == ExecutionState.successful) return;
     Future.delayed(
       const Duration(milliseconds: 100),
       () => setState(() {
@@ -270,6 +276,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   void _onCancel() {
+    if (executionStateNotifier.value == ExecutionState.inProgress ||
+        executionStateNotifier.value == ExecutionState.successful) return;
     setState(() {
       menuItemColor = widget.menuItemColor;
     });
