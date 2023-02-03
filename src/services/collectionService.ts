@@ -529,7 +529,7 @@ export const removeFromCollection = async (
                 continue;
             }
             await moveToCollection(
-                collectionsMap[toMoveCollectionID],
+                collectionsMap.get(toMoveCollectionID),
                 collectionID,
                 toMoveFiles
             );
