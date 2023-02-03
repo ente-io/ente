@@ -26,10 +26,13 @@ class UserAvatarWidget extends StatelessWidget {
     final displayChar = (user.name == null || user.name!.isEmpty)
         ? ((user.email.isEmpty) ? " " : user.email.substring(0, 1))
         : user.name!.substring(0, 1);
-    final randomColor = colorScheme.avatarColors[
-        (user.id ?? 0).remainder(colorScheme.avatarColors.length)];
-    final Color decorationColor =
-        ((user.id ?? -1) == currentUserID) ? Colors.black : randomColor;
+    Color decorationColor;
+    if (user.id == null || user.id! <= 0 || user.id == currentUserID) {
+      decorationColor = Colors.black;
+    } else {
+      decorationColor = colorScheme
+          .avatarColors[(user.id!).remainder(colorScheme.avatarColors.length)];
+    }
 
     final avatarStyle = getAvatarStyle(context, type);
     final double size = avatarStyle.item1;
