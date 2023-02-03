@@ -28,6 +28,7 @@ import {
     EncryptedCollection,
     CollectionMagicMetadata,
     CollectionMagicMetadataProps,
+    RemoveFromCollectionRequest,
 } from 'types/collection';
 import {
     COLLECTION_SORT_BY,
@@ -499,10 +500,38 @@ export const removeFromCollection = async (
     allFiles?: EnteFile[]
 ) => {
     try {
+        const user: User = getData(LS_KEYS.USER);
+        const nonUserFiles = [];
+        const userFiles = [];
+        for (const file of toRemoveFiles) {
+            if (file.ownerID === user.id) {
+                userFiles.push(file);
+            } else {
+                nonUserFiles.push(file);
+            }
+        }
+
+        if (nonUserFiles.length > 0) {
+            await removeNonUserFiles(collectionID, nonUserFiles);
+        }
+        if (userFiles.length > 0) {
+            await removeUserFiles(collectionID, userFiles, allFiles);
+        }
+    } catch (e) {
+        logError(e, 'remove from collection failed ');
+        throw e;
+    }
+};
+
+export const removeUserFiles = async (
+    collectionID: number,
+    toRemoveFiles: EnteFile[],
+    allFiles?: EnteFile[]
+) => {
+    try {
         if (!allFiles) {
             allFiles = await getLocalFiles();
         }
-
         const toRemoveFilesIds = new Set(toRemoveFiles.map((f) => f.id));
         const toRemoveFilesCopiesInOtherCollections = allFiles.filter((f) => {
             if (f.collectionID === collectionID) {
@@ -551,7 +580,32 @@ export const removeFromCollection = async (
             leftFiles
         );
     } catch (e) {
-        logError(e, 'remove from collection failed ');
+        logError(e, 'remove user files failed ');
+        throw e;
+    }
+};
+
+export const removeNonUserFiles = async (
+    collectionID: number,
+    nonUserFiles: EnteFile[]
+) => {
+    try {
+        const fileIDs = nonUserFiles.map((f) => f.id);
+        const token = getToken();
+
+        const request: RemoveFromCollectionRequest = {
+            collectionID,
+            fileIDs,
+        };
+
+        await HTTPService.post(
+            `${ENDPOINT}/collections/v3/remove-files`,
+            request,
+            null,
+            { 'X-Auth-Token': token }
+        );
+    } catch (e) {
+        logError(e, 'remove non user files failed ');
         throw e;
     }
 };

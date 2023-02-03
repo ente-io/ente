@@ -449,7 +449,7 @@ const englishConstants = {
     ),
     NOT_FILE_OWNER: 'You cannot delete files in a shared album',
     ADD_TO_COLLECTION: 'Add to album',
-    SELECTED: 'Selected',
+    SELECTED: 'selected',
     VIDEO_PLAYBACK_FAILED: 'Video format not supported',
     VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD:
         'This video cannot be played on your browser',
@@ -632,11 +632,19 @@ const englishConstants = {
     LEAVE_SHARED_ALBUM_FAILED: 'failed to leave the album, please try again',
     LEAVE_SHARED_ALBUM_MESSAGE:
         'You will leave the album, and it will stop being visible to you.',
-    CONFIRM_REMOVE_MESSAGE: () => (
+    CONFIRM_SELF_REMOVE_MESSAGE: () => (
         <>
             <p>
                 Selected items will be removed from this album. Items which are
                 only in this album will be moved to Uncategorized.
+            </p>
+        </>
+    ),
+    CONFIRM_SELF_AND_OTHER_REMOVE_MESSAGE: () => (
+        <>
+            <p>
+                Some of the items you are removing were added by other people,
+                and you will lose access to them.
             </p>
         </>
     ),
@@ -906,6 +914,7 @@ const englishConstants = {
     ),
     ADD_X_PHOTOS: (x: number) => `Add ${x} ${x > 1 ? 'photos' : 'photo'}`,
     CHOSE_THEME: 'Choose theme',
+    YOURS: 'yours',
 };
 
 export default englishConstants;

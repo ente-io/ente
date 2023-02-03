@@ -35,6 +35,7 @@ interface Props {
     fixTimeHelper: () => void;
     downloadHelper: () => void;
     count: number;
+    ownCount: number;
     clearSelection: () => void;
     archiveFilesHelper: () => void;
     unArchiveFilesHelper: () => void;
@@ -55,6 +56,7 @@ const SelectedFileOptions = ({
     deleteFileHelper,
     downloadHelper,
     count,
+    ownCount,
     clearSelection,
     archiveFilesHelper,
     unArchiveFilesHelper,
@@ -96,18 +98,33 @@ const SelectedFileOptions = ({
             title: constants.RESTORE_TO_COLLECTION,
         });
 
-    const removeFromCollectionHandler = () =>
-        setDialogMessage({
-            title: constants.REMOVE_FROM_COLLECTION,
-            content: constants.CONFIRM_REMOVE_MESSAGE(),
+    const removeFromCollectionHandler = () => {
+        if (ownCount === count) {
+            setDialogMessage({
+                title: constants.REMOVE_FROM_COLLECTION,
+                content: constants.CONFIRM_SELF_REMOVE_MESSAGE(),
 
-            proceed: {
-                action: removeFromCollectionHelper,
-                text: constants.YES_REMOVE,
-                variant: 'primary',
-            },
-            close: { text: constants.CANCEL },
-        });
+                proceed: {
+                    action: removeFromCollectionHelper,
+                    text: constants.YES_REMOVE,
+                    variant: 'primary',
+                },
+                close: { text: constants.CANCEL },
+            });
+        } else {
+            setDialogMessage({
+                title: constants.REMOVE_FROM_COLLECTION,
+                content: constants.CONFIRM_SELF_AND_OTHER_REMOVE_MESSAGE(),
+
+                proceed: {
+                    action: removeFromCollectionHelper,
+                    text: constants.YES_REMOVE,
+                    variant: 'danger',
+                },
+                close: { text: constants.CANCEL },
+            });
+        }
+    };
 
     const moveToCollection = () => {
         setCollectionSelectorAttributes({
@@ -125,7 +142,8 @@ const SelectedFileOptions = ({
                     <CloseIcon />
                 </IconButton>
                 <Box ml={1.5}>
-                    {count} {constants.SELECTED}
+                    {count} {constants.SELECTED}{' '}
+                    {ownCount !== count && `(${ownCount} ${constants.YOURS})`}
                 </Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>

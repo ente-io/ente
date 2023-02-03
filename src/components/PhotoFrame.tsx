@@ -99,6 +99,7 @@ const PhotoFrame = ({
     enableDownload,
     isDeduplicating,
 }: Props) => {
+    const [user, setUser] = useState<User>(null);
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
@@ -118,6 +119,11 @@ const PhotoFrame = ({
     const updateRequired = useRef(false);
 
     const [filteredData, setFilteredData] = useState<EnteFile[]>([]);
+
+    useEffect(() => {
+        const user: User = getData(LS_KEYS.USER);
+        setUser(user);
+    }, []);
 
     useEffect(() => {
         const main = () => {
@@ -181,7 +187,7 @@ const PhotoFrame = ({
 
                     if (
                         isSharedFile(user, item) &&
-                        !isIncomingSharedCollection
+                        activeCollection !== item.collectionID
                     ) {
                         return false;
                     }
@@ -441,30 +447,52 @@ const PhotoFrame = ({
         setOpen(true);
     };
 
-    const handleSelect = (id: number, index?: number) => (checked: boolean) => {
-        if (selected.collectionID !== activeCollection) {
-            setSelected({ count: 0, collectionID: 0 });
-        }
-        if (typeof index !== 'undefined') {
-            if (checked) {
-                setRangeStart(index);
-            } else {
-                setRangeStart(undefined);
+    const handleSelect =
+        (id: number, isOwnFile: boolean, index?: number) =>
+        (checked: boolean) => {
+            if (typeof index !== 'undefined') {
+                if (checked) {
+                    setRangeStart(index);
+                } else {
+                    setRangeStart(undefined);
+                }
             }
-        }
+            setSelected((selected) => {
+                if (selected.collectionID !== activeCollection) {
+                    selected = { ownCount: 0, count: 0, collectionID: 0 };
+                }
 
-        setSelected((selected) => ({
-            ...selected,
-            [id]: checked,
-            count:
-                selected[id] === checked
-                    ? selected.count
-                    : checked
-                    ? selected.count + 1
-                    : selected.count - 1,
-            collectionID: activeCollection,
-        }));
-    };
+                const handleCounterChange = (count: number) => {
+                    if (selected[id] === checked) {
+                        return count;
+                    }
+                    if (checked) {
+                        return count + 1;
+                    } else {
+                        return count - 1;
+                    }
+                };
+
+                const handleAllCounterChange = () => {
+                    if (isOwnFile) {
+                        return {
+                            ownCount: handleCounterChange(selected.ownCount),
+                            count: handleCounterChange(selected.count),
+                        };
+                    } else {
+                        return {
+                            count: handleCounterChange(selected.count),
+                        };
+                    }
+                };
+                return {
+                    ...selected,
+                    [id]: checked,
+                    collectionID: activeCollection,
+                    ...handleAllCounterChange(),
+                };
+            });
+        };
     const onHoverOver = (index: number) => () => {
         setCurrentHover(index);
     };
@@ -486,9 +514,16 @@ const PhotoFrame = ({
                 (index - i) * direction > 0;
                 i += direction
             ) {
-                handleSelect(filteredData[i].id)(!checked);
+                handleSelect(
+                    filteredData[i].id,
+                    filteredData[i].ownerID === user.id
+                )(!checked);
             }
-            handleSelect(filteredData[index].id, index)(!checked);
+            handleSelect(
+                filteredData[index].id,
+                filteredData[index].ownerID === user.id,
+                index
+            )(!checked);
         }
     };
     const getThumbnail = (
@@ -504,7 +539,11 @@ const PhotoFrame = ({
                 file={files[index]}
                 updateURL={updateURL(files[index].id)}
                 onClick={onThumbnailClick(index)}
-                onSelect={handleSelect(files[index].id, index)}
+                onSelect={handleSelect(
+                    files[index].id,
+                    files[index].ownerID === user.id,
+                    index
+                )}
                 selected={
                     selected.collectionID === activeCollection &&
                     selected[files[index].id]

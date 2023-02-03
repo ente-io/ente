@@ -179,6 +179,7 @@ export default function Gallery() {
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
+        ownCount: 0,
         count: 0,
         collectionID: 0,
     });
@@ -421,7 +422,7 @@ export default function Gallery() {
     };
 
     const clearSelection = function () {
-        setSelected({ count: 0, collectionID: 0 });
+        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
     };
 
     if (!files || !collectionSummaries) {
@@ -433,10 +434,19 @@ export default function Gallery() {
             try {
                 setCollectionSelectorView(false);
                 const selectedFiles = getSelectedFiles(selected, files);
+                const toProcessFiles =
+                    ops === COLLECTION_OPS_TYPE.REMOVE
+                        ? selectedFiles
+                        : selectedFiles.filter(
+                              (file) => file.ownerID === user.id
+                          );
+                if (toProcessFiles.length === 0) {
+                    return;
+                }
                 await handleCollectionOps(
                     ops,
                     collection,
-                    selectedFiles,
+                    toProcessFiles,
                     selected.collectionID
                 );
                 clearSelection();
@@ -774,6 +784,7 @@ export default function Gallery() {
                             fixTimeHelper={fixTimeHelper}
                             downloadHelper={downloadHelper}
                             count={selected.count}
+                            ownCount={selected.ownCount}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
                             isFavoriteCollection={

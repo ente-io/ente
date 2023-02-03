@@ -257,8 +257,10 @@ export default function App({ Component, err }) {
         isLoadingBarRunning.current = true;
     };
     const finishLoading = () => {
-        isLoadingBarRunning.current && loadingBar.current?.complete();
-        isLoadingBarRunning.current = false;
+        setTimeout(() => {
+            isLoadingBarRunning.current && loadingBar.current?.complete();
+            isLoadingBarRunning.current = false;
+        }, 100);
     };
 
     const closeMessageDialog = () => setMessageDialogView(false);
