@@ -4,13 +4,13 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/events/notification_event.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserRemoteFlagService {
-  final _enteDio = Network.instance.enteDio;
+  final _enteDio = NetworkClient.instance.enteDio;
   final _logger = Logger((UserRemoteFlagService).toString());
   late SharedPreferences _prefs;
 
