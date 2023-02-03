@@ -167,30 +167,12 @@ export function getSelectedFiles(
 
 export function sortFiles(files: EnteFile[]) {
     // sort according to modification time first
-    files = files.sort((a, b) => {
-        if (!b.metadata?.modificationTime) {
-            return -1;
-        }
-        if (!a.metadata?.modificationTime) {
-            return 1;
-        } else {
-            return b.metadata.modificationTime - a.metadata.modificationTime;
-        }
-    });
-
     // then sort according to creation time, maintaining ordering according to modification time for files with creation time
-    files = files
-        .map((file, index) => ({ index, file }))
-        .sort((a, b) => {
-            let diff =
-                b.file.metadata.creationTime - a.file.metadata.creationTime;
-            if (diff === 0) {
-                diff = a.index - b.index;
-            }
-            return diff;
-        })
-        .map((file) => file.file);
-    return files;
+    return files
+        .sort(
+            (a, b) => b.metadata.modificationTime - a.metadata.modificationTime
+        )
+        .sort((a, b) => b.metadata.creationTime - a.metadata.creationTime);
 }
 
 export async function decryptFile(
@@ -456,23 +438,33 @@ export function isSharedFile(user: User, file: EnteFile) {
 }
 
 export function mergeMetadata(files: EnteFile[]): EnteFile[] {
-    return files.map((file) => ({
-        ...file,
-        metadata: {
-            ...file.metadata,
-            ...(file.pubMagicMetadata?.data
-                ? {
-                      ...(file.pubMagicMetadata?.data.editedTime && {
-                          creationTime: file.pubMagicMetadata.data.editedTime,
-                      }),
-                      ...(file.pubMagicMetadata?.data.editedName && {
-                          title: file.pubMagicMetadata.data.editedName,
-                      }),
-                  }
-                : {}),
-            ...(file.magicMetadata?.data ? file.magicMetadata.data : {}),
-        },
-    }));
+    return files.map((file) => {
+        if (file.pubMagicMetadata?.data.editedTime) {
+            file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
+        }
+        if (file.pubMagicMetadata?.data.editedName) {
+            file.metadata.title = file.pubMagicMetadata.data.editedName;
+        }
+
+        return file;
+
+        // {
+        // ...file,
+        // metadata: {
+        //     ...file.metadata,
+        //     ...(file.pubMagicMetadata?.data
+        //         ? {
+        //               ...(file.pubMagicMetadata?.data.editedTime && {
+        //                   creationTime: file.pubMagicMetadata.data.editedTime,
+        //               }),
+        //               ...(file.pubMagicMetadata?.data.editedName && {
+        //                   title: file.pubMagicMetadata.data.editedName,
+        //               }),
+        //           }
+        //         : {}),
+        //     ...(file.magicMetadata?.data ? file.magicMetadata.data : {}),
+        // },
+    });
 }
 
 export function updateExistingFilePubMetadata(
