@@ -566,5 +566,7 @@ export function getLatestVersionFiles(files: EnteFile[]) {
             latestVersionFiles.set(uid, file);
         }
     });
-    return Array.from(latestVersionFiles.values());
+    return Array.from(latestVersionFiles.values()).filter(
+        (file) => !file.isDeleted
+    );
 }

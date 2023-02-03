@@ -73,7 +73,7 @@ export const syncFiles = async (
             continue;
         }
         const newFiles = await getFiles(collection, lastSyncTime, setFiles);
-        files = [...files, ...newFiles];
+        files = getLatestVersionFiles([...files, ...newFiles]);
         await setLocalFiles(files);
         setCollectionLastSyncTime(collection, collection.updationTime);
     }
@@ -126,7 +126,7 @@ export const getFiles = async (
                         getLatestVersionFiles([
                             ...(files || []),
                             ...decryptedFiles,
-                        ]).filter((item) => !item.isDeleted)
+                        ])
                     )
                 )
             );
