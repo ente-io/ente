@@ -105,22 +105,17 @@ export const getFiles = async (
                 }
             );
 
-            decryptedFiles = [
-                ...decryptedFiles,
-                ...(await Promise.all(
-                    resp.data.diff.map(async (file: EncryptedEnteFile) => {
-                        if (!file.isDeleted) {
-                            return await decryptFile(file, collection.key);
-                        } else {
-                            return file;
-                        }
-                    }) as Promise<EnteFile>[]
-                )),
-            ];
+            const newDecryptedFilesBatch = await Promise.all(
+                resp.data.diff.map(async (file: EncryptedEnteFile) => {
+                    if (!file.isDeleted) {
+                        return await decryptFile(file, collection.key);
+                    } else {
+                        return file;
+                    }
+                }) as Promise<EnteFile>[]
+            );
+            decryptedFiles = [...decryptedFiles, ...newDecryptedFilesBatch];
 
-            if (resp.data.diff.length) {
-                time = resp.data.diff.slice(-1)[0].updationTime;
-            }
             setFiles((files) =>
                 sortFiles(
                     mergeMetadata(
@@ -131,6 +126,9 @@ export const getFiles = async (
                     )
                 )
             );
+            if (resp.data.diff.length) {
+                time = resp.data.diff.slice(-1)[0].updationTime;
+            }
         } while (resp.data.hasMore);
         return decryptedFiles;
     } catch (e) {
