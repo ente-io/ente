@@ -168,7 +168,6 @@ interface Props {
         isScrolling?: boolean
     ) => JSX.Element;
     activeCollection: number;
-    resetFetching: () => void;
 }
 
 export function PhotoList({
@@ -178,7 +177,6 @@ export function PhotoList({
     showAppDownloadBanner,
     getThumbnail,
     activeCollection,
-    resetFetching,
 }: Props) {
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
@@ -205,7 +203,6 @@ export function PhotoList({
 
     const refreshList = () => {
         listRef.current?.resetAfterIndex(0);
-        resetFetching();
     };
 
     useEffect(() => {
