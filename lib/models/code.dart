@@ -115,7 +115,12 @@ class Code {
   }
 
   static Type _getType(Uri uri) {
-    return uri.host == "totp" ? Type.totp : Type.hotp;
+    if (uri.host == "totp") {
+      return Type.totp;
+    } else if (uri.host == "hotp") {
+      return Type.hotp;
+    }
+    throw UnsupportedError("Unsupported format with host ${uri.host}");
   }
 
   @override
