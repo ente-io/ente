@@ -163,7 +163,7 @@ interface Props {
     filteredData: EnteFile[];
     showAppDownloadBanner: boolean;
     getThumbnail: (
-        files: EnteFile[],
+        file: EnteFile,
         index: number,
         isScrolling?: boolean
     ) => JSX.Element;
@@ -654,7 +654,7 @@ export function PhotoList({
             case ITEM_TYPE.FILE: {
                 const ret = listItem.items.map((item, idx) =>
                     getThumbnail(
-                        filteredData,
+                        item,
                         listItem.itemStartIndex + idx,
                         isScrolling
                     )

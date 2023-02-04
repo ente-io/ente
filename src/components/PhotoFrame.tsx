@@ -546,41 +546,31 @@ const PhotoFrame = ({
         }
     };
     const getThumbnail = (
-        files: EnteFile[],
+        item: EnteFile,
         index: number,
         isScrolling: boolean
-    ) =>
-        files[index] ? (
-            <PreviewCard
-                key={`tile-${files[index].id}-selected-${
-                    selected[files[index].id] ?? false
-                }`}
-                file={files[index]}
-                updateURL={updateURL(index)}
-                onClick={onThumbnailClick(index)}
-                onSelect={handleSelect(
-                    files[index].id,
-                    files[index].ownerID === user.id,
-                    index
-                )}
-                selected={
-                    selected.collectionID === activeCollection &&
-                    selected[files[index].id]
-                }
-                selectOnClick={selected.count > 0}
-                onHover={onHoverOver(index)}
-                onRangeSelect={handleRangeSelect(index)}
-                isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
-                isInsSelectRange={
-                    (index >= rangeStart && index <= currentHover) ||
-                    (index >= currentHover && index <= rangeStart)
-                }
-                activeCollection={activeCollection}
-                showPlaceholder={isScrolling}
-            />
-        ) : (
-            <></>
-        );
+    ) => (
+        <PreviewCard
+            key={`tile-${item.id}-selected-${selected[item.id] ?? false}`}
+            file={item}
+            updateURL={updateURL(index)}
+            onClick={onThumbnailClick(index)}
+            onSelect={handleSelect(item.id, item.ownerID === user.id, index)}
+            selected={
+                selected.collectionID === activeCollection && selected[item.id]
+            }
+            selectOnClick={selected.count > 0}
+            onHover={onHoverOver(index)}
+            onRangeSelect={handleRangeSelect(index)}
+            isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
+            isInsSelectRange={
+                (index >= rangeStart && index <= currentHover) ||
+                (index >= currentHover && index <= rangeStart)
+            }
+            activeCollection={activeCollection}
+            showPlaceholder={isScrolling}
+        />
+    );
 
     const getSlideData = async (
         instance: PhotoSwipe<PhotoSwipe.Options>,
