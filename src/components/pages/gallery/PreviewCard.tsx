@@ -1,4 +1,4 @@
-import React, { useContext, useLayoutEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
@@ -196,8 +196,8 @@ const Cont = styled('div')<{ disabled: boolean }>`
 `;
 
 export default function PreviewCard(props: IProps) {
-    const [imgSrc, setImgSrc] = useState<string>();
     const { thumbs } = useContext(GalleryContext);
+
     const {
         file,
         onClick,
@@ -210,13 +210,18 @@ export default function PreviewCard(props: IProps) {
         isRangeSelectActive,
         isInsSelectRange,
     } = props;
+
+    const [imgSrc, setImgSrc] = useState<string>(file.msrc);
+
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
     const deduplicateContext = useContext(DeduplicateContext);
 
-    useLayoutEffect(() => {
-        if (file && !file.msrc && !props.showPlaceholder) {
+    const isMounted = useRef(true);
+
+    useEffect(() => {
+        if (!file.msrc && !props.showPlaceholder) {
             const main = async () => {
                 try {
                     let url;
@@ -237,6 +242,9 @@ export default function PreviewCard(props: IProps) {
                         }
                         thumbs.set(file.id, url);
                     }
+                    if (!isMounted.current) {
+                        return;
+                    }
                     setImgSrc(url);
                     updateURL(file.id, url);
                 } catch (e) {
@@ -245,8 +253,11 @@ export default function PreviewCard(props: IProps) {
                 }
             };
             main();
+            return () => {
+                isMounted.current = false;
+            };
         }
-    }, [file, props.showPlaceholder]);
+    }, []);
 
     const handleClick = () => {
         if (selectOnClick) {
@@ -279,7 +290,7 @@ export default function PreviewCard(props: IProps) {
 
     return (
         <Cont
-            id={`thumb-${file?.id}-${props.showPlaceholder}`}
+            id={`thumb-${file.id}-${props.showPlaceholder}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!file?.msrc && !imgSrc}

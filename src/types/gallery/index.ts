@@ -16,9 +16,14 @@ export type SetCollectionSelectorAttributes = React.Dispatch<
     React.SetStateAction<CollectionSelectorAttributes>
 >;
 
+export type MergedSourceURL = {
+    original: string;
+    converted: string;
+};
+
 export type GalleryContextType = {
     thumbs: Map<number, string>;
-    files: Map<number, { original: string; converted: string }>;
+    files: Map<number, MergedSourceURL>;
     showPlanSelectorModal: () => void;
     setActiveCollection: (collection: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;

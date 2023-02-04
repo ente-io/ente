@@ -4,7 +4,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import DownloadManager from 'services/downloadManager';
-import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoViewer from 'components/PhotoViewer';
 import {
@@ -13,10 +12,9 @@ import {
     TRASH_SECTION,
 } from 'constants/collection';
 import { isSharedFile } from 'utils/file';
-import { isPlaybackPossible } from 'utils/photoFrame';
+import { updateFileMsrcProps, updateFileSrcProps } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
-import { SelectedState } from 'types/gallery';
-import { FILE_TYPE } from 'constants/file';
+import { MergedSourceURL, SelectedState } from 'types/gallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
@@ -71,13 +69,6 @@ interface Props {
     isDeduplicating?: boolean;
     resetSearch?: () => void;
 }
-
-type SourceURL = {
-    originalImageURL?: string;
-    originalVideoURL?: string;
-    convertedImageURL?: string;
-    convertedVideoURL?: string;
-};
 
 const PhotoFrame = ({
     files,
@@ -136,12 +127,27 @@ const PhotoFrame = ({
             const user: User = getData(LS_KEYS.USER);
 
             const filteredData = files
-                .map((item) => ({
-                    ...item,
-                    w: window.innerWidth,
-                    h: window.innerHeight,
-                    title: item.pubMagicMetadata?.data.caption,
-                }))
+                .map((item) => {
+                    const filteredItem = {
+                        ...item,
+                        w: window.innerWidth,
+                        h: window.innerHeight,
+                        title: item.pubMagicMetadata?.data.caption,
+                    };
+                    if (galleryContext.thumbs.has(item.id)) {
+                        updateFileMsrcProps(
+                            filteredItem,
+                            galleryContext.thumbs.get(item.id)
+                        );
+                    }
+                    if (galleryContext.files.has(item.id)) {
+                        updateFileSrcProps(
+                            filteredItem,
+                            galleryContext.files.get(item.id)
+                        );
+                    }
+                    return filteredItem;
+                })
                 .filter((item) => {
                     if (
                         deletedFileIds?.has(item.id) &&
@@ -342,37 +348,13 @@ const PhotoFrame = ({
             );
             return;
         }
-        file.msrc = url;
-        file.w = window.innerWidth;
-        file.h = window.innerHeight;
-
-        if (file.metadata.fileType === FILE_TYPE.VIDEO) {
-            file.html = `
-                <div class="pswp-item-container">
-                    <img src="${url}" onContextMenu="return false;"/>
-                    <div class="spinner-border text-light" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-            `;
-        } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            file.html = `
-                <div class="pswp-item-container">
-                    <img src="${url}" onContextMenu="return false;"/>
-                    <div class="spinner-border text-light" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-            `;
-        } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
-            file.src = url;
-        }
+        updateFileMsrcProps(file, url);
     };
 
     const updateSrcURL = async (
         index: number,
         id: number,
-        srcURL: SourceURL
+        mergedSrcURL: MergedSourceURL
     ) => {
         const file = filteredData[index];
         // this is to prevent outdate updateSrcURL call from updating the wrong file
@@ -394,65 +376,7 @@ const PhotoFrame = ({
             );
             return;
         }
-        const {
-            originalImageURL,
-            convertedImageURL,
-            originalVideoURL,
-            convertedVideoURL,
-        } = srcURL;
-        const isPlayable =
-            convertedVideoURL && (await isPlaybackPossible(convertedVideoURL));
-
-        file.w = window.innerWidth;
-        file.h = window.innerHeight;
-        file.isSourceLoaded = true;
-        file.originalImageURL = originalImageURL;
-        file.originalVideoURL = originalVideoURL;
-
-        if (file.metadata.fileType === FILE_TYPE.VIDEO) {
-            if (isPlayable) {
-                file.html = `
-            <video controls onContextMenu="return false;">
-                <source src="${convertedVideoURL}" />
-                Your browser does not support the video tag.
-            </video>
-        `;
-            } else {
-                file.html = `
-            <div class="pswp-item-container">
-                <img src="${file.msrc}" onContextMenu="return false;"/>
-                <div class="download-banner" >
-                    ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                    <a class="btn btn-outline-success" href=${convertedVideoURL} download="${file.metadata.title}"">Download</a>
-                </div>
-            </div>
-            `;
-            }
-        } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            if (isPlayable) {
-                file.html = `
-                <div class = 'pswp-item-container'>
-                    <img id = "live-photo-image-${file.id}" src="${convertedImageURL}" onContextMenu="return false;"/>
-                    <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
-                        <source src="${convertedVideoURL}" />
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-                `;
-            } else {
-                file.html = `
-                <div class="pswp-item-container">
-                    <img src="${file.msrc}" onContextMenu="return false;"/>
-                    <div class="download-banner">
-                        ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                        <button class = "btn btn-outline-success" id = "download-btn-${file.id}">Download</button>
-                    </div>
-                </div>
-                `;
-            }
-        } else {
-            file.src = convertedImageURL;
-        }
+        await updateFileSrcProps(file, mergedSrcURL);
         setIsSourceLoaded(true);
     };
 
@@ -644,60 +568,39 @@ const PhotoFrame = ({
         try {
             addLogLine(`[${item.id}] new file src request`);
             fetching[item.id] = true;
-            let urls: { original: string[]; converted: string[] };
+            let srcURL: MergedSourceURL;
             if (galleryContext.files.has(item.id)) {
                 addLogLine(
                     `[${item.id}] gallery context cache hit, using cached file`
                 );
-                const mergedURL = galleryContext.files.get(item.id);
-                urls = {
-                    original: mergedURL.original.split(','),
-                    converted: mergedURL.converted.split(','),
-                };
+                srcURL = galleryContext.files.get(item.id);
             } else {
                 addLogLine(
                     `[${item.id}] gallery context cache miss, calling downloadManager to get file`
                 );
                 appContext.startLoading();
+                let downloadedURL;
                 if (publicCollectionGalleryContext.accessedThroughSharedURL) {
-                    urls = await PublicCollectionDownloadManager.getFile(
-                        item,
-                        publicCollectionGalleryContext.token,
-                        publicCollectionGalleryContext.passwordToken,
-                        true
-                    );
+                    downloadedURL =
+                        await PublicCollectionDownloadManager.getFile(
+                            item,
+                            publicCollectionGalleryContext.token,
+                            publicCollectionGalleryContext.passwordToken,
+                            true
+                        );
                 } else {
-                    urls = await DownloadManager.getFile(item, true);
+                    downloadedURL = await DownloadManager.getFile(item, true);
                 }
                 appContext.finishLoading();
-                const mergedURL = {
-                    original: urls.original.join(','),
-                    converted: urls.converted.join(','),
+                const mergedURL: MergedSourceURL = {
+                    original: downloadedURL.original.join(','),
+                    converted: downloadedURL.converted.join(','),
                 };
                 galleryContext.files.set(item.id, mergedURL);
-            }
-
-            let originalImageURL;
-            let originalVideoURL;
-            let convertedImageURL;
-            let convertedVideoURL;
-            if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                [originalImageURL, originalVideoURL] = urls.original;
-                [convertedImageURL, convertedVideoURL] = urls.converted;
-            } else if (item.metadata.fileType === FILE_TYPE.VIDEO) {
-                [originalVideoURL] = urls.original;
-                [convertedVideoURL] = urls.converted;
-            } else {
-                [originalImageURL] = urls.original;
-                [convertedImageURL] = urls.converted;
+                srcURL = mergedURL;
             }
             setIsSourceLoaded(false);
-            await updateSrcURL(index, item.id, {
-                originalImageURL,
-                originalVideoURL,
-                convertedImageURL,
-                convertedVideoURL,
-            });
+            await updateSrcURL(index, item.id, srcURL);
 
             try {
                 addLogLine(
