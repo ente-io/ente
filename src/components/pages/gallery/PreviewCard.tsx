@@ -202,7 +202,6 @@ export default function PreviewCard(props: IProps) {
         file,
         onClick,
         updateURL,
-
         selected,
         onSelect,
         selectOnClick,

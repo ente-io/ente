@@ -325,10 +325,20 @@ const PhotoFrame = ({
 
     const updateURL = (index: number) => (id: number, url: string) => {
         const file = filteredData[index];
-        // this is ro prevent outdate updateURL call from updating the wrong file
+        // this is to prevent outdated updateURL call from updating the wrong file
         if (file.id !== id) {
             addLogLine(
                 `PhotoSwipe: updateURL: file id mismatch: ${file.id} !== ${id}`
+            );
+            return;
+        }
+        if (file.msrc) {
+            addLogLine(`PhotoSwipe: updateURL: msrc already set: ${file.msrc}`);
+            logError(
+                new Error(
+                    `PhotoSwipe: updateURL: msrc already set: ${file.msrc}`
+                ),
+                'PhotoSwipe: updateURL called with msrc already set'
             );
             return;
         }
@@ -336,7 +346,7 @@ const PhotoFrame = ({
         file.w = window.innerWidth;
         file.h = window.innerHeight;
 
-        if (file.metadata.fileType === FILE_TYPE.VIDEO && !file.html) {
+        if (file.metadata.fileType === FILE_TYPE.VIDEO) {
             file.html = `
                 <div class="pswp-item-container">
                     <img src="${url}" onContextMenu="return false;"/>
@@ -345,10 +355,7 @@ const PhotoFrame = ({
                     </div>
                 </div>
             `;
-        } else if (
-            file.metadata.fileType === FILE_TYPE.LIVE_PHOTO &&
-            !file.html
-        ) {
+        } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             file.html = `
                 <div class="pswp-item-container">
                     <img src="${url}" onContextMenu="return false;"/>
@@ -357,7 +364,7 @@ const PhotoFrame = ({
                     </div>
                 </div>
             `;
-        } else if (file.metadata.fileType === FILE_TYPE.IMAGE && !file.src) {
+        } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
             file.src = url;
         }
     };
@@ -372,6 +379,18 @@ const PhotoFrame = ({
         if (file.id !== id) {
             addLogLine(
                 `PhotoSwipe: updateSrcURL: file id mismatch: ${file.id} !== ${id}`
+            );
+            return;
+        }
+        if (file.isSourceLoaded) {
+            addLogLine(
+                `PhotoSwipe: updateSrcURL: source already loaded: ${file.id}`
+            );
+            logError(
+                new Error(
+                    `PhotoSwipe: updateSrcURL: source already loaded: ${file.id}`
+                ),
+                'PhotoSwipe updateSrcURL called when source already loaded'
             );
             return;
         }
@@ -571,9 +590,9 @@ const PhotoFrame = ({
         addLogLine(
             `[${
                 item.id
-            }] getSlideData called for thumbnail:${!!item.msrc} original:${
-                !!item.msrc && !!item.src && item.src !== item.msrc
-            } html:${!!item.html} inProgress:${fetching[item.id]}`
+            }] getSlideData called for thumbnail:${!!item.msrc} sourceLoaded:${isSourceLoaded} fetching:${
+                fetching[item.id]
+            }`
         );
         if (!item.msrc) {
             addLogLine(`[${item.id}] doesn't have thumbnail`);
@@ -607,9 +626,7 @@ const PhotoFrame = ({
                     addLogLine(
                         `[${
                             item.id
-                        }] calling invalidateCurrItems for thumbnail msrc:${!!item.msrc} src:${
-                            !!item.msrc && !!item.src && item.src !== item.msrc
-                        } html:${!!item.html}`
+                        }] calling invalidateCurrItems for thumbnail msrc :${!!item.msrc}`
                     );
                     instance.invalidateCurrItems();
                     if ((instance as any).isOpen()) {
@@ -634,9 +651,8 @@ const PhotoFrame = ({
             addLogLine(`[${item.id}] file download already in progress`);
             return;
         }
-
-        addLogLine(`[${item.id}] new file download fetch original request`);
         try {
+            addLogLine(`[${item.id}] new file src request`);
             fetching[item.id] = true;
             let urls: { original: string[]; converted: string[] };
             if (galleryContext.files.has(item.id)) {
@@ -670,11 +686,11 @@ const PhotoFrame = ({
                 };
                 galleryContext.files.set(item.id, mergedURL);
             }
+
             let originalImageURL;
             let originalVideoURL;
             let convertedImageURL;
             let convertedVideoURL;
-
             if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
                 [originalImageURL, originalVideoURL] = urls.original;
                 [convertedImageURL, convertedVideoURL] = urls.converted;
@@ -695,11 +711,7 @@ const PhotoFrame = ({
 
             try {
                 addLogLine(
-                    `[${
-                        item.id
-                    }] calling invalidateCurrItems for src, msrc:${!!item.msrc} src:${
-                        !!item.msrc && !!item.src && item.src !== item.msrc
-                    } html:${!!item.html}`
+                    `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`
                 );
                 instance.invalidateCurrItems();
                 if ((instance as any).isOpen()) {
