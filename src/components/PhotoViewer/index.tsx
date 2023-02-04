@@ -384,9 +384,9 @@ function PhotoViewer(props: Iprops) {
         const { deletedFileIds, setDeletedFileIds, items: oldItems } = props;
         try {
             deletedFileIds.add(file.id);
-            await trashFiles([file]);
             setDeletedFileIds(new Set(deletedFileIds));
             updateItems(props.items.filter((item) => item.id !== file.id));
+            await trashFiles([file]);
             needUpdate.current = true;
         } catch (e) {
             logError(e, 'trashFile failed');
