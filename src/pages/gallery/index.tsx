@@ -348,6 +348,7 @@ export default function Gallery() {
                     break;
             }
         } finally {
+            setDeletedFileIds(new Set());
             !silent && finishLoading();
         }
         syncInProgress.current = false;
@@ -519,7 +520,6 @@ export default function Gallery() {
             });
         } finally {
             await syncWithRemote(false, true);
-            setDeletedFileIds(new Set());
             finishLoading();
         }
     };
