@@ -654,7 +654,7 @@ export function PhotoList({
             case ITEM_TYPE.FILE: {
                 const ret = listItem.items.map((item, idx) =>
                     getThumbnail(
-                        filteredData[listItem.itemStartIndex + idx],
+                        item,
                         listItem.itemStartIndex + idx,
                         isScrolling
                     )
