@@ -127,27 +127,6 @@ const PhotoFrame = ({
             const user: User = getData(LS_KEYS.USER);
 
             const filteredData = files
-                .map((item) => {
-                    const filteredItem = {
-                        ...item,
-                        w: window.innerWidth,
-                        h: window.innerHeight,
-                        title: item.pubMagicMetadata?.data.caption,
-                    };
-                    if (galleryContext.thumbs.has(item.id)) {
-                        updateFileMsrcProps(
-                            filteredItem,
-                            galleryContext.thumbs.get(item.id)
-                        );
-                    }
-                    if (galleryContext.files.has(item.id)) {
-                        updateFileSrcProps(
-                            filteredItem,
-                            galleryContext.files.get(item.id)
-                        );
-                    }
-                    return filteredItem;
-                })
                 .filter((item) => {
                     if (
                         deletedFileIds?.has(item.id) &&
@@ -216,6 +195,27 @@ const PhotoFrame = ({
                         return false;
                     }
                     return false;
+                })
+                .map((item) => {
+                    const filteredItem = {
+                        ...item,
+                        w: window.innerWidth,
+                        h: window.innerHeight,
+                        title: item.pubMagicMetadata?.data.caption,
+                    };
+                    if (galleryContext.thumbs.has(item.id)) {
+                        updateFileMsrcProps(
+                            filteredItem,
+                            galleryContext.thumbs.get(item.id)
+                        );
+                    }
+                    if (galleryContext.files.has(item.id)) {
+                        updateFileSrcProps(
+                            filteredItem,
+                            galleryContext.files.get(item.id)
+                        );
+                    }
+                    return filteredItem;
                 });
             setFilteredData(filteredData);
             updateInProgress.current = false;
