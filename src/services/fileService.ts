@@ -133,6 +133,7 @@ export const getFiles = async (
         return decryptedFiles;
     } catch (e) {
         logError(e, 'Get files failed');
+        throw e;
     }
 };
 
