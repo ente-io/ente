@@ -290,8 +290,8 @@ class CryptoUtil {
     int memLimit = Sodium.cryptoPwhashMemlimitSensitive;
     int opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
     Uint8List key;
-    while (memLimit > Sodium.cryptoPwhashMemlimitMin &&
-        opsLimit < Sodium.cryptoPwhashOpslimitMax) {
+    while (memLimit >= Sodium.cryptoPwhashMemlimitMin &&
+        opsLimit <= Sodium.cryptoPwhashOpslimitMax) {
       try {
         key = await deriveKey(password, salt, memLimit, opsLimit);
         return DerivedKeyResult(key, memLimit, opsLimit);
