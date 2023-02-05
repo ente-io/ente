@@ -56,6 +56,7 @@ import {
     isOutgoingShare,
     isIncomingShare,
     isSharedOnlyViaLink,
+    isValidMoveTarget,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -524,7 +525,7 @@ export const removeFromCollection = async (
 };
 
 export const removeUserFiles = async (
-    collectionID: number,
+    sourceCollectionID: number,
     toRemoveFiles: EnteFile[],
     allFiles?: EnteFile[]
 ) => {
@@ -534,9 +535,6 @@ export const removeUserFiles = async (
         }
         const toRemoveFilesIds = new Set(toRemoveFiles.map((f) => f.id));
         const toRemoveFilesCopiesInOtherCollections = allFiles.filter((f) => {
-            if (f.collectionID === collectionID) {
-                return false;
-            }
             return toRemoveFilesIds.has(f.id);
         });
         const groupiedFiles = groupFilesBasedOnCollectionID(
@@ -545,8 +543,15 @@ export const removeUserFiles = async (
 
         const collections = await getLocalCollections();
         const collectionsMap = new Map(collections.map((c) => [c.id, c]));
+        const user: User = getData(LS_KEYS.USER);
 
-        for (const [toMoveCollectionID, files] of groupiedFiles.entries()) {
+        for (const [targetCollectionID, files] of groupiedFiles.entries()) {
+            const targetCollection = collectionsMap.get(targetCollectionID);
+            if (
+                !isValidMoveTarget(sourceCollectionID, targetCollection, user)
+            ) {
+                continue;
+            }
             const toMoveFiles = files.filter((f) => {
                 if (toRemoveFilesIds.has(f.id)) {
                     toRemoveFilesIds.delete(f.id);
@@ -558,8 +563,8 @@ export const removeUserFiles = async (
                 continue;
             }
             await moveToCollection(
-                collectionsMap.get(toMoveCollectionID),
-                collectionID,
+                targetCollection,
+                sourceCollectionID,
                 toMoveFiles
             );
         }
@@ -576,7 +581,7 @@ export const removeUserFiles = async (
         }
         await moveToCollection(
             uncategorizedCollection,
-            collectionID,
+            sourceCollectionID,
             leftFiles
         );
     } catch (e) {
