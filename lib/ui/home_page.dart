@@ -34,29 +34,55 @@ class _HomePageState extends State<HomePage> {
   );
   bool _hasLoaded = false;
   bool _isSettingsOpen = false;
+
+  final TextEditingController _textController = TextEditingController();
+  bool _showSearchBox = false;
+  String _searchText = "";
   List<Code> _codes = [];
+  List<Code> _filteredCodes = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
 
   @override
   void initState() {
-    super.initState();
+    _textController.addListener(_applyFiltering);
     _loadCodes();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
     });
+    super.initState();
   }
 
   void _loadCodes() {
     CodeStore.instance.getAllCodes().then((codes) {
       _codes = codes;
+      _filteredCodes = codes;
+
       _hasLoaded = true;
       setState(() {});
     });
   }
 
+  void _applyFiltering() {
+    if (_searchText.isNotEmpty) {
+      final String val = _searchText.toLowerCase();
+      _filteredCodes = _codes
+          .where(
+            (element) => (element.account.toLowerCase().contains(val) ||
+                element.issuer.toLowerCase().contains(val)),
+          )
+          .toList();
+    } else {
+      _filteredCodes = _codes;
+    }
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   void dispose() {
     _streamSubscription?.cancel();
+    _textController.removeListener(_applyFiltering);
     super.dispose();
   }
 
@@ -122,6 +148,26 @@ class _HomePageState extends State<HomePage> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: const Text('ente Authenticator'),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.search),
+              tooltip: 'Search',
+              onPressed: () {
+                setState(
+                  () {
+                    _showSearchBox = !_showSearchBox;
+                    if (!_showSearchBox) {
+                      _searchText = "";
+                      _applyFiltering();
+                    } else if (_textController.text.isNotEmpty) {
+                      _searchText = _textController.text;
+                      _applyFiltering();
+                    }
+                  },
+                );
+              },
+            ),
+          ],
         ),
         floatingActionButton: !_hasLoaded ||
                 _codes.isEmpty ||
@@ -134,20 +180,61 @@ class _HomePageState extends State<HomePage> {
 
   Widget _getBody() {
     if (_hasLoaded) {
-      if (_codes.isEmpty) {
+      if (_filteredCodes.isEmpty && _searchText.isEmpty) {
         return _getEmptyState();
       } else {
         final list = ListView.builder(
           itemBuilder: ((context, index) {
-            return CodeWidget(_codes[index]);
+            return CodeWidget(_filteredCodes[index]);
           }),
-          itemCount: _codes.length,
+          itemCount: _filteredCodes.length,
         );
         if (!PreferenceService.instance.hasShownCoachMark()) {
           return Stack(
             children: [
               list,
               _getCoachMarkWidget(),
+            ],
+          );
+        } else if (_showSearchBox) {
+          return Column(
+            children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: TextField(
+                    autofocus: _searchText.isEmpty,
+                    controller: _textController,
+                    onChanged: (val) {
+                      _searchText = val;
+                      _applyFiltering();
+                    },
+                    decoration: InputDecoration(
+                      // prefixIcon: const Icon(Icons.search),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _textController.clear();
+                          _searchText = "";
+                          _applyFiltering();
+                        },
+                      ),
+                      hintText: 'Search...',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+              ),
+              _filteredCodes.isNotEmpty
+                  ? Expanded(
+                      child: ListView.builder(
+                        itemBuilder: ((context, index) {
+                          return CodeWidget(_filteredCodes[index]);
+                        }),
+                        itemCount: _filteredCodes.length,
+                      ),
+                    )
+                  : (const Text("No result")),
             ],
           );
         } else {
