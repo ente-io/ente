@@ -3,7 +3,7 @@ import * as path from 'path';
 import { isDev } from './common';
 import { isAppQuitting } from '../main';
 import { PROD_HOST_URL } from '../config';
-import { isPlatform } from './main';
+import { isPlatform } from './common/platform';
 import { getHideDockIconPreference } from '../services/userPreference';
 import autoLauncher from '../services/autoLauncher';
 import ElectronLog from 'electron-log';
