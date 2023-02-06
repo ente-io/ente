@@ -691,7 +691,7 @@ export function PhotoList({
             width={width}
             itemCount={timeStampList.length}
             itemKey={generateKey}
-            overscanCount={10}
+            overscanCount={3}
             useIsScrolling>
             {({ index, style, isScrolling }) => (
                 <ListItem style={style}>
