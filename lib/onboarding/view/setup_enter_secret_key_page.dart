@@ -104,9 +104,16 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   width: 400,
                   child: OutlinedButton(
                     onPressed: () {
-                      if (_accountController.text.trim().isEmpty ||
+                      if ((_accountController.text.trim().isEmpty &&
+                              _issuerController.text.trim().isEmpty) ||
                           _secretController.text.trim().isEmpty) {
-                        _showIncorrectDetailsDialog(context);
+                        String message;
+                        if (_secretController.text.trim().isEmpty) {
+                          message = "Secret can not be empty";
+                        } else {
+                          message = "Both account and issuer can not be empty";
+                        }
+                        _showIncorrectDetailsDialog(context, message: message);
                         return;
                       }
                       try {
@@ -142,11 +149,14 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     );
   }
 
-  void _showIncorrectDetailsDialog(BuildContext context) {
+  void _showIncorrectDetailsDialog(
+    BuildContext context, {
+    String message = "Please verify the entered details",
+  }) {
     showErrorDialog(
       context,
       "Incorrect details",
-      "Please verify the entered details",
+      message,
     );
   }
 }
