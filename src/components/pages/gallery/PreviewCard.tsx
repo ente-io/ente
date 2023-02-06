@@ -257,7 +257,7 @@ export default function PreviewCard(props: IProps) {
                 isMounted.current = false;
             };
         }
-    }, []);
+    }, [props.showPlaceholder]);
 
     const handleClick = () => {
         if (selectOnClick) {
