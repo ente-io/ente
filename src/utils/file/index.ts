@@ -166,19 +166,14 @@ export function getSelectedFiles(
 }
 
 export function sortFiles(files: EnteFile[]) {
-    // sort according to modification time first
-    // then sort according to creation time, maintaining ordering according to modification time for files with creation time
-    return files
-        .sort(
-            (a, b) => b.metadata.modificationTime - a.metadata.modificationTime
-        )
-        .sort((a, b) => {
-            if (a.metadata.modificationTime !== b.metadata.modificationTime) {
-                return 0;
-            } else {
-                return b.metadata.creationTime - a.metadata.creationTime;
-            }
-        });
+    // sort based on the time of creation time of the file,
+    // for files with same creation time, sort based on the time of last modification
+    return files.sort((a, b) => {
+        if (a.metadata.creationTime === b.metadata.creationTime) {
+            return b.metadata.modificationTime - a.metadata.modificationTime;
+        }
+        return b.metadata.creationTime - a.metadata.creationTime;
+    });
 }
 
 export async function decryptFile(
