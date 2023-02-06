@@ -1,10 +1,10 @@
 import 'dart:io' as io;
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:computer/computer.dart';
 import 'package:ente_auth/models/derived_key_result.dart';
 import 'package:ente_auth/models/encryption_result.dart';
+import 'package:ente_auth/utils/device_info.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 
@@ -283,35 +283,21 @@ class CryptoUtil {
     return Sodium.cryptoBoxSeal(input, publicKey);
   }
 
-  static bool _isLowSpecDevice() {
-    try {
-      if (Platform.isIOS) {
-        String version = Platform.operatingSystemVersion;
-        int majorVersion = int.parse(version.split('.').first);
-        // iPhone 6 or lower
-        if (majorVersion <= 9) {
-          return true;
-        }
-      }
-    } catch (e) {
-      Logger("_isLowSpecDevice").severe("deviceSpec check failed", e);
-    }
-    return false;
-  }
-
   static Future<DerivedKeyResult> deriveSensitiveKey(
     Uint8List password,
     Uint8List salt,
   ) async {
     final logger = Logger("pwhash");
+    // Default with 1 GB mem and 4 ops limit
     int memLimit = Sodium.cryptoPwhashMemlimitSensitive;
     int opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
 
-    if (_isLowSpecDevice()) {
+    if (await isLowSpecDevice()) {
+      logger.info("low spec device detected");
       // When high memLimit is used, on low spec device the OS might kill the
-      // app with OOM. To avoid that, default to max ops limit
-      memLimit = Sodium.cryptoPwhashMemlimitMin;
-      opsLimit = Sodium.cryptoPwhashOpslimitMax;
+      // app with OOM. To avoid that, start with 256 MB and 16 ops limit
+      memLimit = Sodium.cryptoPwhashMemlimitModerate;
+      opsLimit = 16;
     }
     Uint8List key;
     while (memLimit >= Sodium.cryptoPwhashMemlimitMin &&
