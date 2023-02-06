@@ -203,17 +203,21 @@ const PhotoFrame = ({
                         h: window.innerHeight,
                         title: item.pubMagicMetadata?.data.caption,
                     };
-                    if (galleryContext.thumbs.has(item.id)) {
-                        updateFileMsrcProps(
-                            filteredItem,
-                            galleryContext.thumbs.get(item.id)
-                        );
-                    }
-                    if (galleryContext.files.has(item.id)) {
-                        updateFileSrcProps(
-                            filteredItem,
-                            galleryContext.files.get(item.id)
-                        );
+                    try {
+                        if (galleryContext.thumbs.has(item.id)) {
+                            updateFileMsrcProps(
+                                filteredItem,
+                                galleryContext.thumbs.get(item.id)
+                            );
+                        }
+                        if (galleryContext.files.has(item.id)) {
+                            updateFileSrcProps(
+                                filteredItem,
+                                galleryContext.files.get(item.id)
+                            );
+                        }
+                    } catch (e) {
+                        logError(e, 'PhotoFrame url prefill failed');
                     }
                     return filteredItem;
                 });
