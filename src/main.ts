@@ -14,6 +14,7 @@ import {
     handleDockIconHideOnAutoLaunch,
     handleUpdates,
     logSystemInfo,
+    handleExternalLinks,
 } from './utils/main';
 import { initSentry } from './services/sentry';
 import { setupLogging } from './utils/logging';
@@ -79,6 +80,7 @@ if (!gotTheLock) {
         setupIpcComs(tray, mainWindow, watcher);
         handleUpdates(mainWindow);
         handleDownloads(mainWindow);
+        handleExternalLinks(mainWindow);
         addAllowOriginHeader(mainWindow);
     });
 
