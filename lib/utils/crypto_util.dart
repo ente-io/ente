@@ -294,10 +294,19 @@ class CryptoUtil {
 
     if (await isLowSpecDevice()) {
       logger.info("low spec device detected");
-      // When high memLimit is used, on low spec device the OS might kill the
-      // app with OOM. To avoid that, start with 256 MB and 16 ops limit
+      // When sensitive memLimit (1 GB) is used, on low spec device the OS might
+      // kill the app with OOM. To avoid that, start with 256 MB and 
+      // corresponding ops limit (16).
+      // This ensures that the product of these two variables
+      // (the area under the graph that determines the amount of work required) 
+      // stays the same
+      // SODIUM_CRYPTO_PWHASH_MEMLIMIT_SENSITIVE: 1073741824
+      // SODIUM_CRYPTO_PWHASH_MEMLIMIT_MODERATE: 268435456
+      // SODIUM_CRYPTO_PWHASH_OPSLIMIT_SENSITIVE: 4
       memLimit = Sodium.cryptoPwhashMemlimitModerate;
-      opsLimit = 16;
+      final factor = Sodium.cryptoPwhashMemlimitSensitive ~/
+          Sodium.cryptoPwhashMemlimitModerate; // = 4
+      opsLimit = opsLimit * factor; // = 16
     }
     Uint8List key;
     while (memLimit >= Sodium.cryptoPwhashMemlimitMin &&
