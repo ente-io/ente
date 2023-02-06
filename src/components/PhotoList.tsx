@@ -666,7 +666,7 @@ export function PhotoList({
                         ret.splice(
                             sum,
                             0,
-                            <div key={`${listItem.items[0]}-${i}-gap`} />
+                            <div key={`${listItem.items[0].id}-gap-${i}`} />
                         );
                         sum += 1;
                     }
