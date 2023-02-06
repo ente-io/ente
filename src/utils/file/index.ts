@@ -172,7 +172,13 @@ export function sortFiles(files: EnteFile[]) {
         .sort(
             (a, b) => b.metadata.modificationTime - a.metadata.modificationTime
         )
-        .sort((a, b) => b.metadata.creationTime - a.metadata.creationTime);
+        .sort((a, b) => {
+            if (a.metadata.modificationTime !== b.metadata.modificationTime) {
+                return 0;
+            } else {
+                return b.metadata.creationTime - a.metadata.creationTime;
+            }
+        });
 }
 
 export async function decryptFile(
