@@ -483,6 +483,9 @@ const PhotoFrame = ({
             file={item}
             updateURL={updateURL(index)}
             onClick={onThumbnailClick(index)}
+            selectable={
+                !publicCollectionGalleryContext?.accessedThroughSharedURL
+            }
             onSelect={handleSelect(item.id, item.ownerID === user?.id, index)}
             selected={
                 selected.collectionID === activeCollection && selected[item.id]
