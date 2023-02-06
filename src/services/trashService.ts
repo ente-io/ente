@@ -2,16 +2,10 @@ import { SetFiles } from 'types/gallery';
 import { Collection } from 'types/collection';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
-import {
-    decryptFile,
-    mergeMetadata,
-    preservePhotoswipeProps,
-    sortFiles,
-} from 'utils/file';
+import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
 import { getCollection } from './collectionService';
-import { EnteFile } from 'types/file';
 
 import HTTPService from './HTTPService';
 import { EncryptedTrashItem, Trash } from 'types/trash';
@@ -55,16 +49,15 @@ async function getLastSyncTime() {
 }
 export async function syncTrash(
     collections: Collection[],
-    setFiles: SetFiles,
-    files: EnteFile[]
-): Promise<Trash> {
+    setFiles: SetFiles
+): Promise<void> {
     const trash = await getLocalTrash();
     collections = [...collections, ...(await getLocalDeletedCollections())];
     const collectionMap = new Map<number, Collection>(
         collections.map((collection) => [collection.id, collection])
     );
     if (!getToken()) {
-        return trash;
+        return;
     }
     const lastSyncTime = await getLastSyncTime();
 
@@ -72,18 +65,15 @@ export async function syncTrash(
         collectionMap,
         lastSyncTime,
         setFiles,
-        files,
         trash
     );
     cleanTrashCollections(updatedTrash);
-    return updatedTrash;
 }
 
 export const updateTrash = async (
     collections: Map<number, Collection>,
     sinceTime: number,
     setFiles: SetFiles,
-    files: EnteFile[],
     currentTrash: Trash
 ): Promise<Trash> => {
     try {
@@ -133,16 +123,8 @@ export const updateTrash = async (
                 time = resp.data.diff.slice(-1)[0].updatedAt;
             }
 
-            setFiles(
-                preservePhotoswipeProps(
-                    sortFiles([
-                        ...(files ?? []).map((file) => ({
-                            ...file,
-                            isTrashed: false,
-                        })),
-                        ...getTrashedFiles(updatedTrash),
-                    ])
-                )
+            setFiles((files) =>
+                sortFiles([...(files ?? []), ...getTrashedFiles(updatedTrash)])
             );
             await localForage.setItem(TRASH, updatedTrash);
             await localForage.setItem(TRASH_TIME, time);

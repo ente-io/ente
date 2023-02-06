@@ -163,12 +163,11 @@ interface Props {
     filteredData: EnteFile[];
     showAppDownloadBanner: boolean;
     getThumbnail: (
-        files: EnteFile[],
+        file: EnteFile,
         index: number,
         isScrolling?: boolean
     ) => JSX.Element;
     activeCollection: number;
-    resetFetching: () => void;
 }
 
 export function PhotoList({
@@ -178,7 +177,6 @@ export function PhotoList({
     showAppDownloadBanner,
     getThumbnail,
     activeCollection,
-    resetFetching,
 }: Props) {
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
@@ -205,7 +203,6 @@ export function PhotoList({
 
     const refreshList = () => {
         listRef.current?.resetAfterIndex(0);
-        resetFetching();
     };
 
     useEffect(() => {
@@ -657,7 +654,7 @@ export function PhotoList({
             case ITEM_TYPE.FILE: {
                 const ret = listItem.items.map((item, idx) =>
                     getThumbnail(
-                        filteredData,
+                        item,
                         listItem.itemStartIndex + idx,
                         isScrolling
                     )

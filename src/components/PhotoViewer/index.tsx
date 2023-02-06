@@ -164,10 +164,6 @@ function PhotoViewer(props: Iprops) {
     }, [isOpen, photoSwipe, showInfo]);
 
     useEffect(() => {
-        updateItems(items);
-    }, [items]);
-
-    useEffect(() => {
         if (photoSwipe) {
             photoSwipe.options.arrowKeys = !showInfo;
             photoSwipe.options.escKey = !showInfo;
@@ -386,10 +382,17 @@ function PhotoViewer(props: Iprops) {
 
     const trashFile = async (file: EnteFile) => {
         const { deletedFileIds, setDeletedFileIds } = props;
-        deletedFileIds.add(file.id);
-        setDeletedFileIds(new Set(deletedFileIds));
-        await trashFiles([file]);
-        needUpdate.current = true;
+        try {
+            appContext.startLoading();
+            await trashFiles([file]);
+            appContext.finishLoading();
+            deletedFileIds.add(file.id);
+            setDeletedFileIds(new Set(deletedFileIds));
+            updateItems(props.items.filter((item) => item.id !== file.id));
+            needUpdate.current = true;
+        } catch (e) {
+            logError(e, 'trashFile failed');
+        }
     };
 
     const confirmTrashFile = (file: EnteFile) => {
@@ -403,7 +406,7 @@ function PhotoViewer(props: Iprops) {
         appContext.setDialogMessage(getTrashFileMessage(() => trashFile(file)));
     };
 
-    const updateItems = (items = []) => {
+    const updateItems = (items: EnteFile[]) => {
         try {
             if (photoSwipe) {
                 if (items.length === 0) {

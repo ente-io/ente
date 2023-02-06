@@ -1,4 +1,4 @@
-import React, { useContext, useLayoutEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
@@ -18,7 +18,7 @@ import { formatDateRelative } from 'utils/time/format';
 
 interface IProps {
     file: EnteFile;
-    updateURL: (url: string) => EnteFile;
+    updateURL: (id: number, url: string) => void;
     onClick: () => void;
     selected: boolean;
     onSelect: (checked: boolean) => void;
@@ -196,13 +196,12 @@ const Cont = styled('div')<{ disabled: boolean }>`
 `;
 
 export default function PreviewCard(props: IProps) {
-    const [imgSrc, setImgSrc] = useState<string>();
     const { thumbs } = useContext(GalleryContext);
+
     const {
         file,
         onClick,
         updateURL,
-
         selected,
         onSelect,
         selectOnClick,
@@ -211,56 +210,54 @@ export default function PreviewCard(props: IProps) {
         isRangeSelectActive,
         isInsSelectRange,
     } = props;
+
+    const [imgSrc, setImgSrc] = useState<string>(file.msrc);
+
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
     const deduplicateContext = useContext(DeduplicateContext);
 
-    useLayoutEffect(() => {
-        if (file && !file.msrc && !props.showPlaceholder) {
+    const isMounted = useRef(true);
+
+    useEffect(() => {
+        if (!file.msrc && !props.showPlaceholder) {
             const main = async () => {
                 try {
                     let url;
-                    if (
-                        publicCollectionGalleryContext.accessedThroughSharedURL
-                    ) {
-                        url =
-                            await PublicCollectionDownloadManager.getThumbnail(
-                                file,
-                                publicCollectionGalleryContext.token,
-                                publicCollectionGalleryContext.passwordToken
-                            );
+                    if (thumbs.has(file.id)) {
+                        url = thumbs.get(file.id);
                     } else {
-                        url = await DownloadManager.getThumbnail(file);
+                        if (
+                            publicCollectionGalleryContext.accessedThroughSharedURL
+                        ) {
+                            url =
+                                await PublicCollectionDownloadManager.getThumbnail(
+                                    file,
+                                    publicCollectionGalleryContext.token,
+                                    publicCollectionGalleryContext.passwordToken
+                                );
+                        } else {
+                            url = await DownloadManager.getThumbnail(file);
+                        }
+                        thumbs.set(file.id, url);
+                    }
+                    if (!isMounted.current) {
+                        return;
                     }
                     setImgSrc(url);
-                    thumbs.set(file.id, url);
-                    const newFile = updateURL(url);
-                    file.msrc = newFile.msrc;
-                    file.html = newFile.html;
-                    file.src = newFile.src;
-                    file.w = newFile.w;
-                    file.h = newFile.h;
+                    updateURL(file.id, url);
                 } catch (e) {
                     logError(e, 'preview card useEffect failed');
                     // no-op
                 }
             };
-
-            if (thumbs.has(file.id)) {
-                const thumbImgSrc = thumbs.get(file.id);
-                setImgSrc(thumbImgSrc);
-                const newFile = updateURL(thumbImgSrc);
-                file.msrc = newFile.msrc;
-                file.html = newFile.html;
-                file.src = newFile.src;
-                file.w = newFile.w;
-                file.h = newFile.h;
-            } else {
-                main();
-            }
+            main();
+            return () => {
+                isMounted.current = false;
+            };
         }
-    }, [file, props.showPlaceholder]);
+    }, []);
 
     const handleClick = () => {
         if (selectOnClick) {
@@ -293,7 +290,7 @@ export default function PreviewCard(props: IProps) {
 
     return (
         <Cont
-            id={`thumb-${file?.id}-${props.showPlaceholder}`}
+            id={`thumb-${file.id}-${props.showPlaceholder}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!file?.msrc && !imgSrc}

@@ -167,30 +167,18 @@ export function getSelectedFiles(
 
 export function sortFiles(files: EnteFile[]) {
     // sort according to modification time first
-    files = files.sort((a, b) => {
-        if (!b.metadata?.modificationTime) {
-            return -1;
-        }
-        if (!a.metadata?.modificationTime) {
-            return 1;
-        } else {
-            return b.metadata.modificationTime - a.metadata.modificationTime;
-        }
-    });
-
     // then sort according to creation time, maintaining ordering according to modification time for files with creation time
-    files = files
-        .map((file, index) => ({ index, file }))
+    return files
+        .sort(
+            (a, b) => b.metadata.modificationTime - a.metadata.modificationTime
+        )
         .sort((a, b) => {
-            let diff =
-                b.file.metadata.creationTime - a.file.metadata.creationTime;
-            if (diff === 0) {
-                diff = a.index - b.index;
+            if (a.metadata.modificationTime !== b.metadata.modificationTime) {
+                return 0;
+            } else {
+                return b.metadata.creationTime - a.metadata.creationTime;
             }
-            return diff;
-        })
-        .map((file) => file.file);
-    return files;
+        });
 }
 
 export async function decryptFile(
@@ -251,19 +239,6 @@ export async function decryptFile(
         throw e;
     }
 }
-
-export const preservePhotoswipeProps =
-    (newFiles: EnteFile[]) =>
-    (currentFiles: EnteFile[]): EnteFile[] => {
-        const currentFilesMap = Object.fromEntries(
-            currentFiles.map((file) => [file.id, file])
-        );
-        const fileWithPreservedProperty = newFiles.map((file) => {
-            const currentFile = currentFilesMap[file.id];
-            return { ...currentFile, ...file };
-        });
-        return fileWithPreservedProperty;
-    };
 
 export function fileNameWithoutExtension(filename: string) {
     const lastDotPosition = filename.lastIndexOf('.');
@@ -456,23 +431,16 @@ export function isSharedFile(user: User, file: EnteFile) {
 }
 
 export function mergeMetadata(files: EnteFile[]): EnteFile[] {
-    return files.map((file) => ({
-        ...file,
-        metadata: {
-            ...file.metadata,
-            ...(file.pubMagicMetadata?.data
-                ? {
-                      ...(file.pubMagicMetadata?.data.editedTime && {
-                          creationTime: file.pubMagicMetadata.data.editedTime,
-                      }),
-                      ...(file.pubMagicMetadata?.data.editedName && {
-                          title: file.pubMagicMetadata.data.editedName,
-                      }),
-                  }
-                : {}),
-            ...(file.magicMetadata?.data ? file.magicMetadata.data : {}),
-        },
-    }));
+    return files.map((file) => {
+        if (file.pubMagicMetadata?.data.editedTime) {
+            file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
+        }
+        if (file.pubMagicMetadata?.data.editedName) {
+            file.metadata.title = file.pubMagicMetadata.data.editedName;
+        }
+
+        return file;
+    });
 }
 
 export function updateExistingFilePubMetadata(
@@ -592,3 +560,19 @@ export const copyFileToClipboard = async (fileUrl: string) => {
         .write([new ClipboardItem({ 'image/png': blobPromise })])
         .catch((e) => logError(e, 'failed to copy to clipboard'));
 };
+
+export function getLatestVersionFiles(files: EnteFile[]) {
+    const latestVersionFiles = new Map<string, EnteFile>();
+    files.forEach((file) => {
+        const uid = `${file.collectionID}-${file.id}`;
+        if (
+            !latestVersionFiles.has(uid) ||
+            latestVersionFiles.get(uid).updationTime < file.updationTime
+        ) {
+            latestVersionFiles.set(uid, file);
+        }
+    });
+    return Array.from(latestVersionFiles.values()).filter(
+        (file) => !file.isDeleted
+    );
+}

@@ -228,3 +228,16 @@ export function isIncomingShare(collection: Collection, user: User) {
 export function isSharedOnlyViaLink(collection: Collection) {
     return collection.publicURLs?.length && !collection.sharees?.length;
 }
+
+export function isValidMoveTarget(
+    sourceCollectionID: number,
+    targetCollection: Collection,
+    user: User
+) {
+    return (
+        sourceCollectionID !== targetCollection.id &&
+        !isCollectionHidden(targetCollection) &&
+        !isQuickLinkCollection(targetCollection) &&
+        !isIncomingShare(targetCollection, user)
+    );
+}

@@ -4,7 +4,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import DownloadManager from 'services/downloadManager';
-import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoViewer from 'components/PhotoViewer';
 import {
@@ -13,10 +12,9 @@ import {
     TRASH_SECTION,
 } from 'constants/collection';
 import { isSharedFile } from 'utils/file';
-import { isPlaybackPossible } from 'utils/photoFrame';
+import { updateFileMsrcProps, updateFileSrcProps } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
-import { SelectedState } from 'types/gallery';
-import { FILE_TYPE } from 'constants/file';
+import { MergedSourceURL, SelectedState } from 'types/gallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
@@ -27,12 +25,12 @@ import { IsArchived } from 'utils/magicMetadata';
 import { isSameDayAnyYear, isInsideBox } from 'utils/search';
 import { Search } from 'types/search';
 import { logError } from 'utils/sentry';
-import { CustomError } from 'utils/error';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useMemo } from 'react';
 import { Collection } from 'types/collection';
 import { addLogLine } from 'utils/logging';
+import PhotoSwipe from 'photoswipe';
 
 const Container = styled('div')`
     display: block;
@@ -71,13 +69,6 @@ interface Props {
     isDeduplicating?: boolean;
     resetSearch?: () => void;
 }
-
-type SourceURL = {
-    originalImageURL?: string;
-    originalVideoURL?: string;
-    convertedImageURL?: string;
-    convertedVideoURL?: string;
-};
 
 const PhotoFrame = ({
     files,
@@ -136,13 +127,6 @@ const PhotoFrame = ({
             const user: User = getData(LS_KEYS.USER);
 
             const filteredData = files
-                .map((item, index) => ({
-                    ...item,
-                    dataIndex: index,
-                    w: window.innerWidth,
-                    h: window.innerHeight,
-                    title: item.pubMagicMetadata?.data.caption,
-                }))
                 .filter((item) => {
                     if (
                         deletedFileIds?.has(item.id) &&
@@ -211,6 +195,27 @@ const PhotoFrame = ({
                         return false;
                     }
                     return false;
+                })
+                .map((item) => {
+                    const filteredItem = {
+                        ...item,
+                        w: window.innerWidth,
+                        h: window.innerHeight,
+                        title: item.pubMagicMetadata?.data.caption,
+                    };
+                    if (galleryContext.thumbs.has(item.id)) {
+                        updateFileMsrcProps(
+                            filteredItem,
+                            galleryContext.thumbs.get(item.id)
+                        );
+                    }
+                    if (galleryContext.files.has(item.id)) {
+                        updateFileSrcProps(
+                            filteredItem,
+                            galleryContext.files.get(item.id)
+                        );
+                    }
+                    return filteredItem;
                 });
             setFilteredData(filteredData);
             updateInProgress.current = false;
@@ -229,6 +234,10 @@ const PhotoFrame = ({
         search?.location,
         activeCollection,
     ]);
+
+    useEffect(() => {
+        setFetching({});
+    }, [filteredData]);
 
     const fileToCollectionsMap = useMemo(() => {
         const fileToCollectionsMap = new Map<number, number[]>();
@@ -314,127 +323,61 @@ const PhotoFrame = ({
         }
     }, [search, filteredData]);
 
-    const resetFetching = () => {
-        setFetching({});
-    };
-
     useEffect(() => {
         if (selected.count === 0) {
             setRangeStart(null);
         }
     }, [selected]);
 
-    const getFileIndexFromID = (files: EnteFile[], id: number) => {
-        const index = files.findIndex((file) => file.id === id);
-        if (index === -1) {
-            throw CustomError.FILE_ID_NOT_FOUND;
+    const updateURL = (index: number) => (id: number, url: string) => {
+        const file = filteredData[index];
+        // this is to prevent outdated updateURL call from updating the wrong file
+        if (file.id !== id) {
+            addLogLine(
+                `PhotoSwipe: updateURL: file id mismatch: ${file.id} !== ${id}`
+            );
+            return;
         }
-        return index;
+        if (file.msrc) {
+            addLogLine(`PhotoSwipe: updateURL: msrc already set: ${file.msrc}`);
+            logError(
+                new Error(
+                    `PhotoSwipe: updateURL: msrc already set: ${file.msrc}`
+                ),
+                'PhotoSwipe: updateURL called with msrc already set'
+            );
+            return;
+        }
+        updateFileMsrcProps(file, url);
     };
 
-    const updateURL = (id: number) => (url: string) => {
-        const updateFile = (file: EnteFile) => {
-            file.msrc = url;
-            file.w = window.innerWidth;
-            file.h = window.innerHeight;
-
-            if (file.metadata.fileType === FILE_TYPE.VIDEO && !file.html) {
-                file.html = `
-                <div class="pswp-item-container">
-                    <img src="${url}" onContextMenu="return false;"/>
-                    <div class="spinner-border text-light" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-            `;
-            } else if (
-                file.metadata.fileType === FILE_TYPE.LIVE_PHOTO &&
-                !file.html
-            ) {
-                file.html = `
-                <div class="pswp-item-container">
-                    <img src="${url}" onContextMenu="return false;"/>
-                    <div class="spinner-border text-light" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-            `;
-            } else if (
-                file.metadata.fileType === FILE_TYPE.IMAGE &&
-                !file.src
-            ) {
-                file.src = url;
-            }
-            return file;
-        };
-        const index = getFileIndexFromID(files, id);
-        return updateFile(files[index]);
-    };
-
-    const updateSrcURL = async (id: number, srcURL: SourceURL) => {
-        const {
-            originalImageURL,
-            convertedImageURL,
-            originalVideoURL,
-            convertedVideoURL,
-        } = srcURL;
-        const isPlayable =
-            convertedVideoURL && (await isPlaybackPossible(convertedVideoURL));
-        const updateFile = (file: EnteFile) => {
-            file.w = window.innerWidth;
-            file.h = window.innerHeight;
-            file.isSourceLoaded = true;
-            file.originalImageURL = originalImageURL;
-            file.originalVideoURL = originalVideoURL;
-            if (file.metadata.fileType === FILE_TYPE.VIDEO) {
-                if (isPlayable) {
-                    file.html = `
-            <video controls onContextMenu="return false;">
-                <source src="${convertedVideoURL}" />
-                Your browser does not support the video tag.
-            </video>
-        `;
-                } else {
-                    file.html = `
-            <div class="pswp-item-container">
-                <img src="${file.msrc}" onContextMenu="return false;"/>
-                <div class="download-banner" >
-                    ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                    <a class="btn btn-outline-success" href=${convertedVideoURL} download="${file.metadata.title}"">Download</a>
-                </div>
-            </div>
-            `;
-                }
-            } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                if (isPlayable) {
-                    file.html = `
-                <div class = 'pswp-item-container'>
-                    <img id = "live-photo-image-${file.id}" src="${convertedImageURL}" onContextMenu="return false;"/>
-                    <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
-                        <source src="${convertedVideoURL}" />
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-                `;
-                } else {
-                    file.html = `
-                <div class="pswp-item-container">
-                    <img src="${file.msrc}" onContextMenu="return false;"/>
-                    <div class="download-banner">
-                        ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                        <button class = "btn btn-outline-success" id = "download-btn-${file.id}">Download</button>
-                    </div>
-                </div>
-                `;
-                }
-            } else {
-                file.src = convertedImageURL;
-            }
-            return file;
-        };
+    const updateSrcURL = async (
+        index: number,
+        id: number,
+        mergedSrcURL: MergedSourceURL
+    ) => {
+        const file = filteredData[index];
+        // this is to prevent outdate updateSrcURL call from updating the wrong file
+        if (file.id !== id) {
+            addLogLine(
+                `PhotoSwipe: updateSrcURL: file id mismatch: ${file.id} !== ${id}`
+            );
+            return;
+        }
+        if (file.isSourceLoaded) {
+            addLogLine(
+                `PhotoSwipe: updateSrcURL: source already loaded: ${file.id}`
+            );
+            logError(
+                new Error(
+                    `PhotoSwipe: updateSrcURL: source already loaded: ${file.id}`
+                ),
+                'PhotoSwipe updateSrcURL called when source already loaded'
+            );
+            return;
+        }
+        await updateFileSrcProps(file, mergedSrcURL);
         setIsSourceLoaded(true);
-        const index = getFileIndexFromID(files, id);
-        return updateFile(files[index]);
     };
 
     const handleClose = (needUpdate) => {
@@ -527,53 +470,43 @@ const PhotoFrame = ({
         }
     };
     const getThumbnail = (
-        files: EnteFile[],
+        item: EnteFile,
         index: number,
         isScrolling: boolean
-    ) =>
-        files[index] ? (
-            <PreviewCard
-                key={`tile-${files[index].id}-selected-${
-                    selected[files[index].id] ?? false
-                }`}
-                file={files[index]}
-                updateURL={updateURL(files[index].id)}
-                onClick={onThumbnailClick(index)}
-                onSelect={handleSelect(
-                    files[index].id,
-                    files[index].ownerID === user.id,
-                    index
-                )}
-                selected={
-                    selected.collectionID === activeCollection &&
-                    selected[files[index].id]
-                }
-                selectOnClick={selected.count > 0}
-                onHover={onHoverOver(index)}
-                onRangeSelect={handleRangeSelect(index)}
-                isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
-                isInsSelectRange={
-                    (index >= rangeStart && index <= currentHover) ||
-                    (index >= currentHover && index <= rangeStart)
-                }
-                activeCollection={activeCollection}
-                showPlaceholder={isScrolling}
-            />
-        ) : (
-            <></>
-        );
+    ) => (
+        <PreviewCard
+            key={`tile-${item.id}-selected-${selected[item.id] ?? false}`}
+            file={item}
+            updateURL={updateURL(index)}
+            onClick={onThumbnailClick(index)}
+            onSelect={handleSelect(item.id, item.ownerID === user.id, index)}
+            selected={
+                selected.collectionID === activeCollection && selected[item.id]
+            }
+            selectOnClick={selected.count > 0}
+            onHover={onHoverOver(index)}
+            onRangeSelect={handleRangeSelect(index)}
+            isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
+            isInsSelectRange={
+                (index >= rangeStart && index <= currentHover) ||
+                (index >= currentHover && index <= rangeStart)
+            }
+            activeCollection={activeCollection}
+            showPlaceholder={isScrolling}
+        />
+    );
 
     const getSlideData = async (
-        instance: any,
+        instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
         item: EnteFile
     ) => {
         addLogLine(
             `[${
                 item.id
-            }] getSlideData called for thumbnail:${!!item.msrc} original:${
-                !!item.msrc && item.src !== item.msrc
-            } inProgress:${fetching[item.id]}`
+            }] getSlideData called for thumbnail:${!!item.msrc} sourceLoaded:${isSourceLoaded} fetching:${
+                fetching[item.id]
+            }`
         );
         if (!item.msrc) {
             addLogLine(`[${item.id}] doesn't have thumbnail`);
@@ -602,22 +535,15 @@ const PhotoFrame = ({
                     }
                     galleryContext.thumbs.set(item.id, url);
                 }
-                const newFile = updateURL(item.id)(url);
-                item.msrc = newFile.msrc;
-                item.html = newFile.html;
-                item.src = newFile.src;
-                item.isSourceLoaded = newFile.isSourceLoaded;
-                item.originalImageURL = newFile.originalImageURL;
-                item.originalVideoURL = newFile.originalVideoURL;
-                item.w = newFile.w;
-                item.h = newFile.h;
-
-                addLogLine(
-                    `[${item.id}] calling invalidateCurrItems for thumbnail`
-                );
+                updateURL(index)(item.id, url);
                 try {
+                    addLogLine(
+                        `[${
+                            item.id
+                        }] calling invalidateCurrItems for thumbnail msrc :${!!item.msrc}`
+                    );
                     instance.invalidateCurrItems();
-                    if (instance.isOpen()) {
+                    if ((instance as any).isOpen()) {
                         instance.updateSize(true);
                     }
                 } catch (e) {
@@ -631,94 +557,67 @@ const PhotoFrame = ({
                 logError(e, 'getSlideData failed get msrc url failed');
             }
         }
-        if (!fetching[item.id]) {
-            addLogLine(`[${item.id}] new file download fetch original request`);
-            try {
-                fetching[item.id] = true;
-                let urls: { original: string[]; converted: string[] };
-                if (galleryContext.files.has(item.id)) {
-                    addLogLine(
-                        `[${item.id}] gallery context cache hit, using cached file`
-                    );
-                    const mergedURL = galleryContext.files.get(item.id);
-                    urls = {
-                        original: mergedURL.original.split(','),
-                        converted: mergedURL.converted.split(','),
-                    };
-                } else {
-                    addLogLine(
-                        `[${item.id}] gallery context cache miss, calling downloadManager to get file`
-                    );
-                    appContext.startLoading();
-                    if (
-                        publicCollectionGalleryContext.accessedThroughSharedURL
-                    ) {
-                        urls = await PublicCollectionDownloadManager.getFile(
+        if (item.isSourceLoaded) {
+            addLogLine(`[${item.id}] source already loaded`);
+            return;
+        }
+        if (fetching[item.id]) {
+            addLogLine(`[${item.id}] file download already in progress`);
+            return;
+        }
+        try {
+            addLogLine(`[${item.id}] new file src request`);
+            fetching[item.id] = true;
+            let srcURL: MergedSourceURL;
+            if (galleryContext.files.has(item.id)) {
+                addLogLine(
+                    `[${item.id}] gallery context cache hit, using cached file`
+                );
+                srcURL = galleryContext.files.get(item.id);
+            } else {
+                addLogLine(
+                    `[${item.id}] gallery context cache miss, calling downloadManager to get file`
+                );
+                appContext.startLoading();
+                let downloadedURL;
+                if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+                    downloadedURL =
+                        await PublicCollectionDownloadManager.getFile(
                             item,
                             publicCollectionGalleryContext.token,
                             publicCollectionGalleryContext.passwordToken,
                             true
                         );
-                    } else {
-                        urls = await DownloadManager.getFile(item, true);
-                    }
-                    appContext.finishLoading();
-                    const mergedURL = {
-                        original: urls.original.join(','),
-                        converted: urls.converted.join(','),
-                    };
-                    galleryContext.files.set(item.id, mergedURL);
-                }
-                let originalImageURL;
-                let originalVideoURL;
-                let convertedImageURL;
-                let convertedVideoURL;
-
-                if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                    [originalImageURL, originalVideoURL] = urls.original;
-                    [convertedImageURL, convertedVideoURL] = urls.converted;
-                } else if (item.metadata.fileType === FILE_TYPE.VIDEO) {
-                    [originalVideoURL] = urls.original;
-                    [convertedVideoURL] = urls.converted;
                 } else {
-                    [originalImageURL] = urls.original;
-                    [convertedImageURL] = urls.converted;
+                    downloadedURL = await DownloadManager.getFile(item, true);
                 }
-                setIsSourceLoaded(false);
-                const newFile = await updateSrcURL(item.id, {
-                    originalImageURL,
-                    originalVideoURL,
-                    convertedImageURL,
-                    convertedVideoURL,
-                });
-                item.msrc = newFile.msrc;
-                item.html = newFile.html;
-                item.src = newFile.src;
-                item.isSourceLoaded = newFile.isSourceLoaded;
-                item.originalImageURL = newFile.originalImageURL;
-                item.originalVideoURL = newFile.originalVideoURL;
-                item.w = newFile.w;
-                item.h = newFile.h;
-                try {
-                    addLogLine(
-                        `[${item.id}] calling invalidateCurrItems for src`
-                    );
-                    instance.invalidateCurrItems();
-                    if (instance.isOpen()) {
-                        instance.updateSize(true);
-                    }
-                } catch (e) {
-                    logError(
-                        e,
-                        'updating photoswipe after src url update failed'
-                    );
-                    throw e;
+                appContext.finishLoading();
+                const mergedURL: MergedSourceURL = {
+                    original: downloadedURL.original.join(','),
+                    converted: downloadedURL.converted.join(','),
+                };
+                galleryContext.files.set(item.id, mergedURL);
+                srcURL = mergedURL;
+            }
+            setIsSourceLoaded(false);
+            await updateSrcURL(index, item.id, srcURL);
+
+            try {
+                addLogLine(
+                    `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`
+                );
+                instance.invalidateCurrItems();
+                if ((instance as any).isOpen()) {
+                    instance.updateSize(true);
                 }
             } catch (e) {
-                logError(e, 'getSlideData failed get src url failed');
-                fetching[item.id] = false;
-                // no-op
+                logError(e, 'updating photoswipe after src url update failed');
+                throw e;
             }
+        } catch (e) {
+            logError(e, 'getSlideData failed get src url failed');
+            fetching[item.id] = false;
+            // no-op
         }
     };
 
@@ -744,7 +643,6 @@ const PhotoFrame = ({
                                     !isInSearchMode &&
                                     !deduplicateContext.isOnDeduplicatePage
                                 }
-                                resetFetching={resetFetching}
                             />
                         )}
                     </AutoSizer>
