@@ -663,7 +663,11 @@ export function PhotoList({
                     let sum = 0;
                     for (let i = 0; i < listItem.groups.length - 1; i++) {
                         sum = sum + listItem.groups[i];
-                        ret.splice(sum, 0, <div />);
+                        ret.splice(
+                            sum,
+                            0,
+                            <div key={`${listItem.items[0].id}-gap-${i}`} />
+                        );
                         sum += 1;
                     }
                 }
@@ -687,7 +691,7 @@ export function PhotoList({
             width={width}
             itemCount={timeStampList.length}
             itemKey={generateKey}
-            overscanCount={0}
+            overscanCount={3}
             useIsScrolling>
             {({ index, style, isScrolling }) => (
                 <ListItem style={style}>
