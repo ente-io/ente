@@ -2,6 +2,7 @@ buildscript {
     ext.kotlin_version = '1.6.21'
     repositories {
         google()
+        mavenCentral()  //add this line
         jcenter()
     }
 

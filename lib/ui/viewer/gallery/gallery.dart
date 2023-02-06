@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:media_extension/media_extension_action_types.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -28,6 +29,7 @@ typedef GalleryLoader = Future<FileLoadResult> Function(
 });
 
 class Gallery extends StatefulWidget {
+  final IntentAction intentAction;
   final GalleryLoader asyncLoader;
   final List<File>? initialFiles;
   final Stream<FilesUpdatedEvent>? reloadEvent;
@@ -42,6 +44,7 @@ class Gallery extends StatefulWidget {
   final double scrollBottomSafeArea;
 
   const Gallery({
+    this.intentAction = IntentAction.main,
     required this.asyncLoader,
     required this.selectedFiles,
     required this.tagPrefix,
@@ -248,6 +251,7 @@ class _GalleryState extends State<Gallery> {
               .map((event) => event.index),
           logTag: _logTag,
           photoGirdSize: _photoGridSize,
+          intentAction: widget.intentAction,
         );
         if (widget.header != null && index == 0) {
           gallery = Column(children: [widget.header!, gallery]);

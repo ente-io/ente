@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:media_extension/media_extension_action_types.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -18,11 +19,13 @@ class HomeGalleryWidget extends StatelessWidget {
   final Widget? header;
   final Widget? footer;
   final SelectedFiles selectedFiles;
+  final IntentAction intentAction;
 
   const HomeGalleryWidget({
     Key? key,
     this.header,
     this.footer,
+    required this.intentAction,
     required this.selectedFiles,
   }) : super(key: key);
 
@@ -30,6 +33,7 @@ class HomeGalleryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final double bottomSafeArea = MediaQuery.of(context).padding.bottom;
     final gallery = Gallery(
+      intentAction: intentAction,
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final ownerID = Configuration.instance.getUserID();
         final hasSelectedAllForBackup =

@@ -4,17 +4,18 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:logging/logging.dart';
+import 'package:media_extension/media_extension.dart';
+import 'package:media_extension/media_extension_action_types.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/home_widget.dart';
 
 class EnteApp extends StatefulWidget {
-  static const _homeWidget = HomeWidget();
-
   final Future<void> Function(String) runBackgroundTask;
   final Future<void> Function(String) killBackgroundTask;
 
@@ -30,33 +31,55 @@ class EnteApp extends StatefulWidget {
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   final _logger = Logger("EnteAppState");
+  final _mediaExtensionPlugin = MediaExtension();
 
   @override
   void initState() {
     _logger.info('init App');
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _configureBackgroundFetch();
+  }
+
+  Future<IntentAction> initIntentAction() async {
+    IntentAction intentAction = IntentAction.main;
+    try {
+      final actionResult = await _mediaExtensionPlugin.getIntentAction();
+      intentAction = actionResult.action!;
+    } on PlatformException {
+      intentAction = IntentAction.unknown;
+    }
+    if (intentAction == IntentAction.main) {
+      _configureBackgroundFetch();
+    }
+    return intentAction;
   }
 
   @override
   Widget build(BuildContext context) {
     if (Platform.isAndroid || kDebugMode) {
-      return AdaptiveTheme(
-        light: lightThemeData,
-        dark: darkThemeData,
-        initial: AdaptiveThemeMode.system,
-        builder: (lightTheme, dartTheme) => MaterialApp(
-          title: "ente",
-          themeMode: ThemeMode.system,
-          theme: lightTheme,
-          darkTheme: dartTheme,
-          home: EnteApp._homeWidget,
-          debugShowCheckedModeBanner: false,
-          builder: EasyLoading.init(),
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-        ),
+      return FutureBuilder(
+        future: initIntentAction(),
+        builder: (BuildContext context, AsyncSnapshot<IntentAction> snapshot) {
+          return snapshot.data != null
+              ? AdaptiveTheme(
+                  light: lightThemeData,
+                  dark: darkThemeData,
+                  initial: AdaptiveThemeMode.system,
+                  builder: (lightTheme, dartTheme) => MaterialApp(
+                    title: "ente",
+                    themeMode: ThemeMode.system,
+                    theme: lightTheme,
+                    darkTheme: dartTheme,
+                    home: HomeWidget(intentAction: snapshot.data!),
+                    debugShowCheckedModeBanner: false,
+                    builder: EasyLoading.init(),
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
+                  ),
+                )
+              : Container();
+        },
       );
     } else {
       return MaterialApp(
@@ -64,7 +87,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         themeMode: ThemeMode.system,
         theme: lightThemeData,
         darkTheme: darkThemeData,
-        home: EnteApp._homeWidget,
+        home: const HomeWidget(intentAction: IntentAction.main),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
         supportedLocales: AppLocalizations.supportedLocales,

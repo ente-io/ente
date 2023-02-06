@@ -77,8 +77,10 @@ dependencies:
   logging: ^1.0.1
   lottie: ^1.2.2
   media_extension:
-    git: "https://github.com/ente-io/media_extension.git"
-  modal_bottom_sheet: ^3.0.0-pre
+    git: 
+      url: "https://github.com/ente-io/media_extension.git"
+      ref: "intent-action"
+  modal_bottom_sheet: ^2.1.2
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2

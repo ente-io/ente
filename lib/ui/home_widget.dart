@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:media_extension/media_extension_action_types.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:photos/core/configuration.dart';
@@ -47,7 +48,12 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
-  const HomeWidget({Key? key}) : super(key: key);
+  const HomeWidget({
+    this.intentAction = IntentAction.main,
+    Key? key,
+  }) : super(key: key);
+
+  final IntentAction intentAction;
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
@@ -362,6 +368,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 showBackupFolderHook
                     ? const StartBackupHookWidget(headerWidget: _headerWidget)
                     : HomeGalleryWidget(
+                        intentAction: widget.intentAction,
                         header: _headerWidget,
                         footer: const PreserveFooterWidget(),
                         selectedFiles: _selectedFiles,

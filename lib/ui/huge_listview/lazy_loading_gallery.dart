@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:media_extension/media_extension.dart';
+import 'package:media_extension/media_extension_action_types.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
@@ -19,6 +21,7 @@ import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -33,7 +36,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final String? logTag;
   final Stream<int> currentIndexStream;
   final int photoGirdSize;
-
+  final IntentAction intentAction;
   LazyLoadingGallery(
     this.files,
     this.index,
@@ -45,6 +48,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.currentIndexStream, {
     this.logTag = "",
     this.photoGirdSize = photoGridSizeDefault,
+    this.intentAction = IntentAction.main,
     Key? key,
   }) : super(key: key ?? UniqueKey());
 
@@ -258,6 +262,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           _toggleSelectAllFromDay,
           _areAllFromDaySelected,
           widget.photoGirdSize,
+          intentAction: widget.intentAction,
         ),
       );
     }
@@ -286,6 +291,7 @@ class LazyLoadingGridView extends StatefulWidget {
   final ValueNotifier toggleSelectAllFromDay;
   final ValueNotifier areAllFilesSelected;
   final int? photoGridSize;
+  final IntentAction intentAction;
 
   LazyLoadingGridView(
     this.tag,
@@ -297,6 +303,7 @@ class LazyLoadingGridView extends StatefulWidget {
     this.toggleSelectAllFromDay,
     this.areAllFilesSelected,
     this.photoGridSize, {
+    this.intentAction = IntentAction.main,
     Key? key,
   }) : super(key: key ?? UniqueKey());
 
@@ -308,6 +315,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   bool? _shouldRender;
   int? _currentUserID;
   late StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
+  final _mediaExtensionPlugin = MediaExtension();
 
   @override
   void initState() {
@@ -418,11 +426,16 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       selectionColor = avatarColors[(randomID).remainder(avatarColors.length)];
     }
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         if (widget.selectedFiles.files.isNotEmpty) {
           _selectFile(file);
         } else {
-          _routeToDetailPage(file, context);
+          if (widget.intentAction == IntentAction.pick) {
+            final ioFile = await getFile(file);
+            _mediaExtensionPlugin.setResult("file://${ioFile!.path}");
+          } else {
+            _routeToDetailPage(file, context);
+          }
         }
       },
       onLongPress: () {

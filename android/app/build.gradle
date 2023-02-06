@@ -79,6 +79,10 @@ android {
         fdroid {
             dimension "default"
             applicationIdSuffix ".fdroid"
+<<<<<<< HEAD
+=======
+            // signingConfig null
+>>>>>>> 4615956c (feat[gallery_extention]: integrate handler for gallery pick intent)
         }
     }
 
