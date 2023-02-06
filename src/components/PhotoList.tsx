@@ -663,7 +663,11 @@ export function PhotoList({
                     let sum = 0;
                     for (let i = 0; i < listItem.groups.length - 1; i++) {
                         sum = sum + listItem.groups[i];
-                        ret.splice(sum, 0, <div />);
+                        ret.splice(
+                            sum,
+                            0,
+                            <div key={`${listItem.items[0]}-${i}-gap`} />
+                        );
                         sum += 1;
                     }
                 }
