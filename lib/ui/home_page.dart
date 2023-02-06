@@ -17,7 +17,6 @@ import 'package:ente_auth/ui/code_widget.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
-import 'package:ente_auth/utils/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:move_to_background/move_to_background.dart';
@@ -64,7 +63,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _applyFiltering() {
-    if (_searchText.isNotEmpty) {
+    if (_searchText.isNotEmpty && _showSearchBox) {
       final String val = _searchText.toLowerCase();
       _filteredCodes = _codes
           .where(
@@ -148,22 +147,36 @@ class _HomePageState extends State<HomePage> {
         ),
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('ente Authenticator'),
+          title: !_showSearchBox
+              ? const Text('ente Authenticator')
+              : TextField(
+                  autofocus: _searchText.isEmpty,
+                  controller: _textController,
+                  onChanged: (val) {
+                    _searchText = val;
+                    _applyFiltering();
+                  },
+                  decoration: const InputDecoration(
+                    hintText: 'Search...',
+                    border: InputBorder.none,
+                  ),
+                ),
           actions: <Widget>[
             IconButton(
-              icon: const Icon(Icons.search),
+              icon: _showSearchBox
+                  ? const Icon(Icons.clear)
+                  : const Icon(Icons.search),
               tooltip: 'Search',
               onPressed: () {
                 setState(
                   () {
                     _showSearchBox = !_showSearchBox;
                     if (!_showSearchBox) {
-                      _searchText = "";
-                      _applyFiltering();
-                    } else if (_textController.text.isNotEmpty) {
+                      _textController.clear();
+                    } else {
                       _searchText = _textController.text;
-                      _applyFiltering();
                     }
+                    _applyFiltering();
                   },
                 );
               },
@@ -200,42 +213,16 @@ class _HomePageState extends State<HomePage> {
         } else if (_showSearchBox) {
           return Column(
             children: [
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: TextField(
-                    autofocus: _searchText.isEmpty,
-                    controller: _textController,
-                    onChanged: (val) {
-                      _searchText = val;
-                      _applyFiltering();
-                    },
-                    decoration: InputDecoration(
-                      // prefixIcon: const Icon(Icons.search),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _textController.clear();
-                          _searchText = "";
-                          _applyFiltering();
-                        },
-                      ),
-                      hintText: 'Search...',
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-              ),
-              _filteredCodes.isNotEmpty
-                  ? Expanded(
-                      child: ListView.builder(
+              Expanded(
+                child: _filteredCodes.isNotEmpty
+                    ? ListView.builder(
                         itemBuilder: ((context, index) {
                           return CodeWidget(_filteredCodes[index]);
                         }),
                         itemCount: _filteredCodes.length,
-                      ),
-                    )
-                  : (const Text("No result")),
+                      )
+                    : const Center(child: (Text("No result"))),
+              ),
             ],
           );
         } else {
