@@ -58,8 +58,8 @@ export const syncFiles = async (
     const localFiles = await getLocalFiles();
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
-        await setLocalFiles(sortFiles(mergeMetadata(files)));
-        setFiles(files);
+        await setLocalFiles(files);
+        setFiles(sortFiles(mergeMetadata(files)));
     }
     for (const collection of collections) {
         if (!getToken()) {
