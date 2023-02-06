@@ -16,7 +16,7 @@ dependencies:
   confetti: ^0.7.0
   connectivity: ^3.0.3
   cupertino_icons: ^1.0.0
-  device_info: ^2.0.2
+  device_info_plus: ^8.0.0
   dio: ^4.0.6
   dotted_border: ^2.0.0+2
   email_validator: ^2.0.1
