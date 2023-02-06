@@ -463,12 +463,12 @@ const PhotoFrame = ({
             ) {
                 handleSelect(
                     filteredData[i].id,
-                    filteredData[i].ownerID === user.id
+                    filteredData[i].ownerID === user?.id
                 )(!checked);
             }
             handleSelect(
                 filteredData[index].id,
-                filteredData[index].ownerID === user.id,
+                filteredData[index].ownerID === user?.id,
                 index
             )(!checked);
         }
@@ -483,7 +483,10 @@ const PhotoFrame = ({
             file={item}
             updateURL={updateURL(index)}
             onClick={onThumbnailClick(index)}
-            onSelect={handleSelect(item.id, item.ownerID === user.id, index)}
+            selectable={
+                !publicCollectionGalleryContext?.accessedThroughSharedURL
+            }
+            onSelect={handleSelect(item.id, item.ownerID === user?.id, index)}
             selected={
                 selected.collectionID === activeCollection && selected[item.id]
             }
