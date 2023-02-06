@@ -6,6 +6,8 @@ import { PROD_HOST_URL } from '../config';
 import { isPlatform } from './common/platform';
 import { getHideDockIconPreference } from '../services/userPreference';
 import autoLauncher from '../services/autoLauncher';
+import ElectronLog from 'electron-log';
+import { logErrorSentry } from '../services/sentry';
 
 export async function createWindow(): Promise<BrowserWindow> {
     const appImgPath = isDev
@@ -64,6 +66,20 @@ export async function createWindow(): Promise<BrowserWindow> {
             // ignore
         }
     });
+    mainWindow.webContents.on('render-process-gone', (event, details) => {
+        mainWindow.webContents.reload();
+        logErrorSentry(
+            Error('render-process-gone'),
+            'webContents event render-process-gone',
+            { details }
+        );
+        ElectronLog.log('webContents event render-process-gone', details);
+    });
+    mainWindow.webContents.on('unresponsive', () => {
+        mainWindow.webContents.forcefullyCrashRenderer();
+        ElectronLog.log('webContents event unresponsive');
+    });
+
     setTimeout(() => {
         try {
             splash.destroy();
