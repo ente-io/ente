@@ -381,18 +381,17 @@ function PhotoViewer(props: Iprops) {
     };
 
     const trashFile = async (file: EnteFile) => {
-        const { deletedFileIds, setDeletedFileIds, items: oldItems } = props;
+        const { deletedFileIds, setDeletedFileIds } = props;
         try {
+            appContext.startLoading();
+            await trashFiles([file]);
+            appContext.finishLoading();
             deletedFileIds.add(file.id);
             setDeletedFileIds(new Set(deletedFileIds));
             updateItems(props.items.filter((item) => item.id !== file.id));
-            await trashFiles([file]);
             needUpdate.current = true;
         } catch (e) {
             logError(e, 'trashFile failed');
-            deletedFileIds.delete(file.id);
-            setDeletedFileIds(new Set(deletedFileIds));
-            updateItems(oldItems);
         }
     };
 
