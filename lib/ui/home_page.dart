@@ -17,6 +17,7 @@ import 'package:ente_auth/ui/code_widget.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
+import 'package:ente_auth/utils/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:move_to_background/move_to_background.dart';

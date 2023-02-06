@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:computer/computer.dart';
 import 'package:ente_auth/models/derived_key_result.dart';
 import 'package:ente_auth/models/encryption_result.dart';
+import 'package:ente_auth/utils/device_info.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 
@@ -287,16 +288,29 @@ class CryptoUtil {
     Uint8List salt,
   ) async {
     final logger = Logger("pwhash");
+    // Default with 1 GB mem and 4 ops limit
     int memLimit = Sodium.cryptoPwhashMemlimitSensitive;
     int opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
+
+    if (await isLowSpecDevice()) {
+      logger.info("low spec device detected");
+      // When high memLimit is used, on low spec device the OS might kill the
+      // app with OOM. To avoid that, start with 256 MB and 16 ops limit
+      memLimit = Sodium.cryptoPwhashMemlimitModerate;
+      opsLimit = 16;
+    }
     Uint8List key;
-    while (memLimit > Sodium.cryptoPwhashMemlimitMin &&
-        opsLimit < Sodium.cryptoPwhashOpslimitMax) {
+    while (memLimit >= Sodium.cryptoPwhashMemlimitMin &&
+        opsLimit <= Sodium.cryptoPwhashOpslimitMax) {
       try {
         key = await deriveKey(password, salt, memLimit, opsLimit);
         return DerivedKeyResult(key, memLimit, opsLimit);
       } catch (e, s) {
-        logger.severe(e, s);
+        logger.severe(
+          "failed to derive memLimit: $memLimit and opsLimit: $opsLimit",
+          e,
+          s,
+        );
       }
       memLimit = (memLimit / 2).round();
       opsLimit = opsLimit * 2;
