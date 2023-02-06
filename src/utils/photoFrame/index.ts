@@ -60,6 +60,8 @@ export function updateFileMsrcProps(file: EnteFile, url: string) {
             `;
     } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         file.src = url;
+    } else {
+        throw Error('Invalid file type');
     }
 }
 
@@ -136,7 +138,9 @@ export async function updateFileSrcProps(
                 </div>
                 `;
         }
-    } else {
+    } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         file.src = convertedImageURL;
+    } else {
+        throw Error('Invalid file type');
     }
 }
