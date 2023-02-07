@@ -94,7 +94,7 @@ export function registerWatcherFunctions(
 ) {
     ipcRenderer.removeAllListeners('watch-add');
     ipcRenderer.removeAllListeners('watch-change');
-    ipcRenderer.removeAllListeners('watch-unlink');
+    ipcRenderer.removeAllListeners('watch-unlink-dir');
     ipcRenderer.on('watch-add', async (_, filePath: string) => {
         filePath = filePath.split(path.sep).join(path.posix.sep);
 
