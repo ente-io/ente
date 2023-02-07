@@ -163,6 +163,7 @@ class TextInputDialog extends StatefulWidget {
   final String? label;
   final String? message;
   final FutureVoidCallbackParamStr onConfirm;
+  final String? hintText;
   const TextInputDialog({
     required this.title,
     this.body,
@@ -171,6 +172,7 @@ class TextInputDialog extends StatefulWidget {
     this.icon,
     this.label,
     this.message,
+    this.hintText,
     super.key,
   });
 
@@ -195,7 +197,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
           child: TextFormField(
             controller: _textController,
             decoration: InputDecoration(
-              hintText: "Placeholder",
+              hintText: widget.hintText,
               hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),
               filled: true,
               contentPadding: const EdgeInsets.symmetric(
