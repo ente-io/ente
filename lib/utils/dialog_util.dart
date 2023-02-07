@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -267,14 +268,14 @@ Future<ButtonAction?> showTextInputDialog(
   int? maxLength,
 }) {
   return showDialog(
+    barrierColor: backdropFaintDark,
     context: context,
     builder: (context) {
       final bottomInset = MediaQuery.of(context).viewInsets.bottom;
       final isKeyboardUp = bottomInset > 100;
-      return Align(
-        alignment: isKeyboardUp ? Alignment.bottomCenter : Alignment.center,
+      return Center(
         child: Padding(
-          padding: EdgeInsets.only(bottom: isKeyboardUp ? bottomInset + 24 : 0),
+          padding: EdgeInsets.only(bottom: isKeyboardUp ? bottomInset : 0),
           child: TextInputDialog(
             title: title,
             message: message,
