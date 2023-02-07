@@ -29,7 +29,10 @@ class TextInputWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (initialValue != null) {
-      textController.text = initialValue!;
+      textController.value = TextEditingValue(
+        text: initialValue!,
+        selection: TextSelection.collapsed(offset: initialValue!.length),
+      );
     }
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
