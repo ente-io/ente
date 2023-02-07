@@ -26,6 +26,7 @@ import {
 } from '../services/appUpdater';
 import { deleteTempFile, runFFmpegCmd } from '../services/ffmpeg';
 import { generateTempFilePath } from './temp';
+import ElectronLog from 'electron-log';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -37,7 +38,17 @@ export default function setupIpcComs(
             properties: ['openDirectory'],
         });
         if (result.filePaths && result.filePaths.length > 0) {
-            return result.filePaths[0]?.split(path.sep)?.join(path.posix.sep);
+            const folderPath = result.filePaths[0];
+            if (folderPath) {
+                ElectronLog.log('Selected folder: ' + folderPath);
+                const unixLikeFolderPath = folderPath
+                    .split(path.sep)
+                    .join(path.posix.sep);
+                ElectronLog.log(
+                    'Selected folder (unix): ' + unixLikeFolderPath
+                );
+                return unixLikeFolderPath;
+            }
         }
     });
 
