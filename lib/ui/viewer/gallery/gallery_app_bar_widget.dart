@@ -115,18 +115,23 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       context,
       title: "Title",
       message: "Message",
-      buttons: const [
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.small,
-          labelText: "Cancel",
-        ),
-        ButtonWidget(
-          buttonSize: ButtonSize.small,
-          buttonType: ButtonType.neutral,
-          labelText: "Rename",
-        ),
-      ],
+      confirmationButtonLabel: "Rename",
+      onConfirm: (String text) async {
+        // indicates user cancelled the rename request
+        if (text == "" || text.trim() == _appBarTitle!.trim()) {
+          return;
+        }
+
+        try {
+          await CollectionsService.instance.rename(widget.collection!, text);
+          if (mounted) {
+            _appBarTitle = text;
+            setState(() {});
+          }
+        } catch (e) {
+          showGenericErrorDialog(context: context);
+        }
+      },
     );
     // final result = await showDialog<String>(
     //   context: context,

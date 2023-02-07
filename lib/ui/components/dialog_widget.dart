@@ -6,7 +6,10 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/separators_util.dart';
+
+typedef FutureVoidCallbackParamStr = Future<void> Function(String);
 
 ///Will return null if dismissed by tapping outside
 Future<ButtonAction?> showDialogWidget({
@@ -152,17 +155,19 @@ class Actions extends StatelessWidget {
   }
 }
 
-class TextInputDialog extends StatelessWidget {
+class TextInputDialog extends StatefulWidget {
   final String title;
   final String? body;
-  final List<ButtonWidget> buttons;
+  final String confirmationButtonLabel;
   final IconData? icon;
   final String? label;
   final String? message;
+  final FutureVoidCallbackParamStr onConfirm;
   const TextInputDialog({
     required this.title,
     this.body,
-    required this.buttons,
+    required this.confirmationButtonLabel,
+    required this.onConfirm,
     this.icon,
     this.label,
     this.message,
@@ -170,18 +175,25 @@ class TextInputDialog extends StatelessWidget {
   });
 
   @override
+  State<TextInputDialog> createState() => _TextInputDialogState();
+}
+
+class _TextInputDialogState extends State<TextInputDialog> {
+  final TextEditingController _textController = TextEditingController();
+  @override
   Widget build(BuildContext context) {
     final widthOfScreen = MediaQuery.of(context).size.width;
     final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     var textInputChildren = <Widget>[];
-    if (label != null) textInputChildren.add(Text(label!));
+    if (widget.label != null) textInputChildren.add(Text(widget.label!));
     textInputChildren.add(
       ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         child: Material(
           child: TextFormField(
+            controller: _textController,
             decoration: InputDecoration(
               hintText: "Placeholder",
               hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),
@@ -218,12 +230,12 @@ class TextInputDialog extends StatelessWidget {
         ),
       ),
     );
-    if (message != null) {
+    if (widget.message != null) {
       textInputChildren.add(
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Text(
-            message!,
+            widget.message!,
             style: textTheme.small.copyWith(color: colorScheme.textMuted),
           ),
         ),
@@ -247,9 +259,9 @@ class TextInputDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ContentContainer(
-              title: title,
-              body: body,
-              icon: icon,
+              title: widget.title,
+              body: widget.body,
+              icon: widget.icon,
             ),
             Padding(
               padding: const EdgeInsets.only(top: 19),
@@ -263,14 +275,33 @@ class TextInputDialog extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(child: buttons.first),
+                const Expanded(
+                  child: ButtonWidget(
+                    buttonType: ButtonType.secondary,
+                    buttonSize: ButtonSize.small,
+                    labelText: "Cancel",
+                    isInAlert: true,
+                  ),
+                ),
                 const SizedBox(width: 8),
-                Expanded(child: buttons.last),
+                Expanded(
+                  child: ButtonWidget(
+                    buttonSize: ButtonSize.small,
+                    buttonType: ButtonType.neutral,
+                    labelText: widget.confirmationButtonLabel,
+                    onTap: _onTap,
+                    isInAlert: true,
+                  ),
+                ),
               ],
             )
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _onTap() async {
+    await widget.onConfirm.call(_textController.text);
   }
 }

@@ -255,10 +255,11 @@ showTextInputDialog(
   BuildContext context, {
   required String title,
   String? body,
-  required List<ButtonWidget> buttons,
+  required String confirmationButtonLabel,
   IconData? icon,
   String? label,
   String? message,
+  required FutureVoidCallbackParamStr onConfirm,
 }) {
   return showDialog(
     context: context,
@@ -270,7 +271,8 @@ showTextInputDialog(
           label: label,
           body: body,
           icon: icon,
-          buttons: buttons,
+          confirmationButtonLabel: confirmationButtonLabel,
+          onConfirm: onConfirm,
         ),
       );
     },
