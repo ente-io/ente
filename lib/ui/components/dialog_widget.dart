@@ -168,6 +168,7 @@ class TextInputDialog extends StatefulWidget {
   final IconData? prefixIcon;
   final String? initialValue;
   final Alignment? alignMessage;
+  final int? maxLength;
   const TextInputDialog({
     required this.title,
     this.body,
@@ -180,6 +181,7 @@ class TextInputDialog extends StatefulWidget {
     this.prefixIcon,
     this.initialValue,
     this.alignMessage,
+    this.maxLength,
     super.key,
   });
 
@@ -224,6 +226,8 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 prefixIcon: widget.prefixIcon,
                 initialValue: widget.initialValue,
                 alignMessage: widget.alignMessage,
+                autoFocus: true,
+                maxLength: widget.maxLength,
               ),
             ),
             const SizedBox(height: 36),

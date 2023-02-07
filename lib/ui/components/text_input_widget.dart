@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/utils/separators_util.dart';
 
@@ -10,6 +11,8 @@ class TextInputWidget extends StatelessWidget {
   final IconData? prefixIcon;
   final String? initialValue;
   final Alignment? alignMessage;
+  final bool? autoFocus;
+  final int? maxLength;
   const TextInputWidget({
     required this.textController,
     this.label,
@@ -18,12 +21,16 @@ class TextInputWidget extends StatelessWidget {
     this.prefixIcon,
     this.initialValue,
     this.alignMessage,
+    this.autoFocus,
+    this.maxLength,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    initialValue != null ? textController.text = initialValue! : null;
+    if (initialValue != null) {
+      textController.text = initialValue!;
+    }
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     var textInputChildren = <Widget>[];
@@ -33,7 +40,11 @@ class TextInputWidget extends StatelessWidget {
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         child: Material(
           child: TextFormField(
+            autofocus: autoFocus ?? false,
             controller: textController,
+            inputFormatters: maxLength != null
+                ? [LengthLimitingTextInputFormatter(50)]
+                : null,
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),

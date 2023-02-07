@@ -264,6 +264,7 @@ Future<ButtonAction?> showTextInputDialog(
   IconData? prefixIcon,
   String? initialValue,
   Alignment? alignMessage,
+  int? maxLength,
 }) {
   return showDialog(
     context: context,
@@ -281,6 +282,7 @@ Future<ButtonAction?> showTextInputDialog(
           prefixIcon: prefixIcon,
           initialValue: initialValue,
           alignMessage: alignMessage,
+          maxLength: maxLength,
         ),
       );
     },
