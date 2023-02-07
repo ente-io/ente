@@ -62,8 +62,15 @@ We maintain a public roadmap, that's driven by our community @ [roadmap.ente.io]
 
 If you like this project, please consider upgrading to a paid subscription.
 
-If you would like to motivate us to keep building, you can do so by
-[starring](https://github.com/ente-io/photos-web/stargazers) this project.
+And [star this repo](https://github.com/ente-io/photos-web/stargazers)!
+
+<br/>
+
+## 🌍 Translate
+
+Create a copy of
+[src/utils/strings/englishConstants.tsx](src/utils/strings/englishConstants.tsx)
+and open a PR.
 
 <br/>
 
