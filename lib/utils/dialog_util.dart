@@ -269,20 +269,26 @@ Future<ButtonAction?> showTextInputDialog(
   return showDialog(
     context: context,
     builder: (context) {
-      return Center(
-        child: TextInputDialog(
-          title: title,
-          message: message,
-          label: label,
-          body: body,
-          icon: icon,
-          confirmationButtonLabel: confirmationButtonLabel,
-          onConfirm: onConfirm,
-          hintText: hintText,
-          prefixIcon: prefixIcon,
-          initialValue: initialValue,
-          alignMessage: alignMessage,
-          maxLength: maxLength,
+      final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+      final isKeyboardUp = bottomInset > 100;
+      return Align(
+        alignment: isKeyboardUp ? Alignment.bottomCenter : Alignment.center,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: isKeyboardUp ? bottomInset + 24 : 0),
+          child: TextInputDialog(
+            title: title,
+            message: message,
+            label: label,
+            body: body,
+            icon: icon,
+            confirmationButtonLabel: confirmationButtonLabel,
+            onConfirm: onConfirm,
+            hintText: hintText,
+            prefixIcon: prefixIcon,
+            initialValue: initialValue,
+            alignMessage: alignMessage,
+            maxLength: maxLength,
+          ),
         ),
       );
     },
