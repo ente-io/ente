@@ -8,17 +8,22 @@ class TextInputWidget extends StatelessWidget {
   final String? message;
   final String? hintText;
   final IconData? prefixIcon;
+  final String? initialValue;
+  final Alignment? alignMessage;
   const TextInputWidget({
     required this.textController,
     this.label,
     this.message,
     this.hintText,
     this.prefixIcon,
+    this.initialValue,
+    this.alignMessage,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    initialValue != null ? textController.text = initialValue! : null;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     var textInputChildren = <Widget>[];
@@ -71,9 +76,12 @@ class TextInputWidget extends StatelessWidget {
       textInputChildren.add(
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(
-            message!,
-            style: textTheme.small.copyWith(color: colorScheme.textMuted),
+          child: Align(
+            alignment: alignMessage ?? Alignment.centerLeft,
+            child: Text(
+              message!,
+              style: textTheme.small.copyWith(color: colorScheme.textMuted),
+            ),
           ),
         ),
       );

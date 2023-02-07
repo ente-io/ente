@@ -262,6 +262,8 @@ Future<ButtonAction?> showTextInputDialog(
   String? hintText,
   required FutureVoidCallbackParamStr onConfirm,
   IconData? prefixIcon,
+  String? initialValue,
+  Alignment? alignMessage,
 }) {
   return showDialog(
     context: context,
@@ -277,6 +279,8 @@ Future<ButtonAction?> showTextInputDialog(
           onConfirm: onConfirm,
           hintText: hintText,
           prefixIcon: prefixIcon,
+          initialValue: initialValue,
+          alignMessage: alignMessage,
         ),
       );
     },

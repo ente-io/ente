@@ -166,6 +166,8 @@ class TextInputDialog extends StatefulWidget {
   final FutureVoidCallbackParamStr onConfirm;
   final String? hintText;
   final IconData? prefixIcon;
+  final String? initialValue;
+  final Alignment? alignMessage;
   const TextInputDialog({
     required this.title,
     this.body,
@@ -176,6 +178,8 @@ class TextInputDialog extends StatefulWidget {
     this.message,
     this.hintText,
     this.prefixIcon,
+    this.initialValue,
+    this.alignMessage,
     super.key,
   });
 
@@ -218,6 +222,8 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 message: widget.message,
                 hintText: widget.hintText,
                 prefixIcon: widget.prefixIcon,
+                initialValue: widget.initialValue,
+                alignMessage: widget.alignMessage,
               ),
             ),
             const SizedBox(height: 36),
