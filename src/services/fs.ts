@@ -184,12 +184,12 @@ export const getZipFileStream = async (
 };
 
 export async function isFolder(dirPath: string) {
-    return await fs
-        .stat(dirPath)
-        .then((stats) => {
-            return stats.isDirectory();
-        })
-        .catch(() => false);
+    try {
+        const stats = await fs.stat(dirPath);
+        return stats.isDirectory();
+    } catch (e) {
+        return false;
+    }
 }
 
 export const convertBrowserStreamToNode = (
