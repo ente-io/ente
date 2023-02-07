@@ -4,13 +4,16 @@ import { ipcRenderer } from 'electron';
 import { ElectronFile, WatchMapping } from '../types';
 import { getElectronFile } from '../services/fs';
 import { getWatchMappings, setWatchMappings } from '../services/watch';
+import ElectronLog from 'electron-log';
 
 export async function addWatchMapping(
     rootFolderName: string,
     folderPath: string,
     uploadStrategy: number
 ) {
+    ElectronLog.log(`Adding watch mapping: ${folderPath}`);
     folderPath = path.normalize(folderPath);
+    ElectronLog.log(`Adding watch mapping (normalized): ${folderPath}`);
     const watchMappings = getWatchMappings();
     if (isMappingPresent(watchMappings, folderPath)) {
         throw new Error(`Watch mapping already exists`);
