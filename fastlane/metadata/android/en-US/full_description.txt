@@ -4,9 +4,7 @@ If you've been looking for a privacy-friendly alternative to Google Photos, you'
 
 We have open-source apps across Android, iOS, web and desktop, and your photos will seamlessly sync between all of them in an end-to-end encrypted (e2ee) manner.
 
-ente also makes it simple to share your albums with your loved ones, even if they aren't on ente.
-
-You can share publicly viewable links, where they can view your album and collaborate by adding photos to it, even without an account or app.
+ente also makes it simple to share your albums with your loved ones, even if they aren't on ente. You can share publicly viewable links, where they can view your album and collaborate by adding photos to it, even without an account or app.
 
 Your encrypted data is replicated to 3 different locations, including a fall-out shelter in Paris. We take posterity seriously and make it easy to ensure that your memories outlive you.
 
