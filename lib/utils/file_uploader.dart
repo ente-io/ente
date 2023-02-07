@@ -603,7 +603,9 @@ class FileUploader {
     // case c and d
     final File? fileExistsButDifferentCollection =
         existingUploadedFiles.firstWhereOrNull(
-      (e) => e.collectionID != toCollectionID,
+      (e) =>
+          e.collectionID != toCollectionID &&
+          (e.localID == null || e.localID == fileToUpload.localID),
     );
     if (fileExistsButDifferentCollection != null) {
       _logger.fine(
