@@ -184,12 +184,22 @@ export const getZipFileStream = async (
 };
 
 export async function isFolder(dirPath: string) {
-    return await fs
-        .stat(dirPath)
-        .then((stats) => {
-            return stats.isDirectory();
-        })
-        .catch(() => false);
+    try {
+        const stats = await fs.stat(dirPath);
+        return stats.isDirectory();
+    } catch (e) {
+        let err = e;
+        // if code is defined, it's an error from fs.stat
+        if (typeof e.code !== 'undefined') {
+            // ENOENT means the file does not exist
+            if (e.code === 'ENOENT') {
+                return false;
+            }
+            err = Error(`fs error code: ${e.code}`);
+        }
+        logError(err, 'isFolder failed');
+        return false;
+    }
 }
 
 export const convertBrowserStreamToNode = (
