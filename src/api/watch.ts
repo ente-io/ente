@@ -12,8 +12,6 @@ export async function addWatchMapping(
     uploadStrategy: number
 ) {
     ElectronLog.log(`Adding watch mapping: ${folderPath}`);
-    folderPath = path.normalize(folderPath);
-    ElectronLog.log(`Adding watch mapping (normalized): ${folderPath}`);
     const watchMappings = getWatchMappings();
     if (isMappingPresent(watchMappings, folderPath)) {
         throw new Error(`Watch mapping already exists`);
@@ -98,21 +96,17 @@ export function registerWatcherFunctions(
     ipcRenderer.removeAllListeners('watch-change');
     ipcRenderer.removeAllListeners('watch-unlink');
     ipcRenderer.on('watch-add', async (_, filePath: string) => {
-        filePath = path.normalize(
-            filePath.split(path.sep).join(path.posix.sep)
-        );
+        filePath = filePath.split(path.sep).join(path.posix.sep);
+
         await addFile(await getElectronFile(filePath));
     });
     ipcRenderer.on('watch-unlink', async (_, filePath: string) => {
-        filePath = path.normalize(
-            filePath.split(path.sep).join(path.posix.sep)
-        );
+        filePath = filePath.split(path.sep).join(path.posix.sep);
+
         await removeFile(filePath);
     });
     ipcRenderer.on('watch-unlink-dir', async (_, folderPath: string) => {
-        folderPath = path.normalize(
-            folderPath.split(path.sep).join(path.posix.sep)
-        );
+        folderPath = folderPath.split(path.sep).join(path.posix.sep);
         await removeFolder(folderPath);
     });
 }
