@@ -151,3 +151,126 @@ class Actions extends StatelessWidget {
     );
   }
 }
+
+class TextInputDialog extends StatelessWidget {
+  final String title;
+  final String? body;
+  final List<ButtonWidget> buttons;
+  final IconData? icon;
+  final String? label;
+  final String? message;
+  const TextInputDialog({
+    required this.title,
+    this.body,
+    required this.buttons,
+    this.icon,
+    this.label,
+    this.message,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final widthOfScreen = MediaQuery.of(context).size.width;
+    final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    var textInputChildren = <Widget>[];
+    if (label != null) textInputChildren.add(Text(label!));
+    textInputChildren.add(
+      ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        child: Material(
+          child: TextFormField(
+            decoration: InputDecoration(
+              hintText: "Placeholder",
+              hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),
+              filled: true,
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 11,
+                horizontal: 11,
+              ),
+              border: const UnderlineInputBorder(
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: colorScheme.strokeMuted),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              prefixIconConstraints: const BoxConstraints(
+                maxHeight: 44,
+                maxWidth: 44,
+                minHeight: 44,
+                minWidth: 44,
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                maxHeight: 44,
+                maxWidth: 44,
+                minHeight: 44,
+                minWidth: 44,
+              ),
+              prefixIcon: Icon(
+                Icons.search_outlined,
+                color: colorScheme.strokeMuted,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    if (message != null) {
+      textInputChildren.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Text(
+            message!,
+            style: textTheme.small.copyWith(color: colorScheme.textMuted),
+          ),
+        ),
+      );
+    }
+    textInputChildren =
+        addSeparators(textInputChildren, const SizedBox(height: 4));
+    return Container(
+      width: min(widthOfScreen, 320),
+      padding: isMobileSmall
+          ? const EdgeInsets.all(0)
+          : const EdgeInsets.fromLTRB(6, 8, 6, 6),
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated,
+        boxShadow: shadowFloatLight,
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ContentContainer(
+              title: title,
+              body: body,
+              icon: icon,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 19),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: textInputChildren,
+              ),
+            ),
+            const SizedBox(height: 36),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(child: buttons.first),
+                const SizedBox(width: 8),
+                Expanded(child: buttons.last),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}

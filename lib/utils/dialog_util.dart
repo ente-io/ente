@@ -250,3 +250,29 @@ Future<ButtonAction?> showConfettiDialog<T>({
     routeSettings: routeSettings,
   );
 }
+
+showTextInputDialog(
+  BuildContext context, {
+  required String title,
+  String? body,
+  required List<ButtonWidget> buttons,
+  IconData? icon,
+  String? label,
+  String? message,
+}) {
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return Center(
+        child: TextInputDialog(
+          title: title,
+          message: message,
+          label: label,
+          body: body,
+          icon: icon,
+          buttons: buttons,
+        ),
+      );
+    },
+  );
+}

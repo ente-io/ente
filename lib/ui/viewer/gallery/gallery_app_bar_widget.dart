@@ -17,7 +17,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
-import 'package:photos/ui/common/rename_dialog.dart';
+// import 'package:photos/ui/common/rename_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
@@ -111,31 +111,48 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (widget.type != GalleryType.ownedCollection) {
       return;
     }
-    final result = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return RenameDialog(_appBarTitle, 'Album');
-      },
-      barrierColor: Colors.black.withOpacity(0.85),
+    showTextInputDialog(
+      context,
+      title: "Title",
+      message: "Message",
+      buttons: const [
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.small,
+          labelText: "Cancel",
+        ),
+        ButtonWidget(
+          buttonSize: ButtonSize.small,
+          buttonType: ButtonType.neutral,
+          labelText: "Rename",
+        ),
+      ],
     );
-    // indicates user cancelled the rename request
-    if (result == null || result.trim() == _appBarTitle!.trim()) {
-      return;
-    }
+    // final result = await showDialog<String>(
+    //   context: context,
+    //   builder: (BuildContext context) {
+    //     return RenameDialog(_appBarTitle, 'Album');
+    //   },
+    //   barrierColor: Colors.black.withOpacity(0.85),
+    // );
+    // // indicates user cancelled the rename request
+    // if (result == null || result.trim() == _appBarTitle!.trim()) {
+    //   return;
+    // }
 
-    final dialog = createProgressDialog(context, "Changing name...");
-    await dialog.show();
-    try {
-      await CollectionsService.instance.rename(widget.collection!, result);
-      await dialog.hide();
-      if (mounted) {
-        _appBarTitle = result;
-        setState(() {});
-      }
-    } catch (e) {
-      await dialog.hide();
-      showGenericErrorDialog(context: context);
-    }
+    // final dialog = createProgressDialog(context, "Changing name...");
+    // await dialog.show();
+    // try {
+    //   await CollectionsService.instance.rename(widget.collection!, result);
+    //   await dialog.hide();
+    //   if (mounted) {
+    //     _appBarTitle = result;
+    //     setState(() {});
+    //   }
+    // } catch (e) {
+    //   await dialog.hide();
+    //   showGenericErrorDialog(context: context);
+    // }
   }
 
   Future<dynamic> _leaveAlbum(BuildContext context) async {
