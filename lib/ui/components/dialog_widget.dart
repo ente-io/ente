@@ -7,6 +7,7 @@ import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/components/text_input_widget.dart';
 import 'package:photos/utils/separators_util.dart';
 
 typedef FutureVoidCallbackParamStr = Future<void> Function(String);
@@ -164,6 +165,7 @@ class TextInputDialog extends StatefulWidget {
   final String? message;
   final FutureVoidCallbackParamStr onConfirm;
   final String? hintText;
+  final IconData? prefixIcon;
   const TextInputDialog({
     required this.title,
     this.body,
@@ -173,6 +175,7 @@ class TextInputDialog extends StatefulWidget {
     this.label,
     this.message,
     this.hintText,
+    this.prefixIcon,
     super.key,
   });
 
@@ -187,64 +190,6 @@ class _TextInputDialogState extends State<TextInputDialog> {
     final widthOfScreen = MediaQuery.of(context).size.width;
     final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    var textInputChildren = <Widget>[];
-    if (widget.label != null) textInputChildren.add(Text(widget.label!));
-    textInputChildren.add(
-      ClipRRect(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        child: Material(
-          child: TextFormField(
-            controller: _textController,
-            decoration: InputDecoration(
-              hintText: widget.hintText,
-              hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),
-              filled: true,
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 11,
-                horizontal: 11,
-              ),
-              border: const UnderlineInputBorder(
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: colorScheme.strokeMuted),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              prefixIconConstraints: const BoxConstraints(
-                maxHeight: 44,
-                maxWidth: 44,
-                minHeight: 44,
-                minWidth: 44,
-              ),
-              suffixIconConstraints: const BoxConstraints(
-                maxHeight: 44,
-                maxWidth: 44,
-                minHeight: 44,
-                minWidth: 44,
-              ),
-              prefixIcon: Icon(
-                Icons.search_outlined,
-                color: colorScheme.strokeMuted,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    if (widget.message != null) {
-      textInputChildren.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(
-            widget.message!,
-            style: textTheme.small.copyWith(color: colorScheme.textMuted),
-          ),
-        ),
-      );
-    }
-    textInputChildren =
-        addSeparators(textInputChildren, const SizedBox(height: 4));
     return Container(
       width: min(widthOfScreen, 320),
       padding: isMobileSmall
@@ -267,10 +212,12 @@ class _TextInputDialogState extends State<TextInputDialog> {
             ),
             Padding(
               padding: const EdgeInsets.only(top: 19),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: textInputChildren,
+              child: TextInputWidget(
+                textController: _textController,
+                label: widget.label,
+                message: widget.message,
+                hintText: widget.hintText,
+                prefixIcon: widget.prefixIcon,
               ),
             ),
             const SizedBox(height: 36),
