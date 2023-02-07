@@ -111,10 +111,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (widget.type != GalleryType.ownedCollection) {
       return;
     }
-    showTextInputDialog(
+    final result = await showTextInputDialog(
       context,
-      title: "Title",
-      message: "Message",
+      title: "Rename album",
       confirmationButtonLabel: "Rename",
       onConfirm: (String text) async {
         // indicates user cancelled the rename request
@@ -129,35 +128,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             setState(() {});
           }
         } catch (e) {
-          showGenericErrorDialog(context: context);
+          rethrow;
         }
       },
     );
-    // final result = await showDialog<String>(
-    //   context: context,
-    //   builder: (BuildContext context) {
-    //     return RenameDialog(_appBarTitle, 'Album');
-    //   },
-    //   barrierColor: Colors.black.withOpacity(0.85),
-    // );
-    // // indicates user cancelled the rename request
-    // if (result == null || result.trim() == _appBarTitle!.trim()) {
-    //   return;
-    // }
-
-    // final dialog = createProgressDialog(context, "Changing name...");
-    // await dialog.show();
-    // try {
-    //   await CollectionsService.instance.rename(widget.collection!, result);
-    //   await dialog.hide();
-    //   if (mounted) {
-    //     _appBarTitle = result;
-    //     setState(() {});
-    //   }
-    // } catch (e) {
-    //   await dialog.hide();
-    //   showGenericErrorDialog(context: context);
-    // }
+    if (result == ButtonAction.error) {
+      showGenericErrorDialog(context: context);
+    }
   }
 
   Future<dynamic> _leaveAlbum(BuildContext context) async {

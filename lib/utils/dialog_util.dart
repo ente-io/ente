@@ -251,7 +251,7 @@ Future<ButtonAction?> showConfettiDialog<T>({
   );
 }
 
-showTextInputDialog(
+Future<ButtonAction?> showTextInputDialog(
   BuildContext context, {
   required String title,
   String? body,
