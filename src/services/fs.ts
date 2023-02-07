@@ -188,6 +188,10 @@ export async function isFolder(dirPath: string) {
         const stats = await fs.stat(dirPath);
         return stats.isDirectory();
     } catch (e) {
+        // ENOENT means the file does not exist
+        if (e?.code !== 'ENOENT') {
+            logError(e, 'isFolder failed ');
+        }
         return false;
     }
 }
