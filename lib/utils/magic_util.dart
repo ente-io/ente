@@ -120,9 +120,12 @@ Future<void> editFilename(
           List.of([file]),
           pubMagicKeyEditedName,
           newName,
+          showProgressDialogs: false,
+          showDoneToast: false,
         );
       } catch (e) {
         showShortToast(context, 'Something went wrong');
+        rethrow;
       }
     },
   );
@@ -156,12 +159,13 @@ Future<void> _updatePublicMetadata(
   String key,
   dynamic value, {
   bool showDoneToast = true,
+  bool showProgressDialogs = true,
 }) async {
   if (files.isEmpty) {
     return;
   }
   ProgressDialog? dialog;
-  if (context != null) {
+  if (context != null && showProgressDialogs) {
     dialog = createProgressDialog(context, 'Please wait...');
     await dialog.show();
   }

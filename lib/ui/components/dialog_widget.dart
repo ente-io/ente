@@ -250,6 +250,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
                     labelText: widget.confirmationButtonLabel,
                     onTap: _onTap,
                     isInAlert: true,
+                    shouldShowSuccessConfirmation: true,
                   ),
                 ),
               ],
