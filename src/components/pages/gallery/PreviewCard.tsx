@@ -223,6 +223,12 @@ export default function PreviewCard(props: IProps) {
     const isMounted = useRef(true);
 
     useEffect(() => {
+        return () => {
+            isMounted.current = false;
+        };
+    }, []);
+
+    useEffect(() => {
         if (!file.msrc && !props.showPlaceholder) {
             const main = async () => {
                 try {
@@ -255,9 +261,6 @@ export default function PreviewCard(props: IProps) {
                 }
             };
             main();
-            return () => {
-                isMounted.current = false;
-            };
         }
     }, [props.showPlaceholder]);
 
