@@ -9,6 +9,7 @@ import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/signed_in_event.dart';
 import 'package:ente_auth/events/signed_out_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
+import 'package:ente_auth/locale.dart';
 import "package:ente_auth/onboarding/view/onboarding_page.dart";
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/ui/home_page.dart';
@@ -27,9 +28,6 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   StreamSubscription<SignedOutEvent> _signedOutEvent;
   StreamSubscription<SignedInEvent> _signedInEvent;
-  static const List<Locale> supportedLocales = <Locale>[
-    Locale('en'),
-  ];
 
   @override
   void initState() {
@@ -82,15 +80,7 @@ class _AppState extends State<App> {
           darkTheme: dartTheme,
           debugShowCheckedModeBanner: false,
           supportedLocales: supportedLocales,
-          localeListResolutionCallback: (locales, supportedLocales) {
-            for (Locale locale in locales) {
-              if (supportedLocales.contains(locale)) {
-                return locale;
-              }
-            }
-            // if device language is not supported by the app, use en as default
-            return const Locale('en');
-          },
+          localeListResolutionCallback: localResolutionCallBack,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           routes: _getRoutes,
         ),
@@ -103,15 +93,7 @@ class _AppState extends State<App> {
         darkTheme: darkThemeData,
         debugShowCheckedModeBanner: false,
         supportedLocales: supportedLocales,
-        localeListResolutionCallback: (locales, supportedLocales) {
-          for (Locale locale in locales) {
-            if (supportedLocales.contains(locale)) {
-              return locale;
-            }
-          }
-          // if device language is not supported by the app, use en as default
-          return const Locale('en');
-        },
+        localeListResolutionCallback: localResolutionCallBack,
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
