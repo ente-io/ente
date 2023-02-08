@@ -80,7 +80,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           } on KeyDerivationError catch (e, s) {
             _logger.severe("Password verification failed", e, s);
             await dialog.hide();
-            final dialogChoice = await showNewChoiceDialog(
+            final dialogChoice = await showChoiceDialog(
               context,
               title: "Recreate password",
               body: "The current device is not powerful enough to verify your "
@@ -102,7 +102,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           } catch (e, s) {
             _logger.severe("Password verification failed", e, s);
             await dialog.hide();
-            final dialogChoice = await showNewChoiceDialog(
+            final dialogChoice = await showChoiceDialog(
               context,
               title: "Incorrect password",
               body: "Please try again",

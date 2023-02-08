@@ -9,7 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
@@ -37,8 +37,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
   static const keyUserDetails = "user_details";
-  final _dio = Network.instance.getDio();
-  final _enteDio = Network.instance.enteDio;
+  final _dio = NetworkClient.instance.getDio();
+  final _enteDio = NetworkClient.instance.enteDio;
   final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
   late SharedPreferences _preferences;
@@ -117,6 +117,8 @@ class UserService {
     }
   }
 
+  // getPublicKey returns null value if email id is not
+  // associated with another ente account
   Future<String?> getPublicKey(String email) async {
     try {
       final response = await _enteDio.get(
@@ -127,8 +129,10 @@ class UserService {
       await PublicKeysDB.instance.setKey(PublicKey(email, publicKey));
       return publicKey;
     } on DioError catch (e) {
-      _logger.info(e);
-      return null;
+      if (e.response != null && e.response?.statusCode == 404) {
+        return null;
+      }
+      rethrow;
     }
   }
 
@@ -197,21 +201,23 @@ class UserService {
   }
 
   Future<void> logout(BuildContext context) async {
-    final dialog = createProgressDialog(context, "Logging out...");
-    await dialog.show();
     try {
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
         await Configuration.instance.logout();
-        await dialog.hide();
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         throw Exception("Log out action failed");
       }
     } catch (e) {
       _logger.severe(e);
-      await dialog.hide();
-      showGenericErrorDialog(context: context);
+      //This future is for waiting for the dialog from which logout() is called
+      //to close and only then to show the error dialog.
+      Future.delayed(
+        const Duration(milliseconds: 150),
+        () => showGenericErrorDialog(context: context),
+      );
+      rethrow;
     }
   }
 

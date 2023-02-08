@@ -1,17 +1,17 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
-import 'package:photos/utils/toast_util.dart';
+import 'package:photos/utils/dialog_util.dart';
 
 class ManageIndividualParticipant extends StatefulWidget {
   final Collection collection;
@@ -36,6 +36,7 @@ class _ManageIndividualParticipantState
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    bool isConvertToViewSuccess = false;
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
@@ -71,23 +72,18 @@ class _ManageIndividualParticipantState
               ),
               leadingIcon: Icons.edit_outlined,
               menuItemColor: getEnteColorScheme(context).fillFaint,
-              pressedColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: widget.user.isCollaborator ? Icons.check : null,
               onTap: widget.user.isCollaborator
                   ? null
                   : () async {
-                      if (!kDebugMode) {
-                        showShortToast(context, "Coming soon...");
-                        return;
-                      }
                       final result =
                           await collectionActions.addEmailToCollection(
                         context,
                         widget.collection,
                         widget.user.email,
-                        role: CollectionParticipantRole.collaborator,
+                        CollectionParticipantRole.collaborator,
                       );
-                      if ((result ?? false) && mounted) {
+                      if (result && mounted) {
                         widget.user.role = CollectionParticipantRole
                             .collaborator
                             .toStringVal();
@@ -107,22 +103,40 @@ class _ManageIndividualParticipantState
               leadingIcon: Icons.photo_outlined,
               leadingIconColor: getEnteColorScheme(context).strokeBase,
               menuItemColor: getEnteColorScheme(context).fillFaint,
-              pressedColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: widget.user.isViewer ? Icons.check : null,
+              showOnlyLoadingState: true,
               onTap: widget.user.isViewer
                   ? null
                   : () async {
-                      final result =
-                          await collectionActions.addEmailToCollection(
+                      final ButtonAction? result = await showChoiceActionSheet(
                         context,
-                        widget.collection,
-                        widget.user.email,
-                        role: CollectionParticipantRole.viewer,
+                        title: "Change permissions?",
+                        firstButtonLabel: "Yes, convert to viewer",
+                        body:
+                            '${widget.user.email} will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them',
+                        isCritical: true,
                       );
-                      if ((result ?? false) && mounted) {
-                        widget.user.role =
-                            CollectionParticipantRole.viewer.toStringVal();
-                        setState(() => {});
+                      if (result != null) {
+                        if (result == ButtonAction.first) {
+                          try {
+                            isConvertToViewSuccess =
+                                await collectionActions.addEmailToCollection(
+                              context,
+                              widget.collection,
+                              widget.user.email,
+                              CollectionParticipantRole.viewer,
+                            );
+                          } catch (e) {
+                            showGenericErrorDialog(context: context);
+                          }
+                          if (isConvertToViewSuccess && mounted) {
+                            // reset value
+                            isConvertToViewSuccess = false;
+                            widget.user.role =
+                                CollectionParticipantRole.viewer.toStringVal();
+                            setState(() => {});
+                          }
+                        }
                       }
                     },
               isTopBorderRadiusRemoved: true,
@@ -142,7 +156,7 @@ class _ManageIndividualParticipantState
               leadingIcon: Icons.not_interested_outlined,
               leadingIconColor: warning500,
               menuItemColor: getEnteColorScheme(context).fillFaint,
-              pressedColor: getEnteColorScheme(context).fillFaint,
+              surfaceExecutionStates: false,
               onTap: () async {
                 final result = await collectionActions.removeParticipant(
                   context,
@@ -150,7 +164,7 @@ class _ManageIndividualParticipantState
                   widget.user,
                 );
 
-                if ((result ?? false) && mounted) {
+                if ((result) && mounted) {
                   Navigator.of(context).pop(true);
                 }
               },

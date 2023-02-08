@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
+import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -43,7 +44,8 @@ Future<ButtonAction?> showGenericErrorDialog({
     context: context,
     title: "Error",
     icon: Icons.error_outline_outlined,
-    body: "It looks like something went wrong. Please try again.",
+    body:
+        "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
     isDismissible: isDismissible,
     buttons: const [
       ButtonWidget(
@@ -90,7 +92,7 @@ DialogWidget choiceDialog({
 }
 
 ///Will return null if dismissed by tapping outside
-Future<ButtonAction?> showNewChoiceDialog(
+Future<ButtonAction?> showChoiceDialog(
   BuildContext context, {
   required String title,
   String? body,
@@ -128,6 +130,50 @@ Future<ButtonAction?> showNewChoiceDialog(
     body: body,
     buttons: buttons,
     icon: icon,
+    isDismissible: isDismissible,
+  );
+}
+
+///Will return null if dismissed by tapping outside
+Future<ButtonAction?> showChoiceActionSheet(
+  BuildContext context, {
+  required String title,
+  String? body,
+  required String firstButtonLabel,
+  String secondButtonLabel = "Cancel",
+  ButtonType firstButtonType = ButtonType.neutral,
+  ButtonType secondButtonType = ButtonType.secondary,
+  ButtonAction firstButtonAction = ButtonAction.first,
+  ButtonAction secondButtonAction = ButtonAction.cancel,
+  FutureVoidCallback? firstButtonOnTap,
+  FutureVoidCallback? secondButtonOnTap,
+  bool isCritical = false,
+  IconData? icon,
+  bool isDismissible = true,
+}) async {
+  final buttons = [
+    ButtonWidget(
+      buttonType: isCritical ? ButtonType.critical : firstButtonType,
+      labelText: firstButtonLabel,
+      isInAlert: true,
+      onTap: firstButtonOnTap,
+      buttonAction: firstButtonAction,
+      shouldStickToDarkTheme: true,
+    ),
+    ButtonWidget(
+      buttonType: secondButtonType,
+      labelText: secondButtonLabel,
+      isInAlert: true,
+      onTap: secondButtonOnTap,
+      buttonAction: secondButtonAction,
+      shouldStickToDarkTheme: true,
+    ),
+  ];
+  return showActionSheet(
+    context: context,
+    title: title,
+    body: body,
+    buttons: buttons,
     isDismissible: isDismissible,
   );
 }

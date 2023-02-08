@@ -15,7 +15,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
@@ -30,10 +30,12 @@ class DeviceFolderPage extends StatelessWidget {
 
   @override
   Widget build(Object context) {
+    final int? userID = Configuration.instance.getUserID();
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInDeviceCollection(
           deviceCollection,
+          userID,
           creationStartTime,
           creationEndTime,
           limit: limit,
@@ -111,7 +113,7 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
             children: [
               MenuItemWidget(
                 captionedTextWidget: const CaptionedTextWidget(title: "Backup"),
-                borderRadius: 8.0,
+                singleBorderRadius: 8.0,
                 menuItemColor: colorScheme.fillFaint,
                 alignCaptionedTextToLeft: true,
                 trailingWidget: ToggleSwitchWidget(
@@ -184,6 +186,7 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   Future<List<File>> _filesInDeviceCollection() async {
     return (await FilesDB.instance.getFilesInDeviceCollection(
       widget.deviceCollection,
+      Configuration.instance.getUserID(),
       galleryLoadStartTime,
       galleryLoadEndTime,
     ))
@@ -232,9 +235,10 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Reset ignored files",
           ),
-          borderRadius: 8.0,
+          singleBorderRadius: 8.0,
           menuItemColor: getEnteColorScheme(context).fillFaint,
           leadingIcon: Icons.cloud_off_outlined,
+          alwaysShowSuccessState: true,
           onTap: () async {
             await _removeFilesFromIgnoredFiles(
               widget.filesInDeviceCollection,

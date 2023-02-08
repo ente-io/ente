@@ -12,7 +12,7 @@ import 'package:photos/ui/backup_settings_screen.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/tools/deduplicate_page.dart';
@@ -49,7 +49,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
-        onTap: () {
+        onTap: () async {
           routeToPage(
             context,
             const BackupFolderSelectionPage(
@@ -66,7 +66,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
-        onTap: () {
+        onTap: () async {
           routeToPage(
             context,
             const BackupSettingsScreen(),
@@ -85,19 +85,16 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
           onTap: () async {
-            final dialog = createProgressDialog(context, "Calculating...");
-            await dialog.show();
             BackupStatus status;
             try {
               status = await SyncService.instance.getBackupStatus();
             } catch (e) {
-              await dialog.hide();
               showGenericErrorDialog(context: context);
               return;
             }
 
-            await dialog.hide();
             if (status.localIDs.isEmpty) {
               showErrorDialog(
                 context,
@@ -121,20 +118,17 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
           onTap: () async {
-            final dialog = createProgressDialog(context, "Calculating...");
-            await dialog.show();
             List<DuplicateFiles> duplicates;
             try {
               duplicates =
                   await DeduplicationService.instance.getDuplicateFiles();
             } catch (e) {
-              await dialog.hide();
               showGenericErrorDialog(context: context);
               return;
             }
 
-            await dialog.hide();
             if (duplicates.isEmpty) {
               showErrorDialog(
                 context,

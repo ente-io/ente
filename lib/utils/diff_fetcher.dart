@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
@@ -12,7 +12,7 @@ import 'package:photos/utils/file_download_util.dart';
 
 class DiffFetcher {
   final _logger = Logger("DiffFetcher");
-  final _enteDio = Network.instance.enteDio;
+  final _enteDio = NetworkClient.instance.enteDio;
 
   Future<Diff> getEncryptedFilesDiff(int collectionID, int sinceTime) async {
     _logger.info(

@@ -22,7 +22,9 @@ class _SessionsPageState extends State<SessionsPage> {
 
   @override
   void initState() {
-    _fetchActiveSessions();
+    _fetchActiveSessions().onError((error, stackTrace) {
+      showToast(context, "Failed to fetch active sessions");
+    });
     super.initState();
   }
 
@@ -115,9 +117,9 @@ class _SessionsPageState extends State<SessionsPage> {
       await UserService.instance.terminateSession(session.token);
       await _fetchActiveSessions();
       await dialog.hide();
-    } catch (e, s) {
+    } catch (e) {
       await dialog.hide();
-      _logger.severe('failed to terminate', e, s);
+      _logger.severe('failed to terminate');
       showErrorDialog(
         context,
         'Oops',
@@ -127,17 +129,17 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   Future<void> _fetchActiveSessions() async {
-    _sessions = await UserService.instance
-        .getActiveSessions()
-        .onError((error, stackTrace) {
-      showToast(context, "Failed to fetch active sessions");
-      throw error!;
+    _sessions = await UserService.instance.getActiveSessions().onError((e, s) {
+      _logger.severe("failed to fetch active sessions", e, s);
+      throw e!;
     });
     if (_sessions != null) {
       _sessions!.sessions.sort((first, second) {
         return second.lastUsedTime.compareTo(first.lastUsedTime);
       });
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     }
   }
 

@@ -9,7 +9,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/permission_granted_event.dart';
@@ -28,7 +28,7 @@ class SyncService {
   final _logger = Logger("SyncService");
   final _localSyncService = LocalSyncService.instance;
   final _remoteSyncService = RemoteSyncService.instance;
-  final _enteDio = Network.instance.enteDio;
+  final _enteDio = NetworkClient.instance.enteDio;
   final _uploader = FileUploader.instance;
   bool _syncStopRequested = false;
   Completer<bool>? _existingSync;

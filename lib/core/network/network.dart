@@ -2,16 +2,14 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fk_user_agent/fk_user_agent.dart';
-import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/core/network/ente_interceptor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 
 int kConnectTimeout = 15000;
 
-class Network {
+class NetworkClient {
   // apiEndpoint points to the Ente server's API endpoint
   static const apiEndpoint = String.fromEnvironment(
     "endpoint",
@@ -46,37 +44,14 @@ class Network {
         },
       ),
     );
-    _enteDio.interceptors.add(EnteRequestInterceptor(preferences));
+    _enteDio.interceptors.add(EnteRequestInterceptor(preferences, apiEndpoint));
   }
 
-  Network._privateConstructor();
+  NetworkClient._privateConstructor();
 
-  static Network instance = Network._privateConstructor();
+  static NetworkClient instance = NetworkClient._privateConstructor();
 
   Dio getDio() => _dio;
 
   Dio get enteDio => _enteDio;
-}
-
-class EnteRequestInterceptor extends Interceptor {
-  final SharedPreferences _preferences;
-
-  EnteRequestInterceptor(this._preferences);
-
-  @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    if (kDebugMode) {
-      assert(
-        options.baseUrl == Network.apiEndpoint,
-        "interceptor should only be used for API endpoint",
-      );
-    }
-    // ignore: prefer_const_constructors
-    options.headers.putIfAbsent("x-request-id", () => Uuid().v4().toString());
-    final String? tokenValue = _preferences.getString(Configuration.tokenKey);
-    if (tokenValue != null) {
-      options.headers.putIfAbsent("X-Auth-Token", () => tokenValue);
-    }
-    return super.onRequest(options, handler);
-  }
 }

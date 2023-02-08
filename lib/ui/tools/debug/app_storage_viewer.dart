@@ -9,7 +9,7 @@ import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
@@ -161,9 +161,8 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                             ),
                             menuItemColor:
                                 getEnteColorScheme(context).fillFaint,
-                            pressedColor:
-                                getEnteColorScheme(context).fillFaintPressed,
-                            borderRadius: 8,
+                            singleBorderRadius: 8,
+                            alwaysShowSuccessState: true,
                             onTap: () async {
                               for (var pathItem in paths) {
                                 if (pathItem.allowCacheClear) {

@@ -5,7 +5,7 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
@@ -51,7 +51,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   Future<void> _navigateToAddUser(bool addingViewer) async {
     await routeToPage(
       context,
-      AddParticipantPage(widget.collection),
+      AddParticipantPage(widget.collection, addingViewer),
     );
     if (mounted) {
       setState(() => {});
@@ -72,7 +72,9 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
     final splitResult =
         widget.collection.getSharees().splitMatch((x) => x.isViewer);
     final List<User> viewers = splitResult.matched;
+    viewers.sort((a, b) => a.email.compareTo(b.email));
     final List<User> collaborators = splitResult.unmatched;
+    collaborators.sort((a, b) => a.email.compareTo(b.email));
 
     return Scaffold(
       body: CustomScrollView(
@@ -110,7 +112,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             ),
                             leadingIconSize: 24,
                             menuItemColor: colorScheme.fillFaint,
-                            borderRadius: 8,
+                            singleBorderRadius: 8,
                             isGestureDetectorDisabled: true,
                           ),
                         ],
@@ -153,17 +155,18 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             currentUserID: currentUserID,
                           ),
                           menuItemColor: getEnteColorScheme(context).fillFaint,
-                          pressedColor: getEnteColorScheme(context).fillFaint,
                           trailingIcon: isOwner ? Icons.chevron_right : null,
                           trailingIconIsMuted: true,
-                          onTap: () async {
-                            if (isOwner) {
-                              await _navigateToManageUser(currentUser);
-                            }
-                          },
+                          onTap: isOwner
+                              ? () async {
+                                  if (isOwner) {
+                                    _navigateToManageUser(currentUser);
+                                  }
+                                }
+                              : null,
                           isTopBorderRadiusRemoved: listIndex > 0,
                           isBottomBorderRadiusRemoved: true,
-                          borderRadius: 8,
+                          singleBorderRadius: 8,
                         ),
                         DividerWidget(
                           dividerType: DividerType.menu,
@@ -174,18 +177,18 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                   } else if (index == (1 + collaborators.length) && isOwner) {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
-                        title:
-                            collaborators.isNotEmpty ? "Add more" : "Add email",
+                        title: collaborators.isNotEmpty
+                            ? "Add more"
+                            : "Add collaborator",
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
-                      pressedColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
-                        await _navigateToAddUser(false);
+                        _navigateToAddUser(false);
                       },
                       isTopBorderRadiusRemoved: collaborators.isNotEmpty,
-                      borderRadius: 8,
+                      singleBorderRadius: 8,
                     );
                   }
                   return const SizedBox.shrink();
@@ -226,17 +229,18 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             currentUserID: currentUserID,
                           ),
                           menuItemColor: getEnteColorScheme(context).fillFaint,
-                          pressedColor: getEnteColorScheme(context).fillFaint,
                           trailingIcon: isOwner ? Icons.chevron_right : null,
                           trailingIconIsMuted: true,
-                          onTap: () async {
-                            if (isOwner) {
-                              await _navigateToManageUser(currentUser);
-                            }
-                          },
+                          onTap: isOwner
+                              ? () async {
+                                  if (isOwner) {
+                                    await _navigateToManageUser(currentUser);
+                                  }
+                                }
+                              : null,
                           isTopBorderRadiusRemoved: listIndex > 0,
                           isBottomBorderRadiusRemoved: !isLastItem,
-                          borderRadius: 8,
+                          singleBorderRadius: 8,
                         ),
                         isLastItem
                             ? const SizedBox.shrink()
@@ -249,17 +253,16 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                   } else if (index == (1 + viewers.length) && isOwner) {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
-                        title: viewers.isNotEmpty ? "Add more" : "Add Viewer",
+                        title: viewers.isNotEmpty ? "Add more" : "Add viewer",
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
-                      pressedColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
-                        await _navigateToAddUser(true);
+                        _navigateToAddUser(true);
                       },
                       isTopBorderRadiusRemoved: viewers.isNotEmpty,
-                      borderRadius: 8,
+                      singleBorderRadius: 8,
                     );
                   }
                   return const SizedBox.shrink();

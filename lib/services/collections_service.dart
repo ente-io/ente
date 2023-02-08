@@ -12,7 +12,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -50,7 +50,7 @@ class CollectionsService {
   late Configuration _config;
   late SharedPreferences _prefs;
 
-  final _enteDio = Network.instance.enteDio;
+  final _enteDio = NetworkClient.instance.enteDio;
   final _localPathToCollectionID = <String, int>{};
   final _collectionIDToCollections = <int, Collection>{};
   final _cachedKeys = <int, Uint8List>{};
@@ -138,7 +138,7 @@ class CollectionsService {
     }
     await _updateDB(updatedCollections);
     _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
-    watch.logAndReset("till DB insertion");
+    watch.logAndReset("till DB insertion ${updatedCollections.length}");
     final collections = await _db.getAllCollections();
     for (final collection in collections) {
       _cacheCollectionAttributes(collection);
@@ -159,6 +159,8 @@ class CollectionsService {
   void clearCache() {
     _localPathToCollectionID.clear();
     _collectionIDToCollections.clear();
+    cachedDefaultHiddenCollection = null;
+    cachedUncategorizedCollection = null;
     _cachedKeys.clear();
   }
 
@@ -238,7 +240,7 @@ class CollectionsService {
                 (u) => u.id == userID,
               );
           if (matchingUser != null) {
-            _cachedUserIdToUser[userID] = collection.owner!;
+            _cachedUserIdToUser[userID] = matchingUser;
           }
         }
       }
@@ -592,12 +594,16 @@ class CollectionsService {
     }
   }
 
-  Future<void> createShareUrl(Collection collection) async {
+  Future<void> createShareUrl(
+    Collection collection, {
+    bool enableCollect = false,
+  }) async {
     try {
       final response = await _enteDio.post(
         "/collections/share-url",
         data: {
           "collectionID": collection.id,
+          "enableCollect": enableCollect,
         },
       );
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
@@ -894,8 +900,9 @@ class CollectionsService {
     final params = <String, dynamic>{};
     params["collectionID"] = toCollectionID;
     final toCollectionKey = getCollectionKey(toCollectionID);
+    final int ownerID = Configuration.instance.getUserID()!;
     final Set<String> existingLocalIDS =
-        await FilesDB.instance.getExistingLocalFileIDs();
+        await FilesDB.instance.getExistingLocalFileIDs(ownerID);
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
       params["files"] = [];
@@ -1048,7 +1055,7 @@ class CollectionsService {
         params["fileIDs"].add(file.uploadedFileID);
       }
       await _enteDio.post(
-        "/collections/v2/remove-files",
+        "/collections/v3/remove-files",
         data: params,
       );
 

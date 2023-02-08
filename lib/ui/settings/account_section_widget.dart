@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -12,7 +11,7 @@ import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -40,6 +39,7 @@ class AccountSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -76,6 +76,7 @@ class AccountSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -102,6 +103,7 @@ class AccountSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -129,7 +131,7 @@ class AccountSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () {
+          onTap: () async {
             _onLogoutTapped(context);
           },
         ),
@@ -141,7 +143,7 @@ class AccountSectionWidget extends StatelessWidget {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () {
+          onTap: () async {
             routeToPage(context, const DeleteAccountPage());
           },
         ),
@@ -156,46 +158,14 @@ class AccountSectionWidget extends StatelessWidget {
     );
   }
 
-  Future<void> _onLogoutTapped(BuildContext context) async {
-    final AlertDialog alert = AlertDialog(
-      title: const Text(
-        "Logout",
-        style: TextStyle(
-          color: Colors.red,
-        ),
-      ),
-      content: const Text("Are you sure you want to logout?"),
-      actions: [
-        TextButton(
-          child: const Text(
-            "Yes, logout",
-            style: TextStyle(
-              color: Colors.red,
-            ),
-          ),
-          onPressed: () async {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            await UserService.instance.logout(context);
-          },
-        ),
-        TextButton(
-          child: Text(
-            "No",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-      ],
-    );
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
+  void _onLogoutTapped(BuildContext context) {
+    showChoiceActionSheet(
+      context,
+      title: "Are you sure you want to logout?",
+      firstButtonLabel: "Yes, logout",
+      isCritical: true,
+      firstButtonOnTap: () async {
+        await UserService.instance.logout(context);
       },
     );
   }

@@ -74,7 +74,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           "The recovery key you entered is not valid. Please make sure it "
           "contains 24 words, and check the spelling of each.\n\nIf you "
           "entered an older recovery code, make sure it is 64 characters long, and check each of them.";
-      final result = await showNewChoiceDialog(
+      final result = await showChoiceDialog(
         context,
         title: "Invalid key",
         body: errMessage,

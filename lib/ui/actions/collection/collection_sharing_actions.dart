@@ -13,8 +13,10 @@ import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -29,65 +31,61 @@ class CollectionActions {
 
   CollectionActions(this.collectionsService);
 
-  Future<bool> publicLinkToggle(
+  Future<bool> enableUrl(
     BuildContext context,
-    Collection collection,
-    bool enable,
-  ) async {
-    // confirm if user wants to disable the url
-    if (!enable) {
-      final ButtonAction? result = await showActionSheet(
-        context: context,
-        buttons: [
-          ButtonWidget(
-            buttonType: ButtonType.critical,
-            isInAlert: true,
-            shouldStickToDarkTheme: true,
-            buttonAction: ButtonAction.first,
-            shouldSurfaceExecutionStates: true,
-            labelText: "Yes, remove",
-            onTap: () async {
-              await CollectionsService.instance.disableShareUrl(collection);
-            },
-          ),
-          const ButtonWidget(
-            buttonType: ButtonType.secondary,
-            buttonAction: ButtonAction.cancel,
-            isInAlert: true,
-            shouldStickToDarkTheme: true,
-            labelText: "Cancel",
-          )
-        ],
-        title: "Remove public link",
-        body:
-            'This will remove the public link for accessing "${collection.name}".',
-      );
-      if (result != null) {
-        if (result == ButtonAction.error) {
-          showGenericErrorDialog(context: context);
-        }
-        return result == ButtonAction.first;
-      } else {
-        return false;
-      }
-    }
-    final dialog = createProgressDialog(
-      context,
-      "Creating link...",
-    );
+    Collection collection, {
+    bool enableCollect = false,
+  }) async {
     try {
-      await dialog.show();
-      await CollectionsService.instance.createShareUrl(collection);
-      dialog.hide();
+      await CollectionsService.instance.createShareUrl(
+        collection,
+        enableCollect: enableCollect,
+      );
       return true;
     } catch (e) {
-      dialog.hide();
       if (e is SharingNotPermittedForFreeAccountsError) {
         _showUnSupportedAlert(context);
       } else {
         logger.severe("Failed to update shareUrl collection", e);
         showGenericErrorDialog(context: context);
       }
+      return false;
+    }
+  }
+
+  Future<bool> disableUrl(BuildContext context, Collection collection) async {
+    final ButtonAction? result = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: "Yes, remove",
+          onTap: () async {
+            await CollectionsService.instance.disableShareUrl(collection);
+          },
+        ),
+        const ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: "Cancel",
+        )
+      ],
+      title: "Remove public link",
+      body:
+          'This will remove the public link for accessing "${collection.name}".',
+    );
+    if (result != null) {
+      if (result == ButtonAction.error) {
+        showGenericErrorDialog(context: context);
+      }
+      return result == ButtonAction.first;
+    } else {
       return false;
     }
   }
@@ -137,44 +135,55 @@ class CollectionActions {
   }
 
   // removeParticipant remove the user from a share album
-  Future<bool?> removeParticipant(
+  Future<bool> removeParticipant(
     BuildContext context,
     Collection collection,
     User user,
   ) async {
-    final result = await showNewChoiceDialog(
-      context,
-      title: "Remove",
-      body: "${user.email} will be removed",
-      firstButtonLabel: "Yes, remove",
-      firstButtonOnTap: () async {
-        try {
-          final newSharees = await CollectionsService.instance
-              .unshare(collection.id, user.email);
-          collection.updateSharees(newSharees);
-        } catch (e, s) {
-          Logger("EmailItemWidget").severe(e, s);
-          rethrow;
-        }
-      },
+    final ButtonAction? result = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: "Yes, remove",
+          onTap: () async {
+            final newSharees = await CollectionsService.instance
+                .unshare(collection.id, user.email);
+            collection.updateSharees(newSharees);
+          },
+        ),
+        const ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: "Cancel",
+        )
+      ],
+      title: "Remove?",
+      body: '${user.email} will be removed from this shared album\n\nAny '
+          'photos added by them will also be removed from the album',
     );
-    if (result == ButtonAction.error) {
-      await showGenericErrorDialog(context: context);
-      return false;
+    if (result != null) {
+      if (result == ButtonAction.error) {
+        showGenericErrorDialog(context: context);
+      }
+      return result == ButtonAction.first;
     }
-    if (result == ButtonAction.first) {
-      return true;
-    } else {
-      return false;
-    }
+    return false;
   }
 
-  Future<bool?> addEmailToCollection(
+  // addEmailToCollection returns true if add operation was successful
+  Future<bool> addEmailToCollection(
     BuildContext context,
     Collection collection,
-    String email, {
-    CollectionParticipantRole role = CollectionParticipantRole.viewer,
-    String? publicKey,
+    String email,
+    CollectionParticipantRole role, {
+    bool showProgress = false,
   }) async {
     if (!isValidEmail(email)) {
       await showErrorDialog(
@@ -182,80 +191,64 @@ class CollectionActions {
         "Invalid email address",
         "Please enter a valid email address.",
       );
-      return null;
-    } else if (email == Configuration.instance.getEmail()) {
+      return false;
+    } else if (email.trim() == Configuration.instance.getEmail()) {
       await showErrorDialog(context, "Oops", "You cannot share with yourself");
-      return null;
-    } else {
-      // if (collection.getSharees().any((user) => user.email == email)) {
-      //   showErrorDialog(
-      //     context,
-      //     "Oops",
-      //     "You're already sharing this with " + email,
-      //   );
-      //   return null;
-      // }
+      return false;
     }
-    if (publicKey == null) {
-      final dialog = createProgressDialog(context, "Searching for user...");
+
+    ProgressDialog? dialog;
+    String? publicKey;
+    if (showProgress) {
+      dialog = createProgressDialog(context, "Sharing...", isDismissible: true);
       await dialog.show();
-      try {
-        publicKey = await UserService.instance.getPublicKey(email);
-        await dialog.hide();
-      } catch (e) {
-        logger.severe("Failed to get public key", e);
-        showGenericErrorDialog(context: context);
-        await dialog.hide();
-      }
     }
-    // getPublicKey can return null
-    // ignore: unnecessary_null_comparison
+
+    try {
+      publicKey = await UserService.instance.getPublicKey(email);
+    } catch (e) {
+      await dialog?.hide();
+      logger.severe("Failed to get public key", e);
+      showGenericErrorDialog(context: context);
+      return false;
+    }
+    // getPublicKey can return null when no user is associated with given
+    // email id
     if (publicKey == null || publicKey == '') {
-      final dialog = AlertDialog(
-        title: const Text("Invite to ente?"),
-        content: Text(
-          "Looks like " +
-              email +
-              " hasn't signed up for ente yet. would you like to invite them?",
-          style: const TextStyle(
-            height: 1.4,
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Text(
-              "Invite",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.greenAlternative,
-              ),
-            ),
-            onPressed: () {
+      // todo: neeraj replace this as per the design where a new screen
+      // is used for error. Do this change along with handling of network errors
+      await showDialogWidget(
+        context: context,
+        title: "Invite to ente",
+        icon: Icons.info_outline,
+        body: "$email does not have an ente account\n\nSend them an invite to"
+            " add them after they sign up",
+        isDismissible: true,
+        buttons: [
+          ButtonWidget(
+            buttonType: ButtonType.neutral,
+            icon: Icons.adaptive.share,
+            labelText: "Send invite",
+            isInAlert: true,
+            onTap: () async {
               shareText(
-                "Hey, I have some photos to share. Please install https://ente.io so that I can share them privately.",
+                "Download ente so we can easily share original quality photos"
+                " and videos\n\nhttps://ente.io/#download",
               );
             },
           ),
         ],
       );
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return dialog;
-        },
-      );
-      return null;
+      return false;
     } else {
-      final dialog = createProgressDialog(context, "Sharing...");
-      await dialog.show();
       try {
         final newSharees = await CollectionsService.instance
             .share(collection.id, email, publicKey, role);
+        await dialog?.hide();
         collection.updateSharees(newSharees);
-        await dialog.hide();
-        showShortToast(context, "Shared successfully!");
         return true;
       } catch (e) {
-        await dialog.hide();
+        await dialog?.hide();
         if (e is SharingNotPermittedForFreeAccountsError) {
           _showUnSupportedAlert(context);
         } else {
@@ -267,6 +260,7 @@ class CollectionActions {
     }
   }
 
+  // deleteCollectionSheet returns true if the album is successfully deleted
   Future<bool> deleteCollectionSheet(
     BuildContext bContext,
     Collection collection,
@@ -275,6 +269,13 @@ class CollectionActions {
     final currentUserID = Configuration.instance.getUserID()!;
     if (collection.owner!.id != currentUserID) {
       throw AssertionError("Can not delete album owned by others");
+    }
+    if (collection.hasSharees) {
+      final bool confirmDelete =
+          await _confirmSharedAlbumDeletion(bContext, collection);
+      if (!confirmDelete) {
+        return false;
+      }
     }
     final actionResult = await showActionSheet(
       context: bContext,
@@ -293,8 +294,9 @@ class CollectionActions {
               await moveFilesFromCurrentCollection(bContext, collection, files);
               // collection should be empty on server now
               await collectionsService.trashEmptyCollection(collection);
-            } catch (e) {
-              logger.severe("Failed to keep photos and delete collection", e);
+            } catch (e, s) {
+              logger.severe(
+                  "Failed to keep photos and delete collection", e, s);
               rethrow;
             }
           },
@@ -356,6 +358,23 @@ class CollectionActions {
     return false;
   }
 
+  // _confirmSharedAlbumDeletion should be shown when user tries to delete an
+  // album shared with other ente users.
+  Future<bool> _confirmSharedAlbumDeletion(
+    BuildContext context,
+    Collection collection,
+  ) async {
+    final ButtonAction? result = await showChoiceActionSheet(
+      context,
+      isCritical: true,
+      title: "Delete shared album?",
+      firstButtonLabel: "Delete album",
+      body: "The album will be deleted for everyone\n\nYou will lose access to "
+          "shared photos in this album that are owned by others",
+    );
+    return result != null && result == ButtonAction.first;
+  }
+
   /*
   _moveFilesFromCurrentCollection removes the file from the current
   collection. Based on the file and collection ownership, files will be
@@ -380,19 +399,26 @@ class CollectionActions {
   ) async {
     final int currentUserID = Configuration.instance.getUserID()!;
     final isCollectionOwner = collection.owner!.id == currentUserID;
-    if (!isCollectionOwner) {
-      // Todo: Support for removing own files from a collection owner by
-      // someone else will be added along with collaboration changes
-      showShortToast(context, "Only collection owner can remove");
-      return;
-    }
     final FilesSplit split = FilesSplit.split(
       files,
       Configuration.instance.getUserID()!,
     );
-    if (split.ownedByOtherUsers.isNotEmpty) {
-      //  Todo: Support for removing own files from a collection owner by
-      // someone else will be added along with collaboration changes
+    if (isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
+      await collectionsService.removeFromCollection(
+        collection.id,
+        split.ownedByOtherUsers,
+      );
+    } else if (!isCollectionOwner && split.ownedByCurrentUser.isNotEmpty) {
+      // collection is not owned by the user, just remove files owned
+      // by current user and return
+      await collectionsService.removeFromCollection(
+        collection.id,
+        split.ownedByCurrentUser,
+      );
+      return;
+    }
+
+    if (!isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
       showShortToast(context, "Can only remove files owned by you");
       return;
     }

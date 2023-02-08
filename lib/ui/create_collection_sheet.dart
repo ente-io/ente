@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
@@ -360,11 +361,17 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
   }
 
   Future<bool> _addToCollection(int collectionID) async {
-    final dialog = createProgressDialog(context, "Uploading files to album...");
+    final dialog = createProgressDialog(
+      context,
+      "Uploading files to album"
+      "...",
+      isDismissible: true,
+    );
     await dialog.show();
     try {
       final List<File> files = [];
       final List<File> filesPendingUpload = [];
+      final int currentUserID = Configuration.instance.getUserID()!;
       if (widget.sharedFiles != null) {
         filesPendingUpload.addAll(
           await convertIncomingSharedMediaToFile(
@@ -374,8 +381,17 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
         );
       } else {
         for (final file in widget.selectedFiles!.files) {
-          final File? currentFile =
-              await (FilesDB.instance.getFile(file.generatedID!));
+          File? currentFile;
+          if (file.uploadedFileID != null) {
+            currentFile = file;
+          } else if (file.generatedID != null) {
+            // when file is not uploaded, refresh the state from the db to
+            // ensure we have latest upload status for given file before
+            // queueing it up as pending upload
+            currentFile = await (FilesDB.instance.getFile(file.generatedID!));
+          } else if (file.generatedID == null) {
+            _logger.severe("generated id should not be null");
+          }
           if (currentFile == null) {
             _logger.severe("Failed to find fileBy genID");
             continue;
@@ -389,11 +405,20 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
         }
       }
       if (filesPendingUpload.isNotEmpty) {
-        // filesPendingUpload might be getting ignored during auto-upload
-        // because the user deleted these files from ente in the past.
-        await IgnoredFilesService.instance
-            .removeIgnoredMappings(filesPendingUpload);
-        await FilesDB.instance.insertMultiple(filesPendingUpload);
+        // Newly created collection might not be cached
+        final Collection? c =
+            CollectionsService.instance.getCollectionByID(collectionID);
+        if (c != null && c.owner!.id != currentUserID) {
+          showToast(context, "Can not upload to albums owned by others");
+          await dialog.hide();
+          return false;
+        } else {
+          // filesPendingUpload might be getting ignored during auto-upload
+          // because the user deleted these files from ente in the past.
+          await IgnoredFilesService.instance
+              .removeIgnoredMappings(filesPendingUpload);
+          await FilesDB.instance.insertMultiple(filesPendingUpload);
+        }
       }
       if (files.isNotEmpty) {
         await CollectionsService.instance.addToCollection(collectionID, files);
@@ -414,7 +439,7 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
     final String message = widget.actionType == CollectionActionType.moveFiles
         ? "Moving files to album..."
         : "Unhiding files to album";
-    final dialog = createProgressDialog(context, message);
+    final dialog = createProgressDialog(context, message, isDismissible: true);
     await dialog.show();
     try {
       final int fromCollectionID =
@@ -442,7 +467,8 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
   }
 
   Future<bool> _restoreFilesToCollection(int toCollectionID) async {
-    final dialog = createProgressDialog(context, "Restoring files...");
+    final dialog = createProgressDialog(context, "Restoring files...",
+        isDismissible: true);
     await dialog.show();
     try {
       await CollectionsService.instance

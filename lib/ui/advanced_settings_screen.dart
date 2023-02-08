@@ -1,15 +1,12 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/core/constants.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/tools/debug/app_storage_viewer.dart';
+import 'package:photos/ui/viewer/gallery/photo_grid_size_picker_page.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -21,12 +18,11 @@ class AdvancedSettingsScreen extends StatefulWidget {
 }
 
 class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
-  late int _photoGridSize, _chosenGridSize;
+  late int _photoGridSize;
 
   @override
   void initState() {
     _photoGridSize = LocalSettings.instance.getPhotoGridSize();
-    _chosenGridSize = _photoGridSize;
     super.initState();
   }
 
@@ -66,7 +62,15 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                _showPhotoGridSizePicker(delegateBuildContext);
+                                routeToPage(
+                                  context,
+                                  const PhotoGridSizePickerPage(),
+                                ).then((value) {
+                                  setState(() {
+                                    _photoGridSize = LocalSettings.instance
+                                        .getPhotoGridSize();
+                                  });
+                                });
                               },
                               child: MenuItemWidget(
                                 captionedTextWidget: CaptionedTextWidget(
@@ -78,9 +82,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                   Icons.chevron_right_outlined,
                                   color: colorScheme.strokeBase,
                                 ),
-                                borderRadius: 8,
+                                singleBorderRadius: 8,
                                 alignCaptionedTextToLeft: true,
-                                // isBottomBorderRadiusRemoved: true,
                                 isGestureDetectorDisabled: true,
                               ),
                             ),
@@ -96,9 +99,9 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 Icons.chevron_right_outlined,
                                 color: colorScheme.strokeBase,
                               ),
-                              borderRadius: 8,
+                              singleBorderRadius: 8,
                               alignCaptionedTextToLeft: true,
-                              onTap: () {
+                              onTap: () async {
                                 routeToPage(context, const AppStorageViewer());
                               },
                             ),
@@ -115,107 +118,5 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
         ],
       ),
     );
-  }
-
-  Future<void> _showPhotoGridSizePicker(BuildContext buildContext) async {
-    final textTheme = getEnteTextTheme(buildContext);
-    final List<Text> options = [];
-    for (int gridSize = photoGridSizeMin;
-        gridSize <= photoGridSizeMax;
-        gridSize++) {
-      options.add(
-        Text(
-          gridSize.toString(),
-          style: textTheme.body,
-        ),
-      );
-    }
-    return showCupertinoModalPopup(
-      context: context,
-      builder: (context) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                color: getEnteColorScheme(buildContext).backgroundElevated2,
-                border: const Border(
-                  bottom: BorderSide(
-                    color: Color(0xff999999),
-                    width: 0.0,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  CupertinoButton(
-                    onPressed: () {
-                      Navigator.of(context).pop('cancel');
-                    },
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 5.0,
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: textTheme.body,
-                    ),
-                  ),
-                  CupertinoButton(
-                    onPressed: () async {
-                      await LocalSettings.instance
-                          .setPhotoGridSize(_chosenGridSize);
-                      Bus.instance.fire(
-                        ForceReloadHomeGalleryEvent("grid size changed"),
-                      );
-                      _photoGridSize = _chosenGridSize;
-                      setState(() {});
-                      Navigator.of(context).pop('');
-                    },
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 2.0,
-                    ),
-                    child: Text(
-                      'Confirm',
-                      style: textTheme.body,
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Container(
-              height: 220.0,
-              color: const Color(0xfff7f7f7),
-              child: CupertinoPicker(
-                backgroundColor:
-                    getEnteColorScheme(buildContext).backgroundElevated,
-                onSelectedItemChanged: (index) {
-                  _chosenGridSize = _getPhotoGridSizeFromIndex(index);
-                  setState(() {});
-                },
-                scrollController: FixedExtentScrollController(
-                  initialItem: _getIndexFromPhotoGridSize(_chosenGridSize),
-                ),
-                magnification: 1.3,
-                useMagnifier: true,
-                itemExtent: 25,
-                diameterRatio: 1,
-                children: options,
-              ),
-            )
-          ],
-        );
-      },
-    );
-  }
-
-  int _getPhotoGridSizeFromIndex(int index) {
-    return index + 2;
-  }
-
-  int _getIndexFromPhotoGridSize(int gridSize) {
-    return gridSize - 2;
   }
 }

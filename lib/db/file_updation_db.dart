@@ -105,7 +105,7 @@ class FileUpdationDB {
           endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,
     );
     _logger.info(
-      "Batch insert of ${fileLocalIDs.length} "
+      "Batch insert of ${fileLocalIDs.length} updated files due to $reason "
       "took ${duration.inMilliseconds} ms.",
     );
   }

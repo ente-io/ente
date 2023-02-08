@@ -6,7 +6,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
@@ -65,7 +65,7 @@ class BackupSettingsScreen extends StatelessWidget {
                                   );
                                 },
                               ),
-                              borderRadius: 8,
+                              singleBorderRadius: 8,
                               alignCaptionedTextToLeft: true,
                               isBottomBorderRadiusRemoved: true,
                               isGestureDetectorDisabled: true,
@@ -87,7 +87,7 @@ class BackupSettingsScreen extends StatelessWidget {
                                   !Configuration.instance.shouldBackupVideos(),
                                 ),
                               ),
-                              borderRadius: 8,
+                              singleBorderRadius: 8,
                               alignCaptionedTextToLeft: true,
                               isTopBorderRadiusRemoved: true,
                               isGestureDetectorDisabled: true,
@@ -115,7 +115,7 @@ class BackupSettingsScreen extends StatelessWidget {
                                         );
                                       },
                                     ),
-                                    borderRadius: 8,
+                                    singleBorderRadius: 8,
                                     alignCaptionedTextToLeft: true,
                                     isGestureDetectorDisabled: true,
                                   ),
