@@ -2,8 +2,8 @@ import { Box } from '@mui/material';
 import { AppContext } from 'pages/_app';
 import { useContext, useState } from 'react';
 import {
-    getFaceSearchStatus,
-    updateFaceSearchStatus,
+    getFaceSearchEnabledStatus,
+    updateFaceSearchEnabledStatus,
 } from 'services/userService';
 import { logError } from 'utils/sentry';
 import constants from 'utils/strings/constants';
@@ -30,7 +30,7 @@ const MLSearchSettings = ({ open, onClose, OnRootClose }) => {
 
     const enableMlSearch = async () => {
         try {
-            const hasEnabledFaceSearch = await getFaceSearchStatus();
+            const hasEnabledFaceSearch = await getFaceSearchEnabledStatus();
             if (!hasEnabledFaceSearch) {
                 openEnableFaceSearch();
             } else {
@@ -44,7 +44,7 @@ const MLSearchSettings = ({ open, onClose, OnRootClose }) => {
 
     const enableFaceSearch = async () => {
         try {
-            await updateFaceSearchStatus(true);
+            await updateFaceSearchEnabledStatus(true);
             updateMlSearchEnabled(true);
             closeEnableFaceSearch();
         } catch (e) {
@@ -65,7 +65,7 @@ const MLSearchSettings = ({ open, onClose, OnRootClose }) => {
 
     const disableFaceSearch = async () => {
         try {
-            await updateFaceSearchStatus(false);
+            await updateFaceSearchEnabledStatus(false);
             await disableMlSearch();
         } catch (e) {
             logError(e, 'Disable face search failed');

@@ -5,6 +5,7 @@ import LinkButton from 'components/pages/gallery/LinkButton';
 import React from 'react';
 import { SuggestionType } from 'types/search';
 import { formatNumberWithCommas } from '.';
+import { FACE_SEARCH_PRIVACY_POLICY_LINK } from 'constants/urls';
 
 /**
  * Global English constants.
@@ -951,7 +952,11 @@ const englishConstants = {
                 biometric data will be end-to-encrypted.
                 <br />
                 <br />
-                <Link href="#">
+                <Link
+                    target={'_blank'}
+                    href={FACE_SEARCH_PRIVACY_POLICY_LINK}
+                    underline="always"
+                    sx={{ color: 'inherit', textDecorationColor: 'inherit' }}>
                     Please click here for more details about this feature in our
                     privacy policy
                 </Link>

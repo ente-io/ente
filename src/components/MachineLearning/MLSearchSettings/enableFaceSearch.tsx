@@ -51,7 +51,6 @@ export default function EnableFaceSearch({
                                     onChange={(e) =>
                                         setAcceptTerms(e.target.checked)
                                     }
-                                    color="accent"
                                 />
                             }
                             label={constants.FACE_SEARCH_CONFIRMATION}
