@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/debouncer.dart';
 import 'package:photos/utils/separators_util.dart';
@@ -36,7 +37,7 @@ class TextInputWidget extends StatefulWidget {
     this.autoFocus,
     this.maxLength,
     this.submitNotifier,
-    this.alwaysShowSuccessState = false,
+    this.alwaysShowSuccessState = true,
     this.showOnlyLoadingState = false,
     super.key,
   });
@@ -55,6 +56,9 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   void initState() {
     widget.submitNotifier?.addListener(() {
       _onSubmit();
+    });
+    _executionStateNotifier.addListener(() {
+      setState(() {});
     });
     super.initState();
   }
@@ -92,9 +96,11 @@ class _TextInputWidgetState extends State<TextInputWidget> {
               hintText: widget.hintText,
               hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),
               filled: true,
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 12,
-                horizontal: 12,
+              contentPadding: const EdgeInsets.fromLTRB(
+                12,
+                12,
+                0,
+                12,
               ),
               border: const UnderlineInputBorder(
                 borderSide: BorderSide.none,
@@ -103,6 +109,18 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                 borderSide: BorderSide(color: colorScheme.strokeMuted),
                 borderRadius: BorderRadius.circular(8),
               ),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 175),
+                  switchInCurve: Curves.easeInExpo,
+                  switchOutCurve: Curves.easeOutExpo,
+                  child: SuffixIconWidget(
+                    _executionStateNotifier.value,
+                    key: ValueKey(_executionStateNotifier.value),
+                  ),
+                ),
+              ),
               prefixIconConstraints: const BoxConstraints(
                 maxHeight: 44,
                 maxWidth: 44,
@@ -110,10 +128,10 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                 minWidth: 44,
               ),
               suffixIconConstraints: const BoxConstraints(
-                maxHeight: 44,
-                maxWidth: 44,
-                minHeight: 44,
-                minWidth: 44,
+                maxHeight: 24,
+                maxWidth: 36,
+                minHeight: 24,
+                minWidth: 36,
               ),
               prefixIcon: widget.prefixIcon != null
                   ? Icon(
@@ -183,5 +201,32 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         });
       }
     }
+  }
+}
+
+class SuffixIconWidget extends StatelessWidget {
+  final ExecutionState executionState;
+  const SuffixIconWidget(this.executionState, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget trailingWidget;
+    final colorScheme = getEnteColorScheme(context);
+    if (executionState == ExecutionState.idle) {
+      trailingWidget = const SizedBox.shrink();
+    } else if (executionState == ExecutionState.inProgress) {
+      trailingWidget = EnteLoadingWidget(
+        color: colorScheme.strokeMuted,
+      );
+    } else if (executionState == ExecutionState.successful) {
+      trailingWidget = Icon(
+        Icons.check_outlined,
+        size: 22,
+        color: colorScheme.primary500,
+      );
+    } else {
+      trailingWidget = const SizedBox.shrink();
+    }
+    return trailingWidget;
   }
 }
