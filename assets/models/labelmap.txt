@@ -1,4 +1,3 @@
-???
 person
 bicycle
 car
@@ -10,7 +9,6 @@ truck
 boat
 traffic light
 fire hydrant
-???
 stop sign
 parking meter
 bench
@@ -24,11 +22,8 @@ elephant
 bear
 zebra
 giraffe
-???
 backpack
 umbrella
-???
-???
 handbag
 tie
 suitcase
@@ -43,7 +38,6 @@ skateboard
 surfboard
 tennis racket
 bottle
-???
 wine glass
 cup
 fork
@@ -64,12 +58,8 @@ chair
 couch
 potted plant
 bed
-???
 dining table
-???
-???
 toilet
-???
 tv
 laptop
 mouse
@@ -81,7 +71,6 @@ oven
 toaster
 sink
 refrigerator
-???
 book
 clock
 vase
