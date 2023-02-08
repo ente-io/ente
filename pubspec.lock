@@ -1622,11 +1622,12 @@ packages:
   tflite_flutter_helper:
     dependency: "direct main"
     description:
-      name: tflite_flutter_helper
-      sha256: "0d57cce7622826cf11ec602b345ea34fae0da30c8982f973e2037d6245a605d7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.1"
+      path: "."
+      ref: a7d7a59a33f7cffa0a2a12ab05625807622cc97a
+      resolved-ref: a7d7a59a33f7cffa0a2a12ab05625807622cc97a
+      url: "https://github.com/elephantum/tflite_flutter_helper.git"
+    source: git
+    version: "0.3.0"
   timezone:
     dependency: transitive
     description:
