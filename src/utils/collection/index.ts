@@ -198,11 +198,11 @@ export const shouldShowOptions = (type: CollectionSummaryType) => {
 export const showTrashQuickOption = (type: CollectionSummaryType) => {
     return type === CollectionSummaryType.trash;
 };
-export const notShowDownloadQuickOption = (type: CollectionSummaryType) => {
-    return type === CollectionSummaryType.trash;
+export const showDownloadQuickOption = (type: CollectionSummaryType) => {
+    return !(type === CollectionSummaryType.trash);
 };
-export const notShowShareQuickOption = (type: CollectionSummaryType) => {
-    return (
+export const showShareQuickOption = (type: CollectionSummaryType) => {
+    return !(
         type === CollectionSummaryType.trash ||
         type === CollectionSummaryType.favorites ||
         type === CollectionSummaryType.uncategorized ||

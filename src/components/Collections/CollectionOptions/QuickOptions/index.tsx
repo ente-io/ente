@@ -7,8 +7,8 @@ import { MoveToTrashOption } from './MoveToTrashOption';
 import { DownloadOption } from './DownloadOption';
 import { ShareOption } from './ShareOption';
 import {
-    notShowDownloadQuickOption,
-    notShowShareQuickOption,
+    showDownloadQuickOption,
+    showShareQuickOption,
     showTrashQuickOption,
 } from 'utils/collection';
 interface Iprops {
@@ -30,7 +30,7 @@ export function QuickOptions({
                     handleCollectionAction={handleCollectionAction}
                 />
             )}
-            {!notShowDownloadQuickOption(collectionSummaryType) && (
+            {showDownloadQuickOption(collectionSummaryType) && (
                 <DownloadOption
                     handleCollectionAction={handleCollectionAction}
                     tooltipTitle={
@@ -44,7 +44,7 @@ export function QuickOptions({
                     }
                 />
             )}
-            {!notShowShareQuickOption(collectionSummaryType) && (
+            {showShareQuickOption(collectionSummaryType) && (
                 <ShareOption
                     handleCollectionAction={handleCollectionAction}
                     tooltipTitle={
