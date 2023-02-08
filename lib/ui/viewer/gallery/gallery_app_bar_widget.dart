@@ -114,9 +114,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final result = await showTextInputDialog(
       context,
       title: "Rename album",
-      confirmationButtonLabel: "Rename",
+      submitButtonLabel: "Rename",
       hintText: "Enter album name",
-      onConfirm: (String text) async {
+      onSubmit: (String text) async {
         // indicates user cancelled the rename request
         if (text == "" || text.trim() == _appBarTitle!.trim()) {
           return;

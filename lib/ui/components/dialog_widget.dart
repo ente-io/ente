@@ -159,11 +159,11 @@ class Actions extends StatelessWidget {
 class TextInputDialog extends StatefulWidget {
   final String title;
   final String? body;
-  final String confirmationButtonLabel;
+  final String submitButtonLabel;
   final IconData? icon;
   final String? label;
   final String? message;
-  final FutureVoidCallbackParamStr onConfirm;
+  final FutureVoidCallbackParamStr onSubmit;
   final String? hintText;
   final IconData? prefixIcon;
   final String? initialValue;
@@ -172,8 +172,8 @@ class TextInputDialog extends StatefulWidget {
   const TextInputDialog({
     required this.title,
     this.body,
-    required this.confirmationButtonLabel,
-    required this.onConfirm,
+    required this.submitButtonLabel,
+    required this.onSubmit,
     this.icon,
     this.label,
     this.message,
@@ -190,7 +190,8 @@ class TextInputDialog extends StatefulWidget {
 }
 
 class _TextInputDialogState extends State<TextInputDialog> {
-  final TextEditingController _textController = TextEditingController();
+  //the value of this ValueNotifier has no significance
+  final _submitNotifier = ValueNotifier(false);
   @override
   Widget build(BuildContext context) {
     final widthOfScreen = MediaQuery.of(context).size.width;
@@ -219,7 +220,6 @@ class _TextInputDialogState extends State<TextInputDialog> {
             Padding(
               padding: const EdgeInsets.only(top: 19),
               child: TextInputWidget(
-                textController: _textController,
                 label: widget.label,
                 message: widget.message,
                 hintText: widget.hintText,
@@ -228,6 +228,8 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 alignMessage: widget.alignMessage,
                 autoFocus: true,
                 maxLength: widget.maxLength,
+                submitNotifier: _submitNotifier,
+                onSubmit: widget.onSubmit,
               ),
             ),
             const SizedBox(height: 36),
@@ -247,10 +249,10 @@ class _TextInputDialogState extends State<TextInputDialog> {
                   child: ButtonWidget(
                     buttonSize: ButtonSize.small,
                     buttonType: ButtonType.neutral,
-                    labelText: widget.confirmationButtonLabel,
-                    onTap: _onTap,
-                    isInAlert: true,
-                    shouldShowSuccessConfirmation: true,
+                    labelText: widget.submitButtonLabel,
+                    onTap: () async {
+                      _submitNotifier.value = !_submitNotifier.value;
+                    },
                   ),
                 ),
               ],
@@ -259,9 +261,5 @@ class _TextInputDialogState extends State<TextInputDialog> {
         ),
       ),
     );
-  }
-
-  Future<void> _onTap() async {
-    await widget.onConfirm.call(_textController.text);
   }
 }

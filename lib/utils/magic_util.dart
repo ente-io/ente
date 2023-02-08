@@ -103,13 +103,13 @@ Future<void> editFilename(
   await showTextInputDialog(
     context,
     title: "Rename file",
-    confirmationButtonLabel: "Rename",
+    submitButtonLabel: "Rename",
     initialValue: nameWithoutExt,
     message: extName,
     alignMessage: Alignment.centerRight,
     hintText: "Enter file name",
     maxLength: 50,
-    onConfirm: (String text) async {
+    onSubmit: (String text) async {
       try {
         if (text.isEmpty || text.trim() == nameWithoutExt.trim()) {
           return;
