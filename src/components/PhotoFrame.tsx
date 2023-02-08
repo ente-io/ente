@@ -203,17 +203,21 @@ const PhotoFrame = ({
                         h: window.innerHeight,
                         title: item.pubMagicMetadata?.data.caption,
                     };
-                    if (galleryContext.thumbs.has(item.id)) {
-                        updateFileMsrcProps(
-                            filteredItem,
-                            galleryContext.thumbs.get(item.id)
-                        );
-                    }
-                    if (galleryContext.files.has(item.id)) {
-                        updateFileSrcProps(
-                            filteredItem,
-                            galleryContext.files.get(item.id)
-                        );
+                    try {
+                        if (galleryContext.thumbs.has(item.id)) {
+                            updateFileMsrcProps(
+                                filteredItem,
+                                galleryContext.thumbs.get(item.id)
+                            );
+                        }
+                        if (galleryContext.files.has(item.id)) {
+                            updateFileSrcProps(
+                                filteredItem,
+                                galleryContext.files.get(item.id)
+                            );
+                        }
+                    } catch (e) {
+                        logError(e, 'PhotoFrame url prefill failed');
                     }
                     return filteredItem;
                 });
@@ -459,12 +463,12 @@ const PhotoFrame = ({
             ) {
                 handleSelect(
                     filteredData[i].id,
-                    filteredData[i].ownerID === user.id
+                    filteredData[i].ownerID === user?.id
                 )(!checked);
             }
             handleSelect(
                 filteredData[index].id,
-                filteredData[index].ownerID === user.id,
+                filteredData[index].ownerID === user?.id,
                 index
             )(!checked);
         }
@@ -479,7 +483,10 @@ const PhotoFrame = ({
             file={item}
             updateURL={updateURL(index)}
             onClick={onThumbnailClick(index)}
-            onSelect={handleSelect(item.id, item.ownerID === user.id, index)}
+            selectable={
+                !publicCollectionGalleryContext?.accessedThroughSharedURL
+            }
+            onSelect={handleSelect(item.id, item.ownerID === user?.id, index)}
             selected={
                 selected.collectionID === activeCollection && selected[item.id]
             }

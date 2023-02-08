@@ -1,6 +1,7 @@
 import { FILE_TYPE } from 'constants/file';
 import { EnteFile } from 'types/file';
 import { MergedSourceURL } from 'types/gallery';
+import { logError } from 'utils/sentry';
 import constants from 'utils/strings/constants';
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
@@ -61,7 +62,11 @@ export function updateFileMsrcProps(file: EnteFile, url: string) {
     } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         file.src = url;
     } else {
-        throw Error('Invalid file type');
+        logError(
+            Error(`unknown file type - ${file.metadata.fileType}`),
+            'Unknown file type'
+        );
+        file.src = url;
     }
 }
 
@@ -77,15 +82,18 @@ export async function updateFileSrcProps(
     let originalVideoURL;
     let convertedImageURL;
     let convertedVideoURL;
+    let originalURL;
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         [originalImageURL, originalVideoURL] = urls.original;
         [convertedImageURL, convertedVideoURL] = urls.converted;
     } else if (file.metadata.fileType === FILE_TYPE.VIDEO) {
         [originalVideoURL] = urls.original;
         [convertedVideoURL] = urls.converted;
-    } else {
+    } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         [originalImageURL] = urls.original;
         [convertedImageURL] = urls.converted;
+    } else {
+        [originalURL] = urls.original;
     }
 
     const isPlayable =
@@ -141,6 +149,10 @@ export async function updateFileSrcProps(
     } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         file.src = convertedImageURL;
     } else {
-        throw Error('Invalid file type');
+        logError(
+            Error(`unknown file type - ${file.metadata.fileType}`),
+            'Unknown file type'
+        );
+        file.src = originalURL;
     }
 }
