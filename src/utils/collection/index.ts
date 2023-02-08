@@ -196,6 +196,14 @@ export const shouldShowOptions = (type: CollectionSummaryType) => {
     return !OPTIONS_NOT_HAVING_COLLECTION_TYPES.has(type);
 };
 
+export const onlyDownloadQuickOption = (type: CollectionSummaryType) => {
+    return (
+        type === CollectionSummaryType.favorites ||
+        type === CollectionSummaryType.uncategorized ||
+        type === CollectionSummaryType.incomingShare
+    );
+};
+
 export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
     return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
 };
