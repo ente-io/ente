@@ -107,6 +107,8 @@ dependencies:
   step_progress_indicator: ^1.0.2
   syncfusion_flutter_core: ^19.2.49
   syncfusion_flutter_sliders: ^19.2.49
+  tflite_flutter: ^0.9.0
+  tflite_flutter_helper: ^0.3.1
   tuple: ^2.0.0
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
@@ -151,6 +153,7 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
+    - assets/models/
   fonts:
   - family: Inter
     fonts:
