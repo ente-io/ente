@@ -920,6 +920,61 @@ const englishConstants = {
     ),
     ADD_X_PHOTOS: (x: number) => `Add ${x} ${x > 1 ? 'photos' : 'photo'}`,
     CHOSE_THEME: 'Choose theme',
+    ML_SEARCH: 'ML search (beta)',
+    ML_SEARCH_DESCRIPTION: () => (
+        <>
+            <Typography color="text.secondary">
+                This will enable on-device machine learning and face search
+                which will start analyzing your uploaded photos locally.
+                <br />
+                <br />
+                For the first run after login or enabling this feature, it will
+                download all images on local device to analyze them. So please
+                only enable this if you are ok with bandwidth and local
+                processing of all images in your photo library.
+                <br />
+                <br />
+                If this is the first time you're enabling this, we'll also ask
+                your permission to process face data.
+            </Typography>
+        </>
+    ),
+    ML_MORE_DETAILS: 'More details',
+
+    ENABLE_FACE_SEARCH: 'Enable face search',
+    ENABLE_FACE_SEARCH_TITLE: 'Enable face search?',
+    ENABLE_FACE_SEARCH_DESCRIPTION: () => (
+        <>
+            <Typography color="text.secondary">
+                If you enable face search, ente will extract face geometry from
+                your photos. This will happen on your device, and any generated
+                biometric data will be end-to-encrypted.
+                <br />
+                <br />
+                <Link href="#">
+                    Please click here for more details about this feature in our
+                    privacy policy
+                </Link>
+            </Typography>
+        </>
+    ),
+    DISABLE_BETA: 'Disable beta',
+    DISABLE_FACE_SEARCH: 'Disable face search',
+    DISABLE_FACE_SEARCH_TITLE: 'Disable face search?',
+    DISABLE_FACE_SEARCH_DESCRIPTION: () => (
+        <Typography>
+            ente will stop processing face geometry, and will also disable ML
+            search (beta)
+            <br />
+            <br />
+            You can reenable face search again if you wish, so this operation is
+            safe
+        </Typography>
+    ),
+    ADVANCED: 'Advanced',
+    FACE_SEARCH_CONFIRMATION:
+        'I understand, and wish to allow ente to process face geometry',
+    LABS: 'Labs',
 };
 
 export default englishConstants;

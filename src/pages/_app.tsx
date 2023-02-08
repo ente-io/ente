@@ -76,7 +76,7 @@ type AppContextType = {
     redirectURL: string;
     setRedirectURL: (url: string) => void;
     mlSearchEnabled: boolean;
-    updateMlSearchEnabled: (enabled: boolean) => void;
+    updateMlSearchEnabled: (enabled: boolean) => Promise<void>;
     startLoading: () => void;
     finishLoading: () => void;
     closeMessageDialog: () => void;
@@ -91,6 +91,7 @@ type AppContextType = {
     isMobile: boolean;
     theme: THEME_COLOR;
     setTheme: SetTheme;
+    somethingWentWrong: () => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -328,6 +329,13 @@ export default function App({ Component, err }) {
 
     const closeMessageDialog = () => setMessageDialogView(false);
 
+    const somethingWentWrong = () =>
+        setDialogMessage({
+            title: constants.ERROR,
+            close: { variant: 'danger' },
+            content: constants.UNKNOWN_ERROR,
+        });
+
     return (
         <>
             <Head>
@@ -406,6 +414,7 @@ export default function App({ Component, err }) {
                         setNotificationAttributes,
                         theme,
                         setTheme,
+                        somethingWentWrong,
                     }}>
                     {loading ? (
                         <VerticallyCentered>
