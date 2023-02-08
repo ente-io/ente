@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
+import 'package:photos/utils/debouncer.dart';
 import 'package:photos/utils/separators_util.dart';
+
+enum ExecutionState {
+  idle,
+  inProgress,
+  error,
+  successful;
+}
 
 class TextInputWidget extends StatefulWidget {
   final String? label;
@@ -39,11 +47,14 @@ class TextInputWidget extends StatefulWidget {
 
 class _TextInputWidgetState extends State<TextInputWidget> {
   final _textController = TextEditingController();
+  final _debouncer = Debouncer(const Duration(milliseconds: 300));
+  final ValueNotifier<ExecutionState> _executionStateNotifier =
+      ValueNotifier(ExecutionState.idle);
 
   @override
   void initState() {
     widget.submitNotifier?.addListener(() {
-      widget.onSubmit.call(_textController.text);
+      _onSubmit();
     });
     super.initState();
   }
@@ -51,6 +62,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   @override
   void dispose() {
     widget.submitNotifier?.dispose();
+    _executionStateNotifier.dispose();
     super.dispose();
   }
 
@@ -136,5 +148,40 @@ class _TextInputWidgetState extends State<TextInputWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: textInputChildren,
     );
+  }
+
+  Future<void> _onSubmit() async {
+    _debouncer.run(
+      () => Future(
+        () {
+          _executionStateNotifier.value = ExecutionState.inProgress;
+        },
+      ),
+    );
+    await widget.onSubmit.call(_textController.text).then(
+      (value) {
+        widget.alwaysShowSuccessState
+            ? _executionStateNotifier.value = ExecutionState.successful
+            : null;
+      },
+      onError: (error, stackTrace) => _debouncer.cancelDebounce(),
+    );
+    _debouncer.cancelDebounce();
+    if (widget.alwaysShowSuccessState) {
+      Future.delayed(const Duration(seconds: 2), () {
+        _executionStateNotifier.value = ExecutionState.idle;
+      });
+      return;
+    }
+    if (_executionStateNotifier.value == ExecutionState.inProgress) {
+      if (widget.showOnlyLoadingState) {
+        _executionStateNotifier.value = ExecutionState.idle;
+      } else {
+        _executionStateNotifier.value = ExecutionState.successful;
+        Future.delayed(const Duration(seconds: 2), () {
+          _executionStateNotifier.value = ExecutionState.idle;
+        });
+      }
+    }
   }
 }
