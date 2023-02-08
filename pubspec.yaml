@@ -110,7 +110,7 @@ dependencies:
   tflite_flutter: ^0.9.0
   tflite_flutter_helper:
     git:
-      url: https://github.com/elephantum/tflite_flutter_helper.git
+      url: https://github.com/elephantum/tflite_flutter_helper.git  # Fixes https://github.com/am15h/tflite_flutter_helper/issues/57
       ref: a7d7a59a33f7cffa0a2a12ab05625807622cc97a
   tuple: ^2.0.0
   uni_links: ^0.5.1
