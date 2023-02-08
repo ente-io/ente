@@ -1,15 +1,9 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/models/execution_states.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_child_widgets.dart';
 import 'package:photos/utils/debouncer.dart';
-
-enum ExecutionState {
-  idle,
-  inProgress,
-  error,
-  successful;
-}
 
 typedef FutureVoidCallback = Future<void> Function();
 

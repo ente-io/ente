@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:photos/models/execution_states.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/debouncer.dart';
 import 'package:photos/utils/separators_util.dart';
-
-enum ExecutionState {
-  idle,
-  inProgress,
-  error,
-  successful;
-}
 
 class TextInputWidget extends StatefulWidget {
   final String? label;

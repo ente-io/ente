@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/models/execution_states.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/debouncer.dart';
-
-enum ExecutionState {
-  idle,
-  inProgress,
-  successful,
-}
 
 typedef FutureVoidCallback = Future<void> Function();
 typedef BoolCallBack = bool Function();
