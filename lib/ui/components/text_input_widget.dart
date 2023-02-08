@@ -151,7 +151,9 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                     )
                   : null,
             ),
-            onEditingComplete: () {},
+            onEditingComplete: () {
+              _onSubmit();
+            },
           ),
         ),
       ),

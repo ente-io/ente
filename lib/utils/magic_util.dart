@@ -105,7 +105,7 @@ Future<void> editFilename(
     title: "Rename file",
     submitButtonLabel: "Rename",
     initialValue: nameWithoutExt,
-    message: extName,
+    message: extName.toUpperCase(),
     alignMessage: Alignment.centerRight,
     hintText: "Enter file name",
     maxLength: 50,

@@ -2,6 +2,7 @@ import "package:exif/exif.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:path/path.dart' as path;
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/db/files_db.dart';
@@ -154,7 +155,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 ),
               ),
         title: Text(
-          file.displayName,
+          path.basenameWithoutExtension(file.displayName) +
+              path.extension(file.displayName).toUpperCase(),
         ),
         subtitle: Row(
           children: [
