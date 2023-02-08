@@ -11,7 +11,7 @@ interface Iprops {
     ) => (...args: any[]) => Promise<void>;
 }
 
-export function DeleteOption({ handleCollectionAction }: Iprops) {
+export function MoveToTrashOption({ handleCollectionAction }: Iprops) {
     return (
         <Tooltip title={constants.EMPTY_TRASH}>
             <IconButton

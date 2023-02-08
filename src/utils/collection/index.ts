@@ -195,15 +195,20 @@ export const isSystemCollection = (type: CollectionSummaryType) => {
 export const shouldShowOptions = (type: CollectionSummaryType) => {
     return !OPTIONS_NOT_HAVING_COLLECTION_TYPES.has(type);
 };
-
-export const onlyDownloadQuickOption = (type: CollectionSummaryType) => {
+export const showTrashQuickOption = (type: CollectionSummaryType) => {
+    return type === CollectionSummaryType.trash;
+};
+export const notShowDownloadQuickOption = (type: CollectionSummaryType) => {
+    return type === CollectionSummaryType.trash;
+};
+export const notShowShareQuickOption = (type: CollectionSummaryType) => {
     return (
+        type === CollectionSummaryType.trash ||
         type === CollectionSummaryType.favorites ||
         type === CollectionSummaryType.uncategorized ||
         type === CollectionSummaryType.incomingShare
     );
 };
-
 export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
     return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
 };
