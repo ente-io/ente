@@ -38,8 +38,6 @@ rm ${IOS_ASSET}
 rm -rf "${IOS_DIR}/${IOS_FRAMEWORK}"
 mv ${IOS_FRAMEWORK} ${IOS_DIR}
 
-exit
-
 download () {
     wget "${ANDROID_URL}${TAG}/$1"
     mkdir -p "${ANDROID_DIR}$2/"
