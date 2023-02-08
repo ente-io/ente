@@ -60,6 +60,12 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     _executionStateNotifier.addListener(() {
       setState(() {});
     });
+    if (widget.initialValue != null) {
+      _textController.value = TextEditingValue(
+        text: widget.initialValue!,
+        selection: TextSelection.collapsed(offset: widget.initialValue!.length),
+      );
+    }
     super.initState();
   }
 
@@ -72,12 +78,6 @@ class _TextInputWidgetState extends State<TextInputWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.initialValue != null) {
-      _textController.value = TextEditingValue(
-        text: widget.initialValue!,
-        selection: TextSelection.collapsed(offset: widget.initialValue!.length),
-      );
-    }
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     var textInputChildren = <Widget>[];
@@ -96,6 +96,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
               hintText: widget.hintText,
               hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),
               filled: true,
+              fillColor: colorScheme.fillFaint,
               contentPadding: const EdgeInsets.fromLTRB(
                 12,
                 12,
@@ -110,7 +111,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                 borderRadius: BorderRadius.circular(8),
               ),
               suffixIcon: Padding(
-                padding: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 175),
                   switchInCurve: Curves.easeInExpo,
@@ -129,9 +130,9 @@ class _TextInputWidgetState extends State<TextInputWidget> {
               ),
               suffixIconConstraints: const BoxConstraints(
                 maxHeight: 24,
-                maxWidth: 36,
+                maxWidth: 48,
                 minHeight: 24,
-                minWidth: 36,
+                minWidth: 48,
               ),
               prefixIcon: widget.prefixIcon != null
                   ? Icon(
