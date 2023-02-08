@@ -15,6 +15,7 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/extensions/string_ext.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
@@ -36,7 +37,6 @@ class LazyLoadingGallery extends StatefulWidget {
   final String? logTag;
   final Stream<int> currentIndexStream;
   final int photoGirdSize;
-  final IntentAction intentAction;
   LazyLoadingGallery(
     this.files,
     this.index,
@@ -48,7 +48,6 @@ class LazyLoadingGallery extends StatefulWidget {
     this.currentIndexStream, {
     this.logTag = "",
     this.photoGirdSize = photoGridSizeDefault,
-    this.intentAction = IntentAction.main,
     Key? key,
   }) : super(key: key ?? UniqueKey());
 
@@ -262,7 +261,6 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           _toggleSelectAllFromDay,
           _areAllFromDaySelected,
           widget.photoGirdSize,
-          intentAction: widget.intentAction,
         ),
       );
     }
@@ -291,7 +289,6 @@ class LazyLoadingGridView extends StatefulWidget {
   final ValueNotifier toggleSelectAllFromDay;
   final ValueNotifier areAllFilesSelected;
   final int? photoGridSize;
-  final IntentAction intentAction;
 
   LazyLoadingGridView(
     this.tag,
@@ -303,7 +300,6 @@ class LazyLoadingGridView extends StatefulWidget {
     this.toggleSelectAllFromDay,
     this.areAllFilesSelected,
     this.photoGridSize, {
-    this.intentAction = IntentAction.main,
     Key? key,
   }) : super(key: key ?? UniqueKey());
 
@@ -430,7 +426,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         if (widget.selectedFiles.files.isNotEmpty) {
           _selectFile(file);
         } else {
-          if (widget.intentAction == IntentAction.pick) {
+          if (AppLifecycleService.instance.intentAction == IntentAction.pick) {
             final ioFile = await getFile(file);
             _mediaExtensionPlugin.setResult("file://${ioFile!.path}");
           } else {
@@ -439,8 +435,10 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         }
       },
       onLongPress: () {
-        HapticFeedback.lightImpact();
-        _selectFile(file);
+        if (AppLifecycleService.instance.intentAction == IntentAction.main) {
+          HapticFeedback.lightImpact();
+          _selectFile(file);
+        }
       },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(1),

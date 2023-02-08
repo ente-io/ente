@@ -40,7 +40,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
   }
 
-  Future<IntentAction> initIntentAction() async {
+  Future<bool> initIntentAction() async {
     IntentAction intentAction = IntentAction.main;
     try {
       final actionResult = await _mediaExtensionPlugin.getIntentAction();
@@ -51,7 +51,8 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     if (intentAction == IntentAction.main) {
       _configureBackgroundFetch();
     }
-    return intentAction;
+    AppLifecycleService.instance.setIntentAction(intentAction);
+    return true;
   }
 
   @override
@@ -59,8 +60,8 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     if (Platform.isAndroid || kDebugMode) {
       return FutureBuilder(
         future: initIntentAction(),
-        builder: (BuildContext context, AsyncSnapshot<IntentAction> snapshot) {
-          return snapshot.data != null
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          return snapshot.data != null && snapshot.data == true
               ? AdaptiveTheme(
                   light: lightThemeData,
                   dark: darkThemeData,
@@ -70,7 +71,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
                     themeMode: ThemeMode.system,
                     theme: lightTheme,
                     darkTheme: dartTheme,
-                    home: HomeWidget(intentAction: snapshot.data!),
+                    home: const HomeWidget(),
                     debugShowCheckedModeBanner: false,
                     builder: EasyLoading.init(),
                     supportedLocales: AppLocalizations.supportedLocales,
@@ -87,7 +88,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         themeMode: ThemeMode.system,
         theme: lightThemeData,
         darkTheme: darkThemeData,
-        home: const HomeWidget(intentAction: IntentAction.main),
+        home: const HomeWidget(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
         supportedLocales: AppLocalizations.supportedLocales,
