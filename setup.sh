@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Originally from https://github.com/am15h/tflite_flutter_plugin/blob/master/install.sh
+
 cd "$(dirname "$(readlink -f "$0")")"
 
 IOS_URL="https://github.com/am15h/tflite_flutter_plugin/releases/download/v0.5.0/"
