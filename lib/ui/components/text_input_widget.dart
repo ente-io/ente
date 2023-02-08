@@ -26,6 +26,8 @@ class TextInputWidget extends StatefulWidget {
   final bool alwaysShowSuccessState;
   final bool showOnlyLoadingState;
   final FutureVoidCallbackParamStr onSubmit;
+  final bool popNavAfterSubmission;
+  final bool shouldSurfaceExecutionStates;
   const TextInputWidget({
     required this.onSubmit,
     this.label,
@@ -37,8 +39,10 @@ class TextInputWidget extends StatefulWidget {
     this.autoFocus,
     this.maxLength,
     this.submitNotifier,
-    this.alwaysShowSuccessState = true,
+    this.alwaysShowSuccessState = false,
     this.showOnlyLoadingState = false,
+    this.popNavAfterSubmission = false,
+    this.shouldSurfaceExecutionStates = true,
     super.key,
   });
 
@@ -47,19 +51,16 @@ class TextInputWidget extends StatefulWidget {
 }
 
 class _TextInputWidgetState extends State<TextInputWidget> {
+  ExecutionState executionState = ExecutionState.idle;
   final _textController = TextEditingController();
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
-  final ValueNotifier<ExecutionState> _executionStateNotifier =
-      ValueNotifier(ExecutionState.idle);
 
   @override
   void initState() {
     widget.submitNotifier?.addListener(() {
       _onSubmit();
     });
-    _executionStateNotifier.addListener(() {
-      setState(() {});
-    });
+
     if (widget.initialValue != null) {
       _textController.value = TextEditingValue(
         text: widget.initialValue!,
@@ -72,12 +73,19 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   @override
   void dispose() {
     widget.submitNotifier?.dispose();
-    _executionStateNotifier.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (executionState == ExecutionState.successful) {
+      Future.delayed(Duration(seconds: widget.popNavAfterSubmission ? 1 : 2),
+          () {
+        setState(() {
+          executionState = ExecutionState.idle;
+        });
+      });
+    }
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     var textInputChildren = <Widget>[];
@@ -117,8 +125,10 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                   switchInCurve: Curves.easeInExpo,
                   switchOutCurve: Curves.easeOutExpo,
                   child: SuffixIconWidget(
-                    _executionStateNotifier.value,
-                    key: ValueKey(_executionStateNotifier.value),
+                    key: ValueKey(executionState),
+                    executionState: executionState,
+                    shouldSurfaceExecutionStates:
+                        widget.shouldSurfaceExecutionStates,
                   ),
                 ),
               ),
@@ -169,51 +179,97 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     );
   }
 
-  Future<void> _onSubmit() async {
+  void _onSubmit() async {
     _debouncer.run(
-      () => Future(
-        () {
-          _executionStateNotifier.value = ExecutionState.inProgress;
-        },
-      ),
+      () => Future(() {
+        setState(() {
+          executionState = ExecutionState.inProgress;
+        });
+      }),
     );
-    await widget.onSubmit.call(_textController.text).then(
-      (value) {
-        widget.alwaysShowSuccessState
-            ? _executionStateNotifier.value = ExecutionState.successful
-            : null;
-      },
-      onError: (error, stackTrace) => _debouncer.cancelDebounce(),
-    );
+    await widget.onSubmit!
+        .call(_textController.text)
+        .onError((error, stackTrace) {
+      executionState = ExecutionState.error;
+      _debouncer.cancelDebounce();
+    });
+    widget.alwaysShowSuccessState && _debouncer.isActive()
+        ? executionState = ExecutionState.successful
+        : null;
     _debouncer.cancelDebounce();
-    if (widget.alwaysShowSuccessState) {
-      Future.delayed(const Duration(seconds: 2), () {
-        _executionStateNotifier.value = ExecutionState.idle;
-      });
-      return;
+    if (executionState == ExecutionState.successful) {
+      setState(() {});
     }
-    if (_executionStateNotifier.value == ExecutionState.inProgress) {
-      if (widget.showOnlyLoadingState) {
-        _executionStateNotifier.value = ExecutionState.idle;
-      } else {
-        _executionStateNotifier.value = ExecutionState.successful;
-        Future.delayed(const Duration(seconds: 2), () {
-          _executionStateNotifier.value = ExecutionState.idle;
+
+    // when the time taken by widget.onSubmit is approximately equal to the debounce
+    // time, the callback is getting executed when/after the if condition
+    // below is executing/executed which results in execution state stuck at
+    // idle state. This Future is for delaying the execution of the if
+    // condition so that the calback in the debouncer finishes execution before.
+    await Future.delayed(const Duration(milliseconds: 5));
+    if (executionState == ExecutionState.inProgress ||
+        executionState == ExecutionState.error) {
+      if (executionState == ExecutionState.inProgress) {
+        if (mounted) {
+          setState(() {
+            executionState = ExecutionState.successful;
+            Future.delayed(
+                Duration(
+                  seconds: widget.shouldSurfaceExecutionStates
+                      ? (widget.popNavAfterSubmission ? 1 : 2)
+                      : 0,
+                ), () {
+              widget.popNavAfterSubmission ? _popNavigatorStack(context) : null;
+              if (mounted) {
+                setState(() {
+                  executionState = ExecutionState.idle;
+                });
+              }
+            });
+          });
+        }
+      }
+      if (executionState == ExecutionState.error) {
+        setState(() {
+          executionState = ExecutionState.idle;
+          widget.popNavAfterSubmission
+              ? Future.delayed(
+                  const Duration(seconds: 0),
+                  () => _popNavigatorStack(context),
+                )
+              : null;
         });
       }
+    } else {
+      if (widget.popNavAfterSubmission) {
+        Future.delayed(
+          Duration(seconds: widget.alwaysShowSuccessState ? 1 : 0),
+          () => _popNavigatorStack(context),
+        );
+      }
     }
+  }
+
+  void _popNavigatorStack(BuildContext context) {
+    Navigator.of(context).canPop() ? Navigator.of(context).pop() : null;
   }
 }
 
 class SuffixIconWidget extends StatelessWidget {
   final ExecutionState executionState;
-  const SuffixIconWidget(this.executionState, {super.key});
+  final bool shouldSurfaceExecutionStates;
+  const SuffixIconWidget({
+    required this.executionState,
+    required this.shouldSurfaceExecutionStates,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     final Widget trailingWidget;
     final colorScheme = getEnteColorScheme(context);
-    if (executionState == ExecutionState.idle) {
+    if (executionState == ExecutionState.idle ||
+        !shouldSurfaceExecutionStates) {
       trailingWidget = const SizedBox.shrink();
     } else if (executionState == ExecutionState.inProgress) {
       trailingWidget = EnteLoadingWidget(

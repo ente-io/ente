@@ -230,6 +230,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 maxLength: widget.maxLength,
                 submitNotifier: _submitNotifier,
                 onSubmit: widget.onSubmit,
+                popNavAfterSubmission: true,
               ),
             ),
             const SizedBox(height: 36),
