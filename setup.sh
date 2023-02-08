@@ -4,15 +4,16 @@
 
 cd "$(dirname "$(readlink -f "$0")")"
 
-IOS_URL="https://github.com/am15h/tflite_flutter_plugin/releases/download/v0.5.0/"
+# Pull from the latest tag where binaries were built
+TAG="v0.5.0"
+
+IOS_URL="https://github.com/am15h/tflite_flutter_plugin/releases/download/"
+ANDROID_URL="https://github.com/am15h/tflite_flutter_plugin/releases/download/"
+
 IOS_ASSET="TensorFlowLiteC.framework.zip"
 IOS_FRAMEWORK="TensorFlowLiteC.framework"
 IOS_DIR="ios/.symlinks/plugins/tflite_flutter/ios/"
 MACOSX_METADATA_DIR="__MACOSX"
-
-ANDROID_URL="https://github.com/am15h/tflite_flutter_plugin/releases/download/"
-
-TAG="v0.2.0"
 
 ANDROID_DIR="android/app/src/main/jniLibs/"
 ANDROID_LIB="libtensorflowlite_c.so"
@@ -33,7 +34,7 @@ do
 	esac
 done
 
-wget ${IOS_URL}${IOS_ASSET}
+wget "${IOS_URL}${TAG}/${IOS_ASSET}"
 unzip ${IOS_ASSET}
 rm -rf ${MACOSX_METADATA_DIR}
 rm ${IOS_ASSET}
