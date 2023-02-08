@@ -267,6 +267,8 @@ Future<ButtonAction?> showTextInputDialog(
   String? initialValue,
   Alignment? alignMessage,
   int? maxLength,
+  bool showOnlyLoadingState = false,
+  TextCapitalization textCapitalization = TextCapitalization.none,
 }) {
   return showDialog(
     barrierColor: backdropFaintDark,
@@ -290,6 +292,8 @@ Future<ButtonAction?> showTextInputDialog(
             initialValue: initialValue,
             alignMessage: alignMessage,
             maxLength: maxLength,
+            showOnlyLoadingState: showOnlyLoadingState,
+            textCapitalization: textCapitalization,
           ),
         ),
       );

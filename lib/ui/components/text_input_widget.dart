@@ -22,6 +22,7 @@ class TextInputWidget extends StatefulWidget {
   final FutureVoidCallbackParamStr onSubmit;
   final bool popNavAfterSubmission;
   final bool shouldSurfaceExecutionStates;
+  final TextCapitalization? textCapitalization;
   const TextInputWidget({
     required this.onSubmit,
     this.label,
@@ -37,6 +38,7 @@ class TextInputWidget extends StatefulWidget {
     this.showOnlyLoadingState = false,
     this.popNavAfterSubmission = false,
     this.shouldSurfaceExecutionStates = true,
+    this.textCapitalization = TextCapitalization.none,
     super.key,
   });
 
@@ -89,6 +91,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         child: Material(
           child: TextFormField(
+            textCapitalization: widget.textCapitalization!,
             autofocus: widget.autoFocus ?? false,
             controller: _textController,
             inputFormatters: widget.maxLength != null
@@ -211,6 +214,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
             setState(() {
               executionState = ExecutionState.idle;
             });
+            _popNavigatorStack(context);
           } else {
             setState(() {
               executionState = ExecutionState.successful;

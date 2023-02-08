@@ -153,7 +153,16 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                             widget.showOptionToCreateNewAlbum) {
                                           return GestureDetector(
                                             onTap: () {
-                                              _showNameAlbumDialog();
+                                              showTextInputDialog(
+                                                context,
+                                                title: "Album title",
+                                                submitButtonLabel: "OK",
+                                                hintText: "Enter album name",
+                                                onSubmit: _nameAlbum,
+                                                showOnlyLoadingState: true,
+                                                textCapitalization:
+                                                    TextCapitalization.words,
+                                              );
                                             },
                                             behavior: HitTestBehavior.opaque,
                                             child:
@@ -225,84 +234,44 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
     );
   }
 
-  void _showNameAlbumDialog() async {
-    String? albumName;
-    final AlertDialog alert = AlertDialog(
-      title: const Text("Album title"),
-      content: TextFormField(
-        decoration: const InputDecoration(
-          hintText: "Christmas 2020 / Dinner at Alice's",
-          contentPadding: EdgeInsets.all(8),
-        ),
-        onChanged: (value) {
-          albumName = value;
-        },
-        autofocus: true,
-        keyboardType: TextInputType.text,
-        textCapitalization: TextCapitalization.words,
-      ),
-      actions: [
-        TextButton(
-          child: Text(
-            "Ok",
-            style: TextStyle(
-              color: getEnteColorScheme(context).primary500,
-            ),
-          ),
-          onPressed: () async {
-            if (albumName != null && albumName!.isNotEmpty) {
-              Navigator.of(context, rootNavigator: true).pop('dialog');
-              final collection = await _createAlbum(albumName!);
-              if (collection != null) {
-                if (await _runCollectionAction(collection.id)) {
-                  if (widget.actionType == CollectionActionType.restoreFiles) {
-                    showShortToast(
-                      context,
-                      'Restored files to album ' + albumName!,
-                    );
-                  } else {
-                    showShortToast(
-                      context,
-                      "Album '" + albumName! + "' created.",
-                    );
-                  }
-                  _navigateToCollection(collection);
-                }
-              }
-            }
-          },
-        ),
-      ],
-    );
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
+  Future<void> _nameAlbum(String albumName) async {
+    if (albumName.isNotEmpty) {
+      final collection = await _createAlbum(albumName);
+      if (collection != null) {
+        if (await _runCollectionAction(
+          collectionID: collection.id,
+          showProgressDialog: false,
+        )) {
+          if (widget.actionType == CollectionActionType.restoreFiles) {
+            showShortToast(
+              context,
+              'Restored files to album ' + albumName,
+            );
+          } else {
+            showShortToast(
+              context,
+              "Album '" + albumName + "' created.",
+            );
+          }
+          _navigateToCollection(collection);
+        }
+      }
+    }
   }
 
   Future<Collection?> _createAlbum(String albumName) async {
     Collection? collection;
-    final dialog = createProgressDialog(context, "Creating album...");
-    await dialog.show();
     try {
       collection = await CollectionsService.instance.createAlbum(albumName);
     } catch (e, s) {
       _logger.severe(e, s);
-      await dialog.hide();
       showGenericErrorDialog(context: context);
-    } finally {
-      await dialog.hide();
-    }
+    } finally {}
     return collection;
   }
 
   Future<void> _albumListItemOnTap(CollectionWithThumbnail item) async {
-    if (await _runCollectionAction(
-      item.collection.id,
-    )) {
+    if (await _runCollectionAction(collectionID: item.collection.id)) {
       showShortToast(
         context,
         widget.actionType == CollectionActionType.addFiles
@@ -347,10 +316,16 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
     );
   }
 
-  Future<bool> _runCollectionAction(int collectionID) async {
+  Future<bool> _runCollectionAction({
+    required int collectionID,
+    bool showProgressDialog = true,
+  }) async {
     switch (widget.actionType) {
       case CollectionActionType.addFiles:
-        return _addToCollection(collectionID);
+        return _addToCollection(
+          collectionID: collectionID,
+          showProgressDialog: showProgressDialog,
+        );
       case CollectionActionType.moveFiles:
         return _moveFilesToCollection(collectionID);
       case CollectionActionType.unHide:
@@ -360,14 +335,19 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
     }
   }
 
-  Future<bool> _addToCollection(int collectionID) async {
-    final dialog = createProgressDialog(
-      context,
-      "Uploading files to album"
-      "...",
-      isDismissible: true,
-    );
-    await dialog.show();
+  Future<bool> _addToCollection({
+    required int collectionID,
+    required bool showProgressDialog,
+  }) async {
+    final dialog = showProgressDialog
+        ? createProgressDialog(
+            context,
+            "Uploading files to album"
+            "...",
+            isDismissible: true,
+          )
+        : null;
+    await dialog?.show();
     try {
       final List<File> files = [];
       final List<File> filesPendingUpload = [];
@@ -410,7 +390,7 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
             CollectionsService.instance.getCollectionByID(collectionID);
         if (c != null && c.owner!.id != currentUserID) {
           showToast(context, "Can not upload to albums owned by others");
-          await dialog.hide();
+          await dialog?.hide();
           return false;
         } else {
           // filesPendingUpload might be getting ignored during auto-upload
@@ -424,12 +404,12 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
         await CollectionsService.instance.addToCollection(collectionID, files);
       }
       RemoteSyncService.instance.sync(silently: true);
-      await dialog.hide();
+      await dialog?.hide();
       widget.selectedFiles?.clearAll();
       return true;
     } catch (e, s) {
       _logger.severe("Could not add to album", e, s);
-      await dialog.hide();
+      await dialog?.hide();
       showGenericErrorDialog(context: context);
     }
     return false;

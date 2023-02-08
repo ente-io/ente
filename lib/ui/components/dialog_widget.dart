@@ -168,11 +168,14 @@ class TextInputDialog extends StatefulWidget {
   final String? initialValue;
   final Alignment? alignMessage;
   final int? maxLength;
+  final bool showOnlyLoadingState;
+  final TextCapitalization? textCapitalization;
   const TextInputDialog({
     required this.title,
     this.body,
     required this.submitButtonLabel,
     required this.onSubmit,
+    required this.showOnlyLoadingState,
     this.icon,
     this.label,
     this.message,
@@ -181,6 +184,7 @@ class TextInputDialog extends StatefulWidget {
     this.initialValue,
     this.alignMessage,
     this.maxLength,
+    this.textCapitalization,
     super.key,
   });
 
@@ -230,6 +234,8 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 submitNotifier: _submitNotifier,
                 onSubmit: widget.onSubmit,
                 popNavAfterSubmission: true,
+                showOnlyLoadingState: widget.showOnlyLoadingState,
+                textCapitalization: widget.textCapitalization,
               ),
             ),
             const SizedBox(height: 36),
