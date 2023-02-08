@@ -32,6 +32,17 @@ class FileDownloadItem {
   FileDownloadItem(this.file, this.completer, this.cancelToken, this.counter);
 }
 
+Future<Uint8List?> getThumbnail(File file) async {
+  if (file.isRemoteFile) {
+    return getThumbnailFromServer(file);
+  } else {
+    return getThumbnailFromLocal(
+      file,
+      size: thumbnailLargeSize,
+    );
+  }
+}
+
 Future<Uint8List> getThumbnailFromServer(File file) async {
   final cachedThumbnail = cachedThumbnailPath(file);
   if (await cachedThumbnail.exists()) {

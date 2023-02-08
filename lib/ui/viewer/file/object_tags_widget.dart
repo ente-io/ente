@@ -14,8 +14,8 @@ class ObjectTagsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<String>>(
-      future: getThumbnailFromServer(file).then((data) {
-        return ObjectDetectionService.instance.predict(data);
+      future: getThumbnail(file).then((data) {
+        return ObjectDetectionService.instance.predict(data!);
       }),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
