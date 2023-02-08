@@ -211,22 +211,30 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         executionState == ExecutionState.error) {
       if (executionState == ExecutionState.inProgress) {
         if (mounted) {
-          setState(() {
-            executionState = ExecutionState.successful;
-            Future.delayed(
-                Duration(
-                  seconds: widget.shouldSurfaceExecutionStates
-                      ? (widget.popNavAfterSubmission ? 1 : 2)
-                      : 0,
-                ), () {
-              widget.popNavAfterSubmission ? _popNavigatorStack(context) : null;
-              if (mounted) {
-                setState(() {
-                  executionState = ExecutionState.idle;
-                });
-              }
+          if (widget.showOnlyLoadingState) {
+            setState(() {
+              executionState = ExecutionState.idle;
             });
-          });
+          } else {
+            setState(() {
+              executionState = ExecutionState.successful;
+              Future.delayed(
+                  Duration(
+                    seconds: widget.shouldSurfaceExecutionStates
+                        ? (widget.popNavAfterSubmission ? 1 : 2)
+                        : 0,
+                  ), () {
+                widget.popNavAfterSubmission
+                    ? _popNavigatorStack(context)
+                    : null;
+                if (mounted) {
+                  setState(() {
+                    executionState = ExecutionState.idle;
+                  });
+                }
+              });
+            });
+          }
         }
       }
       if (executionState == ExecutionState.error) {
