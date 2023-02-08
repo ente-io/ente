@@ -7,7 +7,6 @@ import TwoFactorModal from 'components/TwoFactor/Modal';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
-import { canEnableMlSearch } from 'utils/machineLearning/compatibility';
 // import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import isElectron from 'is-electron';
 import WatchFolder from 'components/WatchFolder';
@@ -16,14 +15,13 @@ import { getDownloadAppMessage } from 'utils/ui';
 import ThemeSwitcher from './ThemeSwitcher';
 import { SpaceBetweenFlex } from 'components/Container';
 import { isInternalUser } from 'utils/user';
+import AdvancedSettings from './AdvancedSettings';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
     const {
         setDialogMessage,
         startLoading,
-        mlSearchEnabled,
-        updateMlSearchEnabled,
         watchFolderView,
         setWatchFolderView,
         theme,
@@ -32,7 +30,10 @@ export default function UtilitySection({ closeSidebar }) {
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
-    // const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
+    const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
+
+    const openAdvancedSettings = () => setAdvancedSettingsView(true);
+    const closeAdvancedSettings = () => setAdvancedSettingsView(false);
 
     const openRecoveryKeyModal = () => setRecoveryModalView(true);
     const closeRecoveryKeyModal = () => setRecoveryModalView(false);
@@ -61,8 +62,6 @@ export default function UtilitySection({ closeSidebar }) {
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
 
-    // const openThumbnailCompressModal = () => setFixLargeThumbsView(true);
-
     const somethingWentWrong = () =>
         setDialogMessage({
             title: constants.ERROR,
@@ -70,48 +69,6 @@ export default function UtilitySection({ closeSidebar }) {
             close: { variant: 'danger' },
         });
 
-    // const redirectToMLDebug = () => {
-    //     router.push(PAGES.ML_DEBUG);
-    // };
-
-    const enableMlSearch = async () => {
-        // eslint-disable-next-line @typescript-eslint/await-thenable
-        await updateMlSearchEnabled(true);
-    };
-    const disableMlSearch = async () => {
-        // eslint-disable-next-line @typescript-eslint/await-thenable
-        await updateMlSearchEnabled(false);
-    };
-
-    // const clearMLDB = async () => {
-    //     await mlIDbStorage.clearMLDB();
-    // };
-
-    const toggleMLSearch = () => {
-        if (!mlSearchEnabled) {
-            if (!canEnableMlSearch()) {
-                setDialogMessage({
-                    title: constants.ENABLE_ML_SEARCH,
-                    content: constants.ML_SEARCH_NOT_COMPATIBLE,
-                    close: { text: constants.OK },
-                });
-                return;
-            }
-            setDialogMessage({
-                title: constants.ENABLE_ML_SEARCH,
-                content: constants.ENABLE_ML_SEARCH_MESSAGE,
-                staticBackdrop: true,
-                proceed: {
-                    text: constants.ENABLE,
-                    action: enableMlSearch,
-                    variant: 'accent',
-                },
-                close: { text: constants.CANCEL },
-            });
-        } else {
-            disableMlSearch();
-        }
-    };
     return (
         <>
             {isElectron() && (
@@ -140,48 +97,9 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
-            <SidebarButton onClick={toggleMLSearch}>
-                {mlSearchEnabled
-                    ? constants.DISABLE_ML_SEARCH
-                    : constants.ENABLE_ML_SEARCH}
+            <SidebarButton onClick={openAdvancedSettings}>
+                {constants.ADVANCED}
             </SidebarButton>
-
-            {/* <SidebarButton
-                onClick={() => {
-                    if (!mlSearchEnabled) {
-                        if (!canEnableMlSearch()) {
-                            setDialogMessage({
-                                title: constants.ENABLE_ML_SEARCH,
-                                content: constants.ML_SEARCH_NOT_COMPATIBLE,
-                                close: { text: constants.OK },
-                            });
-                            return;
-                        }
-                        setDialogMessage({
-                            title: 'clear mb db',
-                            content: 'clear mb db',
-                            staticBackdrop: true,
-                            proceed: {
-                                text: 'clear',
-                                action: clearMLDB,
-                                variant: 'accent',
-                            },
-                            close: { text: constants.CANCEL },
-                        });
-                    } else {
-                        disableMlSearch();
-                    }
-                }}>
-                {'Clear ML db'}
-            </SidebarButton>
-
-            <SidebarButton onClick={redirectToMLDebug}>
-                {constants.ML_DEBUG}
-            </SidebarButton> */}
-
-            {/* <SidebarButton onClick={openThumbnailCompressModal}>
-                {constants.COMPRESS_THUMBNAILS}
-            </SidebarButton> */}
             <RecoveryKey
                 show={recoverModalView}
                 onHide={closeRecoveryKeyModal}
@@ -194,11 +112,12 @@ export default function UtilitySection({ closeSidebar }) {
                 setLoading={startLoading}
             />
             <WatchFolder open={watchFolderView} onClose={closeWatchFolder} />
-            {/* <FixLargeThumbnails
-                isOpen={fixLargeThumbsView}
-                hide={() => setFixLargeThumbsView(false)}
-                show={() => setFixLargeThumbsView(true)}
-            /> */}
+
+            <AdvancedSettings
+                open={advancedSettingsView}
+                onClose={closeAdvancedSettings}
+                onRootClose={closeSidebar}
+            />
         </>
     );
 }
