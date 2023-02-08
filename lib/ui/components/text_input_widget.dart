@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/models/execution_states.dart';
+import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/debouncer.dart';
 import 'package:photos/utils/separators_util.dart';
 
@@ -183,7 +183,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         });
       }),
     );
-    await widget.onSubmit!
+    await widget.onSubmit
         .call(_textController.text)
         .onError((error, stackTrace) {
       executionState = ExecutionState.error;

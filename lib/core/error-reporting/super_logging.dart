@@ -14,9 +14,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/error-reporting/tunneled_transport.dart';
+import 'package:photos/models/typedefs.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-
-typedef FutureOrVoidCallback = FutureOr<void> Function();
 
 extension SuperString on String {
   Iterable<String> chunked(int chunkSize) sync* {

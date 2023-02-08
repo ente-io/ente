@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:photos/models/execution_states.dart';
+import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
@@ -22,8 +23,6 @@ enum ButtonAction {
   cancel,
   error;
 }
-
-typedef FutureVoidCallback = Future<void> Function();
 
 class ButtonWidget extends StatelessWidget {
   final IconData? icon;

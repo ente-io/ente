@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -9,8 +10,6 @@ import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/text_input_widget.dart';
 import 'package:photos/utils/separators_util.dart';
-
-typedef FutureVoidCallbackParamStr = Future<void> Function(String);
 
 ///Will return null if dismissed by tapping outside
 Future<ButtonAction?> showDialogWidget({
