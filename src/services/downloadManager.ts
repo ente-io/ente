@@ -11,10 +11,11 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
-import { openThumbnailCache } from './cacheService';
 import QueueProcessor, { PROCESSING_STRATEGY } from './queueProcessor';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { addLogLine } from 'utils/logging';
+import { CacheStorageService } from './cache/cacheStorageService';
+import { CACHES } from 'constants/cache';
 
 const MAX_PARALLEL_DOWNLOADS = 10;
 
@@ -44,7 +45,9 @@ class DownloadManager {
             }
             if (!this.thumbnailObjectURLPromise.has(file.id)) {
                 const downloadPromise = async () => {
-                    const thumbnailCache = await openThumbnailCache();
+                    const thumbnailCache = await CacheStorageService.open(
+                        CACHES.THUMBS
+                    );
 
                     const cacheResp: Response = await thumbnailCache?.match(
                         file.id.toString()
