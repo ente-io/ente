@@ -16,6 +16,9 @@ class TextInputWidget extends StatefulWidget {
   final Alignment? alignMessage;
   final bool? autoFocus;
   final int? maxLength;
+
+  ///TextInputWidget will listen to this notifier and executes onSubmit when
+  ///notified.
   final ValueNotifier? submitNotifier;
   final bool alwaysShowSuccessState;
   final bool showOnlyLoadingState;
@@ -90,7 +93,9 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     var textInputChildren = <Widget>[];
-    if (widget.label != null) textInputChildren.add(Text(widget.label!));
+    if (widget.label != null) {
+      textInputChildren.add(Text(widget.label!));
+    }
     textInputChildren.add(
       ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -272,6 +277,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   }
 }
 
+//todo: Add clear and custom icon for suffic icon
 class SuffixIconWidget extends StatelessWidget {
   final ExecutionState executionState;
   final bool shouldSurfaceExecutionStates;
