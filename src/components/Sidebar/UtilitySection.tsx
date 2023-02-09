@@ -97,9 +97,11 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
-            <SidebarButton onClick={openAdvancedSettings}>
-                {constants.ADVANCED}
-            </SidebarButton>
+            {isElectron() && (
+                <SidebarButton onClick={openAdvancedSettings}>
+                    {constants.ADVANCED}
+                </SidebarButton>
+            )}
             <RecoveryKey
                 show={recoverModalView}
                 onHide={closeRecoveryKeyModal}
