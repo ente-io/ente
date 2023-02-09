@@ -190,13 +190,14 @@ export default function App({ Component, err }) {
             }
         };
         loadMlSearchState();
-        clearLogsIfLocalStorageLimitExceeded();
-        const main = async () => {
-            addLogLine(`userID: ${(getData(LS_KEYS.USER) as User)?.id}`);
-            addLogLine(`sentryID: ${await getSentryUserID()}`);
-            addLogLine(`sentry release ID: ${process.env.SENTRY_RELEASE}`);
-        };
-        main();
+        try {
+            eventBus.on(Events.LOGOUT, () => {
+                setMlSearchEnabled(false);
+                mlWorkManager.setMlSearchEnabled(false);
+            });
+        } catch (e) {
+            logError(e, 'Error while subscribing to logout event');
+        }
     }, []);
 
     useEffect(() => {
