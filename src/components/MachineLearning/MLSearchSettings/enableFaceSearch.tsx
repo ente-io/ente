@@ -5,6 +5,7 @@ import {
     FormGroup,
     Checkbox,
     FormControlLabel,
+    DialogProps,
 } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import Titlebar from 'components/Titlebar';
@@ -23,20 +24,31 @@ export default function EnableFaceSearch({
         setAcceptTerms(false);
     }, [open]);
 
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
+    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
+        if (reason === 'backdropClick') {
+            handleRootClose();
+        } else {
+            onClose();
+        }
+    };
     return (
         <EnteDrawer
             transitionDuration={0}
             open={open}
-            onClose={onClose}
+            onClose={handleDrawerClose}
             BackdropProps={{
-                onClick: onRootClose,
                 sx: { '&&&': { backgroundColor: 'transparent' } },
             }}>
             <Stack spacing={'4px'} py={'12px'}>
                 <Titlebar
                     onClose={onClose}
                     title={constants.ENABLE_FACE_SEARCH_TITLE}
-                    onRootClose={onRootClose}
+                    onRootClose={handleRootClose}
                 />
                 <Stack py={'20px'} px={'8px'} spacing={'32px'}>
                     <Box px={'8px'}>

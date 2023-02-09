@@ -1,4 +1,5 @@
-import { Box } from '@mui/material';
+import { Box, DialogProps } from '@mui/material';
+import { EnteDrawer } from 'components/EnteDrawer';
 import { AppContext } from 'pages/_app';
 import { useContext, useState } from 'react';
 import {
@@ -11,7 +12,7 @@ import EnableFaceSearch from './enableFaceSearch';
 import EnableMLSearch from './enableMLSearch';
 import ManageMLSearch from './manageMLSearch';
 
-const MLSearchSettings = ({ open, onClose, OnRootClose }) => {
+const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const {
         updateMlSearchEnabled,
         mlSearchEnabled,
@@ -92,30 +93,50 @@ const MLSearchSettings = ({ open, onClose, OnRootClose }) => {
         });
     };
 
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
+    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
+        if (reason === 'backdropClick') {
+            handleRootClose();
+        } else {
+            onClose();
+        }
+    };
+
     return (
         <Box>
-            {mlSearchEnabled ? (
-                <ManageMLSearch
-                    open={open}
-                    onClose={onClose}
-                    disableMlSearch={disableMlSearch}
-                    handleDisableFaceSearch={confirmDisableFaceSearch}
-                    onRootClose={OnRootClose}
-                />
-            ) : (
-                <EnableMLSearch
-                    open={open}
-                    onClose={onClose}
-                    enableMlSearch={enableMlSearch}
-                    onRootClose={OnRootClose}
-                />
-            )}
+            <EnteDrawer
+                anchor="left"
+                transitionDuration={0}
+                open={open}
+                onClose={handleDrawerClose}
+                BackdropProps={{
+                    sx: { '&&&': { backgroundColor: 'transparent' } },
+                }}>
+                {mlSearchEnabled ? (
+                    <ManageMLSearch
+                        onClose={onClose}
+                        disableMlSearch={disableMlSearch}
+                        handleDisableFaceSearch={confirmDisableFaceSearch}
+                        onRootClose={handleRootClose}
+                    />
+                ) : (
+                    <EnableMLSearch
+                        onClose={onClose}
+                        enableMlSearch={enableMlSearch}
+                        onRootClose={handleRootClose}
+                    />
+                )}
+            </EnteDrawer>
 
             <EnableFaceSearch
                 open={enableFaceSearchView}
                 onClose={closeEnableFaceSearch}
                 enableFaceSearch={enableFaceSearch}
-                onRootClose={OnRootClose}
+                onRootClose={handleRootClose}
             />
         </Box>
     );

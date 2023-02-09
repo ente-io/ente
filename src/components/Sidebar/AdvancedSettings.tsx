@@ -1,6 +1,6 @@
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import ScienceIcon from '@mui/icons-material/Science';
-import { Box, Stack } from '@mui/material';
+import { Box, DialogProps, Stack } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import MLSearchSettings from 'components/MachineLearning/MLSearchSettings';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
@@ -14,12 +14,25 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
 
     const openMlSearchSettings = () => setMlSearchSettingsView(true);
     const closeMlSearchSettings = () => setMlSearchSettingsView(false);
+
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
+    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
+        if (reason === 'backdropClick') {
+            handleRootClose();
+        } else {
+            onClose();
+        }
+    };
+
     return (
         <EnteDrawer
-            hideBackdrop
             transitionDuration={0}
             open={open}
-            onClose={onClose}
+            onClose={handleDrawerClose}
             BackdropProps={{
                 sx: { '&&&': { backgroundColor: 'transparent' } },
             }}>
@@ -27,7 +40,7 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                 <Titlebar
                     onClose={onClose}
                     title={constants.ADVANCED}
-                    onRootClose={onRootClose}
+                    onRootClose={handleRootClose}
                 />
 
                 <Box px={'8px'}>
@@ -51,7 +64,7 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
             <MLSearchSettings
                 open={mlSearchSettingsView}
                 onClose={closeMlSearchSettings}
-                OnRootClose={onRootClose}
+                onRootClose={handleRootClose}
             />
         </EnteDrawer>
     );
