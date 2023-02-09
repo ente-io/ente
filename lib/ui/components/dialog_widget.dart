@@ -2,10 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/components/text_input_widget.dart';
 import 'package:photos/utils/separators_util.dart';
 
 ///Will return null if dismissed by tapping outside
@@ -146,6 +149,131 @@ class Actions extends StatelessWidget {
           // Height of button component in figma = 48, in code = 50 (2pts for
           // top + bottom border)
           height: 6,
+        ),
+      ),
+    );
+  }
+}
+
+class TextInputDialog extends StatefulWidget {
+  final String title;
+  final String? body;
+  final String submitButtonLabel;
+  final IconData? icon;
+  final String? label;
+  final String? message;
+  final FutureVoidCallbackParamStr onSubmit;
+  final String? hintText;
+  final IconData? prefixIcon;
+  final String? initialValue;
+  final Alignment? alignMessage;
+  final int? maxLength;
+  final bool showOnlyLoadingState;
+  final TextCapitalization? textCapitalization;
+  final bool alwaysShowSuccessState;
+  const TextInputDialog({
+    required this.title,
+    this.body,
+    required this.submitButtonLabel,
+    required this.onSubmit,
+    this.icon,
+    this.label,
+    this.message,
+    this.hintText,
+    this.prefixIcon,
+    this.initialValue,
+    this.alignMessage,
+    this.maxLength,
+    this.textCapitalization,
+    this.showOnlyLoadingState = false,
+    this.alwaysShowSuccessState = false,
+    super.key,
+  });
+
+  @override
+  State<TextInputDialog> createState() => _TextInputDialogState();
+}
+
+class _TextInputDialogState extends State<TextInputDialog> {
+  //the value of this ValueNotifier has no significance
+  final _submitNotifier = ValueNotifier(false);
+
+  @override
+  void dispose() {
+    _submitNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final widthOfScreen = MediaQuery.of(context).size.width;
+    final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
+    final colorScheme = getEnteColorScheme(context);
+    return Container(
+      width: min(widthOfScreen, 320),
+      padding: isMobileSmall
+          ? const EdgeInsets.all(0)
+          : const EdgeInsets.fromLTRB(6, 8, 6, 6),
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated,
+        boxShadow: shadowFloatLight,
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ContentContainer(
+              title: widget.title,
+              body: widget.body,
+              icon: widget.icon,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 19),
+              child: TextInputWidget(
+                label: widget.label,
+                message: widget.message,
+                hintText: widget.hintText,
+                prefixIcon: widget.prefixIcon,
+                initialValue: widget.initialValue,
+                alignMessage: widget.alignMessage,
+                autoFocus: true,
+                maxLength: widget.maxLength,
+                submitNotifier: _submitNotifier,
+                onSubmit: widget.onSubmit,
+                popNavAfterSubmission: true,
+                showOnlyLoadingState: widget.showOnlyLoadingState,
+                textCapitalization: widget.textCapitalization,
+                alwaysShowSuccessState: widget.alwaysShowSuccessState,
+              ),
+            ),
+            const SizedBox(height: 36),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Expanded(
+                  child: ButtonWidget(
+                    buttonType: ButtonType.secondary,
+                    buttonSize: ButtonSize.small,
+                    labelText: "Cancel",
+                    isInAlert: true,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ButtonWidget(
+                    buttonSize: ButtonSize.small,
+                    buttonType: ButtonType.neutral,
+                    labelText: widget.submitButtonLabel,
+                    onTap: () async {
+                      _submitNotifier.value = !_submitNotifier.value;
+                    },
+                  ),
+                ),
+              ],
+            )
+          ],
         ),
       ),
     );
