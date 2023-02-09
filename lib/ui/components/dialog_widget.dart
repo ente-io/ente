@@ -195,6 +195,13 @@ class TextInputDialog extends StatefulWidget {
 class _TextInputDialogState extends State<TextInputDialog> {
   //the value of this ValueNotifier has no significance
   final _submitNotifier = ValueNotifier(false);
+
+  @override
+  void dispose() {
+    _submitNotifier.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final widthOfScreen = MediaQuery.of(context).size.width;

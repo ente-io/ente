@@ -73,6 +73,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   @override
   void dispose() {
     widget.submitNotifier?.dispose();
+    _textController.dispose();
     super.dispose();
   }
 
