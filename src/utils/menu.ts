@@ -11,7 +11,7 @@ import {
 } from '../services/userPreference';
 import { setIsAppQuitting } from '../main';
 import autoLauncher from '../services/autoLauncher';
-import { isPlatform } from './main';
+import { isPlatform } from './common/platform';
 import ElectronLog from 'electron-log';
 
 export function buildContextMenu(

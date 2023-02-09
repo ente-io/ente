@@ -5,10 +5,11 @@ import { existsSync, rmSync } from 'fs';
 import { readFile, writeFile } from 'promise-fs';
 import { generateTempFilePath } from '../utils/temp';
 import { logErrorSentry } from './sentry';
-import { isPlatform } from '../utils/main';
+import { isPlatform } from '../utils/common/platform';
 import { isDev } from '../utils/common';
 import path from 'path';
 import log from 'electron-log';
+import { CustomErrors } from '../constants/errors';
 const shellescape = require('any-shell-escape');
 
 const asyncExec = util.promisify(exec);
@@ -157,7 +158,7 @@ function constructConvertCommand(
             }
         );
     } else {
-        Error(`${process.platform} native heic convert not supported yet`);
+        throw Error(CustomErrors.INVALID_OS(process.platform));
     }
     return convertCmd;
 }
@@ -271,9 +272,7 @@ function constructThumbnailGenerationCommand(
                 return cmdPart;
             });
     } else {
-        Error(
-            `${process.platform} native thumbnail generation not supported yet`
-        );
+        throw Error(CustomErrors.INVALID_OS(process.platform));
     }
     return thumbnailGenerationCmd;
 }

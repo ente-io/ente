@@ -11,6 +11,7 @@ import { getHideDockIconPreference } from '../services/userPreference';
 import { setupAutoUpdater } from '../services/appUpdater';
 import ElectronLog from 'electron-log';
 import os from 'os';
+import { isPlatform } from './common/platform';
 
 export function handleUpdates(mainWindow: BrowserWindow) {
     if (!isDev) {
@@ -82,18 +83,6 @@ export function setupNextElectronServe() {
     serveNextAt(PROD_HOST_URL, {
         outputDir: RENDERER_OUTPUT_DIR,
     });
-}
-
-export function isPlatform(platform: 'mac' | 'windows' | 'linux') {
-    if (process.platform === 'darwin') {
-        return platform === 'mac';
-    } else if (process.platform === 'win32') {
-        return platform === 'windows';
-    } else if (process.platform === 'linux') {
-        return platform === 'linux';
-    } else {
-        return false;
-    }
 }
 
 export async function handleDockIconHideOnAutoLaunch() {

@@ -1,4 +1,4 @@
-import { isPlatform } from '../utils/main';
+import { isPlatform } from '../utils/common/platform';
 import { AutoLauncherClient } from '../types/autoLauncher';
 import linuxAutoLauncher from './autoLauncherClients/linuxAutoLauncher';
 import macAndWindowsAutoLauncher from './autoLauncherClients/macAndWindowsAutoLauncher';
