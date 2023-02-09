@@ -40,7 +40,7 @@ export async function getBlobFromCache(
 export async function deleteAllCache() {
     try {
         await CacheStorageService.delete(CACHES.THUMBS);
-        await CacheStorageService.delete(CACHES.FACE_CROP);
+        await CacheStorageService.delete(CACHES.FACE_CROPS);
         await CacheStorageService.delete(CACHES.FILES);
     } catch (e) {
         logError(e, 'deleteAllCache failed'); // log and ignore

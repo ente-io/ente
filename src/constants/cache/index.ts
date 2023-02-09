@@ -1,5 +1,5 @@
 export enum CACHES {
     THUMBS = 'thumbs',
-    FACE_CROP = 'face-crops',
+    FACE_CROPS = 'face-crops',
     FILES = 'files',
 }

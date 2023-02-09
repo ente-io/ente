@@ -8,7 +8,7 @@ import {
 import styled from 'styled-components';
 import { EnteFile } from 'types/file';
 import { ImageCacheView } from './ImageViews';
-import { FACE_CROPS_CACHE } from 'constants/cache';
+import { CACHES } from 'constants/cache';
 import { Legend } from 'components/PhotoViewer/styledComponents/Legend';
 import constants from 'utils/strings/constants';
 import { addLogLine } from 'utils/logging';
@@ -64,7 +64,7 @@ export function PeopleList(props: PeopleListProps) {
                     }>
                     <ImageCacheView
                         url={person.displayImageUrl}
-                        cacheName={FACE_CROPS_CACHE}
+                        cacheName={CACHES.FACE_CROPS}
                     />
                 </FaceChip>
             ))}
@@ -173,7 +173,7 @@ export function UnidentifiedFaces(props: {
                         <FaceChip key={index}>
                             <ImageCacheView
                                 url={face.crop?.imageUrl}
-                                cacheName={FACE_CROPS_CACHE}
+                                cacheName={CACHES.FACE_CROPS}
                             />
                         </FaceChip>
                     ))}
