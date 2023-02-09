@@ -13,6 +13,6 @@ export enum PAGES {
     VERIFY = '/verify',
     ROOT = '/',
     SHARED_ALBUMS = '/shared-albums',
-    ML_DEBUG = '/ml-debug',
+    // ML_DEBUG = '/ml-debug',
     DEDUPLICATE = '/deduplicate',
 }
