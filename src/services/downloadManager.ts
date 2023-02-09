@@ -15,6 +15,8 @@ import { CacheStorageService } from './cache/cacheStorageService';
 import QueueProcessor, { PROCESSING_STRATEGY } from './queueProcessor';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { addLogLine } from 'utils/logging';
+import { Remote } from 'comlink';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 
 const MAX_PARALLEL_DOWNLOADS = 10;
 
@@ -33,6 +35,7 @@ class DownloadManager {
     public async getThumbnail(
         file: EnteFile,
         tokenOverride?: string,
+        usingWorker?: Remote<DedicatedCryptoWorker>,
         timeout?: number
     ) {
         try {
@@ -66,7 +69,13 @@ class DownloadManager {
                     );
                     const thumb =
                         await this.thumbnailDownloadRequestsProcessor.queueUpRequest(
-                            () => this.downloadThumb(token, file, timeout)
+                            () =>
+                                this.downloadThumb(
+                                    token,
+                                    file,
+                                    usingWorker,
+                                    timeout
+                                )
                         ).promise;
                     const thumbBlob = new Blob([thumb]);
 
@@ -89,7 +98,12 @@ class DownloadManager {
         }
     }
 
-    downloadThumb = async (token: string, file: EnteFile, timeout?: number) => {
+    downloadThumb = async (
+        token: string,
+        file: EnteFile,
+        usingWorker?: Remote<DedicatedCryptoWorker>,
+        timeout?: number
+    ) => {
         const resp = await HTTPService.get(
             getThumbnailURL(file.id),
             null,
@@ -99,7 +113,8 @@ class DownloadManager {
         if (typeof resp.data === 'undefined') {
             throw Error(CustomError.REQUEST_FAILED);
         }
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const cryptoWorker =
+            usingWorker || (await ComlinkCryptoWorker.getInstance());
         const decrypted = await cryptoWorker.decryptThumbnail(
             new Uint8Array(resp.data),
             await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
@@ -149,7 +164,7 @@ class DownloadManager {
     async downloadFile(
         file: EnteFile,
         tokenOverride?: string,
-        usingWorker?: any,
+        usingWorker?: Remote<DedicatedCryptoWorker>,
         timeout?: number
     ) {
         const cryptoWorker =

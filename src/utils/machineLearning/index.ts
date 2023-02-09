@@ -41,6 +41,8 @@ import { FILE_CACHE } from 'constants/cache';
 import { FILE_TYPE } from 'constants/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { addLogLine } from 'utils/logging';
+import { Remote } from 'comlink';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -328,7 +330,7 @@ export async function getImageBlobBitmap(blob: Blob): Promise<ImageBitmap> {
 async function getOriginalFile(
     file: EnteFile,
     token: string,
-    enteWorker?: any,
+    enteWorker?: Remote<DedicatedCryptoWorker>,
     queue?: PQueue
 ) {
     let fileStream;
@@ -354,7 +356,7 @@ async function getOriginalFile(
 async function getOriginalConvertedFile(
     file: EnteFile,
     token: string,
-    enteWorker?: any,
+    enteWorker?: Remote<DedicatedCryptoWorker>,
     queue?: PQueue
 ) {
     const fileBlob = await getOriginalFile(file, token, enteWorker, queue);
@@ -372,7 +374,7 @@ async function getOriginalConvertedFile(
 export async function getOriginalImageBitmap(
     file: EnteFile,
     token: string,
-    enteWorker?: any,
+    enteWorker?: Remote<DedicatedCryptoWorker>,
     queue?: PQueue,
     useCache: boolean = false
 ) {
@@ -395,10 +397,15 @@ export async function getOriginalImageBitmap(
     return getImageBlobBitmap(fileBlob);
 }
 
-export async function getThumbnailImageBitmap(file: EnteFile, token: string) {
+export async function getThumbnailImageBitmap(
+    file: EnteFile,
+    token: string,
+    enteWorker?: Remote<DedicatedCryptoWorker>
+) {
     const fileUrl = await DownloadManager.getThumbnail(
         file,
         token,
+        enteWorker,
         ML_SYNC_DOWNLOAD_TIMEOUT_MS
     );
     addLogLine('[MLService] Got thumbnail: ', file.id.toString());
