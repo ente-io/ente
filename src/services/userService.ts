@@ -119,22 +119,45 @@ export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
 
 export const logoutUser = async () => {
     try {
-        // ignore server logout result as logoutUser can be triggered before sign up or on token expiry
-        await _logout();
-        clearKeys();
-        clearData();
-        await deleteAllCache();
-        await clearFiles();
-        if (isElectron()) {
-            safeStorageService.clearElectronStore();
+        try {
+            // ignore server logout result as logoutUser can be triggered before sign up or on token expiry
+            await _logout();
+        } catch (e) {
+            //ignore
         }
-        router.push(PAGES.ROOT);
-
+        try {
+            clearKeys();
+        } catch (e) {
+            logError(e, 'clearKeys failed');
+        }
+        try {
+            clearData();
+        } catch (e) {
+            logError(e, 'clearData failed');
+        }
+        try {
+            await deleteAllCache();
+        } catch (e) {
+            logError(e, 'deleteAllCache failed');
+        }
+        try {
+            await clearFiles();
+        } catch (e) {
+            logError(e, 'clearFiles failed');
+        }
+        if (isElectron()) {
+            try {
+                safeStorageService.clearElectronStore();
+            } catch (e) {
+                logError(e, 'clearElectronStore failed');
+            }
+        }
         try {
             eventBus.emit(Events.LOGOUT);
         } catch (e) {
             logError(e, 'Error in logout handlers');
         }
+        router.push(PAGES.ROOT);
     } catch (e) {
         logError(e, 'logoutUser failed');
     }
