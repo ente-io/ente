@@ -65,8 +65,9 @@ You can alternatively install the build from PlayStore or F-Droid.
 2. Clone this repository with `git clone git@github.com:ente-io/photos-app.git`
 3. Pull in all submodules with `git submodule update --init --recursive`
 4. Enable repo git hooks `git config core.hooksPath hooks`
-5. For Android, run `flutter build apk --release --flavor independent`
-6. For iOS, run `flutter build ios`
+5. Setup TensorFlowLite by executing `setup.sh`
+6. For Android, run `flutter build apk --release --flavor independent`
+7. For iOS, run `flutter build ios`
 
 <br/>
 
