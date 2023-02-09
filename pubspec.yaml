@@ -80,7 +80,7 @@ dependencies:
     git: 
       url: "https://github.com/ente-io/media_extension.git"
       ref: "intent-action"
-  modal_bottom_sheet: ^2.1.2
+  modal_bottom_sheet: ^3.0.0-pre
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2

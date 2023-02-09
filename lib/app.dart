@@ -46,7 +46,10 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       final actionResult = await _mediaExtensionPlugin.getIntentAction();
       intentAction = actionResult.action!;
     } on PlatformException {
-      intentAction = IntentAction.unknown;
+      intentAction = IntentAction.main;
+    } catch (error) {
+      _logger.info(error);
+      intentAction = IntentAction.main;
     }
     if (intentAction == IntentAction.main) {
       _configureBackgroundFetch();
