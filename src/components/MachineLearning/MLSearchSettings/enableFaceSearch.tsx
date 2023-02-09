@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import Titlebar from 'components/Titlebar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 
 export default function EnableFaceSearch({
@@ -18,6 +18,11 @@ export default function EnableFaceSearch({
     onRootClose,
 }) {
     const [acceptTerms, setAcceptTerms] = useState(false);
+
+    useEffect(() => {
+        setAcceptTerms(false);
+    }, [open]);
+
     return (
         <EnteDrawer
             transitionDuration={0}

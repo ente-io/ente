@@ -395,7 +395,7 @@ export const getFaceSearchEnabledStatus = async () => {
                     'X-Auth-Token': token,
                 }
             );
-        return resp.data.value;
+        return resp.data.value === 'true';
     } catch (e) {
         logError(e, 'failed to get face search enabled status');
         throw e;
@@ -409,7 +409,7 @@ export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
             `${ENDPOINT}/remote-store/update`,
             {
                 key: 'faceSearchEnabled',
-                value: newStatus,
+                value: newStatus.toString(),
             },
             null,
             {
