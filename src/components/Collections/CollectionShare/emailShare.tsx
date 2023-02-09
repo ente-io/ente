@@ -15,7 +15,8 @@ export default function EmailShare({ collection }) {
 
     const collectionShare: SingleInputFormProps['callback'] = async (
         email,
-        setFieldError
+        setFieldError,
+        resetForm
     ) => {
         try {
             const user: User = getData(LS_KEYS.USER);
@@ -28,6 +29,7 @@ export default function EmailShare({ collection }) {
             } else {
                 await shareCollection(collection, email);
                 await galleryContext.syncWithRemote(false, true);
+                resetForm();
             }
         } catch (e) {
             const errorMessage = handleSharingErrors(e);

@@ -68,7 +68,7 @@ interface Iprops {
     favItemIds: Set<number>;
     deletedFileIds: Set<number>;
     setDeletedFileIds?: (value: Set<number>) => void;
-    isSharedCollection: boolean;
+    isIncomingSharedCollection: boolean;
     isTrashCollection: boolean;
     enableDownload: boolean;
     isSourceLoaded: boolean;
@@ -162,10 +162,6 @@ function PhotoViewer(props: Iprops) {
             }
         };
     }, [isOpen, photoSwipe, showInfo]);
-
-    useEffect(() => {
-        updateItems(items);
-    }, [items]);
 
     useEffect(() => {
         if (photoSwipe) {
@@ -386,42 +382,64 @@ function PhotoViewer(props: Iprops) {
 
     const trashFile = async (file: EnteFile) => {
         const { deletedFileIds, setDeletedFileIds } = props;
-        deletedFileIds.add(file.id);
-        setDeletedFileIds(new Set(deletedFileIds));
-        await trashFiles([file]);
-        needUpdate.current = true;
+        try {
+            appContext.startLoading();
+            await trashFiles([file]);
+            appContext.finishLoading();
+            deletedFileIds.add(file.id);
+            setDeletedFileIds(new Set(deletedFileIds));
+            updateItems(props.items.filter((item) => item.id !== file.id));
+            needUpdate.current = true;
+        } catch (e) {
+            logError(e, 'trashFile failed');
+        }
     };
 
     const confirmTrashFile = (file: EnteFile) => {
-        if (!file || props.isSharedCollection || props.isTrashCollection) {
+        if (
+            !file ||
+            props.isIncomingSharedCollection ||
+            props.isTrashCollection
+        ) {
             return;
         }
         appContext.setDialogMessage(getTrashFileMessage(() => trashFile(file)));
     };
 
-    const updateItems = (items = []) => {
-        if (photoSwipe) {
-            if (items.length === 0) {
-                photoSwipe.close();
-            }
-            photoSwipe.items.length = 0;
-            items.forEach((item) => {
-                photoSwipe.items.push(item);
-            });
-            photoSwipe.invalidateCurrItems();
-            if (isOpen) {
-                photoSwipe.updateSize(true);
-                if (photoSwipe.getCurrentIndex() >= photoSwipe.items.length) {
-                    photoSwipe.goTo(0);
+    const updateItems = (items: EnteFile[]) => {
+        try {
+            if (photoSwipe) {
+                if (items.length === 0) {
+                    photoSwipe.close();
+                }
+                photoSwipe.items.length = 0;
+                items.forEach((item) => {
+                    photoSwipe.items.push(item);
+                });
+
+                photoSwipe.invalidateCurrItems();
+                if (isOpen) {
+                    photoSwipe.updateSize(true);
+                    if (
+                        photoSwipe.getCurrentIndex() >= photoSwipe.items.length
+                    ) {
+                        photoSwipe.goTo(0);
+                    }
                 }
             }
+        } catch (e) {
+            logError(e, 'updateItems failed');
         }
     };
 
     const refreshPhotoswipe = () => {
-        photoSwipe.invalidateCurrItems();
-        if (isOpen) {
-            photoSwipe.updateSize(true);
+        try {
+            photoSwipe.invalidateCurrItems();
+            if (isOpen) {
+                photoSwipe.updateSize(true);
+            }
+        } catch (e) {
+            logError(e, 'refreshPhotoswipe failed');
         }
     };
 
@@ -560,7 +578,7 @@ function PhotoViewer(props: Iprops) {
                                     <ContentCopy fontSize="small" />
                                 </button>
                             )}
-                            {!props.isSharedCollection &&
+                            {!props.isIncomingSharedCollection &&
                                 !props.isTrashCollection && (
                                     <button
                                         className="pswp__button pswp__button--custom"
@@ -582,7 +600,7 @@ function PhotoViewer(props: Iprops) {
                                 title={constants.TOGGLE_FULLSCREEN}
                             />
 
-                            {!props.isSharedCollection && (
+                            {!props.isIncomingSharedCollection && (
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     title={constants.INFO_OPTION}
@@ -590,7 +608,7 @@ function PhotoViewer(props: Iprops) {
                                     <InfoIcon fontSize="small" />
                                 </button>
                             )}
-                            {!props.isSharedCollection &&
+                            {!props.isIncomingSharedCollection &&
                                 !props.isTrashCollection && (
                                     <button
                                         title={
@@ -641,7 +659,7 @@ function PhotoViewer(props: Iprops) {
             </div>
             <FileInfo
                 isTrashCollection={props.isTrashCollection}
-                shouldDisableEdits={props.isSharedCollection}
+                shouldDisableEdits={props.isIncomingSharedCollection}
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}

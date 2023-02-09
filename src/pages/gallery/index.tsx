@@ -60,18 +60,19 @@ import Uploader from 'components/Upload/Uploader';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
+    CollectionSummaryType,
     CollectionType,
+    DUMMY_UNCATEGORIZED_SECTION,
     TRASH_SECTION,
+    UNCATEGORIZED_COLLECTION_NAME,
 } from 'constants/collection';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/error';
 import { PAGES } from 'constants/pages';
 import {
     COLLECTION_OPS_TYPE,
-    isSharedCollection,
     handleCollectionOps,
     getSelectedCollection,
-    isFavoriteCollection,
     getArchivedCollections,
     hasNonSystemCollections,
 } from 'utils/collection';
@@ -87,7 +88,7 @@ import FixCreationTime, {
 } from 'components/FixCreationTime';
 import { Collection, CollectionSummaries } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { GalleryContextType, SelectedState, SetFiles } from 'types/gallery';
+import { GalleryContextType, SelectedState } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
@@ -124,60 +125,18 @@ export const GalleryContext = createContext<GalleryContextType>(
     defaultGalleryContext
 );
 
-type FilesFn = EnteFile[] | ((files: EnteFile[]) => EnteFile[]);
-
 export default function Gallery() {
     const router = useRouter();
     const [user, setUser] = useState(null);
     const [collections, setCollections] = useState<Collection[]>(null);
-    const [files, setFilesOriginal] = useState<EnteFile[]>(null);
-
-    const filesUpdateInProgress = useRef(false);
-    const filesCount = useRef(0);
-    const newerFilesFN = useRef<FilesFn>(null);
-
-    const setFilesOriginalWithReSyncIfRequired: SetFiles = (filesFn) => {
-        setFilesOriginal((currentFiles) => {
-            let newFiles: EnteFile[];
-            if (typeof filesFn === 'function') {
-                newFiles = filesFn(currentFiles);
-            } else {
-                newFiles = filesFn;
-            }
-            filesCount.current = newFiles?.length;
-            return newFiles;
-        });
-        filesUpdateInProgress.current = false;
-        if (newerFilesFN.current) {
-            const newerFiles = newerFilesFN.current;
-            setTimeout(() => setFiles(newerFiles), 0);
-            newerFilesFN.current = null;
-        }
-    };
-
-    const setFiles: SetFiles = async (filesFn) => {
-        if (filesUpdateInProgress.current) {
-            newerFilesFN.current = filesFn;
-            return;
-        }
-        filesUpdateInProgress.current = true;
-
-        if (!filesCount.current || filesCount.current < 5000) {
-            setFilesOriginalWithReSyncIfRequired(filesFn);
-        } else {
-            const waitTime = getData(LS_KEYS.WAIT_TIME) ?? 5000;
-            setTimeout(
-                () => setFilesOriginalWithReSyncIfRequired(filesFn),
-                waitTime
-            );
-        }
-    };
+    const [files, setFiles] = useState<EnteFile[]>(null);
 
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
+        ownCount: 0,
         count: 0,
         collectionID: 0,
     });
@@ -326,6 +285,8 @@ export default function Gallery() {
                 collectionURL += constants.ARCHIVE;
             } else if (activeCollection === TRASH_SECTION) {
                 collectionURL += constants.TRASH;
+            } else if (activeCollection === DUMMY_UNCATEGORIZED_SECTION) {
+                collectionURL += UNCATEGORIZED_COLLECTION_NAME;
             } else {
                 collectionURL += activeCollection;
             }
@@ -373,10 +334,8 @@ export default function Gallery() {
             !silent && startLoading();
             const collections = await syncCollections();
             setCollections(collections);
-            let files = await syncFiles(collections, setFiles);
-            const trash = await syncTrash(collections, setFiles, files);
-            files = [...files, ...getTrashedFiles(trash)];
-            setFiles(sortFiles(files));
+            await syncFiles(collections, setFiles);
+            await syncTrash(collections, setFiles);
         } catch (e) {
             logError(e, 'syncWithRemote failed');
             switch (e.message) {
@@ -389,6 +348,7 @@ export default function Gallery() {
                     break;
             }
         } finally {
+            setDeletedFileIds(new Set());
             !silent && finishLoading();
         }
         syncInProgress.current = false;
@@ -408,7 +368,7 @@ export default function Gallery() {
         const archivedCollections = getArchivedCollections(collections);
         setArchivedCollections(archivedCollections);
 
-        const collectionSummaries = getCollectionSummaries(
+        const collectionSummaries = await getCollectionSummaries(
             user,
             collections,
             files,
@@ -418,7 +378,7 @@ export default function Gallery() {
     };
 
     const clearSelection = function () {
-        setSelected({ count: 0, collectionID: 0 });
+        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
     };
 
     if (!files || !collectionSummaries) {
@@ -430,10 +390,19 @@ export default function Gallery() {
             try {
                 setCollectionSelectorView(false);
                 const selectedFiles = getSelectedFiles(selected, files);
+                const toProcessFiles =
+                    ops === COLLECTION_OPS_TYPE.REMOVE
+                        ? selectedFiles
+                        : selectedFiles.filter(
+                              (file) => file.ownerID === user.id
+                          );
+                if (toProcessFiles.length === 0) {
+                    return;
+                }
                 await handleCollectionOps(
                     ops,
                     collection,
-                    selectedFiles,
+                    toProcessFiles,
                     selected.collectionID
                 );
                 clearSelection();
@@ -551,7 +520,6 @@ export default function Gallery() {
             });
         } finally {
             await syncWithRemote(false, true);
-            setDeletedFileIds(new Set());
             finishLoading();
         }
     };
@@ -724,10 +692,10 @@ export default function Gallery() {
                     deletedFileIds={deletedFileIds}
                     setDeletedFileIds={setDeletedFileIds}
                     activeCollection={activeCollection}
-                    isSharedCollection={isSharedCollection(
-                        activeCollection,
-                        collections
-                    )}
+                    isIncomingSharedCollection={
+                        collectionSummaries.get(activeCollection)?.type ===
+                        CollectionSummaryType.incomingShare
+                    }
                     enableDownload={true}
                     resetSearch={resetSearch}
                 />
@@ -771,12 +739,23 @@ export default function Gallery() {
                             fixTimeHelper={fixTimeHelper}
                             downloadHelper={downloadHelper}
                             count={selected.count}
+                            ownCount={selected.ownCount}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
-                            isFavoriteCollection={isFavoriteCollection(
-                                activeCollection,
-                                collections
-                            )}
+                            isFavoriteCollection={
+                                collectionSummaries.get(activeCollection)
+                                    ?.type === CollectionSummaryType.favorites
+                            }
+                            isUncategorizedCollection={
+                                collectionSummaries.get(activeCollection)
+                                    ?.type ===
+                                CollectionSummaryType.uncategorized
+                            }
+                            isIncomingSharedCollection={
+                                collectionSummaries.get(activeCollection)
+                                    ?.type ===
+                                CollectionSummaryType.incomingShare
+                            }
                         />
                     )}
             </FullScreenDropZone>

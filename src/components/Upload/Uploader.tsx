@@ -533,7 +533,7 @@ export default function Uploader(props: Props) {
         }
     };
 
-    function showUserFacingError(err: CustomError) {
+    function showUserFacingError(err: string) {
         let notification: NotificationAttributes;
         switch (err) {
             case CustomError.SESSION_EXPIRED:

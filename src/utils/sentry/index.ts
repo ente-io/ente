@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/nextjs';
-import { isDEVSentryENV } from 'constants/sentry';
 import { addLogLine } from 'utils/logging';
 import { getSentryUserID } from 'utils/user';
 
@@ -17,11 +16,8 @@ export const logError = async (
         addLogLine(
             `error: ${error?.name} ${error?.message} ${
                 error?.stack
-            } msg: ${msg} info: ${JSON.stringify(info)}`
+            } msg: ${msg} ${info ? `info: ${JSON.stringify(info)}` : ''}`
         );
-    }
-    if (isDEVSentryENV()) {
-        console.log(error, { msg, info });
     }
     Sentry.captureException(err, {
         level: Sentry.Severity.Info,

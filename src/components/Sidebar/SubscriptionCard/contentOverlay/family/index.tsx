@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { UserDetails } from 'types/user';
-import { isPartOfFamily } from 'utils/billing';
+import { isPartOfFamily } from 'utils/user/family';
 import StorageSection from '../storageSection';
 import { FamilyUsageSection } from './usageSection';
 
