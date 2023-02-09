@@ -128,12 +128,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             _appBarTitle = text;
             setState(() {});
           }
-        } catch (e) {
+        } catch (e, s) {
+          _logger.severe("Failed to rename album", e, s);
           rethrow;
         }
       },
     );
-    if (result == ButtonAction.error) {
+    if (result is Exception) {
       showGenericErrorDialog(context: context);
     }
   }
