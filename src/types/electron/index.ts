@@ -1,3 +1,4 @@
+import { LimitedCache } from 'types/cache';
 import { ElectronFile } from 'types/upload';
 import { WatchMapping } from 'types/watchFolder';
 
@@ -68,7 +69,7 @@ export interface ElectronAPIs {
     clearElectronStore: () => void;
     setEncryptionKey: (encryptionKey: string) => Promise<void>;
     getEncryptionKey: () => Promise<string>;
-    openDiskCache: (cacheName: string) => Promise<Cache>;
+    openDiskCache: (cacheName: string) => Promise<LimitedCache>;
     deleteDiskCache: (cacheName: string) => Promise<boolean>;
     logToDisk: (msg: string) => void;
     convertHEIC(fileData: Uint8Array): Promise<Uint8Array>;
