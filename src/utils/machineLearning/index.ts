@@ -37,7 +37,7 @@ import {
     getFaceCropBlobFromStorage,
     ibExtractFaceImagesFromCrops,
 } from './faceCrop';
-import { FILE_CACHE } from 'constants/cache';
+import { CACHES } from 'constants/cache';
 import { FILE_TYPE } from 'constants/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { addLogLine } from 'utils/logging';
@@ -381,7 +381,7 @@ export async function getOriginalImageBitmap(
     let fileBlob;
 
     if (useCache) {
-        fileBlob = await cached(FILE_CACHE, file.id.toString(), () => {
+        fileBlob = await cached(CACHES.FILES, file.id.toString(), () => {
             return getOriginalConvertedFile(file, token, enteWorker, queue);
         });
     } else {

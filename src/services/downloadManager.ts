@@ -10,7 +10,7 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
-import { THUMB_CACHE } from 'constants/cache';
+import { CACHES } from 'constants/cache';
 import { CacheStorageService } from './cache/cacheStorageService';
 import QueueProcessor, { PROCESSING_STRATEGY } from './queueProcessor';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
@@ -52,7 +52,7 @@ class DownloadManager {
             if (!this.thumbnailObjectURLPromise.has(file.id)) {
                 const downloadPromise = async () => {
                     const thumbnailCache = await CacheStorageService.open(
-                        THUMB_CACHE
+                        CACHES.THUMBS
                     );
 
                     const cacheResp: Response = await thumbnailCache?.match(

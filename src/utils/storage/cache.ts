@@ -1,4 +1,4 @@
-import { FACE_CROPS_CACHE, FILE_CACHE, THUMB_CACHE } from 'constants/cache';
+import { CACHES } from 'constants/cache';
 import { CacheStorageService } from 'services/cache/cacheStorageService';
 import { logError } from 'utils/sentry';
 
@@ -39,9 +39,9 @@ export async function getBlobFromCache(
 
 export async function deleteAllCache() {
     try {
-        await CacheStorageService.delete(THUMB_CACHE);
-        await CacheStorageService.delete(FACE_CROPS_CACHE);
-        await CacheStorageService.delete(FILE_CACHE);
+        await CacheStorageService.delete(CACHES.THUMBS);
+        await CacheStorageService.delete(CACHES.FACE_CROP);
+        await CacheStorageService.delete(CACHES.FILES);
     } catch (e) {
         logError(e, 'deleteAllCache failed'); // log and ignore
     }

@@ -5,14 +5,16 @@ async function openCache(cacheName: string) {
     try {
         return await CacheStorageFactory.getCacheStorage().open(cacheName);
     } catch (e) {
-        logError(e, 'openCache failed'); // log and ignore
+        // log and ignore, we don't want to crash the app if cache is not available
+        logError(e, 'openCache failed');
     }
 }
 async function deleteCache(cacheName: string) {
     try {
         return await CacheStorageFactory.getCacheStorage().delete(cacheName);
     } catch (e) {
-        logError(e, 'deleteCache failed'); // log and ignore
+        // log and ignore, we don't want to crash the app if cache is not available
+        logError(e, 'deleteCache failed');
     }
 }
 
