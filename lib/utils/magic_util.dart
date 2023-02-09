@@ -100,7 +100,7 @@ Future<void> editFilename(
   final fileName = file.displayName;
   final nameWithoutExt = basenameWithoutExtension(fileName);
   final extName = extension(fileName);
-  await showTextInputDialog(
+  final result = await showTextInputDialog(
     context,
     title: "Rename file",
     submitButtonLabel: "Rename",
@@ -110,25 +110,24 @@ Future<void> editFilename(
     hintText: "Enter file name",
     maxLength: 50,
     onSubmit: (String text) async {
-      try {
-        if (text.isEmpty || text.trim() == nameWithoutExt.trim()) {
-          return;
-        }
-        final newName = text + extName;
-        await _updatePublicMetadata(
-          context,
-          List.of([file]),
-          pubMagicKeyEditedName,
-          newName,
-          showProgressDialogs: false,
-          showDoneToast: false,
-        );
-      } catch (e) {
-        showShortToast(context, 'Something went wrong');
-        rethrow;
+      if (text.isEmpty || text.trim() == nameWithoutExt.trim()) {
+        return;
       }
+      final newName = text + extName;
+      await _updatePublicMetadata(
+        context,
+        List.of([file]),
+        pubMagicKeyEditedName,
+        newName,
+        showProgressDialogs: false,
+        showDoneToast: false,
+      );
     },
   );
+  if (result is Exception) {
+    _logger.severe("Failed to rename file");
+    showGenericErrorDialog(context: context);
+  }
 }
 
 Future<bool> editFileCaption(
