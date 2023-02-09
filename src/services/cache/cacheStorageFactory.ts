@@ -28,6 +28,6 @@ function transformBrowserCacheStorageToLimitedCacheStorage(
             };
         },
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        delete: caches.delete,
+        delete: caches.delete.bind(caches),
     };
 }
