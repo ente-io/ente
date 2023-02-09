@@ -18,6 +18,7 @@ import {
     TwoFactorRecoveryResponse,
     UserDetails,
     DeleteChallengeResponse,
+    GetRemoteStoreValueResponse,
 } from 'types/user';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
@@ -25,6 +26,7 @@ import safeStorageService from './electron/safeStorage';
 import { deleteAllCache } from 'utils/storage/cache';
 import { B64EncryptionResult } from 'types/crypto';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
+import { AxiosResponse } from 'axios';
 
 const ENDPOINT = getEndpoint();
 
@@ -376,5 +378,46 @@ export const validateKey = async () => {
     } catch (e) {
         await logoutUser();
         return false;
+    }
+};
+
+export const getFaceSearchEnabledStatus = async () => {
+    try {
+        const token = getToken();
+        const resp: AxiosResponse<GetRemoteStoreValueResponse> =
+            await HTTPService.get(
+                `${ENDPOINT}/remote-store`,
+                {
+                    key: 'faceSearchEnabled',
+                    defaultValue: false,
+                },
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+        return resp.data.value;
+    } catch (e) {
+        logError(e, 'failed to get face search enabled status');
+        throw e;
+    }
+};
+
+export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
+    try {
+        const token = getToken();
+        await HTTPService.post(
+            `${ENDPOINT}/remote-store/update`,
+            {
+                key: 'faceSearchEnabled',
+                value: newStatus,
+            },
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'failed to update face search enabled status');
+        throw e;
     }
 };
