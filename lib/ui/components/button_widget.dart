@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import "package:photos/models/search/button_result.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
@@ -203,6 +204,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   double? widthOfButton;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
   ExecutionState executionState = ExecutionState.idle;
+  Exception? _exception;
 
   @override
   void initState() {
@@ -411,10 +413,16 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
           });
         }),
       );
-      await widget.onTap!.call().onError((error, stackTrace) {
-        executionState = ExecutionState.error;
-        _debouncer.cancelDebounce();
-      });
+      await widget.onTap!.call().then(
+        (value) {
+          _exception = null;
+        },
+        onError: (error, stackTrace) {
+          executionState = ExecutionState.error;
+          _exception = error as Exception;
+          _debouncer.cancelDebounce();
+        },
+      );
       widget.shouldShowSuccessConfirmation && _debouncer.isActive()
           ? executionState = ExecutionState.successful
           : null;
@@ -443,7 +451,10 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                       : 0,
                 ), () {
               widget.isInAlert
-                  ? _popWithButtonAction(context, widget.buttonAction)
+                  ? _popWithButtonAction(
+                      context,
+                      buttonAction: widget.buttonAction,
+                    )
                   : null;
               if (mounted) {
                 setState(() {
@@ -460,7 +471,11 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
           widget.isInAlert
               ? Future.delayed(
                   const Duration(seconds: 0),
-                  () => _popWithButtonAction(context, ButtonAction.error),
+                  () => _popWithButtonAction(
+                    context,
+                    buttonAction: ButtonAction.error,
+                    exception: _exception,
+                  ),
                 )
               : null;
         });
@@ -469,16 +484,21 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       if (widget.isInAlert) {
         Future.delayed(
           Duration(seconds: widget.shouldShowSuccessConfirmation ? 1 : 0),
-          () => _popWithButtonAction(context, widget.buttonAction),
+          () =>
+              _popWithButtonAction(context, buttonAction: widget.buttonAction),
         );
       }
     }
   }
 
-  void _popWithButtonAction(BuildContext context, ButtonAction? buttonAction) {
+  void _popWithButtonAction(
+    BuildContext context, {
+    required ButtonAction? buttonAction,
+    Exception? exception,
+  }) {
     Navigator.of(context).canPop()
         ? Navigator.of(context).pop(
-            buttonAction,
+            ButtonResult(action: buttonAction, exception: exception),
           )
         : null;
   }
