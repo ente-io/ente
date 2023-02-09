@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/models/search/button_result.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -135,7 +136,7 @@ Future<ButtonAction?> showChoiceDialog(
 }
 
 ///Will return null if dismissed by tapping outside
-Future<ButtonAction?> showChoiceActionSheet(
+Future<ButtonResult?> showChoiceActionSheet(
   BuildContext context, {
   required String title,
   String? body,

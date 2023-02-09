@@ -54,7 +54,7 @@ class CollectionActions {
   }
 
   Future<bool> disableUrl(BuildContext context, Collection collection) async {
-    final ButtonAction? result = await showActionSheet(
+    final actionResult = await showActionSheet(
       context: context,
       buttons: [
         ButtonWidget(
@@ -80,11 +80,11 @@ class CollectionActions {
       body:
           'This will remove the public link for accessing "${collection.name}".',
     );
-    if (result != null) {
-      if (result == ButtonAction.error) {
+    if (actionResult?.action != null) {
+      if (actionResult!.action == ButtonAction.error) {
         showGenericErrorDialog(context: context);
       }
-      return result == ButtonAction.first;
+      return actionResult.action == ButtonAction.first;
     } else {
       return false;
     }
@@ -140,7 +140,7 @@ class CollectionActions {
     Collection collection,
     User user,
   ) async {
-    final ButtonAction? result = await showActionSheet(
+    final actionResult = await showActionSheet(
       context: context,
       buttons: [
         ButtonWidget(
@@ -168,11 +168,11 @@ class CollectionActions {
       body: '${user.email} will be removed from this shared album\n\nAny '
           'photos added by them will also be removed from the album',
     );
-    if (result != null) {
-      if (result == ButtonAction.error) {
+    if (actionResult?.action != null) {
+      if (actionResult!.action == ButtonAction.error) {
         showGenericErrorDialog(context: context);
       }
-      return result == ButtonAction.first;
+      return actionResult.action == ButtonAction.first;
     }
     return false;
   }
@@ -346,13 +346,14 @@ class CollectionActions {
       ),
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
-    if (actionResult != null && actionResult == ButtonAction.error) {
+    if (actionResult?.action != null &&
+        actionResult!.action == ButtonAction.error) {
       showGenericErrorDialog(context: bContext);
       return false;
     }
-    if (actionResult != null &&
-        (actionResult == ButtonAction.first ||
-            actionResult == ButtonAction.second)) {
+    if ((actionResult?.action != null) &&
+        (actionResult!.action == ButtonAction.first ||
+            actionResult.action == ButtonAction.second)) {
       return true;
     }
     return false;
@@ -364,7 +365,7 @@ class CollectionActions {
     BuildContext context,
     Collection collection,
   ) async {
-    final ButtonAction? result = await showChoiceActionSheet(
+    final actionResult = await showChoiceActionSheet(
       context,
       isCritical: true,
       title: "Delete shared album?",
@@ -372,7 +373,8 @@ class CollectionActions {
       body: "The album will be deleted for everyone\n\nYou will lose access to "
           "shared photos in this album that are owned by others",
     );
-    return result != null && result == ButtonAction.first;
+    return actionResult?.action != null &&
+        actionResult!.action == ButtonAction.first;
   }
 
   /*

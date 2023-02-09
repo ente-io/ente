@@ -428,15 +428,18 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       body: "You can manage your links in the share tab.",
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
-    if (actionResult != null && actionResult == ButtonAction.first) {
-      await _copyLink();
+    if (actionResult?.action != null) {
+      if (actionResult!.action == ButtonAction.first) {
+        await _copyLink();
+      }
+      if (actionResult.action == ButtonAction.second) {
+        routeToPage(
+          context,
+          ManageSharedLinkWidget(collection: _cachedCollectionForSharedLink),
+        );
+      }
     }
-    if (actionResult != null && actionResult == ButtonAction.second) {
-      routeToPage(
-        context,
-        ManageSharedLinkWidget(collection: _cachedCollectionForSharedLink),
-      );
-    }
+
     if (mounted) {
       setState(() => {});
     }
