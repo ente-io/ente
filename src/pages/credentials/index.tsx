@@ -14,7 +14,6 @@ import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
-import { eventBus, Events } from 'services/events';
 import { KeyAttributes, User } from 'types/user';
 import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
@@ -81,13 +80,6 @@ export default function Credentials() {
                     keyAttributes,
                     key
                 );
-                // TODO: not required after reseting appContext on first login
-                appContext.updateMlSearchEnabled(false);
-            }
-            try {
-                eventBus.emit(Events.LOGIN);
-            } catch (e) {
-                logError(e, 'Error in login handlers');
             }
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
             await decryptAndStoreToken(key);

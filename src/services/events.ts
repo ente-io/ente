@@ -1,11 +1,9 @@
 import { EventEmitter } from 'eventemitter3';
 
 // When registering event handlers,
-// handle errors to avoid unhandled rejection or propogation to emit call
+// handle errors to avoid unhandled rejection or propagation to emit call
 
 export enum Events {
-    APP_START = 'appStart',
-    LOGIN = 'login',
     LOGOUT = 'logout',
     FILE_UPLOADED = 'fileUploaded',
     LOCAL_FILES_UPDATED = 'localFilesUpdated',

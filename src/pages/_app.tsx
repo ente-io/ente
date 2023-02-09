@@ -183,7 +183,6 @@ export default function App({ Component, err }) {
                 const mlSearchConfig = await getMLSearchConfig();
                 setMlSearchEnabled(mlSearchConfig.enabled);
                 mlWorkManager.setMlSearchEnabled(mlSearchConfig.enabled);
-                eventBus.emit(Events.APP_START);
             } catch (e) {
                 logError(e, 'Error while loading mlSearchEnabled');
             }

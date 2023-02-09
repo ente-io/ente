@@ -58,8 +58,6 @@ class MLWorkManager {
             logQueueStats(this.liveSyncQueue, 'livesync');
             this.liveSyncQueue.on('idle', this.debouncedLiveSyncIdle, this);
 
-            // eventBus.on(Events.APP_START, this.appStartHandler, this);
-            // eventBus.on(Events.LOGIN, this.startSyncJob, this);
             // eslint-disable-next-line @typescript-eslint/unbound-method
             eventBus.on(Events.FILE_UPLOADED, this.fileUploadedHandler, this);
             eventBus.on(
@@ -75,8 +73,6 @@ class MLWorkManager {
 
             this.liveSyncQueue.removeAllListeners();
 
-            // eventBus.removeListener(Events.APP_START, this.appStartHandler, this);
-            // eventBus.removeListener(Events.LOGIN, this.startSyncJob, this);
             eventBus.removeListener(
                 Events.FILE_UPLOADED,
                 // eslint-disable-next-line @typescript-eslint/unbound-method
