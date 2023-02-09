@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:media_extension/media_extension.dart';
+import 'package:media_extension/media_extension_action_types.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
@@ -13,12 +15,14 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/extensions/string_ext.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -33,7 +37,6 @@ class LazyLoadingGallery extends StatefulWidget {
   final String? logTag;
   final Stream<int> currentIndexStream;
   final int photoGirdSize;
-
   LazyLoadingGallery(
     this.files,
     this.index,
@@ -308,6 +311,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   bool? _shouldRender;
   int? _currentUserID;
   late StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
+  final _mediaExtensionPlugin = MediaExtension();
 
   @override
   void initState() {
@@ -418,16 +422,23 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       selectionColor = avatarColors[(randomID).remainder(avatarColors.length)];
     }
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         if (widget.selectedFiles.files.isNotEmpty) {
           _selectFile(file);
         } else {
-          _routeToDetailPage(file, context);
+          if (AppLifecycleService.instance.intentAction == IntentAction.pick) {
+            final ioFile = await getFile(file);
+            _mediaExtensionPlugin.setResult("file://${ioFile!.path}");
+          } else {
+            _routeToDetailPage(file, context);
+          }
         }
       },
       onLongPress: () {
-        HapticFeedback.lightImpact();
-        _selectFile(file);
+        if (AppLifecycleService.instance.intentAction == IntentAction.main) {
+          HapticFeedback.lightImpact();
+          _selectFile(file);
+        }
       },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(1),

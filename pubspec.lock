@@ -13,10 +13,10 @@ packages:
     dependency: transitive
     description:
       name: _flutterfire_internals
-      sha256: "3ff770dfff04a67b0863dff205a0936784de1b87a5e99b11c693fc10e66a9ce3"
+      sha256: "6215ac7d00ed98300b72f45ed2b38c2ca841f9f4e6965fab33cbd591e45e4473"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.12"
+    version: "1.0.13"
   adaptive_theme:
     dependency: "direct main"
     description:
@@ -396,50 +396,50 @@ packages:
     dependency: "direct main"
     description:
       name: firebase_core
-      sha256: c129209ba55f3d4272c89fb4a4994c15bea77fb6de63a82d45fb6bc5c94e4355
+      sha256: be13e431c0c950f0fc66bdb67b41b8059121d7e7d8bbbc21fb59164892d561f8
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.5.0"
   firebase_core_platform_interface:
     dependency: transitive
     description:
       name: firebase_core_platform_interface
-      sha256: "5fab93f5b354648efa62e7cc829c90efb68c8796eecf87e0888cae2d5f3accd4"
+      sha256: "5615b30c36f55b2777d0533771deda7e5730e769e5d3cb7fda79e9bed86cfa55"
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.2"
+    version: "4.5.3"
   firebase_core_web:
     dependency: transitive
     description:
       name: firebase_core_web
-      sha256: "18b35ce111b0a4266abf723c825bcf9d4e2519d13638cc7f06f2a8dd960c75bc"
+      sha256: "4b3a41410f3313bb95fd560aa5eb761b6ad65c185de772c72231e8b4aeed6d18"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   firebase_messaging:
     dependency: "direct main"
     description:
       name: firebase_messaging
-      sha256: dc010a6436333029fba858415fe65887c3fe44d8f6e6ea162bb8d3dd764fbcb6
+      sha256: dbccddc62fef6f3745ba83062bfd1fbf2eb6a931db4c73d03f85c5772dfdec7f
       url: "https://pub.dev"
     source: hosted
-    version: "14.2.1"
+    version: "14.2.2"
   firebase_messaging_platform_interface:
     dependency: transitive
     description:
       name: firebase_messaging_platform_interface
-      sha256: abda2d766486096eb1c568c7b20aef46180596c8b0708190b929133ff03e0a8d
+      sha256: "564a47ea76db9cd2d17e7d95790428ad3de9d0075795d14c4c901ba0bf518e1a"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.10"
+    version: "4.2.11"
   firebase_messaging_web:
     dependency: transitive
     description:
       name: firebase_messaging_web
-      sha256: "7a0ce957bd2210e8636325152234728874dad039f1c7271ba1be5c752fdc5888"
+      sha256: "76291494583a003d4ce0d613c41cb87c58fab25773317daa66a245f537e1c3f7"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.11"
+    version: "3.2.12"
   fk_user_agent:
     dependency: "direct main"
     description:
@@ -672,10 +672,10 @@ packages:
     dependency: "direct main"
     description:
       name: fluttertoast
-      sha256: "7cc92eabe01e3f1babe1571c5560b135dfc762a34e41e9056881e2196b178ec1"
+      sha256: "774fa28b07f3a82c93596bc137be33189fec578ed3447a93a5a11c93435de394"
       url: "https://pub.dev"
     source: hosted
-    version: "8.1.2"
+    version: "8.1.3"
   frontend_server_client:
     dependency: transitive
     description:
@@ -911,12 +911,11 @@ packages:
   media_extension:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "68ffdad3db713b630e0d52edc2a45d23b438de6e"
-      url: "https://github.com/ente-io/media_extension.git"
-    source: git
-    version: "0.0.3"
+      name: media_extension
+      sha256: "50d9f5dd1b31296b0f5bf63c92b6dd69f5a59d9cd1d984f53834f51176319bb0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   meta:
     dependency: transitive
     description:
@@ -1266,18 +1265,18 @@ packages:
     dependency: "direct main"
     description:
       name: sentry
-      sha256: c64db3444237ff747c5a68f5214897bcb078de248785d0d816e3c55ab94dd71d
+      sha256: "81c1f32496ff04476d6ddfe5894215b1034d185301d2e3dffd272853392c5ea7"
       url: "https://pub.dev"
     source: hosted
-    version: "6.19.0"
+    version: "6.20.1"
   sentry_flutter:
     dependency: "direct main"
     description:
       name: sentry_flutter
-      sha256: a76cf5180d571535fb8fc3bf10358ab385d78134fcf652d0e03ba7741525ab09
+      sha256: "5ca2c8d86c220f7ad3109bedceb2c51b0e90bac5218e732be98ea2cba8006461"
       url: "https://pub.dev"
     source: hosted
-    version: "6.19.0"
+    version: "6.20.1"
   share_plus:
     dependency: "direct main"
     description:
