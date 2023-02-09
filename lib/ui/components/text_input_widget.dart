@@ -51,6 +51,10 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   final _textController = TextEditingController();
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
 
+  ///This is to pass if the TextInputWidget is in a dialog and an error is
+  ///thrown in executing onSubmit by passing it as arg in Navigator.pop()
+  Exception? _exception;
+
   @override
   void initState() {
     widget.submitNotifier?.addListener(() {
@@ -186,12 +190,16 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         });
       }),
     );
-    await widget.onSubmit
-        .call(_textController.text)
-        .onError((error, stackTrace) {
+    try {
+      await widget.onSubmit.call(_textController.text);
+    } catch (e) {
       executionState = ExecutionState.error;
       _debouncer.cancelDebounce();
-    });
+      _exception = e as Exception;
+      if (!widget.popNavAfterSubmission) {
+        rethrow;
+      }
+    }
     widget.alwaysShowSuccessState && _debouncer.isActive()
         ? executionState = ExecutionState.successful
         : null;
@@ -243,7 +251,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
           widget.popNavAfterSubmission
               ? Future.delayed(
                   const Duration(seconds: 0),
-                  () => _popNavigatorStack(context),
+                  () => _popNavigatorStack(context, e: _exception),
                 )
               : null;
         });
@@ -258,8 +266,8 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     }
   }
 
-  void _popNavigatorStack(BuildContext context) {
-    Navigator.of(context).canPop() ? Navigator.of(context).pop() : null;
+  void _popNavigatorStack(BuildContext context, {Exception? e}) {
+    Navigator.of(context).canPop() ? Navigator.of(context).pop(e) : null;
   }
 }
 

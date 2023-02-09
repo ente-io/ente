@@ -152,8 +152,9 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                         if (index == 0 &&
                                             widget.showOptionToCreateNewAlbum) {
                                           return GestureDetector(
-                                            onTap: () {
-                                              showTextInputDialog(
+                                            onTap: () async {
+                                              final result =
+                                                  await showTextInputDialog(
                                                 context,
                                                 title: "Album title",
                                                 submitButtonLabel: "OK",
@@ -163,6 +164,15 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                                 textCapitalization:
                                                     TextCapitalization.words,
                                               );
+                                              if (result is Exception) {
+                                                showGenericErrorDialog(
+                                                  context: context,
+                                                );
+                                                _logger.severe(
+                                                  "Failed to name album",
+                                                  result,
+                                                );
+                                              }
                                             },
                                             behavior: HitTestBehavior.opaque,
                                             child:
@@ -264,9 +274,9 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
     try {
       collection = await CollectionsService.instance.createAlbum(albumName);
     } catch (e, s) {
-      _logger.severe(e, s);
-      showGenericErrorDialog(context: context);
-    } finally {}
+      _logger.severe("Failed to create album", e, s);
+      rethrow;
+    }
     return collection;
   }
 
@@ -408,11 +418,11 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
       widget.selectedFiles?.clearAll();
       return true;
     } catch (e, s) {
-      _logger.severe("Could not add to album", e, s);
+      _logger.severe("Failed to add to album", e, s);
       await dialog?.hide();
       showGenericErrorDialog(context: context);
+      rethrow;
     }
-    return false;
   }
 
   Future<bool> _moveFilesToCollection(int toCollectionID) async {
