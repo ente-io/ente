@@ -210,19 +210,6 @@ const englishConstants = {
             registered email address
         </>
     ),
-    ENABLE_ML_SEARCH: 'Enable ML Search beta',
-    DISABLE_ML_SEARCH: 'Disable ML Search beta',
-    ENABLE_ML_SEARCH_MESSAGE:
-        'This will enable on-device machine learning and people search. ' +
-        'It will keep analyzing your uploaded photos locally and will store ' +
-        'all analysis data on local device. For the first run after login or ' +
-        'enabling this feature, it will download all original images on local ' +
-        'device to analyze them. So please only enable this if you are ok with ' +
-        'bandwidth and local processing of all images in your photo library.',
-    ML_SEARCH_NOT_COMPATIBLE:
-        'Can not enable on-device machine learning and people search. ' +
-        'We only support latest chrome desktop and ente desktop for this Beta release.',
-    ML_DEBUG: 'ML Debug',
     CONTACT_SUPPORT: 'Contact support',
     REQUEST_FEATURE: 'Request Feature',
     SUPPORT: 'Support',
