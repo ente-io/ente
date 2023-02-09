@@ -25,6 +25,7 @@ export function QuickOptions({
             {!(
                 collectionSummaryType === CollectionSummaryType.trash ||
                 collectionSummaryType === CollectionSummaryType.favorites ||
+                collectionSummaryType === CollectionSummaryType.uncategorized ||
                 collectionSummaryType === CollectionSummaryType.incomingShare
             ) && (
                 <Tooltip
@@ -51,7 +52,10 @@ export function QuickOptions({
                     title={
                         collectionSummaryType ===
                         CollectionSummaryType.favorites
-                            ? constants.DOWNLOAD_FAVOURITES
+                            ? constants.DOWNLOAD_FAVORITES
+                            : collectionSummaryType ===
+                              CollectionSummaryType.uncategorized
+                            ? constants.DOWNLOAD_UNCATEGORIZED
                             : constants.DOWNLOAD_COLLECTION
                     }>
                     <IconButton

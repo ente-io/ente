@@ -142,7 +142,8 @@ const englishConstants = {
     CREATE: 'Create',
     DOWNLOAD: 'Download',
     DOWNLOAD_OPTION: 'Download (D)',
-    DOWNLOAD_FAVOURITES: 'Download favourites',
+    DOWNLOAD_FAVORITES: 'Download favorites',
+    DOWNLOAD_UNCATEGORIZED: 'Download uncategorized',
     COPY_OPTION: 'Copy as PNG (Ctrl/Cmd - C)',
     TOGGLE_FULLSCREEN: 'Toggle fullscreen (F)',
     ZOOM_IN_OUT: 'Zoom in/out',
@@ -383,8 +384,15 @@ const englishConstants = {
     DELETE_COLLECTION_TITLE: 'Delete album?',
     DELETE_COLLECTION: 'Delete album',
     DELETE_COLLECTION_FAILED: 'Album deletion failed, please try again',
-    DELETE_COLLECTION_MESSAGE:
-        'Files that are unique to this album will be moved to trash, and this album would be deleted.',
+    DELETE_COLLECTION_MESSAGE: () => (
+        <p>
+            Also delete the photos (and videos) present in this album from
+            <span style={{ color: '#fff' }}> all </span> other albums they are
+            part of?
+        </p>
+    ),
+    DELETE_PHOTOS: 'Delete photos',
+    KEEP_PHOTOS: 'Keep photos',
     SHARE: 'Share',
     SHARE_COLLECTION: 'Share album',
     SHARE_WITH_PEOPLE: 'Share with your loved ones',
@@ -457,7 +465,7 @@ const englishConstants = {
         </p>
     ),
     ADD_TO_COLLECTION: 'Add to album',
-    SELECTED: 'Selected',
+    SELECTED: 'selected',
     VIDEO_PLAYBACK_FAILED: 'Video format not supported',
     VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD:
         'This video cannot be played on your browser',
@@ -614,6 +622,8 @@ const englishConstants = {
     THUMBNAIL_GENERATION_FAILED_INFO:
         'These files were uploaded, but unfortunately we could not generate the thumbnails for them.',
     UPLOAD_TO_COLLECTION: 'Upload to album',
+    UNCATEGORIZED: 'Uncategorized',
+    MOVE_TO_UNCATEGORIZED: 'Move to uncategorized',
     ARCHIVE: 'Archive',
     ARCHIVE_COLLECTION: 'Archive album',
     ARCHIVE_SECTION_NAME: 'Archive',
@@ -625,7 +635,9 @@ const englishConstants = {
     ADD: 'Add',
     SORT: 'Sort',
     REMOVE: 'Remove',
+    YES_REMOVE: 'Yes, remove',
     CONFIRM_REMOVE: 'Confirm removal',
+    REMOVE_FROM_COLLECTION: 'Remove from album',
     TRASH: 'Trash',
     MOVE_TO_TRASH: 'Move to trash',
     TRASH_FILES_MESSAGE:
@@ -647,11 +659,19 @@ const englishConstants = {
     LEAVE_SHARED_ALBUM_MESSAGE:
         'You will leave the album, and it will stop being visible to you.',
     NOT_FILE_OWNER: 'You cannot delete files in a shared album',
-    CONFIRM_REMOVE_MESSAGE: () => (
+    CONFIRM_SELF_REMOVE_MESSAGE: () => (
         <>
-            <p>Are you sure you want to remove these files from the album?</p>
             <p>
-                All files that are unique to this album will be moved to trash
+                Selected items will be removed from this album. Items which are
+                only in this album will be moved to Uncategorized.
+            </p>
+        </>
+    ),
+    CONFIRM_SELF_AND_OTHER_REMOVE_MESSAGE: () => (
+        <>
+            <p>
+                Some of the items you are removing were added by other people,
+                and you will lose access to them.
             </p>
         </>
     ),
@@ -717,7 +737,7 @@ const englishConstants = {
     LINK_EXPIRED_MESSAGE: 'This link has either expired or been disabled!',
     MANAGE_LINK: 'Manage link',
     LINK_TOO_MANY_REQUESTS: 'This album is too popular for us to handle!',
-    DISABLE_PUBLIC_SHARING: "'Disable public sharing",
+    DISABLE_PUBLIC_SHARING: 'Disable public sharing',
     DISABLE_PUBLIC_SHARING_MESSAGE:
         'Are you sure you want to disable public sharing?',
     FILE_DOWNLOAD: 'Allow downloads',
@@ -980,6 +1000,7 @@ const englishConstants = {
     FACE_SEARCH_CONFIRMATION:
         'I understand, and wish to allow ente to process face geometry',
     LABS: 'Labs',
+    YOURS: 'yours',
 };
 
 export default englishConstants;

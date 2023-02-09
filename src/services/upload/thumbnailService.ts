@@ -88,13 +88,6 @@ async function generateImageThumbnail(
                 MAX_THUMBNAIL_SIZE
             );
         } catch (e) {
-            logError(
-                e,
-                'Error generating thumbnail using electron image processor',
-                {
-                    fileFormat: fileTypeInfo.exactType,
-                }
-            );
             return await generateImageThumbnailUsingCanvas(file, fileTypeInfo);
         }
     } else {

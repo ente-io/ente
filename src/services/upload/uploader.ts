@@ -51,10 +51,9 @@ export default async function uploader(
         }
         addLogLine(`getting filetype for ${fileNameSize}`);
         fileTypeInfo = await UploadService.getAssetFileType(uploadAsset);
-        addLogLine(`got filetype for ${fileNameSize}`);
-        if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
-            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
-        }
+        addLogLine(
+            `got filetype for ${fileNameSize} - ${JSON.stringify(fileTypeInfo)}`
+        );
         if (skipVideos && fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
             addLogLine(
                 `skipped  video upload for public upload ${fileNameSize}`
@@ -176,7 +175,10 @@ export default async function uploader(
         };
     } catch (e) {
         addLogLine(`upload failed for  ${fileNameSize} ,error: ${e.message}`);
-        if (e.message !== CustomError.UPLOAD_CANCELLED) {
+        if (
+            e.message !== CustomError.UPLOAD_CANCELLED &&
+            e.message !== CustomError.UNSUPPORTED_FILE_FORMAT
+        ) {
             logError(e, 'file upload failed', {
                 fileFormat: fileTypeInfo?.exactType,
             });

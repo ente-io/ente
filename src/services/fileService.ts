@@ -7,8 +7,8 @@ import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import {
     decryptFile,
+    getLatestVersionFiles,
     mergeMetadata,
-    preservePhotoswipeProps,
     sortFiles,
 } from 'utils/file';
 import { eventBus, Events } from './events';
@@ -20,6 +20,10 @@ import { addLogLine } from 'utils/logging';
 import { isCollectionHidden } from 'utils/collection';
 import { CustomError } from 'utils/error';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import {
+    getCollectionLastSyncTime,
+    setCollectionLastSyncTime,
+} from './collectionService';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -53,18 +57,15 @@ const setLocalFiles = async (files: EnteFile[]) => {
     }
 };
 
-const getCollectionLastSyncTime = async (collection: Collection) =>
-    (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
-
 export const syncFiles = async (
     collections: Collection[],
     setFiles: SetFiles
-) => {
+): Promise<EnteFile[]> => {
     const localFiles = await getLocalFiles();
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
         await setLocalFiles(files);
-        setFiles(preservePhotoswipeProps([...sortFiles(mergeMetadata(files))]));
+        setFiles(sortFiles(mergeMetadata(files)));
     }
     for (const collection of collections) {
         if (!getToken()) {
@@ -77,41 +78,17 @@ export const syncFiles = async (
         if (collection.updationTime === lastSyncTime) {
             continue;
         }
-        const fetchedFiles =
-            (await getFiles(collection, lastSyncTime, files, setFiles)) ?? [];
-        files = [...files, ...fetchedFiles];
-        const latestVersionFiles = new Map<string, EnteFile>();
-        files.forEach((file) => {
-            const uid = `${file.collectionID}-${file.id}`;
-            if (
-                !latestVersionFiles.has(uid) ||
-                latestVersionFiles.get(uid).updationTime < file.updationTime
-            ) {
-                latestVersionFiles.set(uid, file);
-            }
-        });
-        files = [];
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (const [_, file] of latestVersionFiles) {
-            if (file.isDeleted) {
-                continue;
-            }
-            files.push(file);
-        }
+        const newFiles = await getFiles(collection, lastSyncTime, setFiles);
+        files = getLatestVersionFiles([...files, ...newFiles]);
         await setLocalFiles(files);
-        await localForage.setItem(
-            `${collection.id}-time`,
-            collection.updationTime
-        );
-        setFiles(preservePhotoswipeProps([...sortFiles(mergeMetadata(files))]));
+        setCollectionLastSyncTime(collection, collection.updationTime);
     }
-    return sortFiles(mergeMetadata(files));
+    return files;
 };
 
 export const getFiles = async (
     collection: Collection,
     sinceTime: number,
-    files: EnteFile[],
     setFiles: SetFiles
 ): Promise<EnteFile[]> => {
     try {
@@ -134,37 +111,35 @@ export const getFiles = async (
                 }
             );
 
-            decryptedFiles = [
-                ...decryptedFiles,
-                ...(await Promise.all(
-                    resp.data.diff.map(async (file: EncryptedEnteFile) => {
-                        if (!file.isDeleted) {
-                            return await decryptFile(file, collection.key);
-                        } else {
-                            return file;
-                        }
-                    }) as Promise<EnteFile>[]
-                )),
-            ];
+            const newDecryptedFilesBatch = await Promise.all(
+                resp.data.diff.map(async (file: EncryptedEnteFile) => {
+                    if (!file.isDeleted) {
+                        return await decryptFile(file, collection.key);
+                    } else {
+                        return file;
+                    }
+                }) as Promise<EnteFile>[]
+            );
+            decryptedFiles = [...decryptedFiles, ...newDecryptedFilesBatch];
 
-            if (resp.data.diff.length) {
-                time = resp.data.diff.slice(-1)[0].updationTime;
-            }
-            setFiles(
-                preservePhotoswipeProps(
-                    sortFiles(
-                        mergeMetadata(
-                            [...(files || []), ...decryptedFiles].filter(
-                                (item) => !item.isDeleted
-                            )
-                        )
+            setFiles((files) =>
+                sortFiles(
+                    mergeMetadata(
+                        getLatestVersionFiles([
+                            ...(files || []),
+                            ...decryptedFiles,
+                        ])
                     )
                 )
             );
+            if (resp.data.diff.length) {
+                time = resp.data.diff.slice(-1)[0].updationTime;
+            }
         } while (resp.data.hasMore);
         return decryptedFiles;
     } catch (e) {
         logError(e, 'Get files failed');
+        throw e;
     }
 };
 
