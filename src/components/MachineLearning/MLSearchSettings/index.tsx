@@ -17,6 +17,8 @@ const MLSearchSettings = ({ open, onClose, OnRootClose }) => {
         mlSearchEnabled,
         setDialogMessage,
         somethingWentWrong,
+        startLoading,
+        finishLoading,
     } = useContext(AppContext);
 
     const [enableFaceSearchView, setEnableFaceSearchView] = useState(false);
@@ -44,9 +46,11 @@ const MLSearchSettings = ({ open, onClose, OnRootClose }) => {
 
     const enableFaceSearch = async () => {
         try {
+            startLoading();
             await updateFaceSearchEnabledStatus(true);
             updateMlSearchEnabled(true);
             closeEnableFaceSearch();
+            finishLoading();
         } catch (e) {
             logError(e, 'Enable face search failed');
             somethingWentWrong();
@@ -65,8 +69,10 @@ const MLSearchSettings = ({ open, onClose, OnRootClose }) => {
 
     const disableFaceSearch = async () => {
         try {
+            startLoading();
             await updateFaceSearchEnabledStatus(false);
             await disableMlSearch();
+            finishLoading();
         } catch (e) {
             logError(e, 'Disable face search failed');
             somethingWentWrong();
