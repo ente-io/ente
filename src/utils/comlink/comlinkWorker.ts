@@ -1,4 +1,5 @@
-import { Remote, wrap } from 'comlink';
+import { expose, Remote, wrap } from 'comlink';
+import { WorkerElectronCacheStorageClient } from 'services/workerElectronCache/client';
 import { addLocalLog } from 'utils/logging';
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
@@ -16,6 +17,7 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
         addLocalLog(() => `Initiated ${this.name}`);
         const comlink = wrap<T>(this.worker);
         this.remote = new comlink() as Promise<Remote<InstanceType<T>>>;
+        expose(WorkerElectronCacheStorageClient, this.worker);
     }
 
     public terminate() {
