@@ -269,6 +269,7 @@ Future<Exception?> showTextInputDialog(
   int? maxLength,
   bool showOnlyLoadingState = false,
   TextCapitalization textCapitalization = TextCapitalization.none,
+  bool alwaysShowSuccessState = false,
 }) {
   return showDialog(
     barrierColor: backdropFaintDark,
@@ -294,6 +295,7 @@ Future<Exception?> showTextInputDialog(
             maxLength: maxLength,
             showOnlyLoadingState: showOnlyLoadingState,
             textCapitalization: textCapitalization,
+            alwaysShowSuccessState: alwaysShowSuccessState,
           ),
         ),
       );

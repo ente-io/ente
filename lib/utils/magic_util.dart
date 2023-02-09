@@ -109,6 +109,7 @@ Future<void> editFilename(
     alignMessage: Alignment.centerRight,
     hintText: "Enter file name",
     maxLength: 50,
+    alwaysShowSuccessState: true,
     onSubmit: (String text) async {
       if (text.isEmpty || text.trim() == nameWithoutExt.trim()) {
         return;

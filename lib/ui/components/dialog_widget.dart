@@ -170,12 +170,12 @@ class TextInputDialog extends StatefulWidget {
   final int? maxLength;
   final bool showOnlyLoadingState;
   final TextCapitalization? textCapitalization;
+  final bool alwaysShowSuccessState;
   const TextInputDialog({
     required this.title,
     this.body,
     required this.submitButtonLabel,
     required this.onSubmit,
-    required this.showOnlyLoadingState,
     this.icon,
     this.label,
     this.message,
@@ -185,6 +185,8 @@ class TextInputDialog extends StatefulWidget {
     this.alignMessage,
     this.maxLength,
     this.textCapitalization,
+    this.showOnlyLoadingState = false,
+    this.alwaysShowSuccessState = false,
     super.key,
   });
 
@@ -243,6 +245,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 popNavAfterSubmission: true,
                 showOnlyLoadingState: widget.showOnlyLoadingState,
                 textCapitalization: widget.textCapitalization,
+                alwaysShowSuccessState: widget.alwaysShowSuccessState,
               ),
             ),
             const SizedBox(height: 36),
