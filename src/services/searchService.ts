@@ -130,13 +130,18 @@ function getYearSuggestion(searchPhrase: string): Suggestion[] {
 }
 
 export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
-    const people = await getAllPeople(200);
-    return people.map((person) => ({
-        label: person.name,
-        type: SuggestionType.PERSON,
-        value: person,
-        hide: true,
-    }));
+    try {
+        const people = await getAllPeople(200);
+        return people.map((person) => ({
+            label: person.name,
+            type: SuggestionType.PERSON,
+            value: person,
+            hide: true,
+        }));
+    } catch (e) {
+        logError(e, 'getAllPeopleSuggestion failed');
+        return [];
+    }
 }
 
 export async function getIndexStatusSuggestion(): Promise<Suggestion> {

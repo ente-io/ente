@@ -12,6 +12,7 @@ import { FACE_CROPS_CACHE } from 'constants/cache';
 import { Legend } from 'components/PhotoViewer/styledComponents/Legend';
 import constants from 'utils/strings/constants';
 import { addLogLine } from 'utils/logging';
+import { logError } from 'utils/sentry';
 
 const FaceChipContainer = styled.div`
     display: flex;
@@ -119,15 +120,17 @@ export function AllPeopleList(props: AllPeopleListProps) {
         let didCancel = false;
 
         async function updateFaceImages() {
-            let people = await getAllPeople();
-            if (props.limit) {
-                people = people.slice(0, props.limit);
+            try {
+                let people = await getAllPeople();
+                if (props.limit) {
+                    people = people.slice(0, props.limit);
+                }
+                !didCancel && setPeople(people);
+            } catch (e) {
+                logError(e, 'updateFaceImages failed');
             }
-            !didCancel && setPeople(people);
         }
-
         updateFaceImages();
-
         return () => {
             didCancel = true;
         };
