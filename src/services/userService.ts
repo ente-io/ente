@@ -21,7 +21,7 @@ import {
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
 import safeStorageService from './electron/safeStorage';
-import { deleteThumbnailCache } from 'utils/cache';
+import { deleteThumbnailCache } from 'utils/storage/cache';
 import { B64EncryptionResult } from 'types/crypto';
 import { isPartOfFamily, getLocalFamilyData } from 'utils/user/family';
 
