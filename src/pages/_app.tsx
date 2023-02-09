@@ -104,7 +104,6 @@ export interface FlashMessage {
     message: string;
     type: FLASH_MESSAGE_TYPE;
 }
-// TODO: AppContext is not cleared after logout
 export const AppContext = createContext<AppContextType>(null);
 
 const redirectMap = new Map([
@@ -197,29 +196,6 @@ export default function App({ Component, err }) {
             });
         } catch (e) {
             logError(e, 'Error while subscribing to logout event');
-        }
-    }, []);
-
-    useEffect(() => {
-        if (isElectron()) {
-            const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
-                if (updateInfo.autoUpdatable) {
-                    setDialogMessage(
-                        getUpdateReadyToInstallMessage(updateInfo)
-                    );
-                } else {
-                    setNotificationAttributes({
-                        endIcon: <ArrowForward />,
-                        variant: 'secondary',
-                        message: constants.UPDATE_AVAILABLE,
-                        onClick: () =>
-                            setDialogMessage(
-                                getUpdateAvailableForDownloadMessage(updateInfo)
-                            ),
-                    });
-                }
-            };
-            ElectronUpdateService.registerUpdateEventListener(showUpdateDialog);
         }
     }, []);
 
@@ -396,13 +372,13 @@ export default function App({ Component, err }) {
                 <AppContext.Provider
                     value={{
                         showNavBar,
-                        redirectURL,
-                        setRedirectURL,
                         mlSearchEnabled,
                         updateMlSearchEnabled,
                         sharedFiles,
                         resetSharedFiles,
                         setDisappearingFlashMessage,
+                        redirectURL,
+                        setRedirectURL,
                         startLoading,
                         finishLoading,
                         closeMessageDialog,
