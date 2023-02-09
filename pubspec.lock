@@ -911,12 +911,11 @@ packages:
   media_extension:
     dependency: "direct main"
     description:
-      path: "."
-      ref: intent-action
-      resolved-ref: "77e8f86058c7430cbb620e9880e79b2ad62a2e1e"
-      url: "https://github.com/ente-io/media_extension.git"
-    source: git
-    version: "0.0.3"
+      name: media_extension
+      sha256: "50d9f5dd1b31296b0f5bf63c92b6dd69f5a59d9cd1d984f53834f51176319bb0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   meta:
     dependency: transitive
     description:
