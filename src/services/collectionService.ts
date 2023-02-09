@@ -42,6 +42,8 @@ import {
     FAVORITE_COLLECTION_NAME,
     DUMMY_UNCATEGORIZED_SECTION,
 } from 'constants/collection';
+// constants strings are used instead of english strings to avoid importing MUI components
+// which reference window object, which is not available in web worker
 import {
     ALL_SECTION_NAME,
     ARCHIVE_SECTION_NAME,
