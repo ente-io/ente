@@ -2,7 +2,7 @@ import { JobConfig } from 'types/common/job';
 import { MLSearchConfig, MLSyncConfig } from 'types/machineLearning';
 
 export const DEFAULT_ML_SYNC_JOB_CONFIG: JobConfig = {
-    intervalSec: 5,
+    intervalSec: 30,
     // TODO: finalize this after seeing effects on and from machine sleep
     maxItervalSec: 960,
     backoffMultiplier: 2,
