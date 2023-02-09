@@ -79,7 +79,6 @@ android {
         fdroid {
             dimension "default"
             applicationIdSuffix ".fdroid"
-            signingConfig null
         }
     }
 
