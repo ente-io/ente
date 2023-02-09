@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/models/typedefs.dart';
+import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -248,5 +250,55 @@ Future<ButtonAction?> showConfettiDialog<T>({
     useSafeArea: useSafeArea,
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
+  );
+}
+
+Future<Exception?> showTextInputDialog(
+  BuildContext context, {
+  required String title,
+  String? body,
+  required String submitButtonLabel,
+  IconData? icon,
+  String? label,
+  String? message,
+  String? hintText,
+  required FutureVoidCallbackParamStr onSubmit,
+  IconData? prefixIcon,
+  String? initialValue,
+  Alignment? alignMessage,
+  int? maxLength,
+  bool showOnlyLoadingState = false,
+  TextCapitalization textCapitalization = TextCapitalization.none,
+  bool alwaysShowSuccessState = false,
+}) {
+  return showDialog(
+    barrierColor: backdropFaintDark,
+    context: context,
+    builder: (context) {
+      final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+      final isKeyboardUp = bottomInset > 100;
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.only(bottom: isKeyboardUp ? bottomInset : 0),
+          child: TextInputDialog(
+            title: title,
+            message: message,
+            label: label,
+            body: body,
+            icon: icon,
+            submitButtonLabel: submitButtonLabel,
+            onSubmit: onSubmit,
+            hintText: hintText,
+            prefixIcon: prefixIcon,
+            initialValue: initialValue,
+            alignMessage: alignMessage,
+            maxLength: maxLength,
+            showOnlyLoadingState: showOnlyLoadingState,
+            textCapitalization: textCapitalization,
+            alwaysShowSuccessState: alwaysShowSuccessState,
+          ),
+        ),
+      );
+    },
   );
 }

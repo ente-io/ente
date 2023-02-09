@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:photos/models/execution_states.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 
 class TrailingWidget extends StatefulWidget {
   final ValueNotifier executionStateNotifier;

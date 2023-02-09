@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:photos/models/execution_states.dart';
+import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
@@ -7,13 +9,6 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/models/custom_button_style.dart';
 import 'package:photos/utils/debouncer.dart';
-
-enum ExecutionState {
-  idle,
-  inProgress,
-  error,
-  successful;
-}
 
 enum ButtonSize {
   small,
@@ -28,8 +23,6 @@ enum ButtonAction {
   cancel,
   error;
 }
-
-typedef FutureVoidCallback = Future<void> Function();
 
 class ButtonWidget extends StatelessWidget {
   final IconData? icon;
