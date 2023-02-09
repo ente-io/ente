@@ -50,7 +50,6 @@ export const getAutoCompleteSuggestions =
             ...getDateSuggestion(searchPhrase),
             ...getCollectionSuggestion(searchPhrase, collections),
             ...getFileSuggestion(searchPhrase, files),
-            ...(await getLocationSuggestions(searchPhrase)),
             ...(await getThingSuggestion(searchPhrase)),
             ...(await getWordSuggestion(searchPhrase)),
         ];
