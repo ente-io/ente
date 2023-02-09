@@ -9,8 +9,8 @@ import { logError } from '../sentry';
 import { SetDialogBoxAttributes } from 'types/dialogBox';
 import { getFamilyPortalRedirectURL } from 'services/userService';
 import { openLink } from 'utils/common';
-import { UserDetails } from 'types/user';
 import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
+import { UserDetails } from 'types/user';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
