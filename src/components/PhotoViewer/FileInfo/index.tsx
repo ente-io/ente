@@ -31,7 +31,7 @@ import {
 
 import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
 import { WordList } from 'components/MachineLearning/WordList';
-import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
+// import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
 import { AppContext } from 'pages/_app';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
@@ -93,6 +93,7 @@ export function FileInfo({
     const [location, setLocation] = useState<Location>(null);
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
     const [showExif, setShowExif] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [updateMLDataIndex, setUpdateMLDataIndex] = useState(0);
 
     const openExif = () => setShowExif(true);
@@ -296,13 +297,13 @@ export function FileInfo({
                             file={file}
                             updateMLDataIndex={updateMLDataIndex}
                         />
-                        <Box pt={1}>
+                        {/* <Box pt={1}>
                             <MLServiceFileInfoButton
                                 file={file}
                                 updateMLDataIndex={updateMLDataIndex}
                                 setUpdateMLDataIndex={setUpdateMLDataIndex}
                             />
-                        </Box>
+                        </Box> */}
                     </>
                 )}
             </Stack>
