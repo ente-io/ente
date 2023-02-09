@@ -3,17 +3,26 @@ import { ElectronCacheStorage } from 'services/electron/cache';
 import { runningInElectron, runningInWorker } from 'utils/common';
 import { WorkerElectronCacheStorageService } from 'services/workerElectronCache/service';
 
-export function getCacheStorage(): LimitedCacheStorage {
-    if (runningInElectron()) {
-        if (runningInWorker()) {
-            return new WorkerElectronCacheStorageService();
+class cacheStorageFactory {
+    workerElectronCacheStorageServiceInstance: WorkerElectronCacheStorageService;
+    getCacheStorage(): LimitedCacheStorage {
+        if (runningInElectron()) {
+            if (runningInWorker()) {
+                if (!this.workerElectronCacheStorageServiceInstance) {
+                    this.workerElectronCacheStorageServiceInstance =
+                        new WorkerElectronCacheStorageService();
+                }
+                return this.workerElectronCacheStorageServiceInstance;
+            } else {
+                return ElectronCacheStorage;
+            }
         } else {
-            return ElectronCacheStorage;
+            return transformBrowserCacheStorageToLimitedCacheStorage(caches);
         }
-    } else {
-        return transformBrowserCacheStorageToLimitedCacheStorage(caches);
     }
 }
+
+export const CacheStorageFactory = new cacheStorageFactory();
 
 function transformBrowserCacheStorageToLimitedCacheStorage(
     caches: CacheStorage
