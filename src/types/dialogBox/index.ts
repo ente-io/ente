@@ -17,6 +17,12 @@ export interface DialogBoxAttributes {
         variant: ButtonProps['color'];
         disabled?: boolean;
     };
+    secondary?: {
+        text: string;
+        action: () => void;
+        variant: ButtonProps['color'];
+        disabled?: boolean;
+    };
 }
 
 export type SetDialogBoxAttributes = React.Dispatch<

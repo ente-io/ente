@@ -54,6 +54,7 @@ export default function Deduplicate() {
     const [selected, setSelected] = useState<SelectedState>({
         count: 0,
         collectionID: 0,
+        ownCount: 0,
     });
     const closeDeduplication = function () {
         Router.push(PAGES.GALLERY);
@@ -107,6 +108,7 @@ export default function Deduplicate() {
         setFileSizeMap(currFileSizeMap);
         const selectedFiles = {
             count: count,
+            ownCount: count,
             collectionID: ALL_SECTION,
         };
         for (const fileID of toSelectFileIDs) {
@@ -144,7 +146,7 @@ export default function Deduplicate() {
     };
 
     const clearSelection = function () {
-        setSelected({ count: 0, collectionID: 0 });
+        setSelected({ count: 0, collectionID: 0, ownCount: 0 });
     };
 
     if (!duplicateFiles) {

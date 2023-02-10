@@ -10,9 +10,13 @@ interface Iprops {
         action: CollectionActions,
         loader?: boolean
     ) => (...args: any[]) => Promise<void>;
+    downloadOptionText?: string;
 }
 
-export function FavoritiesCollectionOption({ handleCollectionAction }: Iprops) {
+export function OnlyDownloadCollectionOption({
+    handleCollectionAction,
+    downloadOptionText = constants.DOWNLOAD,
+}: Iprops) {
     return (
         <OverflowMenuOption
             startIcon={<FileDownloadOutlinedIcon />}
@@ -20,7 +24,7 @@ export function FavoritiesCollectionOption({ handleCollectionAction }: Iprops) {
                 CollectionActions.CONFIRM_DOWNLOAD,
                 false
             )}>
-            {constants.DOWNLOAD_COLLECTION}
+            {downloadOptionText}
         </OverflowMenuOption>
     );
 }
