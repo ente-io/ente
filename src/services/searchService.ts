@@ -1,14 +1,10 @@
 import * as chrono from 'chrono-node';
-import { getEndpoint } from 'utils/common/apiUtil';
-import { getToken } from 'utils/common/key';
-import HTTPService from './HTTPService';
 import { getAllPeople } from 'utils/machineLearning';
 import constants from 'utils/strings/constants';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-
 import { logError } from 'utils/sentry';
 import {
     Bbox,
@@ -26,8 +22,6 @@ import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-
-const ENDPOINT = getEndpoint();
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
@@ -294,23 +288,10 @@ function parseHumanDate(humanDate: string): DateValue[] {
 }
 
 async function searchLocation(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     searchPhrase: string
 ): Promise<LocationSearchResponse[]> {
-    try {
-        const resp = await HTTPService.get(
-            `${ENDPOINT}/search/location`,
-            {
-                query: searchPhrase,
-                limit: 4,
-            },
-            {
-                'X-Auth-Token': getToken(),
-            }
-        );
-        return resp.data.results ?? [];
-    } catch (e) {
-        logError(e, 'location search failed');
-    }
+    logError(Error(), 'attempting to use unimplemented search API');
     return [];
 }
 
