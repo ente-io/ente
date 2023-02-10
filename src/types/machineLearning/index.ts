@@ -317,6 +317,7 @@ export interface MLSearchConfig extends Config {
 
 export interface MLSyncContext {
     token: string;
+    userID: number;
     config: MLSyncConfig;
     shouldUpdateMLVersion: boolean;
 
@@ -461,11 +462,12 @@ export interface MachineLearningWorker {
 
     syncLocalFile(
         token: string,
+        userID: number,
         enteFile: EnteFile,
         localFile: globalThis.File
     ): Promise<MlFileData | Error>;
 
-    sync(token: string): Promise<MLSyncResult>;
+    sync(token: string, userID: number): Promise<MLSyncResult>;
 
     close(): void;
 }

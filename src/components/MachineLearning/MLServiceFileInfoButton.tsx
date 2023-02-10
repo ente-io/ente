@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
 import { EnteFile } from 'types/file';
-import { getToken } from 'utils/common/key';
+import { getToken, getUserID } from 'utils/common/key';
 import mlService from '../../services/machineLearning/machineLearningService';
 
 function MLServiceFileInfoButton({
@@ -18,9 +18,10 @@ function MLServiceFileInfoButton({
     const runMLService = async () => {
         setMlServiceRunning(true);
         const token = getToken();
+        const userID = getUserID();
 
         // index 4 is for timeout of 240 seconds
-        await mlService.syncLocalFile(token, file as EnteFile, null, 4);
+        await mlService.syncLocalFile(token, userID, file as EnteFile, null, 4);
 
         setUpdateMLDataIndex(updateMLDataIndex + 1);
         setMlServiceRunning(false);

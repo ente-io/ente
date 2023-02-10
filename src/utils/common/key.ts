@@ -23,3 +23,4 @@ export const getActualKey = async () => {
 };
 
 export const getToken = () => getData(LS_KEYS.USER)?.token;
+export const getUserID = () => getData(LS_KEYS.USER)?.id;

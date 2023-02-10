@@ -3,7 +3,7 @@ import PQueue from 'p-queue';
 import { eventBus, Events } from 'services/events';
 import { EnteFile } from 'types/file';
 import { FILE_TYPE } from 'constants/file';
-import { getToken } from 'utils/common/key';
+import { getToken, getUserID } from 'utils/common/key';
 import { logQueueStats } from 'utils/machineLearning';
 import { getMLSyncJobConfig } from 'utils/machineLearning/config';
 import { logError } from 'utils/sentry';
@@ -174,8 +174,9 @@ class MLWorkManager {
         const result = await this.liveSyncQueue.add(async () => {
             this.stopSyncJob();
             const token = getToken();
+            const userID = getUserID();
             const mlWorker = await this.getLiveSyncWorker();
-            return mlWorker.syncLocalFile(token, enteFile, localFile);
+            return mlWorker.syncLocalFile(token, userID, enteFile, localFile);
         });
 
         if ('message' in result) {
@@ -213,9 +214,10 @@ class MLWorkManager {
         }
 
         const token = getToken();
+        const userID = getUserID();
         const jobWorkerProxy = await this.getSyncJobWorker();
 
-        const mlSyncResult = await jobWorkerProxy.sync(token);
+        const mlSyncResult = await jobWorkerProxy.sync(token, userID);
 
         // this.terminateSyncJobWorker();
         const jobResult: MLSyncJobResult = {

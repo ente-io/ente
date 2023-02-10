@@ -122,15 +122,22 @@ export class MLFactory {
 
     public static getMLSyncContext(
         token: string,
+        userID: number,
         config: MLSyncConfig,
         shouldUpdateMLVersion: boolean = true
     ) {
-        return new LocalMLSyncContext(token, config, shouldUpdateMLVersion);
+        return new LocalMLSyncContext(
+            token,
+            userID,
+            config,
+            shouldUpdateMLVersion
+        );
     }
 }
 
 export class LocalMLSyncContext implements MLSyncContext {
     public token: string;
+    public userID: number;
     public config: MLSyncConfig;
     public shouldUpdateMLVersion: boolean;
 
@@ -166,11 +173,13 @@ export class LocalMLSyncContext implements MLSyncContext {
 
     constructor(
         token: string,
+        userID: number,
         config: MLSyncConfig,
         shouldUpdateMLVersion: boolean = true,
         concurrency?: number
     ) {
         this.token = token;
+        this.userID = userID;
         this.config = config;
         this.shouldUpdateMLVersion = shouldUpdateMLVersion;
 

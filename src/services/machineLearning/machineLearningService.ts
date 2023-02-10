@@ -33,7 +33,6 @@ import ObjectService from './objectService';
 import ReaderService from './readerService';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;
@@ -56,7 +55,7 @@ class MachineLearningService {
         // this.clusteringService = new ClusteringService();
     }
 
-    public async sync(token: string): Promise<MLSyncResult> {
+    public async sync(token: string, userID: number): Promise<MLSyncResult> {
         if (!token) {
             throw Error('Token needed by ml service to sync file');
         }
@@ -67,7 +66,7 @@ class MachineLearningService {
         // needs to be cleaned using tf.dispose or tf.tidy
         // tf.engine().startScope();
 
-        const syncContext = await this.getSyncContext(token);
+        const syncContext = await this.getSyncContext(token, userID);
 
         await this.syncLocalFiles(syncContext);
 
@@ -124,16 +123,9 @@ class MachineLearningService {
     private async getLocalFilesMap(syncContext: MLSyncContext) {
         if (!syncContext.localFilesMap) {
             const localFiles = await getLocalFiles();
-            const user = getData(LS_KEYS.USER);
-            if (!user) {
-                logError(
-                    Error('user not found'),
-                    'User not found in local storage'
-                );
-                return new Map<number, EnteFile>();
-            }
+
             const personalFiles = localFiles.filter(
-                (f) => f.ownerID === user?.id
+                (f) => f.ownerID === syncContext.userID
             );
             syncContext.localFilesMap = new Map<number, EnteFile>();
             personalFiles.forEach((f) =>
@@ -306,12 +298,12 @@ class MachineLearningService {
         // await this.disposeMLModels();
     }
 
-    private async getSyncContext(token: string) {
+    private async getSyncContext(token: string, userID: number) {
         if (!this.syncContext) {
             addLogLine('Creating syncContext');
 
             this.syncContext = getMLSyncConfig().then((mlSyncConfig) =>
-                MLFactory.getMLSyncContext(token, mlSyncConfig, true)
+                MLFactory.getMLSyncContext(token, userID, mlSyncConfig, true)
             );
         } else {
             addLogLine('reusing existing syncContext');
@@ -319,11 +311,11 @@ class MachineLearningService {
         return this.syncContext;
     }
 
-    private async getLocalSyncContext(token: string) {
+    private async getLocalSyncContext(token: string, userID: number) {
         if (!this.localSyncContext) {
             addLogLine('Creating localSyncContext');
             this.localSyncContext = getMLSyncConfig().then((mlSyncConfig) =>
-                MLFactory.getMLSyncContext(token, mlSyncConfig, false)
+                MLFactory.getMLSyncContext(token, userID, mlSyncConfig, false)
             );
         } else {
             addLogLine('reusing existing localSyncContext');
@@ -342,11 +334,12 @@ class MachineLearningService {
 
     public async syncLocalFile(
         token: string,
+        userID: number,
         enteFile: EnteFile,
         localFile?: globalThis.File,
         textDetectionTimeoutIndex?: number
     ): Promise<MlFileData | Error> {
-        const syncContext = await this.getLocalSyncContext(token);
+        const syncContext = await this.getLocalSyncContext(token, userID);
 
         try {
             const mlFileData = await this.syncFileWithErrorHandler(
