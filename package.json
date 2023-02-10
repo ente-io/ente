@@ -81,7 +81,7 @@
     "yup": "^0.29.3"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^9.5.3",
+    "@next/bundle-analyzer": "^13.1.6",
     "@types/bs58": "^4.0.1",
     "@types/debounce-promise": "^3.1.3",
     "@types/libsodium-wrappers": "^0.7.8",
