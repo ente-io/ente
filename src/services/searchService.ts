@@ -40,12 +40,12 @@ export const getDefaultOptions = async (files: EnteFile[]) => {
 
 export const getAutoCompleteSuggestions =
     (files: EnteFile[], collections: Collection[]) =>
-    async (searchPhrase: string) => {
+    async (searchPhrase: string): Promise<SearchOption[]> => {
         searchPhrase = searchPhrase.trim().toLowerCase();
         if (!searchPhrase?.length) {
             return [];
         }
-        const suggestions = [
+        const suggestions: Suggestion[] = [
             ...getHolidaySuggestion(searchPhrase),
             ...getYearSuggestion(searchPhrase),
             ...getDateSuggestion(searchPhrase),
@@ -171,7 +171,7 @@ export async function getIndexStatusSuggestion(): Promise<Suggestion> {
     };
 }
 
-function getDateSuggestion(searchPhrase: string) {
+function getDateSuggestion(searchPhrase: string): Suggestion[] {
     const searchedDates = parseHumanDate(searchPhrase);
 
     return searchedDates.map((searchedDate) => ({
@@ -184,7 +184,7 @@ function getDateSuggestion(searchPhrase: string) {
 function getCollectionSuggestion(
     searchPhrase: string,
     collections: Collection[]
-) {
+): Suggestion[] {
     const collectionResults = searchCollection(searchPhrase, collections);
 
     return collectionResults.map(
@@ -223,7 +223,7 @@ async function getLocationSuggestions(searchPhrase: string) {
     );
 }
 
-async function getThingSuggestion(searchPhrase: string) {
+async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
     const thingResults = await searchThing(searchPhrase);
 
     return thingResults.map(
@@ -236,7 +236,7 @@ async function getThingSuggestion(searchPhrase: string) {
     );
 }
 
-async function getWordSuggestion(searchPhrase: string) {
+async function getWordSuggestion(searchPhrase: string): Promise<Suggestion[]> {
     const wordResults = await searchText(searchPhrase);
 
     return wordResults.map(
