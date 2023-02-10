@@ -22,7 +22,6 @@ import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { addLogLine } from 'utils/logging';
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
@@ -292,7 +291,7 @@ async function searchLocation(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     searchPhrase: string
 ): Promise<LocationSearchResponse[]> {
-    addLogLine(`attempting to use unimplemented search API`);
+    logError(Error(), 'attempting to use unimplemented search API');
     return [];
 }
 
