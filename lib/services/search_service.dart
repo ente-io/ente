@@ -61,13 +61,10 @@ class SearchService {
     final List<GenericSearchResult> searchResults = [];
     try {
       final List<File> allFiles = await _getAllFiles();
-      final response = await _enteDio.get(
-        "/search/location",
-        queryParameters: {"query": query, "limit": 10},
-      );
-
-      final matchedLocationSearchResults =
-          LocationApiResponse.fromMap(response.data);
+      // This code used an deprecated API earlier. We've retained the
+      // scaffolding for when we implement a client side location search, and
+      // meanwhile have replaced the API response.data with an empty map here.
+      final matchedLocationSearchResults = LocationApiResponse.fromMap({});
 
       for (var locationData in matchedLocationSearchResults.results) {
         final List<File> filesInLocation = [];
