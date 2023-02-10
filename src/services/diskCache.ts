@@ -1,11 +1,12 @@
-import path from 'path';
-import { readFile, writeFile, existsSync, unlink } from 'promise-fs';
 import DiskLRUService from '../services/diskLRU';
 import crypto from 'crypto';
+import { existsSync, readFile, writeFile, unlink } from 'promise-fs';
+import path from 'path';
+import { LimitedCache } from '../types/cache';
 
 const MAX_CACHE_SIZE = 1000 * 1000 * 1000; // 1GB
 
-export class DiskCache {
+export class DiskCache implements LimitedCache {
     constructor(private cacheBucketDir: string) {}
 
     async put(cacheKey: string, response: Response): Promise<void> {
