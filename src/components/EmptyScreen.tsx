@@ -2,8 +2,11 @@ import React, { useContext } from 'react';
 import { Button, styled, Typography } from '@mui/material';
 import constants from 'utils/strings/constants';
 import { DeduplicateContext } from 'pages/deduplicate';
-import VerticallyCentered from './Container';
+import VerticallyCentered, { FlexWrapper } from './Container';
 import uploadManager from 'services/upload/uploadManager';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import FolderIcon from '@mui/icons-material/Folder';
+
 const Wrapper = styled(VerticallyCentered)`
     & > svg {
         filter: drop-shadow(3px 3px 5px rgba(45, 194, 98, 0.5));
@@ -27,7 +30,8 @@ export default function EmptyScreen({ openUploader }) {
                     <VerticallyCentered
                         sx={{
                             flex: 'none',
-                            p: 1.5,
+                            pt: 1.5,
+                            pb: 1.5,
                         }}>
                         <VerticallyCentered sx={{ flex: 'none' }}>
                             {constants.WELCOME_TO_ENTE()}
@@ -45,22 +49,45 @@ export default function EmptyScreen({ openUploader }) {
                         srcSet="/images/empty-state/ente_duck_happy@2x.png,
                                 /images/empty-state/ente_duck_happy@3x.png"
                     />
-                    <Typography color="text.secondary" mt={2}>
-                        {constants.UPLOAD_FIRST_PHOTO_DESCRIPTION()}
-                    </Typography>
                     <span
                         style={{
                             cursor:
                                 !uploadManager.shouldAllowNewUpload() &&
                                 'not-allowed',
                         }}>
-                        <Button
-                            color="accent"
-                            onClick={openUploader}
-                            disabled={!uploadManager.shouldAllowNewUpload()}
-                            sx={{ mt: 4 }}>
-                            {constants.UPLOAD_FIRST_PHOTO}
-                        </Button>
+                        <VerticallyCentered paddingLeft={1} paddingRight={1}>
+                            <Button
+                                color="accent"
+                                onClick={openUploader}
+                                disabled={!uploadManager.shouldAllowNewUpload()}
+                                sx={{
+                                    mt: 1.5,
+                                    p: 1,
+                                    width: 320,
+                                    borderRadius: 0.5,
+                                }}>
+                                <FlexWrapper
+                                    sx={{ gap: 1 }}
+                                    justifyContent="center">
+                                    <AddPhotoAlternateIcon />
+                                    {constants.UPLOAD_FIRST_PHOTO}
+                                </FlexWrapper>
+                            </Button>
+                            <Button
+                                sx={{
+                                    mt: 1.5,
+                                    p: 1,
+                                    width: 320,
+                                    borderRadius: 0.5,
+                                }}>
+                                <FlexWrapper
+                                    sx={{ gap: 1 }}
+                                    justifyContent="center">
+                                    <FolderIcon />
+                                    {constants.IMPORT_YOUR_FOLDERS}
+                                </FlexWrapper>
+                            </Button>
+                        </VerticallyCentered>
                     </span>
                 </>
             )}

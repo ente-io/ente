@@ -159,12 +159,8 @@ const englishConstants = {
     NO_INTERNET_CONNECTION:
         'Please check your internet connection and try again',
     TITLE: 'ente Photos',
-    UPLOAD_FIRST_PHOTO_DESCRIPTION: () => (
-        <>
-            Preserve your first memory with <strong> ente </strong>
-        </>
-    ),
-    UPLOAD_FIRST_PHOTO: 'Preserve',
+    UPLOAD_FIRST_PHOTO: 'Upload your first photo',
+    IMPORT_YOUR_FOLDERS: 'Import your folders',
     UPLOAD_DROPZONE_MESSAGE: 'Drop to backup your files',
     WATCH_FOLDER_DROPZONE_MESSAGE: 'Drop to add watched folder',
     TRASH_FILES_TITLE: 'Delete files?',
