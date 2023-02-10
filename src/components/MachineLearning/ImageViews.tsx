@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { imageBitmapToBlob } from 'utils/image';
+import { logError } from 'utils/sentry';
 import { getBlobFromCache } from 'utils/storage/cache';
 
 export const Image = styled.img``;
@@ -26,16 +27,19 @@ export function ImageCacheView(props: { url: string; cacheName: string }) {
         let didCancel = false;
 
         async function loadImage() {
-            let blob: Blob;
-            if (!props.url || !props.cacheName) {
-                blob = undefined;
-            } else {
-                blob = await getBlobFromCache(props.cacheName, props.url);
+            try {
+                let blob: Blob;
+                if (!props.url || !props.cacheName) {
+                    blob = undefined;
+                } else {
+                    blob = await getBlobFromCache(props.cacheName, props.url);
+                }
+
+                !didCancel && setImageBlob(blob);
+            } catch (e) {
+                logError(e, 'ImageCacheView useEffect failed');
             }
-
-            !didCancel && setImageBlob(blob);
         }
-
         loadImage();
         return () => {
             didCancel = true;
