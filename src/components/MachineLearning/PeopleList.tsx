@@ -24,15 +24,14 @@ const FaceChipContainer = styled.div`
     overflow: auto;
 `;
 
-const FaceChip = styled.div`
+const FaceChip = styled.div<{ clickable?: boolean }>`
     width: 112px;
     height: 112px;
     margin: 5px;
     border-radius: 50%;
     overflow: hidden;
     position: relative;
-    cursor: pointer;
-
+    cursor: ${({ clickable }) => (clickable ? 'pointer' : 'normal')};
     & > img {
         width: 100%;
         height: 100%;
@@ -59,6 +58,7 @@ export function PeopleList(props: PeopleListProps) {
             {props.people.map((person, index) => (
                 <FaceChip
                     key={index}
+                    clickable={!!props.onSelect}
                     onClick={() =>
                         props.onSelect && props.onSelect(person, index)
                     }>
