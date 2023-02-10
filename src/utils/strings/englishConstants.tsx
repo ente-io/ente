@@ -91,6 +91,15 @@ const englishConstants = {
             recover your data without a recovery key.
         </>
     ),
+    WELCOME_TO_ENTE: () => (
+        <>
+            <Typography variant="h3" color="text.secondary">
+                Welcome to <span style={{ color: '#fff' }}> ente </span>
+            </Typography>
+            <h2>End to end encrypted photo storage and sharing</h2>
+        </>
+    ),
+    WHERE_YOUR_BEST_PHOTOS_LIVE: 'Where your best photos live',
     KEY_GENERATION_IN_PROGRESS_MESSAGE: 'Generating encryption keys...',
     PASSPHRASE_HINT: 'Password',
     CONFIRM_PASSPHRASE: 'Confirm password',
