@@ -756,6 +756,7 @@ export default function Gallery() {
                                     ?.type ===
                                 CollectionSummaryType.incomingShare
                             }
+                            isInSearchMode={isInSearchMode}
                         />
                     )}
             </FullScreenDropZone>
