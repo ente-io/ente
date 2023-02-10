@@ -9,7 +9,7 @@ import * as tf from '@tensorflow/tfjs-core';
 import { DebugInfo } from 'hdbscan';
 import PQueue from 'p-queue';
 
-import { Point as D3Point, RawNodeDatum } from 'react-d3-tree/lib/types/common';
+// import { Point as D3Point, RawNodeDatum } from 'react-d3-tree/lib/types/common';
 import { EnteFile } from 'types/file';
 import { Config } from 'types/common/config';
 import { Dimensions } from 'types/image';
@@ -34,12 +34,12 @@ export interface DebugFace {
     faceImage: FaceImage;
 }
 
-export interface MLDebugResult {
-    allFaces: DebugFace[];
-    clustersWithNoise: FacesClustersWithNoise;
-    tree: RawNodeDatum;
-    tsne: TSNEData;
-}
+// export interface MLDebugResult {
+//     allFaces: DebugFace[];
+//     clustersWithNoise: FacesClustersWithNoise;
+//     tree: RawNodeDatum;
+//     tsne: TSNEData;
+// }
 
 export declare type FaceImage = Array<Array<Array<number>>>;
 export declare type FaceImageBlob = Blob;
@@ -81,11 +81,11 @@ export interface NearestCluster {
     distance: number;
 }
 
-export interface TSNEData {
-    width: number;
-    height: number;
-    dataset: D3Point[];
-}
+// export interface TSNEData {
+//     width: number;
+//     height: number;
+//     dataset: D3Point[];
+// }
 
 export declare type Landmark = Point;
 
