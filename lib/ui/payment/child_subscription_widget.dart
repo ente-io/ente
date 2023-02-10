@@ -132,7 +132,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
         }
       },
     );
-    if (choice == ButtonAction.error) {
+    if (choice!.action == ButtonAction.error) {
       await showGenericErrorDialog(context: context);
     }
   }

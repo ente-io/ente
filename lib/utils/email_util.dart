@@ -158,7 +158,7 @@ Future<void> shareLogs(
       ),
     ],
   );
-  if (result != null && result == ButtonAction.second) {
+  if (result?.action != null && result!.action == ButtonAction.second) {
     final Size size = MediaQuery.of(context).size;
     await Share.shareFiles(
       [zipFilePath],

@@ -89,7 +89,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                   "recovery key and regenerate your password (you can use the same one again if you wish).",
               firstButtonLabel: "Use recovery key",
             );
-            if (dialogChoice == ButtonAction.first) {
+            if (dialogChoice!.action == ButtonAction.first) {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (BuildContext context) {
@@ -109,7 +109,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
               firstButtonLabel: "Contact Support",
               secondButtonLabel: "OK",
             );
-            if (dialogChoice == ButtonAction.first) {
+            if (dialogChoice!.action == ButtonAction.first) {
               await sendLogs(
                 context,
                 "Contact support",

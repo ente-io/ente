@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/models/search/button_result.dart";
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
@@ -12,7 +13,7 @@ import 'package:photos/ui/components/text_input_widget.dart';
 import 'package:photos/utils/separators_util.dart';
 
 ///Will return null if dismissed by tapping outside
-Future<ButtonAction?> showDialogWidget({
+Future<ButtonResult?> showDialogWidget({
   required BuildContext context,
   required String title,
   String? body,
