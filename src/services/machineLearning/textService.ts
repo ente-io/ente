@@ -101,40 +101,6 @@ class TextService {
             }))
             .sort((a, b) => b.files.length - a.files.length);
     }
-
-    // async syncThingClassesIndex(syncContext: MLSyncContext) {
-    //     const filesVersion = await mlIDbStorage.getIndexVersion('files');
-    //     addLogLine(
-    //         'thingClasses',
-    //         await mlIDbStorage.getIndexVersion('thingClasses')
-    //     );
-    //     if (
-    //         filesVersion <= (await mlIDbStorage.getIndexVersion('thingClasses'))
-    //     ) {
-    //         addLogLine(
-    //             '[MLService] Skipping people index as already synced to latest version'
-    //         );
-    //         return;
-    //     }
-
-    //     const thingClasses = await this.clusterThingClasses(syncContext);
-
-    //     if (!thingClasses || thingClasses.length < 1) {
-    //         return;
-    //     }
-
-    //     await mlIDbStorage.clearAllThingClasses();
-
-    //     for (const thingClass of thingClasses) {
-    //         await mlIDbStorage.putThingClass(thingClass);
-    //     }
-
-    //     await mlIDbStorage.setIndexVersion('thingClasses', filesVersion);
-    // }
-
-    // async getAllThingClasses() {
-    //     return await mlIDbStorage.getAllThingClasses();
-    // }
 }
 
 export default new TextService();
