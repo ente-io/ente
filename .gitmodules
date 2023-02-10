@@ -4,7 +4,7 @@
 	branch = master 
 [submodule "thirdparty/tesseract"]
 	path = thirdparty/tesseract
-	url = git@github.com:abhinavkgrd/tesseract.js.git
+	url = https://github.com/abhinavkgrd/tesseract.js.git
 	branch = worker-support 
 [submodule "ffmpeg-wasm"]
 	path = thirdparty/ffmpeg-wasm
