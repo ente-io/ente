@@ -3,7 +3,7 @@ import VerticallyCentered, { FlexWrapper } from 'components/Container';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useEffect } from 'react';
 import billingService from 'services/billingService';
-import { getFamilyPlanAdmin } from 'utils/billing';
+import { getFamilyPlanAdmin } from 'utils/user/family';
 import { preloadImage } from 'utils/common';
 import constants from 'utils/strings/constants';
 import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
