@@ -1,11 +1,12 @@
 import DiskLRUService from '../services/diskLRU';
 import crypto from 'crypto';
-import { existsSync, readFile, writeFile } from 'promise-fs';
+import { existsSync, readFile, writeFile, unlink } from 'promise-fs';
 import path from 'path';
+import { LimitedCache } from '../types/cache';
 
 const MAX_CACHE_SIZE = 1000 * 1000 * 1000; // 1GB
 
-export class DiskCache {
+export class DiskCache implements LimitedCache {
     constructor(private cacheBucketDir: string) {}
 
     async put(cacheKey: string, response: Response): Promise<void> {
@@ -27,6 +28,15 @@ export class DiskCache {
             return new Response(await readFile(cachePath));
         } else {
             return undefined;
+        }
+    }
+    async delete(cacheKey: string): Promise<boolean> {
+        const cachePath = getAssetCachePath(this.cacheBucketDir, cacheKey);
+        if (existsSync(cachePath)) {
+            await unlink(cachePath);
+            return true;
+        } else {
+            return false;
         }
     }
 }
