@@ -33,6 +33,7 @@ import ObjectService from './objectService';
 import ReaderService from './readerService';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;
@@ -123,8 +124,21 @@ class MachineLearningService {
     private async getLocalFilesMap(syncContext: MLSyncContext) {
         if (!syncContext.localFilesMap) {
             const localFiles = await getLocalFiles();
+            const user = getData(LS_KEYS.USER);
+            if (!user) {
+                logError(
+                    Error('user not found'),
+                    'User not found in local storage'
+                );
+                return new Map<number, EnteFile>();
+            }
+            const personalFiles = localFiles.filter(
+                (f) => f.ownerID === user?.id
+            );
             syncContext.localFilesMap = new Map<number, EnteFile>();
-            localFiles.forEach((f) => syncContext.localFilesMap.set(f.id, f));
+            personalFiles.forEach((f) =>
+                syncContext.localFilesMap.set(f.id, f)
+            );
         }
 
         return syncContext.localFilesMap;
