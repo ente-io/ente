@@ -410,9 +410,8 @@ const englishConstants = {
                 return 'Location';
             case SuggestionType.DATE:
                 return 'Date';
-            case SuggestionType.IMAGE:
-            case SuggestionType.VIDEO:
-                return 'File';
+            case SuggestionType.FILE_NAME:
+                return 'File name';
         }
     },
     PHOTO_COUNT: (count: number) =>

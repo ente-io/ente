@@ -3,7 +3,6 @@ import FolderIcon from '@mui/icons-material/Folder';
 import CalendarIcon from '@mui/icons-material/CalendarMonth';
 import ImageIcon from '@mui/icons-material/Image';
 import LocationIcon from '@mui/icons-material/LocationOn';
-import VideoFileIcon from '@mui/icons-material/VideoFile';
 import { components } from 'react-select';
 import { SearchOption, SuggestionType } from 'types/search';
 import SearchIcon from '@mui/icons-material/SearchOutlined';
@@ -21,10 +20,8 @@ const getIconByType = (type: SuggestionType) => {
             return <LocationIcon />;
         case SuggestionType.COLLECTION:
             return <FolderIcon />;
-        case SuggestionType.IMAGE:
+        case SuggestionType.FILE_NAME:
             return <ImageIcon />;
-        case SuggestionType.VIDEO:
-            return <VideoFileIcon />;
         default:
             return <SearchIcon />;
     }

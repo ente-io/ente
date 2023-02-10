@@ -13,8 +13,7 @@ export enum SuggestionType {
     DATE,
     LOCATION,
     COLLECTION,
-    IMAGE,
-    VIDEO,
+    FILE_NAME,
     PERSON,
     INDEX_STATUS,
     THING,
@@ -30,7 +29,7 @@ export interface DateValue {
 export interface Suggestion {
     type: SuggestionType;
     label: string;
-    value: Bbox | DateValue | number | Person | IndexStatus | Thing;
+    value: Bbox | DateValue | number[] | Person | IndexStatus | Thing;
     hide?: boolean;
 }
 
@@ -38,7 +37,7 @@ export type Search = {
     date?: DateValue;
     location?: Bbox;
     collection?: number;
-    file?: number;
+    files?: number[];
     person?: Person;
     thing?: ThingClass;
     text?: WordGroup;

@@ -527,12 +527,10 @@ export default function Gallery() {
     const updateSearch: UpdateSearch = (newSearch, summary) => {
         if (newSearch?.collection) {
             setActiveCollection(newSearch?.collection);
-        } else if (newSearch?.file) {
-            setActiveCollection(ALL_SECTION);
         } else {
             setSearch(newSearch);
         }
-        if (!newSearch?.collection && !newSearch?.file) {
+        if (!newSearch?.collection) {
             setIsInSearchMode(!!newSearch);
             setSetSearchResultSummary(summary);
         } else {
@@ -552,11 +550,6 @@ export default function Gallery() {
         startLoading();
         await downloadFiles(selectedFiles);
         finishLoading();
-    };
-
-    const resetSearch = () => {
-        setSearch(null);
-        setSetSearchResultSummary(null);
     };
 
     const openUploader = () => {
@@ -699,7 +692,6 @@ export default function Gallery() {
                         CollectionSummaryType.incomingShare
                     }
                     enableDownload={true}
-                    resetSearch={resetSearch}
                 />
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (

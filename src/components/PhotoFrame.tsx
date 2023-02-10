@@ -82,7 +82,6 @@ const PhotoFrame = ({
     openUploader,
     isInSearchMode,
     search,
-    resetSearch,
     deletedFileIds,
     setDeletedFileIds,
     activeCollection,
@@ -170,6 +169,9 @@ const PhotoFrame = ({
                         search?.text &&
                         search.text.files.indexOf(item.id) === -1
                     ) {
+                        return false;
+                    }
+                    if (search?.files && search.files.indexOf(item.id) === -1) {
                         return false;
                     }
                     if (
@@ -264,6 +266,7 @@ const PhotoFrame = ({
         files,
         deletedFileIds,
         search?.date,
+        search?.files,
         search?.location,
         search?.person,
         search?.thing,
@@ -346,18 +349,6 @@ const PhotoFrame = ({
             document.removeEventListener('keyup', handleKeyUp, false);
         };
     }, []);
-
-    useEffect(() => {
-        if (!isNaN(search?.file)) {
-            const filteredDataIdx = filteredData.findIndex((file) => {
-                return file.id === search.file;
-            });
-            if (!isNaN(filteredDataIdx)) {
-                onThumbnailClick(filteredDataIdx)();
-            }
-            resetSearch();
-        }
-    }, [search, filteredData]);
 
     useEffect(() => {
         if (selected.count === 0) {

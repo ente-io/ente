@@ -21,7 +21,6 @@ import {
 } from 'types/search';
 import ObjectService from './machineLearning/objectService';
 import textService from './machineLearning/textService';
-import { FILE_TYPE } from 'constants/file';
 import { getFormattedDate, isInsideBox, isSameDayAnyYear } from 'utils/search';
 import { Person, ThingClass } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
@@ -51,7 +50,7 @@ export const getAutoCompleteSuggestions =
             ...getYearSuggestion(searchPhrase),
             ...getDateSuggestion(searchPhrase),
             ...getCollectionSuggestion(searchPhrase, collections),
-            ...getFileSuggestion(searchPhrase, files),
+            getFileSuggestion(searchPhrase, files),
             ...(await getThingSuggestion(searchPhrase)),
             ...(await getWordSuggestion(searchPhrase)),
         ];
@@ -172,28 +171,6 @@ export async function getIndexStatusSuggestion(): Promise<Suggestion> {
     };
 }
 
-export function searchCollection(
-    searchPhrase: string,
-    collections: Collection[]
-): Collection[] {
-    return collections.filter((collection) =>
-        collection.name.toLowerCase().includes(searchPhrase)
-    );
-}
-
-function searchFiles(searchPhrase: string, files: EnteFile[]) {
-    const user = getData(LS_KEYS.USER) as User;
-    if (!user) return [];
-    return getUniqueFiles(files.filter((file) => file.ownerID === user.id))
-        .map((file) => ({
-            title: file.metadata.title,
-            id: file.id,
-            type: file.metadata.fileType,
-        }))
-        .filter(({ title }) => title.toLowerCase().includes(searchPhrase))
-        .slice(0, 4);
-}
-
 function getDateSuggestion(searchPhrase: string) {
     const searchedDates = parseHumanDate(searchPhrase);
 
@@ -223,16 +200,13 @@ function getCollectionSuggestion(
 function getFileSuggestion(
     searchPhrase: string,
     files: EnteFile[]
-): Suggestion[] {
-    const fileResults = searchFiles(searchPhrase, files);
-    return fileResults.map((file) => ({
-        type:
-            file.type === FILE_TYPE.IMAGE
-                ? SuggestionType.IMAGE
-                : SuggestionType.VIDEO,
-        value: file.id,
-        label: file.title,
-    }));
+): Suggestion {
+    const matchedFiles = searchFiles(searchPhrase, files);
+    return {
+        type: SuggestionType.FILE_NAME,
+        value: matchedFiles.map((file) => file.id),
+        label: searchPhrase,
+    };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -274,6 +248,26 @@ async function getWordSuggestion(searchPhrase: string) {
             } as Suggestion)
     );
 }
+
+function searchCollection(
+    searchPhrase: string,
+    collections: Collection[]
+): Collection[] {
+    return collections.filter((collection) =>
+        collection.name.toLowerCase().includes(searchPhrase)
+    );
+}
+
+function searchFiles(searchPhrase: string, files: EnteFile[]) {
+    const user = getData(LS_KEYS.USER) as User;
+    if (!user) return [];
+    return files.filter(
+        (file) =>
+            file.ownerID === user.id &&
+            file.metadata.title.toLowerCase().includes(searchPhrase)
+    );
+}
+
 function parseHumanDate(humanDate: string): DateValue[] {
     const date = chrono.parseDate(humanDate);
     const date1 = chrono.parseDate(`${humanDate} 1`);
@@ -320,21 +314,21 @@ async function searchLocation(
     return [];
 }
 
-export async function searchThing(searchPhrase: string) {
+async function searchThing(searchPhrase: string) {
     const thingClasses = await ObjectService.getAllThingClasses();
     return thingClasses.filter((thingClass) =>
         thingClass.className.toLocaleLowerCase().includes(searchPhrase)
     );
 }
 
-export async function searchText(searchPhrase: string) {
+async function searchText(searchPhrase: string) {
     const texts = await textService.clusterWords();
     return texts
         .filter((text) => text.word.toLocaleLowerCase().includes(searchPhrase))
         .slice(0, 4);
 }
 
-export function isSearchedFile(user: User, file: EnteFile, search: Search) {
+function isSearchedFile(user: User, file: EnteFile, search: Search) {
     if (search?.collection) {
         return search.collection === file.collectionID;
     }
@@ -356,8 +350,8 @@ export function isSearchedFile(user: User, file: EnteFile, search: Search) {
             search.location
         );
     }
-    if (search?.file) {
-        return file.id === search.file;
+    if (search?.files) {
+        return search.files.indexOf(file.id) !== -1;
     }
     if (search?.person) {
         return search.person.files.indexOf(file.id) !== -1;
@@ -388,9 +382,8 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
         case SuggestionType.COLLECTION:
             return { collection: option.value as number };
 
-        case SuggestionType.IMAGE:
-        case SuggestionType.VIDEO:
-            return { file: option.value as number };
+        case SuggestionType.FILE_NAME:
+            return { files: option.value as number[] };
 
         case SuggestionType.PERSON:
             return { person: option.value as Person };

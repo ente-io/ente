@@ -96,10 +96,8 @@ export default function SearchInput(props: Iprops) {
                 search = { collection: selectedOption.value as number };
                 setValue(null);
                 break;
-            case SuggestionType.IMAGE:
-            case SuggestionType.VIDEO:
-                search = { file: selectedOption.value as number };
-                setValue(null);
+            case SuggestionType.FILE_NAME:
+                search = { files: selectedOption.value as number[] };
                 break;
             case SuggestionType.PERSON:
                 search = { person: selectedOption.value as Person };
