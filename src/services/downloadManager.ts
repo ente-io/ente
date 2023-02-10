@@ -10,11 +10,11 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
-import { CACHES } from 'constants/cache';
-import { CacheStorageService } from './cache/cacheStorageService';
 import QueueProcessor, { PROCESSING_STRATEGY } from './queueProcessor';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { addLogLine } from 'utils/logging';
+import { CacheStorageService } from './cache/cacheStorageService';
+import { CACHES } from 'constants/cache';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 
