@@ -146,7 +146,9 @@ export default function SearchInput(props: Iprops) {
                 isClearable
                 escapeClearsValue
                 styles={SelectStyles}
-                defaultOptions={defaultOptions}
+                defaultOptions={
+                    appContext.mlSearchEnabled ? defaultOptions : null
+                }
                 noOptionsMessage={() => null}
             />
 
