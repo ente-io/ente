@@ -190,8 +190,9 @@ const PhotoFrame = ({
                     }
 
                     if (
-                        isSharedFile(user, item) &&
-                        activeCollection !== item.collectionID
+                        (isInSearchMode ||
+                            activeCollection !== item.collectionID) &&
+                        isSharedFile(user, item)
                     ) {
                         return false;
                     }
@@ -202,7 +203,11 @@ const PhotoFrame = ({
                     ) {
                         return false;
                     }
-                    if (activeCollection !== TRASH_SECTION && item.isTrashed) {
+                    if (
+                        (isInSearchMode ||
+                            activeCollection !== TRASH_SECTION) &&
+                        item.isTrashed
+                    ) {
                         return false;
                     }
                     if (!idSet.has(item.id)) {
@@ -210,8 +215,8 @@ const PhotoFrame = ({
                             activeCollection === ALL_SECTION ||
                             activeCollection === ARCHIVE_SECTION ||
                             activeCollection === TRASH_SECTION ||
-                            activeCollection === item.collectionID ||
-                            isInSearchMode
+                            isInSearchMode ||
+                            activeCollection === item.collectionID
                         ) {
                             idSet.add(item.id);
                             return true;
