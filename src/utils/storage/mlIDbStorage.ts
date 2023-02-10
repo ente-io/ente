@@ -72,15 +72,13 @@ class MLIDbStorage {
     }
 
     private openDB(): Promise<IDBPDatabase<MLDb>> {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const mlIDbStorage = this;
         return openDB<MLDb>(MLDATA_DB_NAME, 3, {
-            async terminated() {
+            terminated: async () => {
                 console.error('ML Indexed DB terminated');
                 logError(new Error(), 'ML Indexed DB terminated');
-                mlIDbStorage._db = undefined;
+                this._db = undefined;
                 // TODO: remove if there is chance of this going into recursion in some case
-                await mlIDbStorage.db;
+                await this.db;
             },
             blocked() {
                 // TODO: make sure we dont allow multiple tabs of app

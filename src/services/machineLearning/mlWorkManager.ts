@@ -38,8 +38,7 @@ class MLWorkManager {
         });
         this.mlSearchEnabled = false;
 
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        eventBus.on(Events.LOGOUT, this.logoutHandler, this);
+        eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);
         this.debouncedLiveSyncIdle = debounce(
             () => this.onLiveSyncIdle(),
             LIVE_SYNC_IDLE_DEBOUNCE_SEC * 1000
@@ -58,8 +57,11 @@ class MLWorkManager {
             logQueueStats(this.liveSyncQueue, 'livesync');
             this.liveSyncQueue.on('idle', this.debouncedLiveSyncIdle, this);
 
-            // eslint-disable-next-line @typescript-eslint/unbound-method
-            eventBus.on(Events.FILE_UPLOADED, this.fileUploadedHandler, this);
+            eventBus.on(
+                Events.FILE_UPLOADED,
+                this.fileUploadedHandler.bind(this),
+                this
+            );
             eventBus.on(
                 Events.LOCAL_FILES_UPDATED,
                 this.debouncedFilesUpdated,
@@ -75,8 +77,7 @@ class MLWorkManager {
 
             eventBus.removeListener(
                 Events.FILE_UPLOADED,
-                // eslint-disable-next-line @typescript-eslint/unbound-method
-                this.fileUploadedHandler,
+                this.fileUploadedHandler.bind(this),
                 this
             );
             eventBus.removeListener(
@@ -85,8 +86,7 @@ class MLWorkManager {
                 this
             );
 
-            // eslint-disable-next-line @typescript-eslint/await-thenable
-            await this.stopSyncJob();
+            this.stopSyncJob();
         }
     }
 
@@ -103,8 +103,7 @@ class MLWorkManager {
     private async logoutHandler() {
         addLogLine('logoutHandler');
         try {
-            // eslint-disable-next-line @typescript-eslint/await-thenable
-            await this.stopSyncJob();
+            this.stopSyncJob();
             this.mlSyncJob = undefined;
             await this.terminateLiveSyncWorker();
             await mlIDbStorage.clearMLDB();

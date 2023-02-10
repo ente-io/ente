@@ -120,7 +120,6 @@ export default function SearchInput(props: Iprops) {
     // unwanted side effect: placeholder is not shown on focus/click
     // https://github.com/JedWatson/react-select/issues/1879
     // for correct fix AsyncSelect can be extended to support default options reloading on focus/click
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleOnFocus = () => {
         refreshDefaultOptions();
     };
