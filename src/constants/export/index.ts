@@ -1,13 +1,13 @@
 export const ENTE_METADATA_FOLDER = 'metadata';
 
 export enum ExportNotification {
-    START = 'export started',
-    IN_PROGRESS = 'export already in progress',
-    FINISH = 'export finished',
-    FAILED = 'export failed',
-    ABORT = 'export aborted',
-    PAUSE = 'export paused',
-    UP_TO_DATE = `no new files to export`,
+    START = 'Export started',
+    IN_PROGRESS = 'Export already in progress',
+    FINISH = 'Export finished',
+    FAILED = 'Export failed',
+    ABORT = 'Export aborted',
+    PAUSE = 'Export paused',
+    UP_TO_DATE = `No new files to export`,
 }
 
 export enum RecordType {
