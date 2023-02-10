@@ -70,8 +70,8 @@ function convertSuggestionsToOptions(
             searchQuery: convertSuggestionToSearchQuery(suggestion),
         }))
         .map(({ suggestion, searchQuery }) => {
-            const resultFiles = files.filter((file) =>
-                isSearchedFile(user, file, searchQuery)
+            const resultFiles = getUniqueFiles(
+                files.filter((file) => isSearchedFile(user, file, searchQuery))
             );
             return {
                 ...suggestion,
