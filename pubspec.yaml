@@ -76,8 +76,7 @@ dependencies:
   local_auth: ^1.1.5
   logging: ^1.0.1
   lottie: ^1.2.2
-  media_extension:
-    git: "https://github.com/ente-io/media_extension.git"
+  media_extension: ^1.0.0
   modal_bottom_sheet: ^3.0.0-pre
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
@@ -107,6 +106,11 @@ dependencies:
   step_progress_indicator: ^1.0.2
   syncfusion_flutter_core: ^19.2.49
   syncfusion_flutter_sliders: ^19.2.49
+  tflite_flutter: ^0.9.0
+  tflite_flutter_helper:
+    git:
+      url: https://github.com/elephantum/tflite_flutter_helper.git  # Fixes https://github.com/am15h/tflite_flutter_helper/issues/57
+      ref: a7d7a59a33f7cffa0a2a12ab05625807622cc97a
   tuple: ^2.0.0
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
@@ -151,6 +155,7 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
+    - assets/models/
   fonts:
   - family: Inter
     fonts:

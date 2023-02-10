@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:media_extension/media_extension_action_types.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:photos/core/configuration.dart';
@@ -19,6 +20,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
@@ -47,7 +49,9 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
-  const HomeWidget({Key? key}) : super(key: key);
+  const HomeWidget({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
@@ -291,7 +295,9 @@ class _HomeWidgetState extends State<HomeWidget> {
               Navigator.pop(context);
               return false;
             }
-            if (Platform.isAndroid) {
+            if (Platform.isAndroid &&
+                AppLifecycleService.instance.intentAction ==
+                    IntentAction.main) {
               MoveToBackground.moveTaskToBack();
               return false;
             } else {
