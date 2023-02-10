@@ -10,6 +10,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/models/custom_button_style.dart';
 import 'package:photos/utils/debouncer.dart';
+import "package:photos/utils/dialog_util.dart";
 
 enum ButtonSize {
   small,
@@ -489,11 +490,13 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     required ButtonAction? buttonAction,
     Exception? exception,
   }) {
-    Navigator.of(context).canPop()
-        ? Navigator.of(context).pop(
-            ButtonResult(action: buttonAction, exception: exception),
-          )
-        : null;
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop(ButtonResult(widget.buttonAction, exception));
+    } else if (exception != null) {
+      //This is to show the execution was unsuccessful if the dialog is manually
+      //closed before the execution completes.
+      showGenericErrorDialog(context: context);
+    }
   }
 
   void _onTapDown(details) {
