@@ -7,6 +7,7 @@ import {
 } from 'utils/file';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
+
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
