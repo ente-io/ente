@@ -176,7 +176,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         });
       }
     });
-    // For sharing images coming from outside the app while the app is in the memory
+    // For sharing images coming from outside the app
     _initMediaShareSubscription();
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => Future.delayed(
@@ -237,6 +237,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   void _initMediaShareSubscription() {
+    // For sharing images coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
         ReceiveSharingIntent.getMediaStream().listen(
       (List<SharedMediaFile> value) {
@@ -253,6 +254,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
       setState(() {
         _sharedFiles = value;
+        _shouldRenderCreateCollectionSheet = true;
       });
     });
   }
