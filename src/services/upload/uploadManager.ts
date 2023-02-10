@@ -14,6 +14,7 @@ import {
 import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
+import { eventBus, Events } from 'services/events';
 import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { EncryptedEnteFile, EnteFile } from 'types/file';
@@ -274,7 +275,7 @@ class UploadManager {
             i++
         ) {
             this.cryptoWorkers[i] = getDedicatedCryptoWorker();
-            const worker = await new this.cryptoWorkers[i].remote();
+            const worker = await this.cryptoWorkers[i].remote;
             uploadProcesses.push(this.uploadNextFileInQueue(worker));
         }
         await Promise.all(uploadProcesses);
@@ -357,6 +358,14 @@ class UploadManager {
                     UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL,
                 ].includes(fileUploadResult)
             ) {
+                try {
+                    eventBus.emit(Events.FILE_UPLOADED, {
+                        enteFile: decryptedFile,
+                        localFile: fileWithCollection.file,
+                    });
+                } catch (e) {
+                    logError(e, 'Error in fileUploaded handlers');
+                }
                 this.updateExistingFiles(decryptedFile);
             }
             await this.watchFolderCallback(

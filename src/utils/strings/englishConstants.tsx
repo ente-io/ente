@@ -1,9 +1,11 @@
-import { Box, Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import React from 'react';
 import { SuggestionType } from 'types/search';
 import { formatNumberWithCommas } from '.';
+import { FACE_SEARCH_PRIVACY_POLICY_LINK } from 'constants/urls';
 
 /**
  * Global English constants.
@@ -408,14 +410,15 @@ const englishConstants = {
                 return 'Location';
             case SuggestionType.DATE:
                 return 'Date';
-            case SuggestionType.IMAGE:
-            case SuggestionType.VIDEO:
-                return 'File';
+            case SuggestionType.FILE_NAME:
+                return 'File name';
         }
     },
     PHOTO_COUNT: (count: number) =>
         `${
-            count === 1
+            !count
+                ? 'No memory'
+                : count === 1
                 ? `1 memory`
                 : `${formatNumberWithCommas(count)} memories`
         }`,
@@ -447,12 +450,22 @@ const englishConstants = {
             with ente
         </p>
     ),
-    NOT_FILE_OWNER: 'You cannot delete files in a shared album',
     ADD_TO_COLLECTION: 'Add to album',
     SELECTED: 'selected',
     VIDEO_PLAYBACK_FAILED: 'Video format not supported',
     VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD:
         'This video cannot be played on your browser',
+    PEOPLE: 'People',
+    INDEXING_SCHEDULED: 'indexing is scheduled...',
+    ANALYZING_PHOTOS: (nSyncedFiles, nTotalFiles) =>
+        `analyzing new photos (${nSyncedFiles} of ${nTotalFiles} done)...`,
+    INDEXING_PEOPLE: (nSyncedFiles) =>
+        `indexing people in ${nSyncedFiles} photos...`,
+    INDEXING_DONE: (nSyncedFiles) => `indexed ${nSyncedFiles} photos`,
+    UNIDENTIFIED_FACES: 'unidentified faces',
+    OBJECTS: 'objects',
+    TEXT: 'text',
+
     METADATA: 'Metadata',
     INFO: 'Info ',
     INFO_OPTION: 'Info (I)',
@@ -629,9 +642,9 @@ const englishConstants = {
     LEAVE_SHARED_ALBUM: 'Yes, leave',
     LEAVE_ALBUM: 'Leave album',
     LEAVE_SHARED_ALBUM_TITLE: 'Leave shared album?',
-    LEAVE_SHARED_ALBUM_FAILED: 'failed to leave the album, please try again',
     LEAVE_SHARED_ALBUM_MESSAGE:
         'You will leave the album, and it will stop being visible to you.',
+    NOT_FILE_OWNER: 'You cannot delete files in a shared album',
     CONFIRM_SELF_REMOVE_MESSAGE: () => (
         <>
             <p>
@@ -914,6 +927,65 @@ const englishConstants = {
     ),
     ADD_X_PHOTOS: (x: number) => `Add ${x} ${x > 1 ? 'photos' : 'photo'}`,
     CHOSE_THEME: 'Choose theme',
+    ML_SEARCH: 'ML search (beta)',
+    ML_SEARCH_DESCRIPTION: () => (
+        <>
+            <Typography color="text.secondary">
+                This will enable on-device machine learning and face search
+                which will start analyzing your uploaded photos locally.
+                <br />
+                <br />
+                For the first run after login or enabling this feature, it will
+                download all images on local device to analyze them. So please
+                only enable this if you are ok with bandwidth and local
+                processing of all images in your photo library.
+                <br />
+                <br />
+                If this is the first time you're enabling this, we'll also ask
+                your permission to process face data.
+            </Typography>
+        </>
+    ),
+    ML_MORE_DETAILS: 'More details',
+
+    ENABLE_FACE_SEARCH: 'Enable face search',
+    ENABLE_FACE_SEARCH_TITLE: 'Enable face search?',
+    ENABLE_FACE_SEARCH_DESCRIPTION: () => (
+        <>
+            <Typography color="text.secondary">
+                If you enable face search, ente will extract face geometry from
+                your photos. This will happen on your device, and any generated
+                biometric data will be end-to-encrypted.
+                <br />
+                <br />
+                <Link
+                    target={'_blank'}
+                    href={FACE_SEARCH_PRIVACY_POLICY_LINK}
+                    underline="always"
+                    sx={{ color: 'inherit', textDecorationColor: 'inherit' }}>
+                    Please click here for more details about this feature in our
+                    privacy policy
+                </Link>
+            </Typography>
+        </>
+    ),
+    DISABLE_BETA: 'Disable beta',
+    DISABLE_FACE_SEARCH: 'Disable face search',
+    DISABLE_FACE_SEARCH_TITLE: 'Disable face search?',
+    DISABLE_FACE_SEARCH_DESCRIPTION: () => (
+        <Typography>
+            ente will stop processing face geometry, and will also disable ML
+            search (beta)
+            <br />
+            <br />
+            You can reenable face search again if you wish, so this operation is
+            safe
+        </Typography>
+    ),
+    ADVANCED: 'Advanced',
+    FACE_SEARCH_CONFIRMATION:
+        'I understand, and wish to allow ente to process face geometry',
+    LABS: 'Labs',
     YOURS: 'yours',
 };
 

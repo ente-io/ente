@@ -15,36 +15,37 @@ export const OptionWithInfo = (props) => (
     </Option>
 );
 
-const LabelWithInfo = ({ data }: { data: SearchOption }) => (
-    <>
-        <Box className="main" px={2} py={1}>
-            <Typography variant="caption" mb={1}>
-                {constants.SEARCH_TYPE(data.type)}
-            </Typography>
-            <SpaceBetweenFlex>
-                <Box mr={1}>
-                    <FreeFlowText>
-                        <Typography fontWeight={'bold'}>
-                            {data.label}
+const LabelWithInfo = ({ data }: { data: SearchOption }) =>
+    !data.hide && (
+        <>
+            <Box className="main" px={2} py={1}>
+                <Typography variant="caption" mb={1}>
+                    {constants.SEARCH_TYPE(data.type)}
+                </Typography>
+                <SpaceBetweenFlex>
+                    <Box mr={1}>
+                        <FreeFlowText>
+                            <Typography fontWeight={'bold'}>
+                                {data.label}
+                            </Typography>
+                        </FreeFlowText>
+                        <Typography color="text.secondary">
+                            {constants.PHOTO_COUNT(data.fileCount)}
                         </Typography>
-                    </FreeFlowText>
-                    <Typography color="text.secondary">
-                        {constants.PHOTO_COUNT(data.fileCount)}
-                    </Typography>
-                </Box>
+                    </Box>
 
-                <Stack direction={'row'} spacing={1}>
-                    {data.previewFiles.map((file) => (
-                        <CollectionCard
-                            key={file.id}
-                            latestFile={file}
-                            onClick={() => null}
-                            collectionTile={ResultPreviewTile}
-                        />
-                    ))}
-                </Stack>
-            </SpaceBetweenFlex>
-        </Box>
-        <Divider sx={{ mx: 2, my: 1 }} />
-    </>
-);
+                    <Stack direction={'row'} spacing={1}>
+                        {data.previewFiles.map((file) => (
+                            <CollectionCard
+                                key={file.id}
+                                latestFile={file}
+                                onClick={() => null}
+                                collectionTile={ResultPreviewTile}
+                            />
+                        ))}
+                    </Stack>
+                </SpaceBetweenFlex>
+            </Box>
+            <Divider sx={{ mx: 2, my: 1 }} />
+        </>
+    );

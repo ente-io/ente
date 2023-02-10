@@ -2,6 +2,10 @@ import * as chrono from 'chrono-node';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
+import { getAllPeople } from 'utils/machineLearning';
+import constants from 'utils/strings/constants';
+import mlIDbStorage from 'utils/storage/mlIDbStorage';
+import { getMLSyncConfig } from 'utils/machineLearning/config';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 
@@ -15,48 +19,69 @@ import {
     Suggestion,
     SuggestionType,
 } from 'types/search';
-import { FILE_TYPE } from 'constants/file';
+import ObjectService from './machineLearning/objectService';
+import textService from './machineLearning/textService';
 import { getFormattedDate, isInsideBox, isSameDayAnyYear } from 'utils/search';
+import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
+import { User } from 'types/user';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 const ENDPOINT = getEndpoint();
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
+export const getDefaultOptions = async (files: EnteFile[]) => {
+    return [
+        await getIndexStatusSuggestion(),
+        ...convertSuggestionsToOptions(await getAllPeopleSuggestion(), files),
+    ];
+};
+
 export const getAutoCompleteSuggestions =
     (files: EnteFile[], collections: Collection[]) =>
-    async (searchPhrase: string) => {
+    async (searchPhrase: string): Promise<SearchOption[]> => {
         searchPhrase = searchPhrase.trim().toLowerCase();
         if (!searchPhrase?.length) {
             return [];
         }
-        const suggestions = [
+        const suggestions: Suggestion[] = [
             ...getHolidaySuggestion(searchPhrase),
             ...getYearSuggestion(searchPhrase),
             ...getDateSuggestion(searchPhrase),
             ...getCollectionSuggestion(searchPhrase, collections),
-            ...getFileSuggestion(searchPhrase, files),
+            getFileSuggestion(searchPhrase, files),
+            ...(await getThingSuggestion(searchPhrase)),
+            ...(await getWordSuggestion(searchPhrase)),
         ];
 
-        const previewImageAppendedOptions: SearchOption[] = suggestions
-            .map((suggestion) => ({
-                suggestion,
-                searchQuery: convertSuggestionToSearchQuery(suggestion),
-            }))
-            .map(({ suggestion, searchQuery }) => {
-                const resultFiles = getUniqueFiles(
-                    files.filter((file) => isSearchedFile(file, searchQuery))
-                );
-                return {
-                    ...suggestion,
-                    fileCount: resultFiles.length,
-                    previewFiles: resultFiles.slice(0, 3),
-                };
-            })
-            .filter((option) => option.fileCount);
-
-        return previewImageAppendedOptions;
+        return convertSuggestionsToOptions(suggestions, files);
     };
+
+function convertSuggestionsToOptions(
+    suggestions: Suggestion[],
+    files: EnteFile[]
+) {
+    const user = getData(LS_KEYS.USER) as User;
+    const previewImageAppendedOptions: SearchOption[] = suggestions
+        .map((suggestion) => ({
+            suggestion,
+            searchQuery: convertSuggestionToSearchQuery(suggestion),
+        }))
+        .map(({ suggestion, searchQuery }) => {
+            const resultFiles = getUniqueFiles(
+                files.filter((file) => isSearchedFile(user, file, searchQuery))
+            );
+            return {
+                ...suggestion,
+                fileCount: resultFiles.length,
+                previewFiles: resultFiles.slice(0, 3),
+            };
+        })
+        .filter((option) => option.fileCount);
+
+    return previewImageAppendedOptions;
+}
 
 function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
     return [
@@ -105,27 +130,48 @@ function getYearSuggestion(searchPhrase: string): Suggestion[] {
     return [];
 }
 
-function searchCollection(
-    searchPhrase: string,
-    collections: Collection[]
-): Collection[] {
-    return collections.filter((collection) =>
-        collection.name.toLowerCase().includes(searchPhrase)
-    );
+export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
+    try {
+        const people = await getAllPeople(200);
+        return people.map((person) => ({
+            label: person.name,
+            type: SuggestionType.PERSON,
+            value: person,
+            hide: true,
+        }));
+    } catch (e) {
+        logError(e, 'getAllPeopleSuggestion failed');
+        return [];
+    }
 }
 
-function searchFiles(searchPhrase: string, files: EnteFile[]) {
-    return getUniqueFiles(files)
-        .map((file) => ({
-            title: file.metadata.title,
-            id: file.id,
-            type: file.metadata.fileType,
-        }))
-        .filter(({ title }) => title.toLowerCase().includes(searchPhrase))
-        .slice(0, 4);
+export async function getIndexStatusSuggestion(): Promise<Suggestion> {
+    const config = await getMLSyncConfig();
+    const indexStatus = await mlIDbStorage.getIndexStatus(config.mlVersion);
+
+    let label;
+    if (!indexStatus.localFilesSynced) {
+        label = constants.INDEXING_SCHEDULED;
+    } else if (indexStatus.outOfSyncFilesExists) {
+        label = constants.ANALYZING_PHOTOS(
+            indexStatus.nSyncedFiles,
+            indexStatus.nTotalFiles
+        );
+    } else if (!indexStatus.peopleIndexSynced) {
+        label = constants.INDEXING_PEOPLE(indexStatus.nSyncedFiles);
+    } else {
+        label = constants.INDEXING_DONE(indexStatus.nSyncedFiles);
+    }
+
+    return {
+        label,
+        type: SuggestionType.INDEX_STATUS,
+        value: indexStatus,
+        hide: true,
+    };
 }
 
-function getDateSuggestion(searchPhrase: string) {
+function getDateSuggestion(searchPhrase: string): Suggestion[] {
     const searchedDates = parseHumanDate(searchPhrase);
 
     return searchedDates.map((searchedDate) => ({
@@ -138,7 +184,7 @@ function getDateSuggestion(searchPhrase: string) {
 function getCollectionSuggestion(
     searchPhrase: string,
     collections: Collection[]
-) {
+): Suggestion[] {
     const collectionResults = searchCollection(searchPhrase, collections);
 
     return collectionResults.map(
@@ -154,16 +200,13 @@ function getCollectionSuggestion(
 function getFileSuggestion(
     searchPhrase: string,
     files: EnteFile[]
-): Suggestion[] {
-    const fileResults = searchFiles(searchPhrase, files);
-    return fileResults.map((file) => ({
-        type:
-            file.type === FILE_TYPE.IMAGE
-                ? SuggestionType.IMAGE
-                : SuggestionType.VIDEO,
-        value: file.id,
-        label: file.title,
-    }));
+): Suggestion {
+    const matchedFiles = searchFiles(searchPhrase, files);
+    return {
+        type: SuggestionType.FILE_NAME,
+        value: matchedFiles.map((file) => file.id),
+        label: searchPhrase,
+    };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -179,6 +222,52 @@ async function getLocationSuggestions(searchPhrase: string) {
             } as Suggestion)
     );
 }
+
+async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
+    const thingResults = await searchThing(searchPhrase);
+
+    return thingResults.map(
+        (searchResult) =>
+            ({
+                type: SuggestionType.THING,
+                value: searchResult,
+                label: searchResult.name,
+            } as Suggestion)
+    );
+}
+
+async function getWordSuggestion(searchPhrase: string): Promise<Suggestion[]> {
+    const wordResults = await searchText(searchPhrase);
+
+    return wordResults.map(
+        (searchResult) =>
+            ({
+                type: SuggestionType.TEXT,
+                value: searchResult,
+                label: searchResult.word,
+            } as Suggestion)
+    );
+}
+
+function searchCollection(
+    searchPhrase: string,
+    collections: Collection[]
+): Collection[] {
+    return collections.filter((collection) =>
+        collection.name.toLowerCase().includes(searchPhrase)
+    );
+}
+
+function searchFiles(searchPhrase: string, files: EnteFile[]) {
+    const user = getData(LS_KEYS.USER) as User;
+    if (!user) return [];
+    return files.filter(
+        (file) =>
+            file.ownerID === user.id &&
+            file.metadata.title.toLowerCase().includes(searchPhrase)
+    );
+}
+
 function parseHumanDate(humanDate: string): DateValue[] {
     const date = chrono.parseDate(humanDate);
     const date1 = chrono.parseDate(`${humanDate} 1`);
@@ -225,7 +314,28 @@ async function searchLocation(
     return [];
 }
 
-export function isSearchedFile(file: EnteFile, search: Search) {
+async function searchThing(searchPhrase: string) {
+    const things = await ObjectService.getAllThings();
+    return things.filter((thing) =>
+        thing.name.toLocaleLowerCase().includes(searchPhrase)
+    );
+}
+
+async function searchText(searchPhrase: string) {
+    const texts = await textService.clusterWords();
+    return texts
+        .filter((text) => text.word.toLocaleLowerCase().includes(searchPhrase))
+        .slice(0, 4);
+}
+
+function isSearchedFile(user: User, file: EnteFile, search: Search) {
+    if (search?.collection) {
+        return search.collection === file.collectionID;
+    }
+    if (file.ownerID !== user.id) {
+        return false;
+    }
+
     if (search?.date) {
         return isSameDayAnyYear(search.date)(
             new Date(file.metadata.creationTime / 1000)
@@ -240,11 +350,19 @@ export function isSearchedFile(file: EnteFile, search: Search) {
             search.location
         );
     }
-    if (search?.file) {
-        return file.id === search.file;
+    if (search?.files) {
+        return search.files.indexOf(file.id) !== -1;
     }
-    if (search?.collection) {
-        return search.collection === file.collectionID;
+    if (search?.person) {
+        return search.person.files.indexOf(file.id) !== -1;
+    }
+
+    if (search?.thing) {
+        return search.thing.files.indexOf(file.id) !== -1;
+    }
+
+    if (search?.text) {
+        return search.text.files.indexOf(file.id) !== -1;
     }
     return false;
 }
@@ -264,8 +382,13 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
         case SuggestionType.COLLECTION:
             return { collection: option.value as number };
 
-        case SuggestionType.IMAGE:
-        case SuggestionType.VIDEO:
-            return { file: option.value as number };
+        case SuggestionType.FILE_NAME:
+            return { files: option.value as number[] };
+
+        case SuggestionType.PERSON:
+            return { person: option.value as Person };
+
+        case SuggestionType.THING:
+            return { thing: option.value as Thing };
     }
 }

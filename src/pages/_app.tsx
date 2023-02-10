@@ -12,6 +12,12 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
+import { eventBus, Events } from 'services/events';
+import mlWorkManager from 'services/machineLearning/mlWorkManager';
+import {
+    getMLSearchConfig,
+    updateMLSearchConfig,
+} from 'utils/machineLearning/config';
 import LoadingBar from 'react-top-loading-bar';
 import DialogBox from 'components/DialogBox';
 import { styled, ThemeProvider } from '@mui/material/styles';
@@ -69,6 +75,8 @@ type AppContextType = {
     setDisappearingFlashMessage: (message: FlashMessage) => void;
     redirectURL: string;
     setRedirectURL: (url: string) => void;
+    mlSearchEnabled: boolean;
+    updateMlSearchEnabled: (enabled: boolean) => Promise<void>;
     startLoading: () => void;
     finishLoading: () => void;
     closeMessageDialog: () => void;
@@ -83,6 +91,7 @@ type AppContextType = {
     isMobile: boolean;
     theme: THEME_COLOR;
     setTheme: SetTheme;
+    somethingWentWrong: () => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -113,6 +122,7 @@ export default function App({ Component, err }) {
     const [redirectName, setRedirectName] = useState<string>(null);
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
     const [redirectURL, setRedirectURL] = useState(null);
+    const [mlSearchEnabled, setMlSearchEnabled] = useState(false);
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
@@ -164,6 +174,27 @@ export default function App({ Component, err }) {
                 }
             };
             ElectronUpdateService.registerUpdateEventListener(showUpdateDialog);
+        }
+    }, []);
+
+    useEffect(() => {
+        const loadMlSearchState = async () => {
+            try {
+                const mlSearchConfig = await getMLSearchConfig();
+                setMlSearchEnabled(mlSearchConfig.enabled);
+                mlWorkManager.setMlSearchEnabled(mlSearchConfig.enabled);
+            } catch (e) {
+                logError(e, 'Error while loading mlSearchEnabled');
+            }
+        };
+        loadMlSearchState();
+        try {
+            eventBus.on(Events.LOGOUT, () => {
+                setMlSearchEnabled(false);
+                mlWorkManager.setMlSearchEnabled(false);
+            });
+        } catch (e) {
+            logError(e, 'Error while subscribing to logout event');
         }
     }, []);
 
@@ -251,6 +282,17 @@ export default function App({ Component, err }) {
         setFlashMessage(flashMessages);
         setTimeout(() => setFlashMessage(null), 5000);
     };
+    const updateMlSearchEnabled = async (enabled: boolean) => {
+        try {
+            const mlSearchConfig = await getMLSearchConfig();
+            mlSearchConfig.enabled = enabled;
+            await updateMLSearchConfig(mlSearchConfig);
+            setMlSearchEnabled(enabled);
+            mlWorkManager.setMlSearchEnabled(enabled);
+        } catch (e) {
+            logError(e, 'Error while updating mlSearchEnabled');
+        }
+    };
 
     const startLoading = () => {
         !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
@@ -264,6 +306,13 @@ export default function App({ Component, err }) {
     };
 
     const closeMessageDialog = () => setMessageDialogView(false);
+
+    const somethingWentWrong = () =>
+        setDialogMessage({
+            title: constants.ERROR,
+            close: { variant: 'danger' },
+            content: constants.UNKNOWN_ERROR,
+        });
 
     return (
         <>
@@ -322,6 +371,8 @@ export default function App({ Component, err }) {
                 <AppContext.Provider
                     value={{
                         showNavBar,
+                        mlSearchEnabled,
+                        updateMlSearchEnabled,
                         sharedFiles,
                         resetSharedFiles,
                         setDisappearingFlashMessage,
@@ -341,6 +392,7 @@ export default function App({ Component, err }) {
                         setNotificationAttributes,
                         theme,
                         setTheme,
+                        somethingWentWrong,
                     }}>
                     {loading ? (
                         <VerticallyCentered>
