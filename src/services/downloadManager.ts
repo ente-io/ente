@@ -16,6 +16,8 @@ import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { addLogLine } from 'utils/logging';
 import { CacheStorageService } from './cache/cacheStorageService';
 import { CACHES } from 'constants/cache';
+import { Remote } from 'comlink';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 
 const MAX_PARALLEL_DOWNLOADS = 10;
 
@@ -31,10 +33,15 @@ class DownloadManager {
         PROCESSING_STRATEGY.LIFO
     );
 
-    public async getThumbnail(file: EnteFile) {
+    public async getThumbnail(
+        file: EnteFile,
+        tokenOverride?: string,
+        usingWorker?: Remote<DedicatedCryptoWorker>,
+        timeout?: number
+    ) {
         try {
             addLogLine(`[${file.id}] [DownloadManager] getThumbnail called`);
-            const token = getToken();
+            const token = tokenOverride || getToken();
             if (!token) {
                 return null;
             }
@@ -63,7 +70,13 @@ class DownloadManager {
                     );
                     const thumb =
                         await this.thumbnailDownloadRequestsProcessor.queueUpRequest(
-                            () => this.downloadThumb(token, file)
+                            () =>
+                                this.downloadThumb(
+                                    token,
+                                    file,
+                                    usingWorker,
+                                    timeout
+                                )
                         ).promise;
                     const thumbBlob = new Blob([thumb]);
 
@@ -86,17 +99,23 @@ class DownloadManager {
         }
     }
 
-    downloadThumb = async (token: string, file: EnteFile) => {
+    downloadThumb = async (
+        token: string,
+        file: EnteFile,
+        usingWorker?: Remote<DedicatedCryptoWorker>,
+        timeout?: number
+    ) => {
         const resp = await HTTPService.get(
             getThumbnailURL(file.id),
             null,
             { 'X-Auth-Token': token },
-            { responseType: 'arraybuffer' }
+            { responseType: 'arraybuffer', timeout }
         );
         if (typeof resp.data === 'undefined') {
             throw Error(CustomError.REQUEST_FAILED);
         }
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const cryptoWorker =
+            usingWorker || (await ComlinkCryptoWorker.getInstance());
         const decrypted = await cryptoWorker.decryptThumbnail(
             new Uint8Array(resp.data),
             await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
@@ -143,10 +162,15 @@ class DownloadManager {
         return await this.fileObjectURLPromise.get(file.id.toString());
     }
 
-    async downloadFile(file: EnteFile) {
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-
-        const token = getToken();
+    async downloadFile(
+        file: EnteFile,
+        tokenOverride?: string,
+        usingWorker?: Remote<DedicatedCryptoWorker>,
+        timeout?: number
+    ) {
+        const cryptoWorker =
+            usingWorker || (await ComlinkCryptoWorker.getInstance());
+        const token = tokenOverride || getToken();
         if (!token) {
             return null;
         }
@@ -158,7 +182,7 @@ class DownloadManager {
                 getFileURL(file.id),
                 null,
                 { 'X-Auth-Token': token },
-                { responseType: 'arraybuffer' }
+                { responseType: 'arraybuffer', timeout }
             );
             if (typeof resp.data === 'undefined') {
                 throw Error(CustomError.REQUEST_FAILED);
