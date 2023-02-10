@@ -11,7 +11,7 @@ import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { Dimensions } from 'types/image';
 import {
-    Thing,
+    RealWorldObject,
     AlignedFace,
     DetectedFace,
     DetectedObject,
@@ -209,7 +209,9 @@ export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
     return allFaces;
 }
 
-export function getAllThingsFromMap(allObjectsMap: Map<number, Array<Thing>>) {
+export function getAllObjectsFromMap(
+    allObjectsMap: Map<number, Array<RealWorldObject>>
+) {
     return [...allObjectsMap.values()].flat();
 }
 

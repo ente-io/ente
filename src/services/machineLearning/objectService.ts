@@ -2,13 +2,13 @@ import {
     MLSyncContext,
     MLSyncFileContext,
     DetectedObject,
-    ThingClass,
+    Thing,
 } from 'types/machineLearning';
 import { addLogLine } from 'utils/logging';
 import {
     isDifferentOrOld,
     getObjectId,
-    getAllThingsFromMap,
+    getAllObjectsFromMap,
 } from 'utils/machineLearning';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import ReaderService from './readerService';
@@ -31,7 +31,7 @@ class ObjectService {
             ) &&
             oldMlFile?.imageSource === syncContext.config.imageSource
         ) {
-            newMlFile.things = oldMlFile?.things;
+            newMlFile.objects = oldMlFile?.objects;
             newMlFile.imageSource = oldMlFile.imageSource;
             newMlFile.imageDimensions = oldMlFile.imageDimensions;
             newMlFile.objectDetectionMethod = oldMlFile.objectDetectionMethod;
@@ -69,7 +69,7 @@ class ObjectService {
                 detection,
             } as DetectedObject;
         });
-        newMlFile.things = detectedObjects?.map((detectedObject) => ({
+        newMlFile.objects = detectedObjects?.map((detectedObject) => ({
             ...detectedObject,
             id: getObjectId(detectedObject, newMlFile.imageDimensions),
             className: detectedObject.detection.class,
@@ -83,23 +83,21 @@ class ObjectService {
             'ms'
         );
 
-        addLogLine('[MLService] Detected Objects: ', newMlFile.things?.length);
+        addLogLine('[MLService] Detected Objects: ', newMlFile.objects?.length);
     }
 
-    async getAllSyncedThingsMap(syncContext: MLSyncContext) {
-        if (syncContext.allSyncedThingsMap) {
-            return syncContext.allSyncedThingsMap;
+    async getAllSyncedObjectsMap(syncContext: MLSyncContext) {
+        if (syncContext.allSyncedObjectsMap) {
+            return syncContext.allSyncedObjectsMap;
         }
 
-        syncContext.allSyncedThingsMap = await mlIDbStorage.getAllThingsMap();
-        return syncContext.allSyncedThingsMap;
+        syncContext.allSyncedObjectsMap = await mlIDbStorage.getAllObjectsMap();
+        return syncContext.allSyncedObjectsMap;
     }
 
-    public async clusterThingClasses(
-        syncContext: MLSyncContext
-    ): Promise<ThingClass[]> {
-        const allObjectsMap = await this.getAllSyncedThingsMap(syncContext);
-        const allObjects = getAllThingsFromMap(allObjectsMap);
+    public async clusterThings(syncContext: MLSyncContext): Promise<Thing[]> {
+        const allObjectsMap = await this.getAllSyncedObjectsMap(syncContext);
+        const allObjects = getAllObjectsFromMap(allObjectsMap);
         const objectClusters = new Map<string, number[]>();
         allObjects.map((object) => {
             if (!objectClusters.has(object.detection.class)) {
@@ -110,43 +108,38 @@ class ObjectService {
         });
         return [...objectClusters.entries()].map(([className, files], id) => ({
             id,
-            className,
+            name: className,
             files,
         }));
     }
 
-    async syncThingClassesIndex(syncContext: MLSyncContext) {
+    async syncThingsIndex(syncContext: MLSyncContext) {
         const filesVersion = await mlIDbStorage.getIndexVersion('files');
-        addLogLine(
-            'thingClasses',
-            await mlIDbStorage.getIndexVersion('thingClasses')
-        );
-        if (
-            filesVersion <= (await mlIDbStorage.getIndexVersion('thingClasses'))
-        ) {
+        addLogLine('things', await mlIDbStorage.getIndexVersion('things'));
+        if (filesVersion <= (await mlIDbStorage.getIndexVersion('things'))) {
             addLogLine(
                 '[MLService] Skipping people index as already synced to latest version'
             );
             return;
         }
 
-        const thingClasses = await this.clusterThingClasses(syncContext);
+        const things = await this.clusterThings(syncContext);
 
-        if (!thingClasses || thingClasses.length < 1) {
+        if (!things || things.length < 1) {
             return;
         }
 
-        await mlIDbStorage.clearAllThingClasses();
+        await mlIDbStorage.clearAllThings();
 
-        for (const thingClass of thingClasses) {
-            await mlIDbStorage.putThingClass(thingClass);
+        for (const thing of things) {
+            await mlIDbStorage.putThing(thing);
         }
 
-        await mlIDbStorage.setIndexVersion('thingClasses', filesVersion);
+        await mlIDbStorage.setIndexVersion('things', filesVersion);
     }
 
-    async getAllThingClasses() {
-        return await mlIDbStorage.getAllThingClasses();
+    async getAllThings() {
+        return await mlIDbStorage.getAllThings();
     }
 }
 

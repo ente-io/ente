@@ -24,7 +24,7 @@ import { Collection } from 'types/collection';
 import { OptionWithInfo } from './optionWithInfo';
 import { SearchInputWrapper } from '../styledComponents';
 import MenuWithPeople from './MenuWithPeople';
-import { Person, ThingClass, WordGroup } from 'types/machineLearning';
+import { Person, Thing, WordGroup } from 'types/machineLearning';
 
 interface Iprops {
     isOpen: boolean;
@@ -103,7 +103,7 @@ export default function SearchInput(props: Iprops) {
                 search = { person: selectedOption.value as Person };
                 break;
             case SuggestionType.THING:
-                search = { thing: selectedOption.value as ThingClass };
+                search = { thing: selectedOption.value as Thing };
                 break;
             case SuggestionType.TEXT:
                 search = { text: selectedOption.value as WordGroup };

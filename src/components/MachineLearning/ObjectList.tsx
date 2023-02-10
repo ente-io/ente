@@ -14,10 +14,10 @@ export function ObjectLabelList(props: {
     useEffect(() => {
         let didCancel = false;
         const main = async () => {
-            const things = await mlIDbStorage.getAllThingsMap();
+            const objects = await mlIDbStorage.getAllObjectsMap();
             const uniqueObjectNames = [
                 ...new Set(
-                    (things.get(props.file.id) ?? []).map(
+                    (objects.get(props.file.id) ?? []).map(
                         (object) => object.detection.class
                     )
                 ),

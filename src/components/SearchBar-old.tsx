@@ -35,7 +35,7 @@ export {};
 // import { GalleryContext } from 'pages/gallery';
 // import { AppContext } from 'pages/_app';
 // import { Col } from 'react-bootstrap';
-// import { Person, ThingClass, WordGroup } from 'types/machineLearning';
+// import { Person, Thing, WordGroup } from 'types/machineLearning';
 // import { IndexStatus } from 'types/machineLearning/ui';
 // import { PeopleList } from './MachineLearning/PeopleList';
 // import ObjectIcon from './icons/ObjectIcon';
@@ -276,7 +276,7 @@ export {};
 //                 props.setOpen(true);
 //                 break;
 //             case SuggestionType.THING:
-//                 props.setSearch({ thing: selectedOption.value as ThingClass });
+//                 props.setSearch({ thing: selectedOption.value as Thing });
 //                 props.setOpen(true);
 //                 break;
 //             case SuggestionType.TEXT:

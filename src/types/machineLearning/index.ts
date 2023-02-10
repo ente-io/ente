@@ -194,14 +194,14 @@ export interface DetectedObject {
     detection: ObjectDetection;
 }
 
-export interface Thing extends DetectedObject {
+export interface RealWorldObject extends DetectedObject {
     id: string;
     className: string;
 }
 
-export interface ThingClass {
+export interface Thing {
     id: number;
-    className: string;
+    name: string;
     files: Array<number>;
 }
 
@@ -224,7 +224,7 @@ export interface DetectedText {
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
-    things?: Thing[];
+    objects?: RealWorldObject[];
     text?: DetectedText[];
     imageSource?: ImageType;
     imageDimensions?: Dimensions;
@@ -334,7 +334,7 @@ export interface MLSyncContext {
     nSyncedFiles: number;
     nSyncedFaces: number;
     allSyncedFacesMap?: Map<number, Array<Face>>;
-    allSyncedThingsMap?: Map<number, Array<Thing>>;
+    allSyncedObjectsMap?: Map<number, Array<RealWorldObject>>;
     allSyncedTextMap?: Map<number, Array<DetectedText>>;
     tsne?: any;
 

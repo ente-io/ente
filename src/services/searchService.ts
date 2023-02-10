@@ -22,7 +22,7 @@ import {
 import ObjectService from './machineLearning/objectService';
 import textService from './machineLearning/textService';
 import { getFormattedDate, isInsideBox, isSameDayAnyYear } from 'utils/search';
-import { Person, ThingClass } from 'types/machineLearning';
+import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -231,7 +231,7 @@ async function getThingSuggestion(searchPhrase: string) {
             ({
                 type: SuggestionType.THING,
                 value: searchResult,
-                label: searchResult.className,
+                label: searchResult.name,
             } as Suggestion)
     );
 }
@@ -315,9 +315,9 @@ async function searchLocation(
 }
 
 async function searchThing(searchPhrase: string) {
-    const thingClasses = await ObjectService.getAllThingClasses();
-    return thingClasses.filter((thingClass) =>
-        thingClass.className.toLocaleLowerCase().includes(searchPhrase)
+    const things = await ObjectService.getAllThings();
+    return things.filter((thing) =>
+        thing.name.toLocaleLowerCase().includes(searchPhrase)
     );
 }
 
@@ -389,6 +389,6 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
             return { person: option.value as Person };
 
         case SuggestionType.THING:
-            return { thing: option.value as ThingClass };
+            return { thing: option.value as Thing };
     }
 }

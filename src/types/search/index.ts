@@ -1,4 +1,4 @@
-import { Person, Thing, ThingClass, WordGroup } from 'types/machineLearning';
+import { Person, Thing, WordGroup } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { EnteFile } from 'types/file';
 
@@ -29,7 +29,14 @@ export interface DateValue {
 export interface Suggestion {
     type: SuggestionType;
     label: string;
-    value: Bbox | DateValue | number[] | Person | IndexStatus | Thing;
+    value:
+        | Bbox
+        | DateValue
+        | number[]
+        | Person
+        | IndexStatus
+        | Thing
+        | WordGroup;
     hide?: boolean;
 }
 
@@ -39,7 +46,7 @@ export type Search = {
     collection?: number;
     files?: number[];
     person?: Person;
-    thing?: ThingClass;
+    thing?: Thing;
     text?: WordGroup;
 };
 

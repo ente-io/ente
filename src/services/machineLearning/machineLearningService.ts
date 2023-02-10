@@ -548,7 +548,7 @@ class MachineLearningService {
         // await this.init();
         await PeopleService.syncPeopleIndex(syncContext);
 
-        await ObjectService.syncThingClassesIndex(syncContext);
+        await ObjectService.syncThingsIndex(syncContext);
 
         await this.persistMLLibraryData(syncContext);
     }

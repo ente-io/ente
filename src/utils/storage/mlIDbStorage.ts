@@ -19,8 +19,8 @@ import {
     MlFileData,
     MLLibraryData,
     Person,
+    RealWorldObject,
     Thing,
-    ThingClass,
 } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { runningInBrowser } from 'utils/common';
@@ -42,9 +42,9 @@ interface MLDb extends DBSchema {
         key: number;
         value: Person;
     };
-    thingClasses: {
+    things: {
         key: number;
-        value: ThingClass;
+        value: Thing;
     };
     versions: {
         key: string;
@@ -104,7 +104,7 @@ class MLIDbStorage {
                         keyPath: 'id',
                     });
 
-                    db.createObjectStore('thingClasses', {
+                    db.createObjectStore('things', {
                         keyPath: 'id',
                     });
 
@@ -296,19 +296,19 @@ class MLIDbStorage {
         addLogLine('updateFaces', Date.now() - startTime, 'ms');
     }
 
-    public async getAllThingsMap() {
+    public async getAllObjectsMap() {
         const startTime = Date.now();
         const db = await this.db;
         const allFiles = await db.getAll('files');
-        const allThingsMap = new Map<number, Array<Thing>>();
+        const allObjectsMap = new Map<number, Array<RealWorldObject>>();
         allFiles.forEach(
             (mlFileData) =>
-                mlFileData.things &&
-                allThingsMap.set(mlFileData.fileId, mlFileData.things)
+                mlFileData.objects &&
+                allObjectsMap.set(mlFileData.fileId, mlFileData.objects)
         );
-        addLogLine('getAllThingsMap', Date.now() - startTime, 'ms');
+        addLogLine('allObjectsMap', Date.now() - startTime, 'ms');
 
-        return allThingsMap;
+        return allObjectsMap;
     }
 
     public async getAllTextMap() {
@@ -346,18 +346,18 @@ class MLIDbStorage {
         return db.clear('people');
     }
 
-    public async getAllThingClasses() {
+    public async getAllThings() {
         const db = await this.db;
-        return db.getAll('thingClasses');
+        return db.getAll('things');
     }
-    public async putThingClass(thingClass: ThingClass) {
+    public async putThing(thing: Thing) {
         const db = await this.db;
-        return db.put('thingClasses', thingClass);
+        return db.put('things', thing);
     }
 
-    public async clearAllThingClasses() {
+    public async clearAllThings() {
         const db = await this.db;
-        return db.clear('thingClasses');
+        return db.clear('things');
     }
 
     public async getIndexVersion(index: string) {
