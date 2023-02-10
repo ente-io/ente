@@ -174,6 +174,7 @@ const PhotoFrame = ({
                     }
                     if (
                         !isDeduplicating &&
+                        !isInSearchMode &&
                         activeCollection === ALL_SECTION &&
                         (IsArchived(item) ||
                             archivedCollections?.has(item.collectionID))
@@ -181,6 +182,7 @@ const PhotoFrame = ({
                         return false;
                     }
                     if (
+                        !isInSearchMode &&
                         activeCollection === ARCHIVE_SECTION &&
                         !IsArchived(item)
                     ) {
@@ -193,7 +195,11 @@ const PhotoFrame = ({
                     ) {
                         return false;
                     }
-                    if (activeCollection === TRASH_SECTION && !item.isTrashed) {
+                    if (
+                        !isInSearchMode &&
+                        activeCollection === TRASH_SECTION &&
+                        !item.isTrashed
+                    ) {
                         return false;
                     }
                     if (activeCollection !== TRASH_SECTION && item.isTrashed) {
