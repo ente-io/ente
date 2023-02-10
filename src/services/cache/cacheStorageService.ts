@@ -5,7 +5,7 @@ async function openCache(cacheName: string) {
     try {
         return await getCacheStorage().open(cacheName);
     } catch (e) {
-        // log and ignore, we don't want to crash the app if cache is not available
+        // log and ignore, we don't want to break the caller flow, when cache is not available
         logError(e, 'openCache failed');
     }
 }
@@ -13,7 +13,7 @@ async function deleteCache(cacheName: string) {
     try {
         return await getCacheStorage().delete(cacheName);
     } catch (e) {
-        // log and ignore, we don't want to crash the app if cache is not available
+        // log and ignore, we don't want to break the caller flow, when cache is not available
         logError(e, 'deleteCache failed');
     }
 }
