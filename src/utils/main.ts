@@ -104,3 +104,14 @@ export function logSystemInfo() {
     const osRelease = os.release();
     ElectronLog.info({ osName, osRelease, systemVersion });
 }
+
+export function handleExternalLinks(mainWindow: BrowserWindow) {
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        if (!url.startsWith(PROD_HOST_URL)) {
+            require('electron').shell.openExternal(url);
+            return { action: 'deny' };
+        } else {
+            return { action: 'allow' };
+        }
+    });
+}
