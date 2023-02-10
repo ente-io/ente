@@ -25,6 +25,8 @@ import { FILE_TYPE } from 'constants/file';
 import { getFormattedDate, isInsideBox, isSameDayAnyYear } from 'utils/search';
 import { Person, ThingClass } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
+import { User } from 'types/user';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 const ENDPOINT = getEndpoint();
 
@@ -61,6 +63,7 @@ function convertSuggestionsToOptions(
     suggestions: Suggestion[],
     files: EnteFile[]
 ) {
+    const user = getData(LS_KEYS.USER) as User;
     const previewImageAppendedOptions: SearchOption[] = suggestions
         .map((suggestion) => ({
             suggestion,
@@ -68,7 +71,7 @@ function convertSuggestionsToOptions(
         }))
         .map(({ suggestion, searchQuery }) => {
             const resultFiles = files.filter((file) =>
-                isSearchedFile(file, searchQuery)
+                isSearchedFile(user, file, searchQuery)
             );
             return {
                 ...suggestion,
@@ -179,7 +182,9 @@ export function searchCollection(
 }
 
 function searchFiles(searchPhrase: string, files: EnteFile[]) {
-    return getUniqueFiles(files)
+    const user = getData(LS_KEYS.USER) as User;
+    if (!user) return [];
+    return getUniqueFiles(files.filter((file) => file.ownerID === user.id))
         .map((file) => ({
             title: file.metadata.title,
             id: file.id,
@@ -329,7 +334,14 @@ export async function searchText(searchPhrase: string) {
         .slice(0, 4);
 }
 
-export function isSearchedFile(file: EnteFile, search: Search) {
+export function isSearchedFile(user: User, file: EnteFile, search: Search) {
+    if (search?.collection) {
+        return search.collection === file.collectionID;
+    }
+    if (file.ownerID !== user.id) {
+        return false;
+    }
+
     if (search?.date) {
         return isSameDayAnyYear(search.date)(
             new Date(file.metadata.creationTime / 1000)
@@ -346,9 +358,6 @@ export function isSearchedFile(file: EnteFile, search: Search) {
     }
     if (search?.file) {
         return file.id === search.file;
-    }
-    if (search?.collection) {
-        return search.collection === file.collectionID;
     }
     if (search?.person) {
         return search.person.files.indexOf(file.id) !== -1;

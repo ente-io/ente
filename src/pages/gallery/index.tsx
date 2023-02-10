@@ -527,6 +527,8 @@ export default function Gallery() {
     const updateSearch: UpdateSearch = (newSearch, summary) => {
         if (newSearch?.collection) {
             setActiveCollection(newSearch?.collection);
+        } else if (newSearch?.file) {
+            setActiveCollection(ALL_SECTION);
         } else {
             setSearch(newSearch);
         }
