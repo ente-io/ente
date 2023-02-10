@@ -5,7 +5,6 @@ import { initWatcher } from './services/chokidar';
 import { addAllowOriginHeader } from './utils/cors';
 import {
     setupTrayItem,
-    handleUpdates,
     handleDownloads,
     setupMacWindowOnDockIconClick,
     setupMainMenu,
@@ -13,6 +12,7 @@ import {
     setupNextElectronServe,
     enableSharedArrayBufferSupport,
     handleDockIconHideOnAutoLaunch,
+    handleUpdates,
     logSystemInfo,
 } from './utils/main';
 import { initSentry } from './services/sentry';
