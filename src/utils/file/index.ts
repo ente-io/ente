@@ -48,70 +48,79 @@ export async function downloadFile(
     token?: string,
     passwordToken?: string
 ) {
-    let fileBlob: Blob;
-    const fileReader = new FileReader();
-    if (accessedThroughSharedURL) {
-        const fileURL =
-            await PublicCollectionDownloadManager.getCachedOriginalFile(
+    try {
+        let fileBlob: Blob;
+        const fileReader = new FileReader();
+        if (accessedThroughSharedURL) {
+            const fileURL =
+                await PublicCollectionDownloadManager.getCachedOriginalFile(
+                    file
+                )[0];
+            if (!fileURL) {
+                fileBlob = await new Response(
+                    await PublicCollectionDownloadManager.downloadFile(
+                        token,
+                        passwordToken,
+                        file
+                    )
+                ).blob();
+            } else {
+                fileBlob = await (await fetch(fileURL)).blob();
+            }
+        } else {
+            const fileURL = await DownloadManager.getCachedOriginalFile(
                 file
             )[0];
-        if (!fileURL) {
-            fileBlob = await new Response(
-                await PublicCollectionDownloadManager.downloadFile(
-                    token,
-                    passwordToken,
-                    file
-                )
-            ).blob();
-        } else {
-            fileBlob = await (await fetch(fileURL)).blob();
+            if (!fileURL) {
+                fileBlob = await new Response(
+                    await DownloadManager.downloadFile(file)
+                ).blob();
+            } else {
+                fileBlob = await (await fetch(fileURL)).blob();
+            }
         }
-    } else {
-        const fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
-        if (!fileURL) {
-            fileBlob = await new Response(
-                await DownloadManager.downloadFile(file)
-            ).blob();
+
+        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+            const motionPhoto = await decodeMotionPhoto(file, fileBlob);
+            const image = new File(
+                [motionPhoto.image],
+                motionPhoto.imageNameTitle
+            );
+            const imageType = await getFileType(image);
+            const tempImageURL = URL.createObjectURL(
+                new Blob([motionPhoto.image], { type: imageType.mimeType })
+            );
+            const video = new File(
+                [motionPhoto.video],
+                motionPhoto.videoNameTitle
+            );
+            const videoType = await getFileType(video);
+            const tempVideoURL = URL.createObjectURL(
+                new Blob([motionPhoto.video], { type: videoType.mimeType })
+            );
+            downloadUsingAnchor(tempImageURL, motionPhoto.imageNameTitle);
+            downloadUsingAnchor(tempVideoURL, motionPhoto.videoNameTitle);
         } else {
-            fileBlob = await (await fetch(fileURL)).blob();
+            const fileType = await getFileType(
+                new File([fileBlob], file.metadata.title)
+            );
+            if (
+                file.pubMagicMetadata?.data.editedTime &&
+                (fileType.exactType === TYPE_JPEG ||
+                    fileType.exactType === TYPE_JPG)
+            ) {
+                fileBlob = await updateFileCreationDateInEXIF(
+                    fileReader,
+                    fileBlob,
+                    new Date(file.pubMagicMetadata.data.editedTime / 1000)
+                );
+            }
+            fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
+            const tempURL = URL.createObjectURL(fileBlob);
+            downloadUsingAnchor(tempURL, file.metadata.title);
         }
-    }
-
-    const fileType = await getFileType(
-        new File([fileBlob], file.metadata.title)
-    );
-    if (
-        file.pubMagicMetadata?.data.editedTime &&
-        (fileType.exactType === TYPE_JPEG || fileType.exactType === TYPE_JPG)
-    ) {
-        fileBlob = await updateFileCreationDateInEXIF(
-            fileReader,
-            fileBlob,
-            new Date(file.pubMagicMetadata.data.editedTime / 1000)
-        );
-    }
-    let tempImageURL: string;
-    let tempVideoURL: string;
-    let tempURL: string;
-
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        const motionPhoto = await decodeMotionPhoto(file, fileBlob);
-        const image = new File([motionPhoto.image], motionPhoto.imageNameTitle);
-        const imageType = await getFileType(image);
-        tempImageURL = URL.createObjectURL(
-            new Blob([motionPhoto.image], { type: imageType.mimeType })
-        );
-        const video = new File([motionPhoto.video], motionPhoto.videoNameTitle);
-        const videoType = await getFileType(video);
-        tempVideoURL = URL.createObjectURL(
-            new Blob([motionPhoto.video], { type: videoType.mimeType })
-        );
-        downloadUsingAnchor(tempImageURL, motionPhoto.imageNameTitle);
-        downloadUsingAnchor(tempVideoURL, motionPhoto.videoNameTitle);
-    } else {
-        fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
-        tempURL = URL.createObjectURL(fileBlob);
-        downloadUsingAnchor(tempURL, file.metadata.title);
+    } catch (e) {
+        logError(e, 'failed to download file');
     }
 }
 
