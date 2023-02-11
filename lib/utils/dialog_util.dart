@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/models/search/button_result.dart";
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -15,7 +16,7 @@ import 'package:photos/ui/components/models/button_type.dart';
 typedef DialogBuilder = DialogWidget Function(BuildContext context);
 
 ///Will return null if dismissed by tapping outside
-Future<ButtonAction?> showErrorDialog(
+Future<ButtonResult?> showErrorDialog(
   BuildContext context,
   String title,
   String? body, {
@@ -38,7 +39,7 @@ Future<ButtonAction?> showErrorDialog(
 }
 
 ///Will return null if dismissed by tapping outside
-Future<ButtonAction?> showGenericErrorDialog({
+Future<ButtonResult?> showGenericErrorDialog({
   required BuildContext context,
   bool isDismissible = true,
 }) async {
@@ -94,7 +95,7 @@ DialogWidget choiceDialog({
 }
 
 ///Will return null if dismissed by tapping outside
-Future<ButtonAction?> showChoiceDialog(
+Future<ButtonResult?> showChoiceDialog(
   BuildContext context, {
   required String title,
   String? body,
@@ -137,7 +138,7 @@ Future<ButtonAction?> showChoiceDialog(
 }
 
 ///Will return null if dismissed by tapping outside
-Future<ButtonAction?> showChoiceActionSheet(
+Future<ButtonResult?> showChoiceActionSheet(
   BuildContext context, {
   required String title,
   String? body,
@@ -203,7 +204,7 @@ ProgressDialog createProgressDialog(
   return dialog;
 }
 
-Future<ButtonAction?> showConfettiDialog<T>({
+Future<ButtonResult?> showConfettiDialog<T>({
   required BuildContext context,
   required DialogBuilder dialogBuilder,
   bool barrierDismissible = true,

@@ -431,14 +431,15 @@ class FadingAppBarState extends State<FadingAppBar> {
         isInAlert: true,
       ),
     );
-    final ButtonAction? result = await showActionSheet(
+    final actionResult = await showActionSheet(
       context: context,
       buttons: buttons,
       actionSheetType: ActionSheetType.defaultActionSheet,
       body: body,
       bodyHighlight: bodyHighlight,
     );
-    if (result != null && result == ButtonAction.error) {
+    if (actionResult?.action != null &&
+        actionResult!.action == ButtonAction.error) {
       showGenericErrorDialog(context: context);
     }
   }

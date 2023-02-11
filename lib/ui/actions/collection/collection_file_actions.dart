@@ -57,7 +57,8 @@ extension CollectionFileActions on CollectionActions {
           : "Selected items will be removed from this album",
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
-    if (actionResult != null && actionResult == ButtonAction.error) {
+    if (actionResult?.action != null &&
+        actionResult!.action == ButtonAction.error) {
       showGenericErrorDialog(context: bContext);
     } else {
       selectedFiles.clearAll();

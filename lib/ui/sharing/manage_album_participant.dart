@@ -108,7 +108,7 @@ class _ManageIndividualParticipantState
               onTap: widget.user.isViewer
                   ? null
                   : () async {
-                      final ButtonAction? result = await showChoiceActionSheet(
+                      final actionResult = await showChoiceActionSheet(
                         context,
                         title: "Change permissions?",
                         firstButtonLabel: "Yes, convert to viewer",
@@ -116,8 +116,8 @@ class _ManageIndividualParticipantState
                             '${widget.user.email} will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them',
                         isCritical: true,
                       );
-                      if (result != null) {
-                        if (result == ButtonAction.first) {
+                      if (actionResult?.action != null) {
+                        if (actionResult!.action == ButtonAction.first) {
                           try {
                             isConvertToViewSuccess =
                                 await collectionActions.addEmailToCollection(

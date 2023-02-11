@@ -141,7 +141,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<dynamic> _leaveAlbum(BuildContext context) async {
-    final ButtonAction? result = await showActionSheet(
+    final actionResult = await showActionSheet(
       context: context,
       buttons: [
         ButtonWidget(
@@ -166,10 +166,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       title: "Leave shared album?",
       body: "Photos added by you will be removed from the album",
     );
-    if (result != null && mounted) {
-      if (result == ButtonAction.error) {
+    if (actionResult?.action != null && mounted) {
+      if (actionResult!.action == ButtonAction.error) {
         showGenericErrorDialog(context: context);
-      } else if (result == ButtonAction.first) {
+      } else if (actionResult.action == ButtonAction.first) {
         Navigator.of(context).pop();
       }
     }
