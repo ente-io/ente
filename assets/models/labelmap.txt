@@ -1,4 +1,4 @@
-???
+unknown
 person
 bicycle
 car
@@ -10,7 +10,7 @@ truck
 boat
 traffic light
 fire hydrant
-???
+unknown
 stop sign
 parking meter
 bench
@@ -24,11 +24,11 @@ elephant
 bear
 zebra
 giraffe
-???
+unknown
 backpack
 umbrella
-???
-???
+unknown
+unknown
 handbag
 tie
 suitcase
@@ -43,7 +43,7 @@ skateboard
 surfboard
 tennis racket
 bottle
-???
+unknown
 wine glass
 cup
 fork
@@ -64,12 +64,12 @@ chair
 couch
 potted plant
 bed
-???
+unknown
 dining table
-???
-???
+unknown
+unknown
 toilet
-???
+unknown
 tv
 laptop
 mouse
@@ -81,7 +81,7 @@ oven
 toaster
 sink
 refrigerator
-???
+unknown
 book
 clock
 vase
