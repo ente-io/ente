@@ -6,10 +6,10 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 class CodeWidget extends StatefulWidget {
@@ -23,28 +23,29 @@ class CodeWidget extends StatefulWidget {
 
 class _CodeWidgetState extends State<CodeWidget> {
   Timer? _everySecondTimer;
-  int _timeRemaining = 30;
+  final ValueNotifier<String> _currentCode = ValueNotifier<String>("");
+  final ValueNotifier<String> _nextCode = ValueNotifier<String>("");
 
   @override
   void initState() {
     super.initState();
-    _updateTimeRemaining();
+    _currentCode.value = _getTotp();
+    _nextCode.value = _getNextTotp();
     _everySecondTimer =
-        Timer.periodic(const Duration(milliseconds: 200), (Timer t) {
-      setState(() {
-        _updateTimeRemaining();
-      });
+        Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
+      String newCode = _getTotp();
+      if (newCode != _currentCode.value) {
+        _currentCode.value = newCode;
+        _nextCode.value = _getNextTotp();
+      }
     });
-  }
-
-  void _updateTimeRemaining() {
-    _timeRemaining =
-        widget.code.period - (DateTime.now().second % widget.code.period);
   }
 
   @override
   void dispose() {
     _everySecondTimer?.cancel();
+    _currentCode.dispose();
+    _nextCode.dispose();
     super.dispose();
   }
 
@@ -107,14 +108,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        FAProgressBar(
-                          currentValue:
-                              _timeRemaining / widget.code.period * 100,
-                          size: 4,
-                          animatedDuration: const Duration(milliseconds: 200),
-                          progressColor: Colors.orange,
-                          changeColorValue: 40,
-                          changeProgressColor: Colors.green,
+                        CodeTimerProgress(
+                          period: widget.code.period,
                         ),
                         const SizedBox(
                           height: 16,
@@ -167,9 +162,14 @@ class _CodeWidgetState extends State<CodeWidget> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Expanded(
-                                child: Text(
-                                  _getTotp(),
-                                  style: const TextStyle(fontSize: 24),
+                                child: ValueListenableBuilder<String>(
+                                  valueListenable: _currentCode,
+                                  builder: (context, value, child) {
+                                    return Text(
+                                      value,
+                                      style: const TextStyle(fontSize: 24),
+                                    );
+                                  },
                                 ),
                               ),
                               Column(
@@ -179,12 +179,17 @@ class _CodeWidgetState extends State<CodeWidget> {
                                     l10n.nextTotpTitle,
                                     style: Theme.of(context).textTheme.caption,
                                   ),
-                                  Text(
-                                    _getNextTotp(),
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.grey,
-                                    ),
+                                  ValueListenableBuilder<String>(
+                                    valueListenable: _nextCode,
+                                    builder: (context, value, child) {
+                                      return Text(
+                                        value,
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          color: Colors.grey,
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),
