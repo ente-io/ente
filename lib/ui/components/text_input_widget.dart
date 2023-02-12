@@ -60,9 +60,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
 
   @override
   void initState() {
-    widget.submitNotifier?.addListener(() {
-      _onSubmit();
-    });
+    widget.submitNotifier?.addListener(_onSubmit);
 
     if (widget.initialValue != null) {
       _textController.value = TextEditingValue(
@@ -75,7 +73,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
 
   @override
   void dispose() {
-    widget.submitNotifier?.dispose();
+    widget.submitNotifier?.removeListener(_onSubmit);
     _textController.dispose();
     super.dispose();
   }
