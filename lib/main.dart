@@ -161,9 +161,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
   }
   FeatureFlagService.instance.init();
-  if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
-    await ObjectDetectionService.instance.init();
-  }
+  await ObjectDetectionService.instance.init();
   _logger.info("Initialization done");
 }
 
