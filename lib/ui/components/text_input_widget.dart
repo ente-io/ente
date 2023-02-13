@@ -26,6 +26,7 @@ class TextInputWidget extends StatefulWidget {
   final bool popNavAfterSubmission;
   final bool shouldSurfaceExecutionStates;
   final TextCapitalization? textCapitalization;
+  final bool isPasswordInput;
   const TextInputWidget({
     required this.onSubmit,
     this.label,
@@ -42,6 +43,7 @@ class TextInputWidget extends StatefulWidget {
     this.popNavAfterSubmission = false,
     this.shouldSurfaceExecutionStates = true,
     this.textCapitalization = TextCapitalization.none,
+    this.isPasswordInput = false,
     super.key,
   });
 
@@ -53,6 +55,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   ExecutionState executionState = ExecutionState.idle;
   final _textController = TextEditingController();
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
+  late final ValueNotifier<bool> _obscureTextNotifier;
 
   ///This is to pass if the TextInputWidget is in a dialog and an error is
   ///thrown in executing onSubmit by passing it as arg in Navigator.pop()
@@ -68,12 +71,15 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         selection: TextSelection.collapsed(offset: widget.initialValue!.length),
       );
     }
+    _obscureTextNotifier = ValueNotifier(widget.isPasswordInput);
+    _obscureTextNotifier.addListener(_safeRefresh);
     super.initState();
   }
 
   @override
   void dispose() {
     widget.submitNotifier?.removeListener(_onSubmit);
+    _obscureTextNotifier.dispose();
     _textController.dispose();
     super.dispose();
   }
@@ -105,6 +111,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
             inputFormatters: widget.maxLength != null
                 ? [LengthLimitingTextInputFormatter(50)]
                 : null,
+            obscureText: _obscureTextNotifier.value,
             decoration: InputDecoration(
               hintText: widget.hintText,
               hintStyle: textTheme.body.copyWith(color: colorScheme.textMuted),
@@ -134,6 +141,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                     executionState: executionState,
                     shouldSurfaceExecutionStates:
                         widget.shouldSurfaceExecutionStates,
+                    obscureTextNotifier: _obscureTextNotifier,
                   ),
                 ),
               ),
@@ -184,6 +192,12 @@ class _TextInputWidgetState extends State<TextInputWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: textInputChildren,
     );
+  }
+
+  void _safeRefresh() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _onSubmit() async {
@@ -279,9 +293,11 @@ class _TextInputWidgetState extends State<TextInputWidget> {
 class SuffixIconWidget extends StatelessWidget {
   final ExecutionState executionState;
   final bool shouldSurfaceExecutionStates;
+  final ValueNotifier? obscureTextNotifier;
   const SuffixIconWidget({
     required this.executionState,
     required this.shouldSurfaceExecutionStates,
+    this.obscureTextNotifier,
     super.key,
   });
 
@@ -291,7 +307,21 @@ class SuffixIconWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     if (executionState == ExecutionState.idle ||
         !shouldSurfaceExecutionStates) {
-      trailingWidget = const SizedBox.shrink();
+      if (obscureTextNotifier != null) {
+        trailingWidget = GestureDetector(
+          onTap: () {
+            obscureTextNotifier!.value = !obscureTextNotifier!.value;
+          },
+          child: Icon(
+            obscureTextNotifier!.value
+                ? Icons.visibility_off_outlined
+                : Icons.visibility,
+            color: obscureTextNotifier!.value ? colorScheme.strokeMuted : null,
+          ),
+        );
+      } else {
+        trailingWidget = const SizedBox.shrink();
+      }
     } else if (executionState == ExecutionState.inProgress) {
       trailingWidget = EnteLoadingWidget(
         color: colorScheme.strokeMuted,
