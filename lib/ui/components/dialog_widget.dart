@@ -172,6 +172,7 @@ class TextInputDialog extends StatefulWidget {
   final bool showOnlyLoadingState;
   final TextCapitalization? textCapitalization;
   final bool alwaysShowSuccessState;
+  final bool isPasswordInput;
   const TextInputDialog({
     required this.title,
     this.body,
@@ -188,6 +189,7 @@ class TextInputDialog extends StatefulWidget {
     this.textCapitalization,
     this.showOnlyLoadingState = false,
     this.alwaysShowSuccessState = false,
+    this.isPasswordInput = false,
     super.key,
   });
 
@@ -247,6 +249,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 showOnlyLoadingState: widget.showOnlyLoadingState,
                 textCapitalization: widget.textCapitalization,
                 alwaysShowSuccessState: widget.alwaysShowSuccessState,
+                isPasswordInput: widget.isPasswordInput,
               ),
             ),
             const SizedBox(height: 36),

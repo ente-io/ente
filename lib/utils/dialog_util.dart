@@ -272,6 +272,7 @@ Future<dynamic> showTextInputDialog(
   bool showOnlyLoadingState = false,
   TextCapitalization textCapitalization = TextCapitalization.none,
   bool alwaysShowSuccessState = false,
+  bool isPasswordInput = false,
 }) {
   return showDialog(
     barrierColor: backdropFaintDark,
@@ -298,6 +299,7 @@ Future<dynamic> showTextInputDialog(
             showOnlyLoadingState: showOnlyLoadingState,
             textCapitalization: textCapitalization,
             alwaysShowSuccessState: alwaysShowSuccessState,
+            isPasswordInput: isPasswordInput,
           ),
         ),
       );

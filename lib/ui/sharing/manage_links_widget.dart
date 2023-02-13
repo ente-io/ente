@@ -81,8 +81,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           context,
                           {'enableCollect': value},
                         );
-
-                        setState(() {});
                       },
                     ),
                   ),
@@ -170,7 +168,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                             "Viewers can still take screenshots or save a copy of your photos using external tools",
                           );
                         }
-                        setState(() {});
                       },
                     ),
                   ),
@@ -195,6 +192,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                             title: "Set a password",
                             submitButtonLabel: "Lock",
                             hintText: "Enter password",
+                            isPasswordInput: true,
                             onSubmit: (String password) async {
                               if (password.trim().isNotEmpty) {
                                 final propToUpdate =
@@ -208,14 +206,13 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                                 );
                               }
                             },
-                          ).then((value) => setState(() {}));
+                          );
                         } else {
                           await _updateUrlSettings(
                             context,
                             {'disablePassword': true},
                           );
                         }
-                        setState(() {});
                       },
                     ),
                   ),
@@ -248,72 +245,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
           ],
         ),
       ),
-    );
-  }
-
-  final TextEditingController _textFieldController = TextEditingController();
-
-  Future<String?> _displayLinkPasswordInput(BuildContext context) async {
-    _textFieldController.clear();
-    return showDialog<String>(
-      context: context,
-      builder: (context) {
-        bool passwordVisible = false;
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Enter password'),
-              content: TextFormField(
-                autofillHints: const [AutofillHints.newPassword],
-                decoration: InputDecoration(
-                  hintText: "Password",
-                  contentPadding: const EdgeInsets.all(12),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      passwordVisible ? Icons.visibility : Icons.visibility_off,
-                      color: Colors.white.withOpacity(0.5),
-                      size: 20,
-                    ),
-                    onPressed: () {
-                      passwordVisible = !passwordVisible;
-                      setState(() {});
-                    },
-                  ),
-                ),
-                obscureText: !passwordVisible,
-                controller: _textFieldController,
-                autofocus: true,
-                autocorrect: false,
-                keyboardType: TextInputType.visiblePassword,
-                onChanged: (_) {
-                  setState(() {});
-                },
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text(
-                    'Cancel',
-                    style: Theme.of(context).textTheme.subtitle2,
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context, 'cancel');
-                  },
-                ),
-                TextButton(
-                  child:
-                      Text('Ok', style: Theme.of(context).textTheme.subtitle2),
-                  onPressed: () {
-                    if (_textFieldController.text.trim().isEmpty) {
-                      return;
-                    }
-                    Navigator.pop(context, 'ok');
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
     );
   }
 
@@ -351,6 +282,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
           .updateShareUrl(widget.collection!, prop);
       await dialog?.hide();
       showShortToast(context, "Album updated");
+      if (mounted) {
+        setState(() {});
+      }
     } catch (e) {
       await dialog?.hide();
       await showGenericErrorDialog(context: context);
