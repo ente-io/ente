@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -7,14 +5,14 @@ import 'package:ente_auth/utils/email_util.dart';
 import 'package:flutter/material.dart';
 
 class ChangeEmailDialog extends StatefulWidget {
-  const ChangeEmailDialog({Key key}) : super(key: key);
+  const ChangeEmailDialog({Key? key}) : super(key: key);
 
   @override
   State<ChangeEmailDialog> createState() => _ChangeEmailDialogState();
 }
 
 class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
-  String _email;
+  String _email = "";
 
   @override
   Widget build(BuildContext context) {

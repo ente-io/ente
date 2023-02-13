@@ -16,7 +16,7 @@ import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/settings/app_update_dialog.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
-import "package:flutter_localizations/flutter_localizations.dart";
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 class App extends StatefulWidget {
   const App({Key key});
@@ -79,9 +79,14 @@ class _AppState extends State<App> {
           theme: lightTheme,
           darkTheme: dartTheme,
           debugShowCheckedModeBanner: false,
-          supportedLocales: supportedLocales,
+          supportedLocales: appSupportedLocales,
           localeListResolutionCallback: localResolutionCallBack,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
           routes: _getRoutes,
         ),
       );
@@ -92,7 +97,7 @@ class _AppState extends State<App> {
         theme: lightThemeData,
         darkTheme: darkThemeData,
         debugShowCheckedModeBanner: false,
-        supportedLocales: supportedLocales,
+        supportedLocales: appSupportedLocales,
         localeListResolutionCallback: localResolutionCallBack,
         localizationsDelegates: const [
           AppLocalizations.delegate,
