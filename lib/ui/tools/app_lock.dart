@@ -2,8 +2,10 @@
 
 import 'dart:async';
 
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 /// A widget which handles app lifecycle events for showing and hiding a lock screen.
 /// This should wrap around a `MyApp` widget (or equivalent).
@@ -108,8 +110,14 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
       themeMode: ThemeMode.system,
       theme: widget.lightTheme,
       darkTheme: widget.darkTheme,
-      supportedLocales: supportedLocales,
+      supportedLocales: appSupportedLocales,
       localeListResolutionCallback: localResolutionCallBack,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/lock-screen':
