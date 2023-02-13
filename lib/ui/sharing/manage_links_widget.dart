@@ -42,10 +42,15 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isCollectEnabled =
+        widget.collection!.publicURLs?.firstOrNull?.enableCollect ?? false;
+    final isDownloadEnabled =
+        widget.collection!.publicURLs?.firstOrNull?.enableDownload ?? true;
+    final isPasswordEnabled =
+        widget.collection!.publicURLs?.firstOrNull?.passwordEnabled ?? false;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs!.firstOrNull!;
     return Scaffold(
-      backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
         elevation: 0,
         title: const Text(
@@ -61,6 +66,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   MenuItemWidget(
+                    key: ValueKey("Allow collect $isCollectEnabled"),
                     captionedTextWidget: const CaptionedTextWidget(
                       title: "Allow adding photos",
                     ),
@@ -142,6 +148,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     bgColor: getEnteColorScheme(context).fillFaint,
                   ),
                   MenuItemWidget(
+                    key: ValueKey("Allow downloads $isDownloadEnabled"),
                     captionedTextWidget: const CaptionedTextWidget(
                       title: "Allow downloads",
                     ),
@@ -150,9 +157,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     isTopBorderRadiusRemoved: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     trailingWidget: Switch.adaptive(
-                      value: widget.collection!.publicURLs?.firstOrNull
-                              ?.enableDownload ??
-                          true,
+                      value: isDownloadEnabled,
                       onChanged: (value) async {
                         await _updateUrlSettings(
                           context,
@@ -174,6 +179,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     bgColor: getEnteColorScheme(context).fillFaint,
                   ),
                   MenuItemWidget(
+                    key: ValueKey("Password lock $isPasswordEnabled"),
                     captionedTextWidget: const CaptionedTextWidget(
                       title: "Password lock",
                     ),
@@ -181,9 +187,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     isTopBorderRadiusRemoved: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     trailingWidget: Switch.adaptive(
-                      value: widget.collection!.publicURLs?.firstOrNull
-                              ?.passwordEnabled ??
-                          false,
+                      value: isPasswordEnabled,
                       onChanged: (enablePassword) async {
                         if (enablePassword) {
                           final inputResult =
