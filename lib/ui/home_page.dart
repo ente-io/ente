@@ -19,6 +19,7 @@ import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 
 class HomePage extends StatefulWidget {
@@ -34,6 +35,7 @@ class _HomePageState extends State<HomePage> {
   );
   bool _hasLoaded = false;
   bool _isSettingsOpen = false;
+  final Logger _logger = Logger("HomePage");
 
   final TextEditingController _textController = TextEditingController();
   bool _showSearchBox = false;
@@ -217,7 +219,21 @@ class _HomePageState extends State<HomePage> {
                 child: _filteredCodes.isNotEmpty
                     ? ListView.builder(
                         itemBuilder: ((context, index) {
-                          return CodeWidget(_filteredCodes[index]);
+                          Code? code;
+                          try {
+                            code = _filteredCodes[index];
+                            return CodeWidget(code!);
+                          } catch (e, s) {
+                            _logger.severe("code widget error", e, s);
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Sorry, unable to generate code ${code?.issuer ?? ""}',
+                                ),
+                              ),
+                            );
+                          }
                         }),
                         itemCount: _filteredCodes.length,
                       )
