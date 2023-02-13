@@ -308,26 +308,17 @@ class SuffixIconWidget extends StatelessWidget {
     if (executionState == ExecutionState.idle ||
         !shouldSurfaceExecutionStates) {
       if (obscureTextNotifier != null) {
-        if (obscureTextNotifier!.value) {
-          trailingWidget = GestureDetector(
-            onTap: () {
-              obscureTextNotifier!.value = !obscureTextNotifier!.value;
-            },
-            child: Icon(
-              Icons.visibility_off_outlined,
-              color: colorScheme.strokeMuted,
-            ),
-          );
-        } else {
-          trailingWidget = GestureDetector(
-            onTap: () {
-              obscureTextNotifier!.value = !obscureTextNotifier!.value;
-            },
-            child: const Icon(
-              Icons.visibility,
-            ),
-          );
-        }
+        trailingWidget = GestureDetector(
+          onTap: () {
+            obscureTextNotifier!.value = !obscureTextNotifier!.value;
+          },
+          child: Icon(
+            obscureTextNotifier!.value
+                ? Icons.visibility_off_outlined
+                : Icons.visibility,
+            color: obscureTextNotifier!.value ? colorScheme.strokeMuted : null,
+          ),
+        );
       } else {
         trailingWidget = const SizedBox.shrink();
       }
