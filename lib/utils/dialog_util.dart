@@ -254,7 +254,8 @@ Future<ButtonResult?> showConfettiDialog<T>({
   );
 }
 
-Future<Exception?> showTextInputDialog(
+//Can return ButtonResult? from ButtonWidget or Exception? from TextInputDialog
+Future<dynamic> showTextInputDialog(
   BuildContext context, {
   required String title,
   String? body,
