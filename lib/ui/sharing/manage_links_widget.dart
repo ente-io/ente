@@ -193,6 +193,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                             submitButtonLabel: "Lock",
                             hintText: "Enter password",
                             isPasswordInput: true,
+                            alwaysShowSuccessState: true,
                             onSubmit: (String password) async {
                               if (password.trim().isNotEmpty) {
                                 final propToUpdate =
