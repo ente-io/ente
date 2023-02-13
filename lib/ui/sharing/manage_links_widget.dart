@@ -190,16 +190,25 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       value: isPasswordEnabled,
                       onChanged: (enablePassword) async {
                         if (enablePassword) {
-                          final inputResult =
-                              await _displayLinkPasswordInput(context);
-                          if (inputResult != null &&
-                              inputResult == 'ok' &&
-                              _textFieldController.text.trim().isNotEmpty) {
-                            final propToUpdate = await _getEncryptedPassword(
-                              _textFieldController.text,
-                            );
-                            await _updateUrlSettings(context, propToUpdate);
-                          }
+                          showTextInputDialog(
+                            context,
+                            title: "Set a password",
+                            submitButtonLabel: "Lock",
+                            hintText: "Enter password",
+                            onSubmit: (String password) async {
+                              if (password.trim().isNotEmpty) {
+                                final propToUpdate =
+                                    await _getEncryptedPassword(
+                                  password,
+                                );
+                                await _updateUrlSettings(
+                                  context,
+                                  propToUpdate,
+                                  showProgressDialog: false,
+                                );
+                              }
+                            },
+                          ).then((value) => setState(() {}));
                         } else {
                           await _updateUrlSettings(
                             context,
@@ -331,18 +340,19 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   Future<void> _updateUrlSettings(
-    BuildContext context,
-    Map<String, dynamic> prop,
-  ) async {
-    final dialog = createProgressDialog(context, "Please wait...");
-    await dialog.show();
+      BuildContext context, Map<String, dynamic> prop,
+      {bool showProgressDialog = true}) async {
+    final dialog = showProgressDialog
+        ? createProgressDialog(context, "Please wait...")
+        : null;
+    await dialog?.show();
     try {
       await CollectionsService.instance
           .updateShareUrl(widget.collection!, prop);
-      await dialog.hide();
+      await dialog?.hide();
       showShortToast(context, "Album updated");
     } catch (e) {
-      await dialog.hide();
+      await dialog?.hide();
       await showGenericErrorDialog(context: context);
     }
   }
