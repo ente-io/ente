@@ -45,9 +45,9 @@ export default function EmptyScreen({ openUploader }) {
                     </VerticallyCentered>
                     <img
                         height={287.57}
-                        src="/images/empty-state/ente_duck_happy.png"
-                        srcSet="/images/empty-state/ente_duck_happy@2x.png,
-                                /images/empty-state/ente_duck_happy@3x.png"
+                        src="/images/empty-state/ente_duck.png"
+                        srcSet="/images/empty-state/ente_duck.png,
+                                /images/empty-state/ente_duck.png"
                     />
                     <span
                         style={{
