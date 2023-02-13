@@ -12,7 +12,9 @@ const Wrapper = styled(VerticallyCentered)`
         filter: drop-shadow(3px 3px 5px rgba(45, 194, 98, 0.5));
     }
 `;
-
+const NonDraggableImage = styled('img')`
+    pointer-events: none;
+`;
 export default function EmptyScreen({ openUploader }) {
     const deduplicateContext = useContext(DeduplicateContext);
     return (
@@ -43,7 +45,7 @@ export default function EmptyScreen({ openUploader }) {
                             {constants.WHERE_YOUR_BEST_PHOTOS_LIVE}
                         </Typography>
                     </VerticallyCentered>
-                    <img
+                    <NonDraggableImage
                         height={287.57}
                         src="/images/empty-state/ente_duck.png"
                         srcSet="/images/empty-state/ente_duck.png,
@@ -121,6 +123,7 @@ export default function EmptyScreen({ openUploader }) {
                                         src="/images/download_assets/download_fdroid.png"
                                         srcSet="/images/download_assets/download_fdroid@2x.png,
                                 /images/download_assets/download_fdroid@3x.png"
+                                        style={{ pointerEvents: 'none' }}
                                     />
                                 </a>
                                 <a href="https://github.com/ente-io">
@@ -129,6 +132,7 @@ export default function EmptyScreen({ openUploader }) {
                                         src="/images/download_assets/download_github.png"
                                         srcSet="/images/download_assets/download_github@2x.png,
                                 /images/download_assets/download_github@3x.png"
+                                        style={{ pointerEvents: 'none' }}
                                     />
                                 </a>
                             </FlexWrapper>
