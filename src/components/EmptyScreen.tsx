@@ -123,7 +123,7 @@ export default function EmptyScreen({ openUploader }) {
                                 /images/download_assets/download_fdroid@3x.png"
                                     />
                                 </a>
-                                <a href="https://f-droid.org/packages/io.ente.photos.fdroid/">
+                                <a href="https://github.com/ente-io">
                                     <img
                                         height={49}
                                         src="/images/download_assets/download_github.png"
