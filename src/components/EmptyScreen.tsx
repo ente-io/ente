@@ -4,8 +4,8 @@ import constants from 'utils/strings/constants';
 import { DeduplicateContext } from 'pages/deduplicate';
 import VerticallyCentered, { FlexWrapper } from './Container';
 import uploadManager from 'services/upload/uploadManager';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
-import FolderIcon from '@mui/icons-material/Folder';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
+import FolderIcon from '@mui/icons-material/FolderOutlined';
 
 const Wrapper = styled(VerticallyCentered)`
     & > svg {
