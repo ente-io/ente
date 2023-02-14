@@ -1,5 +1,8 @@
-import { euclidean, TreeNode } from 'hdbscan';
-import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
+import {
+    euclidean,
+    // TreeNode
+} from 'hdbscan';
+// import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
 // import { f32Average, getAllFacesFromMap } from '.';
 import {
     FacesCluster,
@@ -93,24 +96,24 @@ export function getNearestCluster(
 // }
 
 // TODO: remove recursion to avoid stack size limits
-export function toD3Tree(
-    treeNode: TreeNode<number>,
-    allObjects: Array<any>
-): RawNodeDatum {
-    if (!treeNode.left && !treeNode.right) {
-        return {
-            name: treeNode.data.toString(),
-            attributes: {
-                face: allObjects[treeNode.data],
-            },
-        };
-    }
-    const children = [];
-    treeNode.left && children.push(toD3Tree(treeNode.left, allObjects));
-    treeNode.right && children.push(toD3Tree(treeNode.right, allObjects));
+// export function toD3Tree(
+//     treeNode: TreeNode<number>,
+//     allObjects: Array<any>
+// ): RawNodeDatum {
+//     if (!treeNode.left && !treeNode.right) {
+//         return {
+//             name: treeNode.data.toString(),
+//             attributes: {
+//                 face: allObjects[treeNode.data],
+//             },
+//         };
+//     }
+//     const children = [];
+//     treeNode.left && children.push(toD3Tree(treeNode.left, allObjects));
+//     treeNode.right && children.push(toD3Tree(treeNode.right, allObjects));
 
-    return {
-        name: treeNode.data.toString(),
-        children: children,
-    };
-}
+//     return {
+//         name: treeNode.data.toString(),
+//         children: children,
+//     };
+// }
