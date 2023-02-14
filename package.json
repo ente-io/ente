@@ -73,7 +73,6 @@
     "styled-components": "^5.3.5",
     "tesseract.js": "file:./thirdparty/tesseract",
     "transformation-matrix": "^2.10.0",
-    "tsne-js": "^1.0.3",
     "workbox-precaching": "^6.1.5",
     "workbox-recipes": "^6.1.5",
     "workbox-routing": "^6.1.5",
