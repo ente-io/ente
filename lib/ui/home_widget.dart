@@ -336,10 +336,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       _shouldRenderCreateCollectionSheet = false;
       ReceiveSharingIntent.reset();
       Future.delayed(const Duration(milliseconds: 10), () {
-        createCollectionSheet(
-          null,
-          _sharedFiles,
+        showCollectionActionSheet(
           context,
+          sharedFiles: _sharedFiles,
           actionType: CollectionActionType.addFiles,
         );
       });

@@ -237,10 +237,9 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             onPressed: () {
               final selectedFiles = SelectedFiles();
               selectedFiles.toggleSelection(widget.file);
-              createCollectionSheet(
-                selectedFiles,
-                null,
+              showCollectionActionSheet(
                 context,
+                selectedFiles: selectedFiles,
                 actionType: CollectionActionType.restoreFiles,
               );
             },

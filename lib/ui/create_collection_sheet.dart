@@ -54,17 +54,17 @@ String _actionName(CollectionActionType type, bool plural) {
   return addTitleSuffix ? text + titleSuffix : text;
 }
 
-void createCollectionSheet(
+void showCollectionActionSheet(
+  BuildContext context, {
   SelectedFiles? selectedFiles,
   List<SharedMediaFile>? sharedFiles,
-  BuildContext context, {
   CollectionActionType actionType = CollectionActionType.addFiles,
   bool showOptionToCreateNewAlbum = true,
 }) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
-      return CreateCollectionSheet(
+      return CollectionActionSheet(
         selectedFiles: selectedFiles,
         sharedFiles: sharedFiles,
         actionType: actionType,
@@ -84,12 +84,12 @@ void createCollectionSheet(
   );
 }
 
-class CreateCollectionSheet extends StatefulWidget {
+class CollectionActionSheet extends StatefulWidget {
   final SelectedFiles? selectedFiles;
   final List<SharedMediaFile>? sharedFiles;
   final CollectionActionType actionType;
   final bool showOptionToCreateNewAlbum;
-  const CreateCollectionSheet({
+  const CollectionActionSheet({
     required this.selectedFiles,
     required this.sharedFiles,
     required this.actionType,
@@ -98,11 +98,11 @@ class CreateCollectionSheet extends StatefulWidget {
   });
 
   @override
-  State<CreateCollectionSheet> createState() => _CreateCollectionSheetState();
+  State<CollectionActionSheet> createState() => _CollectionActionSheetState();
 }
 
-class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
-  final _logger = Logger((_CreateCollectionSheetState).toString());
+class _CollectionActionSheetState extends State<CollectionActionSheet> {
+  final _logger = Logger((_CollectionActionSheetState).toString());
 
   @override
   Widget build(BuildContext context) {

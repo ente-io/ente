@@ -283,10 +283,9 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    createCollectionSheet(
-      widget.selectedFiles,
-      null,
+    showCollectionActionSheet(
       context,
+      selectedFiles: widget.selectedFiles,
       actionType: CollectionActionType.moveFiles,
     );
   }
@@ -296,11 +295,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    createCollectionSheet(
-      widget.selectedFiles,
-      null,
-      context,
-    );
+    showCollectionActionSheet(context, selectedFiles: widget.selectedFiles);
   }
 
   Future<void> _onDeleteClick() async {
@@ -381,10 +376,9 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    createCollectionSheet(
-      widget.selectedFiles,
-      null,
+    showCollectionActionSheet(
       context,
+      selectedFiles: widget.selectedFiles,
       actionType: CollectionActionType.unHide,
     );
   }
@@ -459,10 +453,9 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   }
 
   void _restore() {
-    createCollectionSheet(
-      widget.selectedFiles,
-      null,
+    showCollectionActionSheet(
       context,
+      selectedFiles: widget.selectedFiles,
       actionType: CollectionActionType.restoreFiles,
     );
   }

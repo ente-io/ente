@@ -85,10 +85,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           iconButtonType: IconButtonType.primary,
           iconColor: iconColor,
           onTap: () {
-            createCollectionSheet(
-              widget.selectedFiles,
-              null,
+            showCollectionActionSheet(
               context,
+              selectedFiles: widget.selectedFiles,
               actionType: CollectionActionType.unHide,
             );
           },

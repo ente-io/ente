@@ -269,12 +269,11 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   Future<void> _handleUnHideRequest(BuildContext context) async {
-    final s = SelectedFiles();
-    s.files.add(widget.file);
-    createCollectionSheet(
-      s,
-      null,
+    final selectedFiles = SelectedFiles();
+    selectedFiles.files.add(widget.file);
+    showCollectionActionSheet(
       context,
+      selectedFiles: selectedFiles,
       actionType: CollectionActionType.unHide,
     );
   }
