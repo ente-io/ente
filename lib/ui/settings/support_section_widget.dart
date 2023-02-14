@@ -43,7 +43,7 @@ class SupportSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         const AboutMenuItemWidget(
-          title: "Frequently asked questions",
+          title: "FAQ",
           url: "https://ente.io/faq",
         ),
         sectionOptionSpacing,

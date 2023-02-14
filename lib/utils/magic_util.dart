@@ -9,7 +9,6 @@ import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
-import 'package:photos/ui/common/rename_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -94,36 +93,41 @@ Future<bool> editTime(
   }
 }
 
-Future<bool> editFilename(
+Future<void> editFilename(
   BuildContext context,
   File file,
 ) async {
-  try {
-    final fileName = file.displayName;
-    final nameWithoutExt = basenameWithoutExtension(fileName);
-    final extName = extension(fileName);
-    var result = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return RenameDialog(nameWithoutExt, 'file', maxLength: 50);
-      },
-      barrierColor: Colors.black.withOpacity(0.85),
-    );
-
-    if (result == null || result.trim() == nameWithoutExt.trim()) {
-      return true;
-    }
-    result = result + extName;
-    await _updatePublicMetadata(
-      context,
-      List.of([file]),
-      pubMagicKeyEditedName,
-      result,
-    );
-    return true;
-  } catch (e) {
-    showShortToast(context, 'Something went wrong');
-    return false;
+  final fileName = file.displayName;
+  final nameWithoutExt = basenameWithoutExtension(fileName);
+  final extName = extension(fileName);
+  final result = await showTextInputDialog(
+    context,
+    title: "Rename file",
+    submitButtonLabel: "Rename",
+    initialValue: nameWithoutExt,
+    message: extName.toUpperCase(),
+    alignMessage: Alignment.centerRight,
+    hintText: "Enter file name",
+    maxLength: 50,
+    alwaysShowSuccessState: true,
+    onSubmit: (String text) async {
+      if (text.isEmpty || text.trim() == nameWithoutExt.trim()) {
+        return;
+      }
+      final newName = text + extName;
+      await _updatePublicMetadata(
+        context,
+        List.of([file]),
+        pubMagicKeyEditedName,
+        newName,
+        showProgressDialogs: false,
+        showDoneToast: false,
+      );
+    },
+  );
+  if (result is Exception) {
+    _logger.severe("Failed to rename file");
+    showGenericErrorDialog(context: context);
   }
 }
 
@@ -155,12 +159,13 @@ Future<void> _updatePublicMetadata(
   String key,
   dynamic value, {
   bool showDoneToast = true,
+  bool showProgressDialogs = true,
 }) async {
   if (files.isEmpty) {
     return;
   }
   ProgressDialog? dialog;
-  if (context != null) {
+  if (context != null && showProgressDialogs) {
     dialog = createProgressDialog(context, 'Please wait...');
     await dialog.show();
   }

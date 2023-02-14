@@ -151,10 +151,10 @@ class DeleteAccountPage extends StatelessWidget {
               .deleteAccount(context, challengeResponseStr);
         },
       );
-      if (choice == ButtonAction.error) {
+      if (choice!.action == ButtonAction.error) {
         showGenericErrorDialog(context: context);
       }
-      if (choice != ButtonAction.first) {
+      if (choice.action != ButtonAction.first) {
         return;
       }
       Navigator.of(context).popUntil((route) => route.isFirst);

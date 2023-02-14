@@ -316,10 +316,13 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
+    final bool removingOthersFile =
+        isCollectionOwner && split.ownedByOtherUsers.isNotEmpty;
     await collectionActions.showRemoveFromCollectionSheetV2(
       context,
       widget.collection!,
       widget.selectedFiles,
+      removingOthersFile,
     );
   }
 
@@ -425,15 +428,18 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       body: "You can manage your links in the share tab.",
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
-    if (actionResult != null && actionResult == ButtonAction.first) {
-      await _copyLink();
+    if (actionResult?.action != null) {
+      if (actionResult!.action == ButtonAction.first) {
+        await _copyLink();
+      }
+      if (actionResult.action == ButtonAction.second) {
+        routeToPage(
+          context,
+          ManageSharedLinkWidget(collection: _cachedCollectionForSharedLink),
+        );
+      }
     }
-    if (actionResult != null && actionResult == ButtonAction.second) {
-      routeToPage(
-        context,
-        ManageSharedLinkWidget(collection: _cachedCollectionForSharedLink),
-      );
-    }
+
     if (mounted) {
       setState(() => {});
     }

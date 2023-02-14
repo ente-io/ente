@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.7.19+419
+version: 0.7.20+420
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
@@ -20,6 +20,7 @@ environment:
 dependencies:
   adaptive_theme: ^3.1.0
   animate_do: ^2.0.0
+  animated_list_plus: ^0.4.5
   archive: ^3.1.2
   background_fetch: ^1.1.1
   bip39: ^1.0.6
@@ -43,15 +44,15 @@ dependencies:
   expansion_tile_card: ^2.0.0
   extended_image: ^6.2.1
   fast_base58: ^0.2.1
-  firebase_core: ^1.10.0
-  firebase_messaging: ^11.1.0
+  firebase_core: ^2.4.1
+  firebase_messaging: ^14.2.1
   fk_user_agent: ^2.0.1
   flutter:
     sdk: flutter
   flutter_cache_manager: ^3.3.0
   flutter_datetime_picker: ^1.5.1
   flutter_easyloading: ^3.0.0
-  flutter_email_sender: ^5.1.0
+  flutter_email_sender: ^5.2.0
   flutter_image_compress: ^1.1.0
   flutter_inappwebview: ^5.5.0+2
   flutter_launcher_icons: ^0.9.3
@@ -68,7 +69,6 @@ dependencies:
   http: ^0.13.4
   image: ^3.0.2
   image_editor: ^1.0.0
-  implicitly_animated_reorderable_list: ^0.4.0
   in_app_purchase: ^3.0.7
   intl: ^0.17.0
   like_button: ^2.0.2
@@ -76,9 +76,8 @@ dependencies:
   local_auth: ^1.1.5
   logging: ^1.0.1
   lottie: ^1.2.2
-  media_extension:
-    git: "https://github.com/ente-io/media_extension.git"
-  modal_bottom_sheet: ^2.1.2
+  media_extension: ^1.0.0
+  modal_bottom_sheet: ^3.0.0-pre
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
@@ -107,6 +106,11 @@ dependencies:
   step_progress_indicator: ^1.0.2
   syncfusion_flutter_core: ^19.2.49
   syncfusion_flutter_sliders: ^19.2.49
+  tflite_flutter: ^0.9.0
+  tflite_flutter_helper:
+    git:
+      url: https://github.com/elephantum/tflite_flutter_helper.git  # Fixes https://github.com/am15h/tflite_flutter_helper/issues/57
+      ref: a7d7a59a33f7cffa0a2a12ab05625807622cc97a
   tuple: ^2.0.0
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
@@ -151,6 +155,7 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
+    - assets/models/
   fonts:
   - family: Inter
     fonts:

@@ -1,13 +1,13 @@
 import 'package:logging/logging.dart';
 import 'package:photos/core/errors.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
 
 class DeduplicationService {
   final _logger = Logger("DeduplicationService");
-  final _enteDio = Network.instance.enteDio;
+  final _enteDio = NetworkClient.instance.enteDio;
 
   DeduplicationService._privateConstructor();
 

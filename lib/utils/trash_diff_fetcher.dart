@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:logging/logging.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -10,7 +10,7 @@ import 'package:photos/utils/file_download_util.dart';
 
 class TrashDiffFetcher {
   final _logger = Logger("TrashDiffFetcher");
-  final _enteDio = Network.instance.enteDio;
+  final _enteDio = NetworkClient.instance.enteDio;
 
   Future<Diff> getTrashFilesDiff(int sinceTime) async {
     try {

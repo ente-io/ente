@@ -2,6 +2,7 @@ import "package:exif/exif.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:path/path.dart' as path;
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/db/files_db.dart';
@@ -16,6 +17,7 @@ import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/collections_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/device_folders_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
+import "package:photos/ui/viewer/file/object_tags_widget.dart";
 import 'package:photos/ui/viewer/file/raw_exif_list_tile_widget.dart';
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
@@ -154,7 +156,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 ),
               ),
         title: Text(
-          file.displayName,
+          path.basenameWithoutExtension(file.displayName) +
+              path.extension(file.displayName).toUpperCase(),
         ),
         subtitle: Row(
           children: [
@@ -231,6 +234,14 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                   _currentUserID!,
                 )
               : DeviceFoldersListOfFileWidget(allDeviceFoldersOfFile),
+        ),
+      ),
+      SizedBox(
+        height: 62,
+        child: ListTile(
+          horizontalTitleGap: 0,
+          leading: const Icon(Icons.image_search),
+          title: ObjectTagsWidget(file),
         ),
       ),
       (file.uploadedFileID != null && file.updationTime != null)

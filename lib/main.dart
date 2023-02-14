@@ -12,7 +12,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/errors.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -24,6 +24,7 @@ import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/notification_service.dart';
+import "package:photos/services/object_detection/object_detection_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -135,7 +136,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   }
   CryptoUtil.init();
   await NotificationService.instance.init();
-  await Network.instance.init();
+  await NetworkClient.instance.init();
   await Configuration.instance.init();
   await UserService.instance.init();
   await UserRemoteFlagService.instance.init();
@@ -160,6 +161,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
   }
   FeatureFlagService.instance.init();
+  await ObjectDetectionService.instance.init();
   _logger.info("Initialization done");
 }
 

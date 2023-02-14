@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/extensions/list.dart';
 import 'package:photos/models/file.dart';
@@ -17,7 +17,7 @@ class FilesService {
   late Configuration _config;
 
   FilesService._privateConstructor() {
-    _enteDio = Network.instance.enteDio;
+    _enteDio = NetworkClient.instance.enteDio;
     _logger = Logger("FilesService");
     _filesDB = FilesDB.instance;
     _config = Configuration.instance;

@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -21,7 +21,7 @@ Future<io.File?> downloadAndDecrypt(
       ".encrypted";
   final encryptedFile = io.File(encryptedFilePath);
   final startTime = DateTime.now().millisecondsSinceEpoch;
-  return Network.instance
+  return NetworkClient.instance
       .getDio()
       .download(
         file.downloadUrl,

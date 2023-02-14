@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 
@@ -14,7 +14,7 @@ class BillingQuestionsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Network.instance
+      future: NetworkClient.instance
           .getDio()
           .get("https://static.ente.io/faq.json")
           .then((response) {

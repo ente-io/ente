@@ -1,6 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:photos/data/holidays.dart';
 import 'package:photos/data/months.dart';
 import 'package:photos/data/years.dart';
@@ -21,7 +21,7 @@ import 'package:tuple/tuple.dart';
 
 class SearchService {
   Future<List<File>>? _cachedFilesFuture;
-  final _enteDio = Network.instance.enteDio;
+  final _enteDio = NetworkClient.instance.enteDio;
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
@@ -61,13 +61,10 @@ class SearchService {
     final List<GenericSearchResult> searchResults = [];
     try {
       final List<File> allFiles = await _getAllFiles();
-      final response = await _enteDio.get(
-        "/search/location",
-        queryParameters: {"query": query, "limit": 10},
-      );
-
-      final matchedLocationSearchResults =
-          LocationApiResponse.fromMap(response.data);
+      // This code used an deprecated API earlier. We've retained the
+      // scaffolding for when we implement a client side location search, and
+      // meanwhile have replaced the API response.data with an empty map here.
+      final matchedLocationSearchResults = LocationApiResponse.fromMap({});
 
       for (var locationData in matchedLocationSearchResults.results) {
         final List<File> filesInLocation = [];
@@ -115,8 +112,8 @@ class SearchService {
         break;
       }
 
-      if (!c.collection.isHidden() && c.collection.type != CollectionType
-          .uncategorized &&
+      if (!c.collection.isHidden() &&
+          c.collection.type != CollectionType.uncategorized &&
           c.collection.name!.toLowerCase().contains(
                 query.toLowerCase(),
               )) {

@@ -15,6 +15,7 @@ import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import "package:url_launcher/url_launcher_string.dart";
 
 class AccountSectionWidget extends StatelessWidget {
   const AccountSectionWidget({Key? key}) : super(key: key);
@@ -121,6 +122,18 @@ class AccountSectionWidget extends StatelessWidget {
                 ),
               );
             }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Export your data ",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            launchUrlString("https://ente.io/faq/migration/out-of-ente/");
           },
         ),
         sectionOptionSpacing,

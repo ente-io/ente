@@ -524,7 +524,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       body: "Do you want to discard the edits you have made?",
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
-    if (actionResult != null && actionResult == ButtonAction.first) {
+    if (actionResult?.action != null &&
+        actionResult!.action == ButtonAction.first) {
       replacePage(context, DetailPage(widget.detailPageConfig));
     }
   }

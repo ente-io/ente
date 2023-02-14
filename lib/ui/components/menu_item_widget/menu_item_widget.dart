@@ -1,17 +1,10 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/models/execution_states.dart';
+import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_child_widgets.dart';
 import 'package:photos/utils/debouncer.dart';
-
-enum ExecutionState {
-  idle,
-  inProgress,
-  error,
-  successful;
-}
-
-typedef FutureVoidCallback = Future<void> Function();
 
 class MenuItemWidget extends StatefulWidget {
   final Widget captionedTextWidget;
@@ -130,6 +123,12 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant MenuItemWidget oldWidget) {
+    menuItemColor = widget.menuItemColor;
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void dispose() {
     if (widget.expandableController != null) {
       widget.expandableController!.dispose();
@@ -210,6 +209,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   Future<void> _onTap() async {
+    if (executionStateNotifier.value == ExecutionState.inProgress ||
+        executionStateNotifier.value == ExecutionState.successful) return;
     _debouncer.run(
       () => Future(
         () {
@@ -245,6 +246,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   void _onTapDown(details) {
+    if (executionStateNotifier.value == ExecutionState.inProgress ||
+        executionStateNotifier.value == ExecutionState.successful) return;
     setState(() {
       if (widget.pressedColor == null) {
         hasPassedGestureCallbacks()
@@ -261,6 +264,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   void _onTapUp(details) {
+    if (executionStateNotifier.value == ExecutionState.inProgress ||
+        executionStateNotifier.value == ExecutionState.successful) return;
     Future.delayed(
       const Duration(milliseconds: 100),
       () => setState(() {
@@ -270,6 +275,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   void _onCancel() {
+    if (executionStateNotifier.value == ExecutionState.inProgress ||
+        executionStateNotifier.value == ExecutionState.successful) return;
     setState(() {
       menuItemColor = widget.menuItemColor;
     });

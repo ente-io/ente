@@ -247,7 +247,7 @@ Future<void> deleteFilesOnDeviceOnly(
 
 Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
   bool didDeletionStart = false;
-  final result = await showChoiceActionSheet(
+  final actionResult = await showChoiceActionSheet(
     context,
     title: "Permanently delete?",
     body: "This action cannot be undone",
@@ -270,19 +270,20 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
       }
     },
   );
-  if (result == ButtonAction.error) {
+
+  if (actionResult?.action == null ||
+      actionResult!.action == ButtonAction.cancel) {
+    return didDeletionStart ? true : false;
+  } else if (actionResult.action == ButtonAction.error) {
     await showGenericErrorDialog(context: context);
     return false;
-  }
-  if (result == null || result == ButtonAction.cancel) {
-    return didDeletionStart ? true : false;
   } else {
     return true;
   }
 }
 
 Future<bool> emptyTrash(BuildContext context) async {
-  final result = await showChoiceActionSheet(
+  final actionResult = await showChoiceActionSheet(
     context,
     title: "Empty trash?",
     body:
@@ -298,11 +299,11 @@ Future<bool> emptyTrash(BuildContext context) async {
       }
     },
   );
-  if (result == ButtonAction.error) {
-    await showGenericErrorDialog(context: context);
+  if (actionResult?.action == null ||
+      actionResult!.action == ButtonAction.cancel) {
     return false;
-  }
-  if (result == null || result == ButtonAction.cancel) {
+  } else if (actionResult.action == ButtonAction.error) {
+    await showGenericErrorDialog(context: context);
     return false;
   } else {
     return true;
@@ -467,7 +468,7 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
 }
 
 Future<bool> shouldProceedWithDeletion(BuildContext context) async {
-  final choice = await showChoiceActionSheet(
+  final actionResult = await showChoiceActionSheet(
     context,
     title: "Permanently delete from device?",
     body:
@@ -475,10 +476,10 @@ Future<bool> shouldProceedWithDeletion(BuildContext context) async {
     firstButtonLabel: "Delete",
     isCritical: true,
   );
-  if (choice == null) {
+  if (actionResult?.action == null) {
     return false;
   } else {
-    return choice == ButtonAction.first;
+    return actionResult!.action == ButtonAction.first;
   }
 }
 
@@ -528,8 +529,14 @@ Future<void> showDeleteSheet(
           await deleteFilesFromRemoteOnly(
             context,
             selectedFiles.files.toList(),
+          ).then(
+            (value) {
+              showShortToast(context, "Moved to trash");
+            },
+            onError: (e, s) {
+              showGenericErrorDialog(context: context);
+            },
           );
-          showShortToast(context, "Moved to trash");
         },
       ),
     );
@@ -581,14 +588,15 @@ Future<void> showDeleteSheet(
       isInAlert: true,
     ),
   );
-  final ButtonAction? result = await showActionSheet(
+  final actionResult = await showActionSheet(
     context: context,
     buttons: buttons,
     actionSheetType: ActionSheetType.defaultActionSheet,
     body: body,
     bodyHighlight: bodyHighlight,
   );
-  if (result != null && result == ButtonAction.error) {
+  if (actionResult?.action != null &&
+      actionResult!.action == ButtonAction.error) {
     showGenericErrorDialog(context: context);
   } else {
     selectedFiles.clearAll();

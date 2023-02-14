@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:photos/models/execution_states.dart';
+import "package:photos/models/search/button_result.dart";
+import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
@@ -7,13 +10,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/models/custom_button_style.dart';
 import 'package:photos/utils/debouncer.dart';
-
-enum ExecutionState {
-  idle,
-  inProgress,
-  error,
-  successful;
-}
+import "package:photos/utils/dialog_util.dart";
 
 enum ButtonSize {
   small,
@@ -28,8 +25,6 @@ enum ButtonAction {
   cancel,
   error;
 }
-
-typedef FutureVoidCallback = Future<void> Function();
 
 class ButtonWidget extends StatelessWidget {
   final IconData? icon;
@@ -203,6 +198,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   double? widthOfButton;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
   ExecutionState executionState = ExecutionState.idle;
+  Exception? _exception;
 
   @override
   void initState() {
@@ -411,10 +407,16 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
           });
         }),
       );
-      await widget.onTap!.call().onError((error, stackTrace) {
-        executionState = ExecutionState.error;
-        _debouncer.cancelDebounce();
-      });
+      await widget.onTap!.call().then(
+        (value) {
+          _exception = null;
+        },
+        onError: (error, stackTrace) {
+          executionState = ExecutionState.error;
+          _exception = error as Exception;
+          _debouncer.cancelDebounce();
+        },
+      );
       widget.shouldShowSuccessConfirmation && _debouncer.isActive()
           ? executionState = ExecutionState.successful
           : null;
@@ -443,7 +445,10 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                       : 0,
                 ), () {
               widget.isInAlert
-                  ? _popWithButtonAction(context, widget.buttonAction)
+                  ? _popWithButtonAction(
+                      context,
+                      buttonAction: widget.buttonAction,
+                    )
                   : null;
               if (mounted) {
                 setState(() {
@@ -460,7 +465,11 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
           widget.isInAlert
               ? Future.delayed(
                   const Duration(seconds: 0),
-                  () => _popWithButtonAction(context, ButtonAction.error),
+                  () => _popWithButtonAction(
+                    context,
+                    buttonAction: ButtonAction.error,
+                    exception: _exception,
+                  ),
                 )
               : null;
         });
@@ -469,18 +478,25 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       if (widget.isInAlert) {
         Future.delayed(
           Duration(seconds: widget.shouldShowSuccessConfirmation ? 1 : 0),
-          () => _popWithButtonAction(context, widget.buttonAction),
+          () =>
+              _popWithButtonAction(context, buttonAction: widget.buttonAction),
         );
       }
     }
   }
 
-  void _popWithButtonAction(BuildContext context, ButtonAction? buttonAction) {
-    Navigator.of(context).canPop()
-        ? Navigator.of(context).pop(
-            buttonAction,
-          )
-        : null;
+  void _popWithButtonAction(
+    BuildContext context, {
+    required ButtonAction? buttonAction,
+    Exception? exception,
+  }) {
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop(ButtonResult(widget.buttonAction, exception));
+    } else if (exception != null) {
+      //This is to show the execution was unsuccessful if the dialog is manually
+      //closed before the execution completes.
+      showGenericErrorDialog(context: context);
+    }
   }
 
   void _onTapDown(details) {

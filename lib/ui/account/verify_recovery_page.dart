@@ -82,7 +82,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
         secondButtonLabel: "View recovery key",
         secondButtonAction: ButtonAction.second,
       );
-      if (result == ButtonAction.second) {
+      if (result!.action == ButtonAction.second) {
         await _onViewRecoveryKeyClick();
       }
     }

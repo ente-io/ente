@@ -350,7 +350,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             body: "Are you sure you want to renew?",
             firstButtonLabel: "Yes, Renew",
           );
-          confirmAction = choice == ButtonAction.first;
+          confirmAction = choice!.action == ButtonAction.first;
         } else {
           final choice = await showChoiceDialog(
             context,
@@ -360,7 +360,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             secondButtonLabel: "No",
             isCritical: true,
           );
-          confirmAction = choice == ButtonAction.first;
+          confirmAction = choice!.action == ButtonAction.first;
         }
         if (confirmAction) {
           toggleStripeSubscription(isRenewCancelled);
@@ -435,7 +435,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   body: "Are you sure you want to change your plan?",
                   firstButtonLabel: "Yes",
                 );
-                if (result == ButtonAction.first) {
+                if (result!.action == ButtonAction.first) {
                   stripPurChaseAction = 'update';
                 } else {
                   return;

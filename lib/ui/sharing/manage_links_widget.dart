@@ -4,8 +4,6 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
@@ -15,11 +13,13 @@ import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
+import 'package:photos/ui/sharing/pickers/device_limit_picker_page.dart';
+import 'package:photos/ui/sharing/pickers/link_expiry_picker_page.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:tuple/tuple.dart';
 
 class ManageSharedLinkWidget extends StatefulWidget {
   final Collection? collection;
@@ -31,35 +31,25 @@ class ManageSharedLinkWidget extends StatefulWidget {
 }
 
 class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
-  // index, title, milliseconds in future post which link should expire (when >0)
-  final List<Tuple3<int, String, int>> _expiryOptions = [
-    const Tuple3(0, "Never", 0),
-    Tuple3(1, "After 1 hour", const Duration(hours: 1).inMicroseconds),
-    Tuple3(2, "After 1 day", const Duration(days: 1).inMicroseconds),
-    Tuple3(3, "After 1 week", const Duration(days: 7).inMicroseconds),
-    // todo: make this time calculation perfect
-    Tuple3(4, "After 1 month", const Duration(days: 30).inMicroseconds),
-    Tuple3(5, "After 1 year", const Duration(days: 365).inMicroseconds),
-    const Tuple3(6, "Custom", -1),
-  ];
-
-  late Tuple3<int, String, int> _selectedExpiry;
-  int _selectedDeviceLimitIndex = 0;
   final CollectionActions sharingActions =
       CollectionActions(CollectionsService.instance);
 
   @override
   void initState() {
-    _selectedExpiry = _expiryOptions.first;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isCollectEnabled =
+        widget.collection!.publicURLs?.firstOrNull?.enableCollect ?? false;
+    final isDownloadEnabled =
+        widget.collection!.publicURLs?.firstOrNull?.enableDownload ?? true;
+    final isPasswordEnabled =
+        widget.collection!.publicURLs?.firstOrNull?.passwordEnabled ?? false;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs!.firstOrNull!;
     return Scaffold(
-      backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
         elevation: 0,
         title: const Text(
@@ -75,6 +65,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   MenuItemWidget(
+                    key: ValueKey("Allow collect $isCollectEnabled"),
                     captionedTextWidget: const CaptionedTextWidget(
                       title: "Allow adding photos",
                     ),
@@ -89,8 +80,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           context,
                           {'enableCollect': value},
                         );
-
-                        setState(() {});
                       },
                     ),
                   ),
@@ -113,7 +102,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     menuItemColor: enteColorScheme.fillFaint,
                     surfaceExecutionStates: false,
                     onTap: () async {
-                      await showPicker();
+                      routeToPage(
+                        context,
+                        LinkExpiryPickerPage(widget.collection!),
+                      ).then((value) {
+                        setState(() {});
+                      });
                     },
                   ),
                   url.hasExpiry
@@ -137,7 +131,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     alignCaptionedTextToLeft: true,
                     isBottomBorderRadiusRemoved: true,
                     onTap: () async {
-                      await _showDeviceLimitPicker();
+                      routeToPage(
+                        context,
+                        DeviceLimitPickerPage(widget.collection!),
+                      ).then((value) {
+                        setState(() {});
+                      });
                     },
                     surfaceExecutionStates: false,
                   ),
@@ -146,6 +145,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     bgColor: getEnteColorScheme(context).fillFaint,
                   ),
                   MenuItemWidget(
+                    key: ValueKey("Allow downloads $isDownloadEnabled"),
                     captionedTextWidget: const CaptionedTextWidget(
                       title: "Allow downloads",
                     ),
@@ -154,9 +154,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     isTopBorderRadiusRemoved: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     trailingWidget: Switch.adaptive(
-                      value: widget.collection!.publicURLs?.firstOrNull
-                              ?.enableDownload ??
-                          true,
+                      value: isDownloadEnabled,
                       onChanged: (value) async {
                         await _updateUrlSettings(
                           context,
@@ -169,7 +167,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                             "Viewers can still take screenshots or save a copy of your photos using external tools",
                           );
                         }
-                        setState(() {});
                       },
                     ),
                   ),
@@ -178,6 +175,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     bgColor: getEnteColorScheme(context).fillFaint,
                   ),
                   MenuItemWidget(
+                    key: ValueKey("Password lock $isPasswordEnabled"),
                     captionedTextWidget: const CaptionedTextWidget(
                       title: "Password lock",
                     ),
@@ -185,28 +183,36 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     isTopBorderRadiusRemoved: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     trailingWidget: Switch.adaptive(
-                      value: widget.collection!.publicURLs?.firstOrNull
-                              ?.passwordEnabled ??
-                          false,
+                      value: isPasswordEnabled,
                       onChanged: (enablePassword) async {
                         if (enablePassword) {
-                          final inputResult =
-                              await _displayLinkPasswordInput(context);
-                          if (inputResult != null &&
-                              inputResult == 'ok' &&
-                              _textFieldController.text.trim().isNotEmpty) {
-                            final propToUpdate = await _getEncryptedPassword(
-                              _textFieldController.text,
-                            );
-                            await _updateUrlSettings(context, propToUpdate);
-                          }
+                          showTextInputDialog(
+                            context,
+                            title: "Set a password",
+                            submitButtonLabel: "Lock",
+                            hintText: "Enter password",
+                            isPasswordInput: true,
+                            alwaysShowSuccessState: true,
+                            onSubmit: (String password) async {
+                              if (password.trim().isNotEmpty) {
+                                final propToUpdate =
+                                    await _getEncryptedPassword(
+                                  password,
+                                );
+                                await _updateUrlSettings(
+                                  context,
+                                  propToUpdate,
+                                  showProgressDialog: false,
+                                );
+                              }
+                            },
+                          );
                         } else {
                           await _updateUrlSettings(
                             context,
                             {'disablePassword': true},
                           );
                         }
-                        setState(() {});
                       },
                     ),
                   ),
@@ -230,7 +236,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       );
                       if (result && mounted) {
                         Navigator.of(context).pop();
-                        // setState(() => {});
                       }
                     },
                   ),
@@ -240,219 +245,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
           ],
         ),
       ),
-    );
-  }
-
-  Future<void> showPicker() async {
-    return showCupertinoModalPopup(
-      context: context,
-      builder: (context) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.cupertinoPickerTopColor,
-                border: const Border(
-                  bottom: BorderSide(
-                    color: Color(0xff999999),
-                    width: 0.0,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  CupertinoButton(
-                    onPressed: () {
-                      Navigator.of(context).pop('cancel');
-                    },
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 5.0,
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: Theme.of(context).textTheme.subtitle1,
-                    ),
-                  ),
-                  CupertinoButton(
-                    onPressed: () async {
-                      int newValidTill = -1;
-                      bool hasSelectedCustom = false;
-                      final int expireAfterInMicroseconds =
-                          _selectedExpiry.item3;
-                      // need to manually select time
-                      if (expireAfterInMicroseconds < 0) {
-                        hasSelectedCustom = true;
-                        Navigator.of(context).pop('');
-                        final timeInMicrosecondsFromEpoch =
-                            await _showDateTimePicker();
-                        if (timeInMicrosecondsFromEpoch != null) {
-                          newValidTill = timeInMicrosecondsFromEpoch;
-                        }
-                      } else if (expireAfterInMicroseconds == 0) {
-                        // no expiry
-                        newValidTill = 0;
-                      } else {
-                        newValidTill = DateTime.now().microsecondsSinceEpoch +
-                            expireAfterInMicroseconds;
-                      }
-                      if (!hasSelectedCustom) {
-                        Navigator.of(context).pop('');
-                      }
-                      if (newValidTill >= 0) {
-                        debugPrint("Setting expirty $newValidTill");
-                        await updateTime(newValidTill);
-                      }
-                    },
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 2.0,
-                    ),
-                    child: Text(
-                      'Confirm',
-                      style: Theme.of(context).textTheme.subtitle1,
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Container(
-              height: 220.0,
-              color: const Color(0xfff7f7f7),
-              child: CupertinoPicker(
-                backgroundColor:
-                    Theme.of(context).backgroundColor.withOpacity(0.95),
-                onSelectedItemChanged: (value) {
-                  final firstWhere = _expiryOptions
-                      .firstWhere((element) => element.item1 == value);
-                  setState(() {
-                    _selectedExpiry = firstWhere;
-                  });
-                },
-                magnification: 1.3,
-                useMagnifier: true,
-                itemExtent: 25,
-                diameterRatio: 1,
-                children: _expiryOptions
-                    .map(
-                      (e) => Text(
-                        e.item2,
-                        style: Theme.of(context).textTheme.subtitle1,
-                      ),
-                    )
-                    .toList(),
-              ),
-            )
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> updateTime(int newValidTill) async {
-    await _updateUrlSettings(
-      context,
-      {'validTill': newValidTill},
-    );
-    if (mounted) {
-      // reset to default value. THis is needed will we move to
-      // new selection menu as per figma/
-      _selectedExpiry = _expiryOptions.first;
-      setState(() {});
-    }
-  }
-
-  // _showDateTimePicker return null if user doesn't select date-time
-  Future<int?> _showDateTimePicker() async {
-    final dateResult = await DatePicker.showDatePicker(
-      context,
-      minTime: DateTime.now(),
-      currentTime: DateTime.now(),
-      locale: LocaleType.en,
-      theme: Theme.of(context).colorScheme.dateTimePickertheme,
-    );
-    if (dateResult == null) {
-      return null;
-    }
-    final dateWithTimeResult = await DatePicker.showTime12hPicker(
-      context,
-      showTitleActions: true,
-      currentTime: dateResult,
-      locale: LocaleType.en,
-      theme: Theme.of(context).colorScheme.dateTimePickertheme,
-    );
-    if (dateWithTimeResult == null) {
-      return null;
-    } else {
-      return dateWithTimeResult.microsecondsSinceEpoch;
-    }
-  }
-
-  final TextEditingController _textFieldController = TextEditingController();
-
-  Future<String?> _displayLinkPasswordInput(BuildContext context) async {
-    _textFieldController.clear();
-    return showDialog<String>(
-      context: context,
-      builder: (context) {
-        bool passwordVisible = false;
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Enter password'),
-              content: TextFormField(
-                autofillHints: const [AutofillHints.newPassword],
-                decoration: InputDecoration(
-                  hintText: "Password",
-                  contentPadding: const EdgeInsets.all(12),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      passwordVisible ? Icons.visibility : Icons.visibility_off,
-                      color: Colors.white.withOpacity(0.5),
-                      size: 20,
-                    ),
-                    onPressed: () {
-                      passwordVisible = !passwordVisible;
-                      setState(() {});
-                    },
-                  ),
-                ),
-                obscureText: !passwordVisible,
-                controller: _textFieldController,
-                autofocus: true,
-                autocorrect: false,
-                keyboardType: TextInputType.visiblePassword,
-                onChanged: (_) {
-                  setState(() {});
-                },
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text(
-                    'Cancel',
-                    style: Theme.of(context).textTheme.subtitle2,
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context, 'cancel');
-                  },
-                ),
-                TextButton(
-                  child:
-                      Text('Ok', style: Theme.of(context).textTheme.subtitle2),
-                  onPressed: () {
-                    if (_textFieldController.text.trim().isEmpty) {
-                      return;
-                    }
-                    Navigator.pop(context, 'ok');
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
     );
   }
 
@@ -472,101 +264,25 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   Future<void> _updateUrlSettings(
     BuildContext context,
-    Map<String, dynamic> prop,
-  ) async {
-    final dialog = createProgressDialog(context, "Please wait...");
-    await dialog.show();
+    Map<String, dynamic> prop, {
+    bool showProgressDialog = true,
+  }) async {
+    final dialog = showProgressDialog
+        ? createProgressDialog(context, "Please wait...")
+        : null;
+    await dialog?.show();
     try {
       await CollectionsService.instance
           .updateShareUrl(widget.collection!, prop);
-      await dialog.hide();
+      await dialog?.hide();
       showShortToast(context, "Album updated");
+      if (mounted) {
+        setState(() {});
+      }
     } catch (e) {
-      await dialog.hide();
+      await dialog?.hide();
       await showGenericErrorDialog(context: context);
+      rethrow;
     }
-  }
-
-  Future<void> _showDeviceLimitPicker() async {
-    final List<Text> options = [];
-    for (int i = 50; i > 0; i--) {
-      options.add(
-        Text(i.toString(), style: Theme.of(context).textTheme.subtitle1),
-      );
-    }
-    return showCupertinoModalPopup(
-      context: context,
-      builder: (context) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.cupertinoPickerTopColor,
-                border: const Border(
-                  bottom: BorderSide(
-                    color: Color(0xff999999),
-                    width: 0.0,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  CupertinoButton(
-                    onPressed: () {
-                      Navigator.of(context).pop('cancel');
-                    },
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 5.0,
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: Theme.of(context).textTheme.subtitle1,
-                    ),
-                  ),
-                  CupertinoButton(
-                    onPressed: () async {
-                      await _updateUrlSettings(context, {
-                        'deviceLimit': int.tryParse(
-                          options[_selectedDeviceLimitIndex].data!,
-                        ),
-                      });
-                      setState(() {});
-                      Navigator.of(context).pop('');
-                    },
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 2.0,
-                    ),
-                    child: Text(
-                      'Confirm',
-                      style: Theme.of(context).textTheme.subtitle1,
-                    ),
-                  )
-                ],
-              ),
-            ),
-            Container(
-              height: 220.0,
-              color: const Color(0xfff7f7f7),
-              child: CupertinoPicker(
-                backgroundColor:
-                    Theme.of(context).backgroundColor.withOpacity(0.95),
-                onSelectedItemChanged: (value) {
-                  _selectedDeviceLimitIndex = value;
-                },
-                magnification: 1.3,
-                useMagnifier: true,
-                itemExtent: 25,
-                diameterRatio: 1,
-                children: options,
-              ),
-            )
-          ],
-        );
-      },
-    );
   }
 }

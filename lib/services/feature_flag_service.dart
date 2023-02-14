@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/core/network.dart';
+import 'package:photos/core/network/network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FeatureFlagService {
@@ -69,7 +69,7 @@ class FeatureFlagService {
 
   Future<void> fetchFeatureFlags() async {
     try {
-      final response = await Network.instance
+      final response = await NetworkClient.instance
           .getDio()
           .get("https://static.ente.io/feature_flags.json");
       final flagsResponse = FeatureFlags.fromMap(response.data);
