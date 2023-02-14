@@ -10,6 +10,7 @@ class EmptyStateItemWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(
           Icons.check_outlined,
@@ -17,10 +18,12 @@ class EmptyStateItemWidget extends StatelessWidget {
           color: colorScheme.strokeFaint,
         ),
         const SizedBox(width: 6),
-        Text(
-          textContent,
-          style: textTheme.small.copyWith(
-            color: colorScheme.textFaint,
+        Flexible(
+          child: Text(
+            textContent,
+            style: textTheme.small.copyWith(
+              color: colorScheme.textFaint,
+            ),
           ),
         ),
       ],
