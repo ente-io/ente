@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/button_widget.dart";
 import "package:photos/ui/components/empty_state_item_widget.dart";
@@ -9,7 +10,12 @@ class NewSharedCollectionsGallery extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const EmptyStateWidget();
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: restrictedMaxWidth),
+        child: const EmptyStateWidget(),
+      ),
+    );
   }
 }
 
