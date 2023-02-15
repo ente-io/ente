@@ -2,9 +2,9 @@ import { CollectionActions } from '..';
 import React from 'react';
 import { CollectionSummaryType } from 'constants/collection';
 import { FlexWrapper } from 'components/Container';
-import { MoveToTrashOption } from './MoveToTrashOption';
-import { DownloadOption } from './DownloadOption';
-import { ShareOption } from './ShareOption';
+import { MoveToTrashOption } from './MoveToTrashQuickOption';
+import { DownloadOption } from './DownloadQuickOption';
+import { ShareOption } from './ShareQuickOption';
 import {
     showDownloadQuickOption,
     showShareQuickOption,
