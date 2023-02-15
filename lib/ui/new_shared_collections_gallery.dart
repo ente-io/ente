@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/collection_action_sheet.dart";
 import "package:photos/ui/components/button_widget.dart";
 import "package:photos/ui/components/empty_state_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
@@ -71,20 +72,25 @@ class EmptyStateWidget extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     ButtonWidget(
-                      buttonType: ButtonType.trailingIconPrimary,
-                      labelText: "Share an album now",
-                      icon: Icons.arrow_forward_outlined,
-                    ),
-                    SizedBox(height: 6),
-                    ButtonWidget(
+                        buttonType: ButtonType.trailingIconPrimary,
+                        labelText: "Share an album now",
+                        icon: Icons.arrow_forward_outlined,
+                        onTap: () async {
+                          showCollectionActionSheet(
+                            context,
+                            actionType: CollectionActionType.shareCollection,
+                          );
+                        }),
+                    const SizedBox(height: 6),
+                    const ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       labelText: "Collect event photos",
                       icon: Icons.add_photo_alternate_outlined,
                     ),
-                    SizedBox(height: 6),
-                    ButtonWidget(
+                    const SizedBox(height: 6),
+                    const ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       labelText: "Invite your friends",
                       icon: Icons.ios_share_outlined,

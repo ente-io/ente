@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -22,6 +23,7 @@ import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/new_album_list_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
+import "package:photos/ui/sharing/share_collection_page.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -29,7 +31,13 @@ import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
-enum CollectionActionType { addFiles, moveFiles, restoreFiles, unHide }
+enum CollectionActionType {
+  addFiles,
+  moveFiles,
+  restoreFiles,
+  unHide,
+  shareCollection
+}
 
 String _actionName(CollectionActionType type, bool plural) {
   bool addTitleSuffix = false;
@@ -49,6 +57,9 @@ String _actionName(CollectionActionType type, bool plural) {
       break;
     case CollectionActionType.unHide:
       text = "Unhide to album";
+      break;
+    case CollectionActionType.shareCollection:
+      text = "Share album";
       break;
   }
   return addTitleSuffix ? text + titleSuffix : text;
@@ -108,7 +119,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   Widget build(BuildContext context) {
     final filesCount = widget.sharedFiles != null
         ? widget.sharedFiles!.length
-        : widget.selectedFiles!.files.length;
+        : widget.selectedFiles?.files.length ?? 0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -125,7 +136,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                   title: TitleBarTitleWidget(
                     title: _actionName(widget.actionType, filesCount > 1),
                   ),
-                  caption: "Create or select album",
+                  caption: widget.showOptionToCreateNewAlbum
+                      ? "Create or select album"
+                      : "Select album",
                 ),
                 Flexible(
                   child: Column(
@@ -249,7 +262,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       final collection = await _createAlbum(albumName);
       if (collection != null) {
         if (await _runCollectionAction(
-          collectionID: collection.id,
+          collection: collection,
           showProgressDialog: false,
         )) {
           if (widget.actionType == CollectionActionType.restoreFiles) {
@@ -281,13 +294,22 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   }
 
   Future<void> _albumListItemOnTap(CollectionWithThumbnail item) async {
-    if (await _runCollectionAction(collectionID: item.collection.id)) {
-      showShortToast(
-        context,
-        widget.actionType == CollectionActionType.addFiles
-            ? "Added successfully to " + item.collection.name!
-            : "Moved successfully to " + item.collection.name!,
-      );
+    if (await _runCollectionAction(collection: item.collection)) {
+      late final String toastMessage;
+      if (widget.actionType == CollectionActionType.addFiles) {
+        toastMessage = "Added successfully to " + item.collection.name!;
+      } else if (widget.actionType == CollectionActionType.moveFiles) {
+        toastMessage = "Moved successfully to " + item.collection.name!;
+      } else {
+        toastMessage = "";
+      }
+      if (toastMessage.isNotEmpty) {
+        showShortToast(
+          context,
+          toastMessage,
+        );
+      }
+
       _navigateToCollection(
         item.collection,
       );
@@ -327,22 +349,43 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   }
 
   Future<bool> _runCollectionAction({
-    required int collectionID,
+    required Collection collection,
     bool showProgressDialog = true,
   }) async {
     switch (widget.actionType) {
       case CollectionActionType.addFiles:
         return _addToCollection(
-          collectionID: collectionID,
+          collectionID: collection.id,
           showProgressDialog: showProgressDialog,
         );
       case CollectionActionType.moveFiles:
-        return _moveFilesToCollection(collectionID);
+        return _moveFilesToCollection(collection.id);
       case CollectionActionType.unHide:
-        return _moveFilesToCollection(collectionID);
+        return _moveFilesToCollection(collection.id);
       case CollectionActionType.restoreFiles:
-        return _restoreFilesToCollection(collectionID);
+        return _restoreFilesToCollection(collection.id);
+      case CollectionActionType.shareCollection:
+        return _showShareCollectionPage(collection);
     }
+  }
+
+  Future<bool> _showShareCollectionPage(Collection collection) {
+    try {
+      if (Configuration.instance.getUserID() == collection.owner!.id) {
+        unawaited(
+          routeToPage(
+            context,
+            ShareCollectionPage(collection),
+          ),
+        );
+      } else {
+        showGenericErrorDialog(context: context);
+        throw Exception("Cannot share collections owned by others");
+      }
+    } catch (e, s) {
+      _logger.severe(e, s);
+    }
+    return Future.value(false);
   }
 
   Future<bool> _addToCollection({
