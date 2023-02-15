@@ -17,6 +17,7 @@ import "package:photos/ui/growth/apply_code_screen.dart";
 import "package:photos/ui/growth/storage_details_screen.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/share_util.dart";
 
 class ReferralScreen extends StatefulWidget {
   const ReferralScreen({super.key});
@@ -103,73 +104,79 @@ class ReferralWidget extends StatelessWidget {
       children: [
         // Container with 8 border radius and red color
         isReferralEnabled
-            ? Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: colorScheme.strokeFaint,
-                    width: 1,
+            ? InkWell(
+                onTap: () {
+                  shareText(
+                      "ente referral code: ${referralView.code} \n\nApply it in Settings → General → Referrals to get 10 GB free after you signup for a paid plan\n\nhttps://ente.io");
+                },
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: colorScheme.strokeFaint,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 12,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "1. Give this code to your "
-                        "friends",
-                      ),
-                      const SizedBox(height: 12),
-                      Center(
-                        child: DottedBorder(
-                          color: colorScheme.strokeMuted,
-                          //color of dotted/dash line
-                          strokeWidth: 1,
-                          //thickness of dash/dots
-                          dashPattern: const [6, 6],
-                          radius: const Radius.circular(8),
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: 26.0,
-                              top: 14,
-                              right: 12,
-                              bottom: 14,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  referralView.code,
-                                  style: textStyle.bodyBold.copyWith(
-                                    color: colorScheme.primary700,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 12,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "1. Give this code to your "
+                          "friends",
+                        ),
+                        const SizedBox(height: 12),
+                        Center(
+                          child: DottedBorder(
+                            color: colorScheme.strokeMuted,
+                            //color of dotted/dash line
+                            strokeWidth: 1,
+                            //thickness of dash/dots
+                            dashPattern: const [6, 6],
+                            radius: const Radius.circular(8),
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 26.0,
+                                top: 14,
+                                right: 12,
+                                bottom: 14,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    referralView.code,
+                                    style: textStyle.bodyBold.copyWith(
+                                      color: colorScheme.primary700,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                Icon(
-                                  Icons.adaptive.share,
-                                  size: 22,
-                                  color: colorScheme.strokeMuted,
-                                )
-                              ],
+                                  const SizedBox(width: 12),
+                                  Icon(
+                                    Icons.adaptive.share,
+                                    size: 22,
+                                    color: colorScheme.strokeMuted,
+                                  )
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        "2. They sign up for a paid plan",
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        "3. Both of you get ${referralView.planInfo.storageInGB} "
-                        "GB* free",
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        const Text(
+                          "2. They sign up for a paid plan",
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "3. Both of you get ${referralView.planInfo.storageInGB} "
+                          "GB* free",
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               )
