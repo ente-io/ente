@@ -16,6 +16,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/album_list_item_widget.dart';
 import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
@@ -36,7 +37,8 @@ enum CollectionActionType {
   moveFiles,
   restoreFiles,
   unHide,
-  shareCollection
+  shareCollection,
+  collectPhotos,
 }
 
 String _actionName(CollectionActionType type, bool plural) {
@@ -59,7 +61,10 @@ String _actionName(CollectionActionType type, bool plural) {
       text = "Unhide to album";
       break;
     case CollectionActionType.shareCollection:
-      text = "Share album";
+      text = "Share";
+      break;
+    case CollectionActionType.collectPhotos:
+      text = "Share";
       break;
   }
   return addTitleSuffix ? text + titleSuffix : text;
@@ -303,6 +308,8 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       } else if (widget.actionType == CollectionActionType.moveFiles) {
         toastMessage = "Moved successfully to " + item.collection.name!;
         shouldNavigateToCollection = true;
+      } else if (widget.actionType == CollectionActionType.collectPhotos) {
+        toastMessage = "Created a public link for " + item.collection.name!;
       } else {
         toastMessage = "";
       }
@@ -370,11 +377,20 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         return _restoreFilesToCollection(collection.id);
       case CollectionActionType.shareCollection:
         return _showShareCollectionPage(collection);
+      case CollectionActionType.collectPhotos:
+        return _createCollectPublicLink(collection);
     }
   }
 
-  Future<bool> _showShareCollectionPage(Collection collection) {
-    try {
+  Future<bool> _createCollectPublicLink(Collection collection) async {
+    final CollectionActions collectionActions =
+        CollectionActions(CollectionsService.instance);
+    final bool result = await collectionActions.enableUrl(
+      context,
+      collection,
+      enableCollect: true,
+    );
+    if (result) {
       if (Configuration.instance.getUserID() == collection.owner!.id) {
         unawaited(
           routeToPage(
@@ -384,13 +400,25 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         );
       } else {
         showGenericErrorDialog(context: context);
-        throw Exception("Cannot share collections owned by others");
+        _logger.severe("Cannot share collections owned by others");
       }
-      return Future.value(true);
-    } catch (e, s) {
-      _logger.severe(e, s);
-      rethrow;
     }
+    return result;
+  }
+
+  Future<bool> _showShareCollectionPage(Collection collection) {
+    if (Configuration.instance.getUserID() == collection.owner!.id) {
+      unawaited(
+        routeToPage(
+          context,
+          ShareCollectionPage(collection),
+        ),
+      );
+    } else {
+      showGenericErrorDialog(context: context);
+      _logger.severe("Cannot share collections owned by others");
+    }
+    return Future.value(true);
   }
 
   Future<bool> _addToCollection({

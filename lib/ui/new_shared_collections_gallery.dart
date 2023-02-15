@@ -85,10 +85,16 @@ class EmptyStateWidget extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 6),
-                    const ButtonWidget(
+                    ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       labelText: "Collect event photos",
                       icon: Icons.add_photo_alternate_outlined,
+                      onTap: () async {
+                        showCollectionActionSheet(
+                          context,
+                          actionType: CollectionActionType.collectPhotos,
+                        );
+                      },
                     ),
                     const SizedBox(height: 6),
                     const ButtonWidget(
