@@ -4,6 +4,7 @@ class ReferralView {
   bool enableApplyCode;
   bool isFamilyMember;
   bool hasAppliedCode;
+  int claimedStorage;
 
   ReferralView({
     required this.planInfo,
@@ -11,6 +12,7 @@ class ReferralView {
     required this.enableApplyCode,
     required this.isFamilyMember,
     required this.hasAppliedCode,
+    required this.claimedStorage,
   });
 
   factory ReferralView.fromJson(Map<String, dynamic> json) => ReferralView(
@@ -19,6 +21,7 @@ class ReferralView {
         enableApplyCode: json["enableApplyCode"],
         isFamilyMember: json["isFamilyMember"],
         hasAppliedCode: json["hasAppliedCode"],
+        claimedStorage: json["claimedStorage"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -27,6 +30,7 @@ class ReferralView {
         "enableApplyCode": enableApplyCode,
         "isFamilyMember": isFamilyMember,
         "hasAppliedCode": hasAppliedCode,
+        "claimedStorage": claimedStorage,
       };
 }
 

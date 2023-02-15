@@ -15,4 +15,9 @@ class StorageBonusService {
 
   static StorageBonusService instance =
       StorageBonusService._privateConstructor();
+
+  // getter for gateway
+  StorageBonusGateway getGateway() {
+    return gateway;
+  }
 }
