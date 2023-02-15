@@ -41,6 +41,10 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   }
 
   Future<bool> initIntentAction() async {
+    if (!Platform.isAndroid) {
+      AppLifecycleService.instance.setIntentAction(IntentAction.main);
+      return true;
+    }
     IntentAction intentAction = IntentAction.main;
     try {
       final actionResult = await _mediaExtensionPlugin.getIntentAction();
