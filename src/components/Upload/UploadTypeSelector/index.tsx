@@ -10,7 +10,7 @@ import DialogTitleWithCloseButton, {
 import { Box, Dialog, Stack, Typography } from '@mui/material';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { isMobileOrTable } from 'utils/common/deviceDetection';
-
+import { UploadTypeSelectorIntent } from 'types/gallery';
 interface Iprops {
     onClose: () => void;
     show: boolean;
@@ -18,6 +18,7 @@ interface Iprops {
     uploadFolders: () => void;
     uploadGoogleTakeoutZips: () => void;
     hideZipUploadOption?: boolean;
+    uploadTypeSelectorIntent?: UploadTypeSelectorIntent;
 }
 export default function UploadTypeSelector({
     onClose,
@@ -26,6 +27,7 @@ export default function UploadTypeSelector({
     uploadFolders,
     uploadGoogleTakeoutZips,
     hideZipUploadOption,
+    uploadTypeSelectorIntent,
 }: Iprops) {
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
@@ -57,15 +59,21 @@ export default function UploadTypeSelector({
             <DialogTitleWithCloseButton onClose={onClose}>
                 {publicCollectionGalleryContext.accessedThroughSharedURL
                     ? constants.SELECT_PHOTOS
-                    : constants.UPLOAD}
+                    : uploadTypeSelectorIntent ===
+                      UploadTypeSelectorIntent.normalUpload
+                    ? constants.UPLOAD
+                    : constants.IMPORT}
             </DialogTitleWithCloseButton>
             <Box p={1.5} pt={0.5}>
                 <Stack spacing={0.5}>
-                    <UploadTypeOption
-                        onClick={uploadFiles}
-                        startIcon={<FileUploadIcon />}>
-                        {constants.UPLOAD_FILES}
-                    </UploadTypeOption>
+                    {uploadTypeSelectorIntent !==
+                        UploadTypeSelectorIntent.import && (
+                        <UploadTypeOption
+                            onClick={uploadFiles}
+                            startIcon={<FileUploadIcon />}>
+                            {constants.UPLOAD_FILES}
+                        </UploadTypeOption>
+                    )}
                     <UploadTypeOption
                         onClick={uploadFolders}
                         startIcon={<FolderUploadIcon />}>

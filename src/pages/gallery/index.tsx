@@ -88,7 +88,11 @@ import FixCreationTime, {
 } from 'components/FixCreationTime';
 import { Collection, CollectionSummaries } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { GalleryContextType, SelectedState } from 'types/gallery';
+import {
+    GalleryContextType,
+    SelectedState,
+    UploadTypeSelectorIntent,
+} from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
@@ -200,6 +204,10 @@ export default function Gallery() {
     const showPlanSelectorModal = () => setPlanModalView(true);
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
+    const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
+        useState<UploadTypeSelectorIntent>(
+            UploadTypeSelectorIntent.normalUpload
+        );
 
     const [sidebarView, setSidebarView] = useState(false);
 
@@ -563,8 +571,9 @@ export default function Gallery() {
         setSetSearchResultSummary(null);
     };
 
-    const openUploader = () => {
+    const openUploader = (intent?: UploadTypeSelectorIntent) => {
         setUploadTypeSelectorView(true);
+        setUploadTypeSelectorIntent(intent);
     };
 
     const closeCollectionSelector = () => {
@@ -662,6 +671,7 @@ export default function Gallery() {
                         null,
                         false
                     )}
+                    uploadTypeSelectorIntent={uploadTypeSelectorIntent}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}

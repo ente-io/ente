@@ -6,7 +6,7 @@ import VerticallyCentered, { FlexWrapper } from './Container';
 import uploadManager from 'services/upload/uploadManager';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 import FolderIcon from '@mui/icons-material/FolderOutlined';
-
+import { UploadTypeSelectorIntent } from 'types/gallery';
 const Wrapper = styled(VerticallyCentered)`
     & > svg {
         filter: drop-shadow(3px 3px 5px rgba(45, 194, 98, 0.5));
@@ -48,8 +48,8 @@ export default function EmptyScreen({ openUploader }) {
                     <NonDraggableImage
                         height={287.57}
                         src="/images/empty-state/ente_duck.png"
-                        srcSet="/images/empty-state/ente_duck.png,
-                                /images/empty-state/ente_duck.png"
+                        srcSet="/images/empty-state/ente_duck@2x.png,
+                                /images/empty-state/ente_duck@3x.png"
                     />
                     <span
                         style={{
@@ -57,10 +57,16 @@ export default function EmptyScreen({ openUploader }) {
                                 !uploadManager.shouldAllowNewUpload() &&
                                 'not-allowed',
                         }}>
-                        <VerticallyCentered paddingLeft={1} paddingRight={1}>
+                        <VerticallyCentered
+                            paddingTop={1.5}
+                            paddingBottom={1.5}>
                             <Button
                                 color="accent"
-                                onClick={openUploader}
+                                onClick={() =>
+                                    openUploader(
+                                        UploadTypeSelectorIntent.normalUpload
+                                    )
+                                }
                                 disabled={!uploadManager.shouldAllowNewUpload()}
                                 sx={{
                                     mt: 1.5,
@@ -76,6 +82,12 @@ export default function EmptyScreen({ openUploader }) {
                                 </FlexWrapper>
                             </Button>
                             <Button
+                                onClick={() =>
+                                    openUploader(
+                                        UploadTypeSelectorIntent.import
+                                    )
+                                }
+                                disabled={!uploadManager.shouldAllowNewUpload()}
                                 sx={{
                                     mt: 1.5,
                                     p: 1,

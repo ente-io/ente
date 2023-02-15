@@ -116,6 +116,7 @@ const englishConstants = {
     NO: 'No',
     NOTHING_HERE: 'Nothing to see here yet 👀',
     UPLOAD: 'Upload',
+    IMPORT: 'Import',
     ADD_MORE_PHOTOS: 'Add more photos',
     ADD_PHOTOS: 'Add photos',
     SELECT_PHOTOS: 'Select photos',
