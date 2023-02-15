@@ -74,15 +74,16 @@ class EmptyStateWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ButtonWidget(
-                        buttonType: ButtonType.trailingIconPrimary,
-                        labelText: "Share an album now",
-                        icon: Icons.arrow_forward_outlined,
-                        onTap: () async {
-                          showCollectionActionSheet(
-                            context,
-                            actionType: CollectionActionType.shareCollection,
-                          );
-                        }),
+                      buttonType: ButtonType.trailingIconPrimary,
+                      labelText: "Share an album now",
+                      icon: Icons.arrow_forward_outlined,
+                      onTap: () async {
+                        showCollectionActionSheet(
+                          context,
+                          actionType: CollectionActionType.shareCollection,
+                        );
+                      },
+                    ),
                     const SizedBox(height: 6),
                     const ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,

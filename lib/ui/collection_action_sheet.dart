@@ -296,10 +296,13 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   Future<void> _albumListItemOnTap(CollectionWithThumbnail item) async {
     if (await _runCollectionAction(collection: item.collection)) {
       late final String toastMessage;
+      bool shouldNavigateToCollection = false;
       if (widget.actionType == CollectionActionType.addFiles) {
         toastMessage = "Added successfully to " + item.collection.name!;
+        shouldNavigateToCollection = true;
       } else if (widget.actionType == CollectionActionType.moveFiles) {
         toastMessage = "Moved successfully to " + item.collection.name!;
+        shouldNavigateToCollection = true;
       } else {
         toastMessage = "";
       }
@@ -309,10 +312,11 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           toastMessage,
         );
       }
-
-      _navigateToCollection(
-        item.collection,
-      );
+      if (shouldNavigateToCollection) {
+        _navigateToCollection(
+          item.collection,
+        );
+      }
     }
   }
 
@@ -382,10 +386,11 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         showGenericErrorDialog(context: context);
         throw Exception("Cannot share collections owned by others");
       }
+      return Future.value(true);
     } catch (e, s) {
       _logger.severe(e, s);
+      rethrow;
     }
-    return Future.value(false);
   }
 
   Future<bool> _addToCollection({
