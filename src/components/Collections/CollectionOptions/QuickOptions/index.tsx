@@ -2,7 +2,6 @@ import { CollectionActions } from '..';
 import React from 'react';
 import { CollectionSummaryType } from 'constants/collection';
 import { FlexWrapper } from 'components/Container';
-import constants from 'utils/strings/constants';
 import { MoveToTrashOption } from './MoveToTrashOption';
 import { DownloadOption } from './DownloadOption';
 import { ShareOption } from './ShareOption';
@@ -33,31 +32,13 @@ export function QuickOptions({
             {showDownloadQuickOption(collectionSummaryType) && (
                 <DownloadOption
                     handleCollectionAction={handleCollectionAction}
-                    tooltipTitle={
-                        collectionSummaryType ===
-                        CollectionSummaryType.favorites
-                            ? constants.DOWNLOAD_FAVORITES
-                            : collectionSummaryType ===
-                              CollectionSummaryType.uncategorized
-                            ? constants.DOWNLOAD_UNCATEGORIZED
-                            : constants.DOWNLOAD_COLLECTION
-                    }
+                    collectionSummaryType={collectionSummaryType}
                 />
             )}
             {showShareQuickOption(collectionSummaryType) && (
                 <ShareOption
                     handleCollectionAction={handleCollectionAction}
-                    tooltipTitle={
-                        /*: collectionSummaryType ===
-                    CollectionSummaryType.incomingShare
-                  ? constants.SHARING_DETAILS*/
-                        collectionSummaryType ===
-                            CollectionSummaryType.outgoingShare ||
-                        collectionSummaryType ===
-                            CollectionSummaryType.sharedOnlyViaLink
-                            ? constants.MODIFY_SHARING
-                            : constants.SHARE_COLLECTION
-                    }
+                    collectionSummaryType={collectionSummaryType}
                 />
             )}
         </FlexWrapper>

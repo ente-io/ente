@@ -3,21 +3,32 @@ import React from 'react';
 import PeopleIcon from '@mui/icons-material/People';
 import { IconButton, Tooltip } from '@mui/material';
 import constants from 'utils/strings/constants';
+import { CollectionSummaryType } from 'constants/collection';
 
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean
     ) => (...args: any[]) => Promise<void>;
-    tooltipTitle?: string;
+    collectionSummaryType: CollectionSummaryType;
 }
 
 export function ShareOption({
     handleCollectionAction,
-    tooltipTitle = constants.SHARE_COLLECTION,
+    collectionSummaryType,
 }: Iprops) {
     return (
-        <Tooltip title={tooltipTitle}>
+        <Tooltip
+            title={
+                /*: collectionSummaryType ===
+      CollectionSummaryType.incomingShare
+    ? constants.SHARING_DETAILS*/
+                collectionSummaryType === CollectionSummaryType.outgoingShare ||
+                collectionSummaryType ===
+                    CollectionSummaryType.sharedOnlyViaLink
+                    ? constants.MODIFY_SHARING
+                    : constants.SHARE_COLLECTION
+            }>
             <IconButton
                 onClick={handleCollectionAction(
                     CollectionActions.SHOW_SHARE_DIALOG,
