@@ -112,7 +112,7 @@ const PhotoFrame = ({
     const updateRequired = useRef(false);
 
     const [filteredData, setFilteredData] = useState<EnteFile[]>([]);
-
+    const hasPersonalFiles = files.length - incomingShareFiles.length > 0;
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
         setUser(user);
@@ -633,7 +633,7 @@ const PhotoFrame = ({
     return (
         <>
             {!isFirstLoad &&
-            files.length - incomingShareFiles.length === 0 &&
+            !hasPersonalFiles &&
             !isInSearchMode &&
             activeCollection === ALL_SECTION ? (
                 <EmptyScreen openUploader={openUploader} />

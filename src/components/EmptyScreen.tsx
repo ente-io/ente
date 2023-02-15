@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Button, styled, Typography } from '@mui/material';
+import { Button, Stack, styled, Typography } from '@mui/material';
 import constants from 'utils/strings/constants';
 import { DeduplicateContext } from 'pages/deduplicate';
 import VerticallyCentered, { FlexWrapper } from './Container';
@@ -29,7 +29,7 @@ export default function EmptyScreen({ openUploader }) {
                 </div>
             ) : (
                 <>
-                    <VerticallyCentered
+                    <Stack
                         sx={{
                             flex: 'none',
                             pt: 1.5,
@@ -44,7 +44,7 @@ export default function EmptyScreen({ openUploader }) {
                             color="text.secondary">
                             {constants.WHERE_YOUR_BEST_PHOTOS_LIVE}
                         </Typography>
-                    </VerticallyCentered>
+                    </Stack>
                     <NonDraggableImage
                         height={287.57}
                         src="/images/empty-state/ente_duck.png"
@@ -57,9 +57,7 @@ export default function EmptyScreen({ openUploader }) {
                                 !uploadManager.shouldAllowNewUpload() &&
                                 'not-allowed',
                         }}>
-                        <VerticallyCentered
-                            paddingTop={1.5}
-                            paddingBottom={1.5}>
+                        <Stack paddingTop={1.5} paddingBottom={1.5}>
                             <Button
                                 color="accent"
                                 onClick={() =>
@@ -101,7 +99,7 @@ export default function EmptyScreen({ openUploader }) {
                                     {constants.IMPORT_YOUR_FOLDERS}
                                 </FlexWrapper>
                             </Button>
-                        </VerticallyCentered>
+                        </Stack>
                         <VerticallyCentered
                             paddingTop={3}
                             paddingBottom={3}
@@ -110,7 +108,7 @@ export default function EmptyScreen({ openUploader }) {
                                 sx={{ gap: 1 }}
                                 justifyContent="center">
                                 <a href="https://apps.apple.com/app/id1542026904">
-                                    <img
+                                    <NonDraggableImage
                                         height={59}
                                         src="/images/download_assets/download_app_store.png"
                                         srcSet="/images/download_assets/download_app_store@2x.png,
@@ -118,7 +116,7 @@ export default function EmptyScreen({ openUploader }) {
                                     />
                                 </a>
                                 <a href="https://play.app.goo.gl/?link=https://play.google.com/store/apps/details?id=io.ente.photos">
-                                    <img
+                                    <NonDraggableImage
                                         height={59}
                                         src="/images/download_assets/download_play_store.png"
                                         srcSet="/images/download_assets/download_play_store@2x.png,
@@ -130,7 +128,7 @@ export default function EmptyScreen({ openUploader }) {
                                 sx={{ gap: 1 }}
                                 justifyContent="center">
                                 <a href="https://f-droid.org/packages/io.ente.photos.fdroid/">
-                                    <img
+                                    <NonDraggableImage
                                         height={49}
                                         src="/images/download_assets/download_fdroid.png"
                                         srcSet="/images/download_assets/download_fdroid@2x.png,
@@ -139,7 +137,7 @@ export default function EmptyScreen({ openUploader }) {
                                     />
                                 </a>
                                 <a href="https://github.com/ente-io">
-                                    <img
+                                    <NonDraggableImage
                                         height={49}
                                         src="/images/download_assets/download_github.png"
                                         srcSet="/images/download_assets/download_github@2x.png,
