@@ -165,6 +165,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                                   } else if (snapshot.hasData) {
                                     final collectionsWithThumbnail = snapshot
                                         .data as List<CollectionWithThumbnail>;
+                                    _removeIncomingCollections(
+                                      collectionsWithThumbnail,
+                                    );
                                     return ListView.separated(
                                       itemBuilder: (context, index) {
                                         if (index == 0 &&
@@ -357,6 +360,16 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         CollectionWithThumbnail(collection, null),
       ),
     );
+  }
+
+  _removeIncomingCollections(List<CollectionWithThumbnail> items) {
+    if (widget.actionType == CollectionActionType.shareCollection ||
+        widget.actionType == CollectionActionType.collectPhotos) {
+      final ownerID = Configuration.instance.getUserID();
+      items.removeWhere(
+        (e) => !e.collection.isOwner(ownerID!),
+      );
+    }
   }
 
   Future<bool> _runCollectionAction({
