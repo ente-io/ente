@@ -2,7 +2,7 @@ import { CollectionActions } from '..';
 import React from 'react';
 import { CollectionSummaryType } from 'constants/collection';
 import { FlexWrapper } from 'components/Container';
-import { MoveToTrashOption } from './MoveToTrashQuickOption';
+import { MoveToTrashOption } from './EmptyTrashQuickOption';
 import { DownloadOption } from './DownloadQuickOption';
 import { ShareOption } from './ShareQuickOption';
 import {

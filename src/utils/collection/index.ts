@@ -199,14 +199,24 @@ export const showTrashQuickOption = (type: CollectionSummaryType) => {
     return type === CollectionSummaryType.trash;
 };
 export const showDownloadQuickOption = (type: CollectionSummaryType) => {
-    return !(type === CollectionSummaryType.trash);
+    return (
+        type === CollectionSummaryType.folder ||
+        type === CollectionSummaryType.album ||
+        type === CollectionSummaryType.all ||
+        type === CollectionSummaryType.incomingShare ||
+        type === CollectionSummaryType.outgoingShare ||
+        type === CollectionSummaryType.sharedOnlyViaLink ||
+        type === CollectionSummaryType.archived
+    );
 };
 export const showShareQuickOption = (type: CollectionSummaryType) => {
-    return !(
-        type === CollectionSummaryType.trash ||
-        type === CollectionSummaryType.favorites ||
-        type === CollectionSummaryType.uncategorized ||
-        type === CollectionSummaryType.incomingShare
+    return (
+        type === CollectionSummaryType.folder ||
+        type === CollectionSummaryType.album ||
+        type === CollectionSummaryType.all ||
+        type === CollectionSummaryType.outgoingShare ||
+        type === CollectionSummaryType.sharedOnlyViaLink ||
+        type === CollectionSummaryType.archived
     );
 };
 export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
