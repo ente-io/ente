@@ -281,7 +281,8 @@ class _CodeWidgetState extends State<CodeWidget> {
     try {
       return Uri.decodeComponent(value);
     } catch (e) {
-      logger.info("Failed to decode $value");
+      // note: don't log the value, it might contain sensitive information
+      logger.severe("Failed to decode", e);
       return value;
     }
   }
