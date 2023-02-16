@@ -72,7 +72,17 @@ class _ReferralScreenState extends State<ReferralScreen> {
                           snapshot.data!,
                           UserService.instance.getCachedUserDetails()!,
                         );
-                      } else {
+                      } else if (snapshot.hasError) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(24.0),
+                            child: Text(
+                              "Unable to fetch referral details. Please try again later.",
+                            ),
+                          ),
+                        );
+                      }
+                      {
                         return const EnteLoadingWidget();
                       }
                     },

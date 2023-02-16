@@ -1,11 +1,14 @@
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/extensions/input_formatter.dart";
+import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/button_widget.dart";
 import "package:photos/ui/components/icon_button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
+import "package:photos/utils/dialog_util.dart";
 
 class ApplyCodeScreen extends StatefulWidget {
   const ApplyCodeScreen({super.key});
@@ -105,7 +108,16 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                       labelText: "Apply",
                       isDisabled: code.trim().length < 4,
                       onTap: () async {
-                        debugPrint("yet to implement");
+                        try {
+                          await StorageBonusService.instance
+                              .getGateway()
+                              .claimReferralCode(code.trim().toUpperCase());
+                          Navigator.of(context).pop();
+                        } catch (e) {
+                          Logger('$runtimeType')
+                              .severe("failed to apply referral", e);
+                          showGenericErrorDialog(context: context);
+                        }
                       },
                     )
                   ],
