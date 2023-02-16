@@ -11,6 +11,7 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:logging/logging.dart';
 
 class CodeWidget extends StatefulWidget {
   final Code code;
@@ -25,6 +26,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   Timer? _everySecondTimer;
   final ValueNotifier<String> _currentCode = ValueNotifier<String>("");
   final ValueNotifier<String> _nextCode = ValueNotifier<String>("");
+  final Logger logger = Logger("_CodeWidgetState");
 
   @override
   void initState() {
@@ -124,15 +126,13 @@ class _CodeWidgetState extends State<CodeWidget> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    Uri.decodeFull(widget.code.issuer).trim(),
+                                    safeDecode(widget.code.issuer).trim(),
                                     style:
                                         Theme.of(context).textTheme.headline6,
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    Uri.decodeFull(
-                                      widget.code.account,
-                                    ).trim(),
+                                    safeDecode(widget.code.account).trim(),
                                     style: Theme.of(context)
                                         .textTheme
                                         .caption
@@ -275,6 +275,15 @@ class _CodeWidgetState extends State<CodeWidget> {
       },
       barrierColor: Colors.black12,
     );
+  }
+
+  String safeDecode(String value) {
+    try {
+      return Uri.decodeComponent(value);
+    } catch (e) {
+      logger.info("Failed to decode $value");
+      return value;
+    }
   }
 
   String _getTotp() {
