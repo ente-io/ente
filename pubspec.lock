@@ -952,10 +952,10 @@ packages:
     dependency: "direct main"
     description:
       name: media_extension
-      sha256: "50d9f5dd1b31296b0f5bf63c92b6dd69f5a59d9cd1d984f53834f51176319bb0"
+      sha256: "41e60ac3c4367060922c5b667f47768301d259fd94bc3122c263b266a167d9fc"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   meta:
     dependency: transitive
     description:
