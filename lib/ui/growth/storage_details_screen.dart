@@ -22,12 +22,9 @@ class StorageDetailsScreen extends StatefulWidget {
 
 class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
   bool canApplyCode = true;
-  int maxClaimableStorageBonus = 2000;
 
   @override
   void initState() {
-    maxClaimableStorageBonus =
-        widget.referralView.planInfo.maxClaimableStorageInGB;
     super.initState();
   }
 
@@ -113,8 +110,7 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                                   leftValue: convertBytesToAbsoluteGBs(
                                       widget.referralView.claimedStorage),
                                   leftUnitName: "GB",
-                                  rightValue: maxClaimableStorageBonus,
-                                  rightUnitName: "GB",
+                                  rightValue: null,
                                 ),
                                 BonusInfoSection(
                                   sectionName: "Free storage usable",
@@ -132,8 +128,7 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                                 ),
                                 Text(
                                   "Usable storage is limited by your current"
-                                  " plan, but you can claim upto "
-                                  "$maxClaimableStorageBonus GB. Excess"
+                                  " plan. Excess"
                                   " claimed storage will automatically become"
                                   " usable when you upgrade your plan.",
                                   style: textStyle.small
