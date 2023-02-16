@@ -66,6 +66,9 @@
 		<false/>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Please allow ente to lock itself with FaceID or TouchID</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Please allow access to your camera so that you can take photos
+		within ente</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Please allow access to your photos so that ente can encrypt and back them up.</string>
 		<key>UIBackgroundModes</key>
