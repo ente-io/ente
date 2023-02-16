@@ -28,6 +28,11 @@ class ReferralScreen extends StatefulWidget {
 
 class _ReferralScreenState extends State<ReferralScreen> {
   bool canApplyCode = true;
+  void _safeUIUpdate() {
+    if (mounted) {
+      setState(() => {});
+    }
+  }
 
   @override
   void initState() {
@@ -71,6 +76,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                         return ReferralWidget(
                           snapshot.data!,
                           UserService.instance.getCachedUserDetails()!,
+                          _safeUIUpdate,
                         );
                       } else if (snapshot.hasError) {
                         return const Center(
@@ -101,8 +107,14 @@ class _ReferralScreenState extends State<ReferralScreen> {
 class ReferralWidget extends StatelessWidget {
   final ReferralView referralView;
   final UserDetails userDetails;
+  final Function notifyParent;
 
-  const ReferralWidget(this.referralView, this.userDetails, {super.key});
+  const ReferralWidget(
+    this.referralView,
+    this.userDetails,
+    this.notifyParent, {
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -233,10 +245,11 @@ class ReferralWidget extends StatelessWidget {
                 alignCaptionedTextToLeft: true,
                 isBottomBorderRadiusRemoved: true,
                 onTap: () async {
-                  routeToPage(
+                  await routeToPage(
                     context,
                     const ApplyCodeScreen(),
                   );
+                  notifyParent();
                 },
               )
             : const SizedBox.shrink(),
