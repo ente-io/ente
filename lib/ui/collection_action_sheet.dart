@@ -403,6 +403,29 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   Future<bool> _createCollaborativeLink(Collection collection) async {
     final CollectionActions collectionActions =
         CollectionActions(CollectionsService.instance);
+
+    if (collection.hasLink) {
+      if (collection.publicURLs!.first!.enableCollect) {
+        if (Configuration.instance.getUserID() == collection.owner!.id) {
+          unawaited(
+            routeToPage(
+              context,
+              ShareCollectionPage(collection),
+            ),
+          );
+        }
+        showToast(context, "This album already has a collaborative link");
+        return Future.value(false);
+      } else {
+        CollectionsService.instance
+            .updateShareUrl(collection, {'enableCollect': true}).then(
+          (value) => true,
+          onError: (e, s) {
+            return false;
+          },
+        );
+      }
+    }
     final bool result = await collectionActions.enableUrl(
       context,
       collection,
