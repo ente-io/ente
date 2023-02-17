@@ -8,6 +8,7 @@ import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
 import { getRecoveryKey } from 'utils/crypto';
 import { logError } from 'utils/sentry';
+import { eventBus, Events } from './events';
 import {
     KeyAttributes,
     UpdatedKey,
@@ -17,13 +18,15 @@ import {
     TwoFactorRecoveryResponse,
     UserDetails,
     DeleteChallengeResponse,
+    GetRemoteStoreValueResponse,
 } from 'types/user';
-import { getLocalFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
 import safeStorageService from './electron/safeStorage';
-import { deleteThumbnailCache } from './cacheService';
+import { deleteAllCache } from 'utils/storage/cache';
 import { B64EncryptionResult } from 'types/crypto';
+import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
+import { AxiosResponse } from 'axios';
 
 const ENDPOINT = getEndpoint();
 
@@ -116,18 +119,43 @@ export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
 
 export const logoutUser = async () => {
     try {
-        // ignore server logout result as logoutUser can be triggered before sign up or on token expiry
-        await _logout();
-        clearKeys();
-        clearData();
         try {
-            await deleteThumbnailCache();
+            // ignore server logout result as logoutUser can be triggered before sign up or on token expiry
+            await _logout();
         } catch (e) {
-            // ignore
+            //ignore
         }
-        await clearFiles();
+        try {
+            clearKeys();
+        } catch (e) {
+            logError(e, 'clearKeys failed');
+        }
+        try {
+            clearData();
+        } catch (e) {
+            logError(e, 'clearData failed');
+        }
+        try {
+            await deleteAllCache();
+        } catch (e) {
+            logError(e, 'deleteAllCache failed');
+        }
+        try {
+            await clearFiles();
+        } catch (e) {
+            logError(e, 'clearFiles failed');
+        }
         if (isElectron()) {
-            safeStorageService.clearElectronStore();
+            try {
+                safeStorageService.clearElectronStore();
+            } catch (e) {
+                logError(e, 'clearElectronStore failed');
+            }
+        }
+        try {
+            eventBus.emit(Events.LOGOUT);
+        } catch (e) {
+            logError(e, 'Error in logout handlers');
         }
         router.push(PAGES.ROOT);
     } catch (e) {
@@ -373,5 +401,46 @@ export const validateKey = async () => {
     } catch (e) {
         await logoutUser();
         return false;
+    }
+};
+
+export const getFaceSearchEnabledStatus = async () => {
+    try {
+        const token = getToken();
+        const resp: AxiosResponse<GetRemoteStoreValueResponse> =
+            await HTTPService.get(
+                `${ENDPOINT}/remote-store`,
+                {
+                    key: 'faceSearchEnabled',
+                    defaultValue: false,
+                },
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+        return resp.data.value === 'true';
+    } catch (e) {
+        logError(e, 'failed to get face search enabled status');
+        throw e;
+    }
+};
+
+export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
+    try {
+        const token = getToken();
+        await HTTPService.post(
+            `${ENDPOINT}/remote-store/update`,
+            {
+                key: 'faceSearchEnabled',
+                value: newStatus.toString(),
+            },
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'failed to update face search enabled status');
+        throw e;
     }
 };

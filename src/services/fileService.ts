@@ -11,6 +11,7 @@ import {
     mergeMetadata,
     sortFiles,
 } from 'utils/file';
+import { eventBus, Events } from './events';
 import { EnteFile, EncryptedEnteFile, TrashRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
@@ -36,6 +37,11 @@ export const getLocalFiles = async () => {
 const setLocalFiles = async (files: EnteFile[]) => {
     try {
         await localForage.setItem(FILES_TABLE, files);
+        try {
+            eventBus.emit(Events.LOCAL_FILES_UPDATED);
+        } catch (e) {
+            logError(e, 'Error in localFileUpdated handlers');
+        }
     } catch (e1) {
         try {
             const storageEstimate = await navigator.storage.estimate();

@@ -84,7 +84,6 @@ const PhotoFrame = ({
     openUploader,
     isInSearchMode,
     search,
-    resetSearch,
     deletedFileIds,
     setDeletedFileIds,
     activeCollection,
@@ -157,7 +156,29 @@ const PhotoFrame = ({
                         return false;
                     }
                     if (
+                        search?.person &&
+                        search.person.files.indexOf(item.id) === -1
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.thing &&
+                        search.thing.files.indexOf(item.id) === -1
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.text &&
+                        search.text.files.indexOf(item.id) === -1
+                    ) {
+                        return false;
+                    }
+                    if (search?.files && search.files.indexOf(item.id) === -1) {
+                        return false;
+                    }
+                    if (
                         !isDeduplicating &&
+                        !isInSearchMode &&
                         activeCollection === ALL_SECTION &&
                         (IsArchived(item) ||
                             archivedCollections?.has(item.collectionID))
@@ -165,6 +186,7 @@ const PhotoFrame = ({
                         return false;
                     }
                     if (
+                        !isInSearchMode &&
                         activeCollection === ARCHIVE_SECTION &&
                         !IsArchived(item)
                     ) {
@@ -172,15 +194,24 @@ const PhotoFrame = ({
                     }
 
                     if (
-                        isSharedFile(user, item) &&
-                        activeCollection !== item.collectionID
+                        (isInSearchMode ||
+                            activeCollection !== item.collectionID) &&
+                        isSharedFile(user, item)
                     ) {
                         return false;
                     }
-                    if (activeCollection === TRASH_SECTION && !item.isTrashed) {
+                    if (
+                        !isInSearchMode &&
+                        activeCollection === TRASH_SECTION &&
+                        !item.isTrashed
+                    ) {
                         return false;
                     }
-                    if (activeCollection !== TRASH_SECTION && item.isTrashed) {
+                    if (
+                        (isInSearchMode ||
+                            activeCollection !== TRASH_SECTION) &&
+                        item.isTrashed
+                    ) {
                         return false;
                     }
                     if (!idSet.has(item.id)) {
@@ -188,8 +219,8 @@ const PhotoFrame = ({
                             activeCollection === ALL_SECTION ||
                             activeCollection === ARCHIVE_SECTION ||
                             activeCollection === TRASH_SECTION ||
-                            activeCollection === item.collectionID ||
-                            isInSearchMode
+                            isInSearchMode ||
+                            activeCollection === item.collectionID
                         ) {
                             idSet.add(item.id);
                             return true;
@@ -237,7 +268,11 @@ const PhotoFrame = ({
         files,
         deletedFileIds,
         search?.date,
+        search?.files,
         search?.location,
+        search?.person,
+        search?.thing,
+        search?.text,
         activeCollection,
     ]);
 
@@ -316,18 +351,6 @@ const PhotoFrame = ({
             document.removeEventListener('keyup', handleKeyUp, false);
         };
     }, []);
-
-    useEffect(() => {
-        if (!isNaN(search?.file)) {
-            const filteredDataIdx = filteredData.findIndex((file) => {
-                return file.id === search.file;
-            });
-            if (!isNaN(filteredDataIdx)) {
-                onThumbnailClick(filteredDataIdx)();
-            }
-            resetSearch();
-        }
-    }, [search, filteredData]);
 
     useEffect(() => {
         if (selected.count === 0) {

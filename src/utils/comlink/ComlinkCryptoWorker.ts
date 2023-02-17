@@ -8,7 +8,7 @@ class ComlinkCryptoWorker {
     async getInstance() {
         if (!this.comlinkWorkerInstance) {
             const comlinkWorker = getDedicatedCryptoWorker();
-            this.comlinkWorkerInstance = await new comlinkWorker.remote();
+            this.comlinkWorkerInstance = await comlinkWorker.remote;
         }
         return this.comlinkWorkerInstance;
     }

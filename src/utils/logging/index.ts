@@ -20,17 +20,22 @@ export interface Log {
     logLine: string;
 }
 
-export function addLogLine(log: string) {
+export function addLogLine(
+    log: string | number | boolean,
+    ...optionalParams: (string | number | boolean)[]
+) {
     try {
+        const completeLog = [log, ...optionalParams].join(' ');
         if (isDEVSentryENV()) {
-            console.log(log);
+            console.log(completeLog);
         }
+
         if (isElectron()) {
-            ElectronService.logToDisk(log);
+            ElectronService.logToDisk(completeLog);
         } else {
             saveLogLine({
                 timestamp: Date.now(),
-                logLine: log,
+                logLine: completeLog,
             });
         }
     } catch (e) {
