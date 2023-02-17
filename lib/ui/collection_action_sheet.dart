@@ -396,11 +396,11 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       case CollectionActionType.shareCollection:
         return _showShareCollectionPage(collection);
       case CollectionActionType.collectPhotos:
-        return _createCollectPublicLink(collection);
+        return _createCollaborativeLink(collection);
     }
   }
 
-  Future<bool> _createCollectPublicLink(Collection collection) async {
+  Future<bool> _createCollaborativeLink(Collection collection) async {
     final CollectionActions collectionActions =
         CollectionActions(CollectionsService.instance);
     final bool result = await collectionActions.enableUrl(
