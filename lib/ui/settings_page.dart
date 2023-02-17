@@ -9,7 +9,7 @@ import 'package:photos/services/feature_flag_service.dart';
 import "package:photos/services/storage_bonus_service.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/components/notification_warning_widget.dart";
+import "package:photos/ui/components/notification_widget.dart";
 import "package:photos/ui/growth/referral_screen.dart";
 import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';

@@ -10,7 +10,7 @@ import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/account/verify_recovery_page.dart';
 import 'package:photos/ui/components/home_header_widget.dart';
-import 'package:photos/ui/components/notification_warning_widget.dart';
+import 'package:photos/ui/components/notification_widget.dart';
 import 'package:photos/ui/home/header_error_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
