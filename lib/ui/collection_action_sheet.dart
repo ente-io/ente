@@ -302,6 +302,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   }
 
   Future<void> _albumListItemOnTap(CollectionWithThumbnail item) async {
+    bool showLongToast = false;
     if (await _runCollectionAction(collection: item.collection)) {
       late final String toastMessage;
       bool shouldNavigateToCollection = false;
@@ -312,15 +313,19 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         toastMessage = "Moved successfully to " + item.collection.name!;
         shouldNavigateToCollection = true;
       } else if (widget.actionType == CollectionActionType.collectPhotos) {
-        toastMessage = "Created a public link for " + item.collection.name!;
+        toastMessage =
+            "Collaborative link created for " + item.collection.name!;
+        showLongToast = true;
       } else {
         toastMessage = "";
       }
       if (toastMessage.isNotEmpty) {
-        showShortToast(
-          context,
-          toastMessage,
-        );
+        showLongToast
+            ? showToast(context, toastMessage)
+            : showShortToast(
+                context,
+                toastMessage,
+              );
       }
       if (shouldNavigateToCollection) {
         _navigateToCollection(
