@@ -172,7 +172,7 @@ class BillingService {
         "Add 5 family members to your existing plan without paying extra.\n"
             "\nEach member gets their own private space, and cannot see each "
             "other's files unless they're shared.\n\nFamily plans are "
-            "available to customers who have a paid ente subscription.\n\n "
+            "available to customers who have a paid ente subscription.\n\n"
             "Subscribe now to get started!",
       );
       return;
