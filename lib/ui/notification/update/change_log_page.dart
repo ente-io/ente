@@ -123,15 +123,6 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         ),
       );
     }
-    items.add(
-      ChangeLogEntry(
-        "Object Detection (Beta)",
-        "This release comes packed with another goodie – the ability to "
-            "identify objects within a photo.\nYou can preview this feature "
-            "within the Info section of your files.\n\nPlease note that this "
-            "feature is in beta, and once fine tuned, you will be able to search through your photos based on their contents.",
-      ),
-    );
 
     return Container(
       padding: const EdgeInsets.only(left: 16),
