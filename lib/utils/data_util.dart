@@ -35,6 +35,10 @@ num convertBytesToGBs(int bytes) {
   return num.parse((bytes / (pow(1024, 3))).toStringAsFixed(1));
 }
 
+int convertBytesToAbsoluteGBs(int bytes) {
+  return (bytes / pow(1024, 3)).round();
+}
+
 int convertBytesToMBs(int bytes) {
   return (bytes / pow(1024, 2)).round();
 }

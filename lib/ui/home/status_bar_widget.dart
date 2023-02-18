@@ -10,7 +10,7 @@ import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/account/verify_recovery_page.dart';
 import 'package:photos/ui/components/home_header_widget.dart';
-import 'package:photos/ui/components/notification_warning_widget.dart';
+import 'package:photos/ui/components/notification_widget.dart';
 import 'package:photos/ui/home/header_error_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -97,17 +97,21 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
             ? HeaderErrorWidget(error: _syncError)
             : const SizedBox.shrink(),
         UserRemoteFlagService.instance.shouldShowRecoveryVerification()
-            ? NotificationWarningWidget(
-                warningIcon: Icons.error_outline,
-                actionIcon: Icons.arrow_forward,
-                text: "Confirm your recovery key",
-                onTap: () async => {
-                  await routeToPage(
-                    context,
-                    const VerifyRecoveryPage(),
-                    forceCustomPageRoute: true,
-                  )
-                },
+            ? Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                child: NotificationWidget(
+                  startIcon: Icons.error_outline,
+                  actionIcon: Icons.arrow_forward,
+                  text: "Confirm your recovery key",
+                  onTap: () async => {
+                    await routeToPage(
+                      context,
+                      const VerifyRecoveryPage(),
+                      forceCustomPageRoute: true,
+                    )
+                  },
+                ),
               )
             : const SizedBox.shrink()
       ],
