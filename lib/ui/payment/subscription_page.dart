@@ -233,7 +233,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
     if (_hasActiveSubscription &&
         _currentSubscription!.productID != freeProductID) {
-      if (!_isActiveStripeSubscriber) {
+      if (_isActiveStripeSubscriber) {
         widgets.add(
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
