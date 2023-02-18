@@ -68,8 +68,7 @@ class ArchivePage extends StatelessWidget {
       selectedFiles: _selectedFiles,
       initialFiles: null,
       emptyState: const EmptyState(
-        text: "You don't have any archived photos.\n\n "
-            "Archived albums will be shown on top of this gallery.",
+        text: "You don't have any archived items.",
       ),
       header: FutureBuilder(
         future: CollectionsService.instance.getArchivedCollectionWithThumb(),
