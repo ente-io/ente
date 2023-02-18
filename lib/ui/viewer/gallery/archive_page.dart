@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -21,6 +22,7 @@ class ArchivePage extends StatelessWidget {
   final GalleryType appBarType;
   final GalleryType overlayType;
   final _selectedFiles = SelectedFiles();
+  final Logger _logger = Logger("ArchivePage");
 
   ArchivePage({
     this.tagPrefix = "archived_page",
@@ -73,8 +75,8 @@ class ArchivePage extends StatelessWidget {
         future: CollectionsService.instance.getArchivedCollectionWithThumb(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            //Need to show an error on the UI here
-            return const SizedBox.shrink();
+            _logger.severe("failed to fetch archived albums", snapshot.error);
+            return const Text("Something went wrong");
           } else if (snapshot.hasData) {
             final collectionsWithThumbnail =
                 snapshot.data as List<CollectionWithThumbnail>;
