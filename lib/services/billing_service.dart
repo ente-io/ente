@@ -168,8 +168,12 @@ class BillingService {
     if (userDetails.subscription.productID == freeProductID) {
       await showErrorDialog(
         context,
-        "Share your storage plan with your family members!",
-        "Customers on paid plans can add up to 5 family members without paying extra. Each member gets their own private space.",
+        "Family plans",
+        "Add 5 family members to your existing plan without paying extra.\n"
+            "\nEach member gets their own private space, and cannot see each "
+            "other's files unless they're shared.\n\nFamily plans are "
+            "available to customers who have a paid ente subscription.\n\n "
+            "Subscribe now to get started!",
       );
       return;
     }
