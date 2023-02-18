@@ -38,11 +38,14 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
                 ),
               ],
             ),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
             Text(
-              "Ente preserves your memories, so they're always available to you, even if you lose your device ",
+              "ente preserves your memories, so they're always available to you, even if you lose your device.",
+              style: Theme.of(context).textTheme.caption,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "Your family can be added to your plan as well. ",
               style: Theme.of(context).textTheme.caption,
             ),
           ],
