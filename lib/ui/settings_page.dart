@@ -78,7 +78,7 @@ class SettingsPage extends StatelessWidget {
         const StorageCardWidget(),
         StorageBonusService.instance.shouldShowStorageBonus()
             ? Padding(
-                padding: const EdgeInsets.only(top: 4.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: NotificationWidget(
                   startIcon: Icons.auto_awesome,
                   actionIcon: Icons.arrow_forward_outlined,
@@ -91,8 +91,7 @@ class SettingsPage extends StatelessWidget {
                   },
                 ),
               )
-            : const SizedBox.shrink(),
-        const SizedBox(height: 12),
+            : const SizedBox(height: 12),
         const BackupSectionWidget(),
         sectionSpacing,
         const AccountSectionWidget(),
