@@ -173,7 +173,8 @@ class BillingService {
       );
       return;
     }
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog =
+        createProgressDialog(context, "Please wait...", isDismissible: true);
     await dialog.show();
     try {
       final String jwtToken = await UserService.instance.getFamiliesToken();
