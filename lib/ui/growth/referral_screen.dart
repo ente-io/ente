@@ -272,7 +272,10 @@ class ReferralWidget extends StatelessWidget {
           isTopBorderRadiusRemoved: referralView.enableApplyCode,
           alignCaptionedTextToLeft: true,
           onTap: () async {
-            routeToPage(context, const WebPage("FAQ", "https://ente.io/faq"));
+            routeToPage(
+                context,
+                const WebPage(
+                    "FAQ", "https://ente.io/faq/general/referral-program"));
           },
         ),
         const SizedBox(height: 24),
