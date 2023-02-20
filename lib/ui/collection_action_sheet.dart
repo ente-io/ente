@@ -3,10 +3,13 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import "package:fluttertoast/fluttertoast.dart";
 import 'package:logging/logging.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/event_bus.dart";
 import 'package:photos/db/files_db.dart';
+import "package:photos/events/tab_changed_event.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
@@ -174,26 +177,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                                             widget.showOptionToCreateNewAlbum) {
                                           return GestureDetector(
                                             onTap: () async {
-                                              final result =
-                                                  await showTextInputDialog(
-                                                context,
-                                                title: "Album title",
-                                                submitButtonLabel: "OK",
-                                                hintText: "Enter album name",
-                                                onSubmit: _nameAlbum,
-                                                showOnlyLoadingState: true,
-                                                textCapitalization:
-                                                    TextCapitalization.words,
+                                              await _createNewAlbumOnTap(
+                                                filesCount,
                                               );
-                                              if (result is Exception) {
-                                                showGenericErrorDialog(
-                                                  context: context,
-                                                );
-                                                _logger.severe(
-                                                  "Failed to name album",
-                                                  result,
-                                                );
-                                              }
                                             },
                                             behavior: HitTestBehavior.opaque,
                                             child:
@@ -263,6 +249,42 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         ),
       ],
     );
+  }
+
+  Future<void> _createNewAlbumOnTap(int filesCount) async {
+    if (filesCount > 0) {
+      final result = await showTextInputDialog(
+        context,
+        title: "Album title",
+        submitButtonLabel: "OK",
+        hintText: "Enter album name",
+        onSubmit: _nameAlbum,
+        showOnlyLoadingState: true,
+        textCapitalization: TextCapitalization.words,
+      );
+      if (result is Exception) {
+        showGenericErrorDialog(
+          context: context,
+        );
+        _logger.severe(
+          "Failed to name album",
+          result,
+        );
+      }
+    } else {
+      Navigator.pop(context);
+      await showToast(
+        context,
+        "Long press to select photos and click + to create an album",
+        toastLength: Toast.LENGTH_LONG,
+      );
+      Bus.instance.fire(
+        TabChangedEvent(
+          0,
+          TabChangedEventSource.collectionsPage,
+        ),
+      );
+    }
   }
 
   Future<void> _nameAlbum(String albumName) async {
