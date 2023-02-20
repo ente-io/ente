@@ -272,8 +272,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   Future<void> _updateUrlSettings(
-      BuildContext context, Map<String, dynamic> prop,
-      {bool showProgressDialog = true}) async {
+    BuildContext context,
+    Map<String, dynamic> prop, {
+    bool showProgressDialog = true,
+  }) async {
     final dialog = showProgressDialog
         ? createProgressDialog(context, "Please wait...")
         : null;

@@ -5,6 +5,7 @@ import "package:photos/ui/collection_action_sheet.dart";
 import "package:photos/ui/components/button_widget.dart";
 import "package:photos/ui/components/empty_state_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/utils/share_util.dart";
 
 class NewSharedCollectionsGallery extends StatelessWidget {
   const NewSharedCollectionsGallery({super.key});
@@ -97,10 +98,13 @@ class EmptyStateWidget extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 6),
-                    const ButtonWidget(
+                    ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       labelText: "Invite your friends",
                       icon: Icons.ios_share_outlined,
+                      onTap: () async {
+                        shareText("Check out https://ente.io");
+                      },
                     ),
                   ],
                 ),
