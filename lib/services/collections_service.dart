@@ -652,7 +652,7 @@ class CollectionsService {
       }
       rethrow;
     } catch (e, s) {
-      _logger.severe("failed to rename collection", e, s);
+      _logger.severe("failed to update ShareUrl", e, s);
       rethrow;
     }
   }
