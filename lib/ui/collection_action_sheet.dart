@@ -417,13 +417,14 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         showToast(context, "This album already has a collaborative link");
         return Future.value(false);
       } else {
-        CollectionsService.instance
-            .updateShareUrl(collection, {'enableCollect': true}).then(
-          (value) => true,
-          onError: (e, s) {
-            return false;
-          },
-        );
+        try {
+          await CollectionsService.instance
+              .updateShareUrl(collection, {'enableCollect': true});
+          return true;
+        } catch (e) {
+          showGenericErrorDialog(context: context);
+          return false;
+        }
       }
     }
     final bool result = await collectionActions.enableUrl(
