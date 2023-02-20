@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
@@ -181,6 +180,13 @@ class CollectionsService {
         .where((element) => element.isArchived())
         .map((e) => e.id)
         .toSet();
+  }
+
+  Future<List<CollectionWithThumbnail>> getArchivedCollectionWithThumb() async {
+    final allCollections = await getCollectionsWithThumbnails();
+    return allCollections
+        .where((element) => element.collection.isArchived())
+        .toList();
   }
 
   Set<int> getHiddenCollections() {

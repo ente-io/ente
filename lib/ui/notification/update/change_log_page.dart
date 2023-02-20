@@ -1,3 +1,5 @@
+import "dart:io";
+
 import 'package:flutter/material.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -103,37 +105,24 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.add(
       ChangeLogEntry(
-        "Collaborative albums ✨",
-        "Much awaited, they're here now - create albums where multiple ente "
-            "users can add photos!\n\nWhen sharing an album, you can specify if"
-            " you want to add someone as a viewer or a collaborator. Collaborators can add photos "
-            "to the shared album.\n\nAlbums can have both collaborators and viewers, and as many as "
-            "you like. Storage is only counted once, for the person who uploaded the photo."
-            "\n\nHead over to the sharing options for an album to start adding collaborators.",
+        "Referrals ✨",
+        "You can now double your storage by referring your friends and family"
+            ". Both you and your loved ones will get 10 GB of storage when "
+            "they upgrade to a paid plan.\n\nGo to Settings -> General -> "
+            "Referral to get started!",
       ),
     );
-    items.add(
-      ChangeLogEntry(
-        "Uncategorized",
-        "You can now keep photos that do not belong to a specific album."
-            "\n\nThis will simplify deletion and make it safer since now ente "
-            "will have a place to put photos that don't belong to any album "
-            "instead of always deleting them.\n\nThis will also allow you to "
-            "choose between keeping vs deleting photos present in the album, "
-            "when deleting an album.\n\nUncategorized photos can be seen from "
-            "the bottom of the albums tab.",
-      ),
-    );
-
-    items.add(
-      ChangeLogEntry(
-        '''Cleaner album picker''',
-        "Among other improvements, the list of albums that is shown when adding "
-            "or moving photos gets a facelift, and an issue causing the photo "
-            "zoom to be reset after loading the full resolution photo has been fixed.",
-        isFeature: false,
-      ),
-    );
+    if (Platform.isAndroid) {
+      items.add(
+        ChangeLogEntry(
+          "Pick Files",
+          "While sharing photos and videos through other apps, ente will now "
+              "be an option to pick files from. This means you can now easily"
+              " attach files backed up to ente.\n\nConsider this the first "
+              "step towards making ente your default gallery app!",
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.only(left: 16),
