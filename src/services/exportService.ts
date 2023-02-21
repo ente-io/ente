@@ -170,7 +170,7 @@ class ExportService {
             return resp;
         } catch (e) {
             logError(e, 'exportFiles failed');
-            return { paused: false };
+            throw e;
         } finally {
             this.exportInProgress = null;
         }

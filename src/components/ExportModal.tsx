@@ -1,5 +1,5 @@
 import isElectron from 'is-electron';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import exportService from 'services/exportService';
 import { ExportProgress, ExportStats } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
@@ -32,6 +32,7 @@ import { OverflowMenuOption } from './OverflowMenu/option';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { CustomError } from 'utils/error';
 import { getLocalUserDetails } from 'utils/user';
+import { AppContext } from 'pages/_app';
 
 const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
@@ -49,6 +50,8 @@ interface Props {
     onHide: () => void;
 }
 export default function ExportModal(props: Props) {
+    const appContext = useContext(AppContext);
+
     const userDetails = useMemo(() => getLocalUserDetails(), []);
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState('');
@@ -220,6 +223,7 @@ export default function ExportModal(props: Props) {
                 updateExportFolder(newFolder);
             }
         } catch (e) {
+            appContext.somethingWentWrong();
             logError(e, 'selectExportDirectory failed');
         }
     };
@@ -245,6 +249,7 @@ export default function ExportModal(props: Props) {
             await postExportRun(exportResult);
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
+                appContext.somethingWentWrong();
                 logError(e, 'startExport failed');
             }
         }
@@ -256,6 +261,7 @@ export default function ExportModal(props: Props) {
             await postExportRun();
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
+                appContext.somethingWentWrong();
                 logError(e, 'stopExport failed');
             }
         }
@@ -268,6 +274,7 @@ export default function ExportModal(props: Props) {
             await postExportRun({ paused: true });
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
+                appContext.somethingWentWrong();
                 logError(e, 'pauseExport failed');
             }
         }
@@ -294,6 +301,7 @@ export default function ExportModal(props: Props) {
             await postExportRun(exportResult);
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
+                appContext.somethingWentWrong();
                 logError(e, 'resumeExport failed');
             }
         }
@@ -313,6 +321,7 @@ export default function ExportModal(props: Props) {
             await postExportRun(exportResult);
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
+                appContext.somethingWentWrong();
                 logError(e, 'retryFailedExport failed');
             }
         }
