@@ -194,7 +194,30 @@ export const isSystemCollection = (type: CollectionSummaryType) => {
 export const shouldShowOptions = (type: CollectionSummaryType) => {
     return !OPTIONS_NOT_HAVING_COLLECTION_TYPES.has(type);
 };
-
+export const showEmptyTrashQuickOption = (type: CollectionSummaryType) => {
+    return type === CollectionSummaryType.trash;
+};
+export const showDownloadQuickOption = (type: CollectionSummaryType) => {
+    return (
+        type === CollectionSummaryType.folder ||
+        type === CollectionSummaryType.favorites ||
+        type === CollectionSummaryType.album ||
+        type === CollectionSummaryType.uncategorized ||
+        type === CollectionSummaryType.incomingShare ||
+        type === CollectionSummaryType.outgoingShare ||
+        type === CollectionSummaryType.sharedOnlyViaLink ||
+        type === CollectionSummaryType.archived
+    );
+};
+export const showShareQuickOption = (type: CollectionSummaryType) => {
+    return (
+        type === CollectionSummaryType.folder ||
+        type === CollectionSummaryType.album ||
+        type === CollectionSummaryType.outgoingShare ||
+        type === CollectionSummaryType.sharedOnlyViaLink ||
+        type === CollectionSummaryType.archived
+    );
+};
 export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
     return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
 };
