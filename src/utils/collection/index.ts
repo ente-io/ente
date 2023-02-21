@@ -200,10 +200,13 @@ export const showEmptyTrashQuickOption = (type: CollectionSummaryType) => {
 export const showDownloadQuickOption = (type: CollectionSummaryType) => {
     return (
         type === CollectionSummaryType.folder ||
+        type === CollectionSummaryType.favorites ||
         type === CollectionSummaryType.album ||
+        type === CollectionSummaryType.uncategorized ||
         type === CollectionSummaryType.incomingShare ||
         type === CollectionSummaryType.outgoingShare ||
-        type === CollectionSummaryType.sharedOnlyViaLink
+        type === CollectionSummaryType.sharedOnlyViaLink ||
+        type === CollectionSummaryType.archived
     );
 };
 export const showShareQuickOption = (type: CollectionSummaryType) => {
@@ -211,7 +214,8 @@ export const showShareQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.folder ||
         type === CollectionSummaryType.album ||
         type === CollectionSummaryType.outgoingShare ||
-        type === CollectionSummaryType.sharedOnlyViaLink
+        type === CollectionSummaryType.sharedOnlyViaLink ||
+        type === CollectionSummaryType.archived
     );
 };
 export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
