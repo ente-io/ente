@@ -67,17 +67,23 @@ export default function ExportModal(props: Props) {
     // SIDE EFFECTS
     // ====================
     useEffect(() => {
-        if (!isElectron()) {
-            return;
-        }
-        setExportFolder(getData(LS_KEYS.EXPORT)?.folder);
+        try {
+            if (!isElectron()) {
+                return;
+            }
+            setExportFolder(getData(LS_KEYS.EXPORT)?.folder);
 
-        exportService.electronAPIs.registerStopExportListener(stopExport);
-        exportService.electronAPIs.registerPauseExportListener(pauseExport);
-        exportService.electronAPIs.registerResumeExportListener(resumeExport);
-        exportService.electronAPIs.registerRetryFailedExportListener(
-            retryFailedExport
-        );
+            exportService.electronAPIs.registerStopExportListener(stopExport);
+            exportService.electronAPIs.registerPauseExportListener(pauseExport);
+            exportService.electronAPIs.registerResumeExportListener(
+                resumeExport
+            );
+            exportService.electronAPIs.registerRetryFailedExportListener(
+                retryFailedExport
+            );
+        } catch (e) {
+            logError(e, 'error while registering export listeners');
+        }
     }, []);
 
     useEffect(() => {
@@ -85,16 +91,25 @@ export default function ExportModal(props: Props) {
             return;
         }
         const main = async () => {
-            const exportInfo = await exportService.getExportRecord();
-            setExportStage(exportInfo?.stage ?? ExportStage.INIT);
-            setLastExportTime(exportInfo?.lastAttemptTimestamp);
-            setExportProgress(exportInfo?.progress ?? { current: 0, total: 0 });
-            setExportStats({
-                success: exportInfo?.exportedFiles?.length ?? 0,
-                failed: exportInfo?.failedFiles?.length ?? 0,
-            });
-            if (exportInfo?.stage === ExportStage.INPROGRESS) {
-                resumeExport();
+            try {
+                const exportInfo = await exportService.getExportRecord();
+                setExportStage(exportInfo?.stage ?? ExportStage.INIT);
+                setLastExportTime(exportInfo?.lastAttemptTimestamp);
+                setExportProgress(
+                    exportInfo?.progress ?? { current: 0, total: 0 }
+                );
+                setExportStats({
+                    success: exportInfo?.exportedFiles?.length ?? 0,
+                    failed: exportInfo?.failedFiles?.length ?? 0,
+                });
+                if (exportInfo?.stage === ExportStage.INPROGRESS) {
+                    resumeExport();
+                }
+            } catch (e) {
+                logError(
+                    e,
+                    'error while updating exportModal on exportFolder change'
+                );
             }
         };
         main();
@@ -185,6 +200,7 @@ export default function ExportModal(props: Props) {
         updateExportStage(ExportStage.INPROGRESS);
         await sleep(100);
     };
+
     const postExportRun = async (exportResult?: { paused?: boolean }) => {
         if (!exportResult?.paused) {
             updateExportStage(ExportStage.FINISHED);
@@ -195,11 +211,13 @@ export default function ExportModal(props: Props) {
     };
 
     const selectExportDirectory = async () => {
-        const newFolder = await exportService.selectExportDirectory();
-        if (newFolder) {
-            updateExportFolder(newFolder);
-        } else {
-            throw Error(CustomError.REQUEST_CANCELLED);
+        try {
+            const newFolder = await exportService.selectExportDirectory();
+            if (newFolder) {
+                updateExportFolder(newFolder);
+            }
+        } catch (e) {
+            logError(e, 'selectExportDirectory failed');
         }
     };
 
