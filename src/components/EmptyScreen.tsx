@@ -10,20 +10,15 @@ import FolderIcon from '@mui/icons-material/FolderOutlined';
 import { UploadTypeSelectorIntent } from 'types/gallery';
 
 const Wrapper = styled(Box)`
-    flex: 1;
     display: flex;
-    align-items: center;
-    justify-content: top;
     flex-direction: column;
+    align-items: center;
     text-align: center;
-    overflow: auto;
-    & > svg {
-        filter: drop-shadow(3px 3px 5px rgba(45, 194, 98, 0.5));
-    }
 `;
 const NonDraggableImage = styled('img')`
     pointer-events: none;
 `;
+
 export default function EmptyScreen({ openUploader }) {
     const deduplicateContext = useContext(DeduplicateContext);
     return deduplicateContext.isOnDeduplicatePage ? (
