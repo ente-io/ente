@@ -311,7 +311,6 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   bool? _shouldRender;
   int? _currentUserID;
   late StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
-  final _mediaExtensionPlugin = MediaExtension();
 
   @override
   void initState() {
@@ -426,16 +425,18 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         if (widget.selectedFiles.files.isNotEmpty) {
           _selectFile(file);
         } else {
-          if (AppLifecycleService.instance.intentAction == IntentAction.pick) {
+          if (AppLifecycleService.instance.mediaExtensionAction.action ==
+              IntentAction.pick) {
             final ioFile = await getFile(file);
-            _mediaExtensionPlugin.setResult("file://${ioFile!.path}");
+            MediaExtension().setResult("file://${ioFile!.path}");
           } else {
             _routeToDetailPage(file, context);
           }
         }
       },
       onLongPress: () {
-        if (AppLifecycleService.instance.intentAction == IntentAction.main) {
+        if (AppLifecycleService.instance.mediaExtensionAction.action ==
+            IntentAction.main) {
           HapticFeedback.lightImpact();
           _selectFile(file);
         }
