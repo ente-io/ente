@@ -147,6 +147,14 @@ flutter_native_splash:
   android_fullscreen: true
   android_gravity: center
   ios_content_mode: center
+  android_12:
+    # The image parameter sets the splash screen icon image.  If this parameter is not specified,
+    # the app's launcher icon will be used instead.
+    # Please note that the splash screen will be clipped to a circle on the center of the screen.
+    # App icon without an icon background: This should be 1152×1152 pixels, and fit within a circle
+    # 768 pixels in diameter.
+    image: assets/splash-screen-light.png
+    image_dark: assets/splash-screen-dark.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

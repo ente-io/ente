@@ -23,19 +23,19 @@
 		<key>CFBundleSignature</key>
 		<string>????</string>
 		<key>MinimumOSVersion</key>
-        <string>12.0</string>
+		<string>12.0</string>
 		<key>LSApplicationQueriesSchemes</key>
-        <array>
-            <string>googlegmail</string>
-            <string>x-dispatch</string>
-            <string>readdle-spark</string>
-            <string>airmail</string>
-            <string>ms-outlook</string>
-            <string>ymail</string>
-            <string>fastmail</string>
-            <string>superhuman</string>
-            <string>protonmail</string>
-        </array>
+		<array>
+			<string>googlegmail</string>
+			<string>x-dispatch</string>
+			<string>readdle-spark</string>
+			<string>airmail</string>
+			<string>ms-outlook</string>
+			<string>ymail</string>
+			<string>fastmail</string>
+			<string>superhuman</string>
+			<string>protonmail</string>
+		</array>
 		<key>CFBundleURLTypes</key>
 		<array>
 			<dict>
@@ -67,8 +67,7 @@
 		<key>NSFaceIDUsageDescription</key>
 		<string>Please allow ente to lock itself with FaceID or TouchID</string>
 		<key>NSCameraUsageDescription</key>
-		<string>Please allow access to your camera so that you can take photos
-		within ente</string>
+		<string>Please allow access to your camera so that you can take photos within ente</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Please allow access to your photos so that ente can encrypt and back them up.</string>
 		<key>UIBackgroundModes</key>
@@ -102,5 +101,5 @@
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
-</dict>
+	</dict>
 </plist>
