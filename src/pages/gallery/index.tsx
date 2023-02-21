@@ -139,8 +139,7 @@ export default function Gallery() {
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
-    const [incomingShareFiles, setIncomingShareFiles] =
-        useState<EnteFile[]>(null);
+    const [hasPersonalFiles, setHasPersonalFiles] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
         ownCount: 0,
         count: 0,
@@ -260,7 +259,9 @@ export default function Gallery() {
             );
             setUser(user);
             setFiles(sortFiles(files));
-            setIncomingShareFiles(incomingShareFiles);
+            const hasPersonalFiles =
+                files.length - incomingShareFiles.length > 0;
+            setHasPersonalFiles(hasPersonalFiles);
             setCollections(collections);
             await syncWithRemote(true);
             setIsFirstLoad(false);
@@ -697,7 +698,7 @@ export default function Gallery() {
                     setSelected={setSelected}
                     selected={selected}
                     isFirstLoad={isFirstLoad}
-                    incomingShareFiles={incomingShareFiles}
+                    hasPersonalFiles={hasPersonalFiles}
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     search={search}
