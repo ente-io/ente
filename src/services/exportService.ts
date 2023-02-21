@@ -208,7 +208,7 @@ class ExportService {
             }
             this.stopExport = false;
             this.pauseExport = false;
-            this.addFilesQueuedRecord(exportDir, files);
+            await this.addFilesQueuedRecord(exportDir, files);
             const failedFileCount = 0;
 
             this.electronAPIs.showOnTray({
@@ -241,15 +241,11 @@ class ExportService {
                         RecordType.SUCCESS
                     );
                 } catch (e) {
+                    logError(e, 'failed to export file');
                     await this.addFileExportedRecord(
                         exportDir,
                         file,
                         RecordType.FAILED
-                    );
-
-                    logError(
-                        e,
-                        'download and save failed for file during export'
                     );
                 }
                 this.electronAPIs.showOnTray({
@@ -345,6 +341,7 @@ class ExportService {
         );
         await response.promise;
     }
+
     async updateExportRecordHelper(folder: string, newData: ExportRecord) {
         try {
             if (!folder) {
@@ -358,6 +355,7 @@ class ExportService {
             );
         } catch (e) {
             logError(e, 'error updating Export Record');
+            throw e;
         }
     }
 
@@ -376,6 +374,7 @@ class ExportService {
             }
         } catch (e) {
             logError(e, 'export Record JSON parsing failed ');
+            throw e;
         }
     }
 
@@ -432,36 +431,45 @@ class ExportService {
     }
 
     async downloadAndSave(file: EnteFile, collectionPath: string) {
-        file.metadata = mergeMetadata([file])[0].metadata;
-        const fileSaveName = getUniqueFileSaveName(
-            collectionPath,
-            file.metadata.title,
-            file.id
-        );
-        let fileStream = await retryAsyncFunction(() =>
-            downloadManager.downloadFile(file)
-        );
-        const fileType = getFileExtension(file.metadata.title);
-        if (
-            file.pubMagicMetadata?.data.editedTime &&
-            (fileType === TYPE_JPEG || fileType === TYPE_JPG)
-        ) {
-            const fileBlob = await new Response(fileStream).blob();
-            if (!this.fileReader) {
-                this.fileReader = new FileReader();
-            }
-            const updatedFileBlob = await updateFileCreationDateInEXIF(
-                this.fileReader,
-                fileBlob,
-                new Date(file.pubMagicMetadata.data.editedTime / 1000)
+        try {
+            file.metadata = mergeMetadata([file])[0].metadata;
+            const fileSaveName = getUniqueFileSaveName(
+                collectionPath,
+                file.metadata.title,
+                file.id
             );
-            fileStream = updatedFileBlob.stream();
-        }
-        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            await this.exportMotionPhoto(fileStream, file, collectionPath);
-        } else {
-            this.saveMediaFile(collectionPath, fileSaveName, fileStream);
-            await this.saveMetadataFile(collectionPath, fileSaveName, file);
+            let fileStream = await retryAsyncFunction(() =>
+                downloadManager.downloadFile(file)
+            );
+            const fileType = getFileExtension(file.metadata.title);
+            if (
+                file.pubMagicMetadata?.data.editedTime &&
+                (fileType === TYPE_JPEG || fileType === TYPE_JPG)
+            ) {
+                const fileBlob = await new Response(fileStream).blob();
+                if (!this.fileReader) {
+                    this.fileReader = new FileReader();
+                }
+                const updatedFileBlob = await updateFileCreationDateInEXIF(
+                    this.fileReader,
+                    fileBlob,
+                    new Date(file.pubMagicMetadata.data.editedTime / 1000)
+                );
+                fileStream = updatedFileBlob.stream();
+            }
+            if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+                await this.exportMotionPhoto(fileStream, file, collectionPath);
+            } else {
+                await this.saveMediaFile(
+                    collectionPath,
+                    fileSaveName,
+                    fileStream
+                );
+                await this.saveMetadataFile(collectionPath, fileSaveName, file);
+            }
+        } catch (e) {
+            logError(e, 'download and save failed for file during export');
+            throw e;
         }
     }
 
@@ -478,7 +486,7 @@ class ExportService {
             motionPhoto.imageNameTitle,
             file.id
         );
-        this.saveMediaFile(collectionPath, imageSaveName, imageStream);
+        await this.saveMediaFile(collectionPath, imageSaveName, imageStream);
         await this.saveMetadataFile(collectionPath, imageSaveName, file);
 
         const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
@@ -549,9 +557,12 @@ class ExportService {
                 collectionIDPathMap
             );
 
-            await this.updateExportRecord({
-                version: LATEST_EXPORT_VERSION,
-            });
+            await this.updateExportRecord(
+                {
+                    version: LATEST_EXPORT_VERSION,
+                },
+                exportDir
+            );
         }
     }
 
