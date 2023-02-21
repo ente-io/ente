@@ -81,6 +81,7 @@ export default function ExportModal(props: Props) {
             exportService.electronAPIs.registerRetryFailedExportListener(
                 retryFailedExport
             );
+            exportService.setUpdateExportProgress(updateExportProgress);
         } catch (e) {
             logError(e, 'error while registering export listeners');
         }
@@ -237,7 +238,6 @@ export default function ExportModal(props: Props) {
             await preExportRun();
             updateExportProgress({ current: 0, total: 0 });
             const exportResult = await exportService.exportFiles(
-                updateExportProgress,
                 ExportType.NEW
             );
             await postExportRun(exportResult);
@@ -284,8 +284,8 @@ export default function ExportModal(props: Props) {
                     current: pausedStageProgress.current + progress.current,
                     total: pausedStageProgress.current + progress.total,
                 });
+            exportService.setUpdateExportProgress(updateExportStatsWithOffset);
             const exportResult = await exportService.exportFiles(
-                updateExportStatsWithOffset,
                 ExportType.PENDING
             );
 
@@ -303,7 +303,6 @@ export default function ExportModal(props: Props) {
             updateExportProgress({ current: 0, total: exportStats.failed });
 
             const exportResult = await exportService.exportFiles(
-                updateExportProgress,
                 ExportType.RETRY_FAILED
             );
             await postExportRun(exportResult);

@@ -62,11 +62,19 @@ class ExportService {
     private pauseExport: boolean = false;
     private allElectronAPIsExist: boolean = false;
     private fileReader: FileReader = null;
+    private updateExportProgress: (progress: ExportProgress) => void = null;
 
     constructor() {
         this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.electronAPIs?.exists;
     }
+
+    setUpdateExportProgress(
+        updateExportProgress: (progress: ExportProgress) => void
+    ) {
+        this.updateExportProgress = updateExportProgress;
+    }
+
     async selectExportDirectory() {
         try {
             return await this.electronAPIs.selectRootDirectory();
@@ -82,10 +90,7 @@ class ExportService {
     pauseRunningExport() {
         this.pauseExport = true;
     }
-    async exportFiles(
-        updateProgress: (progress: ExportProgress) => void,
-        exportType: ExportType
-    ) {
+    async exportFiles(exportType: ExportType) {
         try {
             if (this.exportInProgress) {
                 this.electronAPIs.sendNotification(
@@ -159,7 +164,6 @@ class ExportService {
                 newCollections,
                 renamedCollections,
                 collectionIDPathMap,
-                updateProgress,
                 exportDir
             );
             const resp = await this.exportInProgress;
@@ -176,7 +180,6 @@ class ExportService {
         newCollections: Collection[],
         renamedCollections: Collection[],
         collectionIDPathMap: CollectionIDPathMap,
-        updateProgress: (progress: ExportProgress) => void,
         exportDir: string
     ): Promise<{ paused: boolean }> {
         try {
@@ -211,7 +214,7 @@ class ExportService {
             this.electronAPIs.showOnTray({
                 export_progress: `0 / ${files.length} files exported`,
             });
-            updateProgress({
+            this.updateExportProgress({
                 current: 0,
                 total: files.length,
             });
@@ -254,7 +257,10 @@ class ExportService {
                         files.length
                     } files exported`,
                 });
-                updateProgress({ current: index + 1, total: files.length });
+                this.updateExportProgress({
+                    current: index + 1,
+                    total: files.length,
+                });
             }
             if (this.stopExport) {
                 this.electronAPIs.sendNotification(ExportNotification.ABORT);
