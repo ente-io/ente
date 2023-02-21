@@ -105,6 +105,7 @@ import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
 import { checkConnectivity } from 'utils/error/ui';
+import uploadManager from 'services/upload/uploadManager';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -567,6 +568,9 @@ export default function Gallery() {
     };
 
     const openUploader = (intent?: UploadTypeSelectorIntent) => {
+        if (!uploadManager.shouldAllowNewUpload()) {
+            return;
+        }
         setUploadTypeSelectorView(true);
         setUploadTypeSelectorIntent(intent);
     };
