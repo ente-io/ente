@@ -43,6 +43,7 @@ interface Props {
     isFavoriteCollection: boolean;
     isUncategorizedCollection: boolean;
     isIncomingSharedCollection: boolean;
+    isInSearchMode: boolean;
 }
 
 const SelectedFileOptions = ({
@@ -64,6 +65,7 @@ const SelectedFileOptions = ({
     isFavoriteCollection,
     isUncategorizedCollection,
     isIncomingSharedCollection,
+    isInSearchMode,
 }: Props) => {
     const { setDialogMessage } = useContext(AppContext);
     const addToCollection = () =>
@@ -147,7 +149,30 @@ const SelectedFileOptions = ({
                 </Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>
-                {activeCollection === TRASH_SECTION ? (
+                {isInSearchMode ? (
+                    <>
+                        <Tooltip title={constants.FIX_CREATION_TIME}>
+                            <IconButton onClick={fixTimeHelper}>
+                                <ClockIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={constants.DOWNLOAD}>
+                            <IconButton onClick={downloadHelper}>
+                                <DownloadIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={constants.ADD}>
+                            <IconButton onClick={addToCollection}>
+                                <AddIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={constants.ARCHIVE}>
+                            <IconButton onClick={archiveFilesHelper}>
+                                <ArchiveIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </>
+                ) : activeCollection === TRASH_SECTION ? (
                     <>
                         <Tooltip title={constants.RESTORE}>
                             <IconButton onClick={restoreHandler}>

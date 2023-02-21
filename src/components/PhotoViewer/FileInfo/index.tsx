@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { RenderFileName } from './RenderFileName';
 import { RenderCreationTime } from './RenderCreationTime';
@@ -23,6 +23,16 @@ import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
 import TextSnippetOutlined from '@mui/icons-material/TextSnippetOutlined';
 import FolderOutlined from '@mui/icons-material/FolderOutlined';
 import BackupOutlined from '@mui/icons-material/BackupOutlined';
+
+import {
+    PhotoPeopleList,
+    UnidentifiedFaces,
+} from 'components/MachineLearning/PeopleList';
+
+import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
+import { WordList } from 'components/MachineLearning/WordList';
+// import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
+import { AppContext } from 'pages/_app';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
@@ -79,9 +89,12 @@ export function FileInfo({
     collectionNameMap,
     isTrashCollection,
 }: Iprops) {
+    const appContext = useContext(AppContext);
     const [location, setLocation] = useState<Location>(null);
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
     const [showExif, setShowExif] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [updateMLDataIndex, setUpdateMLDataIndex] = useState(0);
 
     const openExif = () => setShowExif(true);
     const closeExif = () => setShowExif(false);
@@ -265,6 +278,33 @@ export function FileInfo({
                                 ))}
                         </Box>
                     </InfoItem>
+                )}
+                {appContext.mlSearchEnabled && (
+                    <>
+                        <PhotoPeopleList
+                            file={file}
+                            updateMLDataIndex={updateMLDataIndex}
+                        />
+                        <UnidentifiedFaces
+                            file={file}
+                            updateMLDataIndex={updateMLDataIndex}
+                        />
+                        <ObjectLabelList
+                            file={file}
+                            updateMLDataIndex={updateMLDataIndex}
+                        />
+                        <WordList
+                            file={file}
+                            updateMLDataIndex={updateMLDataIndex}
+                        />
+                        {/* <Box pt={1}>
+                            <MLServiceFileInfoButton
+                                file={file}
+                                updateMLDataIndex={updateMLDataIndex}
+                                setUpdateMLDataIndex={setUpdateMLDataIndex}
+                            />
+                        </Box> */}
+                    </>
                 )}
             </Stack>
             <ExifData

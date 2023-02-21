@@ -7,6 +7,7 @@ import TwoFactorModal from 'components/TwoFactor/Modal';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
+// import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import isElectron from 'is-electron';
 import WatchFolder from 'components/WatchFolder';
 import { getDownloadAppMessage } from 'utils/ui';
@@ -14,6 +15,7 @@ import { getDownloadAppMessage } from 'utils/ui';
 import ThemeSwitcher from './ThemeSwitcher';
 import { SpaceBetweenFlex } from 'components/Container';
 import { isInternalUser } from 'utils/user';
+import AdvancedSettings from './AdvancedSettings';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
@@ -28,7 +30,10 @@ export default function UtilitySection({ closeSidebar }) {
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
-    // const [fixLargeThumbsView, setFixLargeThumbsView] = useState(false);
+    const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
+
+    const openAdvancedSettings = () => setAdvancedSettingsView(true);
+    const closeAdvancedSettings = () => setAdvancedSettingsView(false);
 
     const openRecoveryKeyModal = () => setRecoveryModalView(true);
     const closeRecoveryKeyModal = () => setRecoveryModalView(false);
@@ -56,8 +61,6 @@ export default function UtilitySection({ closeSidebar }) {
     };
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
-
-    // const openThumbnailCompressModal = () => setFixLargeThumbsView(true);
 
     const somethingWentWrong = () =>
         setDialogMessage({
@@ -94,9 +97,11 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
-            {/* <SidebarButton onClick={openThumbnailCompressModal}>
-                {constants.COMPRESS_THUMBNAILS}
-            </SidebarButton> */}
+            {isElectron() && (
+                <SidebarButton onClick={openAdvancedSettings}>
+                    {constants.ADVANCED}
+                </SidebarButton>
+            )}
             <RecoveryKey
                 show={recoverModalView}
                 onHide={closeRecoveryKeyModal}
@@ -109,11 +114,12 @@ export default function UtilitySection({ closeSidebar }) {
                 setLoading={startLoading}
             />
             <WatchFolder open={watchFolderView} onClose={closeWatchFolder} />
-            {/* <FixLargeThumbnails
-                isOpen={fixLargeThumbsView}
-                hide={() => setFixLargeThumbsView(false)}
-                show={() => setFixLargeThumbsView(true)}
-            /> */}
+
+            <AdvancedSettings
+                open={advancedSettingsView}
+                onClose={closeAdvancedSettings}
+                onRootClose={closeSidebar}
+            />
         </>
     );
 }

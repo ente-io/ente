@@ -1,8 +1,9 @@
-import { Remote, wrap } from 'comlink';
+import { expose, Remote, wrap } from 'comlink';
+import { WorkerElectronCacheStorageClient } from 'services/workerElectronCache/client';
 import { addLocalLog } from 'utils/logging';
 
-export class ComlinkWorker<T> {
-    public remote: Remote<T>;
+export class ComlinkWorker<T extends new () => InstanceType<T>> {
+    public remote: Promise<Remote<InstanceType<T>>>;
     private worker: Worker;
     private name: string;
 
@@ -14,7 +15,9 @@ export class ComlinkWorker<T> {
             console.error('Got error event from worker', errorEvent);
         };
         addLocalLog(() => `Initiated ${this.name}`);
-        this.remote = wrap<T>(this.worker);
+        const comlink = wrap<T>(this.worker);
+        this.remote = new comlink() as Promise<Remote<InstanceType<T>>>;
+        expose(WorkerElectronCacheStorageClient, this.worker);
     }
 
     public terminate() {

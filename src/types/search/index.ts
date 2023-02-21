@@ -1,3 +1,5 @@
+import { Person, Thing, WordGroup } from 'types/machineLearning';
+import { IndexStatus } from 'types/machineLearning/ui';
 import { EnteFile } from 'types/file';
 
 export type Bbox = [number, number, number, number];
@@ -11,8 +13,11 @@ export enum SuggestionType {
     DATE,
     LOCATION,
     COLLECTION,
-    IMAGE,
-    VIDEO,
+    FILE_NAME,
+    PERSON,
+    INDEX_STATUS,
+    THING,
+    TEXT,
 }
 
 export interface DateValue {
@@ -24,14 +29,25 @@ export interface DateValue {
 export interface Suggestion {
     type: SuggestionType;
     label: string;
-    value: Bbox | DateValue | number;
+    value:
+        | Bbox
+        | DateValue
+        | number[]
+        | Person
+        | IndexStatus
+        | Thing
+        | WordGroup;
+    hide?: boolean;
 }
 
 export type Search = {
     date?: DateValue;
     location?: Bbox;
     collection?: number;
-    file?: number;
+    files?: number[];
+    person?: Person;
+    thing?: Thing;
+    text?: WordGroup;
 };
 
 export type SearchResultSummary = {

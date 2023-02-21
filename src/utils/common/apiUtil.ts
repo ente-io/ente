@@ -1,5 +1,4 @@
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { runningInBrowser } from '.';
 
 export const getEndpoint = () => {
     let endpoint = getData(LS_KEYS.API_ENDPOINT);
@@ -90,12 +89,12 @@ It's a dev deployment (and should use the environment override for endpoints ) i
 3. if the app is running locally (hence node_env is development)
 */
 const isDevDeployment = () => {
-    if (runningInBrowser()) {
+    if (globalThis?.location) {
         return (
             process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT ===
-                window.location.origin ||
+                globalThis.location.origin ||
             process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT ===
-                window.location.origin ||
+                globalThis.location.origin ||
             process.env.NEXT_PUBLIC_IS_TEST_APP === 'true' ||
             process.env.NODE_ENV === 'development'
         );

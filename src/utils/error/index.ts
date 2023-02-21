@@ -53,9 +53,11 @@ export const CustomError = {
         `type detection failed ${fileFormat}`,
     WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED:
         'Windows native image processing is not supported',
+    NETWORK_ERROR: 'Network Error',
+    NOT_FILE_OWNER: 'not file owner',
 };
 
-function parseUploadErrorCodes(error) {
+export function parseUploadErrorCodes(error) {
     let parsedMessage = null;
     if (error?.status) {
         const errorCode = error.status.toString();

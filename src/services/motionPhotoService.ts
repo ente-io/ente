@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
-import { fileExtensionWithDot } from 'utils/file';
+import { EnteFile } from 'types/file';
+import { fileExtensionWithDot, fileNameWithoutExtension } from 'utils/file';
 
 class MotionPhoto {
     image: Uint8Array;
@@ -8,10 +9,8 @@ class MotionPhoto {
     videoNameTitle: string;
 }
 
-export const decodeMotionPhoto = async (
-    zipBlob: Blob,
-    originalName: string
-) => {
+export const decodeMotionPhoto = async (file: EnteFile, zipBlob: Blob) => {
+    const originalName = fileNameWithoutExtension(file.metadata.title);
     const zip = await JSZip.loadAsync(zipBlob, { createFolders: true });
 
     const motionPhoto = new MotionPhoto();
