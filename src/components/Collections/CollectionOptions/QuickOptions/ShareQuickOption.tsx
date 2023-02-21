@@ -13,7 +13,7 @@ interface Iprops {
     collectionSummaryType: CollectionSummaryType;
 }
 
-export function ShareOption({
+export function ShareQuickOption({
     handleCollectionAction,
     collectionSummaryType,
 }: Iprops) {

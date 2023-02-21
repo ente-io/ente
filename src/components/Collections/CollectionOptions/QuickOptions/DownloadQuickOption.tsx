@@ -12,7 +12,7 @@ interface Iprops {
     collectionSummaryType: CollectionSummaryType;
 }
 
-export function DownloadOption({
+export function DownloadQuickOption({
     handleCollectionAction,
     collectionSummaryType,
 }: Iprops) {

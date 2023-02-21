@@ -2,13 +2,13 @@ import { CollectionActions } from '..';
 import React from 'react';
 import { CollectionSummaryType } from 'constants/collection';
 import { FlexWrapper } from 'components/Container';
-import { MoveToTrashOption } from './EmptyTrashQuickOption';
-import { DownloadOption } from './DownloadQuickOption';
-import { ShareOption } from './ShareQuickOption';
+import { EmptyTrashQuickOption } from './EmptyTrashQuickOption';
+import { DownloadQuickOption } from './DownloadQuickOption';
+import { ShareQuickOption } from './ShareQuickOption';
 import {
     showDownloadQuickOption,
     showShareQuickOption,
-    showTrashQuickOption,
+    showEmptyTrashQuickOption,
 } from 'utils/collection';
 interface Iprops {
     handleCollectionAction: (
@@ -24,19 +24,19 @@ export function QuickOptions({
 }: Iprops) {
     return (
         <FlexWrapper sx={{ gap: '16px' }}>
-            {showTrashQuickOption(collectionSummaryType) && (
-                <MoveToTrashOption
+            {showEmptyTrashQuickOption(collectionSummaryType) && (
+                <EmptyTrashQuickOption
                     handleCollectionAction={handleCollectionAction}
                 />
             )}
             {showDownloadQuickOption(collectionSummaryType) && (
-                <DownloadOption
+                <DownloadQuickOption
                     handleCollectionAction={handleCollectionAction}
                     collectionSummaryType={collectionSummaryType}
                 />
             )}
             {showShareQuickOption(collectionSummaryType) && (
-                <ShareOption
+                <ShareQuickOption
                     handleCollectionAction={handleCollectionAction}
                     collectionSummaryType={collectionSummaryType}
                 />
