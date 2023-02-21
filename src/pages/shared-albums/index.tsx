@@ -48,6 +48,7 @@ import UploadButton from 'components/Upload/UploadButton';
 import bs58 from 'bs58';
 import AddPhotoAlternateOutlined from '@mui/icons-material/AddPhotoAlternateOutlined';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { UploadTypeSelectorIntent } from 'types/gallery';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -440,7 +441,9 @@ export default function PublicCollectionGallery() {
                     showUploadFilesDialog={openFileSelector}
                     showUploadDirsDialog={openFolderSelector}
                     showSessionExpiredMessage={showPublicLinkExpiredMessage}
-                    zipUploadDisabled
+                    uploadTypeSelectorIntent={
+                        UploadTypeSelectorIntent.collectPhotos
+                    }
                 />
             </FullScreenDropZone>
         </PublicCollectionGalleryContext.Provider>

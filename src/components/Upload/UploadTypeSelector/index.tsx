@@ -17,8 +17,7 @@ interface Iprops {
     uploadFiles: () => void;
     uploadFolders: () => void;
     uploadGoogleTakeoutZips: () => void;
-    hideZipUploadOption?: boolean;
-    uploadTypeSelectorIntent?: UploadTypeSelectorIntent;
+    uploadTypeSelectorIntent: UploadTypeSelectorIntent;
 }
 export default function UploadTypeSelector({
     onClose,
@@ -26,7 +25,6 @@ export default function UploadTypeSelector({
     uploadFiles,
     uploadFolders,
     uploadGoogleTakeoutZips,
-    hideZipUploadOption,
     uploadTypeSelectorIntent,
 }: Iprops) {
     const publicCollectionGalleryContext = useContext(
@@ -57,12 +55,13 @@ export default function UploadTypeSelector({
             }}
             onClose={dialogCloseHandler({ onClose })}>
             <DialogTitleWithCloseButton onClose={onClose}>
-                {publicCollectionGalleryContext.accessedThroughSharedURL
+                {uploadTypeSelectorIntent ===
+                UploadTypeSelectorIntent.collectPhotos
                     ? constants.SELECT_PHOTOS
                     : uploadTypeSelectorIntent ===
-                      UploadTypeSelectorIntent.normalUpload
-                    ? constants.UPLOAD
-                    : constants.IMPORT}
+                      UploadTypeSelectorIntent.import
+                    ? constants.IMPORT
+                    : constants.UPLOAD}
             </DialogTitleWithCloseButton>
             <Box p={1.5} pt={0.5}>
                 <Stack spacing={0.5}>
@@ -79,7 +78,8 @@ export default function UploadTypeSelector({
                         startIcon={<FolderUploadIcon />}>
                         {constants.UPLOAD_DIRS}
                     </UploadTypeOption>
-                    {!hideZipUploadOption && (
+                    {uploadTypeSelectorIntent !==
+                        UploadTypeSelectorIntent.collectPhotos && (
                         <UploadTypeOption
                             onClick={uploadGoogleTakeoutZips}
                             startIcon={<GoogleIcon />}>

@@ -81,9 +81,8 @@ interface Props {
     webFolderSelectorFiles: File[];
     webFileSelectorFiles: File[];
     dragAndDropFiles: File[];
-    zipUploadDisabled?: boolean;
     uploadCollection?: Collection;
-    uploadTypeSelectorIntent?: UploadTypeSelectorIntent;
+    uploadTypeSelectorIntent: UploadTypeSelectorIntent;
 }
 
 export default function Uploader(props: Props) {
@@ -753,7 +752,6 @@ export default function Uploader(props: Props) {
                 uploadFiles={handleFileUpload}
                 uploadFolders={handleFolderUpload}
                 uploadGoogleTakeoutZips={handleZipUpload}
-                hideZipUploadOption={props.zipUploadDisabled}
                 uploadTypeSelectorIntent={props.uploadTypeSelectorIntent}
             />
             <UploadProgress

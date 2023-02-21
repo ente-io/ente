@@ -23,6 +23,7 @@ export type MergedSourceURL = {
 export enum UploadTypeSelectorIntent {
     normalUpload,
     import,
+    collectPhotos,
 }
 export type GalleryContextType = {
     thumbs: Map<number, string>;
