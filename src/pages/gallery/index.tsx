@@ -567,7 +567,7 @@ export default function Gallery() {
         finishLoading();
     };
 
-    const openUploader = (intent?: UploadTypeSelectorIntent) => {
+    const openUploader = (intent = UploadTypeSelectorIntent.normalUpload) => {
         if (!uploadManager.shouldAllowNewUpload()) {
             return;
         }
