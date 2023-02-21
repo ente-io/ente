@@ -254,14 +254,8 @@ export default function Gallery() {
             const collections = await getLocalCollections();
             const trash = await getLocalTrash();
             files = [...files, ...getTrashedFiles(trash)];
-            const incomingShareFiles = files.filter(
-                (file) => file.ownerID !== user.id
-            );
             setUser(user);
             setFiles(sortFiles(files));
-            const hasPersonalFiles =
-                files.length - incomingShareFiles.length > 0;
-            setHasPersonalFiles(hasPersonalFiles);
             setCollections(collections);
             await syncWithRemote(true);
             setIsFirstLoad(false);
@@ -390,6 +384,11 @@ export default function Gallery() {
             archivedCollections
         );
         setCollectionSummaries(collectionSummaries);
+        const incomingShareFiles = files.filter(
+            (file) => file.ownerID !== user.id
+        );
+        const hasPersonalFiles = files.length - incomingShareFiles.length > 0;
+        setHasPersonalFiles(hasPersonalFiles);
     };
 
     const clearSelection = function () {
