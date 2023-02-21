@@ -3,11 +3,19 @@ import { Button, Stack, styled, Typography } from '@mui/material';
 import constants from 'utils/strings/constants';
 import { DeduplicateContext } from 'pages/deduplicate';
 import VerticallyCentered, { FlexWrapper } from './Container';
+import { Box } from '@mui/material';
 import uploadManager from 'services/upload/uploadManager';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 import FolderIcon from '@mui/icons-material/FolderOutlined';
 import { UploadTypeSelectorIntent } from 'types/gallery';
-const Wrapper = styled(VerticallyCentered)`
+const Wrapper = styled(Box)`
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: top;
+    flex-direction: column;
+    text-align: center;
+    overflow: auto;
     & > svg {
         filter: drop-shadow(3px 3px 5px rgba(45, 194, 98, 0.5));
     }
@@ -57,7 +65,9 @@ export default function EmptyScreen({ openUploader }) {
                                 !uploadManager.shouldAllowNewUpload() &&
                                 'not-allowed',
                         }}>
-                        <Stack paddingTop={1.5} paddingBottom={1.5}>
+                        <VerticallyCentered
+                            paddingTop={1.5}
+                            paddingBottom={1.5}>
                             <Button
                                 color="accent"
                                 onClick={() =>
@@ -99,7 +109,7 @@ export default function EmptyScreen({ openUploader }) {
                                     {constants.IMPORT_YOUR_FOLDERS}
                                 </FlexWrapper>
                             </Button>
-                        </Stack>
+                        </VerticallyCentered>
                         <VerticallyCentered
                             paddingTop={3}
                             paddingBottom={3}
