@@ -70,10 +70,10 @@ export default function ExportModal(props: Props) {
     // SIDE EFFECTS
     // ====================
     useEffect(() => {
+        if (!isElectron()) {
+            return;
+        }
         try {
-            if (!isElectron()) {
-                return;
-            }
             setExportFolder(getData(LS_KEYS.EXPORT)?.folder);
 
             exportService.electronAPIs.registerStopExportListener(stopExport);
