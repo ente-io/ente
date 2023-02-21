@@ -46,7 +46,9 @@ export default function HelpSection() {
                 <div style={{ display: 'flex' }}>
                     {constants.EXPORT}
                     <div style={{ width: '20px' }} />
-                    {exportService.isExportInProgress() && <EnteSpinner />}
+                    {exportService.isExportInProgress() && (
+                        <EnteSpinner size="20px" />
+                    )}
                 </div>
             </SidebarButton>
             <ExportModal
