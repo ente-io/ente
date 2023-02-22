@@ -1,9 +1,13 @@
 import "package:flutter/cupertino.dart";
+import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/viewer/file/file_info_widget.dart";
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/toast_util.dart";
@@ -118,4 +122,22 @@ Future<void> showSingleFileDeleteSheet(
       actionResult!.action == ButtonAction.error) {
     showGenericErrorDialog(context: context);
   }
+}
+
+Future<void> showInfoSheet(BuildContext context, File file) async {
+  final colorScheme = getEnteColorScheme(context);
+  return showBarModalBottomSheet(
+    topControl: const SizedBox.shrink(),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+    backgroundColor: colorScheme.backgroundElevated,
+    barrierColor: backdropFaintDark,
+    context: context,
+    builder: (BuildContext context) {
+      return Padding(
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: FileInfoWidget(file),
+      );
+    },
+  );
 }
