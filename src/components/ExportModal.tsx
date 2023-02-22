@@ -195,13 +195,11 @@ export default function ExportModal(props: Props) {
     };
 
     const selectExportDirectory = async () => {
-        try {
-            const newFolder = await exportService.selectExportDirectory();
-            if (newFolder) {
-                updateExportFolder(newFolder);
-            }
-        } catch (e) {
-            logError(e, 'selectExportDirectory failed');
+        const newFolder = await exportService.selectExportDirectory();
+        if (newFolder) {
+            updateExportFolder(newFolder);
+        } else {
+            throw Error(CustomError.REQUEST_CANCELLED);
         }
     };
 
