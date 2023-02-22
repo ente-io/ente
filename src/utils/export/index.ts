@@ -121,10 +121,9 @@ export const getExportFailedFiles = (
     return filesToExport;
 };
 
-export const dedupe = (files: any[]) => {
+export const dedupe = (files: string[]) => {
     const fileSet = new Set(files);
-    const dedupedArray = new Array(...fileSet);
-    return dedupedArray;
+    return Array.from(fileSet);
 };
 
 export const getGoogleLikeMetadataFile = (
