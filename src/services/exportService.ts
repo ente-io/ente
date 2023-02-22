@@ -62,19 +62,11 @@ class ExportService {
     private pauseExport: boolean = false;
     private allElectronAPIsExist: boolean = false;
     private fileReader: FileReader = null;
-    private updateExportProgress: (progress: ExportProgress) => void = null;
 
     constructor() {
         this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.electronAPIs?.exists;
     }
-
-    setUpdateExportProgress(
-        updateExportProgress: (progress: ExportProgress) => void
-    ) {
-        this.updateExportProgress = updateExportProgress;
-    }
-
     async selectExportDirectory() {
         try {
             return await this.electronAPIs.selectRootDirectory();
@@ -90,7 +82,10 @@ class ExportService {
     pauseRunningExport() {
         this.pauseExport = true;
     }
-    async exportFiles(exportType: ExportType) {
+    async exportFiles(
+        updateProgress: (progress: ExportProgress) => void,
+        exportType: ExportType
+    ) {
         try {
             if (this.exportInProgress) {
                 this.electronAPIs.sendNotification(
@@ -164,15 +159,15 @@ class ExportService {
                 newCollections,
                 renamedCollections,
                 collectionIDPathMap,
+                updateProgress,
                 exportDir
             );
             const resp = await this.exportInProgress;
+            this.exportInProgress = null;
             return resp;
         } catch (e) {
             logError(e, 'exportFiles failed');
             return { paused: false };
-        } finally {
-            this.exportInProgress = null;
         }
     }
 
@@ -181,6 +176,7 @@ class ExportService {
         newCollections: Collection[],
         renamedCollections: Collection[],
         collectionIDPathMap: CollectionIDPathMap,
+        updateProgress: (progress: ExportProgress) => void,
         exportDir: string
     ): Promise<{ paused: boolean }> {
         try {
@@ -215,7 +211,7 @@ class ExportService {
             this.electronAPIs.showOnTray({
                 export_progress: `0 / ${files.length} files exported`,
             });
-            this.updateExportProgress({
+            updateProgress({
                 current: 0,
                 total: files.length,
             });
@@ -242,11 +238,15 @@ class ExportService {
                         RecordType.SUCCESS
                     );
                 } catch (e) {
-                    logError(e, 'failed to export file');
                     await this.addFileExportedRecord(
                         exportDir,
                         file,
                         RecordType.FAILED
+                    );
+
+                    logError(
+                        e,
+                        'download and save failed for file during export'
                     );
                 }
                 this.electronAPIs.showOnTray({
@@ -254,10 +254,7 @@ class ExportService {
                         files.length
                     } files exported`,
                 });
-                this.updateExportProgress({
-                    current: index + 1,
-                    total: files.length,
-                });
+                updateProgress({ current: index + 1, total: files.length });
             }
             if (this.stopExport) {
                 this.electronAPIs.sendNotification(ExportNotification.ABORT);

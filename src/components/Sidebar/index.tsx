@@ -22,7 +22,7 @@ export default function Sidebar({
     closeSidebar,
 }: Iprops) {
     return (
-        <DrawerSidebar open={sidebarView} onClose={closeSidebar}>
+        <DrawerSidebar open={sidebarView} onClose={closeSidebar} keepMounted>
             <HeaderSection closeSidebar={closeSidebar} />
             <Divider />
             <UserDetailsSection sidebarView={sidebarView} />
