@@ -1,5 +1,5 @@
 import isElectron from 'is-electron';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import exportService from 'services/exportService';
 import { ExportProgress, ExportStats } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
@@ -32,7 +32,6 @@ import { OverflowMenuOption } from './OverflowMenu/option';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { CustomError } from 'utils/error';
 import { getLocalUserDetails } from 'utils/user';
-import { AppContext } from 'pages/_app';
 
 const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
@@ -50,8 +49,6 @@ interface Props {
     onHide: () => void;
 }
 export default function ExportModal(props: Props) {
-    const appContext = useContext(AppContext);
-
     const userDetails = useMemo(() => getLocalUserDetails(), []);
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState('');
@@ -73,21 +70,15 @@ export default function ExportModal(props: Props) {
         if (!isElectron()) {
             return;
         }
-        try {
-            setExportFolder(getData(LS_KEYS.EXPORT)?.folder);
+        setExportFolder(getData(LS_KEYS.EXPORT)?.folder);
 
-            exportService.electronAPIs.registerStopExportListener(stopExport);
-            exportService.electronAPIs.registerPauseExportListener(pauseExport);
-            exportService.electronAPIs.registerResumeExportListener(
-                resumeExport
-            );
-            exportService.electronAPIs.registerRetryFailedExportListener(
-                retryFailedExport
-            );
-            exportService.setUpdateExportProgress(updateExportProgress);
-        } catch (e) {
-            logError(e, 'error while registering export listeners');
-        }
+        exportService.electronAPIs.registerStopExportListener(stopExport);
+        exportService.electronAPIs.registerPauseExportListener(pauseExport);
+        exportService.electronAPIs.registerResumeExportListener(resumeExport);
+        exportService.electronAPIs.registerRetryFailedExportListener(
+            retryFailedExport
+        );
+        exportService.setUpdateExportProgress(updateExportProgress);
     }, []);
 
     useEffect(() => {
@@ -95,28 +86,19 @@ export default function ExportModal(props: Props) {
             return;
         }
         const main = async () => {
-            try {
-                const exportInfo = await exportService.getExportRecord();
-                setExportStage(exportInfo?.stage ?? ExportStage.INIT);
-                setLastExportTime(exportInfo?.lastAttemptTimestamp);
-                setExportProgress(
-                    exportInfo?.progress ?? { current: 0, total: 0 }
-                );
-                setExportStats({
-                    success: exportInfo?.exportedFiles?.length ?? 0,
-                    failed: exportInfo?.failedFiles?.length ?? 0,
-                });
-                if (exportInfo?.stage === ExportStage.INPROGRESS) {
-                    await resumeExport();
-                }
-            } catch (e) {
-                logError(
-                    e,
-                    'error while updating exportModal on exportFolder change'
-                );
+            const exportInfo = await exportService.getExportRecord();
+            setExportStage(exportInfo?.stage ?? ExportStage.INIT);
+            setLastExportTime(exportInfo?.lastAttemptTimestamp);
+            setExportProgress(exportInfo?.progress ?? { current: 0, total: 0 });
+            setExportStats({
+                success: exportInfo?.exportedFiles?.length ?? 0,
+                failed: exportInfo?.failedFiles?.length ?? 0,
+            });
+            if (exportInfo?.stage === ExportStage.INPROGRESS) {
+                resumeExport();
             }
         };
-        void main();
+        main();
     }, [exportFolder]);
 
     useEffect(() => {
@@ -136,7 +118,7 @@ export default function ExportModal(props: Props) {
                     const failedFilesCnt = exportRecord.failedFiles?.length;
                     const syncedFilesCnt = userPersonalFiles.length;
                     if (syncedFilesCnt > exportedFileCnt + failedFilesCnt) {
-                        await updateExportProgress({
+                        updateExportProgress({
                             current: exportedFileCnt + failedFilesCnt,
                             total: syncedFilesCnt,
                         });
@@ -150,11 +132,11 @@ export default function ExportModal(props: Props) {
                                     getExportRecordFileUID(file)
                                 )
                         );
-                        await exportService.addFilesQueuedRecord(
+                        exportService.addFilesQueuedRecord(
                             exportFolder,
                             unExportedFiles
                         );
-                        await updateExportStage(ExportStage.PAUSED);
+                        updateExportStage(ExportStage.PAUSED);
                     }
                 } catch (e) {
                     setExportStage(ExportStage.INIT);
@@ -162,7 +144,7 @@ export default function ExportModal(props: Props) {
                 }
             }
         };
-        void main();
+        main();
     }, [props.show]);
 
     useEffect(() => {
@@ -177,21 +159,19 @@ export default function ExportModal(props: Props) {
         setData(LS_KEYS.EXPORT, { folder: newFolder });
     };
 
-    const updateExportStage = async (newStage: ExportStage) => {
+    const updateExportStage = (newStage: ExportStage) => {
         setExportStage(newStage);
-        await exportService.updateExportRecord({ stage: newStage });
+        exportService.updateExportRecord({ stage: newStage });
     };
 
-    const updateExportTime = async (newTime: number) => {
+    const updateExportTime = (newTime: number) => {
         setLastExportTime(newTime);
-        await exportService.updateExportRecord({
-            lastAttemptTimestamp: newTime,
-        });
+        exportService.updateExportRecord({ lastAttemptTimestamp: newTime });
     };
 
-    const updateExportProgress = async (newProgress: ExportProgress) => {
+    const updateExportProgress = (newProgress: ExportProgress) => {
         setExportProgress(newProgress);
-        await exportService.updateExportRecord({ progress: newProgress });
+        exportService.updateExportRecord({ progress: newProgress });
     };
 
     // ======================
@@ -203,16 +183,15 @@ export default function ExportModal(props: Props) {
         if (!exportFolder) {
             await selectExportDirectory();
         }
-        await updateExportStage(ExportStage.INPROGRESS);
+        updateExportStage(ExportStage.INPROGRESS);
         await sleep(100);
     };
-
     const postExportRun = async (exportResult?: { paused?: boolean }) => {
         if (!exportResult?.paused) {
-            await updateExportStage(ExportStage.FINISHED);
+            updateExportStage(ExportStage.FINISHED);
             await sleep(100);
-            await updateExportTime(Date.now());
-            await syncExportStatsWithRecord();
+            updateExportTime(Date.now());
+            syncExportStatsWithRecord();
         }
     };
 
@@ -223,7 +202,6 @@ export default function ExportModal(props: Props) {
                 updateExportFolder(newFolder);
             }
         } catch (e) {
-            appContext.somethingWentWrong();
             logError(e, 'selectExportDirectory failed');
         }
     };
@@ -242,14 +220,13 @@ export default function ExportModal(props: Props) {
     const startExport = async () => {
         try {
             await preExportRun();
-            await updateExportProgress({ current: 0, total: 0 });
+            updateExportProgress({ current: 0, total: 0 });
             const exportResult = await exportService.exportFiles(
                 ExportType.NEW
             );
             await postExportRun(exportResult);
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
-                appContext.somethingWentWrong();
                 logError(e, 'startExport failed');
             }
         }
@@ -258,23 +235,21 @@ export default function ExportModal(props: Props) {
     const stopExport = async () => {
         try {
             exportService.stopRunningExport();
-            await postExportRun();
+            postExportRun();
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
-                appContext.somethingWentWrong();
                 logError(e, 'stopExport failed');
             }
         }
     };
 
-    const pauseExport = async () => {
+    const pauseExport = () => {
         try {
-            await updateExportStage(ExportStage.PAUSED);
+            updateExportStage(ExportStage.PAUSED);
             exportService.pauseRunningExport();
-            await postExportRun({ paused: true });
+            postExportRun({ paused: true });
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
-                appContext.somethingWentWrong();
                 logError(e, 'pauseExport failed');
             }
         }
@@ -301,7 +276,6 @@ export default function ExportModal(props: Props) {
             await postExportRun(exportResult);
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
-                appContext.somethingWentWrong();
                 logError(e, 'resumeExport failed');
             }
         }
@@ -310,7 +284,7 @@ export default function ExportModal(props: Props) {
     const retryFailedExport = async () => {
         try {
             await preExportRun();
-            await updateExportProgress({
+            updateExportProgress({
                 current: 0,
                 total: exportStats.failed,
             });
@@ -321,7 +295,6 @@ export default function ExportModal(props: Props) {
             await postExportRun(exportResult);
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
-                appContext.somethingWentWrong();
                 logError(e, 'retryFailedExport failed');
             }
         }
