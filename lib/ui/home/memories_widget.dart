@@ -1,3 +1,6 @@
+import "dart:io";
+
+import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/memory.dart';
@@ -315,6 +318,22 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     );
   }
 
+  void onFileDeleted() {
+    if (widget.memories.length == 1) {
+      Navigator.pop(context);
+    } else {
+      setState(() {
+        if (_index != 0) {
+          _pageController?.jumpToPage(_index - 1);
+        }
+        widget.memories.removeAt(_index);
+        if (_index != 0) {
+          _index--;
+        }
+      });
+    }
+  }
+
   Hero _buildInfoText() {
     return Hero(
       tag: widget.title,
@@ -346,17 +365,46 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   Widget _buildBottomIcons() {
     final file = widget.memories[_index].file;
-    return Container(
-      alignment: Alignment.bottomRight,
-      padding: const EdgeInsets.fromLTRB(0, 0, 26, 20),
-      child: IconButton(
-        icon: Icon(
-          Icons.adaptive.share,
-          color: Colors.white, //same for both themes
+    return SafeArea(
+      child: Container(
+        alignment: Alignment.bottomRight,
+        padding: const EdgeInsets.fromLTRB(26, 0, 26, 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(
+                Icons.delete_outline,
+                color: Colors.white, //same for both themes
+              ),
+              onPressed: () async {
+                await showSingleFileDeleteSheet(
+                  context,
+                  file,
+                  onFileRemoved: (file) => {onFileDeleted()},
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
+                color: Colors.white, //same for both themes
+              ),
+              onPressed: () {
+                showInfoSheet(context, file);
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.adaptive.share,
+                color: Colors.white, //same for both themes
+              ),
+              onPressed: () {
+                share(context, [file]);
+              },
+            ),
+          ],
         ),
-        onPressed: () {
-          share(context, [file]);
-        },
       ),
     );
   }
