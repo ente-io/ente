@@ -8,6 +8,7 @@ import 'package:photos/ui/components/icon_button_widget.dart';
 enum NotificationType {
   warning,
   banner,
+  goldenBanner,
 }
 
 class NotificationWidget extends StatelessWidget {
@@ -38,6 +39,8 @@ class NotificationWidget extends StatelessWidget {
       case NotificationType.banner:
         backgroundColor = backgroundElevated2Dark;
         break;
+      case NotificationType.goldenBanner:
+        backgroundColor = const Color.fromARGB(255, 250, 202, 88);
     }
     return Center(
       child: GestureDetector(

@@ -84,7 +84,7 @@ class SettingsPage extends StatelessWidget {
                   actionIcon: Icons.arrow_forward_outlined,
                   text: "Double your storage",
                   subText: "Refer friends and 2x your plan",
-                  type: NotificationType.banner,
+                  type: NotificationType.goldenBanner,
                   onTap: () async {
                     StorageBonusService.instance.markStorageBonusAsDone();
                     routeToPage(context, const ReferralScreen());
