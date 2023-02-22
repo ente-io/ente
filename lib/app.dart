@@ -41,7 +41,9 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   }
 
   void setupIntentAction() async {
-    final mediaExtentionAction = await initIntentAction();
+    final mediaExtentionAction = Platform.isAndroid
+        ? await initIntentAction()
+        : MediaExtentionAction(action: IntentAction.main);
     AppLifecycleService.instance.setMediaExtensionAction(mediaExtentionAction);
     if (mediaExtentionAction.action == IntentAction.main) {
       _configureBackgroundFetch();
