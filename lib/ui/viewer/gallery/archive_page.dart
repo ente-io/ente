@@ -79,28 +79,31 @@ class ArchivePage extends StatelessWidget {
           } else if (snapshot.hasData) {
             final collectionsWithThumbnail =
                 snapshot.data as List<CollectionWithThumbnail>;
-            return SizedBox(
-              height: 200,
-              child: ListView.builder(
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                itemCount: collectionsWithThumbnail.length,
-                padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
-                itemBuilder: (context, index) {
-                  final item = collectionsWithThumbnail[index];
-                  return GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () async {},
-                    child: Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: CollectionItem(
-                        item,
-                        120,
-                        shouldRender: true,
+            return Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                height: 200,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: collectionsWithThumbnail.length,
+                  padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
+                  itemBuilder: (context, index) {
+                    final item = collectionsWithThumbnail[index];
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () async {},
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: CollectionItem(
+                          item,
+                          120,
+                          shouldRender: true,
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             );
           } else {
