@@ -228,7 +228,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           ),
           leadingIcon: Icons.link,
           menuItemColor: getEnteColorScheme(context).fillFaint,
-          isBottomBorderRadiusRemoved: true,
           showOnlyLoadingState: true,
           onTap: () async {
             final bool result =
