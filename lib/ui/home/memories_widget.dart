@@ -1,8 +1,11 @@
+import "dart:io";
+
+import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
-import 'package:photos/ui/extents_page_view.dart';
+import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -315,6 +318,22 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     );
   }
 
+  void onFileDeleted() {
+    if (widget.memories.length == 1) {
+      Navigator.pop(context);
+    } else {
+      setState(() {
+        if (_index != 0) {
+          _pageController?.jumpToPage(_index - 1);
+        }
+        widget.memories.removeAt(_index);
+        if (_index != 0) {
+          _index--;
+        }
+      });
+    }
+  }
+
   Hero _buildInfoText() {
     return Hero(
       tag: widget.title,
@@ -346,17 +365,48 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   Widget _buildBottomIcons() {
     final file = widget.memories[_index].file;
-    return Container(
-      alignment: Alignment.bottomRight,
-      padding: const EdgeInsets.fromLTRB(0, 0, 26, 20),
-      child: IconButton(
-        icon: Icon(
-          Icons.adaptive.share,
-          color: Colors.white, //same for both themes
+    return SafeArea(
+      child: Container(
+        alignment: Alignment.bottomRight,
+        padding: const EdgeInsets.fromLTRB(26, 0, 26, 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: Icon(
+                Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
+                color: Colors.white, //same for both themes
+              ),
+              onPressed: () {
+                showInfoSheet(context, file);
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                Platform.isAndroid
+                    ? Icons.delete_outline
+                    : CupertinoIcons.delete,
+                color: Colors.white, //same for both themes
+              ),
+              onPressed: () async {
+                await showSingleFileDeleteSheet(
+                  context,
+                  file,
+                  onFileRemoved: (file) => {onFileDeleted()},
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.adaptive.share,
+                color: Colors.white, //same for both themes
+              ),
+              onPressed: () {
+                share(context, [file]);
+              },
+            ),
+          ],
         ),
-        onPressed: () {
-          share(context, [file]);
-        },
       ),
     );
   }
@@ -381,7 +431,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   Widget _buildSwiper() {
     _pageController = PageController(initialPage: _index);
-    return ExtentsPageView.extents(
+    return PageView.builder(
       itemBuilder: (BuildContext context, int index) {
         if (index < widget.memories.length - 1) {
           final nextFile = widget.memories[index + 1].file;
@@ -405,7 +455,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       },
       itemCount: widget.memories.length,
       controller: _pageController,
-      extents: 1,
       onPageChanged: (index) async {
         await MemoriesService.instance.markMemoryAsSeen(widget.memories[index]);
         if (mounted) {

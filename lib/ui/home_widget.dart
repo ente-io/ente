@@ -264,7 +264,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
     bool isSettingsOpen = false;
     final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport();
-
+    final action = AppLifecycleService.instance.mediaExtensionAction.action;
     return UserDetailsStateWidget(
       child: WillPopScope(
         child: Scaffold(
@@ -297,9 +297,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               Navigator.pop(context);
               return false;
             }
-            if (Platform.isAndroid &&
-                AppLifecycleService.instance.intentAction ==
-                    IntentAction.main) {
+            if (Platform.isAndroid && action == IntentAction.main) {
               MoveToBackground.moveTaskToBack();
               return false;
             } else {
