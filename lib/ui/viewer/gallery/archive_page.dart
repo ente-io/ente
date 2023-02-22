@@ -70,7 +70,7 @@ class ArchivePage extends StatelessWidget {
       emptyState: const EmptyState(
         text: "You don't have any archived items.",
       ),
-      header: FutureBuilder(
+      header: FutureBuilder<List<CollectionWithThumbnail>>(
         future: CollectionsService.instance.getArchivedCollectionWithThumb(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
