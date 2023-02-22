@@ -21,13 +21,10 @@ import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
+import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/common/progress_dialog.dart';
-import 'package:photos/ui/components/action_sheet_widget.dart';
-import 'package:photos/ui/components/button_widget.dart';
-import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
-import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -339,109 +336,11 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   Future<void> _showSingleFileDeleteSheet(File file) async {
-    final List<ButtonWidget> buttons = [];
-    final String fileType = file.fileType == FileType.video ? "video" : "photo";
-    final bool isBothLocalAndRemote =
-        file.uploadedFileID != null && file.localID != null;
-    final bool isLocalOnly =
-        file.uploadedFileID == null && file.localID != null;
-    final bool isRemoteOnly =
-        file.uploadedFileID != null && file.localID == null;
-    const String bodyHighlight = "It will be deleted from all albums.";
-    String body = "";
-    if (isBothLocalAndRemote) {
-      body = "This $fileType is in both ente and your device.";
-    } else if (isRemoteOnly) {
-      body = "This $fileType will be deleted from ente.";
-    } else if (isLocalOnly) {
-      body = "This $fileType will be deleted from your device.";
-    } else {
-      throw AssertionError("Unexpected state");
-    }
-    // Add option to delete from ente
-    if (isBothLocalAndRemote || isRemoteOnly) {
-      buttons.add(
-        ButtonWidget(
-          labelText: isBothLocalAndRemote ? "Delete from ente" : "Yes, delete",
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          isInAlert: true,
-          onTap: () async {
-            await deleteFilesFromRemoteOnly(context, [file]);
-            showShortToast(context, "Moved to trash");
-            if (isRemoteOnly) {
-              Navigator.of(context, rootNavigator: true).pop();
-              widget.onFileRemoved(file);
-            }
-          },
-        ),
-      );
-    }
-    // Add option to delete from local
-    if (isBothLocalAndRemote || isLocalOnly) {
-      buttons.add(
-        ButtonWidget(
-          labelText:
-              isBothLocalAndRemote ? "Delete from device" : "Yes, delete",
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.second,
-          shouldSurfaceExecutionStates: false,
-          isInAlert: true,
-          onTap: () async {
-            await deleteFilesOnDeviceOnly(context, [file]);
-            if (isLocalOnly) {
-              Navigator.of(context, rootNavigator: true).pop();
-              widget.onFileRemoved(file);
-            }
-          },
-        ),
-      );
-    }
-
-    if (isBothLocalAndRemote) {
-      buttons.add(
-        ButtonWidget(
-          labelText: "Delete from both",
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.third,
-          shouldSurfaceExecutionStates: true,
-          isInAlert: true,
-          onTap: () async {
-            await deleteFilesFromEverywhere(context, [file]);
-            Navigator.of(context, rootNavigator: true).pop();
-            widget.onFileRemoved(file);
-          },
-        ),
-      );
-    }
-    buttons.add(
-      const ButtonWidget(
-        labelText: "Cancel",
-        buttonType: ButtonType.secondary,
-        buttonSize: ButtonSize.large,
-        shouldStickToDarkTheme: true,
-        buttonAction: ButtonAction.fourth,
-        isInAlert: true,
-      ),
+    await showSingleFileDeleteSheet(
+      context,
+      file,
+      onFileRemoved: widget.onFileRemoved,
     );
-    final actionResult = await showActionSheet(
-      context: context,
-      buttons: buttons,
-      actionSheetType: ActionSheetType.defaultActionSheet,
-      body: body,
-      bodyHighlight: bodyHighlight,
-    );
-    if (actionResult?.action != null &&
-        actionResult!.action == ButtonAction.error) {
-      showGenericErrorDialog(context: context);
-    }
   }
 
   Future<void> _download(File file) async {
