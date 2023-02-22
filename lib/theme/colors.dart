@@ -51,6 +51,7 @@ class EnteColorScheme {
   //other colors
   final Color tabIcon;
   final List<Color> avatarColors;
+  final Color golden500;
 
   const EnteColorScheme(
     this.backgroundBase,
@@ -86,6 +87,7 @@ class EnteColorScheme {
     this.warning500 = _warning500,
     this.warning400 = _warning400,
     this.caution500 = _caution500,
+    this.golden500 = _golden500,
   });
 }
 
@@ -223,6 +225,8 @@ const Color _warning400 = Color.fromRGBO(255, 111, 111, 1);
 const Color _warning800 = Color(0xFFF53434);
 
 const Color _caution500 = Color.fromRGBO(255, 194, 71, 1);
+
+const Color _golden500 = Color(0xFFFFC94D);
 
 const List<Color> avatarLight = [
   Color.fromRGBO(118, 84, 154, 1),

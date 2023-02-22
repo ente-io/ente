@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/theme/colors.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 
@@ -40,7 +41,7 @@ class NotificationWidget extends StatelessWidget {
         backgroundColor = backgroundElevated2Dark;
         break;
       case NotificationType.goldenBanner:
-        backgroundColor = const Color.fromARGB(255, 250, 202, 88);
+        backgroundColor = getEnteColorScheme(context).golden500;
     }
     return Center(
       child: GestureDetector(
