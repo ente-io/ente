@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/theme/colors.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 
@@ -8,6 +9,7 @@ import 'package:photos/ui/components/icon_button_widget.dart';
 enum NotificationType {
   warning,
   banner,
+  goldenBanner,
 }
 
 class NotificationWidget extends StatelessWidget {
@@ -30,7 +32,9 @@ class NotificationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = Colors.white;
+    final colorScheme = getEnteColorScheme(context);
+    LinearGradient? backgroundGradient;
+    Color? backgroundColor;
     switch (type) {
       case NotificationType.warning:
         backgroundColor = warning500;
@@ -38,6 +42,13 @@ class NotificationWidget extends StatelessWidget {
       case NotificationType.banner:
         backgroundColor = backgroundElevated2Dark;
         break;
+      case NotificationType.goldenBanner:
+        backgroundGradient = LinearGradient(
+          colors: [colorScheme.golden700, colorScheme.golden500],
+          stops: const [0.25, 1],
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+        );
     }
     return Center(
       child: GestureDetector(
@@ -49,6 +60,7 @@ class NotificationWidget extends StatelessWidget {
             ),
             boxShadow: Theme.of(context).colorScheme.enteTheme.shadowMenu,
             color: backgroundColor,
+            gradient: backgroundGradient,
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

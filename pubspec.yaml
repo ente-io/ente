@@ -49,6 +49,7 @@ dependencies:
   fk_user_agent: ^2.0.1
   flutter:
     sdk: flutter
+  flutter_animate: ^4.1.0
   flutter_cache_manager: ^3.3.0
   flutter_datetime_picker: ^1.5.1
   flutter_easyloading: ^3.0.0
