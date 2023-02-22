@@ -51,7 +51,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   late CollectionActions collectionActions;
   late bool isCollectionOwner;
 
-  // _cachedCollectionForSharedLink is primarly used to avoid creating duplicate
+  // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting
   // few files. This link is reset on any selection changed;
   Collection? _cachedCollectionForSharedLink;
