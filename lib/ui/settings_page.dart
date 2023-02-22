@@ -47,8 +47,6 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _getBody(BuildContext context, EnteColorScheme colorScheme) {
-    Animate.restartOnHotReload = true;
-
     final hasLoggedIn = Configuration.instance.isLoggedIn();
     final enteTextTheme = getEnteTextTheme(context);
     final List<Widget> contents = [];
