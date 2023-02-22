@@ -96,7 +96,7 @@ class SettingsPage extends StatelessWidget {
                   ),
                 )
                     .animate(onPlay: (controller) => controller.repeat())
-                    .shimmer(duration: 1000.ms, delay: 4000.ms, size: 0.6),
+                    .shimmer(duration: 1000.ms, delay: 3200.ms, size: 0.6),
               )
             : const SizedBox(height: 12),
         const BackupSectionWidget(),
