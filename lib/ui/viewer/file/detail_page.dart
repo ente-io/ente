@@ -124,6 +124,8 @@ class _DetailPageState extends State<DetailPage> {
               _files![_selectedIndex],
               _onEditFileRequested,
               widget.config.mode == DetailPageMode.minimalistic,
+              onFileRemoved: _onFileRemoved,
+              userID: Configuration.instance.getUserID(),
               key: _bottomBarKey,
             ),
           ],

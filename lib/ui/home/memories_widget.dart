@@ -373,8 +373,19 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              icon: const Icon(
-                Icons.delete_outline,
+              icon: Icon(
+                Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
+                color: Colors.white, //same for both themes
+              ),
+              onPressed: () {
+                showInfoSheet(context, file);
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                Platform.isAndroid
+                    ? Icons.delete_outline
+                    : CupertinoIcons.delete,
                 color: Colors.white, //same for both themes
               ),
               onPressed: () async {
@@ -383,15 +394,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   file,
                   onFileRemoved: (file) => {onFileDeleted()},
                 );
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
-                color: Colors.white, //same for both themes
-              ),
-              onPressed: () {
-                showInfoSheet(context, file);
               },
             ),
             IconButton(

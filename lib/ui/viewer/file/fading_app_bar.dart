@@ -14,6 +14,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/ignored_file.dart';
+import "package:photos/models/magic_metadata.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/services/collections_service.dart';
@@ -21,12 +22,12 @@ import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
-import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
+import "package:photos/utils/magic_util.dart";
 import 'package:photos/utils/toast_util.dart';
 
 class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -145,22 +146,22 @@ class FadingAppBarState extends State<FadingAppBar> {
             );
           }
           // options for files owned by the user
-          if (isOwnedByUser) {
+          if (isOwnedByUser && !isFileHidden) {
+            final bool isArchived =
+                widget.file.magicMetadata.visibility == visibilityArchive;
             items.add(
               PopupMenuItem(
                 value: 2,
                 child: Row(
                   children: [
                     Icon(
-                      Platform.isAndroid
-                          ? Icons.delete_outline
-                          : CupertinoIcons.delete,
+                      isArchived ? Icons.unarchive : Icons.archive_outlined,
                       color: Theme.of(context).iconTheme.color,
                     ),
                     const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    const Text("Delete"),
+                    Text(isArchived ? "Unarchive" : "Archive"),
                   ],
                 ),
               ),
@@ -232,7 +233,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           if (value == 1) {
             _download(widget.file);
           } else if (value == 2) {
-            await _showSingleFileDeleteSheet(widget.file);
+            await _toggleFileArchiveStatus(widget.file);
           } else if (value == 3) {
             _setAs(widget.file);
           } else if (value == 4) {
@@ -335,12 +336,17 @@ class FadingAppBarState extends State<FadingAppBar> {
     );
   }
 
-  Future<void> _showSingleFileDeleteSheet(File file) async {
-    await showSingleFileDeleteSheet(
+  Future<void> _toggleFileArchiveStatus(File file) async {
+    final bool isArchived =
+        widget.file.magicMetadata.visibility == visibilityArchive;
+    await changeVisibility(
       context,
-      file,
-      onFileRemoved: widget.onFileRemoved,
+      [widget.file],
+      isArchived ? visibilityVisible : visibilityArchive,
     );
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _download(File file) async {
