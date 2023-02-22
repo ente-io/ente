@@ -382,8 +382,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               },
             ),
             IconButton(
-              icon: const Icon(
-                Icons.delete_outline,
+              icon: Icon(
+                Platform.isAndroid
+                    ? Icons.delete_outline
+                    : CupertinoIcons.delete,
                 color: Colors.white, //same for both themes
               ),
               onPressed: () async {
