@@ -32,7 +32,9 @@ class NotificationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = Colors.white;
+    final colorScheme = getEnteColorScheme(context);
+    LinearGradient? backgroundGradient;
+    Color? backgroundColor;
     switch (type) {
       case NotificationType.warning:
         backgroundColor = warning500;
@@ -41,7 +43,12 @@ class NotificationWidget extends StatelessWidget {
         backgroundColor = backgroundElevated2Dark;
         break;
       case NotificationType.goldenBanner:
-        backgroundColor = getEnteColorScheme(context).golden500;
+        backgroundGradient = LinearGradient(
+          colors: [colorScheme.golden700, colorScheme.golden500],
+          stops: const [0.25, 1],
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+        );
     }
     return Center(
       child: GestureDetector(
@@ -53,6 +60,7 @@ class NotificationWidget extends StatelessWidget {
             ),
             boxShadow: Theme.of(context).colorScheme.enteTheme.shadowMenu,
             color: backgroundColor,
+            gradient: backgroundGradient,
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
