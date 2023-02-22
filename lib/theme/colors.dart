@@ -226,7 +226,7 @@ const Color _warning800 = Color(0xFFF53434);
 
 const Color _caution500 = Color.fromRGBO(255, 194, 71, 1);
 
-const Color _golden500 = Color(0xFFFFC94D);
+const Color _golden500 = Color(0xFFFDB816);
 
 const List<Color> avatarLight = [
   Color.fromRGBO(118, 84, 154, 1),

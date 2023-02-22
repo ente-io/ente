@@ -92,9 +92,11 @@ class SettingsPage extends StatelessWidget {
                       routeToPage(context, const ReferralScreen());
                     },
                   ),
-                )
-                    .animate(onPlay: (controller) => controller.repeat())
-                    .shimmer(duration: 1000.ms, delay: 3200.ms, size: 0.6),
+                ).animate(onPlay: (controller) => controller.repeat()).shimmer(
+                      duration: 1000.ms,
+                      delay: 3200.ms,
+                      size: 0.6,
+                    ),
               )
             : const SizedBox(height: 12),
         const BackupSectionWidget(),
