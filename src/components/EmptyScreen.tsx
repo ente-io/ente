@@ -98,49 +98,6 @@ export default function EmptyScreen({ openUploader }) {
                     </FlexWrapper>
                 </Button>
             </VerticallyCentered>
-            <VerticallyCentered
-                paddingTop={3}
-                paddingBottom={3}
-                sx={{ gap: 3 }}>
-                <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
-                    <a href="https://apps.apple.com/app/id1542026904">
-                        <NonDraggableImage
-                            height={59}
-                            src="/images/download_assets/download_app_store.png"
-                            srcSet="/images/download_assets/download_app_store@2x.png,
-                                /images/download_assets/download_app_store@3x.png"
-                        />
-                    </a>
-                    <a href="https://play.app.goo.gl/?link=https://play.google.com/store/apps/details?id=io.ente.photos">
-                        <NonDraggableImage
-                            height={59}
-                            src="/images/download_assets/download_play_store.png"
-                            srcSet="/images/download_assets/download_play_store@2x.png,
-                                /images/download_assets/download_play_store@3x.png"
-                        />
-                    </a>
-                </FlexWrapper>
-                <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
-                    <a href="https://f-droid.org/packages/io.ente.photos.fdroid/">
-                        <NonDraggableImage
-                            height={49}
-                            src="/images/download_assets/download_fdroid.png"
-                            srcSet="/images/download_assets/download_fdroid@2x.png,
-                                /images/download_assets/download_fdroid@3x.png"
-                            style={{ pointerEvents: 'none' }}
-                        />
-                    </a>
-                    <a href="https://github.com/ente-io">
-                        <NonDraggableImage
-                            height={49}
-                            src="/images/download_assets/download_github.png"
-                            srcSet="/images/download_assets/download_github@2x.png,
-                                /images/download_assets/download_github@3x.png"
-                            style={{ pointerEvents: 'none' }}
-                        />
-                    </a>
-                </FlexWrapper>
-            </VerticallyCentered>
         </Wrapper>
     );
 }
