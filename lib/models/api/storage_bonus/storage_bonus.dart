@@ -18,7 +18,7 @@ class ReferralView {
   factory ReferralView.fromJson(Map<String, dynamic> json) => ReferralView(
         planInfo: PlanInfo.fromJson(json["planInfo"]),
         code: json["code"],
-        enableApplyCode: json["enableApplyCode"],
+        enableApplyCode: !json["enableApplyCode"],
         isFamilyMember: json["isFamilyMember"],
         hasAppliedCode: json["hasAppliedCode"],
         claimedStorage: json["claimedStorage"],
