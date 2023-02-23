@@ -129,7 +129,8 @@ class ReferralWidget extends StatelessWidget {
             ? InkWell(
                 onTap: () {
                   shareText(
-                      "ente referral code: ${referralView.code} \n\nApply it in Settings → General → Referrals to get 10 GB free after you signup for a paid plan\n\nhttps://ente.io");
+                    "ente referral code: ${referralView.code} \n\nApply it in Settings → General → Referrals to get 10 GB free after you signup for a paid plan\n\nhttps://ente.io",
+                  );
                 },
                 child: Container(
                   width: double.infinity,
@@ -179,9 +180,11 @@ class ReferralWidget extends StatelessWidget {
                         color: colorScheme.strokeMuted,
                       ),
                       const SizedBox(height: 12),
-                      Text("Referrals are currently paused",
-                          style: textStyle.small
-                              .copyWith(color: colorScheme.textFaint)),
+                      Text(
+                        "Referrals are currently paused",
+                        style: textStyle.small
+                            .copyWith(color: colorScheme.textFaint),
+                      ),
                     ],
                   ),
                 ),
@@ -239,9 +242,12 @@ class ReferralWidget extends StatelessWidget {
           alignCaptionedTextToLeft: true,
           onTap: () async {
             routeToPage(
-                context,
-                const WebPage(
-                    "FAQ", "https://ente.io/faq/general/referral-program"));
+              context,
+              const WebPage(
+                "FAQ",
+                "https://ente.io/faq/general/referral-program",
+              ),
+            );
           },
         ),
         const SizedBox(height: 24),
