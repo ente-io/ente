@@ -41,6 +41,7 @@ import 'package:photos/ui/home/preserve_footer_widget.dart';
 import 'package:photos/ui/home/start_backup_hook_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/notification/update/change_log_page.dart';
+import "package:photos/ui/search_tab.dart";
 import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
@@ -60,6 +61,7 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   static const _deviceFolderGalleryWidget = CollectionsGalleryWidget();
   static const _sharedCollectionGallery = SharedCollectionGallery();
+  static const _searchTab = SearchTab();
   static final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
   );
@@ -374,6 +376,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                       ),
                 _deviceFolderGalleryWidget,
                 _sharedCollectionGallery,
+                _searchTab,
               ],
             );
           },
