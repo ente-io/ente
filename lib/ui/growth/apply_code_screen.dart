@@ -11,7 +11,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/growth/code_success_screen.dart";
-// import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/dialog_util.dart";
 
 class ApplyCodeScreen extends StatefulWidget {
   // referrerView and userDetails used to render code_success_screen
@@ -132,20 +132,12 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                             ),
                           );
                         } catch (e) {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => CodeSuccessScreen(
-                                widget.referralView,
-                                widget.userDetails,
-                              ),
-                            ),
-                          );
                           Logger('$runtimeType')
                               .severe("failed to apply referral", e);
-                          // showErrorDialogForException(
-                          //     context: context,
-                          //     exception: e as Exception,
-                          //     apiErrorPrefix: "Failed to apply code");
+                          showErrorDialogForException(
+                              context: context,
+                              exception: e as Exception,
+                              apiErrorPrefix: "Failed to apply code");
                         }
                       },
                     )
