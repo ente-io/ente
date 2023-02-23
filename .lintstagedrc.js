@@ -9,5 +9,5 @@ const buildPrettierCommand = (filenames) =>
     `yarn prettier --write --ignore-unknown ${filenames.join(' ')}`;
 
 module.exports = {
-    '*.{js,jsx,ts,tsx}': [buildEslintCommand, buildPrettierCommand],
+    'src/**/*.{js,jsx,ts,tsx}': [buildEslintCommand, buildPrettierCommand],
 };

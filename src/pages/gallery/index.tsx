@@ -88,7 +88,11 @@ import FixCreationTime, {
 } from 'components/FixCreationTime';
 import { Collection, CollectionSummaries } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { GalleryContextType, SelectedState } from 'types/gallery';
+import {
+    GalleryContextType,
+    SelectedState,
+    UploadTypeSelectorIntent,
+} from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
@@ -103,6 +107,7 @@ import { CenteredFlex } from 'components/Container';
 import { checkConnectivity } from 'utils/error/ui';
 import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
 import ElectronService from 'services/electron/common';
+import uploadManager from 'services/upload/uploadManager';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -137,6 +142,7 @@ export default function Gallery() {
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
+    const [hasPersonalFiles, setHasPersonalFiles] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
         ownCount: 0,
         count: 0,
@@ -200,6 +206,10 @@ export default function Gallery() {
     const showPlanSelectorModal = () => setPlanModalView(true);
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
+    const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
+        useState<UploadTypeSelectorIntent>(
+            UploadTypeSelectorIntent.normalUpload
+        );
 
     const [sidebarView, setSidebarView] = useState(false);
 
@@ -383,6 +393,11 @@ export default function Gallery() {
             archivedCollections
         );
         setCollectionSummaries(collectionSummaries);
+        const incomingShareFiles = files.filter(
+            (file) => file.ownerID !== user.id
+        );
+        const hasPersonalFiles = files.length - incomingShareFiles.length > 0;
+        setHasPersonalFiles(hasPersonalFiles);
     };
 
     const clearSelection = function () {
@@ -560,8 +575,12 @@ export default function Gallery() {
         finishLoading();
     };
 
-    const openUploader = () => {
+    const openUploader = (intent = UploadTypeSelectorIntent.normalUpload) => {
+        if (!uploadManager.shouldAllowNewUpload()) {
+            return;
+        }
         setUploadTypeSelectorView(true);
+        setUploadTypeSelectorIntent(intent);
     };
 
     const closeCollectionSelector = () => {
@@ -659,6 +678,7 @@ export default function Gallery() {
                         null,
                         false
                     )}
+                    uploadTypeSelectorIntent={uploadTypeSelectorIntent}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
@@ -689,6 +709,7 @@ export default function Gallery() {
                     setSelected={setSelected}
                     selected={selected}
                     isFirstLoad={isFirstLoad}
+                    hasPersonalFiles={hasPersonalFiles}
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     search={search}
