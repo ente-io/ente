@@ -59,7 +59,7 @@ You can alternatively install the build from PlayStore.
 src="https://ente.io/static/ed265c3abdcd3efa5e29f64b927bcb44/e230a/play-store-badge.webp">
 </a>
 
-### iOS
+### iPhone / Apple Silicon
 
 <a href="https://apps.apple.com/us/app/ente-authenticator/id6444121398"> <img
   width="197" alt="Download on AppStore"
