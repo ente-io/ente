@@ -6,6 +6,7 @@ import {
     updateAndRestart,
     skipAppUpdate,
     muteUpdateNotification,
+    registerForegroundEventListener,
 } from './api/system';
 import {
     showUploadDirsDialog,
@@ -111,4 +112,5 @@ windowObject['ElectronAPIs'] = {
     muteUpdateNotification,
     generateImageThumbnail,
     logRendererProcessMemoryUsage,
+    registerForegroundEventListener,
 };
