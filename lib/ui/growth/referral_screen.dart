@@ -216,7 +216,7 @@ class ReferralWidget extends StatelessWidget {
                 onTap: () async {
                   await routeToPage(
                     context,
-                    const ApplyCodeScreen(),
+                    ApplyCodeScreen(referralView, userDetails),
                   );
                   notifyParent();
                 },
