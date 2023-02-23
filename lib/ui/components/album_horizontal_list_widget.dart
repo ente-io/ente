@@ -10,10 +10,10 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
 
 class AlbumHorizontalListWidget extends StatefulWidget {
-  final Future<List<CollectionWithThumbnail>> Function() future;
+  final Future<List<CollectionWithThumbnail>> Function() collectionsFuture;
 
   const AlbumHorizontalListWidget(
-    this.future, {
+    this.collectionsFuture, {
     Key? key,
   }) : super(key: key);
 
@@ -47,7 +47,7 @@ class _AlbumHorizontalListWidgetState extends State<AlbumHorizontalListWidget> {
   Widget build(BuildContext context) {
     debugPrint('$runtimeType widget build');
     return FutureBuilder<List<CollectionWithThumbnail>>(
-      future: widget.future(),
+      future: widget.collectionsFuture(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           _logger.severe("failed to fetch albums", snapshot.error);
