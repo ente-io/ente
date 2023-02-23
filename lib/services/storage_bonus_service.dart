@@ -6,7 +6,8 @@ class StorageBonusService {
   late StorageBonusGateway gateway;
   late SharedPreferences prefs;
 
-  final String _showStorageBonus = "showStorageBonus.showBanner";
+  final int minTapCountBeforeHidingBanner = 5;
+  final String _showStorageBonusTapCount = "showStorageBonus.tap_count";
 
   void init(SharedPreferences preferences) {
     prefs = preferences;
@@ -18,12 +19,15 @@ class StorageBonusService {
   static StorageBonusService instance =
       StorageBonusService._privateConstructor();
 
+  // returns true if _showStorageBonusTapCount value is less than minTapCountBeforeHidingBanner
   bool shouldShowStorageBonus() {
-    return prefs.getBool(_showStorageBonus) ?? true;
+    final tapCount = prefs.getInt(_showStorageBonusTapCount) ?? 0;
+    return tapCount <= minTapCountBeforeHidingBanner;
   }
 
   void markStorageBonusAsDone() {
-    prefs.setBool(_showStorageBonus, false).ignore();
+    final tapCount = prefs.getInt(_showStorageBonusTapCount) ?? 0;
+    prefs.setInt(_showStorageBonusTapCount, tapCount + 1).ignore();
   }
 
   // getter for gateway
