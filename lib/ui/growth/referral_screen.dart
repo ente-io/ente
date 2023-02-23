@@ -1,4 +1,3 @@
-import "package:dotted_border/dotted_border.dart";
 import "package:flutter/material.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
@@ -14,6 +13,7 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/growth/apply_code_screen.dart";
+import "package:photos/ui/growth/referral_code_widget.dart";
 import "package:photos/ui/growth/storage_details_screen.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -153,41 +153,7 @@ class ReferralWidget extends StatelessWidget {
                           "friends",
                         ),
                         const SizedBox(height: 12),
-                        Center(
-                          child: DottedBorder(
-                            color: colorScheme.strokeMuted,
-                            //color of dotted/dash line
-                            strokeWidth: 1,
-                            //thickness of dash/dots
-                            dashPattern: const [6, 6],
-                            radius: const Radius.circular(8),
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                left: 26.0,
-                                top: 14,
-                                right: 12,
-                                bottom: 14,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    referralView.code,
-                                    style: textStyle.bodyBold.copyWith(
-                                      color: colorScheme.primary700,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Icon(
-                                    Icons.adaptive.share,
-                                    size: 22,
-                                    color: colorScheme.strokeMuted,
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                        ReferralCodeWidget(referralView.code),
                         const SizedBox(height: 12),
                         const Text(
                           "2. They sign up for a paid plan",
