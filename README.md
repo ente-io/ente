@@ -68,7 +68,7 @@ src="https://user-images.githubusercontent.com/1161789/154795157-c4468ff9-97fd-4
 
 ### Desktop
 
-Support for desktop platforms (Linux, Mac and Windows) is a [work in
+Support for desktop platforms (Linux, Windows and older Macs) is a [work in
 progress](https://github.com/ente-io/auth/tree/desktop).
 
 Please ⭐ this repo to be notified of updates.
