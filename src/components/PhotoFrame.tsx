@@ -58,6 +58,7 @@ interface Props {
     ) => void;
     selected: SelectedState;
     isFirstLoad?;
+    hasPersonalFiles?;
     openUploader?;
     isInSearchMode?: boolean;
     search?: Search;
@@ -79,6 +80,7 @@ const PhotoFrame = ({
     setSelected,
     selected,
     isFirstLoad,
+    hasPersonalFiles,
     openUploader,
     isInSearchMode,
     search,
@@ -109,7 +111,6 @@ const PhotoFrame = ({
     const updateRequired = useRef(false);
 
     const [filteredData, setFilteredData] = useState<EnteFile[]>([]);
-
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
         setUser(user);
@@ -654,7 +655,7 @@ const PhotoFrame = ({
     return (
         <>
             {!isFirstLoad &&
-            files.length === 0 &&
+            !hasPersonalFiles &&
             !isInSearchMode &&
             activeCollection === ALL_SECTION ? (
                 <EmptyScreen openUploader={openUploader} />

@@ -59,7 +59,7 @@ import {
     getPublicCollectionUploaderName,
     savePublicCollectionUploaderName,
 } from 'services/publicCollectionService';
-
+import { UploadTypeSelectorIntent } from 'types/gallery';
 const FIRST_ALBUM_NAME = 'My First Album';
 
 interface Props {
@@ -81,8 +81,8 @@ interface Props {
     webFolderSelectorFiles: File[];
     webFileSelectorFiles: File[];
     dragAndDropFiles: File[];
-    zipUploadDisabled?: boolean;
     uploadCollection?: Collection;
+    uploadTypeSelectorIntent: UploadTypeSelectorIntent;
 }
 
 export default function Uploader(props: Props) {
@@ -752,7 +752,7 @@ export default function Uploader(props: Props) {
                 uploadFiles={handleFileUpload}
                 uploadFolders={handleFolderUpload}
                 uploadGoogleTakeoutZips={handleZipUpload}
-                hideZipUploadOption={props.zipUploadDisabled}
+                uploadTypeSelectorIntent={props.uploadTypeSelectorIntent}
             />
             <UploadProgress
                 open={uploadProgressView}
