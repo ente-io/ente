@@ -6,7 +6,7 @@ import React from 'react';
 import { SuggestionType } from 'types/search';
 import { formatNumberWithCommas } from '.';
 import { FACE_SEARCH_PRIVACY_POLICY_LINK } from 'constants/urls';
-
+import { EnteLogo } from 'components/EnteLogo';
 /**
  * Global English constants.
  */
@@ -96,8 +96,8 @@ const englishConstants = {
     ),
     WELCOME_TO_ENTE: () => (
         <>
-            <Typography variant="h3" color="text.secondary">
-                Welcome to <span style={{ color: '#fff' }}> ente </span>
+            <Typography variant="h3" color="text.secondary" mb={1}>
+                Welcome to <EnteLogo />
             </Typography>
             <h2>End to end encrypted photo storage and sharing</h2>
         </>
