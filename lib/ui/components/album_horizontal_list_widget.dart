@@ -7,6 +7,7 @@ import "package:photos/events/collection_updated_event.dart";
 import "package:photos/models/collection_items.dart";
 import "package:photos/ui/collections/collection_item_widget.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/divider_widget.dart";
 
 class AlbumHorizontalListWidget extends StatefulWidget {
   final Future<List<CollectionWithThumbnail>> Function() future;
@@ -57,27 +58,33 @@ class _AlbumHorizontalListWidgetState extends State<AlbumHorizontalListWidget> {
           return Align(
             alignment: Alignment.centerLeft,
             child: SizedBox(
-              height: 200,
-              child: ListView.builder(
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                itemCount: collectionsWithThumbnail.length,
-                padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
-                itemBuilder: (context, index) {
-                  final item = collectionsWithThumbnail[index];
-                  return GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () async {},
-                    child: Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: CollectionItem(
-                        item,
-                        120,
-                        shouldRender: true,
-                      ),
+              height: 180,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: collectionsWithThumbnail.length,
+                      padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
+                      itemBuilder: (context, index) {
+                        final item = collectionsWithThumbnail[index];
+                        return GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () async {},
+                          child: Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: CollectionItem(
+                              item,
+                              120,
+                              shouldRender: true,
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
+                  ),
+                  const DividerWidget(dividerType: DividerType.solid),
+                ],
               ),
             ),
           );
