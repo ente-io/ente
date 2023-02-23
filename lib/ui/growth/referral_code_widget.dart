@@ -13,34 +13,37 @@ class ReferralCodeWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textStyle = getEnteTextTheme(context);
     return Center(
-      child: DottedBorder(
-        color: colorScheme.strokeMuted,
-        strokeWidth: 1,
-        dashPattern: const [6, 6],
-        radius: const Radius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.only(
-            left: 26.0,
-            top: 14,
-            right: 12,
-            bottom: 14,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                codeValue,
-                style: textStyle.bodyBold.copyWith(
-                  color: colorScheme.primary700,
+      child: Container(
+        color: colorScheme.backgroundElevated2,
+        child: DottedBorder(
+          color: colorScheme.strokeMuted,
+          strokeWidth: 1,
+          dashPattern: const [6, 6],
+          radius: const Radius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.only(
+              left: 26.0,
+              top: 14,
+              right: 12,
+              bottom: 14,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  codeValue,
+                  style: textStyle.bodyBold.copyWith(
+                    color: colorScheme.primary700,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Icon(
-                Icons.adaptive.share,
-                size: 22,
-                color: colorScheme.strokeMuted,
-              )
-            ],
+                const SizedBox(width: 12),
+                Icon(
+                  Icons.adaptive.share,
+                  size: 22,
+                  color: colorScheme.strokeMuted,
+                )
+              ],
+            ),
           ),
         ),
       ),
