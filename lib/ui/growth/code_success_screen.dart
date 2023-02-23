@@ -11,6 +11,7 @@ import "package:photos/ui/growth/referral_code_widget.dart";
 import "package:photos/ui/growth/storage_details_screen.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
+import "package:spring/spring.dart";
 
 class CodeSuccessScreen extends StatelessWidget {
   final ReferralView referralView;
@@ -53,10 +54,14 @@ class CodeSuccessScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.check,
-                          color: colorScheme.primary500,
-                          size: 96,
+                        Spring.scale(
+                          start: 0.2,
+                          end: 1.0,
+                          child: Icon(
+                            Icons.check,
+                            color: colorScheme.primary500,
+                            size: 96,
+                          ),
                         ),
                         Text(
                           "${referralView.planInfo.storageInGB} GB",

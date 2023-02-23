@@ -102,6 +102,7 @@ dependencies:
   sentry_flutter: ^6.12.1
   share_plus: ^4.0.10
   shared_preferences: ^2.0.5
+  spring: ^2.0.2
   sqflite: ^2.0.0+3
   sqflite_migration: ^0.3.0
   step_progress_indicator: ^1.0.2
