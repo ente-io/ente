@@ -67,7 +67,7 @@ class ArchivePage extends StatelessWidget {
         text: "You don't have any archived items.",
       ),
       header: AlbumHorizontalListWidget(
-        CollectionsService.instance.getArchivedCollectionWithThumb(),
+        CollectionsService.instance.getArchivedCollectionWithThumb,
       ),
     );
     return Scaffold(
