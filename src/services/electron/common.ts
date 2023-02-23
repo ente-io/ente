@@ -39,6 +39,11 @@ class ElectronService {
             return this.electronAPIs.logRendererProcessMemoryUsage(message);
         }
     }
+    registerForegroundEventListener(onForeground: () => void) {
+        if (this.electronAPIs?.registerForegroundEventListener) {
+            this.electronAPIs.registerForegroundEventListener(onForeground);
+        }
+    }
 }
 
 export default new ElectronService();

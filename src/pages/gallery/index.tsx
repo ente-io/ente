@@ -105,6 +105,8 @@ import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
 import { checkConnectivity } from 'utils/error/ui';
+import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
+import ElectronService from 'services/electron/common';
 import uploadManager from 'services/upload/uploadManager';
 
 export const DeadCenter = styled('div')`
@@ -262,6 +264,12 @@ export default function Gallery() {
             setIsFirstLoad(false);
             setJustSignedUp(false);
             setIsFirstFetch(false);
+            setInterval(() => {
+                syncWithRemote(false, true);
+            }, SYNC_INTERVAL_IN_MICROSECONDS);
+            ElectronService.registerForegroundEventListener(() =>
+                syncWithRemote(false, true)
+            );
         };
         main();
     }, []);
