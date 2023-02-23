@@ -20,6 +20,13 @@ export const registerUpdateEventListener = (
     });
 };
 
+export const registerForegroundEventListener = (onForeground: () => void) => {
+    ipcRenderer.removeAllListeners('app-in-foreground');
+    ipcRenderer.on('app-in-foreground', () => {
+        onForeground();
+    });
+};
+
 export const updateAndRestart = () => {
     ipcRenderer.send('update-and-restart');
 };
