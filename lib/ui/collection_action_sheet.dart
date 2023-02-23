@@ -440,6 +440,12 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         return Future.value(false);
       } else {
         try {
+          unawaited(
+            routeToPage(
+              context,
+              ShareCollectionPage(collection),
+            ),
+          );
           await CollectionsService.instance
               .updateShareUrl(collection, {'enableCollect': true});
           return true;
