@@ -53,6 +53,11 @@ class CodeSuccessScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        Icon(
+                          Icons.check,
+                          color: colorScheme.primary500,
+                          size: 96,
+                        ),
                         Text(
                           "${referralView.planInfo.storageInGB} GB",
                           style: textStyle.h2Bold,
