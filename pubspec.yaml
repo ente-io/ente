@@ -49,6 +49,7 @@ dependencies:
   fk_user_agent: ^2.0.1
   flutter:
     sdk: flutter
+  flutter_animate: ^4.1.0
   flutter_cache_manager: ^3.3.0
   flutter_datetime_picker: ^1.5.1
   flutter_easyloading: ^3.0.0
@@ -76,7 +77,7 @@ dependencies:
   local_auth: ^1.1.5
   logging: ^1.0.1
   lottie: ^1.2.2
-  media_extension: ^1.0.0
+  media_extension: ^1.0.1
   modal_bottom_sheet: ^3.0.0-pre
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"

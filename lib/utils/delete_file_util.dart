@@ -13,6 +13,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import "package:photos/events/force_reload_trash_page_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
@@ -264,6 +265,9 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
             source: "deleteFromTrash",
           ),
         );
+        //the FilesUpdateEvent is not reloading trash on premanently removing
+        //files, so need to fire ForceReloadTrashPageEvent
+        Bus.instance.fire(ForceReloadTrashPageEvent());
       } catch (e, s) {
         _logger.info("failed to delete from trash", e, s);
         rethrow;

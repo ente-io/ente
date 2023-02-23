@@ -5,15 +5,17 @@ class AppLifecycleService {
   final _logger = Logger("AppLifecycleService");
 
   bool isForeground = false;
-  IntentAction intentAction = IntentAction.main;
+  MediaExtentionAction mediaExtensionAction =
+      MediaExtentionAction(action: IntentAction.main);
 
   static final AppLifecycleService instance =
       AppLifecycleService._privateConstructor();
 
   AppLifecycleService._privateConstructor();
 
-  void setIntentAction(IntentAction intentAction) {
-    this.intentAction = intentAction;
+  void setMediaExtensionAction(MediaExtentionAction mediaExtensionAction) {
+    _logger.info("App invoked via ${mediaExtensionAction.action}");
+    this.mediaExtensionAction = mediaExtensionAction;
   }
 
   void onAppInForeground(String reason) {
