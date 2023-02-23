@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -11,7 +12,6 @@ import "package:photos/ui/growth/referral_code_widget.dart";
 import "package:photos/ui/growth/storage_details_screen.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
-import "package:spring/spring.dart";
 
 class CodeSuccessScreen extends StatelessWidget {
   final ReferralView referralView;
@@ -54,15 +54,23 @@ class CodeSuccessScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Spring.scale(
-                          start: 0.2,
-                          end: 1.0,
-                          child: Icon(
-                            Icons.check,
-                            color: colorScheme.primary500,
-                            size: 96,
-                          ),
-                        ),
+                        Icon(
+                          Icons.check,
+                          color: colorScheme.primary500,
+                          size: 96,
+                        )
+                            .animate()
+                            .scaleXY(
+                              begin: 0.5,
+                              end: 1,
+                              duration: 750.ms,
+                              curve: Curves.easeInOutCubic,
+                              delay: 250.ms,
+                            )
+                            .fadeIn(
+                              duration: 500.ms,
+                              curve: Curves.easeInOutCubic,
+                            ),
                         Text(
                           "${referralView.planInfo.storageInGB} GB",
                           style: textStyle.h2Bold,
