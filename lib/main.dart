@@ -5,6 +5,7 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/app.dart';
@@ -54,6 +55,7 @@ const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 const kBackgroundLockLatency = Duration(seconds: 3);
 
 void main() async {
+  debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
   await _runInForeground();
   BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);

@@ -86,6 +86,26 @@ class EnteTextTheme {
   final TextStyle brandSmall;
   final TextStyle brandMedium;
 
+  // textMuted variants
+  final TextStyle h1Muted;
+  final TextStyle h2Muted;
+  final TextStyle h3Muted;
+  final TextStyle largeMuted;
+  final TextStyle bodyMuted;
+  final TextStyle smallMuted;
+  final TextStyle miniMuted;
+  final TextStyle tinyMuted;
+
+  // textFaint variants
+  final TextStyle h1Faint;
+  final TextStyle h2Faint;
+  final TextStyle h3Faint;
+  final TextStyle largeFaint;
+  final TextStyle bodyFaint;
+  final TextStyle smallFaint;
+  final TextStyle miniFaint;
+  final TextStyle tinyFaint;
+
   const EnteTextTheme({
     required this.h1,
     required this.h1Bold,
@@ -105,13 +125,42 @@ class EnteTextTheme {
     required this.tinyBold,
     required this.brandSmall,
     required this.brandMedium,
+    required this.h1Muted,
+    required this.h2Muted,
+    required this.h3Muted,
+    required this.largeMuted,
+    required this.bodyMuted,
+    required this.smallMuted,
+    required this.miniMuted,
+    required this.tinyMuted,
+    required this.h1Faint,
+    required this.h2Faint,
+    required this.h3Faint,
+    required this.largeFaint,
+    required this.bodyFaint,
+    required this.smallFaint,
+    required this.miniFaint,
+    required this.tinyFaint,
   });
 }
 
-EnteTextTheme lightTextTheme = _buildEnteTextStyle(textBaseLight);
-EnteTextTheme darkTextTheme = _buildEnteTextStyle(textBaseDark);
+EnteTextTheme lightTextTheme = _buildEnteTextStyle(
+  textBaseLight,
+  textMutedLight,
+  textFaintLight,
+);
 
-EnteTextTheme _buildEnteTextStyle(Color color) {
+EnteTextTheme darkTextTheme = _buildEnteTextStyle(
+  textBaseDark,
+  textMutedDark,
+  textFaintDark,
+);
+
+EnteTextTheme _buildEnteTextStyle(
+  Color color,
+  Color textMuted,
+  Color textFaint,
+) {
   return EnteTextTheme(
     h1: h1.copyWith(color: color),
     h1Bold: h1.copyWith(color: color, fontWeight: _boldWeight),
@@ -131,5 +180,21 @@ EnteTextTheme _buildEnteTextStyle(Color color) {
     tinyBold: tiny.copyWith(color: color, fontWeight: _boldWeight),
     brandSmall: brandStyleSmall.copyWith(color: color),
     brandMedium: brandStyleMedium.copyWith(color: color),
+    h1Muted: h1.copyWith(color: textMuted),
+    h2Muted: h2.copyWith(color: textMuted),
+    h3Muted: h3.copyWith(color: textMuted),
+    largeMuted: large.copyWith(color: textMuted),
+    bodyMuted: body.copyWith(color: textMuted),
+    smallMuted: small.copyWith(color: textMuted),
+    miniMuted: mini.copyWith(color: textMuted),
+    tinyMuted: tiny.copyWith(color: textMuted),
+    h1Faint: h1.copyWith(color: textFaint),
+    h2Faint: h2.copyWith(color: textFaint),
+    h3Faint: h3.copyWith(color: textFaint),
+    largeFaint: large.copyWith(color: textFaint),
+    bodyFaint: body.copyWith(color: textFaint),
+    smallFaint: small.copyWith(color: textFaint),
+    miniFaint: mini.copyWith(color: textFaint),
+    tinyFaint: tiny.copyWith(color: textFaint),
   );
 }

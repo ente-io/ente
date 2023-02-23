@@ -108,19 +108,23 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                                 BonusInfoSection(
                                   sectionName: "Free storage claimed",
                                   leftValue: convertBytesToAbsoluteGBs(
-                                      widget.referralView.claimedStorage),
+                                    widget.referralView.claimedStorage,
+                                  ),
                                   leftUnitName: "GB",
                                   rightValue: null,
                                 ),
                                 BonusInfoSection(
                                   sectionName: "Free storage usable",
-                                  leftValue: convertBytesToAbsoluteGBs(min(
-                                    widget.referralView.claimedStorage,
-                                    widget.userDetails.getTotalStorage(),
-                                  )),
+                                  leftValue: convertBytesToAbsoluteGBs(
+                                    min(
+                                      widget.referralView.claimedStorage,
+                                      widget.userDetails.getTotalStorage(),
+                                    ),
+                                  ),
                                   leftUnitName: "GB",
                                   rightValue: convertBytesToAbsoluteGBs(
-                                      widget.userDetails.getTotalStorage()),
+                                    widget.userDetails.getTotalStorage(),
+                                  ),
                                   rightUnitName: "GB",
                                 ),
                                 const SizedBox(

@@ -43,14 +43,15 @@ Future<ButtonResult?> showErrorDialogForException({
   required BuildContext context,
   required Exception exception,
   bool isDismissible = true,
+  String apiErrorPrefix = "It looks like something went wrong.",
 }) async {
   String errorMessage =
       "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.";
   if (exception is DioError &&
       exception.response != null &&
       exception.response!.data["code"] != null) {
-    errorMessage = "It looks like something went wrong. \n\nReason: " +
-        exception.response!.data["code"];
+    errorMessage =
+        "$apiErrorPrefix\n\nReason: " + exception.response!.data["code"];
   }
   return showDialogWidget(
     context: context,

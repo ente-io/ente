@@ -1,4 +1,3 @@
-import "package:dotted_border/dotted_border.dart";
 import "package:flutter/material.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
@@ -14,6 +13,7 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/growth/apply_code_screen.dart";
+import "package:photos/ui/growth/referral_code_widget.dart";
 import "package:photos/ui/growth/storage_details_screen.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -129,7 +129,8 @@ class ReferralWidget extends StatelessWidget {
             ? InkWell(
                 onTap: () {
                   shareText(
-                      "ente referral code: ${referralView.code} \n\nApply it in Settings → General → Referrals to get 10 GB free after you signup for a paid plan\n\nhttps://ente.io");
+                    "ente referral code: ${referralView.code} \n\nApply it in Settings → General → Referrals to get 10 GB free after you signup for a paid plan\n\nhttps://ente.io",
+                  );
                 },
                 child: Container(
                   width: double.infinity,
@@ -153,41 +154,7 @@ class ReferralWidget extends StatelessWidget {
                           "friends",
                         ),
                         const SizedBox(height: 12),
-                        Center(
-                          child: DottedBorder(
-                            color: colorScheme.strokeMuted,
-                            //color of dotted/dash line
-                            strokeWidth: 1,
-                            //thickness of dash/dots
-                            dashPattern: const [6, 6],
-                            radius: const Radius.circular(8),
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                left: 26.0,
-                                top: 14,
-                                right: 12,
-                                bottom: 14,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    referralView.code,
-                                    style: textStyle.bodyBold.copyWith(
-                                      color: colorScheme.primary700,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Icon(
-                                    Icons.adaptive.share,
-                                    size: 22,
-                                    color: colorScheme.strokeMuted,
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                        ReferralCodeWidget(referralView.code),
                         const SizedBox(height: 12),
                         const Text(
                           "2. They sign up for a paid plan",
@@ -213,9 +180,11 @@ class ReferralWidget extends StatelessWidget {
                         color: colorScheme.strokeMuted,
                       ),
                       const SizedBox(height: 12),
-                      Text("Referrals are currently paused",
-                          style: textStyle.small
-                              .copyWith(color: colorScheme.textFaint)),
+                      Text(
+                        "Referrals are currently paused",
+                        style: textStyle.small
+                            .copyWith(color: colorScheme.textFaint),
+                      ),
                     ],
                   ),
                 ),
@@ -247,7 +216,7 @@ class ReferralWidget extends StatelessWidget {
                 onTap: () async {
                   await routeToPage(
                     context,
-                    const ApplyCodeScreen(),
+                    ApplyCodeScreen(referralView, userDetails),
                   );
                   notifyParent();
                 },
@@ -273,9 +242,12 @@ class ReferralWidget extends StatelessWidget {
           alignCaptionedTextToLeft: true,
           onTap: () async {
             routeToPage(
-                context,
-                const WebPage(
-                    "FAQ", "https://ente.io/faq/general/referral-program"));
+              context,
+              const WebPage(
+                "FAQ",
+                "https://ente.io/faq/general/referral-program",
+              ),
+            );
           },
         ),
         const SizedBox(height: 24),

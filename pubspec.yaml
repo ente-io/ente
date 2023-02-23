@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.7.26+426
+version: 0.7.27+427
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
@@ -30,7 +30,7 @@ dependencies:
   collection: # dart
   computer: ^2.0.0
   confetti: ^0.6.0
-  connectivity: ^3.0.3
+  connectivity_plus: ^3.0.3
   cupertino_icons: ^1.0.0
   device_info: ^2.0.2
   dio: ^4.0.6
@@ -49,6 +49,7 @@ dependencies:
   fk_user_agent: ^2.0.1
   flutter:
     sdk: flutter
+  flutter_animate: ^4.1.0
   flutter_cache_manager: ^3.3.0
   flutter_datetime_picker: ^1.5.1
   flutter_easyloading: ^3.0.0
@@ -76,7 +77,7 @@ dependencies:
   local_auth: ^1.1.5
   logging: ^1.0.1
   lottie: ^1.2.2
-  media_extension: ^1.0.0
+  media_extension: ^1.0.1
   modal_bottom_sheet: ^3.0.0-pre
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
@@ -147,6 +148,14 @@ flutter_native_splash:
   android_fullscreen: true
   android_gravity: center
   ios_content_mode: center
+  android_12:
+    # The image parameter sets the splash screen icon image.  If this parameter is not specified,
+    # the app's launcher icon will be used instead.
+    # Please note that the splash screen will be clipped to a circle on the center of the screen.
+    # App icon without an icon background: This should be 1152×1152 pixels, and fit within a circle
+    # 768 pixels in diameter.
+    image: assets/splash-screen-light.png
+    image_dark: assets/splash-screen-dark.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -185,7 +185,9 @@ class CollectionsService {
   Future<List<CollectionWithThumbnail>> getArchivedCollectionWithThumb() async {
     final allCollections = await getCollectionsWithThumbnails();
     return allCollections
-        .where((element) => element.collection.isArchived())
+        .where(
+          (c) => c.collection.isArchived() && !c.collection.isHidden(),
+        )
         .toList();
   }
 

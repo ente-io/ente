@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/core/event_bus.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
+import "package:photos/events/files_updated_event.dart";
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/collections_service.dart';
@@ -33,6 +35,17 @@ class MemoriesService extends ChangeNotifier {
       _memoriesDB.clearMemoriesSeenBeforeTime(
         DateTime.now().microsecondsSinceEpoch - (7 * microSecondsInDay),
       );
+    });
+    Bus.instance.on<FilesUpdatedEvent>().where((event) {
+      return event.type == EventType.deletedFromEverywhere;
+    }).listen((event) {
+      final generatedIDs = event.updatedFiles
+          .where((element) => element.generatedID != null)
+          .map((e) => e.generatedID!)
+          .toSet();
+      _cachedMemories?.removeWhere((element) {
+        return generatedIDs.contains(element.file.generatedID);
+      });
     });
   }
 

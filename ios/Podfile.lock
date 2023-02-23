@@ -3,9 +3,9 @@ PODS:
     - Flutter
   - camera_avfoundation (0.0.1):
     - Flutter
-  - connectivity (0.0.1):
+  - connectivity_plus (0.0.1):
     - Flutter
-    - Reachability
+    - ReachabilitySwift
   - device_info (0.0.1):
     - Flutter
   - Firebase/CoreOnly (10.3.0):
@@ -136,7 +136,7 @@ PODS:
     - Flutter
     - FlutterMacOS
   - PromisesObjC (2.1.1)
-  - Reachability (3.2)
+  - ReachabilitySwift (5.0.0)
   - receive_sharing_intent (0.0.1):
     - Flutter
   - SDWebImage (5.15.2):
@@ -178,7 +178,7 @@ PODS:
 DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
-  - connectivity (from `.symlinks/plugins/connectivity/ios`)
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - device_info (from `.symlinks/plugins/device_info/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
@@ -231,7 +231,7 @@ SPEC REPOS:
     - nanopb
     - OrderedSet
     - PromisesObjC
-    - Reachability
+    - ReachabilitySwift
     - SDWebImage
     - SDWebImageWebPCoder
     - Sentry
@@ -242,8 +242,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/background_fetch/ios"
   camera_avfoundation:
     :path: ".symlinks/plugins/camera_avfoundation/ios"
-  connectivity:
-    :path: ".symlinks/plugins/connectivity/ios"
+  connectivity_plus:
+    :path: ".symlinks/plugins/connectivity_plus/ios"
   device_info:
     :path: ".symlinks/plugins/device_info/ios"
   firebase_core:
@@ -320,7 +320,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   background_fetch: bd64e544b303ee4cd4cf2fe8cb2187b72aecf9ca
   camera_avfoundation: 07c77549ea54ad95d8581be86617c094a46280d9
-  connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
+  connectivity_plus: 413a8857dd5d9f1c399a39130850d02fe0feaf7e
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Firebase: f92fc551ead69c94168d36c2b26188263860acd9
   firebase_core: f95c8bbe65213d406d592573ad42a12d64849cb8
@@ -358,7 +358,7 @@ SPEC CHECKSUMS:
   path_provider_foundation: 37748e03f12783f9de2cb2c4eadfaa25fe6d4852
   photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
   PromisesObjC: ab77feca74fa2823e7af4249b8326368e61014cb
-  Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
+  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   receive_sharing_intent: c0d87310754e74c0f9542947e7cbdf3a0335a3b1
   SDWebImage: 8ab87d4b3e5cc4927bd47f78db6ceb0b94442577
   SDWebImageWebPCoder: 4851414d9f8894e328e8b97c93ea4f4f4e4418ae

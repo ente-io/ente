@@ -597,8 +597,11 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   }
 
   Future<bool> _restoreFilesToCollection(int toCollectionID) async {
-    final dialog = createProgressDialog(context, "Restoring files...",
-        isDismissible: true);
+    final dialog = createProgressDialog(
+      context,
+      "Restoring files...",
+      isDismissible: true,
+    );
     await dialog.show();
     try {
       await CollectionsService.instance
