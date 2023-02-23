@@ -53,6 +53,9 @@ class _AlbumHorizontalListWidgetState extends State<AlbumHorizontalListWidget> {
           _logger.severe("failed to fetch albums", snapshot.error);
           return const Text("Something went wrong");
         } else if (snapshot.hasData) {
+          if (snapshot.data!.isEmpty) {
+            return const SizedBox.shrink();
+          }
           final collectionsWithThumbnail =
               snapshot.data as List<CollectionWithThumbnail>;
           return Align(
