@@ -61,7 +61,7 @@ class _AlbumHorizontalListWidgetState extends State<AlbumHorizontalListWidget> {
           return Align(
             alignment: Alignment.centerLeft,
             child: SizedBox(
-              height: 180,
+              height: 190,
               child: Column(
                 children: [
                   Expanded(
