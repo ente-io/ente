@@ -18,6 +18,7 @@ export enum SuggestionType {
     INDEX_STATUS,
     THING,
     TEXT,
+    FILE_CAPTION,
 }
 
 export interface DateValue {

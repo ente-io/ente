@@ -99,6 +99,9 @@ export default function SearchInput(props: Iprops) {
             case SuggestionType.FILE_NAME:
                 search = { files: selectedOption.value as number[] };
                 break;
+            case SuggestionType.FILE_CAPTION:
+                search = { files: selectedOption.value as number[] };
+                break;
             case SuggestionType.PERSON:
                 search = { person: selectedOption.value as Person };
                 break;
