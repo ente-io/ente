@@ -1,4 +1,5 @@
 import "package:flutter/widgets.dart";
+import "package:photos/ui/viewer/search/tab_empty_state.dart";
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -9,8 +10,6 @@ class SearchTab extends StatefulWidget {
 class _SearchTabState extends State<SearchTab> {
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text("Search tab placeholder"),
-    );
+    return const Center(child: SearchTabEmptyState());
   }
 }
