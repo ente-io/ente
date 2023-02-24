@@ -238,7 +238,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           onTap: isOwner
                               ? () async {
                                   if (isOwner) {
-                                    await _navigateToManageUser(currentUser);
+                                    _navigateToManageUser(currentUser);
                                   }
                                 }
                               : null,
