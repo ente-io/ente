@@ -12,36 +12,38 @@ class SearchTabEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textStyle = getEnteTextTheme(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Fast, on-device search", style: textStyle.h3Bold),
-          const SizedBox(height: 24),
-          const EmptyStateItemWidget("Photo dates, descriptions"),
-          const SizedBox(height: 12),
-          const EmptyStateItemWidget("Albums, file names, and types"),
-          const SizedBox(height: 12),
-          const EmptyStateItemWidget("Location"),
-          const SizedBox(height: 12),
-          const EmptyStateItemWidget("Coming soon: Photo contents, faces"),
-          const SizedBox(height: 32),
-          ButtonWidget(
-            buttonType: ButtonType.trailingIconPrimary,
-            labelText: "Add your photos now",
-            icon: Icons.arrow_forward_outlined,
-            onTap: () async {
-              routeToPage(
-                context,
-                const BackupFolderSelectionPage(
-                  buttonText: "Backup",
-                ),
-              );
-            },
-          )
-        ],
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Fast, on-device search", style: textStyle.h3Bold),
+            const SizedBox(height: 24),
+            const EmptyStateItemWidget("Photo dates, descriptions"),
+            const SizedBox(height: 12),
+            const EmptyStateItemWidget("Albums, file names, and types"),
+            const SizedBox(height: 12),
+            const EmptyStateItemWidget("Location"),
+            const SizedBox(height: 12),
+            const EmptyStateItemWidget("Coming soon: Photo contents, faces"),
+            const SizedBox(height: 32),
+            ButtonWidget(
+              buttonType: ButtonType.trailingIconPrimary,
+              labelText: "Add your photos now",
+              icon: Icons.arrow_forward_outlined,
+              onTap: () async {
+                routeToPage(
+                  context,
+                  const BackupFolderSelectionPage(
+                    buttonText: "Backup",
+                  ),
+                );
+              },
+            )
+          ],
+        ),
       ),
     );
   }
