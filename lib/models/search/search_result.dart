@@ -1,5 +1,7 @@
 import 'package:photos/models/file.dart';
 
+import "search_types.dart";
+
 abstract class SearchResult {
   ResultType type();
 
@@ -12,16 +14,4 @@ abstract class SearchResult {
   }
 
   List<File> resultFiles();
-}
-
-enum ResultType {
-  collection,
-  file,
-  location,
-  month,
-  year,
-  fileType,
-  fileExtension,
-  fileCaption,
-  event
 }

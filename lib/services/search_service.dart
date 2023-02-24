@@ -14,7 +14,7 @@ import 'package:photos/models/location.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import 'package:photos/models/search/location_api_response.dart';
-import 'package:photos/models/search/search_result.dart';
+import "package:photos/models/search/search_types.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:tuple/tuple.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/search_result.dart';
+import "package:photos/models/search/search_types.dart";
 import 'package:photos/ui/viewer/search/result/search_result_page.dart';
 import 'package:photos/ui/viewer/search/result/search_thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
