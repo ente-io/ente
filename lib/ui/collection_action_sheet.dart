@@ -458,11 +458,11 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       collection,
       enableCollect: true,
     );
-    showToast(
-      context,
-      "Collaborative link created for " + collection.name!,
-    );
     if (result) {
+      showToast(
+        context,
+        "Collaborative link created for " + collection.name!,
+      );
       if (Configuration.instance.getUserID() == collection.owner!.id) {
         unawaited(
           routeToPage(
