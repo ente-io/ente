@@ -22,8 +22,8 @@ import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
+import 'package:photos/ui/collection_action_sheet.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
-import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -267,12 +267,11 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   Future<void> _handleUnHideRequest(BuildContext context) async {
-    final s = SelectedFiles();
-    s.files.add(widget.file);
-    createCollectionSheet(
-      s,
-      null,
+    final selectedFiles = SelectedFiles();
+    selectedFiles.files.add(widget.file);
+    showCollectionActionSheet(
       context,
+      selectedFiles: selectedFiles,
       actionType: CollectionActionType.unHide,
     );
   }

@@ -219,7 +219,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
           ButtonWidget(
             buttonType: ButtonType.neutral,
             buttonAction: ButtonAction.first,
-            labelText: "Ok",
+            labelText: "OK",
             isInAlert: true,
           ),
         ],
