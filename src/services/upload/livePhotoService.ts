@@ -18,6 +18,8 @@ import { extractFileMetadata } from './fileService';
 import { getFileHash } from './hashService';
 import { generateThumbnail } from './thumbnailService';
 import uploadCancelService from './uploadCancelService';
+import { Remote } from 'comlink';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 
 interface LivePhotoIdentifier {
     collectionID: number;
@@ -44,7 +46,7 @@ export async function getLivePhotoFileType(
 }
 
 export async function extractLivePhotoMetadata(
-    worker,
+    worker: Remote<DedicatedCryptoWorker>,
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,

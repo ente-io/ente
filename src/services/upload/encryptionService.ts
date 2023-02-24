@@ -1,7 +1,12 @@
+import { Remote } from 'comlink';
 import { EncryptionResult } from 'types/crypto';
 import { DataStream, isDataStream } from 'types/upload';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 
-async function encryptFileStream(worker, fileData: DataStream) {
+async function encryptFileStream(
+    worker: Remote<DedicatedCryptoWorker>,
+    fileData: DataStream
+) {
     const { stream, chunkCount } = fileData;
     const fileStreamReader = stream.getReader();
     const { key, decryptionHeader, pushState } =
@@ -32,7 +37,7 @@ async function encryptFileStream(worker, fileData: DataStream) {
 }
 
 export async function encryptFiledata(
-    worker,
+    worker: Remote<DedicatedCryptoWorker>,
     filedata: Uint8Array | DataStream
 ): Promise<EncryptionResult<Uint8Array | DataStream>> {
     return isDataStream(filedata)

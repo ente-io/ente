@@ -105,7 +105,7 @@ class UploadService {
     }
 
     async extractAssetMetadata(
-        worker,
+        worker: Remote<DedicatedCryptoWorker>,
         { isLivePhoto, file, livePhotoAssets }: UploadAsset,
         collectionID: number,
         fileTypeInfo: FileTypeInfo
