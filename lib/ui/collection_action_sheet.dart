@@ -324,7 +324,6 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   }
 
   Future<void> _albumListItemOnTap(CollectionWithThumbnail item) async {
-    bool showLongToast = false;
     if (await _runCollectionAction(collection: item.collection)) {
       late final String toastMessage;
       bool shouldNavigateToCollection = false;
@@ -334,20 +333,14 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       } else if (widget.actionType == CollectionActionType.moveFiles) {
         toastMessage = "Moved successfully to " + item.collection.name!;
         shouldNavigateToCollection = true;
-      } else if (widget.actionType == CollectionActionType.collectPhotos) {
-        toastMessage =
-            "Collaborative link created for " + item.collection.name!;
-        showLongToast = true;
       } else {
         toastMessage = "";
       }
       if (toastMessage.isNotEmpty) {
-        showLongToast
-            ? showToast(context, toastMessage)
-            : showShortToast(
-                context,
-                toastMessage,
-              );
+        showShortToast(
+          context,
+          toastMessage,
+        );
       }
       if (shouldNavigateToCollection) {
         _navigateToCollection(
@@ -446,8 +439,13 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
               ShareCollectionPage(collection),
             ),
           );
-          await CollectionsService.instance
-              .updateShareUrl(collection, {'enableCollect': true});
+          CollectionsService.instance
+              .updateShareUrl(collection, {'enableCollect': true}).then(
+            (value) => showToast(
+              context,
+              "Collaborative link created for " + collection.name!,
+            ),
+          );
           return true;
         } catch (e) {
           showGenericErrorDialog(context: context);
@@ -459,6 +457,10 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       context,
       collection,
       enableCollect: true,
+    );
+    showToast(
+      context,
+      "Collaborative link created for " + collection.name!,
     );
     if (result) {
       if (Configuration.instance.getUserID() == collection.owner!.id) {
