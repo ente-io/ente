@@ -142,7 +142,7 @@ export default function Gallery() {
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
-    const [hasPersonalFiles, setHasPersonalFiles] = useState(false);
+    const [hasNoPersonalFiles, setHasNoPersonalFiles] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
         ownCount: 0,
         count: 0,
@@ -393,11 +393,10 @@ export default function Gallery() {
             archivedCollections
         );
         setCollectionSummaries(collectionSummaries);
-        const incomingShareFiles = files.filter(
+        const hasNoPersonalFiles = files.every(
             (file) => file.ownerID !== user.id
         );
-        const hasPersonalFiles = files.length - incomingShareFiles.length > 0;
-        setHasPersonalFiles(hasPersonalFiles);
+        setHasNoPersonalFiles(hasNoPersonalFiles);
     };
 
     const clearSelection = function () {
@@ -709,7 +708,7 @@ export default function Gallery() {
                     setSelected={setSelected}
                     selected={selected}
                     isFirstLoad={isFirstLoad}
-                    hasPersonalFiles={hasPersonalFiles}
+                    hasNoPersonalFiles={hasNoPersonalFiles}
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     search={search}

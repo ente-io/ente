@@ -58,7 +58,7 @@ interface Props {
     ) => void;
     selected: SelectedState;
     isFirstLoad?;
-    hasPersonalFiles?;
+    hasNoPersonalFiles?;
     openUploader?;
     isInSearchMode?: boolean;
     search?: Search;
@@ -80,7 +80,7 @@ const PhotoFrame = ({
     setSelected,
     selected,
     isFirstLoad,
-    hasPersonalFiles,
+    hasNoPersonalFiles,
     openUploader,
     isInSearchMode,
     search,
@@ -655,7 +655,7 @@ const PhotoFrame = ({
     return (
         <>
             {!isFirstLoad &&
-            !hasPersonalFiles &&
+            hasNoPersonalFiles &&
             !isInSearchMode &&
             activeCollection === ALL_SECTION ? (
                 <EmptyScreen openUploader={openUploader} />
