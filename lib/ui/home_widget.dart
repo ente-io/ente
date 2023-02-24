@@ -40,10 +40,10 @@ import 'package:photos/ui/home/landing_page_widget.dart';
 import 'package:photos/ui/home/preserve_footer_widget.dart';
 import 'package:photos/ui/home/start_backup_hook_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
-import "package:photos/ui/new_shared_collections_gallery.dart";
 import 'package:photos/ui/notification/update/change_log_page.dart';
 import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings_page.dart';
+import "package:photos/ui/shared_collections_gallery.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
@@ -59,8 +59,7 @@ class HomeWidget extends StatefulWidget {
 
 class _HomeWidgetState extends State<HomeWidget> {
   static const _deviceFolderGalleryWidget = CollectionsGalleryWidget();
-  // static const _sharedCollectionGallery = SharedCollectionGallery();
-  static const _sharedCollectionGallery = NewSharedCollectionsGallery();
+  static const _sharedCollectionGallery = SharedCollectionGallery();
   static final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
   );
