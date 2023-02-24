@@ -352,8 +352,8 @@ export default function Gallery() {
             !silent && startLoading();
             const collections = await syncCollections();
             setCollections(collections);
-            await syncFiles(collections, setFiles);
-            await syncTrash(collections, setFiles);
+            const files = await syncFiles(collections, setFiles);
+            await syncTrash(collections, files, setFiles);
         } catch (e) {
             logError(e, 'syncWithRemote failed');
             switch (e.message) {
@@ -372,7 +372,7 @@ export default function Gallery() {
         syncInProgress.current = false;
         if (resync.current) {
             resync.current = false;
-            syncWithRemote();
+            setTimeout(() => syncWithRemote(), 0);
         }
     };
 
