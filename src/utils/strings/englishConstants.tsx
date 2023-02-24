@@ -419,6 +419,10 @@ const englishConstants = {
                 return 'Date';
             case SuggestionType.FILE_NAME:
                 return 'File name';
+            case SuggestionType.THING:
+                return 'Content';
+            case SuggestionType.FILE_CAPTION:
+                return 'Caption';
         }
     },
     PHOTO_COUNT: (count: number) =>
