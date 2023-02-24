@@ -374,7 +374,7 @@ function isSearchedFile(user: User, file: EnteFile, search: Search) {
     return false;
 }
 
-export function convertSuggestionToSearchQuery(option: Suggestion): Search {
+function convertSuggestionToSearchQuery(option: Suggestion): Search {
     switch (option.type) {
         case SuggestionType.DATE:
             return {
