@@ -255,6 +255,7 @@ export const getCollection = async (
 };
 
 export const getCollectionLatestFiles = (
+    user: User,
     files: EnteFile[],
     archivedCollections: Set<number>
 ): CollectionLatestFiles => {
@@ -274,6 +275,7 @@ export const getCollectionLatestFiles = (
             !latestFiles.has(ALL_SECTION) &&
             !IsArchived(file) &&
             !file.isTrashed &&
+            file.ownerID === user.id &&
             !archivedCollections.has(file.collectionID)
         ) {
             latestFiles.set(ALL_SECTION, file);
@@ -943,6 +945,7 @@ export async function getCollectionSummaries(
 ): Promise<CollectionSummaries> {
     const collectionSummaries: CollectionSummaries = new Map();
     const collectionLatestFiles = getCollectionLatestFiles(
+        user,
         files,
         archivedCollections
     );
