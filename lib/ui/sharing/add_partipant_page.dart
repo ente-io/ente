@@ -200,7 +200,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                           },
                   ),
                   const SizedBox(height: 12),
-                  InkWell(
+                  GestureDetector(
                     onTap: () async {
                       if ((selectedEmail == '' && !_emailIsValid)) {
                         await showErrorDialog(
