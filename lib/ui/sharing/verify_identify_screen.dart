@@ -159,7 +159,7 @@ class _VerifyIdentifyScreenState extends State<VerifyIdentifyScreen> {
                 child: ButtonWidget(
                   buttonType: ButtonType.neutral,
                   isInAlert: true,
-                  labelText: widget.self ? "Ok" : "Done",
+                  labelText: widget.self ? "OK" : "Done",
                 ),
               ),
             ),
