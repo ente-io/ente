@@ -13,6 +13,9 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
+import "package:photos/ui/sharing/verify_identify_screen.dart";
+import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class AddParticipantPage extends StatefulWidget {
   final Collection collection;
@@ -167,7 +170,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                 right: 16,
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 8),
                   ButtonWidget(
@@ -196,7 +199,33 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                             }
                           },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () async {
+                      if ((selectedEmail == '' && !_emailIsValid)) {
+                        await showErrorDialog(
+                          context,
+                          "Invalid email address",
+                          "Please enter a valid email address.",
+                        );
+                        return;
+                      }
+                      final emailToAdd =
+                          selectedEmail == '' ? _email : selectedEmail;
+                      routeToPage(
+                        context,
+                        VerifyIdentifyScreen(self: false, email: emailToAdd),
+                      );
+                    },
+                    child: Text(
+                      "Verify",
+                      textAlign: TextAlign.center,
+                      style: enteTextTheme.smallMuted.copyWith(
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                 ],
               ),
             ),
