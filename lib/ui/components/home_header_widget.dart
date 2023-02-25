@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
-import 'package:photos/ui/viewer/search/search_widget.dart';
 
 class HomeHeaderWidget extends StatefulWidget {
   final Widget centerWidget;
@@ -28,7 +27,7 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
           duration: const Duration(milliseconds: 250),
           child: widget.centerWidget,
         ),
-        const SearchIconWidget(),
+        // const SearchIconWidget(),
       ],
     );
   }

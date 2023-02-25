@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:photos/core/event_bus.dart";
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/events/tab_changed_event.dart";
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -60,6 +62,21 @@ class _SearchWidgetState extends State<SearchWidget> {
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 100));
   final Logger _logger = Logger((_SearchWidgetState).toString());
+  late FocusNode focusNode;
+  StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
+
+  @override
+  void initState() {
+    super.initState();
+    focusNode = FocusNode();
+    _tabDoubleTapEvent =
+        Bus.instance.on<TabDoubleTapEvent>().listen((event) async {
+      debugPrint("Firing now ${event.selectedIndex}");
+      if (mounted && event.selectedIndex == 3) {
+        focusNode.requestFocus();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -168,6 +185,8 @@ class _SearchWidgetState extends State<SearchWidget> {
   @override
   void dispose() {
     _debouncer.cancelDebounce();
+    focusNode.dispose();
+    _tabDoubleTapEvent?.cancel();
     super.dispose();
   }
 
