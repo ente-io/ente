@@ -129,7 +129,7 @@ class SubFaqWidget extends StatelessWidget {
           padding: const EdgeInsets.all(40),
           child: RichText(
             text: TextSpan(
-              text: "FAQ",
+              text: "FAQs",
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     decoration: TextDecoration.underline,
                   ),
