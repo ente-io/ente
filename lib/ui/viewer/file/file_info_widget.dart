@@ -160,7 +160,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           path.basenameWithoutExtension(file.displayName) +
               path.extension(file.displayName).toUpperCase(),
         ),
-        subtitle: Row(
+        subtitle: Wrap(
           children: [
             showDimension
                 ? Text(
@@ -193,7 +193,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               horizontalTitleGap: 2,
               leading: const Icon(Icons.camera_rounded),
               title: Text(_exifData["takenOnDevice"] ?? "--"),
-              subtitle: Row(
+              subtitle: Wrap(
                 children: [
                   _exifData["fNumber"] != null
                       ? Padding(
