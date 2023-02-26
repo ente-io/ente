@@ -215,7 +215,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                         context: context,
                         builder: (BuildContext context) {
                           return VerifyIdentifyDialog(
-                              self: false, email: emailToAdd);
+                            self: false,
+                            email: emailToAdd,
+                          );
                         },
                       );
                     },
