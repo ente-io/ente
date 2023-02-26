@@ -52,7 +52,7 @@ class SettingsPage extends StatelessWidget {
     final enteTextTheme = getEnteTextTheme(context);
     final List<Widget> contents = [];
     contents.add(
-      InkWell(
+      GestureDetector(
         onDoubleTap: () {
           routeToPage(context, VerifyIdentifyScreen(self: true));
         },
