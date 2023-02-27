@@ -8,7 +8,9 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/ui/components/album_horizontal_list_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
+import "package:photos/ui/viewer/gallery/empty_state.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 
@@ -61,6 +63,12 @@ class ArchivePage extends StatelessWidget {
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: null,
+      emptyState: const EmptyState(
+        text: "You don't have any archived items.",
+      ),
+      header: AlbumHorizontalListWidget(
+        CollectionsService.instance.getArchivedCollectionWithThumb,
+      ),
     );
     return Scaffold(
       appBar: PreferredSize(

@@ -1091,13 +1091,17 @@ class FilesDB {
     return count ?? 0;
   }
 
-  Future<int> fileCountWithVisibility(int visibility, int ownerID) async {
+  Future<int> archivedFilesCount(
+    int visibility,
+    int ownerID,
+    Set<int> hiddenCollections,
+  ) async {
     final db = await instance.database;
     final count = Sqflite.firstIntValue(
       await db.rawQuery(
         'SELECT COUNT(distinct($columnUploadedFileID)) FROM $filesTable where '
         '$columnMMdVisibility'
-        ' = $visibility AND $columnOwnerID = $ownerID',
+        ' = $visibility AND $columnOwnerID = $ownerID AND $columnCollectionID NOT IN (${hiddenCollections.join(', ')})',
       ),
     );
     return count ?? 0;

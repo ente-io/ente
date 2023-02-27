@@ -14,6 +14,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/ignored_file.dart';
+import "package:photos/models/magic_metadata.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/services/collections_service.dart';
@@ -21,15 +22,12 @@ import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
+import 'package:photos/ui/collection_action_sheet.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
-import 'package:photos/ui/components/action_sheet_widget.dart';
-import 'package:photos/ui/components/button_widget.dart';
-import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
-import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
+import "package:photos/utils/magic_util.dart";
 import 'package:photos/utils/toast_util.dart';
 
 class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -148,22 +146,22 @@ class FadingAppBarState extends State<FadingAppBar> {
             );
           }
           // options for files owned by the user
-          if (isOwnedByUser) {
+          if (isOwnedByUser && !isFileHidden) {
+            final bool isArchived =
+                widget.file.magicMetadata.visibility == visibilityArchive;
             items.add(
               PopupMenuItem(
                 value: 2,
                 child: Row(
                   children: [
                     Icon(
-                      Platform.isAndroid
-                          ? Icons.delete_outline
-                          : CupertinoIcons.delete,
+                      isArchived ? Icons.unarchive : Icons.archive_outlined,
                       color: Theme.of(context).iconTheme.color,
                     ),
                     const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    const Text("Delete"),
+                    Text(isArchived ? "Unarchive" : "Archive"),
                   ],
                 ),
               ),
@@ -235,7 +233,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           if (value == 1) {
             _download(widget.file);
           } else if (value == 2) {
-            await _showSingleFileDeleteSheet(widget.file);
+            await _toggleFileArchiveStatus(widget.file);
           } else if (value == 3) {
             _setAs(widget.file);
           } else if (value == 4) {
@@ -269,12 +267,11 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   Future<void> _handleUnHideRequest(BuildContext context) async {
-    final s = SelectedFiles();
-    s.files.add(widget.file);
-    createCollectionSheet(
-      s,
-      null,
+    final selectedFiles = SelectedFiles();
+    selectedFiles.files.add(widget.file);
+    showCollectionActionSheet(
       context,
+      selectedFiles: selectedFiles,
       actionType: CollectionActionType.unHide,
     );
   }
@@ -338,109 +335,16 @@ class FadingAppBarState extends State<FadingAppBar> {
     );
   }
 
-  Future<void> _showSingleFileDeleteSheet(File file) async {
-    final List<ButtonWidget> buttons = [];
-    final String fileType = file.fileType == FileType.video ? "video" : "photo";
-    final bool isBothLocalAndRemote =
-        file.uploadedFileID != null && file.localID != null;
-    final bool isLocalOnly =
-        file.uploadedFileID == null && file.localID != null;
-    final bool isRemoteOnly =
-        file.uploadedFileID != null && file.localID == null;
-    const String bodyHighlight = "It will be deleted from all albums.";
-    String body = "";
-    if (isBothLocalAndRemote) {
-      body = "This $fileType is in both ente and your device.";
-    } else if (isRemoteOnly) {
-      body = "This $fileType will be deleted from ente.";
-    } else if (isLocalOnly) {
-      body = "This $fileType will be deleted from your device.";
-    } else {
-      throw AssertionError("Unexpected state");
-    }
-    // Add option to delete from ente
-    if (isBothLocalAndRemote || isRemoteOnly) {
-      buttons.add(
-        ButtonWidget(
-          labelText: isBothLocalAndRemote ? "Delete from ente" : "Yes, delete",
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          isInAlert: true,
-          onTap: () async {
-            await deleteFilesFromRemoteOnly(context, [file]);
-            showShortToast(context, "Moved to trash");
-            if (isRemoteOnly) {
-              Navigator.of(context, rootNavigator: true).pop();
-              widget.onFileRemoved(file);
-            }
-          },
-        ),
-      );
-    }
-    // Add option to delete from local
-    if (isBothLocalAndRemote || isLocalOnly) {
-      buttons.add(
-        ButtonWidget(
-          labelText:
-              isBothLocalAndRemote ? "Delete from device" : "Yes, delete",
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.second,
-          shouldSurfaceExecutionStates: false,
-          isInAlert: true,
-          onTap: () async {
-            await deleteFilesOnDeviceOnly(context, [file]);
-            if (isLocalOnly) {
-              Navigator.of(context, rootNavigator: true).pop();
-              widget.onFileRemoved(file);
-            }
-          },
-        ),
-      );
-    }
-
-    if (isBothLocalAndRemote) {
-      buttons.add(
-        ButtonWidget(
-          labelText: "Delete from both",
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.third,
-          shouldSurfaceExecutionStates: true,
-          isInAlert: true,
-          onTap: () async {
-            await deleteFilesFromEverywhere(context, [file]);
-            Navigator.of(context, rootNavigator: true).pop();
-            widget.onFileRemoved(file);
-          },
-        ),
-      );
-    }
-    buttons.add(
-      const ButtonWidget(
-        labelText: "Cancel",
-        buttonType: ButtonType.secondary,
-        buttonSize: ButtonSize.large,
-        shouldStickToDarkTheme: true,
-        buttonAction: ButtonAction.fourth,
-        isInAlert: true,
-      ),
+  Future<void> _toggleFileArchiveStatus(File file) async {
+    final bool isArchived =
+        widget.file.magicMetadata.visibility == visibilityArchive;
+    await changeVisibility(
+      context,
+      [widget.file],
+      isArchived ? visibilityVisible : visibilityArchive,
     );
-    final actionResult = await showActionSheet(
-      context: context,
-      buttons: buttons,
-      actionSheetType: ActionSheetType.defaultActionSheet,
-      body: body,
-      bodyHighlight: bodyHighlight,
-    );
-    if (actionResult?.action != null &&
-        actionResult!.action == ButtonAction.error) {
-      showGenericErrorDialog(context: context);
+    if (mounted) {
+      setState(() {});
     }
   }
 

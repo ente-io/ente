@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
+import "package:dio/dio.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/models/search/button_result.dart";
@@ -33,6 +34,36 @@ Future<ButtonResult?> showErrorDialog(
         labelText: "OK",
         isInAlert: true,
         buttonAction: ButtonAction.first,
+      ),
+    ],
+  );
+}
+
+Future<ButtonResult?> showErrorDialogForException({
+  required BuildContext context,
+  required Exception exception,
+  bool isDismissible = true,
+  String apiErrorPrefix = "It looks like something went wrong.",
+}) async {
+  String errorMessage =
+      "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.";
+  if (exception is DioError &&
+      exception.response != null &&
+      exception.response!.data["code"] != null) {
+    errorMessage =
+        "$apiErrorPrefix\n\nReason: " + exception.response!.data["code"];
+  }
+  return showDialogWidget(
+    context: context,
+    title: "Error",
+    icon: Icons.error_outline_outlined,
+    body: errorMessage,
+    isDismissible: isDismissible,
+    buttons: const [
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: "OK",
+        isInAlert: true,
       ),
     ],
   );

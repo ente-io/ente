@@ -208,38 +208,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.0"
-  connectivity:
+  connectivity_plus:
     dependency: "direct main"
     description:
-      name: connectivity
-      sha256: a8e91263cf3e25fb5cc95e19dfde4999e32a648ac3b9e8a558a28165731678f8
+      name: connectivity_plus
+      sha256: "8875e8ed511a49f030e313656154e4bbbcef18d68dfd32eb853fac10bce48e96"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.6"
-  connectivity_for_web:
+    version: "3.0.3"
+  connectivity_plus_platform_interface:
     dependency: transitive
     description:
-      name: connectivity_for_web
-      sha256: "01a390c1d5adc2ed1fa1f52d120c07fe9fd01166a93f965a832fd6cfc0ea6482"
+      name: connectivity_plus_platform_interface
+      sha256: cf1d1c28f4416f8c654d7dc3cd638ec586076255d407cef3ddbdaf178272a71a
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0+1"
-  connectivity_macos:
-    dependency: transitive
-    description:
-      name: connectivity_macos
-      sha256: "51ae08d5162eca9669b9d8951ed83ce19c5355a81149f94e4dee2740beb93628"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.1+2"
-  connectivity_platform_interface:
-    dependency: transitive
-    description:
-      name: connectivity_platform_interface
-      sha256: "2d82e942df9d49f29a24bb07fb5ce085d4a53e47818c62364d2b6deb9e0d7a8e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
+    version: "1.2.4"
   convert:
     dependency: transitive
     description:
@@ -493,6 +477,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_animate:
+    dependency: "direct main"
+    description:
+      name: flutter_animate
+      sha256: c6e38af9fe376fa07fb6995fe6a12d07a08828d2847aa652b7c1bc60f9993374
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.0"
   flutter_blurhash:
     dependency: transitive
     description:
@@ -952,10 +944,10 @@ packages:
     dependency: "direct main"
     description:
       name: media_extension
-      sha256: "50d9f5dd1b31296b0f5bf63c92b6dd69f5a59d9cd1d984f53834f51176319bb0"
+      sha256: "41e60ac3c4367060922c5b667f47768301d259fd94bc3122c263b266a167d9fc"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   meta:
     dependency: transitive
     description:
@@ -1005,6 +997,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  nm:
+    dependency: transitive
+    description:
+      name: nm
+      sha256: "2c9aae4127bdc8993206464fcc063611e0e36e72018696cd9631023a31b24254"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   node_preamble:
     dependency: transitive
     description:

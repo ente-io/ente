@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/subscription.dart';
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/captioned_text_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import 'package:photos/ui/payment/billing_questions_widget.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -38,11 +41,14 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
                 ),
               ],
             ),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
             Text(
-              "Ente preserves your memories, so they're always available to you, even if you lose your device ",
+              "ente preserves your memories, so they're always available to you, even if you lose your device.",
+              style: Theme.of(context).textTheme.caption,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "Your family can be added to your plan as well. ",
               style: Theme.of(context).textTheme.caption,
             ),
           ],
@@ -107,15 +113,27 @@ class ValidityWidget extends StatelessWidget {
 }
 
 class SubFaqWidget extends StatelessWidget {
-  const SubFaqWidget({Key? key}) : super(key: key);
+  final bool isOnboarding;
+
+  const SubFaqWidget({Key? key, this.isOnboarding = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () {
+    final colorScheme = getEnteColorScheme(context);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 40, 16, isOnboarding ? 40 : 4),
+      child: MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "FAQs",
+        ),
+        menuItemColor: colorScheme.fillFaint,
+        trailingWidget: Icon(
+          Icons.chevron_right_outlined,
+          color: colorScheme.strokeBase,
+        ),
+        singleBorderRadius: 4,
+        alignCaptionedTextToLeft: true,
+        onTap: () async {
           showModalBottomSheet<void>(
             backgroundColor: Theme.of(context).colorScheme.bgColorForQuestions,
             barrierColor: Colors.black87,
@@ -125,17 +143,6 @@ class SubFaqWidget extends StatelessWidget {
             },
           );
         },
-        child: Container(
-          padding: const EdgeInsets.all(40),
-          child: RichText(
-            text: TextSpan(
-              text: "FAQs",
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    decoration: TextDecoration.underline,
-                  ),
-            ),
-          ),
-        ),
       ),
     );
   }

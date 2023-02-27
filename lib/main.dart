@@ -5,6 +5,7 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/app.dart';
@@ -28,6 +29,7 @@ import "package:photos/services/object_detection/object_detection_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
+import "package:photos/services/storage_bonus_service.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/services/update_service.dart';
@@ -53,6 +55,7 @@ const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 const kBackgroundLockLatency = Duration(seconds: 3);
 
 void main() async {
+  debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
   await _runInForeground();
   BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);
@@ -153,6 +156,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   LocalSettings.instance.init(preferences);
   LocalFileUpdateService.instance.init(preferences);
   SearchService.instance.init();
+  StorageBonusService.instance.init(preferences);
   if (Platform.isIOS) {
     PushService.instance.init().then((_) {
       FirebaseMessaging.onBackgroundMessage(
@@ -161,7 +165,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
   }
   FeatureFlagService.instance.init();
-  await ObjectDetectionService.instance.init();
+  if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+    await ObjectDetectionService.instance.init();
+  }
   _logger.info("Initialization done");
 }
 

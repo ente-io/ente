@@ -14,12 +14,12 @@ import 'package:photos/services/hidden_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import 'package:photos/ui/collection_action_sheet.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/blur_menu_item_widget.dart';
 import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -51,7 +51,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   late CollectionActions collectionActions;
   late bool isCollectionOwner;
 
-  // _cachedCollectionForSharedLink is primarly used to avoid creating duplicate
+  // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting
   // few files. This link is reset on any selection changed;
   Collection? _cachedCollectionForSharedLink;
@@ -283,10 +283,9 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    createCollectionSheet(
-      widget.selectedFiles,
-      null,
+    showCollectionActionSheet(
       context,
+      selectedFiles: widget.selectedFiles,
       actionType: CollectionActionType.moveFiles,
     );
   }
@@ -296,11 +295,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    createCollectionSheet(
-      widget.selectedFiles,
-      null,
-      context,
-    );
+    showCollectionActionSheet(context, selectedFiles: widget.selectedFiles);
   }
 
   Future<void> _onDeleteClick() async {
@@ -381,10 +376,9 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    createCollectionSheet(
-      widget.selectedFiles,
-      null,
+    showCollectionActionSheet(
       context,
+      selectedFiles: widget.selectedFiles,
       actionType: CollectionActionType.unHide,
     );
   }
@@ -459,10 +453,9 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   }
 
   void _restore() {
-    createCollectionSheet(
-      widget.selectedFiles,
-      null,
+    showCollectionActionSheet(
       context,
+      selectedFiles: widget.selectedFiles,
       actionType: CollectionActionType.restoreFiles,
     );
   }

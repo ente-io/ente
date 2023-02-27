@@ -10,6 +10,7 @@ import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
@@ -159,7 +160,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           path.basenameWithoutExtension(file.displayName) +
               path.extension(file.displayName).toUpperCase(),
         ),
-        subtitle: Row(
+        subtitle: Wrap(
           children: [
             showDimension
                 ? Text(
@@ -192,7 +193,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               horizontalTitleGap: 2,
               leading: const Icon(Icons.camera_rounded),
               title: Text(_exifData["takenOnDevice"] ?? "--"),
-              subtitle: Row(
+              subtitle: Wrap(
                 children: [
                   _exifData["fNumber"] != null
                       ? Padding(
@@ -236,14 +237,16 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               : DeviceFoldersListOfFileWidget(allDeviceFoldersOfFile),
         ),
       ),
-      SizedBox(
-        height: 62,
-        child: ListTile(
-          horizontalTitleGap: 0,
-          leading: const Icon(Icons.image_search),
-          title: ObjectTagsWidget(file),
-        ),
-      ),
+      FeatureFlagService.instance.isInternalUserOrDebugBuild()
+          ? SizedBox(
+              height: 62,
+              child: ListTile(
+                horizontalTitleGap: 0,
+                leading: const Icon(Icons.image_search),
+                title: ObjectTagsWidget(file),
+              ),
+            )
+          : null,
       (file.uploadedFileID != null && file.updationTime != null)
           ? ListTile(
               horizontalTitleGap: 2,

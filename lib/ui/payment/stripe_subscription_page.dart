@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/billing_plan.dart';
@@ -7,12 +8,15 @@ import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
+import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/button_widget.dart';
+import "package:photos/ui/components/captioned_text_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
@@ -50,6 +54,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   bool _isLoading = false;
   bool _isStripeSubscriber = false;
   bool _showYearlyPlan = false;
+  EnteColorScheme colorScheme = darkScheme;
 
   @override
   void initState() {
@@ -112,6 +117,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
+    colorScheme = getEnteColorScheme(context);
     final appBar = PreferredSize(
       preferredSize: const Size(double.infinity, 60),
       child: Container(
@@ -143,7 +149,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               )
             : AppBar(
                 elevation: 0,
-                title: const Text("Subscription"),
+                title: const Text("Subscription${kDebugMode ? ' Stripe' : ''}"),
               ),
       ),
     );
@@ -205,7 +211,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       if (widget.isOnboarding) {
         widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
       }
-      widgets.add(const SubFaqWidget());
+      widgets.add(
+        SubFaqWidget(isOnboarding: widget.isOnboarding),
+      );
     }
 
     // only active subscription can be renewed/canceled
@@ -214,90 +222,49 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     }
 
     if (_currentSubscription!.productID != freeProductID) {
-      widgets.addAll([
-        Align(
-          alignment: Alignment.center,
-          child: GestureDetector(
-            onTap: () async {
-              final String paymentProvider =
-                  _currentSubscription!.paymentProvider;
-              switch (_currentSubscription!.paymentProvider) {
-                case stripe:
-                  await _launchStripePortal();
-                  break;
-                case playStore:
-                  launchUrlString(
-                    "https://play.google.com/store/account/subscriptions?sku=" +
-                        _currentSubscription!.productID +
-                        "&package=io.ente.photos",
-                  );
-                  break;
-                case appStore:
-                  launchUrlString("https://apps.apple.com/account/billing");
-                  break;
-                default:
-                  final String capitalizedWord = paymentProvider.isNotEmpty
-                      ? '${paymentProvider[0].toUpperCase()}${paymentProvider.substring(1).toLowerCase()}'
-                      : '';
-                  showErrorDialog(
-                    context,
-                    "Sorry",
-                    "Please contact us at support@ente.io to manage your "
-                        "$capitalizedWord subscription.",
-                  );
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(40, 80, 40, 20),
-              child: Column(
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      text: "Payment details",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontFamily: 'Inter-Medium',
-                        fontSize: 14,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 40, 16, 4),
+          child: MenuItemWidget(
+            captionedTextWidget: const CaptionedTextWidget(
+              title: "Payment details",
             ),
+            menuItemColor: colorScheme.fillFaint,
+            trailingWidget: Icon(
+              Icons.chevron_right_outlined,
+              color: colorScheme.strokeBase,
+            ),
+            singleBorderRadius: 4,
+            alignCaptionedTextToLeft: true,
+            onTap: () async {
+              _onStripSupportedPaymentDetailsTap();
+            },
           ),
         ),
-      ]);
+      );
     }
 
     if (!widget.isOnboarding) {
-      widgets.addAll([
-        Align(
-          alignment: Alignment.topCenter,
-          child: GestureDetector(
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+          child: MenuItemWidget(
+            captionedTextWidget: const CaptionedTextWidget(
+              title: "Manage Family",
+            ),
+            menuItemColor: colorScheme.fillFaint,
+            trailingWidget: Icon(
+              Icons.chevron_right_outlined,
+              color: colorScheme.strokeBase,
+            ),
+            singleBorderRadius: 4,
+            alignCaptionedTextToLeft: true,
             onTap: () async {
               _billingService.launchFamilyPortal(context, _userDetails);
             },
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(40, 0, 40, 80),
-              child: Column(
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      text: "Manage family",
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                            decoration: TextDecoration.underline,
-                          ),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
           ),
         ),
-      ]);
+      );
     }
 
     return SingleChildScrollView(
@@ -306,6 +273,37 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         children: widgets,
       ),
     );
+  }
+
+  // _onStripSupportedPaymentDetailsTap action allows the user to update
+  // their stripe payment details
+  void _onStripSupportedPaymentDetailsTap() async {
+    final String paymentProvider = _currentSubscription!.paymentProvider;
+    switch (_currentSubscription!.paymentProvider) {
+      case stripe:
+        await _launchStripePortal();
+        break;
+      case playStore:
+        launchUrlString(
+          "https://play.google.com/store/account/subscriptions?sku=" +
+              _currentSubscription!.productID +
+              "&package=io.ente.photos",
+        );
+        break;
+      case appStore:
+        launchUrlString("https://apps.apple.com/account/billing");
+        break;
+      default:
+        final String capitalizedWord = paymentProvider.isNotEmpty
+            ? '${paymentProvider[0].toUpperCase()}${paymentProvider.substring(1).toLowerCase()}'
+            : '';
+        showErrorDialog(
+          context,
+          "Sorry",
+          "Please contact us at support@ente.io to manage your "
+              "$capitalizedWord subscription.",
+        );
+    }
   }
 
   Future<void> _launchStripePortal() async {
@@ -336,9 +334,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         title,
         style: TextStyle(
           color: (isRenewCancelled
-                  ? Colors.greenAccent
-                  : Theme.of(context).colorScheme.onSurface)
-              .withOpacity(isRenewCancelled ? 1.0 : 0.2),
+              ? colorScheme.primary700
+              : colorScheme.textMuted),
         ),
       ),
       onPressed: () async {

@@ -2,31 +2,30 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
-import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/create_collection_sheet.dart';
-import 'package:photos/ui/viewer/file/file_info_widget.dart';
+import "package:photos/ui/actions/file/file_actions.dart";
+import 'package:photos/ui/collection_action_sheet.dart';
 import 'package:photos/utils/delete_file_util.dart';
-import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/share_util.dart';
 
 class FadingBottomBar extends StatefulWidget {
   final File file;
   final Function(File) onEditRequested;
+  final Function(File) onFileRemoved;
   final bool showOnlyInfoButton;
+  final int? userID;
 
   const FadingBottomBar(
     this.file,
     this.onEditRequested,
     this.showOnlyInfoButton, {
+    required this.onFileRemoved,
+    this.userID,
     Key? key,
   }) : super(key: key);
 
@@ -63,6 +62,8 @@ class FadingBottomBarState extends State<FadingBottomBar> {
 
   Widget _getBottomBar() {
     final List<Widget> children = [];
+    final bool isOwnedByUser =
+        widget.file.ownerID == null || widget.file.ownerID == widget.userID;
     children.add(
       Tooltip(
         message: "Info",
@@ -88,15 +89,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     if (widget.file is TrashFile) {
       _addTrashOptions(children);
     }
-    final bool isUploadedByUser = widget.file.uploadedFileID != null &&
-        widget.file.ownerID == Configuration.instance.getUserID();
-    bool isFileHidden = false;
-    if (isUploadedByUser) {
-      isFileHidden = CollectionsService.instance
-              .getCollectionByID(widget.file.collectionID!)
-              ?.isHidden() ??
-          false;
-    }
+
     if (!widget.showOnlyInfoButton && widget.file is! TrashFile) {
       if (widget.file.fileType == FileType.image ||
           widget.file.fileType == FileType.livePhoto) {
@@ -118,26 +111,21 @@ class FadingBottomBarState extends State<FadingBottomBar> {
           ),
         );
       }
-      if (isUploadedByUser && !isFileHidden) {
-        final bool isArchived =
-            widget.file.magicMetadata.visibility == visibilityArchive;
+      if (isOwnedByUser) {
         children.add(
           Tooltip(
-            message: isArchived ? "Unarchive" : "Archive",
+            message: "Delete",
             child: Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: IconButton(
                 icon: Icon(
-                  isArchived ? Icons.unarchive : Icons.archive_outlined,
+                  Platform.isAndroid
+                      ? Icons.delete_outline
+                      : CupertinoIcons.delete,
                   color: Colors.white,
                 ),
                 onPressed: () async {
-                  await changeVisibility(
-                    context,
-                    [widget.file],
-                    isArchived ? visibilityVisible : visibilityArchive,
-                  );
-                  safeRefresh();
+                  await _showSingleFileDeleteSheet(widget.file);
                 },
               ),
             ),
@@ -223,6 +211,14 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     );
   }
 
+  Future<void> _showSingleFileDeleteSheet(File file) async {
+    await showSingleFileDeleteSheet(
+      context,
+      file,
+      onFileRemoved: widget.onFileRemoved,
+    );
+  }
+
   void _addTrashOptions(List<Widget> children) {
     children.add(
       Tooltip(
@@ -237,10 +233,9 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             onPressed: () {
               final selectedFiles = SelectedFiles();
               selectedFiles.toggleSelection(widget.file);
-              createCollectionSheet(
-                selectedFiles,
-                null,
+              showCollectionActionSheet(
                 context,
+                selectedFiles: selectedFiles,
                 actionType: CollectionActionType.restoreFiles,
               );
             },
@@ -273,20 +268,6 @@ class FadingBottomBarState extends State<FadingBottomBar> {
   }
 
   Future<void> _displayInfo(File file) async {
-    final colorScheme = getEnteColorScheme(context);
-    return showBarModalBottomSheet(
-      topControl: const SizedBox.shrink(),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-      backgroundColor: colorScheme.backgroundElevated,
-      barrierColor: backdropFaintDark,
-      context: context,
-      builder: (BuildContext context) {
-        return Padding(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: FileInfoWidget(file),
-        );
-      },
-    );
+    await showInfoSheet(context, file);
   }
 }
