@@ -79,12 +79,10 @@ export async function decryptChunk(data: Uint8Array, pullState: StateAddress) {
     return { decryptedData: pullResult.message, newTag };
 }
 
-export async function encryptChaChaOneShot(data: Uint8Array, key?: string) {
+export async function encryptChaChaOneShot(data: Uint8Array, key: string) {
     await sodium.ready;
 
-    const uintkey: Uint8Array = key
-        ? await fromB64(key)
-        : sodium.crypto_secretstream_xchacha20poly1305_keygen();
+    const uintkey: Uint8Array = await fromB64(key);
     const initPushResult =
         sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
     const [pushState, header] = [initPushResult.state, initPushResult.header];
