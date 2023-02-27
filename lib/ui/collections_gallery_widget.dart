@@ -85,11 +85,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     final List<CollectionWithThumbnail> collectionsWithThumbnail =
         await CollectionsService.instance.getCollectionsWithThumbnails();
 
-    // Remove uncategorized collection and archived collections
+    // Remove uncategorized collection
     collectionsWithThumbnail.removeWhere(
-      (t) =>
-          t.collection.type == CollectionType.uncategorized ||
-          t.collection.isArchived(),
+      (t) => t.collection.type == CollectionType.uncategorized,
     );
     final ListMatch<CollectionWithThumbnail> favMathResult =
         collectionsWithThumbnail.splitMatch(
