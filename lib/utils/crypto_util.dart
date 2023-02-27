@@ -333,6 +333,9 @@ class CryptoUtil {
           s,
         );
       }
+      // Ensure that the product of these two variables
+      // (the area under the graph that determines the amount of work required)
+      // stays the same
       memLimit = (memLimit / 2).round();
       opsLimit = opsLimit * 2;
     }
