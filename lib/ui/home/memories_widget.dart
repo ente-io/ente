@@ -6,6 +6,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
 import "package:photos/ui/actions/file/file_actions.dart";
+import "package:photos/ui/extents_page_view.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -431,7 +432,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   Widget _buildSwiper() {
     _pageController = PageController(initialPage: _index);
-    return PageView.builder(
+    return ExtentsPageView.extents(
       itemBuilder: (BuildContext context, int index) {
         if (index < widget.memories.length - 1) {
           final nextFile = widget.memories[index + 1].file;

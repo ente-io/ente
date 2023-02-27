@@ -25,6 +25,7 @@ import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/storage_card_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
+import "package:photos/ui/sharing/verify_identity_dialog.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class SettingsPage extends StatelessWidget {
@@ -51,23 +52,31 @@ class SettingsPage extends StatelessWidget {
     final enteTextTheme = getEnteTextTheme(context);
     final List<Widget> contents = [];
     contents.add(
-      Container(
-        constraints: const BoxConstraints(maxWidth: 350),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: AnimatedBuilder(
-            // [AnimatedBuilder] accepts any [Listenable] subtype.
-            animation: emailNotifier,
-            builder: (BuildContext context, Widget? child) {
-              return Text(
-                emailNotifier.value!,
-                style: enteTextTheme.body.copyWith(
-                  color: colorScheme.textMuted,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              );
-            },
+      GestureDetector(
+        onDoubleTap: () {
+          _showVerifyIdentityDialog(context);
+        },
+        onLongPress: () {
+          _showVerifyIdentityDialog(context);
+        },
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 350),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: AnimatedBuilder(
+              // [AnimatedBuilder] accepts any [Listenable] subtype.
+              animation: emailNotifier,
+              builder: (BuildContext context, Widget? child) {
+                return Text(
+                  emailNotifier.value!,
+                  style: enteTextTheme.body.copyWith(
+                    color: colorScheme.textMuted,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -154,6 +163,15 @@ class SettingsPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _showVerifyIdentityDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return VerifyIdentifyDialog(self: true);
+      },
     );
   }
 }
