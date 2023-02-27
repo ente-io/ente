@@ -49,8 +49,8 @@ export class DedicatedCryptoWorker {
         return libsodium.encryptChaChaOneShot(fileData, key);
     }
 
-    async encryptFile(fileData: Uint8Array, key: string) {
-        return libsodium.encryptChaCha(fileData, key);
+    async encryptFile(fileData: Uint8Array) {
+        return libsodium.encryptChaCha(fileData);
     }
 
     async encryptFileChunk(
