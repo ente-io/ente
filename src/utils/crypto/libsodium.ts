@@ -215,7 +215,7 @@ export async function decryptToUTF8(data: string, nonce: string, key: string) {
     return sodium.to_string(decrypted);
 }
 
-export async function encrypt(data: Uint8Array, key?: Uint8Array) {
+async function encrypt(data: Uint8Array, key?: Uint8Array) {
     await sodium.ready;
     const uintkey: Uint8Array = key || sodium.crypto_secretbox_keygen();
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
@@ -227,27 +227,9 @@ export async function encrypt(data: Uint8Array, key?: Uint8Array) {
     };
 }
 
-export async function decrypt(
-    data: Uint8Array,
-    nonce: Uint8Array,
-    key: Uint8Array
-) {
+async function decrypt(data: Uint8Array, nonce: Uint8Array, key: Uint8Array) {
     await sodium.ready;
     return sodium.crypto_secretbox_open_easy(data, nonce, key);
-}
-
-export async function verifyHash(hash: string, input: string) {
-    await sodium.ready;
-    return sodium.crypto_pwhash_str_verify(hash, await fromB64(input));
-}
-
-export async function hash(input: string) {
-    await sodium.ready;
-    return sodium.crypto_pwhash_str(
-        await fromB64(input),
-        sodium.crypto_pwhash_OPSLIMIT_SENSITIVE,
-        sodium.crypto_pwhash_MEMLIMIT_MODERATE
-    );
 }
 
 export async function initChunkHashing() {

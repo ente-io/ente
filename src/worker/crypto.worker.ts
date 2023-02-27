@@ -73,22 +73,6 @@ export class DedicatedCryptoWorker {
         return libsodium.decryptChunk(fileData, pullState);
     }
 
-    async encrypt(data: Uint8Array, key: Uint8Array) {
-        return libsodium.encrypt(data, key);
-    }
-
-    async decrypt(data: Uint8Array, nonce: Uint8Array, key: Uint8Array) {
-        return libsodium.decrypt(data, nonce, key);
-    }
-
-    async hash(input: string) {
-        return libsodium.hash(input);
-    }
-
-    async verifyHash(hash: string, input: string) {
-        return libsodium.verifyHash(hash, input);
-    }
-
     async initChunkHashing() {
         return libsodium.initChunkHashing();
     }
