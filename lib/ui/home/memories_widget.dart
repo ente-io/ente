@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
+import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/extents_page_view.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
@@ -338,28 +339,24 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   Hero _buildInfoText() {
     return Hero(
       tag: widget.title,
-      child: Container(
-        alignment: Alignment.bottomCenter,
-        padding: const EdgeInsets.fromLTRB(0, 0, 0, 28),
-        child: _showCounter
-            ? Text(
-                '${_index + 1}/${widget.memories.length}',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText1!
-                    .copyWith(color: Colors.white.withOpacity(0.4)),
-              )
-            : AnimatedOpacity(
-                opacity: _opacity,
-                duration: const Duration(milliseconds: 500),
-                child: Text(
-                  widget.title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headline4!
-                      .copyWith(color: Colors.white),
+      child: SafeArea(
+        child: Container(
+          alignment: Alignment.bottomCenter,
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 72),
+          child: _showCounter
+              ? Text(
+                  '${_index + 1}/${widget.memories.length}',
+                  style: darkTextTheme.bodyMuted,
+                )
+              : AnimatedOpacity(
+                  opacity: _opacity,
+                  duration: const Duration(milliseconds: 500),
+                  child: Text(
+                    widget.title,
+                    style: darkTextTheme.h2,
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
