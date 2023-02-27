@@ -492,7 +492,7 @@ class Configuration {
     final keyAttributes = getKeyAttributes()!;
     return CryptoUtil.decryptSync(
       CryptoUtil.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey!),
-      getKey(),
+      getKey()!,
       CryptoUtil.base642bin(keyAttributes.recoveryKeyDecryptionNonce!),
     );
   }

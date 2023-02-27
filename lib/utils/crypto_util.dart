@@ -10,6 +10,7 @@ import 'package:photos/models/encryption_result.dart';
 const int encryptionChunkSize = 4 * 1024 * 1024;
 final int decryptionChunkSize =
     encryptionChunkSize + Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
+const int hashChunkSize = 4 * 1024 * 1024;
 
 Uint8List cryptoSecretboxEasy(Map<String, dynamic> args) {
   return Sodium.cryptoSecretboxEasy(args["source"], args["nonce"], args["key"]);
@@ -34,6 +35,7 @@ Uint8List cryptoPwHash(Map<String, dynamic> args) {
   );
 }
 
+// Returns the hash for a given file, chunking it in batches of hashChunkSize
 Future<Uint8List> cryptoGenericHash(Map<String, dynamic> args) async {
   final sourceFile = io.File(args["sourceFilePath"]);
   final sourceFileLength = await sourceFile.length();
@@ -43,7 +45,7 @@ Future<Uint8List> cryptoGenericHash(Map<String, dynamic> args) async {
   var bytesRead = 0;
   bool isDone = false;
   while (!isDone) {
-    var chunkSize = encryptionChunkSize;
+    var chunkSize = hashChunkSize;
     if (bytesRead + chunkSize >= sourceFileLength) {
       chunkSize = sourceFileLength - bytesRead;
       isDone = true;
@@ -71,6 +73,7 @@ EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
   );
 }
 
+// Encrypts a given file, in chunks of encryptionChunkSize
 Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
   final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final logger = Logger("ChaChaEncrypt");
@@ -197,6 +200,11 @@ class CryptoUtil {
     return Sodium.hex2bin(hex);
   }
 
+  // Encrypts the given source, with the given key and a randomly generated
+  // nonce, using XSalsa20 (w Poly1305 MAC).
+  // This function runs on the same thread as the caller, so should be used only
+  // for small amounts of data where thread switching can result in a degraded
+  // user experience
   static EncryptionResult encryptSync(Uint8List source, Uint8List key) {
     final nonce = Sodium.randombytesBuf(Sodium.cryptoSecretboxNoncebytes);
 
@@ -212,6 +220,8 @@ class CryptoUtil {
     );
   }
 
+  // Decrypts the given cipher, with the given key and nonce using XSalsa20
+  // (w Poly1305 MAC).
   static Future<Uint8List> decrypt(
     Uint8List cipher,
     Uint8List key,
@@ -224,12 +234,16 @@ class CryptoUtil {
     return _computer.compute(cryptoSecretboxOpenEasy, param: args);
   }
 
+  // Decrypts the given cipher, with the given key and nonce using XSalsa20
+  // (w Poly1305 MAC).
+  // This function runs on the same thread as the caller, so should be used only
+  // for small amounts of data where thread switching can result in a degraded
+  // user experience
   static Uint8List decryptSync(
     Uint8List cipher,
-    Uint8List? key,
+    Uint8List key,
     Uint8List nonce,
   ) {
-    assert(key != null, "key can not be null");
     final args = <String, dynamic>{};
     args["cipher"] = cipher;
     args["nonce"] = nonce;
@@ -237,6 +251,10 @@ class CryptoUtil {
     return cryptoSecretboxOpenEasy(args);
   }
 
+  // Encrypts the given source, with the given key and a randomly generated
+  // nonce, using XChaCha20 (w Poly1305 MAC).
+  // This function runs on the isolate pool held by `_computer`.
+  // TODO: Remove "ChaCha", an implementation detail from the function name
   static Future<EncryptionResult> encryptChaCha(
     Uint8List source,
     Uint8List key,
@@ -247,6 +265,9 @@ class CryptoUtil {
     return _computer.compute(chachaEncryptData, param: args);
   }
 
+  // Decrypts the given source, with the given key and header using XChaCha20
+  // (w Poly1305 MAC).
+  // TODO: Remove "ChaCha", an implementation detail from the function name
   static Future<Uint8List> decryptChaCha(
     Uint8List source,
     Uint8List key,
@@ -259,6 +280,10 @@ class CryptoUtil {
     return _computer.compute(chachaDecryptData, param: args);
   }
 
+  // Encrypts the file at sourceFilePath, with the key (if provided) and a
+  // randomly generated nonce using XChaCha20 (w Poly1305 MAC), and writes it
+  // to the destinationFilePath.
+  // If a key is not provided, one is generated and returned.
   static Future<EncryptionResult> encryptFile(
     String sourceFilePath,
     String destinationFilePath, {
@@ -271,6 +296,8 @@ class CryptoUtil {
     return _computer.compute(chachaEncryptFile, param: args);
   }
 
+  // Decrypts the file at sourceFilePath, with the given key and header using
+  // XChaCha20 (w Poly1305 MAC), and writes it to the destinationFilePath.
   static Future<void> decryptFile(
     String sourceFilePath,
     String destinationFilePath,
@@ -285,18 +312,23 @@ class CryptoUtil {
     return _computer.compute(chachaDecryptFile, param: args);
   }
 
+  // Generates and returns a 256-bit key.
   static Uint8List generateKey() {
     return Sodium.cryptoSecretboxKeygen();
   }
 
+  // Generates and returns a random byte buffer of length
+  // crypto_pwhash_SALTBYTES (16)
   static Uint8List getSaltToDeriveKey() {
     return Sodium.randombytesBuf(Sodium.cryptoPwhashSaltbytes);
   }
 
+  // Generates and returns a secret key and the corresponding public key.
   static Future<KeyPair> generateKeyPair() async {
     return Sodium.cryptoBoxKeypair();
   }
 
+  // Decrypts the input using the given publicKey-secretKey pair
   static Uint8List openSealSync(
     Uint8List input,
     Uint8List publicKey,
@@ -305,6 +337,7 @@ class CryptoUtil {
     return Sodium.cryptoBoxSealOpen(input, publicKey, secretKey);
   }
 
+  // Encrypts the input using the given publicKey
   static Uint8List sealSync(Uint8List input, Uint8List publicKey) {
     return Sodium.cryptoBoxSeal(input, publicKey);
   }
@@ -312,8 +345,8 @@ class CryptoUtil {
   // Derives a key for a given password and salt using Argon2id, v1.3.
   // The function first attempts to derive a key with both memLimit and opsLimit
   // set to their Sensitive variants.
-  // If this fails, say on a device with insufficient RAM, we retry by halving 
-  // the memLimit and doubling the opsLimit, while ensuring that we stay within 
+  // If this fails, say on a device with insufficient RAM, we retry by halving
+  // the memLimit and doubling the opsLimit, while ensuring that we stay within
   // the min and max limits for both parameters.
   // At all points, we ensure that the product of these two variables (the area
   // under the graph that determines the amount of work required) is a constant.
@@ -347,8 +380,8 @@ class CryptoUtil {
     throw UnsupportedError("Cannot perform this operation on this device");
   }
 
-  // Derives a key for the given password and salt, with memory and ops limit
-  // hardcoded to their Interactive variants
+  // Derives a key for the given password and salt, using Argon2id, v1.3
+  // with memory and ops limit hardcoded to their Interactive variants
   // NOTE: This is only used while setting passwords for shared links, as an
   // extra layer of authentication (atop the access token and collection key).
   // More details @ https://ente.io/blog/building-shareable-links/
@@ -366,6 +399,8 @@ class CryptoUtil {
     return DerivedKeyResult(key, memLimit, opsLimit);
   }
 
+  // Derives a key for a given password, salt, memLimit and opsLimit using 
+  // Argon2id, v1.3.
   static Future<Uint8List> deriveKey(
     Uint8List password,
     Uint8List salt,
@@ -383,6 +418,7 @@ class CryptoUtil {
     );
   }
 
+  // Computes and returns the hash of the source file
   static Future<Uint8List> getHash(io.File source) {
     return _computer.compute(
       cryptoGenericHash,

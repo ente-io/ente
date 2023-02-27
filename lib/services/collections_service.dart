@@ -492,7 +492,7 @@ class CollectionsService {
       }
       collectionKey = CryptoUtil.decryptSync(
         encryptedKey,
-        _config.getKey(),
+        _config.getKey()!,
         CryptoUtil.base642bin(collection.keyDecryptionNonce!),
       );
     } else {
@@ -1139,7 +1139,7 @@ class CollectionsService {
     return utf8.decode(
       CryptoUtil.decryptSync(
         CryptoUtil.base642bin(collection.attributes.encryptedPath!),
-        key,
+        key!,
         CryptoUtil.base642bin(collection.attributes.pathDecryptionNonce!),
       ),
     );
