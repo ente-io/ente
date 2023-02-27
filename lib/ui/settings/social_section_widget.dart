@@ -26,6 +26,7 @@ class SocialSectionWidget extends StatelessWidget {
     final String rateUrl = result.item2;
     options.addAll(
       [
+        sectionOptionSpacing,
         SocialsMenuItemWidget("Rate us on $ratePlace", rateUrl),
         sectionOptionSpacing,
       ],
