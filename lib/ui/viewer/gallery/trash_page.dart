@@ -14,7 +14,7 @@ import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 
-class TrashPage extends StatefulWidget {
+class TrashPage extends StatelessWidget {
   final String tagPrefix;
   final GalleryType appBarType;
   final GalleryType overlayType;
@@ -27,29 +27,8 @@ class TrashPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<TrashPage> createState() => _TrashPageState();
-}
-
-class _TrashPageState extends State<TrashPage> {
-  late Function() _selectedFilesListener;
-  @override
-  void initState() {
-    _selectedFilesListener = () {
-      setState(() {});
-    };
-    widget._selectedFiles.addListener(_selectedFilesListener);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    widget._selectedFiles.removeListener(_selectedFilesListener);
-    super.dispose();
-  }
-
-  @override
   Widget build(Object context) {
-    final bool filesAreSelected = widget._selectedFiles.files.isNotEmpty;
+    final bool filesAreSelected = _selectedFiles.files.isNotEmpty;
 
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
@@ -70,8 +49,8 @@ class _TrashPageState extends State<TrashPage> {
       forceReloadEvents: [
         Bus.instance.on<ForceReloadTrashPageEvent>(),
       ],
-      tagPrefix: widget.tagPrefix,
-      selectedFiles: widget._selectedFiles,
+      tagPrefix: tagPrefix,
+      selectedFiles: _selectedFiles,
       header: _headerWidget(),
       initialFiles: null,
     );
@@ -80,9 +59,9 @@ class _TrashPageState extends State<TrashPage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
-          widget.appBarType,
+          appBarType,
           "Trash",
-          widget._selectedFiles,
+          _selectedFiles,
         ),
       ),
       body: Stack(
@@ -109,7 +88,7 @@ class _TrashPageState extends State<TrashPage> {
               ),
             ),
           ),
-          FileSelectionOverlayBar(GalleryType.trash, widget._selectedFiles)
+          FileSelectionOverlayBar(GalleryType.trash, _selectedFiles)
         ],
       ),
     );

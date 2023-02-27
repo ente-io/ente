@@ -6,7 +6,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
-import 'package:connectivity/connectivity.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -281,9 +281,11 @@ class FileUploader {
       return;
     }
     final connectivityResult = await (Connectivity().checkConnectivity());
-    final canUploadUnderCurrentNetworkConditions =
-        (connectivityResult == ConnectivityResult.wifi ||
-            Configuration.instance.shouldBackupOverMobileData());
+    bool canUploadUnderCurrentNetworkConditions = true;
+    if (connectivityResult == ConnectivityResult.mobile) {
+      canUploadUnderCurrentNetworkConditions =
+          Configuration.instance.shouldBackupOverMobileData();
+    }
     if (!canUploadUnderCurrentNetworkConditions) {
       throw WiFiUnavailableError();
     }

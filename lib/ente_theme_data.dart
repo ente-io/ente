@@ -27,7 +27,7 @@ final lightThemeData = ThemeData(
     onPrimary: const Color.fromRGBO(255, 255, 255, 1),
     primary: const Color.fromRGBO(0, 0, 0, 1),
   ),
-  toggleableActiveColor: const Color.fromRGBO(102, 187, 106, 1),
+  switchTheme: getSwitchThemeData(const Color.fromRGBO(102, 187, 106, 1)),
   scaffoldBackgroundColor: const Color.fromRGBO(255, 255, 255, 1),
   backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
   appBarTheme: const AppBarTheme().copyWith(
@@ -97,7 +97,7 @@ final darkThemeData = ThemeData(
     buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
   ),
   textTheme: _buildTextTheme(const Color.fromRGBO(255, 255, 255, 1)),
-  toggleableActiveColor: const Color.fromRGBO(102, 187, 106, 1),
+  switchTheme: getSwitchThemeData(const Color.fromRGBO(102, 187, 106, 1)),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: const Color.fromRGBO(158, 158, 158, 1),
     bgEnabled: const Color.fromRGBO(255, 255, 255, 1),
@@ -409,5 +409,30 @@ ElevatedButtonThemeData buildElevatedButtonThemeData({
         borderRadius: BorderRadius.all(Radius.circular(8)),
       ),
     ),
+  );
+}
+
+SwitchThemeData getSwitchThemeData(Color activeColor) {
+  return SwitchThemeData(
+    thumbColor:
+        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return activeColor;
+      }
+      return null;
+    }),
+    trackColor:
+        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return activeColor;
+      }
+      return null;
+    }),
   );
 }

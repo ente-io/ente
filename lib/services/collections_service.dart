@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
@@ -180,6 +179,15 @@ class CollectionsService {
         .where((element) => element.isArchived())
         .map((e) => e.id)
         .toSet();
+  }
+
+  Future<List<CollectionWithThumbnail>> getArchivedCollectionWithThumb() async {
+    final allCollections = await getCollectionsWithThumbnails();
+    return allCollections
+        .where(
+          (c) => c.collection.isArchived() && !c.collection.isHidden(),
+        )
+        .toList();
   }
 
   Set<int> getHiddenCollections() {
@@ -645,7 +653,7 @@ class CollectionsService {
       }
       rethrow;
     } catch (e, s) {
-      _logger.severe("failed to rename collection", e, s);
+      _logger.severe("failed to update ShareUrl", e, s);
       rethrow;
     }
   }

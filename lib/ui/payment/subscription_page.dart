@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
@@ -12,8 +13,12 @@ import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
+import "package:photos/ui/components/captioned_text_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
@@ -48,6 +53,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   bool _hasLoadedData = false;
   bool _isLoading = false;
   late bool _isActiveStripeSubscriber;
+  EnteColorScheme colorScheme = darkScheme;
 
   @override
   void initState() {
@@ -135,18 +141,26 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
+    colorScheme = getEnteColorScheme(context);
     if (!_isLoading) {
       _isLoading = true;
       _fetchSubData();
     }
     _dialog = createProgressDialog(context, "Please wait...");
     final appBar = AppBar(
-      title: widget.isOnboarding ? null : const Text("Subscription"),
+      title: widget.isOnboarding
+          ? null
+          : const Text("Subscription${kDebugMode ? ' Store' : ''}"),
     );
     return Scaffold(
       appBar: appBar,
       body: _getBody(),
     );
+  }
+
+  bool _isFreePlanUser() {
+    return _currentSubscription != null &&
+        freeProductID == _currentSubscription!.productID;
   }
 
   Future<void> _fetchSubData() async {
@@ -212,98 +226,69 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       if (widget.isOnboarding) {
         widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
       }
-      widgets.add(const SubFaqWidget());
+      widgets.add(
+        SubFaqWidget(isOnboarding: widget.isOnboarding),
+      );
     }
 
     if (_hasActiveSubscription &&
         _currentSubscription!.productID != freeProductID) {
-      widgets.addAll([
-        Align(
-          alignment: Alignment.center,
-          child: GestureDetector(
-            onTap: () {
-              final String paymentProvider =
-                  _currentSubscription!.paymentProvider;
-              if (paymentProvider == appStore && !Platform.isAndroid) {
-                launchUrlString("https://apps.apple.com/account/billing");
-              } else if (paymentProvider == playStore && Platform.isAndroid) {
-                launchUrlString(
-                  "https://play.google.com/store/account/subscriptions?sku=" +
-                      _currentSubscription!.productID +
-                      "&package=io.ente.photos",
-                );
-              } else if (paymentProvider == stripe) {
-                showErrorDialog(
-                  context,
-                  "Sorry",
-                  "Visit web.ente.io to manage your subscription",
-                );
-              } else {
-                final String capitalizedWord = paymentProvider.isNotEmpty
-                    ? '${paymentProvider[0].toUpperCase()}${paymentProvider.substring(1).toLowerCase()}'
-                    : '';
-                showErrorDialog(
-                  context,
-                  "Sorry",
-                  "Please contact us at support@ente.io to manage your "
-                      "$capitalizedWord subscription.",
-                );
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(40, 80, 40, 20),
-              child: Column(
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      text: _isActiveStripeSubscriber
-                          ? "Visit web.ente.io to manage your subscription"
-                          : "Payment details",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontFamily: 'Inter-Medium',
-                        fontSize: 14,
-                        decoration: _isActiveStripeSubscriber
-                            ? TextDecoration.none
-                            : TextDecoration.underline,
-                      ),
-                    ),
-                    textAlign: TextAlign.center,
+      if (_isActiveStripeSubscriber) {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+            child: Text(
+              "Visit web.ente.io to manage your subscription",
+              style: getEnteTextTheme(context).small.copyWith(
+                    color: colorScheme.textMuted,
                   ),
-                ],
-              ),
             ),
           ),
-        ),
-      ]);
+        );
+      } else {
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 40, 16, 4),
+            child: MenuItemWidget(
+              captionedTextWidget: const CaptionedTextWidget(
+                title: "Payment details",
+              ),
+              menuItemColor: colorScheme.fillFaint,
+              trailingWidget: Icon(
+                Icons.chevron_right_outlined,
+                color: colorScheme.strokeBase,
+              ),
+              singleBorderRadius: 4,
+              alignCaptionedTextToLeft: true,
+              onTap: () async {
+                _onPlatformRestrictedPaymentDetailsClick();
+              },
+            ),
+          ),
+        );
+      }
     }
     if (!widget.isOnboarding) {
-      widgets.addAll([
-        Align(
-          alignment: Alignment.topCenter,
-          child: GestureDetector(
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+          child: MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: _isFreePlanUser() ? "Family Plans" : "Manage Family",
+            ),
+            menuItemColor: colorScheme.fillFaint,
+            trailingWidget: Icon(
+              Icons.chevron_right_outlined,
+              color: colorScheme.strokeBase,
+            ),
+            singleBorderRadius: 4,
+            alignCaptionedTextToLeft: true,
             onTap: () async {
               _billingService.launchFamilyPortal(context, _userDetails);
             },
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(40, 0, 40, 80),
-              child: Column(
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      text: "Manage family",
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                            decoration: TextDecoration.underline,
-                          ),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
           ),
         ),
-      ]);
+      );
     }
     return SingleChildScrollView(
       child: Column(
@@ -311,6 +296,35 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         children: widgets,
       ),
     );
+  }
+
+  void _onPlatformRestrictedPaymentDetailsClick() {
+    final String paymentProvider = _currentSubscription!.paymentProvider;
+    if (paymentProvider == appStore && !Platform.isAndroid) {
+      launchUrlString("https://apps.apple.com/account/billing");
+    } else if (paymentProvider == playStore && Platform.isAndroid) {
+      launchUrlString(
+        "https://play.google.com/store/account/subscriptions?sku=" +
+            _currentSubscription!.productID +
+            "&package=io.ente.photos",
+      );
+    } else if (paymentProvider == stripe) {
+      showErrorDialog(
+        context,
+        "Sorry",
+        "Visit web.ente.io to manage your subscription",
+      );
+    } else {
+      final String capitalizedWord = paymentProvider.isNotEmpty
+          ? '${paymentProvider[0].toUpperCase()}${paymentProvider.substring(1).toLowerCase()}'
+          : '';
+      showErrorDialog(
+        context,
+        "Sorry",
+        "Please contact us at support@ente.io to manage your "
+            "$capitalizedWord subscription.",
+      );
+    }
   }
 
   List<Widget> _getStripePlanWidgets() {

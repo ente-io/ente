@@ -1,11 +1,15 @@
+import "dart:async";
 import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import "package:fluttertoast/fluttertoast.dart";
 import 'package:logging/logging.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/event_bus.dart";
 import 'package:photos/db/files_db.dart';
+import "package:photos/events/tab_changed_event.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
@@ -15,6 +19,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/album_list_item_widget.dart';
 import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
@@ -22,6 +27,7 @@ import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/new_album_list_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
+import "package:photos/ui/sharing/share_collection_page.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -29,7 +35,14 @@ import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
-enum CollectionActionType { addFiles, moveFiles, restoreFiles, unHide }
+enum CollectionActionType {
+  addFiles,
+  moveFiles,
+  restoreFiles,
+  unHide,
+  shareCollection,
+  collectPhotos,
+}
 
 String _actionName(CollectionActionType type, bool plural) {
   bool addTitleSuffix = false;
@@ -50,21 +63,27 @@ String _actionName(CollectionActionType type, bool plural) {
     case CollectionActionType.unHide:
       text = "Unhide to album";
       break;
+    case CollectionActionType.shareCollection:
+      text = "Share";
+      break;
+    case CollectionActionType.collectPhotos:
+      text = "Share";
+      break;
   }
   return addTitleSuffix ? text + titleSuffix : text;
 }
 
-void createCollectionSheet(
+void showCollectionActionSheet(
+  BuildContext context, {
   SelectedFiles? selectedFiles,
   List<SharedMediaFile>? sharedFiles,
-  BuildContext context, {
   CollectionActionType actionType = CollectionActionType.addFiles,
   bool showOptionToCreateNewAlbum = true,
 }) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
-      return CreateCollectionSheet(
+      return CollectionActionSheet(
         selectedFiles: selectedFiles,
         sharedFiles: sharedFiles,
         actionType: actionType,
@@ -84,12 +103,12 @@ void createCollectionSheet(
   );
 }
 
-class CreateCollectionSheet extends StatefulWidget {
+class CollectionActionSheet extends StatefulWidget {
   final SelectedFiles? selectedFiles;
   final List<SharedMediaFile>? sharedFiles;
   final CollectionActionType actionType;
   final bool showOptionToCreateNewAlbum;
-  const CreateCollectionSheet({
+  const CollectionActionSheet({
     required this.selectedFiles,
     required this.sharedFiles,
     required this.actionType,
@@ -98,17 +117,17 @@ class CreateCollectionSheet extends StatefulWidget {
   });
 
   @override
-  State<CreateCollectionSheet> createState() => _CreateCollectionSheetState();
+  State<CollectionActionSheet> createState() => _CollectionActionSheetState();
 }
 
-class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
-  final _logger = Logger((_CreateCollectionSheetState).toString());
+class _CollectionActionSheetState extends State<CollectionActionSheet> {
+  final _logger = Logger((_CollectionActionSheetState).toString());
 
   @override
   Widget build(BuildContext context) {
     final filesCount = widget.sharedFiles != null
         ? widget.sharedFiles!.length
-        : widget.selectedFiles!.files.length;
+        : widget.selectedFiles?.files.length ?? 0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -125,7 +144,9 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                   title: TitleBarTitleWidget(
                     title: _actionName(widget.actionType, filesCount > 1),
                   ),
-                  caption: "Create or select album",
+                  caption: widget.showOptionToCreateNewAlbum
+                      ? "Create or select album"
+                      : "Select album",
                 ),
                 Flexible(
                   child: Column(
@@ -147,32 +168,18 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                   } else if (snapshot.hasData) {
                                     final collectionsWithThumbnail = snapshot
                                         .data as List<CollectionWithThumbnail>;
+                                    _removeIncomingCollections(
+                                      collectionsWithThumbnail,
+                                    );
                                     return ListView.separated(
                                       itemBuilder: (context, index) {
                                         if (index == 0 &&
                                             widget.showOptionToCreateNewAlbum) {
                                           return GestureDetector(
                                             onTap: () async {
-                                              final result =
-                                                  await showTextInputDialog(
-                                                context,
-                                                title: "Album title",
-                                                submitButtonLabel: "OK",
-                                                hintText: "Enter album name",
-                                                onSubmit: _nameAlbum,
-                                                showOnlyLoadingState: true,
-                                                textCapitalization:
-                                                    TextCapitalization.words,
+                                              await _createNewAlbumOnTap(
+                                                filesCount,
                                               );
-                                              if (result is Exception) {
-                                                showGenericErrorDialog(
-                                                  context: context,
-                                                );
-                                                _logger.severe(
-                                                  "Failed to name album",
-                                                  result,
-                                                );
-                                              }
                                             },
                                             behavior: HitTestBehavior.opaque,
                                             child:
@@ -244,12 +251,48 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
     );
   }
 
+  Future<void> _createNewAlbumOnTap(int filesCount) async {
+    if (filesCount > 0) {
+      final result = await showTextInputDialog(
+        context,
+        title: "Album title",
+        submitButtonLabel: "OK",
+        hintText: "Enter album name",
+        onSubmit: _nameAlbum,
+        showOnlyLoadingState: true,
+        textCapitalization: TextCapitalization.words,
+      );
+      if (result is Exception) {
+        showGenericErrorDialog(
+          context: context,
+        );
+        _logger.severe(
+          "Failed to name album",
+          result,
+        );
+      }
+    } else {
+      Navigator.pop(context);
+      await showToast(
+        context,
+        "Long press to select photos and click + to create an album",
+        toastLength: Toast.LENGTH_LONG,
+      );
+      Bus.instance.fire(
+        TabChangedEvent(
+          0,
+          TabChangedEventSource.collectionsPage,
+        ),
+      );
+    }
+  }
+
   Future<void> _nameAlbum(String albumName) async {
     if (albumName.isNotEmpty) {
       final collection = await _createAlbum(albumName);
       if (collection != null) {
         if (await _runCollectionAction(
-          collectionID: collection.id,
+          collection: collection,
           showProgressDialog: false,
         )) {
           if (widget.actionType == CollectionActionType.restoreFiles) {
@@ -281,16 +324,29 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
   }
 
   Future<void> _albumListItemOnTap(CollectionWithThumbnail item) async {
-    if (await _runCollectionAction(collectionID: item.collection.id)) {
-      showShortToast(
-        context,
-        widget.actionType == CollectionActionType.addFiles
-            ? "Added successfully to " + item.collection.name!
-            : "Moved successfully to " + item.collection.name!,
-      );
-      _navigateToCollection(
-        item.collection,
-      );
+    if (await _runCollectionAction(collection: item.collection)) {
+      late final String toastMessage;
+      bool shouldNavigateToCollection = false;
+      if (widget.actionType == CollectionActionType.addFiles) {
+        toastMessage = "Added successfully to " + item.collection.name!;
+        shouldNavigateToCollection = true;
+      } else if (widget.actionType == CollectionActionType.moveFiles) {
+        toastMessage = "Moved successfully to " + item.collection.name!;
+        shouldNavigateToCollection = true;
+      } else {
+        toastMessage = "";
+      }
+      if (toastMessage.isNotEmpty) {
+        showShortToast(
+          context,
+          toastMessage,
+        );
+      }
+      if (shouldNavigateToCollection) {
+        _navigateToCollection(
+          item.collection,
+        );
+      }
     }
   }
 
@@ -326,23 +382,115 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
     );
   }
 
+  _removeIncomingCollections(List<CollectionWithThumbnail> items) {
+    if (widget.actionType == CollectionActionType.shareCollection ||
+        widget.actionType == CollectionActionType.collectPhotos) {
+      final ownerID = Configuration.instance.getUserID();
+      items.removeWhere(
+        (e) => !e.collection.isOwner(ownerID!),
+      );
+    }
+  }
+
   Future<bool> _runCollectionAction({
-    required int collectionID,
+    required Collection collection,
     bool showProgressDialog = true,
   }) async {
     switch (widget.actionType) {
       case CollectionActionType.addFiles:
         return _addToCollection(
-          collectionID: collectionID,
+          collectionID: collection.id,
           showProgressDialog: showProgressDialog,
         );
       case CollectionActionType.moveFiles:
-        return _moveFilesToCollection(collectionID);
+        return _moveFilesToCollection(collection.id);
       case CollectionActionType.unHide:
-        return _moveFilesToCollection(collectionID);
+        return _moveFilesToCollection(collection.id);
       case CollectionActionType.restoreFiles:
-        return _restoreFilesToCollection(collectionID);
+        return _restoreFilesToCollection(collection.id);
+      case CollectionActionType.shareCollection:
+        return _showShareCollectionPage(collection);
+      case CollectionActionType.collectPhotos:
+        return _createCollaborativeLink(collection);
     }
+  }
+
+  Future<bool> _createCollaborativeLink(Collection collection) async {
+    final CollectionActions collectionActions =
+        CollectionActions(CollectionsService.instance);
+
+    if (collection.hasLink) {
+      if (collection.publicURLs!.first!.enableCollect) {
+        if (Configuration.instance.getUserID() == collection.owner!.id) {
+          unawaited(
+            routeToPage(
+              context,
+              ShareCollectionPage(collection),
+            ),
+          );
+        }
+        showToast(context, "This album already has a collaborative link");
+        return Future.value(false);
+      } else {
+        try {
+          unawaited(
+            routeToPage(
+              context,
+              ShareCollectionPage(collection),
+            ),
+          );
+          CollectionsService.instance
+              .updateShareUrl(collection, {'enableCollect': true}).then(
+            (value) => showToast(
+              context,
+              "Collaborative link created for " + collection.name!,
+            ),
+          );
+          return true;
+        } catch (e) {
+          showGenericErrorDialog(context: context);
+          return false;
+        }
+      }
+    }
+    final bool result = await collectionActions.enableUrl(
+      context,
+      collection,
+      enableCollect: true,
+    );
+    if (result) {
+      showToast(
+        context,
+        "Collaborative link created for " + collection.name!,
+      );
+      if (Configuration.instance.getUserID() == collection.owner!.id) {
+        unawaited(
+          routeToPage(
+            context,
+            ShareCollectionPage(collection),
+          ),
+        );
+      } else {
+        showGenericErrorDialog(context: context);
+        _logger.severe("Cannot share collections owned by others");
+      }
+    }
+    return result;
+  }
+
+  Future<bool> _showShareCollectionPage(Collection collection) {
+    if (Configuration.instance.getUserID() == collection.owner!.id) {
+      unawaited(
+        routeToPage(
+          context,
+          ShareCollectionPage(collection),
+        ),
+      );
+    } else {
+      showGenericErrorDialog(context: context);
+      _logger.severe("Cannot share collections owned by others");
+    }
+    return Future.value(true);
   }
 
   Future<bool> _addToCollection({
@@ -457,8 +605,11 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
   }
 
   Future<bool> _restoreFilesToCollection(int toCollectionID) async {
-    final dialog = createProgressDialog(context, "Restoring files...",
-        isDismissible: true);
+    final dialog = createProgressDialog(
+      context,
+      "Restoring files...",
+      isDismissible: true,
+    );
     await dialog.show();
     try {
       await CollectionsService.instance

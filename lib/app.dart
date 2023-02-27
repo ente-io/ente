@@ -4,16 +4,16 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:logging/logging.dart';
-import 'package:media_extension/media_extension.dart';
 import 'package:media_extension/media_extension_action_types.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/home_widget.dart';
+import "package:photos/ui/viewer/actions/file_viewer.dart";
+import "package:photos/utils/intent_util.dart";
 
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
@@ -31,59 +31,46 @@ class EnteApp extends StatefulWidget {
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   final _logger = Logger("EnteAppState");
-  final _mediaExtensionPlugin = MediaExtension();
 
   @override
   void initState() {
     _logger.info('init App');
     super.initState();
+    setupIntentAction();
     WidgetsBinding.instance.addObserver(this);
   }
 
-  Future<bool> initIntentAction() async {
-    IntentAction intentAction = IntentAction.main;
-    try {
-      final actionResult = await _mediaExtensionPlugin.getIntentAction();
-      intentAction = actionResult.action!;
-    } on PlatformException {
-      intentAction = IntentAction.main;
-    } catch (error) {
-      _logger.info(error);
-      intentAction = IntentAction.main;
-    }
-    if (intentAction == IntentAction.main) {
+  void setupIntentAction() async {
+    final mediaExtentionAction = Platform.isAndroid
+        ? await initIntentAction()
+        : MediaExtentionAction(action: IntentAction.main);
+    AppLifecycleService.instance.setMediaExtensionAction(mediaExtentionAction);
+    if (mediaExtentionAction.action == IntentAction.main) {
       _configureBackgroundFetch();
     }
-    AppLifecycleService.instance.setIntentAction(intentAction);
-    return true;
   }
 
   @override
   Widget build(BuildContext context) {
     if (Platform.isAndroid || kDebugMode) {
-      return FutureBuilder(
-        future: initIntentAction(),
-        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-          return snapshot.data != null && snapshot.data == true
-              ? AdaptiveTheme(
-                  light: lightThemeData,
-                  dark: darkThemeData,
-                  initial: AdaptiveThemeMode.system,
-                  builder: (lightTheme, dartTheme) => MaterialApp(
-                    title: "ente",
-                    themeMode: ThemeMode.system,
-                    theme: lightTheme,
-                    darkTheme: dartTheme,
-                    home: const HomeWidget(),
-                    debugShowCheckedModeBanner: false,
-                    builder: EasyLoading.init(),
-                    supportedLocales: AppLocalizations.supportedLocales,
-                    localizationsDelegates:
-                        AppLocalizations.localizationsDelegates,
-                  ),
-                )
-              : Container();
-        },
+      return AdaptiveTheme(
+        light: lightThemeData,
+        dark: darkThemeData,
+        initial: AdaptiveThemeMode.system,
+        builder: (lightTheme, dartTheme) => MaterialApp(
+          title: "ente",
+          themeMode: ThemeMode.system,
+          theme: lightTheme,
+          darkTheme: dartTheme,
+          home: AppLifecycleService.instance.mediaExtensionAction.action ==
+                  IntentAction.view
+              ? const FileViewer()
+              : const HomeWidget(),
+          debugShowCheckedModeBanner: false,
+          builder: EasyLoading.init(),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+        ),
       );
     } else {
       return MaterialApp(

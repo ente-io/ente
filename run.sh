@@ -2,14 +2,12 @@
 
 FLUTTER_RUN="flutter run --flavor dev "
 
-if [ ! -z "$1" ]
-then
-    SUPPLIED_ENV_FILE="$1"
-    while IFS= read -r line
-    do
-      FLUTTER_RUN="$FLUTTER_RUN --dart-define $line"
+SUPPLIED_ENV_FILE=".env"
+while IFS= read -r line
+do
+    FLUTTER_RUN="$FLUTTER_RUN --dart-define $line"
 
-    done < "$SUPPLIED_ENV_FILE"
-fi
+done < "$SUPPLIED_ENV_FILE"
+
 echo "Running: $FLUTTER_RUN"
 $FLUTTER_RUN

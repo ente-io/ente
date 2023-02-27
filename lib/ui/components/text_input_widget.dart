@@ -142,6 +142,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                     shouldSurfaceExecutionStates:
                         widget.shouldSurfaceExecutionStates,
                     obscureTextNotifier: _obscureTextNotifier,
+                    isPasswordInput: widget.isPasswordInput,
                   ),
                 ),
               ),
@@ -294,10 +295,12 @@ class SuffixIconWidget extends StatelessWidget {
   final ExecutionState executionState;
   final bool shouldSurfaceExecutionStates;
   final ValueNotifier? obscureTextNotifier;
+  final bool isPasswordInput;
   const SuffixIconWidget({
     required this.executionState,
     required this.shouldSurfaceExecutionStates,
     this.obscureTextNotifier,
+    this.isPasswordInput = false,
     super.key,
   });
 
@@ -307,7 +310,8 @@ class SuffixIconWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     if (executionState == ExecutionState.idle ||
         !shouldSurfaceExecutionStates) {
-      if (obscureTextNotifier != null) {
+      if (isPasswordInput) {
+        assert(obscureTextNotifier != null);
         trailingWidget = GestureDetector(
           onTap: () {
             obscureTextNotifier!.value = !obscureTextNotifier!.value;

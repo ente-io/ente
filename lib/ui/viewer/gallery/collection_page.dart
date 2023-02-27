@@ -16,13 +16,13 @@ import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 
-class CollectionPage extends StatefulWidget {
+class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
   final GalleryType appBarType;
   final bool hasVerifiedLock;
 
-  const CollectionPage(
+  CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
     this.appBarType = GalleryType.ownedCollection,
@@ -30,42 +30,24 @@ class CollectionPage extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
-  @override
-  State<CollectionPage> createState() => _CollectionPageState();
-}
-
-class _CollectionPageState extends State<CollectionPage> {
   final _selectedFiles = SelectedFiles();
 
   final GlobalKey shareButtonKey = GlobalKey();
-  final ValueNotifier<double> _bottomPosition = ValueNotifier(-150.0);
-
-  @override
-  void initState() {
-    _selectedFiles.addListener(_selectedFilesListener);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _selectedFiles.removeListener(_selectedFilesListener);
-    super.dispose();
-  }
 
   @override
   Widget build(Object context) {
-    if (widget.hasVerifiedLock == false && widget.c.collection.isHidden()) {
+    if (hasVerifiedLock == false && c.collection.isHidden()) {
       return const EmptyState();
     }
 
-    final appBarTypeValue = _getGalleryType(widget.c.collection);
+    final appBarTypeValue = _getGalleryType(c.collection);
     final List<File>? initialFiles =
-        widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
+        c.thumbnail != null ? [c.thumbnail!] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final FileLoadResult result =
             await FilesDB.instance.getFilesInCollection(
-          widget.c.collection.id,
+          c.collection.id,
           creationStartTime,
           creationEndTime,
           limit: limit,
@@ -82,25 +64,25 @@ class _CollectionPageState extends State<CollectionPage> {
       },
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()
-          .where((event) => event.collectionID == widget.c.collection.id),
+          .where((event) => event.collectionID == c.collection.id),
       removalEventTypes: const {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
         EventType.hide,
       },
-      tagPrefix: widget.tagPrefix,
+      tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
-      albumName: widget.c.collection.name,
+      albumName: c.collection.name,
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarTypeValue,
-          widget.c.collection.name,
+          c.collection.name,
           _selectedFiles,
-          collection: widget.c.collection,
+          collection: c.collection,
         ),
       ),
       body: Stack(
@@ -110,7 +92,7 @@ class _CollectionPageState extends State<CollectionPage> {
           FileSelectionOverlayBar(
             appBarTypeValue,
             _selectedFiles,
-            collection: widget.c.collection,
+            collection: c.collection,
           )
         ],
       ),
@@ -129,12 +111,6 @@ class _CollectionPageState extends State<CollectionPage> {
     } else if (c.type == CollectionType.favorites) {
       return GalleryType.favorite;
     }
-    return widget.appBarType;
-  }
-
-  _selectedFilesListener() {
-    _selectedFiles.files.isNotEmpty
-        ? _bottomPosition.value = 0.0
-        : _bottomPosition.value = -150.0;
+    return appBarType;
   }
 }
