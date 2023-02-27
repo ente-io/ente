@@ -176,7 +176,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
   }
   try {
     thumbnailData = await getThumbnailFromInAppCacheFile(file);
-    final fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
+    final fileHash =
+        CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
     return MediaUploadData(
       sourceFile,
       thumbnailData,
