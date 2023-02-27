@@ -422,7 +422,7 @@ const englishConstants = {
             case SuggestionType.THING:
                 return 'Content';
             case SuggestionType.FILE_CAPTION:
-                return 'Caption';
+                return 'Description';
         }
     },
     PHOTO_COUNT: (count: number) =>
