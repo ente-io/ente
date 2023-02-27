@@ -16,7 +16,7 @@ class UpdateService {
   static final UpdateService instance = UpdateService._privateConstructor();
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
-  static const currentChangeLogVersion = 6;
+  static const currentChangeLogVersion = 7;
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
