@@ -681,9 +681,9 @@ class UserService {
         data: {
           "code": code,
           "encryptedTwoFactorSecret":
-              CryptoUtil.bin2base64(encryptionResult.encryptedData as Uint8List),
+              CryptoUtil.bin2base64(encryptionResult.encryptedData!),
           "twoFactorSecretDecryptionNonce":
-              CryptoUtil.bin2base64(encryptionResult.nonce as Uint8List),
+              CryptoUtil.bin2base64(encryptionResult.nonce!),
         },
       );
       await dialog.hide();
