@@ -55,7 +55,7 @@ Future<io.File?> downloadAndDecrypt(
       encryptedFilePath,
       decryptedFilePath,
       CryptoUtil.base642bin(file.fileDecryptionHeader!),
-      decryptFileKey(file),
+      getFileKey(file),
     );
     _logger.info("File decrypted: " + file.uploadedFileID.toString());
     await encryptedFile.delete();
@@ -63,7 +63,7 @@ Future<io.File?> downloadAndDecrypt(
   });
 }
 
-Uint8List decryptFileKey(ente.File file) {
+Uint8List getFileKey(ente.File file) {
   final encryptedKey = CryptoUtil.base642bin(file.encryptedKey!);
   final nonce = CryptoUtil.base642bin(file.keyDecryptionNonce!);
   final collectionKey =

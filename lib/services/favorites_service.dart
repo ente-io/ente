@@ -193,14 +193,17 @@ class FavoritesService {
     if (_cachedFavoritesCollectionID != null) {
       return _cachedFavoritesCollectionID!;
     }
-    final key = CryptoUtil.generateKey();
-    final encKey = CryptoUtil.encryptSync(key, _config.getKey()!);
-    final encName =
-        CryptoUtil.encryptSync(utf8.encode("Favorites") as Uint8List, key);
+    final favoriteCollectionKey = CryptoUtil.generateKey();
+    final encryptedKeyResult =
+        CryptoUtil.encryptSync(favoriteCollectionKey, _config.getKey()!);
+    final encName = CryptoUtil.encryptSync(
+      utf8.encode("Favorites") as Uint8List,
+      favoriteCollectionKey,
+    );
     final collection = await _collectionsService.createAndCacheCollection(
       CreateRequest(
-        encryptedKey: CryptoUtil.bin2base64(encKey.encryptedData!),
-        keyDecryptionNonce: CryptoUtil.bin2base64(encKey.nonce!),
+        encryptedKey: CryptoUtil.bin2base64(encryptedKeyResult.encryptedData!),
+        keyDecryptionNonce: CryptoUtil.bin2base64(encryptedKeyResult.nonce!),
         encryptedName: CryptoUtil.bin2base64(encName.encryptedData!),
         nameDecryptionNonce: CryptoUtil.bin2base64(encName.nonce!),
         type: CollectionType.favorites,

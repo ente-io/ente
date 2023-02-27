@@ -50,7 +50,7 @@ class TrashDiffFetcher {
             item["file"]["thumbnail"]["decryptionHeader"];
         trash.metadataDecryptionHeader =
             item["file"]["metadata"]["decryptionHeader"];
-        final fileDecryptionKey = decryptFileKey(trash);
+        final fileDecryptionKey = getFileKey(trash);
         final encodedMetadata = await CryptoUtil.decryptChaCha(
           CryptoUtil.base642bin(item["file"]["metadata"]["encryptedData"]),
           fileDecryptionKey,

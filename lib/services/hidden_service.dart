@@ -133,10 +133,13 @@ extension HiddenService on CollectionsService {
   }
 
   Future<Collection> _createUncategorizedCollection() async {
-    final key = CryptoUtil.generateKey();
-    final encKey = CryptoUtil.encryptSync(key, config.getKey()!);
-    final encName =
-        CryptoUtil.encryptSync(utf8.encode("Uncategorized") as Uint8List, key);
+    final uncategorizedCollectionKey = CryptoUtil.generateKey();
+    final encKey =
+        CryptoUtil.encryptSync(uncategorizedCollectionKey, config.getKey()!);
+    final encName = CryptoUtil.encryptSync(
+      utf8.encode("Uncategorized") as Uint8List,
+      uncategorizedCollectionKey,
+    );
     final collection = await createAndCacheCollection(
       CreateRequest(
         encryptedKey: CryptoUtil.bin2base64(encKey.encryptedData!),
@@ -156,11 +159,12 @@ extension HiddenService on CollectionsService {
     required int visibility,
     required int subType,
   }) async {
-    final key = CryptoUtil.generateKey();
-    final encryptedKeyData = CryptoUtil.encryptSync(key, config.getKey()!);
+    final collectionKey = CryptoUtil.generateKey();
+    final encryptedKeyData =
+        CryptoUtil.encryptSync(collectionKey, config.getKey()!);
     final encryptedName = CryptoUtil.encryptSync(
       utf8.encode(name) as Uint8List,
-      key,
+      collectionKey,
     );
     final jsonToUpdate = CollectionMagicMetadata(
       visibility: visibility,
@@ -169,7 +173,7 @@ extension HiddenService on CollectionsService {
     assert(jsonToUpdate.length == 2, "metadata should have two keys");
     final encryptedMMd = await CryptoUtil.encryptChaCha(
       utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
-      key,
+      collectionKey,
     );
     final MetadataRequest metadataRequest = MetadataRequest(
       version: 1,

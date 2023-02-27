@@ -92,7 +92,7 @@ class FileMagicService {
         file.pubMmdEncodedJson = jsonEncode(jsonToUpdate);
         file.pubMagicMetadata = PubMagicMetadata.fromJson(jsonToUpdate);
 
-        final fileKey = decryptFileKey(file);
+        final fileKey = getFileKey(file);
         final encryptedMMd = await CryptoUtil.encryptChaCha(
           utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
           fileKey,
@@ -158,7 +158,7 @@ class FileMagicService {
           file.mMdEncodedJson = jsonEncode(jsonToUpdate);
           file.magicMetadata = MagicMetadata.fromJson(jsonToUpdate);
 
-          final fileKey = decryptFileKey(file);
+          final fileKey = getFileKey(file);
           final encryptedMMd = await CryptoUtil.encryptChaCha(
             utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
             fileKey,

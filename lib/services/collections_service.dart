@@ -484,7 +484,10 @@ class CollectionsService {
     final encryptedKey = CryptoUtil.base642bin(collection.encryptedKey);
     Uint8List? collectionKey;
     if (collection.owner?.id == _config.getUserID()) {
+      // If the collection is owned by the user, decrypt with the master key
       if (_config.getKey() == null) {
+        // Possible during AppStore account migration, where SecureStorage
+        // would become inaccessible to the new Developer Account
         throw Exception("key can not be null");
       }
       collectionKey = CryptoUtil.decryptSync(
@@ -493,6 +496,7 @@ class CollectionsService {
         CryptoUtil.base642bin(collection.keyDecryptionNonce!),
       );
     } else {
+      // If owned by a different user, decrypt with the public key
       collectionKey = CryptoUtil.openSealSync(
         encryptedKey,
         CryptoUtil.base642bin(_config.getKeyAttributes()!.publicKey),
@@ -693,11 +697,11 @@ class CollectionsService {
       for (final collectionData in c) {
         final collection = Collection.fromMap(collectionData);
         if (collectionData['magicMetadata'] != null) {
-          final decryptionKey =
+          final collectionKey =
               _getAndCacheDecryptedKey(collection, source: "fetchCollection");
           final utfEncodedMmd = await CryptoUtil.decryptChaCha(
             CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
-            decryptionKey,
+            collectionKey,
             CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
           );
           collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
@@ -722,10 +726,13 @@ class CollectionsService {
   }
 
   Future<Collection> createAlbum(String albumName) async {
-    final key = CryptoUtil.generateKey();
-    final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey()!);
-    final encryptedName =
-        CryptoUtil.encryptSync(utf8.encode(albumName) as Uint8List, key);
+    final collectionKey = CryptoUtil.generateKey();
+    final encryptedKeyData =
+        CryptoUtil.encryptSync(collectionKey, _config.getKey()!);
+    final encryptedName = CryptoUtil.encryptSync(
+      utf8.encode(albumName) as Uint8List,
+      collectionKey,
+    );
     final collection = await createAndCacheCollection(
       CreateRequest(
         encryptedKey: CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
@@ -749,13 +756,13 @@ class CollectionsService {
       final collectionData = response.data["collection"];
       final collection = Collection.fromMap(collectionData);
       if (collectionData['magicMetadata'] != null) {
-        final decryptionKey = _getAndCacheDecryptedKey(
+        final collectionKey = _getAndCacheDecryptedKey(
           collection,
           source: "fetchCollectionByID",
         );
         final utfEncodedMmd = await CryptoUtil.decryptChaCha(
           CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
-          decryptionKey,
+          collectionKey,
           CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
         );
         collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
@@ -785,10 +792,11 @@ class CollectionsService {
         return cachedCollection;
       }
     }
-    final key = CryptoUtil.generateKey();
-    final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey()!);
+    final collectionKey = CryptoUtil.generateKey();
+    final encryptedKeyData =
+        CryptoUtil.encryptSync(collectionKey, _config.getKey()!);
     final encryptedPath =
-        CryptoUtil.encryptSync(utf8.encode(path) as Uint8List, key);
+        CryptoUtil.encryptSync(utf8.encode(path) as Uint8List, collectionKey);
     final collection = await createAndCacheCollection(
       CreateRequest(
         encryptedKey: CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
@@ -831,14 +839,16 @@ class CollectionsService {
     for (final batch in batchedFiles) {
       params["files"] = [];
       for (final file in batch) {
-        final key = decryptFileKey(file);
+        final fileKey = getFileKey(file);
         file.generatedID =
             null; // So that a new entry is created in the FilesDB
         file.collectionID = collectionID;
         final encryptedKeyData =
-            CryptoUtil.encryptSync(key, getCollectionKey(collectionID));
-        file.encryptedKey = CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
-        file.keyDecryptionNonce = CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+            CryptoUtil.encryptSync(fileKey, getCollectionKey(collectionID));
+        file.encryptedKey =
+            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+        file.keyDecryptionNonce =
+            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
         params["files"].add(
           CollectionFileItem(
             file.uploadedFileID!,
@@ -872,7 +882,7 @@ class CollectionsService {
     final int uploadedFileID = existingUploadedFile.uploadedFileID!;
 
     // encrypt the fileKey with destination collection's key
-    final fileKey = decryptFileKey(existingUploadedFile);
+    final fileKey = getFileKey(existingUploadedFile);
     final encryptedKeyData =
         CryptoUtil.encryptSync(fileKey, getCollectionKey(destCollectionID));
 
@@ -914,7 +924,7 @@ class CollectionsService {
     for (final batch in batchedFiles) {
       params["files"] = [];
       for (final file in batch) {
-        final key = decryptFileKey(file);
+        final fileKey = getFileKey(file);
         file.generatedID =
             null; // So that a new entry is created in the FilesDB
         file.collectionID = toCollectionID;
@@ -923,9 +933,12 @@ class CollectionsService {
         if (file.localID != null && !existingLocalIDS.contains(file.localID)) {
           file.localID = null;
         }
-        final encryptedKeyData = CryptoUtil.encryptSync(key, toCollectionKey);
-        file.encryptedKey = CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
-        file.keyDecryptionNonce = CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+        final encryptedKeyData =
+            CryptoUtil.encryptSync(fileKey, toCollectionKey);
+        file.encryptedKey =
+            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+        file.keyDecryptionNonce =
+            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
         params["files"].add(
           CollectionFileItem(
             file.uploadedFileID!,
@@ -984,14 +997,16 @@ class CollectionsService {
     for (final batch in batchedFiles) {
       params["files"] = [];
       for (final file in batch) {
-        final fileKey = decryptFileKey(file);
+        final fileKey = getFileKey(file);
         file.generatedID =
             null; // So that a new entry is created in the FilesDB
         file.collectionID = toCollectionID;
         final encryptedKeyData =
             CryptoUtil.encryptSync(fileKey, getCollectionKey(toCollectionID));
-        file.encryptedKey = CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
-        file.keyDecryptionNonce = CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+        file.encryptedKey =
+            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+        file.keyDecryptionNonce =
+            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
         params["files"].add(
           CollectionFileItem(
             file.uploadedFileID!,
@@ -1087,11 +1102,11 @@ class CollectionsService {
       final collectionData = response.data["collection"];
       final collection = Collection.fromMap(collectionData);
       if (collectionData['magicMetadata'] != null) {
-        final decryptionKey =
+        final collectionKey =
             _getAndCacheDecryptedKey(collection, source: "create");
         final utfEncodedMmd = await CryptoUtil.decryptChaCha(
           CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
-          decryptionKey,
+          collectionKey,
           CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
         );
         collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);

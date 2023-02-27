@@ -65,10 +65,10 @@ class DiffFetcher {
           file.fileSize = item["info"]["fileSize"];
         }
 
-        final fileDecryptionKey = decryptFileKey(file);
+        final fileKey = getFileKey(file);
         final encodedMetadata = await CryptoUtil.decryptChaCha(
           CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
-          fileDecryptionKey,
+          fileKey,
           CryptoUtil.base642bin(file.metadataDecryptionHeader!),
         );
         final Map<String, dynamic> metadata =
@@ -77,7 +77,7 @@ class DiffFetcher {
         if (item['magicMetadata'] != null) {
           final utfEncodedMmd = await CryptoUtil.decryptChaCha(
             CryptoUtil.base642bin(item['magicMetadata']['data']),
-            fileDecryptionKey,
+            fileKey,
             CryptoUtil.base642bin(item['magicMetadata']['header']),
           );
           file.mMdEncodedJson = utf8.decode(utfEncodedMmd);
@@ -88,7 +88,7 @@ class DiffFetcher {
         if (item['pubMagicMetadata'] != null) {
           final utfEncodedMmd = await CryptoUtil.decryptChaCha(
             CryptoUtil.base642bin(item['pubMagicMetadata']['data']),
-            fileDecryptionKey,
+            fileKey,
             CryptoUtil.base642bin(item['pubMagicMetadata']['header']),
           );
           file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);

@@ -356,7 +356,7 @@ class FileUploader {
           file.uploadedFileID != null && file.updationTime == -1;
       if (isUpdatedFile) {
         _logger.info("File was updated " + file.toString());
-        key = decryptFileKey(file);
+        key = getFileKey(file);
       } else {
         key = null;
         // check if the file is already uploaded and can be mapped to existing
@@ -389,15 +389,15 @@ class FileUploader {
       final thumbnailData = mediaUploadData.thumbnail;
 
       final encryptedThumbnailData = await CryptoUtil.encryptChaCha(
-        thumbnailData as Uint8List,
-        fileAttributes.key as Uint8List,
+        thumbnailData!,
+        fileAttributes.key!,
       );
       if (io.File(encryptedThumbnailPath).existsSync()) {
         await io.File(encryptedThumbnailPath).delete();
       }
       final encryptedThumbnailFile = io.File(encryptedThumbnailPath);
       await encryptedThumbnailFile
-          .writeAsBytes(encryptedThumbnailData.encryptedData as Uint8List);
+          .writeAsBytes(encryptedThumbnailData.encryptedData!);
 
       final thumbnailUploadURL = await _getUploadURL();
       final String thumbnailObjectKey =
@@ -407,18 +407,19 @@ class FileUploader {
       final String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
 
       final metadata = await file.getMetadataForUpload(mediaUploadData);
-      final encryptedMetadataData = await CryptoUtil.encryptChaCha(
+      final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)) as Uint8List,
-        fileAttributes.key as Uint8List,
+        fileAttributes.key!,
       );
       final fileDecryptionHeader =
-          CryptoUtil.bin2base64(fileAttributes.header as Uint8List);
+          CryptoUtil.bin2base64(fileAttributes.header!);
       final thumbnailDecryptionHeader =
-          CryptoUtil.bin2base64(encryptedThumbnailData.header as Uint8List);
-      final encryptedMetadata =
-          CryptoUtil.bin2base64(encryptedMetadataData.encryptedData as Uint8List);
+          CryptoUtil.bin2base64(encryptedThumbnailData.header!);
+      final encryptedMetadata = CryptoUtil.bin2base64(
+        encryptedMetadataResult.encryptedData!,
+      );
       final metadataDecryptionHeader =
-          CryptoUtil.bin2base64(encryptedMetadataData.header as Uint8List);
+          CryptoUtil.bin2base64(encryptedMetadataResult.header!);
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
       }
@@ -439,13 +440,13 @@ class FileUploader {
         await FilesDB.instance.updateUploadedFileAcrossCollections(remoteFile);
       } else {
         final encryptedFileKeyData = CryptoUtil.encryptSync(
-          fileAttributes.key as Uint8List,
+          fileAttributes.key!,
           CollectionsService.instance.getCollectionKey(collectionID),
         );
         final encryptedKey =
-            CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData as Uint8List);
+            CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
         final keyDecryptionNonce =
-            CryptoUtil.bin2base64(encryptedFileKeyData.nonce as Uint8List);
+            CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
         remoteFile = await _uploadFile(
           file,
           collectionID,
