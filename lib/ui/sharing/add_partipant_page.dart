@@ -13,9 +13,8 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import "package:photos/ui/sharing/verify_identify_screen.dart";
+import "package:photos/ui/sharing/verify_identity_dialog.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class AddParticipantPage extends StatefulWidget {
   final Collection collection;
@@ -212,9 +211,14 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                       }
                       final emailToAdd =
                           selectedEmail == '' ? _email : selectedEmail;
-                      routeToPage(
-                        context,
-                        VerifyIdentifyScreen(self: false, email: emailToAdd),
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return VerifyIdentifyDialog(
+                            self: false,
+                            email: emailToAdd,
+                          );
+                        },
                       );
                     },
                     child: Text(

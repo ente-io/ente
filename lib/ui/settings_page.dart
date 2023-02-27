@@ -25,7 +25,7 @@ import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/storage_card_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
-import "package:photos/ui/sharing/verify_identify_screen.dart";
+import "package:photos/ui/sharing/verify_identity_dialog.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class SettingsPage extends StatelessWidget {
@@ -52,12 +52,12 @@ class SettingsPage extends StatelessWidget {
     final enteTextTheme = getEnteTextTheme(context);
     final List<Widget> contents = [];
     contents.add(
-      InkWell(
+      GestureDetector(
         onDoubleTap: () {
-          routeToPage(context, VerifyIdentifyScreen(self: true));
+          _showVerifyIdentityDialog(context);
         },
         onLongPress: () {
-          routeToPage(context, VerifyIdentifyScreen(self: true));
+          _showVerifyIdentityDialog(context);
         },
         child: Container(
           constraints: const BoxConstraints(maxWidth: 350),
@@ -163,6 +163,15 @@ class SettingsPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _showVerifyIdentityDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return VerifyIdentifyDialog(self: true);
+      },
     );
   }
 }
