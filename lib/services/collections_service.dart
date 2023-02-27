@@ -1133,7 +1133,7 @@ class CollectionsService {
   }
 
   String decryptCollectionPath(Collection collection) {
-    final key = collection.attributes.version == 1
+    final key = collection.attributes.version! >= 1
         ? getCollectionKey(collection.id)
         : _config.getKey();
     return utf8.decode(
