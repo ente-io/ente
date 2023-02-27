@@ -264,79 +264,50 @@ class Configuration {
     String password,
     KeyAttributes attributes,
   ) async {
-    _logger.info('Start decryptAndSaveSecrets');
     validatePreVerificationStateCheck(
       attributes,
       password,
       getEncryptedToken(),
     );
-    _logger.info('state validation done');
+    // Derive key-encryption-key from the entered password and existing
+    // mem and ops limits
     final kek = await CryptoUtil.deriveKey(
       utf8.encode(password) as Uint8List,
       CryptoUtil.base642bin(attributes.kekSalt),
       attributes.memLimit!,
       attributes.opsLimit!,
     ).onError((e, s) {
-      _logger.severe('deriveKey failed', e, s);
+      _logger.severe('key derivation failed', e, s);
       throw KeyDerivationError();
     });
 
-    _logger.info('user-key done');
     Uint8List key;
     try {
+      // Decrypt the master key with the derived key
       key = CryptoUtil.decryptSync(
         CryptoUtil.base642bin(attributes.encryptedKey),
         kek,
         CryptoUtil.base642bin(attributes.keyDecryptionNonce),
       );
     } catch (e) {
-      _logger.severe('master-key failed, incorrect password?', e);
+      _logger.severe('master-key decryption failed', e);
       throw Exception("Incorrect password");
     }
-    _logger.info("master-key done");
     await setKey(CryptoUtil.bin2base64(key));
     final secretKey = CryptoUtil.decryptSync(
       CryptoUtil.base642bin(attributes.encryptedSecretKey),
       key,
       CryptoUtil.base642bin(attributes.secretKeyDecryptionNonce),
     );
-    _logger.info("secret-key done");
     await setSecretKey(CryptoUtil.bin2base64(secretKey));
     final token = CryptoUtil.openSealSync(
       CryptoUtil.base642bin(getEncryptedToken()!),
       CryptoUtil.base642bin(attributes.publicKey),
       secretKey,
     );
-    _logger.info('appToken done');
     await setToken(
       CryptoUtil.bin2base64(token, urlSafe: true),
     );
-  }
-
-  Future<void> verifyPassword(String password) async {
-    final KeyAttributes attributes = getKeyAttributes()!;
-    _logger.info('state validation done');
-    final kek = await CryptoUtil.deriveKey(
-      utf8.encode(password) as Uint8List,
-      CryptoUtil.base642bin(attributes.kekSalt),
-      attributes.memLimit!,
-      attributes.opsLimit!,
-    ).onError((e, s) {
-      _logger.severe('deriveKey failed', e, s);
-      throw KeyDerivationError();
-    });
-
-    _logger.info('user-key done');
-    try {
-      final Uint8List key = CryptoUtil.decryptSync(
-        CryptoUtil.base642bin(attributes.encryptedKey),
-        kek,
-        CryptoUtil.base642bin(attributes.keyDecryptionNonce),
-      );
-    } catch (e) {
-      _logger.severe('master-key failed, incorrect password?', e);
-      throw Exception("Incorrect password");
-    }
   }
 
   Future<KeyAttributes> createNewRecoveryKey() async {
@@ -363,18 +334,22 @@ class Configuration {
   }
 
   Future<void> recover(String recoveryKey) async {
-    // check if user has entered mnemonic code
+    // Legacy users will have recoveryKey in the form of a hex string, while
+    // newer users will have it as a mnemonic code
     if (recoveryKey.contains(' ')) {
+      // Check if user has entered a mnemonic code
       if (recoveryKey.split(' ').length != mnemonicKeyWordCount) {
         throw AssertionError(
           'recovery code should have $mnemonicKeyWordCount words',
         );
       }
+      // Convert mnemonic code to hex
       recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
     }
     final attributes = getKeyAttributes();
     Uint8List masterKey;
     try {
+      // Decrypt the master key that was earlier encrypted with the recovery key
       masterKey = await CryptoUtil.decrypt(
         CryptoUtil.base642bin(attributes!.masterKeyEncryptedWithRecoveryKey!),
         CryptoUtil.hex2bin(recoveryKey),
@@ -474,6 +449,7 @@ class Configuration {
   Future<void> setKey(String? key) async {
     _key = key;
     if (key == null) {
+      // Used to clear key from secure storage
       await _secureStorage.delete(
         key: keyKey,
         iOptions: _secureStorageOptionsIOS,
@@ -490,6 +466,7 @@ class Configuration {
   Future<void> setSecretKey(String? secretKey) async {
     _secretKey = secretKey;
     if (secretKey == null) {
+      // Used to clear secret key from secure storage
       await _secureStorage.delete(
         key: secretKeyKey,
         iOptions: _secureStorageOptionsIOS,
