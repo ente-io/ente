@@ -124,7 +124,7 @@ class SubFaqWidget extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(16, 40, 16, isOnboarding ? 40 : 4),
       child: MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
-          title: "Questions?",
+          title: "FAQs",
         ),
         menuItemColor: colorScheme.fillFaint,
         trailingWidget: Icon(
