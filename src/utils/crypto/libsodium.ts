@@ -102,12 +102,11 @@ export async function encryptChaChaOneShot(data: Uint8Array, key: string) {
     };
 }
 
-export async function encryptChaCha(data: Uint8Array, key?: string) {
+export async function encryptChaCha(data: Uint8Array) {
     await sodium.ready;
 
-    const uintkey: Uint8Array = key
-        ? await fromB64(key)
-        : sodium.crypto_secretstream_xchacha20poly1305_keygen();
+    const uintkey: Uint8Array =
+        sodium.crypto_secretstream_xchacha20poly1305_keygen();
 
     const initPushResult =
         sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
