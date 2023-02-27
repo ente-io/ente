@@ -309,6 +309,14 @@ class CryptoUtil {
     return Sodium.cryptoBoxSeal(input, publicKey);
   }
 
+  // Derives a key for a given password and salt using Argon2id, v1.3.
+  // The function first attempts to derive a key with both memLimit and opsLimit
+  // set to their Sensitive variants.
+  // If this fails, say on a device with insufficient RAM, we retry by halving 
+  // the memLimit and doubling the opsLimit, while ensuring that we stay within 
+  // the min and max limits for both parameters.
+  // At all points, we ensure that the product of these two variables (the area
+  // under the graph that determines the amount of work required) is a constant.
   static Future<DerivedKeyResult> deriveSensitiveKey(
     Uint8List password,
     Uint8List salt,
@@ -333,15 +341,17 @@ class CryptoUtil {
           s,
         );
       }
-      // Ensure that the product of these two variables
-      // (the area under the graph that determines the amount of work required)
-      // stays the same
       memLimit = (memLimit / 2).round();
       opsLimit = opsLimit * 2;
     }
     throw UnsupportedError("Cannot perform this operation on this device");
   }
 
+  // Derives a key for the given password and salt, with memory and ops limit
+  // hardcoded to their Interactive variants
+  // NOTE: This is only used while setting passwords for shared links, as an
+  // extra layer of authentication (atop the access token and collection key).
+  // More details @ https://ente.io/blog/building-shareable-links/
   static Future<DerivedKeyResult> deriveInteractiveKey(
     Uint8List password,
     Uint8List salt,
