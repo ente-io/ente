@@ -39,7 +39,6 @@ class UpdateService {
   }
 
   Future<bool> resetChangeLog() async {
-    await _prefs.remove("userNotify.passwordReminderFlag");
     return _prefs.remove(changeLogVersionKey);
   }
 
