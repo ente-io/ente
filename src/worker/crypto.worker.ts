@@ -56,9 +56,9 @@ export class DedicatedCryptoWorker {
     async encryptFileChunk(
         data: Uint8Array,
         pushState: StateAddress,
-        finalChunk: boolean
+        isFinalChunk: boolean
     ) {
-        return libsodium.encryptFileChunk(data, pushState, finalChunk);
+        return libsodium.encryptFileChunk(data, pushState, isFinalChunk);
     }
 
     async initChunkEncryption() {
