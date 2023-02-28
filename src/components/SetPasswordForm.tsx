@@ -40,10 +40,10 @@ function SetPasswordForm(props: SetPasswordFormProps) {
         setLoading(true);
         try {
             const { passphrase, confirm } = values;
-            if (passphrase !== confirm) {
-                setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
-            } else {
+            if (passphrase === confirm) {
                 await props.callback(passphrase, setFieldError);
+            } else {
+                setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
             }
         } catch (e) {
             setFieldError('confirm', `${constants.UNKNOWN_ERROR} ${e.message}`);
