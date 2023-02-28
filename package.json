@@ -78,7 +78,8 @@
     "workbox-strategies": "^6.1.5",
     "workbox-window": "^6.1.5",
     "xml-js": "^1.6.11",
-    "yup": "^0.29.3"
+    "yup": "^0.29.3",
+    "zxcvbn": "^4.4.2"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^13.1.6",
@@ -96,6 +97,7 @@
     "@types/styled-components": "^5.1.25",
     "@types/wicg-file-system-access": "^2020.9.5",
     "@types/yup": "^0.29.7",
+    "@types/zxcvbn": "^4.4.1",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "eslint": "^8.28.0",
     "eslint-config-next": "^13.0.6",
