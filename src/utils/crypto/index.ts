@@ -88,6 +88,7 @@ export const saveKeyInSessionStore = async (
     key: string,
     fromDesktop?: boolean
 ) => {
+    // the key is encrypted before saving in session storage, to obfuscate it from the browser
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const sessionKeyAttributes = await cryptoWorker.generateKeyAndEncryptToB64(
         key
