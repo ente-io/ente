@@ -69,7 +69,10 @@ export async function initChunkDecryption(header: Uint8Array, key: Uint8Array) {
     return { pullState, decryptionChunkSize, tag };
 }
 
-export async function decryptChunk(data: Uint8Array, pullState: StateAddress) {
+export async function decryptFileChunk(
+    data: Uint8Array,
+    pullState: StateAddress
+) {
     await sodium.ready;
     const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
         pullState,
