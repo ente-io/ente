@@ -31,7 +31,7 @@ Uint8List cryptoPwHash(Map<String, dynamic> args) {
     args["salt"],
     args["opsLimit"],
     args["memLimit"],
-    Sodium.cryptoPwhashAlgDefault,
+    Sodium.cryptoPwhashAlgArgon2id13,
   );
 }
 
@@ -354,10 +354,6 @@ class CryptoUtil {
     Uint8List password,
     Uint8List salt,
   ) async {
-    assert(
-      Sodium.cryptoPwhashAlgArgon2id13 == Sodium.cryptoPwhashAlgDefault,
-      "mismatch in expected default pw hashing algo",
-    );
     final logger = Logger("pwhash");
     int memLimit = Sodium.cryptoPwhashMemlimitSensitive;
     int opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
@@ -389,10 +385,6 @@ class CryptoUtil {
     Uint8List password,
     Uint8List salt,
   ) async {
-    assert(
-      Sodium.cryptoPwhashAlgArgon2id13 == Sodium.cryptoPwhashAlgDefault,
-      "mismatch in expected default pw hashing algo",
-    );
     final int memLimit = Sodium.cryptoPwhashMemlimitInteractive;
     final int opsLimit = Sodium.cryptoPwhashOpslimitInteractive;
     final key = await deriveKey(password, salt, memLimit, opsLimit);
