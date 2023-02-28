@@ -110,8 +110,12 @@ export class DedicatedCryptoWorker {
         return libsodium.decryptToUTF8(data, nonce, key);
     }
 
-    async encryptToB64(data: string, key?: string) {
+    async encryptToB64(data: string, key: string) {
         return libsodium.encryptToB64(data, key);
+    }
+
+    async generateKeyAndEncryptToB64(data: string) {
+        return libsodium.generateKeyAndEncryptToB64(data);
     }
 
     async encryptUTF8(data: string, key: string) {

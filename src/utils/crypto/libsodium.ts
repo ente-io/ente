@@ -178,12 +178,9 @@ export async function encryptFileChunk(
 
     return pushResult;
 }
-export async function encryptToB64(data: string, key?: string) {
+export async function encryptToB64(data: string, key: string) {
     await sodium.ready;
-    const encrypted = await encrypt(
-        await fromB64(data),
-        key ? await fromB64(key) : null
-    );
+    const encrypted = await encrypt(await fromB64(data), await fromB64(key));
 
     return {
         encryptedData: await toB64(encrypted.encryptedData),
@@ -191,7 +188,13 @@ export async function encryptToB64(data: string, key?: string) {
         nonce: await toB64(encrypted.nonce),
     } as B64EncryptionResult;
 }
-export async function encryptUTF8(data: string, key?: string) {
+
+export async function generateKeyAndEncryptToB64(data: string) {
+    const key = sodium.crypto_secretbox_keygen();
+    return await encryptToB64(data, await toB64(key));
+}
+
+export async function encryptUTF8(data: string, key: string) {
     const b64Data = await toB64(await fromString(data));
     return await encryptToB64(b64Data, key);
 }
@@ -218,14 +221,13 @@ export async function decryptToUTF8(data: string, nonce: string, key: string) {
     return sodium.to_string(decrypted);
 }
 
-async function encrypt(data: Uint8Array, key?: Uint8Array) {
+async function encrypt(data: Uint8Array, key: Uint8Array) {
     await sodium.ready;
-    const uintkey: Uint8Array = key || sodium.crypto_secretbox_keygen();
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-    const encryptedData = sodium.crypto_secretbox_easy(data, nonce, uintkey);
+    const encryptedData = sodium.crypto_secretbox_easy(data, nonce, key);
     return {
         encryptedData,
-        key: uintkey,
+        key,
         nonce,
     };
 }
