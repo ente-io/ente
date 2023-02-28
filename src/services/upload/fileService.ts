@@ -69,7 +69,7 @@ export async function readFile(
 }
 
 export async function extractFileMetadata(
-    worker,
+    worker: Remote<DedicatedCryptoWorker>,
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
