@@ -213,3 +213,42 @@ export async function decryptDeleteAccountChallenge(
     const utf8DecryptedChallenge = atob(b64DecryptedChallenge);
     return utf8DecryptedChallenge;
 }
+
+// Port of https://github.com/JinHoSo/flutter-password-strength/blob/master/lib/src/estimate_bruteforce_strength.dart
+// used in mobile app.
+function estimatePasswordStrength(password: string) {
+    if (!password) {
+        return 0.0;
+    }
+
+    // Check which types of characters are used and create an opinionated bonus.
+    let charsetBonus: number;
+    if (/^[a-z]*$/.test(password)) {
+        charsetBonus = 1.0;
+    } else if (/^[a-z0-9]*$/.test(password)) {
+        charsetBonus = 1.2;
+    } else if (/^[a-zA-Z]*$/.test(password)) {
+        charsetBonus = 1.3;
+    } else if (/^[a-z\-_!?]*$/.test(password)) {
+        charsetBonus = 1.3;
+    } else if (/^[a-zA-Z0-9]*$/.test(password)) {
+        charsetBonus = 1.5;
+    } else {
+        charsetBonus = 1.8;
+    }
+
+    const logisticFunction = (x: number) => {
+        return 1.0 / (1.0 + Math.exp(-x));
+    };
+
+    const curve = (x: number) => {
+        return logisticFunction(x / 3.0 - 4.0);
+    };
+
+    return curve(password.length * charsetBonus);
+}
+
+export function isWeakPassword(password: string) {
+    // used the strength color green as threshold
+    return estimatePasswordStrength(password) < 0.76;
+}
