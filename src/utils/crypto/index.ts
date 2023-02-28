@@ -89,7 +89,9 @@ export const saveKeyInSessionStore = async (
     fromDesktop?: boolean
 ) => {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-    const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
+    const sessionKeyAttributes = await cryptoWorker.generateKeyAndEncryptToB64(
+        key
+    );
     setKey(keyType, sessionKeyAttributes);
     if (isElectron() && !fromDesktop) {
         safeStorageService.setEncryptionKey(key);
