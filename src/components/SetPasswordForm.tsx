@@ -4,6 +4,8 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
 import { Box, Input, TextField, Typography } from '@mui/material';
+import { PasswordStrengthHint } from './PasswordStrength';
+import { isWeakPassword } from 'utils/crypto';
 
 export interface SetPasswordFormProps {
     userEmail: string;
@@ -101,6 +103,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         error={Boolean(errors.confirm)}
                         helperText={errors.confirm}
                     />
+                    <PasswordStrengthHint password={values.passphrase} />
 
                     <Typography my={2} variant="body2">
                         {constants.PASSPHRASE_DISCLAIMER()}
@@ -111,6 +114,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                             sx={{ my: 0 }}
                             loading={loading}
                             buttonText={props.buttonText}
+                            disabled={isWeakPassword(values.passphrase)}
                         />
                         {loading && (
                             <Typography

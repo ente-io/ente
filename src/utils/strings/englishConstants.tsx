@@ -7,6 +7,7 @@ import { SuggestionType } from 'types/search';
 import { formatNumberWithCommas } from '.';
 import { FACE_SEARCH_PRIVACY_POLICY_LINK } from 'constants/urls';
 import { EnteLogo } from 'components/EnteLogo';
+import { PasswordStrength } from 'constants/crypto';
 /**
  * Global English constants.
  */
@@ -998,6 +999,14 @@ const englishConstants = {
         'I understand, and wish to allow ente to process face geometry',
     LABS: 'Labs',
     YOURS: 'yours',
+    PASSPHRASE_STRENGTH: (strength: PasswordStrength) =>
+        `Password strength: ${
+            strength === PasswordStrength.STRONG
+                ? 'Strong'
+                : strength === PasswordStrength.MODERATE
+                ? 'Moderate'
+                : 'Weak'
+        }`,
 };
 
 export default englishConstants;

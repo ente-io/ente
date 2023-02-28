@@ -9,6 +9,7 @@ import SubmitButton from 'components/SubmitButton';
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
+    isWeakPassword,
     saveKeyInSessionStore,
 } from 'utils/crypto';
 import { setJustSignedUp } from 'utils/storage';
@@ -27,6 +28,7 @@ import FormPaperTitle from './Form/FormPaper/Title';
 import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import VerticallyCentered from './Container';
+import { PasswordStrengthHint } from './PasswordStrength';
 
 interface FormValues {
     email: string;
@@ -158,6 +160,9 @@ export default function SignUp(props: SignUpProps) {
                                 helperText={errors.confirm}
                                 disabled={loading}
                             />
+                            <PasswordStrengthHint
+                                password={values.passphrase}
+                            />
                             <FormGroup sx={{ width: '100%' }}>
                                 <FormControlLabel
                                     sx={{
@@ -185,7 +190,10 @@ export default function SignUp(props: SignUpProps) {
                                 sx={{ my: 0 }}
                                 buttonText={constants.CREATE_ACCOUNT}
                                 loading={loading}
-                                disabled={!acceptTerms}
+                                disabled={
+                                    !acceptTerms ||
+                                    isWeakPassword(values.passphrase)
+                                }
                             />
                             {loading && (
                                 <Typography
