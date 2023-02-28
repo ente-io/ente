@@ -8,6 +8,7 @@ import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { PasswordStrength } from 'constants/crypto';
+import zxcvbn from 'zxcvbn';
 
 export async function generateKeyAttributes(
     passphrase: string
@@ -215,42 +216,15 @@ export async function decryptDeleteAccountChallenge(
     return utf8DecryptedChallenge;
 }
 
-// Port of https://github.com/JinHoSo/flutter-password-strength/blob/master/lib/src/estimate_bruteforce_strength.dart
-// used in mobile app.
 export function estimatePasswordStrength(password: string): PasswordStrength {
     if (!password) {
         return PasswordStrength.WEAK;
     }
 
-    // Check which types of characters are used and create an opinionated bonus.
-    let charsetBonus: number;
-    if (/^[a-z]*$/.test(password)) {
-        charsetBonus = 1.0;
-    } else if (/^[a-z0-9]*$/.test(password)) {
-        charsetBonus = 1.2;
-    } else if (/^[a-zA-Z]*$/.test(password)) {
-        charsetBonus = 1.3;
-    } else if (/^[a-z\-_!?]*$/.test(password)) {
-        charsetBonus = 1.3;
-    } else if (/^[a-zA-Z0-9]*$/.test(password)) {
-        charsetBonus = 1.5;
-    } else {
-        charsetBonus = 1.8;
-    }
-
-    const logisticFunction = (x: number) => {
-        return 1.0 / (1.0 + Math.exp(-x));
-    };
-
-    const curve = (x: number) => {
-        return logisticFunction(x / 3.0 - 4.0);
-    };
-
-    const passwordStrengthValue = curve(password.length * charsetBonus);
-
-    if (passwordStrengthValue < 0.5) {
+    const zxcvbnResult = zxcvbn(password);
+    if (zxcvbnResult.score < 2) {
         return PasswordStrength.WEAK;
-    } else if (passwordStrengthValue < 0.75) {
+    } else if (zxcvbnResult.score < 3) {
         return PasswordStrength.MODERATE;
     } else {
         return PasswordStrength.STRONG;
