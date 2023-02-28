@@ -998,6 +998,7 @@ const englishConstants = {
         'I understand, and wish to allow ente to process face geometry',
     LABS: 'Labs',
     YOURS: 'yours',
+    PASSPHRASE_STRENGTH_WEAK: 'Password strength: weak',
 };
 
 export default englishConstants;

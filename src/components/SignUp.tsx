@@ -9,6 +9,7 @@ import SubmitButton from 'components/SubmitButton';
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
+    isWeakPassword,
     saveKeyInSessionStore,
 } from 'utils/crypto';
 import { setJustSignedUp } from 'utils/storage';
@@ -50,6 +51,9 @@ export default function SignUp(props: SignUpProps) {
         try {
             if (passphrase !== confirm) {
                 setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
+                return;
+            } else if (isWeakPassword(passphrase)) {
+                setFieldError('confirm', constants.PASSPHRASE_STRENGTH_WEAK);
                 return;
             }
             setLoading(true);

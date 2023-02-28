@@ -4,6 +4,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
 import { Box, Input, TextField, Typography } from '@mui/material';
+import { isWeakPassword } from 'utils/crypto';
 
 export interface SetPasswordFormProps {
     userEmail: string;
@@ -38,10 +39,12 @@ function SetPasswordForm(props: SetPasswordFormProps) {
         setLoading(true);
         try {
             const { passphrase, confirm } = values;
-            if (passphrase === confirm) {
-                await props.callback(passphrase, setFieldError);
-            } else {
+            if (passphrase !== confirm) {
                 setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
+            } else if (isWeakPassword(passphrase)) {
+                setFieldError('confirm', constants.PASSPHRASE_STRENGTH_WEAK);
+            } else {
+                await props.callback(passphrase, setFieldError);
             }
         } catch (e) {
             setFieldError('confirm', `${constants.UNKNOWN_ERROR} ${e.message}`);
