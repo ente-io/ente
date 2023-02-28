@@ -7,6 +7,7 @@ import { logError } from 'utils/sentry';
 import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { PasswordStrength } from 'constants/crypto';
 
 export async function generateKeyAttributes(
     passphrase: string
@@ -216,9 +217,9 @@ export async function decryptDeleteAccountChallenge(
 
 // Port of https://github.com/JinHoSo/flutter-password-strength/blob/master/lib/src/estimate_bruteforce_strength.dart
 // used in mobile app.
-function estimatePasswordStrength(password: string) {
+export function estimatePasswordStrength(password: string): PasswordStrength {
     if (!password) {
-        return 0.0;
+        return PasswordStrength.WEAK;
     }
 
     // Check which types of characters are used and create an opinionated bonus.
@@ -245,10 +246,17 @@ function estimatePasswordStrength(password: string) {
         return logisticFunction(x / 3.0 - 4.0);
     };
 
-    return curve(password.length * charsetBonus);
+    const passwordStrengthValue = curve(password.length * charsetBonus);
+
+    if (passwordStrengthValue < 0.5) {
+        return PasswordStrength.WEAK;
+    } else if (passwordStrengthValue < 0.75) {
+        return PasswordStrength.MODERATE;
+    } else {
+        return PasswordStrength.STRONG;
+    }
 }
 
-export function isWeakPassword(password: string) {
-    // used the strength color green as threshold
-    return estimatePasswordStrength(password) < 0.76;
-}
+export const isWeakPassword = (password: string) => {
+    return estimatePasswordStrength(password) === PasswordStrength.WEAK;
+};

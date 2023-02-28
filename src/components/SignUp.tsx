@@ -28,6 +28,7 @@ import FormPaperTitle from './Form/FormPaper/Title';
 import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import VerticallyCentered from './Container';
+import { PasswordStrengthHint } from './PasswordStrength';
 
 interface FormValues {
     email: string;
@@ -51,9 +52,6 @@ export default function SignUp(props: SignUpProps) {
         try {
             if (passphrase !== confirm) {
                 setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
-                return;
-            } else if (isWeakPassword(passphrase)) {
-                setFieldError('confirm', constants.PASSPHRASE_STRENGTH_WEAK);
                 return;
             }
             setLoading(true);
@@ -162,6 +160,9 @@ export default function SignUp(props: SignUpProps) {
                                 helperText={errors.confirm}
                                 disabled={loading}
                             />
+                            <PasswordStrengthHint
+                                password={values.passphrase}
+                            />
                             <FormGroup sx={{ width: '100%' }}>
                                 <FormControlLabel
                                     sx={{
@@ -189,7 +190,10 @@ export default function SignUp(props: SignUpProps) {
                                 sx={{ my: 0 }}
                                 buttonText={constants.CREATE_ACCOUNT}
                                 loading={loading}
-                                disabled={!acceptTerms}
+                                disabled={
+                                    !acceptTerms ||
+                                    isWeakPassword(values.passphrase)
+                                }
                             />
                             {loading && (
                                 <Typography

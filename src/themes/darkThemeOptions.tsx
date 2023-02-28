@@ -33,12 +33,14 @@ declare module '@mui/material/styles' {
         backdrop: PaletteColor;
         blur: BlurStrength;
         danger: PaletteColor;
+        caution: PaletteColor;
         stroke: TypeText;
         fixed: FixedColor;
     }
     interface PaletteOptions {
         accent?: PaletteColorOptions;
         danger?: PaletteColorOptions;
+        caution?: PaletteColorOptions;
         fill?: PaletteColorOptions;
         backdrop?: PaletteColorOptions;
         blur?: BlurStrengthOptions;
@@ -296,6 +298,9 @@ const darkThemeOptions = createTheme({
 
         danger: {
             main: '#EA3f3f',
+        },
+        caution: {
+            main: '#FFC247',
         },
         stroke: {
             primary: '#ffffff',
