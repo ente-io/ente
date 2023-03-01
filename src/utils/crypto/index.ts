@@ -132,6 +132,8 @@ export const getRecoveryKey = async () => {
     }
 };
 
+// Used only for legacy users for whom we did not generate recovery keys during
+// sign up
 async function createNewRecoveryKey() {
     const masterKey = await getActualKey();
     const existingAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
@@ -163,6 +165,7 @@ async function createNewRecoveryKey() {
 
     return recoveryKey;
 }
+
 export async function decryptAndStoreToken(masterKey: string) {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const user = getData(LS_KEYS.USER);
@@ -175,13 +178,13 @@ export async function decryptAndStoreToken(masterKey: string) {
             keyAttributes.secretKeyDecryptionNonce,
             masterKey
         );
-        const URLUnsafeB64DecryptedToken = await cryptoWorker.boxSealOpen(
+        const urlUnsafeB64DecryptedToken = await cryptoWorker.boxSealOpen(
             encryptedToken,
             keyAttributes.publicKey,
             secretKey
         );
         const decryptedTokenBytes = await cryptoWorker.fromB64(
-            URLUnsafeB64DecryptedToken
+            urlUnsafeB64DecryptedToken
         );
         decryptedToken = await cryptoWorker.toURLSafeB64(decryptedTokenBytes);
         setData(LS_KEYS.USER, {
