@@ -207,7 +207,7 @@ class DownloadManager {
                 );
                 const fileKey = await cryptoWorker.fromB64(file.key);
                 const { pullState, decryptionChunkSize } =
-                    await cryptoWorker.initDecryption(
+                    await cryptoWorker.initChunkDecryption(
                         decryptionHeader,
                         fileKey
                     );
@@ -229,7 +229,7 @@ class DownloadManager {
                                     decryptionChunkSize
                                 );
                                 const { decryptedData } =
-                                    await cryptoWorker.decryptChunk(
+                                    await cryptoWorker.decryptFileChunk(
                                         fileData,
                                         pullState
                                     );
@@ -242,7 +242,7 @@ class DownloadManager {
                         } else {
                             if (data) {
                                 const { decryptedData } =
-                                    await cryptoWorker.decryptChunk(
+                                    await cryptoWorker.decryptFileChunk(
                                         data,
                                         pullState
                                     );

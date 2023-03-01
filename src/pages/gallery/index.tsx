@@ -88,7 +88,11 @@ import FixCreationTime, {
 } from 'components/FixCreationTime';
 import { Collection, CollectionSummaries } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { GalleryContextType, SelectedState } from 'types/gallery';
+import {
+    GalleryContextType,
+    SelectedState,
+    UploadTypeSelectorIntent,
+} from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
@@ -101,6 +105,9 @@ import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
 import { checkConnectivity } from 'utils/error/ui';
+import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
+import ElectronService from 'services/electron/common';
+import uploadManager from 'services/upload/uploadManager';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -135,6 +142,7 @@ export default function Gallery() {
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
+    const [hasNoPersonalFiles, setHasNoPersonalFiles] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
         ownCount: 0,
         count: 0,
@@ -198,6 +206,10 @@ export default function Gallery() {
     const showPlanSelectorModal = () => setPlanModalView(true);
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
+    const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
+        useState<UploadTypeSelectorIntent>(
+            UploadTypeSelectorIntent.normalUpload
+        );
 
     const [sidebarView, setSidebarView] = useState(false);
 
@@ -252,6 +264,12 @@ export default function Gallery() {
             setIsFirstLoad(false);
             setJustSignedUp(false);
             setIsFirstFetch(false);
+            setInterval(() => {
+                syncWithRemote(false, true);
+            }, SYNC_INTERVAL_IN_MICROSECONDS);
+            ElectronService.registerForegroundEventListener(() =>
+                syncWithRemote(false, true)
+            );
         };
         main();
     }, []);
@@ -334,8 +352,8 @@ export default function Gallery() {
             !silent && startLoading();
             const collections = await syncCollections();
             setCollections(collections);
-            await syncFiles(collections, setFiles);
-            await syncTrash(collections, setFiles);
+            const files = await syncFiles(collections, setFiles);
+            await syncTrash(collections, files, setFiles);
         } catch (e) {
             logError(e, 'syncWithRemote failed');
             switch (e.message) {
@@ -354,7 +372,7 @@ export default function Gallery() {
         syncInProgress.current = false;
         if (resync.current) {
             resync.current = false;
-            syncWithRemote();
+            setTimeout(() => syncWithRemote(), 0);
         }
     };
 
@@ -375,6 +393,10 @@ export default function Gallery() {
             archivedCollections
         );
         setCollectionSummaries(collectionSummaries);
+        const hasNoPersonalFiles = files.every(
+            (file) => file.ownerID !== user.id
+        );
+        setHasNoPersonalFiles(hasNoPersonalFiles);
     };
 
     const clearSelection = function () {
@@ -552,8 +574,12 @@ export default function Gallery() {
         finishLoading();
     };
 
-    const openUploader = () => {
+    const openUploader = (intent = UploadTypeSelectorIntent.normalUpload) => {
+        if (!uploadManager.shouldAllowNewUpload()) {
+            return;
+        }
         setUploadTypeSelectorView(true);
+        setUploadTypeSelectorIntent(intent);
     };
 
     const closeCollectionSelector = () => {
@@ -651,6 +677,7 @@ export default function Gallery() {
                         null,
                         false
                     )}
+                    uploadTypeSelectorIntent={uploadTypeSelectorIntent}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
@@ -681,6 +708,7 @@ export default function Gallery() {
                     setSelected={setSelected}
                     selected={selected}
                     isFirstLoad={isFirstLoad}
+                    hasNoPersonalFiles={hasNoPersonalFiles}
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     search={search}

@@ -7,6 +7,8 @@ import { logError } from 'utils/sentry';
 import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { PasswordStrength } from 'constants/crypto';
+import zxcvbn from 'zxcvbn';
 
 export async function generateKeyAttributes(
     passphrase: string
@@ -88,8 +90,11 @@ export const saveKeyInSessionStore = async (
     key: string,
     fromDesktop?: boolean
 ) => {
+    // the key is encrypted before saving in session storage, to obfuscate it from the browser
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-    const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
+    const sessionKeyAttributes = await cryptoWorker.generateKeyAndEncryptToB64(
+        key
+    );
     setKey(keyType, sessionKeyAttributes);
     if (isElectron() && !fromDesktop) {
         safeStorageService.setEncryptionKey(key);
@@ -211,3 +216,22 @@ export async function decryptDeleteAccountChallenge(
     const utf8DecryptedChallenge = atob(b64DecryptedChallenge);
     return utf8DecryptedChallenge;
 }
+
+export function estimatePasswordStrength(password: string): PasswordStrength {
+    if (!password) {
+        return PasswordStrength.WEAK;
+    }
+
+    const zxcvbnResult = zxcvbn(password);
+    if (zxcvbnResult.score < 2) {
+        return PasswordStrength.WEAK;
+    } else if (zxcvbnResult.score < 3) {
+        return PasswordStrength.MODERATE;
+    } else {
+        return PasswordStrength.STRONG;
+    }
+}
+
+export const isWeakPassword = (password: string) => {
+    return estimatePasswordStrength(password) === PasswordStrength.WEAK;
+};

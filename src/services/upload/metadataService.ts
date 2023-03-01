@@ -17,6 +17,8 @@ import {
     tryToParseDateTime,
 } from 'utils/time';
 import { getFileHash } from './hashService';
+import { Remote } from 'comlink';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
@@ -30,7 +32,7 @@ const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
 };
 
 export async function extractMetadata(
-    worker,
+    worker: Remote<DedicatedCryptoWorker>,
     receivedFile: File | ElectronFile,
     fileTypeInfo: FileTypeInfo
 ) {

@@ -11,3 +11,5 @@ export enum PLAN_PERIOD {
     MONTH = 'month',
     YEAR = 'year',
 }
+
+export const SYNC_INTERVAL_IN_MICROSECONDS = 1000 * 60 * 5; // 5 minutes

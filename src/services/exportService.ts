@@ -163,11 +163,12 @@ class ExportService {
                 exportDir
             );
             const resp = await this.exportInProgress;
-            this.exportInProgress = null;
             return resp;
         } catch (e) {
             logError(e, 'exportFiles failed');
             return { paused: false };
+        } finally {
+            this.exportInProgress = null;
         }
     }
 
@@ -339,6 +340,7 @@ class ExportService {
         );
         await response.promise;
     }
+
     async updateExportRecordHelper(folder: string, newData: ExportRecord) {
         try {
             if (!folder) {

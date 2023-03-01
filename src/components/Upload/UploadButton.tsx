@@ -4,6 +4,7 @@ import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { Button } from '@mui/material';
 import constants from 'utils/strings/constants';
 import uploadManager from 'services/upload/uploadManager';
+import { UploadTypeSelectorIntent } from 'types/gallery';
 
 const Wrapper = styled('div')<{ $disableShrink: boolean }>`
     display: flex;
@@ -27,7 +28,7 @@ const Wrapper = styled('div')<{ $disableShrink: boolean }>`
 `;
 
 interface Iprops {
-    openUploader: () => void;
+    openUploader: (intent?: UploadTypeSelectorIntent) => void;
     text?: string;
     color?: ButtonProps['color'];
     disableShrink?: boolean;
@@ -40,6 +41,8 @@ function UploadButton({
     disableShrink,
     icon,
 }: Iprops) {
+    const onClickHandler = () => openUploader();
+
     return (
         <Wrapper
             $disableShrink={disableShrink}
@@ -47,7 +50,7 @@ function UploadButton({
                 cursor: !uploadManager.shouldAllowNewUpload() && 'not-allowed',
             }}>
             <Button
-                onClick={openUploader}
+                onClick={onClickHandler}
                 disabled={!uploadManager.shouldAllowNewUpload()}
                 className="desktop-button"
                 color={color ?? 'secondary'}
@@ -56,7 +59,7 @@ function UploadButton({
             </Button>
 
             <IconButton
-                onClick={openUploader}
+                onClick={onClickHandler}
                 disabled={!uploadManager.shouldAllowNewUpload()}
                 className="mobile-button">
                 <FileUploadOutlinedIcon />

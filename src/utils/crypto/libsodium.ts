@@ -1,6 +1,5 @@
 import sodium, { StateAddress } from 'libsodium-wrappers';
 import { ENCRYPTION_CHUNK_SIZE } from 'constants/crypto';
-import assert from 'assert';
 import { B64EncryptionResult } from 'types/crypto';
 
 export async function decryptChaChaOneShot(
@@ -69,7 +68,10 @@ export async function initChunkDecryption(header: Uint8Array, key: Uint8Array) {
     return { pullState, decryptionChunkSize, tag };
 }
 
-export async function decryptChunk(data: Uint8Array, pullState: StateAddress) {
+export async function decryptFileChunk(
+    data: Uint8Array,
+    pullState: StateAddress
+) {
     await sodium.ready;
     const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
         pullState,
@@ -79,12 +81,10 @@ export async function decryptChunk(data: Uint8Array, pullState: StateAddress) {
     return { decryptedData: pullResult.message, newTag };
 }
 
-export async function encryptChaChaOneShot(data: Uint8Array, key?: string) {
+export async function encryptChaChaOneShot(data: Uint8Array, key: string) {
     await sodium.ready;
 
-    const uintkey: Uint8Array = key
-        ? await fromB64(key)
-        : sodium.crypto_secretstream_xchacha20poly1305_keygen();
+    const uintkey: Uint8Array = await fromB64(key);
     const initPushResult =
         sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
     const [pushState, header] = [initPushResult.state, initPushResult.header];
@@ -104,12 +104,11 @@ export async function encryptChaChaOneShot(data: Uint8Array, key?: string) {
     };
 }
 
-export async function encryptChaCha(data: Uint8Array, key?: string) {
+export async function encryptChaCha(data: Uint8Array) {
     await sodium.ready;
 
-    const uintkey: Uint8Array = key
-        ? await fromB64(key)
-        : sodium.crypto_secretstream_xchacha20poly1305_keygen();
+    const uintkey: Uint8Array =
+        sodium.crypto_secretstream_xchacha20poly1305_keygen();
 
     const initPushResult =
         sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
@@ -159,14 +158,14 @@ export async function initChunkEncryption() {
         pushState,
     };
 }
+
 export async function encryptFileChunk(
     data: Uint8Array,
     pushState: sodium.StateAddress,
-    finalChunk?: boolean
+    isFinalChunk: boolean
 ) {
     await sodium.ready;
-
-    const tag = finalChunk
+    const tag = isFinalChunk
         ? sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL
         : sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
     const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
@@ -178,12 +177,9 @@ export async function encryptFileChunk(
 
     return pushResult;
 }
-export async function encryptToB64(data: string, key?: string) {
+export async function encryptToB64(data: string, key: string) {
     await sodium.ready;
-    const encrypted = await encrypt(
-        await fromB64(data),
-        key ? await fromB64(key) : null
-    );
+    const encrypted = await encrypt(await fromB64(data), await fromB64(key));
 
     return {
         encryptedData: await toB64(encrypted.encryptedData),
@@ -191,7 +187,13 @@ export async function encryptToB64(data: string, key?: string) {
         nonce: await toB64(encrypted.nonce),
     } as B64EncryptionResult;
 }
-export async function encryptUTF8(data: string, key?: string) {
+
+export async function generateKeyAndEncryptToB64(data: string) {
+    const key = sodium.crypto_secretbox_keygen();
+    return await encryptToB64(data, await toB64(key));
+}
+
+export async function encryptUTF8(data: string, key: string) {
     const b64Data = await toB64(await fromString(data));
     return await encryptToB64(b64Data, key);
 }
@@ -218,39 +220,20 @@ export async function decryptToUTF8(data: string, nonce: string, key: string) {
     return sodium.to_string(decrypted);
 }
 
-export async function encrypt(data: Uint8Array, key?: Uint8Array) {
+async function encrypt(data: Uint8Array, key: Uint8Array) {
     await sodium.ready;
-    const uintkey: Uint8Array = key || sodium.crypto_secretbox_keygen();
     const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-    const encryptedData = sodium.crypto_secretbox_easy(data, nonce, uintkey);
+    const encryptedData = sodium.crypto_secretbox_easy(data, nonce, key);
     return {
         encryptedData,
-        key: uintkey,
+        key,
         nonce,
     };
 }
 
-export async function decrypt(
-    data: Uint8Array,
-    nonce: Uint8Array,
-    key: Uint8Array
-) {
+async function decrypt(data: Uint8Array, nonce: Uint8Array, key: Uint8Array) {
     await sodium.ready;
     return sodium.crypto_secretbox_open_easy(data, nonce, key);
-}
-
-export async function verifyHash(hash: string, input: string) {
-    await sodium.ready;
-    return sodium.crypto_pwhash_str_verify(hash, await fromB64(input));
-}
-
-export async function hash(input: string) {
-    await sodium.ready;
-    return sodium.crypto_pwhash_str(
-        await fromB64(input),
-        sodium.crypto_pwhash_OPSLIMIT_SENSITIVE,
-        sodium.crypto_pwhash_MEMLIMIT_MODERATE
-    );
 }
 
 export async function initChunkHashing() {
@@ -294,7 +277,7 @@ export async function deriveKey(
             await fromB64(salt),
             opsLimit,
             memLimit,
-            sodium.crypto_pwhash_ALG_DEFAULT
+            sodium.crypto_pwhash_ALG_ARGON2ID13
         )
     );
 }
@@ -321,13 +304,6 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
 
 export async function deriveInteractiveKey(passphrase: string, salt: string) {
     await sodium.ready;
-    // default algo can change in future when we upgrade library.
-    // this assert act as a safegaurd for us to identify any such issue.
-    assert(
-        sodium.crypto_pwhash_ALG_DEFAULT ===
-            sodium.crypto_pwhash_ALG_ARGON2ID13,
-        'mismatch in expected password hashing algorithm'
-    );
     const key = await toB64(
         sodium.crypto_pwhash(
             sodium.crypto_secretbox_KEYBYTES,
@@ -335,7 +311,7 @@ export async function deriveInteractiveKey(passphrase: string, salt: string) {
             await fromB64(salt),
             sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
             sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
-            sodium.crypto_pwhash_ALG_DEFAULT
+            sodium.crypto_pwhash_ALG_ARGON2ID13
         )
     );
     return {

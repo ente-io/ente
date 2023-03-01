@@ -15,12 +15,12 @@ import {
     MLSyncResult,
 } from 'types/machineLearning';
 
-import { toTSNE } from 'utils/machineLearning/visualization';
+// import { toTSNE } from 'utils/machineLearning/visualization';
 // import {
 //     incrementIndexVersion,
 //     mlFilesStore
 // } from 'utils/storage/mlStorage';
-import { getAllFacesFromMap } from 'utils/machineLearning';
+// import { getAllFacesFromMap } from 'utils/machineLearning';
 import { MLFactory } from './machineLearningFactory';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
@@ -88,9 +88,9 @@ class MachineLearningService {
 
         // tf.engine().endScope();
 
-        if (syncContext.config.tsne) {
-            await this.runTSNE(syncContext);
-        }
+        // if (syncContext.config.tsne) {
+        //     await this.runTSNE(syncContext);
+        // }
 
         const mlSyncResult: MLSyncResult = {
             nOutOfSyncFiles: syncContext.outOfSyncFiles.length,
@@ -560,16 +560,16 @@ class MachineLearningService {
         await this.persistMLLibraryData(syncContext);
     }
 
-    private async runTSNE(syncContext: MLSyncContext) {
-        const allFacesMap = await FaceService.getAllSyncedFacesMap(syncContext);
-        const allFaces = getAllFacesFromMap(allFacesMap);
+    // private async runTSNE(syncContext: MLSyncContext) {
+    //     const allFacesMap = await FaceService.getAllSyncedFacesMap(syncContext);
+    //     const allFaces = getAllFacesFromMap(allFacesMap);
 
-        const input = allFaces
-            .slice(0, syncContext.config.tsne.samples)
-            .map((f) => Array.from(f.embedding));
-        syncContext.tsne = toTSNE(input, syncContext.config.tsne);
-        addLogLine('tsne: ', syncContext.tsne);
-    }
+    //     const input = allFaces
+    //         .slice(0, syncContext.config.tsne.samples)
+    //         .map((f) => Array.from(f.embedding));
+    //     syncContext.tsne = toTSNE(input, syncContext.config.tsne);
+    //     addLogLine('tsne: ', syncContext.tsne);
+    // }
 
     private async syncFaceDetections(
         syncContext: MLSyncContext,

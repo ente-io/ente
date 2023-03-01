@@ -44,7 +44,8 @@ export const getAutoCompleteSuggestions =
             ...getYearSuggestion(searchPhrase),
             ...getDateSuggestion(searchPhrase),
             ...getCollectionSuggestion(searchPhrase, collections),
-            getFileSuggestion(searchPhrase, files),
+            getFileNameSuggestion(searchPhrase, files),
+            getFileCaptionSuggestion(searchPhrase, files),
             ...(await getThingSuggestion(searchPhrase)),
             ...(await getWordSuggestion(searchPhrase)),
         ];
@@ -191,13 +192,25 @@ function getCollectionSuggestion(
     );
 }
 
-function getFileSuggestion(
+function getFileNameSuggestion(
     searchPhrase: string,
     files: EnteFile[]
 ): Suggestion {
-    const matchedFiles = searchFiles(searchPhrase, files);
+    const matchedFiles = searchFilesByName(searchPhrase, files);
     return {
         type: SuggestionType.FILE_NAME,
+        value: matchedFiles.map((file) => file.id),
+        label: searchPhrase,
+    };
+}
+
+function getFileCaptionSuggestion(
+    searchPhrase: string,
+    files: EnteFile[]
+): Suggestion {
+    const matchedFiles = searchFilesByCaption(searchPhrase, files);
+    return {
+        type: SuggestionType.FILE_CAPTION,
         value: matchedFiles.map((file) => file.id),
         label: searchPhrase,
     };
@@ -252,13 +265,26 @@ function searchCollection(
     );
 }
 
-function searchFiles(searchPhrase: string, files: EnteFile[]) {
+function searchFilesByName(searchPhrase: string, files: EnteFile[]) {
     const user = getData(LS_KEYS.USER) as User;
     if (!user) return [];
     return files.filter(
         (file) =>
             file.ownerID === user.id &&
             file.metadata.title.toLowerCase().includes(searchPhrase)
+    );
+}
+
+function searchFilesByCaption(searchPhrase: string, files: EnteFile[]) {
+    const user = getData(LS_KEYS.USER) as User;
+    if (!user) return [];
+    return files.filter(
+        (file) =>
+            file.ownerID === user.id &&
+            file.pubMagicMetadata &&
+            file.pubMagicMetadata.data.caption
+                ?.toLowerCase()
+                .includes(searchPhrase)
     );
 }
 
@@ -364,6 +390,9 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
             return { collection: option.value as number };
 
         case SuggestionType.FILE_NAME:
+            return { files: option.value as number[] };
+
+        case SuggestionType.FILE_CAPTION:
             return { files: option.value as number[] };
 
         case SuggestionType.PERSON:

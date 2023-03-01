@@ -6,7 +6,8 @@ import React from 'react';
 import { SuggestionType } from 'types/search';
 import { formatNumberWithCommas } from '.';
 import { FACE_SEARCH_PRIVACY_POLICY_LINK } from 'constants/urls';
-
+import { EnteLogo } from 'components/EnteLogo';
+import { PasswordStrength } from 'constants/crypto';
 /**
  * Global English constants.
  */
@@ -94,6 +95,15 @@ const englishConstants = {
             recover your data without a recovery key.
         </>
     ),
+    WELCOME_TO_ENTE: () => (
+        <>
+            <Typography variant="h3" color="text.secondary" mb={1}>
+                Welcome to <EnteLogo />
+            </Typography>
+            <h2>End to end encrypted photo storage and sharing</h2>
+        </>
+    ),
+    WHERE_YOUR_BEST_PHOTOS_LIVE: 'Where your best photos live',
     KEY_GENERATION_IN_PROGRESS_MESSAGE: 'Generating encryption keys...',
     PASSPHRASE_HINT: 'Password',
     CONFIRM_PASSPHRASE: 'Confirm password',
@@ -110,6 +120,7 @@ const englishConstants = {
     NO: 'No',
     NOTHING_HERE: 'Nothing to see here yet 👀',
     UPLOAD: 'Upload',
+    IMPORT: 'Import',
     ADD_MORE_PHOTOS: 'Add more photos',
     ADD_PHOTOS: 'Add photos',
     SELECT_PHOTOS: 'Select photos',
@@ -153,12 +164,8 @@ const englishConstants = {
     NO_INTERNET_CONNECTION:
         'Please check your internet connection and try again',
     TITLE: 'ente Photos',
-    UPLOAD_FIRST_PHOTO_DESCRIPTION: () => (
-        <>
-            Preserve your first memory with <strong> ente </strong>
-        </>
-    ),
-    UPLOAD_FIRST_PHOTO: 'Preserve',
+    UPLOAD_FIRST_PHOTO: 'Upload your first photo',
+    IMPORT_YOUR_FOLDERS: 'Import your folders',
     UPLOAD_DROPZONE_MESSAGE: 'Drop to backup your files',
     WATCH_FOLDER_DROPZONE_MESSAGE: 'Drop to add watched folder',
     TRASH_FILES_TITLE: 'Delete files?',
@@ -413,6 +420,10 @@ const englishConstants = {
                 return 'Date';
             case SuggestionType.FILE_NAME:
                 return 'File name';
+            case SuggestionType.THING:
+                return 'Content';
+            case SuggestionType.FILE_CAPTION:
+                return 'Description';
         }
     },
     PHOTO_COUNT: (count: number) =>
@@ -988,6 +999,14 @@ const englishConstants = {
         'I understand, and wish to allow ente to process face geometry',
     LABS: 'Labs',
     YOURS: 'yours',
+    PASSPHRASE_STRENGTH: (strength: PasswordStrength) =>
+        `Password strength: ${
+            strength === PasswordStrength.STRONG
+                ? 'Strong'
+                : strength === PasswordStrength.MODERATE
+                ? 'Moderate'
+                : 'Weak'
+        }`,
 };
 
 export default englishConstants;
