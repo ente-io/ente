@@ -1,6 +1,7 @@
-import { getLocale } from 'utils/storage';
 import englishConstants from './englishConstants';
 import frenchConstants from './frenchConstants';
+import { getUserLocale as getUserChosenLocale } from 'utils/storage';
+import { getBestPossibleUserLocale } from '.';
 
 /** Enums of supported locale */
 export enum locale {
@@ -62,7 +63,11 @@ const globalConstants: VernacularConstants<typeof englishConstants> = {
  * @param localConstants
  */
 export function getConstantValue<T>(localConstants?: VernacularConstants<T>) {
-    const currLocale = getLocale();
+    let currLocale = getUserChosenLocale();
+    if (!currLocale) {
+        currLocale = getBestPossibleUserLocale();
+    }
+
     if (currLocale !== 'en') {
         return {
             ...globalConstants.en,
