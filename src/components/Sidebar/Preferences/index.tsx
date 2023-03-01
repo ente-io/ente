@@ -3,6 +3,7 @@ import { Box, DialogProps, Stack } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import Titlebar from 'components/Titlebar';
+import isElectron from 'is-electron';
 import { useState } from 'react';
 import constants from 'utils/strings/constants';
 import AdvancedSettings from '../AdvancedSettings';
@@ -48,13 +49,15 @@ export default function Preferences({ open, onClose, onRootClose }) {
                             <MenuSectionTitle title={constants.LANGUAGE} />
                             <LanguageSelector />
                         </Box>
-                        <SidebarButton
-                            variant="contained"
-                            color="secondary"
-                            onClick={openAdvancedSettings}
-                            endIcon={<ChevronRight />}>
-                            {constants.ADVANCED}
-                        </SidebarButton>
+                        {isElectron() && (
+                            <SidebarButton
+                                variant="contained"
+                                color="secondary"
+                                onClick={openAdvancedSettings}
+                                endIcon={<ChevronRight />}>
+                                {constants.ADVANCED}
+                            </SidebarButton>
+                        )}
                     </Stack>
                 </Box>
             </Stack>
