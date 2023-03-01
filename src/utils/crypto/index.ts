@@ -58,6 +58,10 @@ export async function generateKeyAttributes(
     return { keyAttributes, masterKey };
 }
 
+// We encrypt existingKeyAttributes with a key derived from the passphrase (with
+// Interactive mem and ops limits) to avoid saving them to local storage in
+// plain text. This means that on the web user will always have to enter their
+// passphrase to access their masterKey.
 export async function generateAndSaveIntermediateKeyAttributes(
     passphrase: string,
     existingKeyAttributes: KeyAttributes,
@@ -90,7 +94,6 @@ export const saveKeyInSessionStore = async (
     key: string,
     fromDesktop?: boolean
 ) => {
-    // the key is encrypted before saving in session storage, to obfuscate it from the browser
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const sessionKeyAttributes = await cryptoWorker.generateKeyAndEncryptToB64(
         key
