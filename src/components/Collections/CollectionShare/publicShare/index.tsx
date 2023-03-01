@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Collection, PublicURL } from 'types/collection';
 import { appendCollectionKeyToShareURL } from 'utils/collection';
-import PublicShareControl from './control';
-import PublicShareLink from './link';
+import BeforeShare from './beforeShare';
 import PublicShareManage from './manage';
+import SidebarButton from 'components/Sidebar/Button';
+import ContentCopyIcon from '@mui/icons-material/ContentCopyOutlined';
+import constants from 'utils/strings/constants';
+import { Dialog, DialogTitle, DialogActions, Button } from '@mui/material';
+import LinkIcon from '@mui/icons-material/Link';
 
 export default function PublicShare({
     collection,
@@ -12,6 +16,8 @@ export default function PublicShare({
 }) {
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
     const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
+    const [isFirstShareProp, setIsFirstShareProp] = useState(false);
+    const [manageShareModalView, setManageShareModalView] = useState(false);
 
     useEffect(() => {
         if (collection.publicURLs?.length) {
@@ -31,23 +37,90 @@ export default function PublicShare({
         }
     }, [publicShareProp]);
 
+    useEffect(() => {
+        if (isFirstShareProp) {
+            setIsFirstShareProp(true);
+            setManageShareModalView(false);
+        } else setIsFirstShareProp(false);
+    }, [isFirstShareProp]);
+
+    useEffect(() => {
+        if (manageShareModalView) {
+            setManageShareModalView(true);
+        } else setManageShareModalView(false);
+    }, [manageShareModalView]);
+
+    const copyToClipboardHelper = (text: string) => () => {
+        navigator.clipboard.writeText(text);
+    };
+    const handleCancel = () => {
+        setIsFirstShareProp(false);
+    };
+
+    const closeManageShare = () => setManageShareModalView(false);
+    const openManageShare = () => setManageShareModalView(true);
     return (
         <>
-            <PublicShareControl
-                setPublicShareProp={setPublicShareProp}
-                collection={collection}
-                publicShareActive={!!publicShareProp}
-            />
-            {publicShareProp && (
+            {publicShareProp ? (
                 <>
-                    <PublicShareLink publicShareUrl={publicShareUrl} />
+                    <SidebarButton
+                        startIcon={<ContentCopyIcon />}
+                        variant="contained"
+                        color="secondary"
+                        sx={{ fontWeight: 'normal' }}
+                        onClick={copyToClipboardHelper(publicShareUrl)}>
+                        {constants.COPY_LINK}
+                    </SidebarButton>
 
+                    <SidebarButton
+                        startIcon={<LinkIcon />}
+                        variant="contained"
+                        color="secondary"
+                        sx={{ fontWeight: 'normal' }}
+                        onClick={openManageShare}>
+                        {constants.MANAGE_LINK}
+                    </SidebarButton>
                     <PublicShareManage
+                        open={manageShareModalView}
+                        onClose={closeManageShare}
                         publicShareProp={publicShareProp}
                         collection={collection}
                         setPublicShareProp={setPublicShareProp}
+                        publicShareUrl={publicShareUrl}
                     />
+                    <Dialog
+                        open={isFirstShareProp}
+                        onClose={handleCancel}
+                        disablePortal
+                        BackdropProps={{ sx: { position: 'absolute' } }}
+                        sx={{ position: 'absolute' }}
+                        PaperProps={{
+                            sx: { p: 1, justifyContent: 'flex-end' },
+                        }}>
+                        <DialogTitle>
+                            {constants.PUBLIC_LINK_CREATED}
+                        </DialogTitle>
+                        <DialogActions>
+                            <Button onClick={handleCancel} color="primary">
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={copyToClipboardHelper(publicShareUrl)}
+                                color="primary"
+                                autoFocus>
+                                {constants.COPY_LINK}
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                 </>
+            ) : (
+                <BeforeShare
+                    publicShareProp={publicShareProp}
+                    setPublicShareProp={setPublicShareProp}
+                    collection={collection}
+                    publicShareActive={!!publicShareProp}
+                    setIsFirstShareProp={setIsFirstShareProp}
+                />
             )}
         </>
     );

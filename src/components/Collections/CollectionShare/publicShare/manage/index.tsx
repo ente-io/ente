@@ -1,33 +1,46 @@
 import { ManageLinkPassword } from './linkPassword';
 import { ManageDeviceLimit } from './deviceLimit';
 import { ManageLinkExpiry } from './linkExpiry';
-import { Stack, Typography } from '@mui/material';
+import { DialogContent, Stack, Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import React, { useContext, useState } from 'react';
-import { updateShareableURL } from 'services/collectionService';
-import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
-import { sleep } from 'utils/common';
-import constants from 'utils/strings/constants';
 import {
-    ManageSectionLabel,
-    ManageSectionOptions,
-} from '../../styledComponents';
+    deleteShareableURL,
+    updateShareableURL,
+} from 'services/collectionService';
+import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
+import constants from 'utils/strings/constants';
 import { ManageDownloadAccess } from './downloadAccess';
 import { handleSharingErrors } from 'utils/error/ui';
 import { SetPublicShareProp } from 'types/publicCollection';
 import { ManagePublicCollect } from './publicCollect';
-
+import { EnteDrawer } from 'components/EnteDrawer';
+import DialogTitleWithCloseButton, {
+    dialogCloseHandler,
+} from 'components/DialogBox/TitleWithCloseButton';
+import SidebarButton from 'components/Sidebar/Button';
+import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 interface Iprops {
     publicShareProp: PublicURL;
     collection: Collection;
     setPublicShareProp: SetPublicShareProp;
+    open: boolean;
+    onClose: () => void;
+    publicShareUrl: string;
 }
 
 export default function PublicShareManage({
     publicShareProp,
     collection,
     setPublicShareProp,
+    open,
+    onClose,
+    publicShareUrl,
 }: Iprops) {
+    const handleClose = dialogCloseHandler({
+        onClose: onClose,
+    });
     const galleryContext = useContext(GalleryContext);
 
     const [sharableLinkError, setSharableLinkError] = useState(null);
@@ -44,25 +57,30 @@ export default function PublicShareManage({
             galleryContext.setBlockingLoad(false);
         }
     };
-
-    const scrollToEnd = (e) => {
-        const lastOptionRow: Element =
-            e.currentTarget.nextElementSibling.lastElementChild;
-        const main = async (lastOptionRow: Element) => {
-            await sleep(0);
-            lastOptionRow.scrollIntoView(true);
-        };
-        main(lastOptionRow);
+    const disablePublicSharing = async () => {
+        //appContext.startLoading();
+        await deleteShareableURL(collection);
+        setPublicShareProp(null);
+        // await galleryContext.syncWithRemote(false, true);
     };
-
+    const copyToClipboardHelper = (text: string) => () => {
+        navigator.clipboard.writeText(text);
+    };
     return (
         <>
-            <details>
-                <ManageSectionLabel onClick={scrollToEnd}>
-                    {constants.MANAGE_LINK}
-                </ManageSectionLabel>
-                <ManageSectionOptions>
+            <EnteDrawer anchor="right" open={open} onClose={handleClose}>
+                <DialogTitleWithCloseButton onClose={handleClose}>
+                    {constants.SHARE_COLLECTION}
+                </DialogTitleWithCloseButton>
+                <DialogContent>
                     <Stack spacing={1.5}>
+                        <ManagePublicCollect
+                            collection={collection}
+                            publicShareProp={publicShareProp}
+                            updatePublicShareURLHelper={
+                                updatePublicShareURLHelper
+                            }
+                        />
                         <ManageLinkExpiry
                             collection={collection}
                             publicShareProp={publicShareProp}
@@ -71,13 +89,6 @@ export default function PublicShareManage({
                             }
                         />
                         <ManageDeviceLimit
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                        <ManagePublicCollect
                             collection={collection}
                             publicShareProp={publicShareProp}
                             updatePublicShareURLHelper={
@@ -98,6 +109,22 @@ export default function PublicShareManage({
                                 updatePublicShareURLHelper
                             }
                         />
+                        <SidebarButton
+                            startIcon={<ContentCopyIcon />}
+                            variant="contained"
+                            color="secondary"
+                            sx={{ fontWeight: 'normal' }}
+                            onClick={copyToClipboardHelper(publicShareUrl)}>
+                            {constants.COPY_LINK}
+                        </SidebarButton>
+                        <SidebarButton
+                            startIcon={<RemoveCircleOutline />}
+                            variant="contained"
+                            color="secondary"
+                            sx={{ fontWeight: 'normal' }}
+                            onClick={disablePublicSharing}>
+                            {constants.DELETE}
+                        </SidebarButton>
                     </Stack>
                     {sharableLinkError && (
                         <Typography
@@ -110,8 +137,8 @@ export default function PublicShareManage({
                             {sharableLinkError}
                         </Typography>
                     )}
-                </ManageSectionOptions>
-            </details>
+                </DialogContent>
+            </EnteDrawer>
         </>
     );
 }
