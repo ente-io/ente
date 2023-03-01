@@ -54,6 +54,8 @@ import { User } from 'types/user';
 import { SetTheme } from 'types/theme';
 import { useLocalState } from 'hooks/useLocalState';
 import { THEME_COLOR } from 'constants/theme';
+import { locale } from 'constants/locale';
+import { getBestPossibleUserLocale } from 'utils/strings';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -92,6 +94,8 @@ type AppContextType = {
     theme: THEME_COLOR;
     setTheme: SetTheme;
     somethingWentWrong: () => void;
+    userLocale: locale;
+    setUserLocale: (locale: locale) => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -136,6 +140,10 @@ export default function App({ Component, err }) {
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
     const [theme, setTheme] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
+    const [userLocale, setUserLocale] = useLocalState(
+        LS_KEYS.LOCALE,
+        getBestPossibleUserLocale()
+    );
 
     useEffect(() => {
         HTTPService.getInterceptors().response.use(
@@ -393,6 +401,8 @@ export default function App({ Component, err }) {
                         theme,
                         setTheme,
                         somethingWentWrong,
+                        userLocale,
+                        setUserLocale,
                     }}>
                     {loading ? (
                         <VerticallyCentered>

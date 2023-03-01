@@ -1007,6 +1007,8 @@ const englishConstants = {
                 ? 'Moderate'
                 : 'Weak'
         }`,
+    PREFERENCES: 'Preferences',
+    LANGUAGE: 'Language',
 };
 
 export default englishConstants;
