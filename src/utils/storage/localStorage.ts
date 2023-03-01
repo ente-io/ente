@@ -21,6 +21,7 @@ export enum LS_KEYS {
     THEME = 'theme',
     WAIT_TIME = 'waitTime',
     API_ENDPOINT = 'apiEndpoint',
+    LOCALE = 'locale',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {

@@ -1,3 +1,4 @@
+import { locale } from 'utils/strings/vernacularStrings';
 import { getData, LS_KEYS, setData } from './localStorage';
 
 export const isFirstLogin = () =>
@@ -20,4 +21,12 @@ export function getLivePhotoInfoShownCount() {
 
 export function setLivePhotoInfoShownCount(count) {
     setData(LS_KEYS.LIVE_PHOTO_INFO_SHOWN_COUNT, { count });
+}
+
+export function getLocale(): locale {
+    return getData(LS_KEYS.LOCALE) ?? locale.en;
+}
+
+export function setLocale(locale: locale) {
+    setData(LS_KEYS.LOCALE, { locale });
 }

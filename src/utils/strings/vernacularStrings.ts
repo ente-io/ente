@@ -1,10 +1,11 @@
-import { runningInBrowser } from 'utils/common';
+import { getLocale } from 'utils/storage';
 import englishConstants from './englishConstants';
+import frenchConstants from './frenchConstants';
 
 /** Enums of supported locale */
 export enum locale {
     en = 'en',
-    hi = 'hi',
+    fr = 'fr',
 }
 
 /**
@@ -32,8 +33,12 @@ export function template(strings: TemplateStringsArray, ...keys: string[]) {
 /** Type for vernacular string constants */
 export type VernacularConstants<T> = {
     [locale.en]: T;
-    [locale.hi]?: {
-        [x in keyof T]?: string | ReturnType<typeof template>;
+    [locale.fr]?: {
+        [x in keyof T]?:
+            | string
+            | ReturnType<typeof template>
+            | ((...values: any) => JSX.Element)
+            | Record<any, any>;
     };
 };
 
@@ -43,20 +48,13 @@ export type VernacularConstants<T> = {
  *
  * @param lang
  */
-export const getLocale = (lang: string) => {
-    switch (lang) {
-        case locale.hi:
-            return locale.hi;
-        default:
-            return locale.en;
-    }
-};
 
 /**
  * Global constants
  */
 const globalConstants: VernacularConstants<typeof englishConstants> = {
     en: englishConstants,
+    fr: frenchConstants,
 };
 
 /**
@@ -64,10 +62,7 @@ const globalConstants: VernacularConstants<typeof englishConstants> = {
  * @param localConstants
  */
 export function getConstantValue<T>(localConstants?: VernacularConstants<T>) {
-    const searchParam = runningInBrowser() ? window.location.search : '';
-    const query = new URLSearchParams(searchParam);
-    const currLocale = getLocale(query.get('lang'));
-
+    const currLocale = getLocale();
     if (currLocale !== 'en') {
         return {
             ...globalConstants.en,
