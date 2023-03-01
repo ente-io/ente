@@ -158,7 +158,7 @@ class UserService {
       if (shouldCache) {
         await _preferences.setString(keyUserDetails, userDetails.toJson());
       }
-      _logger.info("User details fetched: " + userDetails.toJson());
+      debugPrint("User details fetched: " + userDetails.toJson());
       return userDetails;
     } on DioError catch (e) {
       _logger.info(e);
