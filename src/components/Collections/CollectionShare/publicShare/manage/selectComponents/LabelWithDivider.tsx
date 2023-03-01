@@ -7,7 +7,7 @@ export function LabelWithDivider({ data }) {
             <Box className="main" px={3} py={1}>
                 <Typography>{data.label}</Typography>
             </Box>
-            <Divider />
+            <Divider sx={{ borderColor: 'stroke.fainter' }} />
         </>
     );
 }
