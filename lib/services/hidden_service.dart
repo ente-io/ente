@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -134,16 +133,19 @@ extension HiddenService on CollectionsService {
   }
 
   Future<Collection> _createUncategorizedCollection() async {
-    final key = CryptoUtil.generateKey();
-    final encKey = CryptoUtil.encryptSync(key, config.getKey()!);
-    final encName =
-        CryptoUtil.encryptSync(utf8.encode("Uncategorized") as Uint8List, key);
+    final uncategorizedCollectionKey = CryptoUtil.generateKey();
+    final encKey =
+        CryptoUtil.encryptSync(uncategorizedCollectionKey, config.getKey()!);
+    final encName = CryptoUtil.encryptSync(
+      utf8.encode("Uncategorized") as Uint8List,
+      uncategorizedCollectionKey,
+    );
     final collection = await createAndCacheCollection(
       CreateRequest(
-        encryptedKey: Sodium.bin2base64(encKey.encryptedData!),
-        keyDecryptionNonce: Sodium.bin2base64(encKey.nonce!),
-        encryptedName: Sodium.bin2base64(encName.encryptedData!),
-        nameDecryptionNonce: Sodium.bin2base64(encName.nonce!),
+        encryptedKey: CryptoUtil.bin2base64(encKey.encryptedData!),
+        keyDecryptionNonce: CryptoUtil.bin2base64(encKey.nonce!),
+        encryptedName: CryptoUtil.bin2base64(encName.encryptedData!),
+        nameDecryptionNonce: CryptoUtil.bin2base64(encName.nonce!),
         type: CollectionType.uncategorized,
         attributes: CollectionAttributes(),
       ),
@@ -157,11 +159,12 @@ extension HiddenService on CollectionsService {
     required int visibility,
     required int subType,
   }) async {
-    final key = CryptoUtil.generateKey();
-    final encryptedKeyData = CryptoUtil.encryptSync(key, config.getKey()!);
+    final collectionKey = CryptoUtil.generateKey();
+    final encryptedKeyData =
+        CryptoUtil.encryptSync(collectionKey, config.getKey()!);
     final encryptedName = CryptoUtil.encryptSync(
       utf8.encode(name) as Uint8List,
-      key,
+      collectionKey,
     );
     final jsonToUpdate = CollectionMagicMetadata(
       visibility: visibility,
@@ -170,19 +173,19 @@ extension HiddenService on CollectionsService {
     assert(jsonToUpdate.length == 2, "metadata should have two keys");
     final encryptedMMd = await CryptoUtil.encryptChaCha(
       utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
-      key,
+      collectionKey,
     );
     final MetadataRequest metadataRequest = MetadataRequest(
       version: 1,
       count: jsonToUpdate.length,
-      data: Sodium.bin2base64(encryptedMMd.encryptedData!),
-      header: Sodium.bin2base64(encryptedMMd.header!),
+      data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+      header: CryptoUtil.bin2base64(encryptedMMd.header!),
     );
     final CreateRequest createRequest = CreateRequest(
-      encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData!),
-      keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce!),
-      encryptedName: Sodium.bin2base64(encryptedName.encryptedData!),
-      nameDecryptionNonce: Sodium.bin2base64(encryptedName.nonce!),
+      encryptedKey: CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
+      keyDecryptionNonce: CryptoUtil.bin2base64(encryptedKeyData.nonce!),
+      encryptedName: CryptoUtil.bin2base64(encryptedName.encryptedData!),
+      nameDecryptionNonce: CryptoUtil.bin2base64(encryptedName.nonce!),
       type: CollectionType.album,
       attributes: CollectionAttributes(),
       magicMetadata: metadataRequest,

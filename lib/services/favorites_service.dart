@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -194,16 +193,19 @@ class FavoritesService {
     if (_cachedFavoritesCollectionID != null) {
       return _cachedFavoritesCollectionID!;
     }
-    final key = CryptoUtil.generateKey();
-    final encKey = CryptoUtil.encryptSync(key, _config.getKey()!);
-    final encName =
-        CryptoUtil.encryptSync(utf8.encode("Favorites") as Uint8List, key);
+    final favoriteCollectionKey = CryptoUtil.generateKey();
+    final encryptedKeyResult =
+        CryptoUtil.encryptSync(favoriteCollectionKey, _config.getKey()!);
+    final encName = CryptoUtil.encryptSync(
+      utf8.encode("Favorites") as Uint8List,
+      favoriteCollectionKey,
+    );
     final collection = await _collectionsService.createAndCacheCollection(
       CreateRequest(
-        encryptedKey: Sodium.bin2base64(encKey.encryptedData!),
-        keyDecryptionNonce: Sodium.bin2base64(encKey.nonce!),
-        encryptedName: Sodium.bin2base64(encName.encryptedData!),
-        nameDecryptionNonce: Sodium.bin2base64(encName.nonce!),
+        encryptedKey: CryptoUtil.bin2base64(encryptedKeyResult.encryptedData!),
+        keyDecryptionNonce: CryptoUtil.bin2base64(encryptedKeyResult.nonce!),
+        encryptedName: CryptoUtil.bin2base64(encName.encryptedData!),
+        nameDecryptionNonce: CryptoUtil.bin2base64(encName.nonce!),
         type: CollectionType.favorites,
         attributes: CollectionAttributes(),
       ),

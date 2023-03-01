@@ -37,7 +37,7 @@ void validatePreVerificationStateCheck(
     try {
       utf8.decode(passwordL);
     } catch (e) {
-      _logger.severe("CRITICAL: password decode failed", e);
+      _logger.severe("CRITICAL: password decode failed");
       rethrow;
     }
   } catch (e) {
