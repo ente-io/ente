@@ -58,6 +58,10 @@ export async function generateKeyAttributes(
     return { keyAttributes, masterKey };
 }
 
+// We encrypt the masterKey, with an intermediate key derived from the
+// passphrase (with Interactive mem and ops limits) to avoid saving it to local
+// storage in plain text. This means that on the web user will always have to
+// enter their passphrase to access their masterKey.
 export async function generateAndSaveIntermediateKeyAttributes(
     passphrase: string,
     existingKeyAttributes: KeyAttributes,
@@ -90,7 +94,6 @@ export const saveKeyInSessionStore = async (
     key: string,
     fromDesktop?: boolean
 ) => {
-    // the key is encrypted before saving in session storage, to obfuscate it from the browser
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const sessionKeyAttributes = await cryptoWorker.generateKeyAndEncryptToB64(
         key
@@ -129,6 +132,8 @@ export const getRecoveryKey = async () => {
     }
 };
 
+// Used only for legacy users for whom we did not generate recovery keys during
+// sign up
 async function createNewRecoveryKey() {
     const masterKey = await getActualKey();
     const existingAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
@@ -160,6 +165,7 @@ async function createNewRecoveryKey() {
 
     return recoveryKey;
 }
+
 export async function decryptAndStoreToken(masterKey: string) {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const user = getData(LS_KEYS.USER);
@@ -172,13 +178,13 @@ export async function decryptAndStoreToken(masterKey: string) {
             keyAttributes.secretKeyDecryptionNonce,
             masterKey
         );
-        const URLUnsafeB64DecryptedToken = await cryptoWorker.boxSealOpen(
+        const urlUnsafeB64DecryptedToken = await cryptoWorker.boxSealOpen(
             encryptedToken,
             keyAttributes.publicKey,
             secretKey
         );
         const decryptedTokenBytes = await cryptoWorker.fromB64(
-            URLUnsafeB64DecryptedToken
+            urlUnsafeB64DecryptedToken
         );
         decryptedToken = await cryptoWorker.toURLSafeB64(decryptedTokenBytes);
         setData(LS_KEYS.USER, {
