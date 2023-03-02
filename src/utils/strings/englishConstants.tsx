@@ -1007,6 +1007,13 @@ const englishConstants = {
                 ? 'Moderate'
                 : 'Weak'
         }`,
+    EXPORT_DIRECTORY_DOES_NOT_EXIST: 'Invalid export directory',
+    EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE: () => (
+        <>
+            <p>The export directory you have selected does not exist.</p>
+            <p> Please select a valid directory.</p>
+        </>
+    ),
 };
 
 export default englishConstants;

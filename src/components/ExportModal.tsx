@@ -1,5 +1,5 @@
 import isElectron from 'is-electron';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useContext } from 'react';
 import exportService from 'services/exportService';
 import { ExportProgress, ExportStats } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
@@ -32,6 +32,8 @@ import { OverflowMenuOption } from './OverflowMenu/option';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { CustomError } from 'utils/error';
 import { getLocalUserDetails } from 'utils/user';
+import { AppContext } from 'pages/_app';
+import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 
 const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
@@ -49,6 +51,7 @@ interface Props {
     onHide: () => void;
 }
 export default function ExportModal(props: Props) {
+    const appContext = useContext(AppContext);
     const userDetails = useMemo(() => getLocalUserDetails(), []);
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState('');
@@ -199,6 +202,13 @@ export default function ExportModal(props: Props) {
         const exportFolder = getData(LS_KEYS.EXPORT)?.folder;
         if (!exportFolder) {
             await selectExportDirectory();
+        }
+        const exportFolderExists = exportService.exists(exportFolder);
+        if (!exportFolderExists) {
+            appContext.setDialogMessage(
+                getExportDirectoryDoesNotExistMessage()
+            );
+            return;
         }
         await updateExportStage(ExportStage.INPROGRESS);
         await sleep(100);

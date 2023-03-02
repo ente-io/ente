@@ -90,3 +90,10 @@ export const getRootLevelFileWithFolderNotAllowMessage =
         content: constants.ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE(),
         close: {},
     });
+
+export const getExportDirectoryDoesNotExistMessage =
+    (): DialogBoxAttributes => ({
+        title: constants.EXPORT_DIRECTORY_DOES_NOT_EXIST,
+        content: constants.EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE(),
+        close: {},
+    });
