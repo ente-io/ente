@@ -87,6 +87,7 @@ class ExportService {
         exportType: ExportType
     ) {
         try {
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             if (this.exportInProgress) {
                 this.electronAPIs.sendNotification(
                     ExportNotification.IN_PROGRESS
@@ -206,7 +207,7 @@ class ExportService {
             }
             this.stopExport = false;
             this.pauseExport = false;
-            this.addFilesQueuedRecord(exportDir, files);
+            await this.addFilesQueuedRecord(exportDir, files);
             const failedFileCount = 0;
 
             this.electronAPIs.showOnTray({
@@ -456,7 +457,7 @@ class ExportService {
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             await this.exportMotionPhoto(fileStream, file, collectionPath);
         } else {
-            this.saveMediaFile(collectionPath, fileSaveName, fileStream);
+            await this.saveMediaFile(collectionPath, fileSaveName, fileStream);
             await this.saveMetadataFile(collectionPath, fileSaveName, file);
         }
     }
@@ -474,7 +475,7 @@ class ExportService {
             motionPhoto.imageNameTitle,
             file.id
         );
-        this.saveMediaFile(collectionPath, imageSaveName, imageStream);
+        await this.saveMediaFile(collectionPath, imageSaveName, imageStream);
         await this.saveMetadataFile(collectionPath, imageSaveName, file);
 
         const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);

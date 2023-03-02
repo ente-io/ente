@@ -2,33 +2,46 @@ import * as Sentry from '@sentry/nextjs';
 import { addLogLine } from 'utils/logging';
 import { getSentryUserID } from 'utils/user';
 
-export const logError = async (
+export const logError = (
     error: any,
     msg: string,
     info?: Record<string, unknown>,
     skipAddLogLine = false
 ) => {
-    if (isErrorUnnecessaryForSentry(error)) {
-        return;
-    }
-    const err = errorWithContext(error, msg);
-    if (!skipAddLogLine) {
-        addLogLine(
-            `error: ${error?.name} ${error?.message} ${
-                error?.stack
-            } msg: ${msg} ${info ? `info: ${JSON.stringify(info)}` : ''}`
-        );
-    }
-    Sentry.captureException(err, {
-        level: Sentry.Severity.Info,
-        user: { id: await getSentryUserID() },
-        contexts: {
-            ...(info && {
-                info: info,
-            }),
-            rootCause: { message: error?.message, completeError: error },
-        },
-    });
+    const main = async () => {
+        try {
+            if (isErrorUnnecessaryForSentry(error)) {
+                return;
+            }
+            const err = errorWithContext(error, msg);
+            if (!skipAddLogLine) {
+                addLogLine(
+                    `error: ${error?.name} ${error?.message} ${
+                        error?.stack
+                    } msg: ${msg} ${
+                        info ? `info: ${JSON.stringify(info)}` : ''
+                    }`
+                );
+            }
+            Sentry.captureException(err, {
+                level: Sentry.Severity.Info,
+                user: { id: await getSentryUserID() },
+                contexts: {
+                    ...(info && {
+                        info: info,
+                    }),
+                    rootCause: {
+                        message: error?.message,
+                        completeError: error,
+                    },
+                },
+            });
+        } catch (e) {
+            addLogLine('error in logError', e);
+            // ignore
+        }
+    };
+    void main();
 };
 
 // copy of errorWithContext to prevent importing error util
