@@ -87,7 +87,6 @@ class ExportService {
         exportType: ExportType
     ) {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             if (this.exportInProgress) {
                 this.electronAPIs.sendNotification(
                     ExportNotification.IN_PROGRESS
