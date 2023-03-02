@@ -375,6 +375,13 @@ class ExportService {
             if (!folder) {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
             }
+            if (!folder) {
+                throw Error(CustomError.NO_EXPORT_FOLDER_SELECTED);
+            }
+            const exportFolderExists = this.exists(folder);
+            if (!exportFolderExists) {
+                throw Error(CustomError.EXPORT_FOLDER_DOES_NOT_EXIST);
+            }
             const recordFile = await this.electronAPIs.getExportRecord(
                 `${folder}/${EXPORT_RECORD_FILE_NAME}`
             );
