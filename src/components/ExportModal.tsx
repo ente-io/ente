@@ -70,14 +70,20 @@ export default function ExportModal(props: Props) {
         if (!isElectron()) {
             return;
         }
-        setExportFolder(getData(LS_KEYS.EXPORT)?.folder);
+        try {
+            setExportFolder(getData(LS_KEYS.EXPORT)?.folder);
 
-        exportService.electronAPIs.registerStopExportListener(stopExport);
-        exportService.electronAPIs.registerPauseExportListener(pauseExport);
-        exportService.electronAPIs.registerResumeExportListener(resumeExport);
-        exportService.electronAPIs.registerRetryFailedExportListener(
-            retryFailedExport
-        );
+            exportService.electronAPIs.registerStopExportListener(stopExport);
+            exportService.electronAPIs.registerPauseExportListener(pauseExport);
+            exportService.electronAPIs.registerResumeExportListener(
+                resumeExport
+            );
+            exportService.electronAPIs.registerRetryFailedExportListener(
+                retryFailedExport
+            );
+        } catch (e) {
+            logError(e, 'error in exportModal');
+        }
     }, []);
 
     useEffect(() => {
@@ -85,19 +91,25 @@ export default function ExportModal(props: Props) {
             return;
         }
         const main = async () => {
-            const exportInfo = await exportService.getExportRecord();
-            setExportStage(exportInfo?.stage ?? ExportStage.INIT);
-            setLastExportTime(exportInfo?.lastAttemptTimestamp);
-            setExportProgress(exportInfo?.progress ?? { current: 0, total: 0 });
-            setExportStats({
-                success: exportInfo?.exportedFiles?.length ?? 0,
-                failed: exportInfo?.failedFiles?.length ?? 0,
-            });
-            if (exportInfo?.stage === ExportStage.INPROGRESS) {
-                resumeExport();
+            try {
+                const exportInfo = await exportService.getExportRecord();
+                setExportStage(exportInfo?.stage ?? ExportStage.INIT);
+                setLastExportTime(exportInfo?.lastAttemptTimestamp);
+                setExportProgress(
+                    exportInfo?.progress ?? { current: 0, total: 0 }
+                );
+                setExportStats({
+                    success: exportInfo?.exportedFiles?.length ?? 0,
+                    failed: exportInfo?.failedFiles?.length ?? 0,
+                });
+                if (exportInfo?.stage === ExportStage.INPROGRESS) {
+                    resumeExport();
+                }
+            } catch (e) {
+                logError(e, 'error handling exportFolder change');
             }
         };
-        main();
+        void main();
     }, [exportFolder]);
 
     useEffect(() => {
@@ -117,7 +129,7 @@ export default function ExportModal(props: Props) {
                     const failedFilesCnt = exportRecord.failedFiles?.length;
                     const syncedFilesCnt = userPersonalFiles.length;
                     if (syncedFilesCnt > exportedFileCnt + failedFilesCnt) {
-                        updateExportProgress({
+                        await updateExportProgress({
                             current: exportedFileCnt + failedFilesCnt,
                             total: syncedFilesCnt,
                         });
@@ -131,11 +143,11 @@ export default function ExportModal(props: Props) {
                                     getExportRecordFileUID(file)
                                 )
                         );
-                        exportService.addFilesQueuedRecord(
+                        await exportService.addFilesQueuedRecord(
                             exportFolder,
                             unExportedFiles
                         );
-                        updateExportStage(ExportStage.PAUSED);
+                        await updateExportStage(ExportStage.PAUSED);
                     }
                 } catch (e) {
                     setExportStage(ExportStage.INIT);
@@ -143,7 +155,7 @@ export default function ExportModal(props: Props) {
                 }
             }
         };
-        main();
+        void main();
     }, [props.show]);
 
     useEffect(() => {
@@ -158,19 +170,21 @@ export default function ExportModal(props: Props) {
         setData(LS_KEYS.EXPORT, { folder: newFolder });
     };
 
-    const updateExportStage = (newStage: ExportStage) => {
+    const updateExportStage = async (newStage: ExportStage) => {
         setExportStage(newStage);
-        exportService.updateExportRecord({ stage: newStage });
+        await exportService.updateExportRecord({ stage: newStage });
     };
 
-    const updateExportTime = (newTime: number) => {
+    const updateExportTime = async (newTime: number) => {
         setLastExportTime(newTime);
-        exportService.updateExportRecord({ lastAttemptTimestamp: newTime });
+        await exportService.updateExportRecord({
+            lastAttemptTimestamp: newTime,
+        });
     };
 
-    const updateExportProgress = (newProgress: ExportProgress) => {
+    const updateExportProgress = async (newProgress: ExportProgress) => {
         setExportProgress(newProgress);
-        exportService.updateExportRecord({ progress: newProgress });
+        await exportService.updateExportRecord({ progress: newProgress });
     };
 
     // ======================
@@ -182,15 +196,15 @@ export default function ExportModal(props: Props) {
         if (!exportFolder) {
             await selectExportDirectory();
         }
-        updateExportStage(ExportStage.INPROGRESS);
+        await updateExportStage(ExportStage.INPROGRESS);
         await sleep(100);
     };
     const postExportRun = async (exportResult?: { paused?: boolean }) => {
         if (!exportResult?.paused) {
-            updateExportStage(ExportStage.FINISHED);
+            await updateExportStage(ExportStage.FINISHED);
             await sleep(100);
-            updateExportTime(Date.now());
-            syncExportStatsWithRecord();
+            await updateExportTime(Date.now());
+            await syncExportStatsWithRecord();
         }
     };
 
@@ -214,86 +228,106 @@ export default function ExportModal(props: Props) {
     // UI functions
     // =============
 
-    const startExport = async () => {
-        try {
-            await preExportRun();
-            updateExportProgress({ current: 0, total: 0 });
-            const exportResult = await exportService.exportFiles(
-                updateExportProgress,
-                ExportType.NEW
-            );
-            await postExportRun(exportResult);
-        } catch (e) {
-            if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, 'startExport failed');
+    const startExport = () => {
+        const main = async () => {
+            try {
+                await preExportRun();
+                await updateExportProgress({ current: 0, total: 0 });
+                const exportResult = await exportService.exportFiles(
+                    updateExportProgress,
+                    ExportType.NEW
+                );
+                await postExportRun(exportResult);
+            } catch (e) {
+                if (e.message !== CustomError.REQUEST_CANCELLED) {
+                    logError(e, 'startExport failed');
+                }
             }
-        }
+        };
+        void main();
     };
 
-    const stopExport = async () => {
-        try {
-            exportService.stopRunningExport();
-            postExportRun();
-        } catch (e) {
-            if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, 'stopExport failed');
+    const stopExport = () => {
+        const main = async () => {
+            try {
+                exportService.stopRunningExport();
+                await postExportRun();
+            } catch (e) {
+                if (e.message !== CustomError.REQUEST_CANCELLED) {
+                    logError(e, 'stopExport failed');
+                }
             }
-        }
+        };
+        void main();
     };
 
     const pauseExport = () => {
-        try {
-            updateExportStage(ExportStage.PAUSED);
-            exportService.pauseRunningExport();
-            postExportRun({ paused: true });
-        } catch (e) {
-            if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, 'pauseExport failed');
+        const main = async () => {
+            try {
+                await updateExportStage(ExportStage.PAUSED);
+                exportService.pauseRunningExport();
+                await postExportRun({ paused: true });
+            } catch (e) {
+                if (e.message !== CustomError.REQUEST_CANCELLED) {
+                    logError(e, 'pauseExport failed');
+                }
             }
-        }
+        };
+        void main();
     };
 
-    const resumeExport = async () => {
-        try {
-            const exportRecord = await exportService.getExportRecord();
-            await preExportRun();
+    const resumeExport = () => {
+        const main = async () => {
+            try {
+                const exportRecord = await exportService.getExportRecord();
+                await preExportRun();
 
-            const pausedStageProgress = exportRecord.progress;
-            setExportProgress(pausedStageProgress);
+                const pausedStageProgress = exportRecord.progress;
+                setExportProgress(pausedStageProgress);
 
-            const updateExportStatsWithOffset = (progress: ExportProgress) =>
-                updateExportProgress({
-                    current: pausedStageProgress.current + progress.current,
-                    total: pausedStageProgress.current + progress.total,
+                const updateExportStatsWithOffset = (
+                    progress: ExportProgress
+                ) =>
+                    updateExportProgress({
+                        current: pausedStageProgress.current + progress.current,
+                        total: pausedStageProgress.current + progress.total,
+                    });
+                const exportResult = await exportService.exportFiles(
+                    updateExportStatsWithOffset,
+                    ExportType.PENDING
+                );
+
+                await postExportRun(exportResult);
+            } catch (e) {
+                if (e.message !== CustomError.REQUEST_CANCELLED) {
+                    logError(e, 'resumeExport failed');
+                }
+            }
+        };
+        void main();
+    };
+
+    const retryFailedExport = () => {
+        const main = async () => {
+            try {
+                await preExportRun();
+                await updateExportProgress({
+                    current: 0,
+                    total: exportStats.failed,
                 });
-            const exportResult = await exportService.exportFiles(
-                updateExportStatsWithOffset,
-                ExportType.PENDING
-            );
 
-            await postExportRun(exportResult);
-        } catch (e) {
-            if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, 'resumeExport failed');
+                const exportResult = await exportService.exportFiles(
+                    updateExportProgress,
+                    ExportType.RETRY_FAILED
+                );
+                await postExportRun(exportResult);
+            } catch (e) {
+                if (e.message !== CustomError.REQUEST_CANCELLED) {
+                    logError(e, 'retryFailedExport failed');
+                }
             }
-        }
-    };
-
-    const retryFailedExport = async () => {
-        try {
-            await preExportRun();
-            updateExportProgress({ current: 0, total: exportStats.failed });
-
-            const exportResult = await exportService.exportFiles(
-                updateExportProgress,
-                ExportType.RETRY_FAILED
-            );
-            await postExportRun(exportResult);
-        } catch (e) {
-            if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, 'retryFailedExport failed');
-            }
-        }
+        };
+        void main();
     };
 
     const ExportDynamicContent = () => {
