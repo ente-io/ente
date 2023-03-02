@@ -91,16 +91,9 @@ export const getRootLevelFileWithFolderNotAllowMessage =
         close: {},
     });
 
-export const getExportDirectoryDoesNotExistMessage = (
-    selectDirectory: () => Promise<void>
-): DialogBoxAttributes => ({
-    icon: <InfoOutlined />,
-    title: constants.EXPORT_DIRECTORY_DOES_NOT_EXIST,
-    content: constants.EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE(),
-    proceed: {
-        text: constants.SELECT_FOLDER,
-        action: () => void selectDirectory(),
-        variant: 'accent',
-    },
-    close: { text: constants.CANCEL },
-});
+export const getExportDirectoryDoesNotExistMessage =
+    (): DialogBoxAttributes => ({
+        title: constants.EXPORT_DIRECTORY_DOES_NOT_EXIST,
+        content: constants.EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE(),
+        close: {},
+    });

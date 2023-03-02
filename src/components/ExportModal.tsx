@@ -206,7 +206,7 @@ export default function ExportModal(props: Props) {
         const exportFolderExists = exportService.exists(exportFolder);
         if (!exportFolderExists) {
             appContext.setDialogMessage(
-                getExportDirectoryDoesNotExistMessage(selectExportDirectory)
+                getExportDirectoryDoesNotExistMessage()
             );
             return;
         }
