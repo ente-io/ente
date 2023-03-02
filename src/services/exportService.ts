@@ -241,6 +241,7 @@ class ExportService {
                         RecordType.SUCCESS
                     );
                 } catch (e) {
+                    logError(e, 'export failed for a file');
                     if (
                         e.message ===
                         CustomError.ADD_FILE_EXPORTED_RECORD_FAILED
@@ -251,11 +252,6 @@ class ExportService {
                         exportDir,
                         file,
                         RecordType.FAILED
-                    );
-
-                    logError(
-                        e,
-                        'download and save failed for file during export'
                     );
                 }
                 this.electronAPIs.showOnTray({
@@ -446,36 +442,45 @@ class ExportService {
     }
 
     async downloadAndSave(file: EnteFile, collectionPath: string) {
-        file.metadata = mergeMetadata([file])[0].metadata;
-        const fileSaveName = getUniqueFileSaveName(
-            collectionPath,
-            file.metadata.title,
-            file.id
-        );
-        let fileStream = await retryAsyncFunction(() =>
-            downloadManager.downloadFile(file)
-        );
-        const fileType = getFileExtension(file.metadata.title);
-        if (
-            file.pubMagicMetadata?.data.editedTime &&
-            (fileType === TYPE_JPEG || fileType === TYPE_JPG)
-        ) {
-            const fileBlob = await new Response(fileStream).blob();
-            if (!this.fileReader) {
-                this.fileReader = new FileReader();
-            }
-            const updatedFileBlob = await updateFileCreationDateInEXIF(
-                this.fileReader,
-                fileBlob,
-                new Date(file.pubMagicMetadata.data.editedTime / 1000)
+        try {
+            file.metadata = mergeMetadata([file])[0].metadata;
+            const fileSaveName = getUniqueFileSaveName(
+                collectionPath,
+                file.metadata.title,
+                file.id
             );
-            fileStream = updatedFileBlob.stream();
-        }
-        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            await this.exportMotionPhoto(fileStream, file, collectionPath);
-        } else {
-            await this.saveMediaFile(collectionPath, fileSaveName, fileStream);
-            await this.saveMetadataFile(collectionPath, fileSaveName, file);
+            let fileStream = await retryAsyncFunction(() =>
+                downloadManager.downloadFile(file)
+            );
+            const fileType = getFileExtension(file.metadata.title);
+            if (
+                file.pubMagicMetadata?.data.editedTime &&
+                (fileType === TYPE_JPEG || fileType === TYPE_JPG)
+            ) {
+                const fileBlob = await new Response(fileStream).blob();
+                if (!this.fileReader) {
+                    this.fileReader = new FileReader();
+                }
+                const updatedFileBlob = await updateFileCreationDateInEXIF(
+                    this.fileReader,
+                    fileBlob,
+                    new Date(file.pubMagicMetadata.data.editedTime / 1000)
+                );
+                fileStream = updatedFileBlob.stream();
+            }
+            if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+                await this.exportMotionPhoto(fileStream, file, collectionPath);
+            } else {
+                await this.saveMediaFile(
+                    collectionPath,
+                    fileSaveName,
+                    fileStream
+                );
+                await this.saveMetadataFile(collectionPath, fileSaveName, file);
+            }
+        } catch (e) {
+            logError(e, 'download and save failed');
+            throw e;
         }
     }
 
