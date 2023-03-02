@@ -49,6 +49,7 @@ import { User } from 'types/user';
 import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
 import { ExportType, ExportNotification, RecordType } from 'constants/export';
 import { ElectronAPIs } from 'types/electron';
+import { CustomError } from 'utils/error';
 
 const LATEST_EXPORT_VERSION = 1;
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
@@ -83,10 +84,11 @@ class ExportService {
         this.pauseExport = true;
     }
     async exportFiles(
-        updateProgress: (progress: ExportProgress) => void,
+        updateProgress: (progress: ExportProgress) => Promise<void>,
         exportType: ExportType
     ) {
         try {
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             if (this.exportInProgress) {
                 this.electronAPIs.sendNotification(
                     ExportNotification.IN_PROGRESS
@@ -177,7 +179,7 @@ class ExportService {
         newCollections: Collection[],
         renamedCollections: Collection[],
         collectionIDPathMap: CollectionIDPathMap,
-        updateProgress: (progress: ExportProgress) => void,
+        updateProgress: (progress: ExportProgress) => Promise<void>,
         exportDir: string
     ): Promise<{ paused: boolean }> {
         try {
@@ -212,7 +214,7 @@ class ExportService {
             this.electronAPIs.showOnTray({
                 export_progress: `0 / ${files.length} files exported`,
             });
-            updateProgress({
+            await updateProgress({
                 current: 0,
                 total: files.length,
             });
@@ -239,15 +241,17 @@ class ExportService {
                         RecordType.SUCCESS
                     );
                 } catch (e) {
+                    logError(e, 'export failed for a file');
+                    if (
+                        e.message ===
+                        CustomError.ADD_FILE_EXPORTED_RECORD_FAILED
+                    ) {
+                        throw e;
+                    }
                     await this.addFileExportedRecord(
                         exportDir,
                         file,
                         RecordType.FAILED
-                    );
-
-                    logError(
-                        e,
-                        'download and save failed for file during export'
                     );
                 }
                 this.electronAPIs.showOnTray({
@@ -255,7 +259,10 @@ class ExportService {
                         files.length
                     } files exported`,
                 });
-                updateProgress({ current: index + 1, total: files.length });
+                await updateProgress({
+                    current: index + 1,
+                    total: files.length,
+                });
             }
             if (this.stopExport) {
                 this.electronAPIs.sendNotification(ExportNotification.ABORT);
@@ -266,7 +273,7 @@ class ExportService {
             } else if (failedFileCount > 0) {
                 this.electronAPIs.sendNotification(ExportNotification.FAILED);
                 this.electronAPIs.showOnTray({
-                    retry_export: `export failed - retry export`,
+                    retry_export: `Retry failed exports`,
                 });
             } else {
                 this.electronAPIs.sendNotification(ExportNotification.FINISH);
@@ -289,32 +296,37 @@ class ExportService {
         file: EnteFile,
         type: RecordType
     ) {
-        const fileUID = getExportRecordFileUID(file);
-        const exportRecord = await this.getExportRecord(folder);
-        exportRecord.queuedFiles = exportRecord.queuedFiles.filter(
-            (queuedFilesUID) => queuedFilesUID !== fileUID
-        );
-        if (type === RecordType.SUCCESS) {
-            if (!exportRecord.exportedFiles) {
-                exportRecord.exportedFiles = [];
+        try {
+            const fileUID = getExportRecordFileUID(file);
+            const exportRecord = await this.getExportRecord(folder);
+            exportRecord.queuedFiles = exportRecord.queuedFiles.filter(
+                (queuedFilesUID) => queuedFilesUID !== fileUID
+            );
+            if (type === RecordType.SUCCESS) {
+                if (!exportRecord.exportedFiles) {
+                    exportRecord.exportedFiles = [];
+                }
+                exportRecord.exportedFiles.push(fileUID);
+                exportRecord.failedFiles &&
+                    (exportRecord.failedFiles = exportRecord.failedFiles.filter(
+                        (FailedFileUID) => FailedFileUID !== fileUID
+                    ));
+            } else {
+                if (!exportRecord.failedFiles) {
+                    exportRecord.failedFiles = [];
+                }
+                if (!exportRecord.failedFiles.find((x) => x === fileUID)) {
+                    exportRecord.failedFiles.push(fileUID);
+                }
             }
-            exportRecord.exportedFiles.push(fileUID);
-            exportRecord.failedFiles &&
-                (exportRecord.failedFiles = exportRecord.failedFiles.filter(
-                    (FailedFileUID) => FailedFileUID !== fileUID
-                ));
-        } else {
-            if (!exportRecord.failedFiles) {
-                exportRecord.failedFiles = [];
-            }
-            if (!exportRecord.failedFiles.find((x) => x === fileUID)) {
-                exportRecord.failedFiles.push(fileUID);
-            }
+            exportRecord.exportedFiles = dedupe(exportRecord.exportedFiles);
+            exportRecord.queuedFiles = dedupe(exportRecord.queuedFiles);
+            exportRecord.failedFiles = dedupe(exportRecord.failedFiles);
+            await this.updateExportRecord(exportRecord, folder);
+        } catch (e) {
+            logError(e, 'addFileExportedRecord failed');
+            throw Error(CustomError.ADD_FILE_EXPORTED_RECORD_FAILED);
         }
-        exportRecord.exportedFiles = dedupe(exportRecord.exportedFiles);
-        exportRecord.queuedFiles = dedupe(exportRecord.queuedFiles);
-        exportRecord.failedFiles = dedupe(exportRecord.failedFiles);
-        await this.updateExportRecord(exportRecord, folder);
     }
 
     async addCollectionExportedRecord(
@@ -354,6 +366,7 @@ class ExportService {
             );
         } catch (e) {
             logError(e, 'error updating Export Record');
+            throw e;
         }
     }
 
@@ -372,6 +385,7 @@ class ExportService {
             }
         } catch (e) {
             logError(e, 'export Record JSON parsing failed ');
+            throw e;
         }
     }
 
@@ -428,36 +442,45 @@ class ExportService {
     }
 
     async downloadAndSave(file: EnteFile, collectionPath: string) {
-        file.metadata = mergeMetadata([file])[0].metadata;
-        const fileSaveName = getUniqueFileSaveName(
-            collectionPath,
-            file.metadata.title,
-            file.id
-        );
-        let fileStream = await retryAsyncFunction(() =>
-            downloadManager.downloadFile(file)
-        );
-        const fileType = getFileExtension(file.metadata.title);
-        if (
-            file.pubMagicMetadata?.data.editedTime &&
-            (fileType === TYPE_JPEG || fileType === TYPE_JPG)
-        ) {
-            const fileBlob = await new Response(fileStream).blob();
-            if (!this.fileReader) {
-                this.fileReader = new FileReader();
-            }
-            const updatedFileBlob = await updateFileCreationDateInEXIF(
-                this.fileReader,
-                fileBlob,
-                new Date(file.pubMagicMetadata.data.editedTime / 1000)
+        try {
+            file.metadata = mergeMetadata([file])[0].metadata;
+            const fileSaveName = getUniqueFileSaveName(
+                collectionPath,
+                file.metadata.title,
+                file.id
             );
-            fileStream = updatedFileBlob.stream();
-        }
-        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            await this.exportMotionPhoto(fileStream, file, collectionPath);
-        } else {
-            await this.saveMediaFile(collectionPath, fileSaveName, fileStream);
-            await this.saveMetadataFile(collectionPath, fileSaveName, file);
+            let fileStream = await retryAsyncFunction(() =>
+                downloadManager.downloadFile(file)
+            );
+            const fileType = getFileExtension(file.metadata.title);
+            if (
+                file.pubMagicMetadata?.data.editedTime &&
+                (fileType === TYPE_JPEG || fileType === TYPE_JPG)
+            ) {
+                const fileBlob = await new Response(fileStream).blob();
+                if (!this.fileReader) {
+                    this.fileReader = new FileReader();
+                }
+                const updatedFileBlob = await updateFileCreationDateInEXIF(
+                    this.fileReader,
+                    fileBlob,
+                    new Date(file.pubMagicMetadata.data.editedTime / 1000)
+                );
+                fileStream = updatedFileBlob.stream();
+            }
+            if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+                await this.exportMotionPhoto(fileStream, file, collectionPath);
+            } else {
+                await this.saveMediaFile(
+                    collectionPath,
+                    fileSaveName,
+                    fileStream
+                );
+                await this.saveMetadataFile(collectionPath, fileSaveName, file);
+            }
+        } catch (e) {
+            logError(e, 'download and save failed');
+            throw e;
         }
     }
 
