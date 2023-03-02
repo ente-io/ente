@@ -189,6 +189,7 @@ export async function encryptToB64(data: string, key: string) {
 }
 
 export async function generateKeyAndEncryptToB64(data: string) {
+    await sodium.ready;
     const key = sodium.crypto_secretbox_keygen();
     return await encryptToB64(data, await toB64(key));
 }
