@@ -277,7 +277,7 @@ class ExportService {
             } else if (failedFileCount > 0) {
                 this.electronAPIs.sendNotification(ExportNotification.FAILED);
                 this.electronAPIs.showOnTray({
-                    retry_export: `Retry failed export`,
+                    retry_export: `Retry failed exports`,
                 });
             } else {
                 this.electronAPIs.sendNotification(ExportNotification.FINISH);
