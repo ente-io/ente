@@ -950,6 +950,13 @@ const frenchConstants = {
     YOURS: 'Le vôtre',
     PREFERENCES: 'Préférences',
     LANGUAGE: 'Langue',
+    EXPORT_DIRECTORY_DOES_NOT_EXIST: "Dossier d'export invalide",
+    EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE: () => (
+        <>
+            <p> Le dossier d'export que vous avez sélectionné n'existe pas </p>
+            <p>Veuillez sélectionner un dossier valide</p>
+        </>
+    ),
 };
 
 export default frenchConstants;
