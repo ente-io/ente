@@ -504,7 +504,7 @@ const frenchConstants = {
     TWO_FACTOR: 'Double authentification',
     TWO_FACTOR_AUTHENTICATION: 'Authentification double-facteur',
     TWO_FACTOR_QR_INSTRUCTION:
-        "Scannez le QRCode ci-dessous avec une appli d'authentification (ex: FreeOTP) ",
+        "Scannez le QRCode ci-dessous avec une appli d'authentification",
     ENTER_CODE_MANUALLY: 'Saisir le code manuellement',
     TWO_FACTOR_MANUAL_CODE_INSTRUCTION:
         "Veuillez saisir ce code dans votre appli d'authentification",
