@@ -504,7 +504,7 @@ const frenchConstants = {
     TWO_FACTOR: 'Double authentification',
     TWO_FACTOR_AUTHENTICATION: 'Authentification double-facteur',
     TWO_FACTOR_QR_INSTRUCTION:
-        "Scannez le QRCode ci-dessous avec une appli d'authentification (ex: FreeOTP) ",
+        "Scannez le QRCode ci-dessous avec une appli d'authentification",
     ENTER_CODE_MANUALLY: 'Saisir le code manuellement',
     TWO_FACTOR_MANUAL_CODE_INSTRUCTION:
         "Veuillez saisir ce code dans votre appli d'authentification",
@@ -948,6 +948,15 @@ const frenchConstants = {
     ADD_X_PHOTOS: (x: number) => `Add ${x} ${x > 1 ? 'photos' : 'photo'}`,
     CHOSE_THEME: 'Choisir un thème',
     YOURS: 'Le vôtre',
+    PREFERENCES: 'Préférences',
+    LANGUAGE: 'Langue',
+    EXPORT_DIRECTORY_DOES_NOT_EXIST: "Dossier d'export invalide",
+    EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE: () => (
+        <>
+            <p> Le dossier d'export que vous avez sélectionné n'existe pas </p>
+            <p>Veuillez sélectionner un dossier valide</p>
+        </>
+    ),
 };
 
 export default frenchConstants;

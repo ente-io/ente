@@ -15,7 +15,7 @@ import { getDownloadAppMessage } from 'utils/ui';
 import ThemeSwitcher from './ThemeSwitcher';
 import { SpaceBetweenFlex } from 'components/Container';
 import { isInternalUser } from 'utils/user';
-import AdvancedSettings from './AdvancedSettings';
+import Preferences from './Preferences';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
@@ -30,10 +30,10 @@ export default function UtilitySection({ closeSidebar }) {
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
-    const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
+    const [preferencesView, setPreferencesView] = useState(false);
 
-    const openAdvancedSettings = () => setAdvancedSettingsView(true);
-    const closeAdvancedSettings = () => setAdvancedSettingsView(false);
+    const openPreferencesOptions = () => setPreferencesView(true);
+    const closePreferencesOptions = () => setPreferencesView(false);
 
     const openRecoveryKeyModal = () => setRecoveryModalView(true);
     const closeRecoveryKeyModal = () => setRecoveryModalView(false);
@@ -97,11 +97,10 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
-            {isElectron() && (
-                <SidebarButton onClick={openAdvancedSettings}>
-                    {constants.ADVANCED}
-                </SidebarButton>
-            )}
+            <SidebarButton onClick={openPreferencesOptions}>
+                {constants.PREFERENCES}
+            </SidebarButton>
+
             <RecoveryKey
                 show={recoverModalView}
                 onHide={closeRecoveryKeyModal}
@@ -114,10 +113,9 @@ export default function UtilitySection({ closeSidebar }) {
                 setLoading={startLoading}
             />
             <WatchFolder open={watchFolderView} onClose={closeWatchFolder} />
-
-            <AdvancedSettings
-                open={advancedSettingsView}
-                onClose={closeAdvancedSettings}
+            <Preferences
+                open={preferencesView}
+                onClose={closePreferencesOptions}
                 onRootClose={closeSidebar}
             />
         </>

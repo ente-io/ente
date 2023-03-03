@@ -2,7 +2,6 @@ import {
     createTheme,
     PaletteColor,
     PaletteColorOptions,
-    TypeText,
 } from '@mui/material/styles';
 
 declare module '@mui/material/styles' {
@@ -10,15 +9,17 @@ declare module '@mui/material/styles' {
         overPaper?: string;
     }
 
-    interface BlurStrength {
+    interface ColorStrength {
         base: string;
         muted: string;
         faint: string;
+        fainter: string;
     }
-    interface BlurStrengthOptions {
+    interface ColorStrengthOptions {
         base?: string;
         muted?: string;
         faint?: string;
+        fainter?: string;
     }
 
     interface FixedColor {
@@ -31,10 +32,10 @@ declare module '@mui/material/styles' {
         accent: PaletteColor;
         fill: PaletteColor;
         backdrop: PaletteColor;
-        blur: BlurStrength;
+        blur: ColorStrength;
         danger: PaletteColor;
         caution: PaletteColor;
-        stroke: TypeText;
+        stroke: ColorStrength;
         fixed: FixedColor;
     }
     interface PaletteOptions {
@@ -43,8 +44,8 @@ declare module '@mui/material/styles' {
         caution?: PaletteColorOptions;
         fill?: PaletteColorOptions;
         backdrop?: PaletteColorOptions;
-        blur?: BlurStrengthOptions;
-        stroke?: Partial<TypeText>;
+        blur?: ColorStrengthOptions;
+        stroke?: ColorStrengthOptions;
         fixed?: Partial<FixedColor>;
     }
 
@@ -303,9 +304,10 @@ const darkThemeOptions = createTheme({
             main: '#FFC247',
         },
         stroke: {
-            primary: '#ffffff',
-            secondary: 'rgba(255,255,255,0.24)',
-            disabled: 'rgba(255,255,255,0.16)',
+            base: '#ffffff',
+            muted: 'rgba(255,255,255,0.24)',
+            faint: 'rgba(255,255,255,0.16)',
+            fainter: 'rgba(255,255,255,0.08)',
         },
         background: {
             default: '#000000',
