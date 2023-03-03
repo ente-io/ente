@@ -55,6 +55,9 @@ export const CustomError = {
         'Windows native image processing is not supported',
     NETWORK_ERROR: 'Network Error',
     NOT_FILE_OWNER: 'not file owner',
+    ADD_FILE_EXPORTED_RECORD_FAILED: 'add file exported record failed',
+    NO_EXPORT_FOLDER_SELECTED: 'no export folder selected',
+    EXPORT_FOLDER_DOES_NOT_EXIST: 'export folder does not exist',
 };
 
 export function parseUploadErrorCodes(error) {

@@ -394,6 +394,9 @@ export const deleteAccount = async (challenge: string) => {
     }
 };
 
+// Ensure that the keys in local storage are not malformed by verifying that the
+// recoveryKey can be decrypted with the masterKey.
+// Note: This is not bullet-proof.
 export const validateKey = async () => {
     try {
         await getRecoveryKey();
