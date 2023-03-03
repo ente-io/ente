@@ -944,10 +944,10 @@ packages:
     dependency: "direct main"
     description:
       name: media_extension
-      sha256: "41e60ac3c4367060922c5b667f47768301d259fd94bc3122c263b266a167d9fc"
+      sha256: "5c4347d7035a48220c210149df776c764b920daf312b2ae7e3077506273db8d3"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "1.0.2"
   meta:
     dependency: transitive
     description:
