@@ -18,6 +18,7 @@ import "package:photos/ui/growth/storage_details_screen.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
+import "package:tuple/tuple.dart";
 
 class ReferralScreen extends StatefulWidget {
   const ReferralScreen({super.key});
@@ -33,6 +34,16 @@ class _ReferralScreenState extends State<ReferralScreen> {
     if (mounted) {
       setState(() => {});
     }
+  }
+
+  Future<Tuple2<ReferralView, UserDetails>> _fetchData() async {
+    UserDetails? cachedUserDetails =
+        UserService.instance.getCachedUserDetails();
+    cachedUserDetails ??=
+        await UserService.instance.getUserDetailsV2(memoryCount: false);
+    final referralView =
+        await StorageBonusService.instance.getGateway().getReferralView();
+    return Tuple2(referralView, cachedUserDetails!);
   }
 
   @override
@@ -63,16 +74,14 @@ class _ReferralScreenState extends State<ReferralScreen> {
                 return Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                  child: FutureBuilder<ReferralView>(
-                    future: StorageBonusService.instance
-                        .getGateway()
-                        .getReferralView(),
+                  child: FutureBuilder<Tuple2<ReferralView, UserDetails>>(
+                    future: _fetchData(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return ReferralWidget(
-                          snapshot.data!,
-                          UserService.instance.getCachedUserDetails()!,
-                          _safeUIUpdate,
+                          referralView: snapshot.data!.item1,
+                          userDetails: snapshot.data!.item2,
+                          notifyParent: _safeUIUpdate,
                         );
                       } else if (snapshot.hasError) {
                         return const Center(
@@ -105,10 +114,10 @@ class ReferralWidget extends StatelessWidget {
   final UserDetails userDetails;
   final Function notifyParent;
 
-  const ReferralWidget(
-    this.referralView,
-    this.userDetails,
-    this.notifyParent, {
+  const ReferralWidget({
+    required this.referralView,
+    required this.userDetails,
+    required this.notifyParent,
     super.key,
   });
 
