@@ -28,15 +28,11 @@ class ReferralScreen extends StatefulWidget {
 
 class _ReferralScreenState extends State<ReferralScreen> {
   bool canApplyCode = true;
+
   void _safeUIUpdate() {
     if (mounted) {
       setState(() => {});
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   @override
