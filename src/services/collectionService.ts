@@ -66,6 +66,8 @@ import {
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
+import { REQUEST_BATCH_SIZE } from 'constants/api';
+import { batch } from 'utils/common';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -405,21 +407,24 @@ export const addToCollection = async (
 ) => {
     try {
         const token = getToken();
-        const fileKeysEncryptedWithNewCollection =
-            await encryptWithNewCollectionKey(collection, files);
+        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFiles) {
+            const fileKeysEncryptedWithNewCollection =
+                await encryptWithNewCollectionKey(collection, batch);
 
-        const requestBody: AddToCollectionRequest = {
-            collectionID: collection.id,
-            files: fileKeysEncryptedWithNewCollection,
-        };
-        await HTTPService.post(
-            `${ENDPOINT}/collections/add-files`,
-            requestBody,
-            null,
-            {
-                'X-Auth-Token': token,
-            }
-        );
+            const requestBody: AddToCollectionRequest = {
+                collectionID: collection.id,
+                files: fileKeysEncryptedWithNewCollection,
+            };
+            await HTTPService.post(
+                `${ENDPOINT}/collections/add-files`,
+                requestBody,
+                null,
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+        }
     } catch (e) {
         logError(e, 'Add to collection Failed ');
         throw e;
@@ -432,21 +437,24 @@ export const restoreToCollection = async (
 ) => {
     try {
         const token = getToken();
-        const fileKeysEncryptedWithNewCollection =
-            await encryptWithNewCollectionKey(collection, files);
+        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFiles) {
+            const fileKeysEncryptedWithNewCollection =
+                await encryptWithNewCollectionKey(collection, batch);
 
-        const requestBody: AddToCollectionRequest = {
-            collectionID: collection.id,
-            files: fileKeysEncryptedWithNewCollection,
-        };
-        await HTTPService.post(
-            `${ENDPOINT}/collections/restore-files`,
-            requestBody,
-            null,
-            {
-                'X-Auth-Token': token,
-            }
-        );
+            const requestBody: AddToCollectionRequest = {
+                collectionID: collection.id,
+                files: fileKeysEncryptedWithNewCollection,
+            };
+            await HTTPService.post(
+                `${ENDPOINT}/collections/restore-files`,
+                requestBody,
+                null,
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+        }
     } catch (e) {
         logError(e, 'restore to collection Failed ');
         throw e;
@@ -459,22 +467,25 @@ export const moveToCollection = async (
 ) => {
     try {
         const token = getToken();
-        const fileKeysEncryptedWithNewCollection =
-            await encryptWithNewCollectionKey(toCollection, files);
+        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFiles) {
+            const fileKeysEncryptedWithNewCollection =
+                await encryptWithNewCollectionKey(toCollection, batch);
 
-        const requestBody: MoveToCollectionRequest = {
-            fromCollectionID: fromCollectionID,
-            toCollectionID: toCollection.id,
-            files: fileKeysEncryptedWithNewCollection,
-        };
-        await HTTPService.post(
-            `${ENDPOINT}/collections/move-files`,
-            requestBody,
-            null,
-            {
-                'X-Auth-Token': token,
-            }
-        );
+            const requestBody: MoveToCollectionRequest = {
+                fromCollectionID: fromCollectionID,
+                toCollectionID: toCollection.id,
+                files: fileKeysEncryptedWithNewCollection,
+            };
+            await HTTPService.post(
+                `${ENDPOINT}/collections/move-files`,
+                requestBody,
+                null,
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+        }
     } catch (e) {
         logError(e, 'move to collection Failed ');
         throw e;
@@ -605,18 +616,20 @@ export const removeNonUserFiles = async (
     try {
         const fileIDs = nonUserFiles.map((f) => f.id);
         const token = getToken();
+        const batchedFileIDs = batch(fileIDs, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFileIDs) {
+            const request: RemoveFromCollectionRequest = {
+                collectionID,
+                fileIDs: batch,
+            };
 
-        const request: RemoveFromCollectionRequest = {
-            collectionID,
-            fileIDs,
-        };
-
-        await HTTPService.post(
-            `${ENDPOINT}/collections/v3/remove-files`,
-            request,
-            null,
-            { 'X-Auth-Token': token }
-        );
+            await HTTPService.post(
+                `${ENDPOINT}/collections/v3/remove-files`,
+                request,
+                null,
+                { 'X-Auth-Token': token }
+            );
+        }
     } catch (e) {
         logError(e, 'remove non user files failed ');
         throw e;
