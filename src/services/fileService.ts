@@ -14,7 +14,6 @@ import {
 import { eventBus, Events } from './events';
 import { EnteFile, EncryptedEnteFile, TrashRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
-import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from 'utils/logging';
 import { isCollectionHidden } from 'utils/collection';
@@ -24,6 +23,8 @@ import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,
 } from './collectionService';
+import { REQUEST_BATCH_SIZE } from 'constants/api';
+import { batch } from 'utils/common';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -161,24 +162,22 @@ export const trashFiles = async (filesToTrash: EnteFile[]) => {
         if (!token) {
             return;
         }
-
-        const trashBatch: TrashRequest = {
-            items: [],
-        };
-
-        for (const file of filesToTrash) {
-            trashBatch.items.push({
-                collectionID: file.collectionID,
-                fileID: file.id,
-            });
-            if (trashBatch.items.length >= MAX_TRASH_BATCH_SIZE) {
-                await trashFilesFromServer(trashBatch, token);
-                trashBatch.items = [];
-            }
-        }
-
-        if (trashBatch.items.length > 0) {
-            await trashFilesFromServer(trashBatch, token);
+        const batchedFilesToTrash = batch(filesToTrash, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFilesToTrash) {
+            const trashRequest: TrashRequest = {
+                items: batch.map((file) => ({
+                    fileID: file.id,
+                    collectionID: file.collectionID,
+                })),
+            };
+            await HTTPService.post(
+                `${ENDPOINT}/files/trash`,
+                trashRequest,
+                null,
+                {
+                    'X-Auth-Token': token,
+                }
+            );
         }
     } catch (e) {
         logError(e, 'trash file failed');
@@ -192,35 +191,20 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
         if (!token) {
             return;
         }
-        let deleteBatch: number[] = [];
-        for (const fileID of filesToDelete) {
-            deleteBatch.push(fileID);
-            if (deleteBatch.length >= MAX_TRASH_BATCH_SIZE) {
-                await deleteBatchFromTrash(token, deleteBatch);
-                deleteBatch = [];
-            }
-        }
-        if (deleteBatch.length > 0) {
-            await deleteBatchFromTrash(token, deleteBatch);
+        const batchedFilesToDelete = batch(filesToDelete, REQUEST_BATCH_SIZE);
+
+        for (const batch of batchedFilesToDelete) {
+            await HTTPService.post(
+                `${ENDPOINT}/trash/delete`,
+                { fileIDs: batch },
+                null,
+                {
+                    'X-Auth-Token': token,
+                }
+            );
         }
     } catch (e) {
         logError(e, 'deleteFromTrash failed');
-        throw e;
-    }
-};
-
-const deleteBatchFromTrash = async (token: string, deleteBatch: number[]) => {
-    try {
-        await HTTPService.post(
-            `${ENDPOINT}/trash/delete`,
-            { fileIDs: deleteBatch },
-            null,
-            {
-                'X-Auth-Token': token,
-            }
-        );
-    } catch (e) {
-        logError(e, 'deleteBatchFromTrash failed');
         throw e;
     }
 };
@@ -303,14 +287,3 @@ export const updateFilePublicMagicMetadata = async (files: EnteFile[]) => {
         })
     );
 };
-
-async function trashFilesFromServer(trashBatch: TrashRequest, token: any) {
-    try {
-        await HTTPService.post(`${ENDPOINT}/files/trash`, trashBatch, null, {
-            'X-Auth-Token': token,
-        });
-    } catch (e) {
-        logError(e, 'trash files from server failed');
-        throw e;
-    }
-}
