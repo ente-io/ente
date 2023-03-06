@@ -364,7 +364,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
   }
 
   Widget _showSubscriptionToggle() {
-    Widget _planText(String title, bool reduceOpacity) {
+    Widget planText(String title, bool reduceOpacity) {
       return Padding(
         padding: const EdgeInsets.only(left: 4, right: 4),
         child: Text(
@@ -393,7 +393,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _planText("Monthly", showYearlyPlan),
+              planText("Monthly", showYearlyPlan),
               Switch(
                 value: showYearlyPlan,
                 activeColor: Colors.white,
@@ -404,7 +404,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
                   await _filterStorePlansForUi();
                 },
               ),
-              _planText("Yearly", !showYearlyPlan)
+              planText("Yearly", !showYearlyPlan)
             ],
           ),
         ],
