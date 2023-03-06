@@ -386,7 +386,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
         children: [
           _isFreePlanUser()
               ? Text(
-                  "Get 2 months free on yearly plans",
+                  "2 months free on yearly plans",
                   style: getEnteTextTheme(context).miniMuted,
                 )
               : const SizedBox.shrink(),
