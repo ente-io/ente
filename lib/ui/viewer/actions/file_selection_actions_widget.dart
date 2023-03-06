@@ -243,7 +243,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     if (widget.type.showRestoreOption()) {
       secondList.add(
         BlurMenuItemWidget(
-          leadingIcon: Icons.visibility,
+          leadingIcon: Icons.restore_outlined,
           labelText: "Restore",
           menuItemColor: colorScheme.fillFaint,
           onTap: _restore,
