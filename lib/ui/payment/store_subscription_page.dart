@@ -27,19 +27,19 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-class SubscriptionPage extends StatefulWidget {
+class StoreSubscriptionPage extends StatefulWidget {
   final bool isOnboarding;
 
-  const SubscriptionPage({
+  const StoreSubscriptionPage({
     this.isOnboarding = false,
     Key? key,
   }) : super(key: key);
 
   @override
-  State<SubscriptionPage> createState() => _SubscriptionPageState();
+  State<StoreSubscriptionPage> createState() => _StoreSubscriptionPageState();
 }
 
-class _SubscriptionPageState extends State<SubscriptionPage> {
+class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
   final _logger = Logger("SubscriptionPage");
   final _billingService = BillingService.instance;
   final _userService = UserService.instance;
