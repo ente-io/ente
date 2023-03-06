@@ -188,7 +188,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
         return productID.isNotEmpty;
       }).toList();
       hasYearlyPlans = _plans.any((plan) => plan.period == 'year');
-      if (showYearlyPlan) {
+      if (showYearlyPlan && hasYearlyPlans) {
         _plans = _plans.where((plan) => plan.period == 'year').toList();
       } else {
         _plans = _plans.where((plan) => plan.period != 'year').toList();
