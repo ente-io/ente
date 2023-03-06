@@ -55,6 +55,12 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
   late bool _isActiveStripeSubscriber;
   EnteColorScheme colorScheme = darkScheme;
 
+  // hasYearlyPlans is used to check if there are yearly plans for given store
+  bool hasYearlyPlans = false;
+
+  // _showYearlyPlan is used to determine if we should show the yearly plans
+  bool showYearlyPlan = false;
+
   @override
   void initState() {
     _billingService.setIsOnSubscriptionPage(true);
@@ -168,6 +174,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
       _hasActiveSubscription = _currentSubscription!.isValid();
+      showYearlyPlan = _currentSubscription!.isYearlyPlan();
       final billingPlans = await _billingService.getBillingPlans();
       _isActiveStripeSubscriber =
           _currentSubscription!.paymentProvider == stripe &&
@@ -180,6 +187,12 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
                 : plan.iosID;
         return productID.isNotEmpty;
       }).toList();
+      hasYearlyPlans = _plans.any((plan) => plan.period == 'year');
+      if (showYearlyPlan) {
+        _plans = _plans.where((plan) => plan.period == 'year').toList();
+      } else {
+        _plans = _plans.where((plan) => plan.period != 'year').toList();
+      }
       _freePlan = billingPlans.freePlan;
       _hasLoadedData = true;
       if (mounted) {
@@ -217,6 +230,10 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       ),
       const Padding(padding: EdgeInsets.all(8)),
     ]);
+
+    if (hasYearlyPlans) {
+      widgets.add(_showSubscriptionToggle());
+    }
 
     if (_hasActiveSubscription) {
       widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
@@ -325,6 +342,64 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             "$capitalizedWord subscription.",
       );
     }
+  }
+
+  Future<void> _filterStorePlansForUi() async {
+    final billingPlans = await _billingService.getBillingPlans();
+    _plans = billingPlans.plans.where((plan) {
+      final productID = _isActiveStripeSubscriber
+          ? plan.stripeID
+          : Platform.isAndroid
+              ? plan.androidID
+              : plan.iosID;
+      return productID.isNotEmpty;
+    }).toList();
+    hasYearlyPlans = _plans.any((plan) => plan.period == 'year');
+    if (showYearlyPlan) {
+      _plans = _plans.where((plan) => plan.period == 'year').toList();
+    } else {
+      _plans = _plans.where((plan) => plan.period != 'year').toList();
+    }
+    setState(() {});
+  }
+
+  Widget _showSubscriptionToggle() {
+    Widget _planText(String title, bool reduceOpacity) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 4, right: 4),
+        child: Text(
+          title,
+          style: TextStyle(
+            color: Theme.of(context)
+                .colorScheme
+                .onSurface
+                .withOpacity(reduceOpacity ? 0.5 : 1.0),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 2, bottom: 2),
+      margin: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _planText("Monthly", showYearlyPlan),
+          Switch(
+            value: showYearlyPlan,
+            activeColor: Colors.white,
+            inactiveThumbColor: Colors.white,
+            activeTrackColor: getEnteColorScheme(context).strokeMuted,
+            onChanged: (value) async {
+              showYearlyPlan = value;
+              await _filterStorePlansForUi();
+            },
+          ),
+          _planText("Yearly", !showYearlyPlan)
+        ],
+      ),
+    );
   }
 
   List<Widget> _getStripePlanWidgets() {
