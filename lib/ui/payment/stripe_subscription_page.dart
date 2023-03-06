@@ -472,7 +472,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Widget _showSubscriptionToggle() {
-    Widget _planText(String title, bool reduceOpacity) {
+    Widget planText(String title, bool reduceOpacity) {
       return Padding(
         padding: const EdgeInsets.only(left: 4, right: 4),
         child: Text(
@@ -498,22 +498,24 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   style: getEnteTextTheme(context).miniMuted,
                 )
               : const SizedBox.shrink(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _planText("Monthly", _showYearlyPlan),
-              Switch(
-                value: _showYearlyPlan,
-                activeColor: Colors.white,
-                inactiveThumbColor: Colors.white,
-                activeTrackColor: getEnteColorScheme(context).strokeMuted,
-                onChanged: (value) async {
-                  _showYearlyPlan = value;
-                  await _filterStripeForUI();
-                },
-              ),
-              _planText("Yearly", !_showYearlyPlan)
-            ],
+          RepaintBoundary(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                planText("Monthly", _showYearlyPlan),
+                Switch(
+                  value: _showYearlyPlan,
+                  activeColor: Colors.white,
+                  inactiveThumbColor: Colors.white,
+                  activeTrackColor: getEnteColorScheme(context).strokeMuted,
+                  onChanged: (value) async {
+                    _showYearlyPlan = value;
+                    await _filterStripeForUI();
+                  },
+                ),
+                planText("Yearly", !_showYearlyPlan)
+              ],
+            ),
           ),
         ],
       ),
