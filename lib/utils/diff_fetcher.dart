@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
@@ -66,20 +65,20 @@ class DiffFetcher {
           file.fileSize = item["info"]["fileSize"];
         }
 
-        final fileDecryptionKey = decryptFileKey(file);
+        final fileKey = getFileKey(file);
         final encodedMetadata = await CryptoUtil.decryptChaCha(
-          Sodium.base642bin(item["metadata"]["encryptedData"]),
-          fileDecryptionKey,
-          Sodium.base642bin(file.metadataDecryptionHeader!),
+          CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
+          fileKey,
+          CryptoUtil.base642bin(file.metadataDecryptionHeader!),
         );
         final Map<String, dynamic> metadata =
             jsonDecode(utf8.decode(encodedMetadata));
         file.applyMetadata(metadata);
         if (item['magicMetadata'] != null) {
           final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-            Sodium.base642bin(item['magicMetadata']['data']),
-            fileDecryptionKey,
-            Sodium.base642bin(item['magicMetadata']['header']),
+            CryptoUtil.base642bin(item['magicMetadata']['data']),
+            fileKey,
+            CryptoUtil.base642bin(item['magicMetadata']['header']),
           );
           file.mMdEncodedJson = utf8.decode(utfEncodedMmd);
           file.mMdVersion = item['magicMetadata']['version'];
@@ -88,9 +87,9 @@ class DiffFetcher {
         }
         if (item['pubMagicMetadata'] != null) {
           final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-            Sodium.base642bin(item['pubMagicMetadata']['data']),
-            fileDecryptionKey,
-            Sodium.base642bin(item['pubMagicMetadata']['header']),
+            CryptoUtil.base642bin(item['pubMagicMetadata']['data']),
+            fileKey,
+            CryptoUtil.base642bin(item['pubMagicMetadata']['header']),
           );
           file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
           file.pubMmdVersion = item['pubMagicMetadata']['version'];

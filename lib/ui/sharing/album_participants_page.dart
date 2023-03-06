@@ -139,6 +139,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                     final currentUser = collaborators[listIndex];
                     final isSameAsLoggedInUser =
                         currentUserID == currentUser.id;
+                    final isLastItem =
+                        !isOwner && index == collaborators.length;
                     return Column(
                       children: [
                         MenuItemWidget(
@@ -165,13 +167,15 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                                 }
                               : null,
                           isTopBorderRadiusRemoved: listIndex > 0,
-                          isBottomBorderRadiusRemoved: true,
+                          isBottomBorderRadiusRemoved: !isLastItem,
                           singleBorderRadius: 8,
                         ),
-                        DividerWidget(
-                          dividerType: DividerType.menu,
-                          bgColor: getEnteColorScheme(context).blurStrokeFaint,
-                        ),
+                        isLastItem
+                            ? const SizedBox.shrink()
+                            : DividerWidget(
+                                dividerType: DividerType.menu,
+                                bgColor: getEnteColorScheme(context).fillFaint,
+                              ),
                       ],
                     );
                   } else if (index == (1 + collaborators.length) && isOwner) {
@@ -234,7 +238,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           onTap: isOwner
                               ? () async {
                                   if (isOwner) {
-                                    await _navigateToManageUser(currentUser);
+                                    _navigateToManageUser(currentUser);
                                   }
                                 }
                               : null,

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -93,7 +92,7 @@ class FileMagicService {
         file.pubMmdEncodedJson = jsonEncode(jsonToUpdate);
         file.pubMagicMetadata = PubMagicMetadata.fromJson(jsonToUpdate);
 
-        final fileKey = decryptFileKey(file);
+        final fileKey = getFileKey(file);
         final encryptedMMd = await CryptoUtil.encryptChaCha(
           utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
           fileKey,
@@ -104,8 +103,8 @@ class FileMagicService {
             magicMetadata: MetadataRequest(
               version: file.pubMmdVersion,
               count: jsonToUpdate.length,
-              data: Sodium.bin2base64(encryptedMMd.encryptedData!),
-              header: Sodium.bin2base64(encryptedMMd.header!),
+              data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+              header: CryptoUtil.bin2base64(encryptedMMd.header!),
             ),
           ),
         );
@@ -159,7 +158,7 @@ class FileMagicService {
           file.mMdEncodedJson = jsonEncode(jsonToUpdate);
           file.magicMetadata = MagicMetadata.fromJson(jsonToUpdate);
 
-          final fileKey = decryptFileKey(file);
+          final fileKey = getFileKey(file);
           final encryptedMMd = await CryptoUtil.encryptChaCha(
             utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
             fileKey,
@@ -170,8 +169,8 @@ class FileMagicService {
               magicMetadata: MetadataRequest(
                 version: file.mMdVersion,
                 count: jsonToUpdate.length,
-                data: Sodium.bin2base64(encryptedMMd.encryptedData!),
-                header: Sodium.bin2base64(encryptedMMd.header!),
+                data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+                header: CryptoUtil.bin2base64(encryptedMMd.header!),
               ),
             ),
           );

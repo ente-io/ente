@@ -485,7 +485,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     return Container(
       padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
       margin: const EdgeInsets.only(bottom: 12),
-      // color: Color.fromRGBO(10, 40, 40, 0.3),
+      // coloome_r: Color.fromRGBO(10, 40, 40, 0.3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/local_authentication_service.dart';
@@ -141,8 +140,8 @@ class DeleteAccountPage extends StatelessWidget {
         isCritical: true,
         firstButtonOnTap: () async {
           final decryptChallenge = CryptoUtil.openSealSync(
-            Sodium.base642bin(response.encryptedChallenge),
-            Sodium.base642bin(
+            CryptoUtil.base642bin(response.encryptedChallenge),
+            CryptoUtil.base642bin(
               Configuration.instance.getKeyAttributes()!.publicKey,
             ),
             Configuration.instance.getSecretKey()!,

@@ -9,3 +9,8 @@
 [submodule "thirdparty/extended_image"]
     path = thirdparty/extended_image
     url = https://github.com/ente-io/extended_image.git
+
+[submodule "thirdparty/flutter"]
+	path = thirdparty/flutter
+	url = https://github.com/flutter/flutter.git
+	branch = stable

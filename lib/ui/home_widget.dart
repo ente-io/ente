@@ -44,7 +44,7 @@ import "package:photos/ui/new_shared_collections_gallery.dart";
 import 'package:photos/ui/notification/update/change_log_page.dart';
 import "package:photos/ui/search_tab.dart";
 import 'package:photos/ui/settings/app_update_dialog.dart';
-import 'package:photos/ui/settings_page.dart';
+import "package:photos/ui/settings_page.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
@@ -63,6 +63,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   static const _searchTab = SearchTab();
   // static const _sharedCollectionGallery = SharedCollectionGallery();
   static const _sharedCollectionGallery = NewSharedCollectionsGallery();
+
   static final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
   );

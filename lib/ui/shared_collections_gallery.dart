@@ -19,6 +19,7 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/new_shared_collections_gallery.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
@@ -122,6 +123,10 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
       }),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          if ((snapshot.data?.incoming.length ?? 0) == 0 &&
+              (snapshot.data?.outgoing.length ?? 0) == 0) {
+            return const Center(child: EmptyStateWidget());
+          }
           return _getSharedCollectionsGallery(snapshot.data!);
         } else if (snapshot.hasError) {
           _logger.severe(

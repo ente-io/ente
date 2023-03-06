@@ -106,10 +106,9 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     items.add(
       ChangeLogEntry(
         "Referrals ✨",
-        "You can now double your storage by referring your friends and family"
-            ". Both you and your loved ones will get 10 GB of storage when "
+        "You can now double your storage by referring your friends and family. Both you and your loved ones will get 10 GB of storage when "
             "they upgrade to a paid plan.\n\nGo to Settings -> General -> "
-            "Referral to get started!",
+            "Referrals to get started!",
       ),
     );
     if (Platform.isAndroid) {
@@ -123,6 +122,24 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         ),
       );
     }
+
+    items.add(
+      ChangeLogEntry(
+        "Verification ID",
+        "Security of your end-to-end encryption with those you are sharing your "
+            "albums with can now be verified, with the help of Verification IDs."
+            "\n\nPlease click on the Verify button on the album sharing page to learn more.",
+      ),
+    );
+
+    items.add(
+      ChangeLogEntry(
+        "Prettier Pixels",
+        "This release is also packed with a bunch of user interface improvements suggested by our community."
+            "\n\nWe have added more actions to your Memories section, introduced archived albums to your Archived section, improved the experience of the Trash screen and sprinkled a few more improvements here and there.",
+        isFeature: false,
+      ),
+    );
 
     return Container(
       padding: const EdgeInsets.only(left: 16),
