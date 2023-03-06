@@ -390,22 +390,24 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
                   style: getEnteTextTheme(context).miniMuted,
                 )
               : const SizedBox.shrink(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              planText("Monthly", showYearlyPlan),
-              Switch(
-                value: showYearlyPlan,
-                activeColor: Colors.white,
-                inactiveThumbColor: Colors.white,
-                activeTrackColor: getEnteColorScheme(context).strokeMuted,
-                onChanged: (value) async {
-                  showYearlyPlan = value;
-                  await _filterStorePlansForUi();
-                },
-              ),
-              planText("Yearly", !showYearlyPlan)
-            ],
+          RepaintBoundary(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                planText("Monthly", showYearlyPlan),
+                Switch(
+                  value: showYearlyPlan,
+                  activeColor: Colors.white,
+                  inactiveThumbColor: Colors.white,
+                  activeTrackColor: getEnteColorScheme(context).strokeMuted,
+                  onChanged: (value) async {
+                    showYearlyPlan = value;
+                    await _filterStorePlansForUi();
+                  },
+                ),
+                planText("Yearly", !showYearlyPlan)
+              ],
+            ),
           ),
         ],
       ),
