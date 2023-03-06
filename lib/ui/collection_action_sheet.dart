@@ -330,7 +330,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       if (widget.actionType == CollectionActionType.addFiles) {
         toastMessage = "Added successfully to " + item.collection.name!;
         shouldNavigateToCollection = true;
-      } else if (widget.actionType == CollectionActionType.moveFiles) {
+      } else if (widget.actionType == CollectionActionType.moveFiles ||
+          widget.actionType == CollectionActionType.restoreFiles ||
+          widget.actionType == CollectionActionType.unHide) {
         toastMessage = "Moved successfully to " + item.collection.name!;
         shouldNavigateToCollection = true;
       } else {
