@@ -382,21 +382,31 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     return Container(
       padding: const EdgeInsets.only(left: 8, right: 8, top: 2, bottom: 2),
       margin: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
         children: [
-          _planText("Monthly", showYearlyPlan),
-          Switch(
-            value: showYearlyPlan,
-            activeColor: Colors.white,
-            inactiveThumbColor: Colors.white,
-            activeTrackColor: getEnteColorScheme(context).strokeMuted,
-            onChanged: (value) async {
-              showYearlyPlan = value;
-              await _filterStorePlansForUi();
-            },
+          _isFreePlanUser()
+              ? Text(
+                  "Get 2 months free on yearly plans",
+                  style: getEnteTextTheme(context).miniMuted,
+                )
+              : const SizedBox.shrink(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _planText("Monthly", showYearlyPlan),
+              Switch(
+                value: showYearlyPlan,
+                activeColor: Colors.white,
+                inactiveThumbColor: Colors.white,
+                activeTrackColor: getEnteColorScheme(context).strokeMuted,
+                onChanged: (value) async {
+                  showYearlyPlan = value;
+                  await _filterStorePlansForUi();
+                },
+              ),
+              _planText("Yearly", !showYearlyPlan)
+            ],
           ),
-          _planText("Yearly", !showYearlyPlan)
         ],
       ),
     );

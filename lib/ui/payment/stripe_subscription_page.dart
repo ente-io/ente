@@ -466,6 +466,11 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     return planWidgets;
   }
 
+  bool _isFreePlanUser() {
+    return _currentSubscription != null &&
+        freeProductID == _currentSubscription!.productID;
+  }
+
   Widget _showSubscriptionToggle() {
     Widget _planText(String title, bool reduceOpacity) {
       return Padding(
@@ -483,24 +488,33 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     }
 
     return Container(
-      padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
-      margin: const EdgeInsets.only(bottom: 12),
-      // color: Color.fromRGBO(10, 40, 40, 0.3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 2, bottom: 2),
+      margin: const EdgeInsets.only(bottom: 6),
+      child: Column(
         children: [
-          _planText("Monthly", _showYearlyPlan),
-          Switch(
-            value: _showYearlyPlan,
-            activeColor: Colors.white,
-            inactiveThumbColor: Colors.white,
-            activeTrackColor: getEnteColorScheme(context).strokeMuted,
-            onChanged: (value) async {
-              _showYearlyPlan = value;
-              await _filterStripeForUI();
-            },
+          _isFreePlanUser()
+              ? Text(
+                  "Get 2 months free on yearly plans",
+                  style: getEnteTextTheme(context).miniMuted,
+                )
+              : const SizedBox.shrink(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _planText("Monthly", _showYearlyPlan),
+              Switch(
+                value: _showYearlyPlan,
+                activeColor: Colors.white,
+                inactiveThumbColor: Colors.white,
+                activeTrackColor: getEnteColorScheme(context).strokeMuted,
+                onChanged: (value) async {
+                  _showYearlyPlan = value;
+                  await _filterStripeForUI();
+                },
+              ),
+              _planText("Yearly", !_showYearlyPlan)
+            ],
           ),
-          _planText("Yearly", !_showYearlyPlan)
         ],
       ),
     );
