@@ -12,7 +12,7 @@ import {
     sortFiles,
 } from 'utils/file';
 import { eventBus, Events } from './events';
-import { EnteFile, EncryptedEnteFile } from 'types/file';
+import { EnteFile, EncryptedEnteFile, TrashRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from 'utils/logging';
@@ -164,9 +164,20 @@ export const trashFiles = async (filesToTrash: EnteFile[]) => {
         }
         const batchedFilesToTrash = batch(filesToTrash, REQUEST_BATCH_SIZE);
         for (const batch of batchedFilesToTrash) {
-            await HTTPService.post(`${ENDPOINT}/files/trash`, batch, null, {
-                'X-Auth-Token': token,
-            });
+            const trashRequest: TrashRequest = {
+                items: batch.map((file) => ({
+                    fileID: file.id,
+                    collectionID: file.collectionID,
+                })),
+            };
+            await HTTPService.post(
+                `${ENDPOINT}/files/trash`,
+                trashRequest,
+                null,
+                {
+                    'X-Auth-Token': token,
+                }
+            );
         }
     } catch (e) {
         logError(e, 'trash file failed');
@@ -181,6 +192,7 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
             return;
         }
         const batchedFilesToDelete = batch(filesToDelete, REQUEST_BATCH_SIZE);
+
         for (const batch of batchedFilesToDelete) {
             await HTTPService.post(
                 `${ENDPOINT}/trash/delete`,
