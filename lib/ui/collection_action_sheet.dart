@@ -157,7 +157,6 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                             prefixIcon: Icons.search_rounded,
                             autoFocus: true,
                             onChange: (value) {
-                              _logger.info(value);
                               setState(() {
                                 _searchQuery = value;
                               });
@@ -204,7 +203,6 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
         child: Scrollbar(
           thumbVisibility: true,
-          controller: ScrollController(),
           radius: const Radius.circular(2),
           child: Padding(
             padding: const EdgeInsets.only(right: 12),
