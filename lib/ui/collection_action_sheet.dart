@@ -123,6 +123,7 @@ class CollectionActionSheet extends StatefulWidget {
 }
 
 class _CollectionActionSheetState extends State<CollectionActionSheet> {
+  static const int cancelButtonSize = 80;
   final _logger = Logger((_CollectionActionSheetState).toString());
   String _searchQuery = "";
 
@@ -131,74 +132,82 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     final filesCount = widget.sharedFiles != null
         ? widget.sharedFiles!.length
         : widget.selectedFiles?.files.length ?? 0;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: min(428, MediaQuery.of(context).size.width),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      BottomOfTitleBarWidget(
-                        title: TitleBarTitleWidget(
-                          title: _actionName(widget.actionType, filesCount > 1),
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final isKeyboardUp = bottomInset > 100;
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: isKeyboardUp ? bottomInset - cancelButtonSize : 0,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: min(428, MediaQuery.of(context).size.width),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        BottomOfTitleBarWidget(
+                          title: TitleBarTitleWidget(
+                            title:
+                                _actionName(widget.actionType, filesCount > 1),
+                          ),
+                          caption: widget.showOptionToCreateNewAlbum
+                              ? "Create or select album"
+                              : "Select album",
                         ),
-                        caption: widget.showOptionToCreateNewAlbum
-                            ? "Create or select album"
-                            : "Select album",
-                      ),
-                      Padding(
-                        padding:
-                            const EdgeInsets.only(top: 16, left: 16, right: 16),
-                        child: TextInputWidget(
-                          hintText: "Album name",
-                          prefixIcon: Icons.search_rounded,
-                          autoFocus: true,
-                          onChange: (value) {
-                            _logger.info(value);
-                            setState(() {
-                              _searchQuery = value;
-                            });
-                          },
-                          cancellable: true,
-                          shouldUnfocusOnCancelOrSubmit: true,
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              top: 16, left: 16, right: 16),
+                          child: TextInputWidget(
+                            hintText: "Album name",
+                            prefixIcon: Icons.search_rounded,
+                            autoFocus: true,
+                            onChange: (value) {
+                              _logger.info(value);
+                              setState(() {
+                                _searchQuery = value;
+                              });
+                            },
+                            cancellable: true,
+                            shouldUnfocusOnCancelOrSubmit: true,
+                          ),
                         ),
-                      ),
-                      _getCollectionItems(filesCount),
-                    ],
-                  ),
-                ),
-                SafeArea(
-                  child: Container(
-                    //inner stroke of 1pt + 15 pts of top padding = 16 pts
-                    padding: const EdgeInsets.fromLTRB(16, 15, 16, 8),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(
-                          color: getEnteColorScheme(context).strokeFaint,
-                        ),
-                      ),
-                    ),
-                    child: const ButtonWidget(
-                      buttonType: ButtonType.secondary,
-                      buttonAction: ButtonAction.cancel,
-                      isInAlert: true,
-                      labelText: "Cancel",
+                        _getCollectionItems(filesCount),
+                      ],
                     ),
                   ),
-                )
-              ],
+                  SafeArea(
+                    child: Container(
+                      //inner stroke of 1pt + 15 pts of top padding = 16 pts
+                      padding: const EdgeInsets.fromLTRB(16, 15, 16, 8),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          top: BorderSide(
+                            color: getEnteColorScheme(context).strokeFaint,
+                          ),
+                        ),
+                      ),
+                      child: const ButtonWidget(
+                        buttonType: ButtonType.secondary,
+                        buttonAction: ButtonAction.cancel,
+                        isInAlert: true,
+                        labelText: "Cancel",
+                      ),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
