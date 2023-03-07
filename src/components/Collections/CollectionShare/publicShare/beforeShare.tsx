@@ -10,7 +10,7 @@ import {
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { handleSharingErrors } from 'utils/error/ui';
 import constants from 'utils/strings/constants';
-import SidebarButton from 'components/Sidebar/Button';
+import { EnteMenuItem } from 'components/Menu/menuItem';
 interface Iprops {
     publicShareProp;
     collection: Collection;
@@ -112,22 +112,20 @@ export default function BeforeShare({
     };
     return (
         <Box mt={3}>
-            <SidebarButton
+            <EnteMenuItem
                 startIcon={<LinkIcon />}
-                variant="contained"
-                color="secondary"
-                sx={{ fontWeight: 'normal' }}
+                endIcon={<LinkIcon />}
+                subText="never"
+                color="primary"
                 onClick={handleCollectionPublicSharing}>
                 {constants.CREATE_PUBLIC_SHARING}
-            </SidebarButton>
-            <SidebarButton
+            </EnteMenuItem>
+            <EnteMenuItem
                 startIcon={<LinkIcon />}
-                variant="contained"
-                color="secondary"
-                sx={{ fontWeight: 'normal' }}
+                color="primary"
                 onClick={handleCollecPhotosPublicSharing}>
                 {constants.COLLECT_PHOTOS}
-            </SidebarButton>
+            </EnteMenuItem>
             {sharableLinkError && (
                 <Typography
                     textAlign={'center'}

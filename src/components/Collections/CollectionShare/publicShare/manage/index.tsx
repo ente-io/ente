@@ -18,9 +18,9 @@ import { EnteDrawer } from 'components/EnteDrawer';
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
 } from 'components/DialogBox/TitleWithCloseButton';
-import SidebarButton from 'components/Sidebar/Button';
 import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { EnteMenuItem } from 'components/Menu/menuItem';
 interface Iprops {
     publicShareProp: PublicURL;
     collection: Collection;
@@ -109,22 +109,18 @@ export default function PublicShareManage({
                                 updatePublicShareURLHelper
                             }
                         />
-                        <SidebarButton
+                        <EnteMenuItem
                             startIcon={<ContentCopyIcon />}
-                            variant="contained"
                             color="secondary"
-                            sx={{ fontWeight: 'normal' }}
                             onClick={copyToClipboardHelper(publicShareUrl)}>
                             {constants.COPY_LINK}
-                        </SidebarButton>
-                        <SidebarButton
+                        </EnteMenuItem>
+                        <EnteMenuItem
                             startIcon={<RemoveCircleOutline />}
-                            variant="contained"
                             color="secondary"
-                            sx={{ fontWeight: 'normal' }}
                             onClick={disablePublicSharing}>
                             {constants.DELETE}
-                        </SidebarButton>
+                        </EnteMenuItem>
                     </Stack>
                     {sharableLinkError && (
                         <Typography
