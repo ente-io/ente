@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:exif/exif.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
@@ -11,6 +13,7 @@ import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/feature_flag_service.dart";
+import "package:photos/services/location_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
@@ -18,6 +21,8 @@ import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/collections_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/device_folders_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
+import "package:photos/ui/viewer/file/location_chip.dart";
+import "package:photos/ui/viewer/file/locations_list.dart";
 import "package:photos/ui/viewer/file/object_tags_widget.dart";
 import 'package:photos/ui/viewer/file/raw_exif_list_tile_widget.dart';
 import "package:photos/utils/date_time_util.dart";
@@ -39,6 +44,7 @@ class FileInfoWidget extends StatefulWidget {
 
 class _FileInfoWidgetState extends State<FileInfoWidget> {
   Map<String, IfdTag>? _exif;
+  late LocationService locationService = LocationService.instance;
   final Map<String, dynamic> _exifData = {
     "focalLength": null,
     "fNumber": null,
@@ -272,6 +278,55 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
             )
           : null,
+      ListTile(
+        horizontalTitleGap: 2,
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: locationService.getLocationsByFileID(file.generatedID!).isEmpty
+              ? const Icon(Icons.add_location_alt_rounded)
+              : const Icon(Icons.location_on_rounded),
+        ),
+        title: Text(
+          locationService.getLocationsByFileID(file.generatedID!).isEmpty
+              ? "Add Location"
+              : "Locations",
+        ),
+        subtitle:
+            locationService.getLocationsByFileID(file.generatedID!).isEmpty
+                ? Text(
+                    "group nearby photos",
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .defaultTextColor
+                              .withOpacity(0.5),
+                        ),
+                  )
+                : locationChipList(
+                    file.generatedID!,
+                    context,
+                  ),
+        trailing:
+            locationService.getLocationsByFileID(file.generatedID!).isEmpty
+                ? IconButton(
+                    onPressed: () async {
+                      unawaited(
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) {
+                              return LocationsList(
+                                state: 1,
+                                fileId: file.generatedID,
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.arrow_forward_ios),
+                  )
+                : const SizedBox.shrink(),
+      ),
       _isImage ? RawExifListTileWidget(_exif, widget.file) : null,
     ];
 

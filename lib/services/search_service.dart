@@ -1,3 +1,5 @@
+import "dart:convert";
+
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
@@ -16,6 +18,7 @@ import 'package:photos/models/search/generic_search_result.dart';
 import 'package:photos/models/search/location_api_response.dart';
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/location_service.dart";
 import 'package:photos/utils/date_time_util.dart';
 import 'package:tuple/tuple.dart';
 
@@ -55,45 +58,45 @@ class SearchService {
     _cachedFilesFuture = null;
   }
 
-  Future<List<GenericSearchResult>> getLocationSearchResults(
-    String query,
-  ) async {
-    final List<GenericSearchResult> searchResults = [];
-    try {
-      final List<File> allFiles = await _getAllFiles();
-      // This code used an deprecated API earlier. We've retained the
-      // scaffolding for when we implement a client side location search, and
-      // meanwhile have replaced the API response.data with an empty map here.
-      final matchedLocationSearchResults = LocationApiResponse.fromMap({});
+  // Future<List<GenericSearchResult>> getLocationSearchResults(
+  //   String query,
+  // ) async {
+  //   final List<GenericSearchResult> searchResults = [];
+  //   try {
+  //     final List<File> allFiles = await _getAllFiles();
+  //     // This code used an deprecated API earlier. We've retained the
+  //     // scaffolding for when we implement a client side location search, and
+  //     // meanwhile have replaced the API response.data with an empty map here.
+  //     final matchedLocationSearchResults = LocationApiResponse.fromMap({});
 
-      for (var locationData in matchedLocationSearchResults.results) {
-        final List<File> filesInLocation = [];
+  //     for (var locationData in matchedLocationSearchResults.results) {
+  //       final List<File> filesInLocation = [];
 
-        for (var file in allFiles) {
-          if (_isValidLocation(file.location) &&
-              _isLocationWithinBounds(file.location!, locationData)) {
-            filesInLocation.add(file);
-          }
-        }
-        filesInLocation.sort(
-          (first, second) =>
-              second.creationTime!.compareTo(first.creationTime!),
-        );
-        if (filesInLocation.isNotEmpty) {
-          searchResults.add(
-            GenericSearchResult(
-              ResultType.location,
-              locationData.place,
-              filesInLocation,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      _logger.severe(e);
-    }
-    return searchResults;
-  }
+  //       for (var file in allFiles) {
+  //         if (_isValidLocation(file.location) &&
+  //             _isLocationWithinBounds(file.location!, locationData)) {
+  //           filesInLocation.add(file);
+  //         }
+  //       }
+  //       filesInLocation.sort(
+  //         (first, second) =>
+  //             second.creationTime!.compareTo(first.creationTime!),
+  //       );
+  //       if (filesInLocation.isNotEmpty) {
+  //         searchResults.add(
+  //           GenericSearchResult(
+  //             ResultType.location,
+  //             locationData.place,
+  //             filesInLocation,
+  //           ),
+  //         );
+  //       }
+  //     }
+  //   } catch (e) {
+  //     _logger.severe(e);
+  //   }
+  //   return searchResults;
+  // }
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
   // collections which don't have a file from search result
@@ -261,6 +264,37 @@ class SearchService {
           entry.value,
         ),
       );
+    }
+    return searchResults;
+  }
+
+  Future<List<GenericSearchResult>> getLocationResults(
+    String query,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+    final locations = LocationService.instance.getLocations();
+    for (String location in locations) {
+      final locationJson = json.decode(location);
+      final locationName = locationJson["name"].toString();
+      _logger.info(locationName);
+      if (locationName.contains(query)) {
+        _logger.info("TRUEEE");
+        final fileIDs = LocationService.instance
+            .getFilesByLocation(locationJson["id"].toString());
+        final files = List<File>.empty(growable: true);
+        for (String fileID in fileIDs) {
+          final id = int.parse(fileID);
+          final file = await FilesDB.instance.getFile(id);
+          files.add(file!);
+        }
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.location,
+            locationName,
+            files,
+          ),
+        );
+      }
     }
     return searchResults;
   }
