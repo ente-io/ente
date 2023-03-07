@@ -164,7 +164,10 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(
-                              top: 16, left: 16, right: 16),
+                            top: 16,
+                            left: 16,
+                            right: 16,
+                          ),
                           child: TextInputWidget(
                             hintText: "Album name",
                             prefixIcon: Icons.search_rounded,
