@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/models/collection.dart';
@@ -108,7 +107,6 @@ class CollectionActionSheet extends StatefulWidget {
 
 class _CollectionActionSheetState extends State<CollectionActionSheet> {
   static const int cancelButtonSize = 80;
-  final _logger = Logger((_CollectionActionSheetState).toString());
   String _searchQuery = "";
 
   @override
