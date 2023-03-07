@@ -171,90 +171,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                           shouldUnfocusOnCancelOrSubmit: true,
                         ),
                       ),
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
-                          child: Scrollbar(
-                            thumbVisibility: true,
-                            controller: ScrollController(),
-                            radius: const Radius.circular(2),
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 12),
-                              child: FutureBuilder(
-                                future: _getCollectionsWithThumbnail(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasError) {
-                                    //Need to show an error on the UI here
-                                    return const SizedBox.shrink();
-                                  } else if (snapshot.hasData) {
-                                    final collectionsWithThumbnail = snapshot
-                                        .data as List<CollectionWithThumbnail>;
-                                    _removeIncomingCollections(
-                                      collectionsWithThumbnail,
-                                    );
-
-                                    final searchResults =
-                                        _searchQuery.isNotEmpty
-                                            ? collectionsWithThumbnail
-                                                .where(
-                                                  (element) => element
-                                                      .collection.name!
-                                                      .toLowerCase()
-                                                      .contains(_searchQuery),
-                                                )
-                                                .toList()
-                                            : collectionsWithThumbnail;
-
-                                    if (searchResults.isEmpty) {
-                                      return const EmptyState();
-                                    }
-                                    final shouldShowCreateAlbum =
-                                        widget.showOptionToCreateNewAlbum &&
-                                            _searchQuery.isEmpty;
-                                    return ListView.separated(
-                                      itemBuilder: (context, index) {
-                                        if (index == 0 &&
-                                            shouldShowCreateAlbum) {
-                                          return GestureDetector(
-                                            onTap: () async {
-                                              await _createNewAlbumOnTap(
-                                                filesCount,
-                                              );
-                                            },
-                                            behavior: HitTestBehavior.opaque,
-                                            child:
-                                                const NewAlbumListItemWidget(),
-                                          );
-                                        }
-                                        final item = searchResults[index -
-                                            (shouldShowCreateAlbum ? 1 : 0)];
-                                        return GestureDetector(
-                                          behavior: HitTestBehavior.opaque,
-                                          onTap: () =>
-                                              _albumListItemOnTap(item),
-                                          child: AlbumListItemWidget(
-                                            item,
-                                          ),
-                                        );
-                                      },
-                                      separatorBuilder: (context, index) =>
-                                          const SizedBox(
-                                        height: 8,
-                                      ),
-                                      itemCount: searchResults.length +
-                                          (shouldShowCreateAlbum ? 1 : 0),
-                                      shrinkWrap: true,
-                                      physics: const BouncingScrollPhysics(),
-                                    );
-                                  } else {
-                                    return const EnteLoadingWidget();
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                      _getCollectionItems(filesCount),
                     ],
                   ),
                 ),
@@ -282,6 +199,86 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           ),
         ),
       ],
+    );
+  }
+
+  Flexible _getCollectionItems(int filesCount) {
+    return Flexible(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
+        child: Scrollbar(
+          thumbVisibility: true,
+          controller: ScrollController(),
+          radius: const Radius.circular(2),
+          child: Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: FutureBuilder(
+              future: _getCollectionsWithThumbnail(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  //Need to show an error on the UI here
+                  return const SizedBox.shrink();
+                } else if (snapshot.hasData) {
+                  final collectionsWithThumbnail =
+                      snapshot.data as List<CollectionWithThumbnail>;
+                  _removeIncomingCollections(
+                    collectionsWithThumbnail,
+                  );
+
+                  final searchResults = _searchQuery.isNotEmpty
+                      ? collectionsWithThumbnail
+                          .where(
+                            (element) => element.collection.name!
+                                .toLowerCase()
+                                .contains(_searchQuery),
+                          )
+                          .toList()
+                      : collectionsWithThumbnail;
+
+                  if (searchResults.isEmpty) {
+                    return const EmptyState();
+                  }
+                  final shouldShowCreateAlbum =
+                      widget.showOptionToCreateNewAlbum && _searchQuery.isEmpty;
+                  return ListView.separated(
+                    itemBuilder: (context, index) {
+                      if (index == 0 && shouldShowCreateAlbum) {
+                        return GestureDetector(
+                          onTap: () async {
+                            await _createNewAlbumOnTap(
+                              filesCount,
+                            );
+                          },
+                          behavior: HitTestBehavior.opaque,
+                          child: const NewAlbumListItemWidget(),
+                        );
+                      }
+                      final item = searchResults[
+                          index - (shouldShowCreateAlbum ? 1 : 0)];
+                      return GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => _albumListItemOnTap(item),
+                        child: AlbumListItemWidget(
+                          item,
+                        ),
+                      );
+                    },
+                    separatorBuilder: (context, index) => const SizedBox(
+                      height: 8,
+                    ),
+                    itemCount:
+                        searchResults.length + (shouldShowCreateAlbum ? 1 : 0),
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                  );
+                } else {
+                  return const EnteLoadingWidget();
+                }
+              },
+            ),
+          ),
+        ),
+      ),
     );
   }
 
