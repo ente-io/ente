@@ -26,9 +26,11 @@ import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/new_album_list_widget.dart';
+import "package:photos/ui/components/text_input_widget.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import "package:photos/ui/sharing/share_collection_page.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
+import "package:photos/ui/viewer/gallery/empty_state.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
@@ -122,6 +124,7 @@ class CollectionActionSheet extends StatefulWidget {
 
 class _CollectionActionSheetState extends State<CollectionActionSheet> {
   final _logger = Logger((_CollectionActionSheetState).toString());
+  String _searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
@@ -138,24 +141,42 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.max,
               children: [
-                BottomOfTitleBarWidget(
-                  title: TitleBarTitleWidget(
-                    title: _actionName(widget.actionType, filesCount > 1),
-                  ),
-                  caption: widget.showOptionToCreateNewAlbum
-                      ? "Create or select album"
-                      : "Select album",
-                ),
-                Flexible(
+                Expanded(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
+                      BottomOfTitleBarWidget(
+                        title: TitleBarTitleWidget(
+                          title: _actionName(widget.actionType, filesCount > 1),
+                        ),
+                        caption: widget.showOptionToCreateNewAlbum
+                            ? "Create or select album"
+                            : "Select album",
+                      ),
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(top: 16, left: 16, right: 16),
+                        child: TextInputWidget(
+                          hintText: "Album name",
+                          prefixIcon: Icons.search_rounded,
+                          autoFocus: true,
+                          onChange: (value) {
+                            _logger.info(value);
+                            setState(() {
+                              _searchQuery = value;
+                            });
+                          },
+                          cancellable: true,
+                          shouldUnfocusOnCancelOrSubmit: true,
+                        ),
+                      ),
                       Flexible(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
                           child: Scrollbar(
+                            thumbVisibility: true,
+                            controller: ScrollController(),
                             radius: const Radius.circular(2),
                             child: Padding(
                               padding: const EdgeInsets.only(right: 12),
@@ -171,10 +192,29 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                                     _removeIncomingCollections(
                                       collectionsWithThumbnail,
                                     );
+
+                                    final searchResults =
+                                        _searchQuery.isNotEmpty
+                                            ? collectionsWithThumbnail
+                                                .where(
+                                                  (element) => element
+                                                      .collection.name!
+                                                      .toLowerCase()
+                                                      .contains(_searchQuery),
+                                                )
+                                                .toList()
+                                            : collectionsWithThumbnail;
+
+                                    if (searchResults.isEmpty) {
+                                      return const EmptyState();
+                                    }
+                                    final shouldShowCreateAlbum =
+                                        widget.showOptionToCreateNewAlbum &&
+                                            _searchQuery.isEmpty;
                                     return ListView.separated(
                                       itemBuilder: (context, index) {
                                         if (index == 0 &&
-                                            widget.showOptionToCreateNewAlbum) {
+                                            shouldShowCreateAlbum) {
                                           return GestureDetector(
                                             onTap: () async {
                                               await _createNewAlbumOnTap(
@@ -186,11 +226,8 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                                                 const NewAlbumListItemWidget(),
                                           );
                                         }
-                                        final item = collectionsWithThumbnail[
-                                            index -
-                                                (widget.showOptionToCreateNewAlbum
-                                                    ? 1
-                                                    : 0)];
+                                        final item = searchResults[index -
+                                            (shouldShowCreateAlbum ? 1 : 0)];
                                         return GestureDetector(
                                           behavior: HitTestBehavior.opaque,
                                           onTap: () =>
@@ -204,11 +241,8 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                                           const SizedBox(
                                         height: 8,
                                       ),
-                                      itemCount:
-                                          collectionsWithThumbnail.length +
-                                              (widget.showOptionToCreateNewAlbum
-                                                  ? 1
-                                                  : 0),
+                                      itemCount: searchResults.length +
+                                          (shouldShowCreateAlbum ? 1 : 0),
                                       shrinkWrap: true,
                                       physics: const BouncingScrollPhysics(),
                                     );
@@ -221,28 +255,28 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                           ),
                         ),
                       ),
-                      SafeArea(
-                        child: Container(
-                          //inner stroke of 1pt + 15 pts of top padding = 16 pts
-                          padding: const EdgeInsets.fromLTRB(16, 15, 16, 8),
-                          decoration: BoxDecoration(
-                            border: Border(
-                              top: BorderSide(
-                                color: getEnteColorScheme(context).strokeFaint,
-                              ),
-                            ),
-                          ),
-                          child: const ButtonWidget(
-                            buttonType: ButtonType.secondary,
-                            buttonAction: ButtonAction.cancel,
-                            isInAlert: true,
-                            labelText: "Cancel",
-                          ),
-                        ),
-                      )
                     ],
                   ),
                 ),
+                SafeArea(
+                  child: Container(
+                    //inner stroke of 1pt + 15 pts of top padding = 16 pts
+                    padding: const EdgeInsets.fromLTRB(16, 15, 16, 8),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: getEnteColorScheme(context).strokeFaint,
+                        ),
+                      ),
+                    ),
+                    child: const ButtonWidget(
+                      buttonType: ButtonType.secondary,
+                      buttonAction: ButtonAction.cancel,
+                      isInAlert: true,
+                      labelText: "Cancel",
+                    ),
+                  ),
+                )
               ],
             ),
           ),
