@@ -5,9 +5,9 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/models/collection_items.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_item_widget.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/components/divider_widget.dart";
 
 class AlbumHorizontalListWidget extends StatefulWidget {
   final Future<List<CollectionWithThumbnail>> Function() collectionsFuture;
@@ -46,55 +46,56 @@ class _AlbumHorizontalListWidgetState extends State<AlbumHorizontalListWidget> {
   @override
   Widget build(BuildContext context) {
     debugPrint('$runtimeType widget build');
-    return FutureBuilder<List<CollectionWithThumbnail>>(
-      future: widget.collectionsFuture(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          _logger.severe("failed to fetch albums", snapshot.error);
-          return const Text("Something went wrong");
-        } else if (snapshot.hasData) {
-          if (snapshot.data!.isEmpty) {
-            return const SizedBox.shrink();
-          }
-          final collectionsWithThumbnail =
-              snapshot.data as List<CollectionWithThumbnail>;
-          return Align(
-            alignment: Alignment.centerLeft,
-            child: SizedBox(
-              height: 190,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: collectionsWithThumbnail.length,
-                      padding: const EdgeInsets.fromLTRB(6, 6, 6, 6),
-                      itemBuilder: (context, index) {
-                        final item = collectionsWithThumbnail[index];
-                        return GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () async {},
-                          child: Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: CollectionItem(
-                              item,
-                              120,
-                              shouldRender: true,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Text(
+            "Albums",
+            style: getEnteTextTheme(context).large,
+          ),
+        ),
+        FutureBuilder<List<CollectionWithThumbnail>>(
+          future: widget.collectionsFuture(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              _logger.severe("failed to fetch albums", snapshot.error);
+              return const Text("Something went wrong");
+            } else if (snapshot.hasData) {
+              if (snapshot.data!.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              final collectionsWithThumbnail =
+                  snapshot.data as List<CollectionWithThumbnail>;
+              return Align(
+                alignment: Alignment.centerLeft,
+                child: SizedBox(
+                  height: 147, //139 + 8 (calculated from figma design)
+                  child: ListView.separated(
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 4),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: collectionsWithThumbnail.length,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    itemBuilder: (context, index) {
+                      final item = collectionsWithThumbnail[index];
+                      return CollectionItem(
+                        item,
+                        120,
+                        shouldRender: true,
+                        showFileCount: false,
+                      );
+                    },
                   ),
-                  const DividerWidget(dividerType: DividerType.solid),
-                ],
-              ),
-            ),
-          );
-        } else {
-          return const EnteLoadingWidget();
-        }
-      },
+                ),
+              );
+            } else {
+              return const EnteLoadingWidget();
+            }
+          },
+        ),
+      ],
     );
   }
 }
