@@ -27,59 +27,62 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: ButtonWidget(
-        buttonSize: ButtonSize.small,
-        buttonType: ButtonType.secondary,
-        labelText: "Delete empty albums",
-        icon: Icons.delete_sweep_outlined,
-        shouldSurfaceExecutionStates: false,
-        onTap: () async {
-          await showActionSheet(
-            context: context,
-            isDismissible: true,
-            buttons: [
-              ButtonWidget(
-                labelText: "Yes",
-                buttonType: ButtonType.neutral,
-                buttonSize: ButtonSize.large,
-                shouldStickToDarkTheme: true,
-                shouldSurfaceExecutionStates: true,
-                progressStatus: _deleteProgress,
-                onTap: () async {
-                  await _deleteEmptyAlbums();
-                  if (!_isCancelled) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 2, 8, 12),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: ButtonWidget(
+          buttonSize: ButtonSize.small,
+          buttonType: ButtonType.secondary,
+          labelText: "Delete empty albums",
+          icon: Icons.delete_sweep_outlined,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            await showActionSheet(
+              context: context,
+              isDismissible: true,
+              buttons: [
+                ButtonWidget(
+                  labelText: "Yes",
+                  buttonType: ButtonType.neutral,
+                  buttonSize: ButtonSize.large,
+                  shouldStickToDarkTheme: true,
+                  shouldSurfaceExecutionStates: true,
+                  progressStatus: _deleteProgress,
+                  onTap: () async {
+                    await _deleteEmptyAlbums();
+                    if (!_isCancelled) {
+                      Navigator.of(context, rootNavigator: true).pop();
+                    }
+                    Bus.instance.fire(
+                      CollectionUpdatedEvent(
+                        0,
+                        <File>[],
+                        "empty_albums_deleted",
+                      ),
+                    );
+                    CollectionsService.instance.sync().ignore();
+                    _isCancelled = false;
+                  },
+                ),
+                ButtonWidget(
+                  labelText: "Cancel",
+                  buttonType: ButtonType.secondary,
+                  buttonSize: ButtonSize.large,
+                  shouldStickToDarkTheme: true,
+                  onTap: () async {
+                    _isCancelled = true;
                     Navigator.of(context, rootNavigator: true).pop();
-                  }
-                  Bus.instance.fire(
-                    CollectionUpdatedEvent(
-                      0,
-                      <File>[],
-                      "empty_albums_deleted",
-                    ),
-                  );
-                  CollectionsService.instance.sync().ignore();
-                  _isCancelled = false;
-                },
-              ),
-              ButtonWidget(
-                labelText: "Cancel",
-                buttonType: ButtonType.secondary,
-                buttonSize: ButtonSize.large,
-                shouldStickToDarkTheme: true,
-                onTap: () async {
-                  _isCancelled = true;
-                  Navigator.of(context, rootNavigator: true).pop();
-                },
-              )
-            ],
-            title: "Delete empty albums?",
-            body:
-                "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.",
-            actionSheetType: ActionSheetType.defaultActionSheet,
-          );
-        },
+                  },
+                )
+              ],
+              title: "Delete empty albums?",
+              body:
+                  "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.",
+              actionSheetType: ActionSheetType.defaultActionSheet,
+            );
+          },
+        ),
       ),
     );
   }
