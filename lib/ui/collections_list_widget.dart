@@ -52,7 +52,7 @@ class CollectionsListWidget extends StatefulWidget {
 }
 
 class _CollectionsListWidgetState extends State<CollectionsListWidget> {
-  final _logger = Logger("Logger");
+  final _logger = Logger("CollectionsListWidgetState");
 
   @override
   Widget build(BuildContext context) {
