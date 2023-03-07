@@ -22,13 +22,17 @@ class TextInputWidget extends StatefulWidget {
   final ValueNotifier? submitNotifier;
   final bool alwaysShowSuccessState;
   final bool showOnlyLoadingState;
-  final FutureVoidCallbackParamStr onSubmit;
+  final FutureVoidCallbackParamStr? onSubmit;
+  final VoidCallbackParamStr? onChange;
   final bool popNavAfterSubmission;
   final bool shouldSurfaceExecutionStates;
   final TextCapitalization? textCapitalization;
   final bool isPasswordInput;
+  final bool cancellable;
+  final bool shouldUnfocusOnCancelOrSubmit;
   const TextInputWidget({
-    required this.onSubmit,
+    this.onSubmit,
+    this.onChange,
     this.label,
     this.message,
     this.hintText,
@@ -44,6 +48,8 @@ class TextInputWidget extends StatefulWidget {
     this.shouldSurfaceExecutionStates = true,
     this.textCapitalization = TextCapitalization.none,
     this.isPasswordInput = false,
+    this.cancellable = false,
+    this.shouldUnfocusOnCancelOrSubmit = false,
     super.key,
   });
 
@@ -71,6 +77,9 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         selection: TextSelection.collapsed(offset: widget.initialValue!.length),
       );
     }
+    _textController.addListener(() {
+      widget.onChange!.call(_textController.text);
+    });
     _obscureTextNotifier = ValueNotifier(widget.isPasswordInput);
     _obscureTextNotifier.addListener(_safeRefresh);
     super.initState();
@@ -127,25 +136,38 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                 borderSide: BorderSide.none,
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: colorScheme.strokeMuted),
+                borderSide: BorderSide(color: colorScheme.strokeFaint),
                 borderRadius: BorderRadius.circular(8),
               ),
-              suffixIcon: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 175),
-                  switchInCurve: Curves.easeInExpo,
-                  switchOutCurve: Curves.easeOutExpo,
-                  child: SuffixIconWidget(
-                    key: ValueKey(executionState),
-                    executionState: executionState,
-                    shouldSurfaceExecutionStates:
-                        widget.shouldSurfaceExecutionStates,
-                    obscureTextNotifier: _obscureTextNotifier,
-                    isPasswordInput: widget.isPasswordInput,
-                  ),
-                ),
-              ),
+              suffixIcon: widget.cancellable
+                  ? GestureDetector(
+                      onTap: () {
+                        _textController.clear();
+                        if (widget.shouldUnfocusOnCancelOrSubmit) {
+                          FocusScope.of(context).unfocus();
+                        }
+                      },
+                      child: Icon(
+                        Icons.cancel_rounded,
+                        color: colorScheme.strokeMuted,
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 175),
+                        switchInCurve: Curves.easeInExpo,
+                        switchOutCurve: Curves.easeOutExpo,
+                        child: SuffixIconWidget(
+                          key: ValueKey(executionState),
+                          executionState: executionState,
+                          shouldSurfaceExecutionStates:
+                              widget.shouldSurfaceExecutionStates,
+                          obscureTextNotifier: _obscureTextNotifier,
+                          isPasswordInput: widget.isPasswordInput,
+                        ),
+                      ),
+                    ),
               prefixIconConstraints: const BoxConstraints(
                 maxHeight: 44,
                 maxWidth: 44,
@@ -209,8 +231,11 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         });
       }),
     );
+    if (widget.shouldUnfocusOnCancelOrSubmit) {
+      FocusScope.of(context).unfocus();
+    }
     try {
-      await widget.onSubmit.call(_textController.text);
+      await widget.onSubmit!.call(_textController.text);
     } catch (e) {
       executionState = ExecutionState.error;
       _debouncer.cancelDebounce();
