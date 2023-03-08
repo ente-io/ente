@@ -139,35 +139,26 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                 borderSide: BorderSide(color: colorScheme.strokeFaint),
                 borderRadius: BorderRadius.circular(8),
               ),
-              suffixIcon: widget.cancellable
-                  ? GestureDetector(
-                      onTap: () {
-                        _textController.clear();
-                        if (widget.shouldUnfocusOnCancelOrSubmit) {
-                          FocusScope.of(context).unfocus();
-                        }
-                      },
-                      child: Icon(
-                        Icons.cancel_rounded,
-                        color: colorScheme.strokeMuted,
-                      ),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 175),
-                        switchInCurve: Curves.easeInExpo,
-                        switchOutCurve: Curves.easeOutExpo,
-                        child: SuffixIconWidget(
-                          key: ValueKey(executionState),
-                          executionState: executionState,
-                          shouldSurfaceExecutionStates:
-                              widget.shouldSurfaceExecutionStates,
-                          obscureTextNotifier: _obscureTextNotifier,
-                          isPasswordInput: widget.isPasswordInput,
-                        ),
-                      ),
-                    ),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 175),
+                  switchInCurve: Curves.easeInExpo,
+                  switchOutCurve: Curves.easeOutExpo,
+                  child: SuffixIconWidget(
+                    key: ValueKey(executionState),
+                    executionState: executionState,
+                    shouldSurfaceExecutionStates:
+                        widget.shouldSurfaceExecutionStates,
+                    obscureTextNotifier: _obscureTextNotifier,
+                    isPasswordInput: widget.isPasswordInput,
+                    textController: _textController,
+                    isCancellable: widget.cancellable,
+                    shouldUnfocusOnCancelOrSubmit:
+                        widget.shouldUnfocusOnCancelOrSubmit,
+                  ),
+                ),
+              ),
               prefixIconConstraints: const BoxConstraints(
                 maxHeight: 44,
                 maxWidth: 44,
@@ -319,13 +310,20 @@ class _TextInputWidgetState extends State<TextInputWidget> {
 class SuffixIconWidget extends StatelessWidget {
   final ExecutionState executionState;
   final bool shouldSurfaceExecutionStates;
+  final TextEditingController textController;
   final ValueNotifier? obscureTextNotifier;
   final bool isPasswordInput;
+  final bool isCancellable;
+  final bool shouldUnfocusOnCancelOrSubmit;
+
   const SuffixIconWidget({
     required this.executionState,
     required this.shouldSurfaceExecutionStates,
+    required this.textController,
     this.obscureTextNotifier,
     this.isPasswordInput = false,
+    this.isCancellable = false,
+    this.shouldUnfocusOnCancelOrSubmit = false,
     super.key,
   });
 
@@ -335,7 +333,20 @@ class SuffixIconWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     if (executionState == ExecutionState.idle ||
         !shouldSurfaceExecutionStates) {
-      if (isPasswordInput) {
+      if (isCancellable) {
+        trailingWidget = GestureDetector(
+          onTap: () {
+            textController.clear();
+            if (shouldUnfocusOnCancelOrSubmit) {
+              FocusScope.of(context).unfocus();
+            }
+          },
+          child: Icon(
+            Icons.cancel_rounded,
+            color: colorScheme.strokeMuted,
+          ),
+        );
+      } else if (isPasswordInput) {
         assert(obscureTextNotifier != null);
         trailingWidget = GestureDetector(
           onTap: () {
