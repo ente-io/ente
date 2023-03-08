@@ -66,8 +66,11 @@ class ArchivePage extends StatelessWidget {
       emptyState: const EmptyState(
         text: "You don't have any archived items.",
       ),
-      header: AlbumHorizontalListWidget(
-        CollectionsService.instance.getArchivedCollectionWithThumb,
+      header: Padding(
+        padding: const EdgeInsets.only(bottom: 24, top: 8),
+        child: AlbumHorizontalListWidget(
+          CollectionsService.instance.getArchivedCollectionWithThumb,
+        ),
       ),
     );
     return Scaffold(
