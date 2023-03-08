@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -57,18 +58,20 @@ const kBackgroundLockLatency = Duration(seconds: 3);
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
-  await _runInForeground();
+  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+  await _runInForeground(savedThemeMode);
   BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);
 }
 
-Future<void> _runInForeground() async {
+Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
     unawaited(_scheduleFGSync('appStart in FG'));
     runApp(
       AppLock(
-        builder: (args) => const EnteApp(_runBackgroundTask, _killBGTask),
+        builder: (args) =>
+            EnteApp(_runBackgroundTask, _killBGTask, savedThemeMode),
         lockScreen: const LockScreen(),
         enabled: Configuration.instance.shouldShowLockScreen(),
         lightTheme: lightThemeData,
