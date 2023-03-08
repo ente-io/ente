@@ -61,11 +61,6 @@ export interface TwoFactorSecret {
     qrCode: string;
 }
 
-export interface TwoFactorRecoveryResponse {
-    encryptedSecret: string;
-    secretDecryptionNonce: string;
-}
-
 export interface FamilyMember {
     email: string;
     usage: number;
