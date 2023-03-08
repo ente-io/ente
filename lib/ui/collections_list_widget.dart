@@ -27,7 +27,7 @@ import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
-class CollectionsListWidget extends StatefulWidget {
+class CollectionsListWidget extends StatelessWidget {
   final List<CollectionWithThumbnail> collectionsWithThumbnail;
   final CollectionActionType actionType;
   final bool showOptionToCreateNewAlbum;
@@ -36,7 +36,7 @@ class CollectionsListWidget extends StatefulWidget {
   final String searchQuery;
   final bool shouldShowCreateAlbum;
 
-  const CollectionsListWidget(
+  CollectionsListWidget(
     this.collectionsWithThumbnail,
     this.actionType,
     this.showOptionToCreateNewAlbum,
@@ -47,38 +47,33 @@ class CollectionsListWidget extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
-  @override
-  State<CollectionsListWidget> createState() => _CollectionsListWidgetState();
-}
-
-class _CollectionsListWidgetState extends State<CollectionsListWidget> {
   final _logger = Logger("CollectionsListWidgetState");
 
   @override
   Widget build(BuildContext context) {
-    final filesCount = widget.sharedFiles != null
-        ? widget.sharedFiles!.length
-        : widget.selectedFiles?.files.length ?? 0;
+    final filesCount = sharedFiles != null
+        ? sharedFiles!.length
+        : selectedFiles?.files.length ?? 0;
 
-    if (widget.collectionsWithThumbnail.isEmpty) {
+    if (collectionsWithThumbnail.isEmpty) {
       return const EmptyState();
     }
     return ListView.separated(
       itemBuilder: (context, index) {
-        if (index == 0 && widget.shouldShowCreateAlbum) {
+        if (index == 0 && shouldShowCreateAlbum) {
           return GestureDetector(
             onTap: () async {
-              await _createNewAlbumOnTap(filesCount);
+              await _createNewAlbumOnTap(context, filesCount);
             },
             behavior: HitTestBehavior.opaque,
             child: const NewAlbumListItemWidget(),
           );
         }
-        final item = widget.collectionsWithThumbnail[
-            index - (widget.shouldShowCreateAlbum ? 1 : 0)];
+        final item =
+            collectionsWithThumbnail[index - (shouldShowCreateAlbum ? 1 : 0)];
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => _albumListItemOnTap(item),
+          onTap: () => _albumListItemOnTap(context, item),
           child: AlbumListItemWidget(
             item,
           ),
@@ -87,21 +82,26 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
       separatorBuilder: (context, index) => const SizedBox(
         height: 8,
       ),
-      itemCount: widget.collectionsWithThumbnail.length +
-          (widget.shouldShowCreateAlbum ? 1 : 0),
+      itemCount:
+          collectionsWithThumbnail.length + (shouldShowCreateAlbum ? 1 : 0),
       shrinkWrap: true,
       physics: const BouncingScrollPhysics(),
     );
   }
 
-  Future<void> _createNewAlbumOnTap(int filesCount) async {
+  Future<void> _createNewAlbumOnTap(
+    BuildContext context,
+    int filesCount,
+  ) async {
     if (filesCount > 0) {
       final result = await showTextInputDialog(
         context,
         title: "Album title",
         submitButtonLabel: "OK",
         hintText: "Enter album name",
-        onSubmit: _nameAlbum,
+        onSubmit: (name) {
+          return _nameAlbum(context, name);
+        },
         showOnlyLoadingState: true,
         textCapitalization: TextCapitalization.words,
       );
@@ -130,15 +130,16 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
     }
   }
 
-  Future<void> _nameAlbum(String albumName) async {
+  Future<void> _nameAlbum(BuildContext context, String albumName) async {
     if (albumName.isNotEmpty) {
       final collection = await _createAlbum(albumName);
       if (collection != null) {
         if (await _runCollectionAction(
-          collection: collection,
+          context,
+          collection,
           showProgressDialog: false,
         )) {
-          if (widget.actionType == CollectionActionType.restoreFiles) {
+          if (actionType == CollectionActionType.restoreFiles) {
             showShortToast(
               context,
               'Restored files to album ' + albumName,
@@ -149,7 +150,7 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
               "Album '" + albumName + "' created.",
             );
           }
-          _navigateToCollection(collection);
+          _navigateToCollection(context, collection);
         }
       }
     }
@@ -166,16 +167,19 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
     return collection;
   }
 
-  Future<void> _albumListItemOnTap(CollectionWithThumbnail item) async {
-    if (await _runCollectionAction(collection: item.collection)) {
+  Future<void> _albumListItemOnTap(
+    BuildContext context,
+    CollectionWithThumbnail item,
+  ) async {
+    if (await _runCollectionAction(context, item.collection)) {
       late final String toastMessage;
       bool shouldNavigateToCollection = false;
-      if (widget.actionType == CollectionActionType.addFiles) {
+      if (actionType == CollectionActionType.addFiles) {
         toastMessage = "Added successfully to " + item.collection.name!;
         shouldNavigateToCollection = true;
-      } else if (widget.actionType == CollectionActionType.moveFiles ||
-          widget.actionType == CollectionActionType.restoreFiles ||
-          widget.actionType == CollectionActionType.unHide) {
+      } else if (actionType == CollectionActionType.moveFiles ||
+          actionType == CollectionActionType.restoreFiles ||
+          actionType == CollectionActionType.unHide) {
         toastMessage = "Moved successfully to " + item.collection.name!;
         shouldNavigateToCollection = true;
       } else {
@@ -189,36 +193,39 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
       }
       if (shouldNavigateToCollection) {
         _navigateToCollection(
+          context,
           item.collection,
         );
       }
     }
   }
 
-  Future<bool> _runCollectionAction({
-    required Collection collection,
+  Future<bool> _runCollectionAction(
+    BuildContext context,
+    Collection collection, {
     bool showProgressDialog = true,
   }) async {
-    switch (widget.actionType) {
+    switch (actionType) {
       case CollectionActionType.addFiles:
         return _addToCollection(
-          collectionID: collection.id,
-          showProgressDialog: showProgressDialog,
+          context,
+          collection.id,
+          showProgressDialog,
         );
       case CollectionActionType.moveFiles:
-        return _moveFilesToCollection(collection.id);
+        return _moveFilesToCollection(context, collection.id);
       case CollectionActionType.unHide:
-        return _moveFilesToCollection(collection.id);
+        return _moveFilesToCollection(context, collection.id);
       case CollectionActionType.restoreFiles:
-        return _restoreFilesToCollection(collection.id);
+        return _restoreFilesToCollection(context, collection.id);
       case CollectionActionType.shareCollection:
-        return _showShareCollectionPage(collection);
+        return _showShareCollectionPage(context, collection);
       case CollectionActionType.collectPhotos:
-        return _createCollaborativeLink(collection);
+        return _createCollaborativeLink(context, collection);
     }
   }
 
-  void _navigateToCollection(Collection collection) {
+  void _navigateToCollection(BuildContext context, Collection collection) {
     Navigator.pop(context);
     routeToPage(
       context,
@@ -228,7 +235,10 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
     );
   }
 
-  Future<bool> _createCollaborativeLink(Collection collection) async {
+  Future<bool> _createCollaborativeLink(
+    BuildContext context,
+    Collection collection,
+  ) async {
     final CollectionActions collectionActions =
         CollectionActions(CollectionsService.instance);
 
@@ -291,7 +301,10 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
     return result;
   }
 
-  Future<bool> _showShareCollectionPage(Collection collection) {
+  Future<bool> _showShareCollectionPage(
+    BuildContext context,
+    Collection collection,
+  ) {
     if (Configuration.instance.getUserID() == collection.owner!.id) {
       unawaited(
         routeToPage(
@@ -306,10 +319,11 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
     return Future.value(true);
   }
 
-  Future<bool> _addToCollection({
-    required int collectionID,
-    required bool showProgressDialog,
-  }) async {
+  Future<bool> _addToCollection(
+    BuildContext context,
+    int collectionID,
+    bool showProgressDialog,
+  ) async {
     final dialog = showProgressDialog
         ? createProgressDialog(
             context,
@@ -323,15 +337,15 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
       final List<File> files = [];
       final List<File> filesPendingUpload = [];
       final int currentUserID = Configuration.instance.getUserID()!;
-      if (widget.sharedFiles != null) {
+      if (sharedFiles != null) {
         filesPendingUpload.addAll(
           await convertIncomingSharedMediaToFile(
-            widget.sharedFiles!,
+            sharedFiles!,
             collectionID,
           ),
         );
       } else {
-        for (final file in widget.selectedFiles!.files) {
+        for (final file in selectedFiles!.files) {
           File? currentFile;
           if (file.uploadedFileID != null) {
             currentFile = file;
@@ -376,7 +390,7 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
       }
       RemoteSyncService.instance.sync(silently: true);
       await dialog?.hide();
-      widget.selectedFiles?.clearAll();
+      selectedFiles?.clearAll();
       return true;
     } catch (e, s) {
       _logger.severe("Failed to add to album", e, s);
@@ -386,23 +400,25 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
     }
   }
 
-  Future<bool> _moveFilesToCollection(int toCollectionID) async {
-    final String message = widget.actionType == CollectionActionType.moveFiles
+  Future<bool> _moveFilesToCollection(
+    BuildContext context,
+    int toCollectionID,
+  ) async {
+    final String message = actionType == CollectionActionType.moveFiles
         ? "Moving files to album..."
         : "Unhiding files to album";
     final dialog = createProgressDialog(context, message, isDismissible: true);
     await dialog.show();
     try {
-      final int fromCollectionID =
-          widget.selectedFiles!.files.first.collectionID!;
+      final int fromCollectionID = selectedFiles!.files.first.collectionID!;
       await CollectionsService.instance.move(
         toCollectionID,
         fromCollectionID,
-        widget.selectedFiles!.files.toList(),
+        selectedFiles!.files.toList(),
       );
       await dialog.hide();
       RemoteSyncService.instance.sync(silently: true);
-      widget.selectedFiles?.clearAll();
+      selectedFiles?.clearAll();
 
       return true;
     } on AssertionError catch (e) {
@@ -417,7 +433,10 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
     }
   }
 
-  Future<bool> _restoreFilesToCollection(int toCollectionID) async {
+  Future<bool> _restoreFilesToCollection(
+    BuildContext context,
+    int toCollectionID,
+  ) async {
     final dialog = createProgressDialog(
       context,
       "Restoring files...",
@@ -426,9 +445,9 @@ class _CollectionsListWidgetState extends State<CollectionsListWidget> {
     await dialog.show();
     try {
       await CollectionsService.instance
-          .restore(toCollectionID, widget.selectedFiles!.files.toList());
+          .restore(toCollectionID, selectedFiles!.files.toList());
       RemoteSyncService.instance.sync(silently: true);
-      widget.selectedFiles?.clearAll();
+      selectedFiles?.clearAll();
       await dialog.hide();
       return true;
     } on AssertionError catch (e) {
