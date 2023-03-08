@@ -6,7 +6,6 @@ import { useRouter } from 'next/router';
 import VerifyTwoFactor, {
     VerifyTwoFactorCallback,
 } from 'components/TwoFactor/VerifyForm';
-import { encryptWithRecoveryKey } from 'utils/crypto';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
 import { TwoFactorSecret } from 'types/user';
@@ -45,10 +44,7 @@ export default function SetupTwoFactor() {
         otp: string,
         markSuccessful
     ) => {
-        const recoveryEncryptedTwoFactorSecret = await encryptWithRecoveryKey(
-            twoFactorSecret.secretCode
-        );
-        await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
+        await enableTwoFactor(otp);
         await markSuccessful();
         setData(LS_KEYS.USER, {
             ...getData(LS_KEYS.USER),

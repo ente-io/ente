@@ -2,8 +2,9 @@ import VerifyTwoFactor, {
     VerifyTwoFactorCallback,
 } from 'components/TwoFactor/VerifyForm';
 import router from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { logoutUser, verifyTwoFactor } from 'services/userService';
+import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import { User } from 'types/user';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
@@ -16,6 +17,7 @@ import FormPaperFooter from 'components/Form/FormPaper/Footer';
 
 export default function Home() {
     const [sessionID, setSessionID] = useState('');
+    const appContext = useContext(AppContext);
 
     useEffect(() => {
         const main = async () => {
@@ -34,6 +36,14 @@ export default function Home() {
         };
         main();
     }, []);
+
+    const showContactSupport = () => {
+        appContext.setDialogMessage({
+            title: constants.CONTACT_SUPPORT,
+            close: {},
+            content: constants.NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE(),
+        });
+    };
 
     const onSubmit: VerifyTwoFactorCallback = async (otp) => {
         try {
@@ -65,8 +75,7 @@ export default function Home() {
                 />
 
                 <FormPaperFooter>
-                    <LinkButton
-                        onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}>
+                    <LinkButton onClick={showContactSupport}>
                         {constants.LOST_DEVICE}
                     </LinkButton>
                 </FormPaperFooter>
