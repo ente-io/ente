@@ -181,6 +181,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                     ),
                   )
                 : _getIncomingCollectionEmptyState(),
+            const SizedBox(height: 16),
             const SectionTitle(title: "Shared by me"),
             const SizedBox(height: 12),
             collections.outgoing.isNotEmpty

@@ -27,7 +27,7 @@ class SectionTitle extends StatelessWidget {
       child = const SizedBox.shrink();
     }
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 0, 0),
+      margin: const EdgeInsets.only(left: 16),
       child: Column(
         children: [
           Align(
