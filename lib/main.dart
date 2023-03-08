@@ -77,9 +77,17 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
         backgroundLockLatency: kBackgroundLockLatency,
+        savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
   });
+}
+
+ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
+  if (savedThemeMode == null) return ThemeMode.system;
+  if (savedThemeMode.isLight) return ThemeMode.light;
+  if (savedThemeMode.isDark) return ThemeMode.dark;
+  return ThemeMode.system;
 }
 
 Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
