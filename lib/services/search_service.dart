@@ -277,7 +277,7 @@ class SearchService {
       final locationJson = json.decode(location);
       final locationName = locationJson["name"].toString();
       _logger.info(locationName);
-      if (locationName.contains(query)) {
+      if (locationName.toLowerCase().contains(query.toLowerCase())) {
         _logger.info("TRUEEE");
         final fileIDs = LocationService.instance
             .getFilesByLocation(locationJson["id"].toString());
