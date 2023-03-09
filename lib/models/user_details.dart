@@ -52,7 +52,8 @@ class UserDetails {
   }
 
   int getTotalStorage() {
-    return isPartOfFamily() ? familyData!.storage : subscription.storage;
+    return (isPartOfFamily() ? familyData!.storage : subscription.storage) +
+        storageBonus;
   }
 
   factory UserDetails.fromMap(Map<String, dynamic> map) {
