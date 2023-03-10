@@ -23,7 +23,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
-import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';

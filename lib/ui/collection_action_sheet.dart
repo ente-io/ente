@@ -14,7 +14,7 @@ import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/collections_list_widget.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
-import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/components/text_input_widget.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';

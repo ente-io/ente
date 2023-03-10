@@ -5,7 +5,7 @@ import "package:photos/models/file_type.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
-import "package:photos/ui/components/button_widget.dart";
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file/file_info_widget.dart";
 import "package:photos/utils/delete_file_util.dart";

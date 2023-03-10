@@ -7,7 +7,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/collection_action_sheet.dart';
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
-import 'package:photos/ui/components/icon_button_widget.dart';
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/viewer/actions/file_selection_actions_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';

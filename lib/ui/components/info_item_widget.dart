@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:photos/ui/components/icon_button_widget.dart";
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/utils/separators_util.dart";
 
 ///https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=8113-59605&t=OMX5f5KdDJYWSQQN-4
