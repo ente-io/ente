@@ -10,7 +10,7 @@ class InfoItemWidget extends StatelessWidget {
   final List<Widget> subtitle;
   const InfoItemWidget({
     required this.leadingIcon,
-    required this.editOnTap,
+    this.editOnTap,
     required this.title,
     required this.subtitle,
     super.key,
@@ -51,11 +51,13 @@ class InfoItemWidget extends StatelessWidget {
             ],
           ),
         ),
-        IconButtonWidget(
-          icon: Icons.edit,
-          iconButtonType: IconButtonType.secondary,
-          onTap: editOnTap,
-        ),
+        editOnTap != null
+            ? IconButtonWidget(
+                icon: Icons.edit,
+                iconButtonType: IconButtonType.secondary,
+                onTap: editOnTap,
+              )
+            : const SizedBox.shrink(),
       ],
     );
   }
