@@ -15,6 +15,7 @@ import "package:photos/models/file_type.dart";
 import "package:photos/models/gallery_type.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/feature_flag_service.dart";
+import "package:photos/services/object_detection/object_detection_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
@@ -23,7 +24,6 @@ import 'package:photos/ui/components/divider_widget.dart';
 import "package:photos/ui/components/info_item_widget.dart";
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
-import "package:photos/ui/viewer/file/object_tags_widget.dart";
 import 'package:photos/ui/viewer/file/raw_exif_list_tile_widget.dart';
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/date_time_util.dart";
@@ -31,6 +31,7 @@ import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/thumbnail_util.dart";
 
 class FileInfoWidget extends StatefulWidget {
   final File file;
@@ -200,13 +201,12 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         hasChipButtons: true,
       ),
       FeatureFlagService.instance.isInternalUserOrDebugBuild()
-          ? SizedBox(
-              height: 62,
-              child: ListTile(
-                horizontalTitleGap: 0,
-                leading: const Icon(Icons.image_search),
-                title: ObjectTagsWidget(file),
-              ),
+          ? InfoItemWidget(
+              key: const ValueKey("Objects"),
+              leadingIcon: Icons.image_search_outlined,
+              title: "Objects",
+              subtitleSection: _objectTags(file),
+              hasChipButtons: true,
             )
           : null,
       (file.uploadedFileID != null && file.updationTime != null)
@@ -279,6 +279,30 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         ),
       ),
     );
+  }
+
+  Future<List<ChipButtonWidget>> _objectTags(File file) async {
+    try {
+      final chipButtons = <ChipButtonWidget>[];
+      final objectTags = await getThumbnail(file).then((data) {
+        return ObjectDetectionService.instance.predict(data!);
+      });
+      for (String objectTag in objectTags) {
+        chipButtons.add(ChipButtonWidget(objectTag));
+      }
+      if (chipButtons.isEmpty) {
+        return const [
+          ChipButtonWidget(
+            "No result",
+            noChips: true,
+          )
+        ];
+      }
+      return chipButtons;
+    } catch (e, s) {
+      Logger("FileInfoWidget").info(e, s);
+      return [];
+    }
   }
 
   Future<List<ChipButtonWidget>> _deviceFoldersListOfFile(

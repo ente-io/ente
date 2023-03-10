@@ -1,14 +1,17 @@
 import "package:flutter/material.dart";
 import "package:photos/theme/ente_theme.dart";
 
+///https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=8119%3A59513&t=gQa1to5jY89Qk1k7-4
 class ChipButtonWidget extends StatelessWidget {
   final String? label;
   final IconData? leadingIcon;
   final VoidCallback? onTap;
+  final bool noChips;
   const ChipButtonWidget(
     this.label, {
     this.leadingIcon,
     this.onTap,
+    this.noChips = false,
     super.key,
   });
 
@@ -17,6 +20,7 @@ class ChipButtonWidget extends StatelessWidget {
     return GestureDetector(
       onTap: onTap?.call,
       child: Container(
+        width: noChips ? double.infinity : null,
         decoration: BoxDecoration(
           color: getEnteColorScheme(context).fillFaint,
           borderRadius: const BorderRadius.all(Radius.circular(4)),
