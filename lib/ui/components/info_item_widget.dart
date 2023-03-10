@@ -1,26 +1,26 @@
 import "package:flutter/material.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
-import "package:photos/utils/separators_util.dart";
 
 ///https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=8113-59605&t=OMX5f5KdDJYWSQQN-4
 class InfoItemWidget extends StatelessWidget {
   final IconData leadingIcon;
   final VoidCallback? editOnTap;
   final String title;
-  final List<Widget> subtitle;
+  final Future<List<Widget>> subtitle;
+  final bool hasChipButtons;
   const InfoItemWidget({
     required this.leadingIcon,
     this.editOnTap,
     required this.title,
     required this.subtitle,
+    this.hasChipButtons = false,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    //if subtitle has list of ChipButtons, set whitespace width to 12pts
-    final subtitleWithSeparators =
-        addSeparators(subtitle, const SizedBox(width: 8));
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,10 +40,36 @@ class InfoItemWidget extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      //modify textStyle if subtitle has list of ChipButtons
-                      Text(title),
-                      const SizedBox(height: 4),
-                      Flexible(child: Wrap(children: subtitleWithSeparators)),
+                      Text(
+                        title,
+                        style: hasChipButtons
+                            ? getEnteTextTheme(context).smallMuted
+                            : getEnteTextTheme(context).body,
+                      ),
+                      SizedBox(height: hasChipButtons ? 8 : 4),
+                      Flexible(
+                        child: FutureBuilder(
+                          future: subtitle,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              final subtitle = snapshot.data as List<Widget>;
+                              if (subtitle.isNotEmpty) {
+                                return Wrap(
+                                  runSpacing: 8,
+                                  spacing: 8,
+                                  children: subtitle,
+                                );
+                              } else {
+                                return const SizedBox.shrink();
+                              }
+                            } else {
+                              return const EnteLoadingWidget(
+                                is20pts: true,
+                              );
+                            }
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 ),

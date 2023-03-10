@@ -2,29 +2,35 @@ import "package:exif/exif.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import "package:logging/logging.dart";
 import 'package:path/path.dart' as path;
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/ente_theme_data.dart";
+import "package:photos/models/collection.dart";
+import "package:photos/models/collection_items.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
+import "package:photos/models/gallery_type.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import "package:photos/ui/components/info_item_widget.dart";
 import 'package:photos/ui/components/title_bar_widget.dart';
-import 'package:photos/ui/viewer/file/collections_list_of_file_widget.dart';
-import 'package:photos/ui/viewer/file/device_folders_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
 import "package:photos/ui/viewer/file/object_tags_widget.dart";
 import 'package:photos/ui/viewer/file/raw_exif_list_tile_widget.dart';
+import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class FileInfoWidget extends StatefulWidget {
   final File file;
@@ -115,12 +121,12 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         title: getFullDate(
           DateTime.fromMicrosecondsSinceEpoch(file.creationTime!),
         ),
-        subtitle: [
+        subtitle: Future.value([
           Text(
             getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
             style: subtitleTextTheme,
           ),
-        ],
+        ]),
         editOnTap: ((widget.file.ownerID == null ||
                     widget.file.ownerID == _currentUserID) &&
                 widget.file.uploadedFileID != null)
@@ -134,20 +140,18 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             _isImage ? Icons.photo_outlined : Icons.video_camera_back_outlined,
         title: path.basenameWithoutExtension(file.displayName) +
             path.extension(file.displayName).toUpperCase(),
-        subtitle: [
-          showDimension
-              ? Text(
-                  "${_exifData["megaPixels"]}MP  "
-                  "${_exifData["resolution"]}  ",
-                  style: subtitleTextTheme,
-                )
-              : const SizedBox.shrink(),
+        subtitle: Future.value([
+          if (showDimension)
+            Text(
+              "${_exifData["megaPixels"]}MP  "
+              "${_exifData["resolution"]}  ",
+              style: subtitleTextTheme,
+            ),
           _getFileSize(),
-          (file.fileType == FileType.video) &&
-                  (file.localID != null || file.duration != 0)
-              ? _getVideoDuration()
-              : const SizedBox.shrink(),
-        ],
+          if ((file.fileType == FileType.video) &&
+              (file.localID != null || file.duration != 0))
+            _getVideoDuration(),
+        ]),
         editOnTap: file.uploadedFileID == null || file.ownerID != _currentUserID
             ? null
             : () async {
@@ -159,46 +163,37 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ? InfoItemWidget(
               leadingIcon: Icons.camera_outlined,
               title: _exifData["takenOnDevice"] ?? "--",
-              subtitle: [
-                _exifData["fNumber"] != null
-                    ? Text(
-                        'ƒ/' + _exifData["fNumber"].toString(),
-                        style: subtitleTextTheme,
-                      )
-                    : const SizedBox.shrink(),
-                _exifData["exposureTime"] != null
-                    ? Text(
-                        _exifData["exposureTime"],
-                        style: subtitleTextTheme,
-                      )
-                    : const SizedBox.shrink(),
-                _exifData["focalLength"] != null
-                    ? Text(
-                        _exifData["focalLength"].toString() + "mm",
-                        style: subtitleTextTheme,
-                      )
-                    : const SizedBox.shrink(),
-                _exifData["ISO"] != null
-                    ? Text(
-                        "ISO" + _exifData["ISO"].toString(),
-                        style: subtitleTextTheme,
-                      )
-                    : const SizedBox.shrink(),
-              ],
+              subtitle: Future.value([
+                if (_exifData["fNumber"] != null)
+                  Text(
+                    'ƒ/' + _exifData["fNumber"].toString(),
+                    style: subtitleTextTheme,
+                  ),
+                if (_exifData["exposureTime"] != null)
+                  Text(
+                    _exifData["exposureTime"],
+                    style: subtitleTextTheme,
+                  ),
+                if (_exifData["focalLength"] != null)
+                  Text(
+                    _exifData["focalLength"].toString() + "mm",
+                    style: subtitleTextTheme,
+                  ),
+                if (_exifData["ISO"] != null)
+                  Text(
+                    "ISO" + _exifData["ISO"].toString(),
+                    style: subtitleTextTheme,
+                  ),
+              ]),
             )
           : null,
-      SizedBox(
-        height: 62,
-        child: ListTile(
-          horizontalTitleGap: 0,
-          leading: const Icon(Icons.folder_outlined),
-          title: fileIsBackedup
-              ? CollectionsListOfFileWidget(
-                  allCollectionIDsOfFile,
-                  _currentUserID!,
-                )
-              : DeviceFoldersListOfFileWidget(allDeviceFoldersOfFile),
-        ),
+      InfoItemWidget(
+        leadingIcon: Icons.folder_outlined,
+        title: "Albums",
+        subtitle: fileIsBackedup
+            ? _collectionsListOfFile(allCollectionIDsOfFile, _currentUserID!)
+            : _deviceFoldersListOfFile(allDeviceFoldersOfFile),
+        hasChipButtons: true,
       ),
       FeatureFlagService.instance.isInternalUserOrDebugBuild()
           ? SizedBox(
@@ -216,14 +211,14 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               title: getFullDate(
                 DateTime.fromMicrosecondsSinceEpoch(file.updationTime!),
               ),
-              subtitle: [
+              subtitle: Future.value([
                 Text(
                   getTimeIn12hrFormat(dateTimeForUpdationTime) +
                       "  " +
                       dateTimeForUpdationTime.timeZoneName,
                   style: subtitleTextTheme,
                 ),
-              ],
+              ]),
             )
           : null,
       _isImage ? RawExifListTileWidget(_exif, widget.file) : null,
@@ -279,6 +274,65 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         ),
       ),
     );
+  }
+
+  Future<List<ChipButtonWidget>> _deviceFoldersListOfFile(
+    Future<Set<String>> allDeviceFoldersOfFile,
+  ) async {
+    try {
+      final chipButtons = <ChipButtonWidget>[];
+      final List<String> deviceFolders =
+          (await allDeviceFoldersOfFile).toList();
+      for (var deviceFolder in deviceFolders) {
+        chipButtons.add(
+          ChipButtonWidget(
+            deviceFolder,
+          ),
+        );
+      }
+      return chipButtons;
+    } catch (e, s) {
+      Logger("FileInfoWidget").info(e, s);
+      return [];
+    }
+  }
+
+  Future<List<ChipButtonWidget>> _collectionsListOfFile(
+    Future<Set<int>> allCollectionIDsOfFile,
+    int currentUserID,
+  ) async {
+    try {
+      final chipButtons = <ChipButtonWidget>[];
+      final Set<int> collectionIDs = await allCollectionIDsOfFile;
+      final collections = <Collection>[];
+      for (var collectionID in collectionIDs) {
+        final c = CollectionsService.instance.getCollectionByID(collectionID);
+        collections.add(c!);
+        chipButtons.add(
+          ChipButtonWidget(
+            c.isHidden() ? "Hidden" : c.name,
+            onTap: () {
+              if (c.isHidden()) {
+                return;
+              }
+              routeToPage(
+                context,
+                CollectionPage(
+                  CollectionWithThumbnail(c, null),
+                  appBarType: c.isOwner(currentUserID)
+                      ? GalleryType.ownedCollection
+                      : GalleryType.sharedCollection,
+                ),
+              );
+            },
+          ),
+        );
+      }
+      return chipButtons;
+    } catch (e, s) {
+      Logger("FileInfoWidget").info(e, s);
+      return [];
+    }
   }
 
   Widget addedBy(File file) {
@@ -364,12 +418,11 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             style: getEnteTextTheme(context).smallMuted,
           );
         } else {
-          return Center(
-            child: SizedBox.fromSize(
-              size: const Size.square(24),
-              child: const CupertinoActivityIndicator(
-                radius: 8,
-              ),
+          return SizedBox.fromSize(
+            size: const Size.square(16),
+            child: EnteLoadingWidget(
+              is20pts: true,
+              color: getEnteColorScheme(context).strokeMuted,
             ),
           );
         }
