@@ -155,9 +155,11 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                             prefixIcon: Icons.search_rounded,
                             autoFocus: true,
                             onChange: (value) {
-                              setState(() {
-                                _searchQuery = value;
-                              });
+                              value != _searchQuery
+                                  ? setState(() {
+                                      _searchQuery = value;
+                                    })
+                                  : null;
                             },
                             cancellable: true,
                             shouldUnfocusOnCancelOrSubmit: true,
