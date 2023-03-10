@@ -8,13 +8,13 @@ class InfoItemWidget extends StatelessWidget {
   final IconData leadingIcon;
   final VoidCallback? editOnTap;
   final String title;
-  final Future<List<Widget>> subtitle;
+  final Future<List<Widget>> subtitleSection;
   final bool hasChipButtons;
   const InfoItemWidget({
     required this.leadingIcon,
     this.editOnTap,
     required this.title,
-    required this.subtitle,
+    required this.subtitleSection,
     this.hasChipButtons = false,
     super.key,
   });
@@ -49,7 +49,7 @@ class InfoItemWidget extends StatelessWidget {
                       SizedBox(height: hasChipButtons ? 8 : 4),
                       Flexible(
                         child: FutureBuilder(
-                          future: subtitle,
+                          future: subtitleSection,
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
                               final subtitle = snapshot.data as List<Widget>;

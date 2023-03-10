@@ -121,7 +121,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         title: getFullDate(
           DateTime.fromMicrosecondsSinceEpoch(file.creationTime!),
         ),
-        subtitle: Future.value([
+        subtitleSection: Future.value([
           Text(
             getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
             style: subtitleTextTheme,
@@ -140,7 +140,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             _isImage ? Icons.photo_outlined : Icons.video_camera_back_outlined,
         title: path.basenameWithoutExtension(file.displayName) +
             path.extension(file.displayName).toUpperCase(),
-        subtitle: Future.value([
+        subtitleSection: Future.value([
           if (showDimension)
             Text(
               "${_exifData["megaPixels"]}MP  "
@@ -163,7 +163,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ? InfoItemWidget(
               leadingIcon: Icons.camera_outlined,
               title: _exifData["takenOnDevice"] ?? "--",
-              subtitle: Future.value([
+              subtitleSection: Future.value([
                 if (_exifData["fNumber"] != null)
                   Text(
                     'ƒ/' + _exifData["fNumber"].toString(),
@@ -190,7 +190,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       InfoItemWidget(
         leadingIcon: Icons.folder_outlined,
         title: "Albums",
-        subtitle: fileIsBackedup
+        subtitleSection: fileIsBackedup
             ? _collectionsListOfFile(allCollectionIDsOfFile, _currentUserID!)
             : _deviceFoldersListOfFile(allDeviceFoldersOfFile),
         hasChipButtons: true,
@@ -211,7 +211,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               title: getFullDate(
                 DateTime.fromMicrosecondsSinceEpoch(file.updationTime!),
               ),
-              subtitle: Future.value([
+              subtitleSection: Future.value([
                 Text(
                   getTimeIn12hrFormat(dateTimeForUpdationTime) +
                       "  " +
