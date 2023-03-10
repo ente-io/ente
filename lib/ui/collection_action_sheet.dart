@@ -153,7 +153,6 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                           child: TextInputWidget(
                             hintText: "Album name",
                             prefixIcon: Icons.search_rounded,
-                            autoFocus: true,
                             onChange: (value) {
                               setState(() {
                                 _searchQuery = value;
