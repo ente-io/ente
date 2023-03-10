@@ -285,7 +285,6 @@ export interface MLSyncConfig extends Config {
     faceClustering: FaceClusteringConfig;
     objectDetection: ObjectDetectionConfig;
     sceneDetection: SceneDetectionConfig;
-    textDetection: TextDetectionConfig;
     tsne?: TSNEConfig;
     mlVersion: number;
 }
@@ -307,7 +306,6 @@ export interface MLSyncContext {
     faceClusteringService: ClusteringService;
     objectDetectionService: ObjectDetectionService;
     sceneDetectionService: SceneDetectionService;
-    textDetectionService: TextDetectionService;
 
     localFilesMap: Map<number, EnteFile>;
     outOfSyncFiles: EnteFile[];
@@ -315,7 +313,6 @@ export interface MLSyncContext {
     nSyncedFaces: number;
     allSyncedFacesMap?: Map<number, Array<Face>>;
     allSyncedObjectsMap?: Map<number, Array<RealWorldObject>>;
-    allSyncedTextMap?: Map<number, Array<DetectedText>>;
     tsne?: any;
 
     error?: Error;
