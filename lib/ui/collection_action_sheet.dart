@@ -201,33 +201,33 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     return Flexible(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
-        child: Scrollbar(
-          thumbVisibility: true,
-          radius: const Radius.circular(2),
-          child: Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: FutureBuilder(
-              future: _getCollectionsWithThumbnail(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  //Need to show an error on the UI here
-                  return const SizedBox.shrink();
-                } else if (snapshot.hasData) {
-                  final collectionsWithThumbnail =
-                      snapshot.data as List<CollectionWithThumbnail>;
-                  _removeIncomingCollections(collectionsWithThumbnail);
-                  final shouldShowCreateAlbum =
-                      widget.showOptionToCreateNewAlbum && _searchQuery.isEmpty;
-                  final searchResults = _searchQuery.isNotEmpty
-                      ? collectionsWithThumbnail
-                          .where(
-                            (element) => element.collection.name!
-                                .toLowerCase()
-                                .contains(_searchQuery),
-                          )
-                          .toList()
-                      : collectionsWithThumbnail;
-                  return CollectionsListWidget(
+        child: FutureBuilder(
+          future: _getCollectionsWithThumbnail(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              //Need to show an error on the UI here
+              return const SizedBox.shrink();
+            } else if (snapshot.hasData) {
+              final collectionsWithThumbnail =
+                  snapshot.data as List<CollectionWithThumbnail>;
+              _removeIncomingCollections(collectionsWithThumbnail);
+              final shouldShowCreateAlbum =
+                  widget.showOptionToCreateNewAlbum && _searchQuery.isEmpty;
+              final searchResults = _searchQuery.isNotEmpty
+                  ? collectionsWithThumbnail
+                      .where(
+                        (element) => element.collection.name!
+                            .toLowerCase()
+                            .contains(_searchQuery),
+                      )
+                      .toList()
+                  : collectionsWithThumbnail;
+              return Scrollbar(
+                thumbVisibility: true,
+                radius: const Radius.circular(2),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: CollectionsListWidget(
                     searchResults,
                     widget.actionType,
                     widget.showOptionToCreateNewAlbum,
@@ -235,13 +235,13 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                     widget.sharedFiles,
                     _searchQuery,
                     shouldShowCreateAlbum,
-                  );
-                } else {
-                  return const EnteLoadingWidget();
-                }
-              },
-            ),
-          ),
+                  ),
+                ),
+              );
+            } else {
+              return const EnteLoadingWidget();
+            }
+          },
         ),
       ),
     );
