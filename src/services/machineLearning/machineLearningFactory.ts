@@ -17,8 +17,6 @@ import {
     MLLibraryData,
     ObjectDetectionService,
     ObjectDetectionMethod,
-    TextDetectionMethod,
-    TextDetectionService,
     SceneDetectionService,
     SceneDetectionMethod,
 } from 'types/machineLearning';
@@ -31,7 +29,6 @@ import blazeFaceDetectionService from './blazeFaceDetectionService';
 import mobileFaceNetEmbeddingService from './mobileFaceNetEmbeddingService';
 import dbscanClusteringService from './dbscanClusteringService';
 import ssdMobileNetV2Service from './ssdMobileNetV2Service';
-import tesseractService from './tesseractService';
 import imageSceneService from './imageSceneService';
 import { getDedicatedCryptoWorker } from 'utils/comlink/ComlinkCryptoWorker';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
@@ -67,16 +64,6 @@ export class MLFactory {
         }
 
         throw Error('Unknown scene detection method: ' + method);
-    }
-
-    public static getTextDetectionService(
-        method: TextDetectionMethod
-    ): TextDetectionService {
-        if (method === 'Tesseract') {
-            return tesseractService;
-        }
-
-        throw Error('Unknown text detection method: ' + method);
     }
 
     public static getFaceCropService(method: FaceCropMethod) {
@@ -148,7 +135,6 @@ export class LocalMLSyncContext implements MLSyncContext {
     public faceClusteringService: ClusteringService;
     public objectDetectionService: ObjectDetectionService;
     public sceneDetectionService: SceneDetectionService;
-    public textDetectionService: TextDetectionService;
 
     public localFilesMap: Map<number, EnteFile>;
     public outOfSyncFiles: EnteFile[];
@@ -204,10 +190,6 @@ export class LocalMLSyncContext implements MLSyncContext {
         );
         this.sceneDetectionService = MLFactory.getSceneDetectionService(
             this.config.sceneDetection.method
-        );
-
-        this.textDetectionService = MLFactory.getTextDetectionService(
-            this.config.textDetection.method
         );
 
         this.outOfSyncFiles = [];

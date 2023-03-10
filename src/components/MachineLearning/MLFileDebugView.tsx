@@ -15,7 +15,6 @@ import { ibExtractFaceImageFromCrop } from 'utils/machineLearning/faceCrop';
 import { FaceCropsRow, FaceImagesRow, ImageBitmapView } from './ImageViews';
 import ssdMobileNetV2Service from 'services/machineLearning/ssdMobileNetV2Service';
 import { DEFAULT_ML_SYNC_CONFIG } from 'constants/machineLearning/config';
-// import tesseractService from 'services/machineLearning/tesseractService';
 import imageSceneService from 'services/machineLearning/imageSceneService';
 import { addLogLine } from 'utils/logging';
 
@@ -109,13 +108,6 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
                 DEFAULT_ML_SYNC_CONFIG.sceneDetection.minScore
             );
             addLogLine('detectedScenes: ', JSON.stringify(sceneDetections));
-
-            // const textDetections = await tesseractService.detectText(
-            //     imageBitmap,
-            //     DEFAULT_ML_SYNC_CONFIG.textDetection.minAccuracy,
-            //     0
-            // );
-            // addLogLine('detectedTexts: ', textDetections);
 
             const mlSyncConfig = await getMLSyncConfig();
             const faceCropPromises = faceDetections.map(async (faceDetection) =>

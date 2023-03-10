@@ -30,7 +30,7 @@ import {
 } from 'components/MachineLearning/PeopleList';
 
 import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
-import { WordList } from 'components/MachineLearning/WordList';
+
 // import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
 import { AppContext } from 'pages/_app';
 
@@ -293,10 +293,7 @@ export function FileInfo({
                             file={file}
                             updateMLDataIndex={updateMLDataIndex}
                         />
-                        <WordList
-                            file={file}
-                            updateMLDataIndex={updateMLDataIndex}
-                        />
+
                         {/* <Box pt={1}>
                             <MLServiceFileInfoButton
                                 file={file}
