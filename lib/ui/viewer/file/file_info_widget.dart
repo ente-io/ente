@@ -12,8 +12,9 @@ import "package:photos/models/file_type.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
-import 'package:photos/ui/components/icon_button_widget.dart';
+import "package:photos/ui/components/info_item_widget.dart";
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/collections_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/device_folders_list_of_file_widget.dart';
@@ -27,7 +28,6 @@ import "package:photos/utils/magic_util.dart";
 
 class FileInfoWidget extends StatefulWidget {
   final File file;
-
   const FileInfoWidget(
     this.file, {
     Key? key,
@@ -72,6 +72,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final subtitleTextTheme = getEnteTextTheme(context).smallMuted;
     final file = widget.file;
     final fileIsBackedup = file.uploadedFileID == null ? false : true;
     final bool isFileOwner =
@@ -109,119 +110,81 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                   ? FileCaptionWidget(file: widget.file)
                   : FileCaptionReadyOnly(caption: widget.file.caption!),
             ),
-      ListTile(
-        horizontalTitleGap: 2,
-        leading: const Padding(
-          padding: EdgeInsets.only(top: 8),
-          child: Icon(Icons.calendar_today_rounded),
+      InfoItemWidget(
+        leadingIcon: Icons.calendar_today_outlined,
+        title: getFullDate(
+          DateTime.fromMicrosecondsSinceEpoch(file.creationTime!),
         ),
-        title: Text(
-          getFullDate(
-            DateTime.fromMicrosecondsSinceEpoch(file.creationTime!),
+        subtitle: [
+          Text(
+            getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
+            style: subtitleTextTheme,
           ),
-        ),
-        subtitle: Text(
-          getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
-          style: Theme.of(context).textTheme.bodyText2!.copyWith(
-                color: Theme.of(context)
-                    .colorScheme
-                    .defaultTextColor
-                    .withOpacity(0.5),
-              ),
-        ),
-        trailing: (widget.file.ownerID == null ||
+        ],
+        editOnTap: ((widget.file.ownerID == null ||
                     widget.file.ownerID == _currentUserID) &&
-                widget.file.uploadedFileID != null
-            ? IconButton(
-                onPressed: () {
-                  _showDateTimePicker(widget.file);
-                },
-                icon: const Icon(Icons.edit),
-              )
-            : const SizedBox.shrink(),
+                widget.file.uploadedFileID != null)
+            ? () {
+                _showDateTimePicker(widget.file);
+              }
+            : null,
       ),
-      ListTile(
-        horizontalTitleGap: 2,
-        leading: _isImage
-            ? const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Icon(
-                  Icons.image,
-                ),
-              )
-            : const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Icon(
-                  Icons.video_camera_back,
-                  size: 27,
-                ),
-              ),
-        title: Text(
-          path.basenameWithoutExtension(file.displayName) +
-              path.extension(file.displayName).toUpperCase(),
-        ),
-        subtitle: Wrap(
-          children: [
-            showDimension
-                ? Text(
-                    "${_exifData["megaPixels"]}MP  "
-                    "${_exifData["resolution"]}  ",
-                  )
-                : const SizedBox.shrink(),
-            _getFileSize(),
-            (file.fileType == FileType.video) &&
-                    (file.localID != null || file.duration != 0)
-                ? Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: _getVideoDuration(),
-                  )
-                : const SizedBox.shrink(),
-          ],
-        ),
-        trailing: file.uploadedFileID == null || file.ownerID != _currentUserID
-            ? const SizedBox.shrink()
-            : IconButton(
-                onPressed: () async {
-                  await editFilename(context, file);
-                  setState(() {});
-                },
-                icon: const Icon(Icons.edit),
-              ),
+      InfoItemWidget(
+        leadingIcon:
+            _isImage ? Icons.photo_outlined : Icons.video_camera_back_outlined,
+        title: path.basenameWithoutExtension(file.displayName) +
+            path.extension(file.displayName).toUpperCase(),
+        subtitle: [
+          showDimension
+              ? Text(
+                  "${_exifData["megaPixels"]}MP  "
+                  "${_exifData["resolution"]}  ",
+                  style: subtitleTextTheme,
+                )
+              : const SizedBox.shrink(),
+          _getFileSize(),
+          (file.fileType == FileType.video) &&
+                  (file.localID != null || file.duration != 0)
+              ? _getVideoDuration()
+              : const SizedBox.shrink(),
+        ],
+        editOnTap: file.uploadedFileID == null || file.ownerID != _currentUserID
+            ? null
+            : () async {
+                await editFilename(context, file);
+                setState(() {});
+              },
       ),
       showExifListTile
-          ? ListTile(
-              horizontalTitleGap: 2,
-              leading: const Icon(Icons.camera_rounded),
-              title: Text(_exifData["takenOnDevice"] ?? "--"),
-              subtitle: Wrap(
-                children: [
-                  _exifData["fNumber"] != null
-                      ? Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: Text('ƒ/' + _exifData["fNumber"].toString()),
-                        )
-                      : const SizedBox.shrink(),
-                  _exifData["exposureTime"] != null
-                      ? Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: Text(_exifData["exposureTime"]),
-                        )
-                      : const SizedBox.shrink(),
-                  _exifData["focalLength"] != null
-                      ? Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child:
-                              Text(_exifData["focalLength"].toString() + "mm"),
-                        )
-                      : const SizedBox.shrink(),
-                  _exifData["ISO"] != null
-                      ? Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: Text("ISO" + _exifData["ISO"].toString()),
-                        )
-                      : const SizedBox.shrink(),
-                ],
-              ),
+          ? InfoItemWidget(
+              leadingIcon: Icons.camera_outlined,
+              title: _exifData["takenOnDevice"] ?? "--",
+              subtitle: [
+                _exifData["fNumber"] != null
+                    ? Text(
+                        'ƒ/' + _exifData["fNumber"].toString(),
+                        style: subtitleTextTheme,
+                      )
+                    : const SizedBox.shrink(),
+                _exifData["exposureTime"] != null
+                    ? Text(
+                        _exifData["exposureTime"],
+                        style: subtitleTextTheme,
+                      )
+                    : const SizedBox.shrink(),
+                _exifData["focalLength"] != null
+                    ? Text(
+                        _exifData["focalLength"].toString() + "mm",
+                        style: subtitleTextTheme,
+                      )
+                    : const SizedBox.shrink(),
+                _exifData["ISO"] != null
+                    ? Text(
+                        "ISO" + _exifData["ISO"].toString(),
+                        style: subtitleTextTheme,
+                      )
+                    : const SizedBox.shrink(),
+              ],
             )
           : null,
       SizedBox(
@@ -248,28 +211,19 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             )
           : null,
       (file.uploadedFileID != null && file.updationTime != null)
-          ? ListTile(
-              horizontalTitleGap: 2,
-              leading: const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Icon(Icons.cloud_upload_outlined),
+          ? InfoItemWidget(
+              leadingIcon: Icons.backup_outlined,
+              title: getFullDate(
+                DateTime.fromMicrosecondsSinceEpoch(file.updationTime!),
               ),
-              title: Text(
-                getFullDate(
-                  DateTime.fromMicrosecondsSinceEpoch(file.updationTime!),
+              subtitle: [
+                Text(
+                  getTimeIn12hrFormat(dateTimeForUpdationTime) +
+                      "  " +
+                      dateTimeForUpdationTime.timeZoneName,
+                  style: subtitleTextTheme,
                 ),
-              ),
-              subtitle: Text(
-                getTimeIn12hrFormat(dateTimeForUpdationTime) +
-                    "  " +
-                    dateTimeForUpdationTime.timeZoneName,
-                style: Theme.of(context).textTheme.bodyText2!.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .defaultTextColor
-                          .withOpacity(0.5),
-                    ),
-              ),
+              ],
             )
           : null,
       _isImage ? RawExifListTileWidget(_exif, widget.file) : null,
@@ -297,7 +251,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 isOnTopOfScreen: false,
                 backgroundColor: getEnteColorScheme(context).backgroundElevated,
                 leading: IconButtonWidget(
-                  icon: Icons.close_outlined,
+                  icon: Icons.expand_more_outlined,
                   iconButtonType: IconButtonType.primary,
                   onTap: () => Navigator.pop(context),
                 ),
@@ -306,6 +260,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
+                    //Dividers occupy odd indexes
                     if (index.isOdd) {
                       return index == 1
                           ? const SizedBox.shrink()
@@ -406,6 +361,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         if (snapshot.hasData) {
           return Text(
             (snapshot.data! / (1024 * 1024)).toStringAsFixed(2) + " MB",
+            style: getEnteTextTheme(context).smallMuted,
           );
         } else {
           return Center(
@@ -425,6 +381,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     if (widget.file.duration != 0) {
       return Text(
         secondsToHHMMSS(widget.file.duration!),
+        style: getEnteTextTheme(context).smallMuted,
       );
     }
     return FutureBuilder<AssetEntity?>(
@@ -433,6 +390,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         if (snapshot.hasData) {
           return Text(
             snapshot.data!.videoDuration.toString().split(".")[0],
+            style: getEnteTextTheme(context).smallMuted,
           );
         } else {
           return Center(
