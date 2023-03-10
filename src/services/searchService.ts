@@ -16,7 +16,6 @@ import {
     SuggestionType,
 } from 'types/search';
 import ObjectService from './machineLearning/objectService';
-import textService from './machineLearning/textService';
 import { getFormattedDate, isInsideBox, isSameDayAnyYear } from 'utils/search';
 import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
@@ -47,7 +46,6 @@ export const getAutoCompleteSuggestions =
             getFileNameSuggestion(searchPhrase, files),
             getFileCaptionSuggestion(searchPhrase, files),
             ...(await getThingSuggestion(searchPhrase)),
-            ...(await getWordSuggestion(searchPhrase)),
         ];
 
         return convertSuggestionsToOptions(suggestions, files);
@@ -243,19 +241,6 @@ async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
     );
 }
 
-async function getWordSuggestion(searchPhrase: string): Promise<Suggestion[]> {
-    const wordResults = await searchText(searchPhrase);
-
-    return wordResults.map(
-        (searchResult) =>
-            ({
-                type: SuggestionType.TEXT,
-                value: searchResult,
-                label: searchResult.word,
-            } as Suggestion)
-    );
-}
-
 function searchCollection(
     searchPhrase: string,
     collections: Collection[]
@@ -326,13 +311,6 @@ async function searchThing(searchPhrase: string) {
     return things.filter((thing) =>
         thing.name.toLocaleLowerCase().includes(searchPhrase)
     );
-}
-
-async function searchText(searchPhrase: string) {
-    const texts = await textService.clusterWords();
-    return texts
-        .filter((text) => text.word.toLocaleLowerCase().includes(searchPhrase))
-        .slice(0, 4);
 }
 
 function isSearchedFile(user: User, file: EnteFile, search: Search) {

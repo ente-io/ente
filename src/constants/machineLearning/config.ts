@@ -52,10 +52,6 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
         method: 'ImageScene',
         minScore: 0.1,
     },
-    textDetection: {
-        method: 'Tesseract',
-        minAccuracy: 75,
-    },
     // tsne: {
     //     samples: 200,
     //     dim: 2,
@@ -85,10 +81,6 @@ export const BLAZEFACE_SCORE_THRESHOLD = 0.75;
 export const BLAZEFACE_PASS1_SCORE_THRESHOLD = 0.4;
 export const BLAZEFACE_FACE_SIZE = 112;
 export const MOBILEFACENET_FACE_SIZE = 112;
-
-export const TESSERACT_MIN_IMAGE_WIDTH = 44;
-export const TESSERACT_MIN_IMAGE_HEIGHT = 20;
-export const TESSERACT_MAX_IMAGE_DIMENSION = 720;
 
 // scene detection model takes fixed-shaped (224x224) inputs
 // https://tfhub.dev/sayannath/lite-model/image-scene/1

@@ -14,7 +14,6 @@ import { EnteFile } from 'types/file';
 import { Config } from 'types/common/config';
 import { Dimensions } from 'types/image';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
-import Tesseract from 'tesseract.js';
 
 export interface MLSyncResult {
     nOutOfSyncFiles: number;
@@ -96,8 +95,6 @@ export declare type FaceDetectionMethod = 'BlazeFace' | 'FaceApiSSD';
 export declare type ObjectDetectionMethod = 'SSDMobileNetV2';
 
 export declare type SceneDetectionMethod = 'ImageScene';
-
-export declare type TextDetectionMethod = 'Tesseract';
 
 export declare type FaceCropMethod = 'ArcFace';
 
@@ -210,22 +207,10 @@ export interface WordGroup {
     files: Array<number>;
 }
 
-export interface TextDetection {
-    bbox: Tesseract.Bbox;
-    word: string;
-    confidence: number;
-}
-
-export interface DetectedText {
-    fileID: number;
-    detection: TextDetection;
-}
-
 export interface MlFileData {
     fileId: number;
     faces?: Face[];
     objects?: RealWorldObject[];
-    text?: DetectedText[];
     imageSource?: ImageType;
     imageDimensions?: Dimensions;
     faceDetectionMethod?: Versioned<FaceDetectionMethod>;
@@ -234,7 +219,6 @@ export interface MlFileData {
     faceEmbeddingMethod?: Versioned<FaceEmbeddingMethod>;
     objectDetectionMethod?: Versioned<ObjectDetectionMethod>;
     sceneDetectionMethod?: Versioned<SceneDetectionMethod>;
-    textDetectionMethod?: Versioned<TextDetectionMethod>;
     mlVersion: number;
     errorCount: number;
     lastErrorMessage?: string;
@@ -254,11 +238,6 @@ export interface ObjectDetectionConfig {
 export interface SceneDetectionConfig {
     method: SceneDetectionMethod;
     minScore: number;
-}
-
-export interface TextDetectionConfig {
-    method: TextDetectionMethod;
-    minAccuracy: number;
 }
 
 export interface FaceCropConfig {
@@ -397,17 +376,6 @@ export interface SceneDetectionService {
         image: ImageBitmap,
         minScore: number
     ): Promise<ObjectDetection[]>;
-}
-
-export interface TextDetectionService {
-    method: Versioned<TextDetectionMethod>;
-    // init(): Promise<void>;
-    detectText(
-        imageBitmap: ImageBitmap,
-        minAccuracy: number,
-        attemptNumber: number
-    ): Promise<Tesseract.Word[] | Error>;
-    dispose(): Promise<void>;
 }
 
 export interface FaceCropService {

@@ -71,7 +71,6 @@
     "sanitize-filename": "^1.6.3",
     "similarity-transformation": "^0.0.1",
     "styled-components": "^5.3.5",
-    "tesseract.js": "file:./thirdparty/tesseract",
     "transformation-matrix": "^2.10.0",
     "workbox-precaching": "^6.1.5",
     "workbox-recipes": "^6.1.5",
