@@ -117,6 +117,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                   : FileCaptionReadyOnly(caption: widget.file.caption!),
             ),
       InfoItemWidget(
+        key: const ValueKey("Creation time"),
         leadingIcon: Icons.calendar_today_outlined,
         title: getFullDate(
           DateTime.fromMicrosecondsSinceEpoch(file.creationTime!),
@@ -136,6 +137,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             : null,
       ),
       InfoItemWidget(
+        key: const ValueKey("File name and info"),
         leadingIcon:
             _isImage ? Icons.photo_outlined : Icons.video_camera_back_outlined,
         title: path.basenameWithoutExtension(file.displayName) +
@@ -161,6 +163,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       ),
       showExifListTile
           ? InfoItemWidget(
+              key: const ValueKey("Basic EXIF"),
               leadingIcon: Icons.camera_outlined,
               title: _exifData["takenOnDevice"] ?? "--",
               subtitleSection: Future.value([
@@ -188,6 +191,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             )
           : null,
       InfoItemWidget(
+        key: const ValueKey("Albums"),
         leadingIcon: Icons.folder_outlined,
         title: "Albums",
         subtitleSection: fileIsBackedup
@@ -207,6 +211,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           : null,
       (file.uploadedFileID != null && file.updationTime != null)
           ? InfoItemWidget(
+              key: const ValueKey("Backup date"),
               leadingIcon: Icons.backup_outlined,
               title: getFullDate(
                 DateTime.fromMicrosecondsSinceEpoch(file.updationTime!),
