@@ -112,6 +112,13 @@ class UserService {
     }
   }
 
+  Future<void> sendFeedback(BuildContext context, String feedback) async {
+    await _dio.post(
+      _config.getHttpEndpoint() + "/anonymous/feedback",
+      data: {"feedback": feedback},
+    );
+  }
+
   // getPublicKey returns null value if email id is not
   // associated with another ente account
   Future<String?> getPublicKey(String email) async {
@@ -523,9 +530,7 @@ class UserService {
     try {
       await _enteDio.post(
         "/users/two-factor/enable",
-        data: {
-          "code": code
-        },
+        data: {"code": code},
       );
       await dialog.hide();
       Navigator.pop(context);
