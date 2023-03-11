@@ -1,12 +1,13 @@
-import { Box, Typography } from '@mui/material';
-import React from 'react';
-import Select from 'react-select';
-import { linkExpiryStyle } from 'styles/linkExpiry';
+import { ChevronRight } from '@mui/icons-material';
+import { DialogContent } from '@mui/material';
+import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
+import { EnteDrawer } from 'components/EnteDrawer';
+import { EnteMenuItem } from 'components/Menu/menuItem';
+import React, { useEffect, useState } from 'react';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import { shareExpiryOptions } from 'utils/collection';
 import constants from 'utils/strings/constants';
 import { formatDateTime } from 'utils/time/format';
-import { OptionWithDivider } from './selectComponents/OptionWithDivider';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -22,30 +23,67 @@ export function ManageLinkExpiry({
     const updateDeviceExpiry = async (optionFn) => {
         return updatePublicShareURLHelper({
             collectionID: collection.id,
-            validTill: optionFn(),
+            validTill: optionFn,
         });
     };
+    const [shareExpiryOptionsModalView, setShareExpiryOptionsModalView] =
+        useState(false);
+    const [shareExpiryValue, setShareExpiryValue] = useState(0);
+    const [labelText, setLabelText] = useState('never');
+    useEffect(() => {
+        if (shareExpiryOptionsModalView) {
+            setShareExpiryOptionsModalView(true);
+        } else setShareExpiryOptionsModalView(false);
+    }, [shareExpiryOptionsModalView]);
+    const closeShareExpiryOptionsModalView = () =>
+        setShareExpiryOptionsModalView(false);
+    const openShareExpiryOptionsModalView = () =>
+        setShareExpiryOptionsModalView(true);
+    const changeshareExpiryValue = (value: number) => () => {
+        updateDeviceExpiry(value);
+        setLabelText(
+            publicShareProp?.validTill
+                ? formatDateTime(publicShareProp?.validTill / 1000)
+                : 'never'
+        );
+        setShareExpiryValue(value);
+        shareExpiryValue;
+        setShareExpiryOptionsModalView(false);
+    };
     return (
-        <Box>
-            <Typography mb={0.5}>{constants.LINK_EXPIRY}</Typography>
-            <Select
-                menuPosition="fixed"
-                options={shareExpiryOptions}
-                isSearchable={false}
-                value={null}
-                components={{
-                    Option: OptionWithDivider,
-                }}
-                placeholder={
-                    publicShareProp?.validTill
-                        ? formatDateTime(publicShareProp?.validTill / 1000)
-                        : 'never'
-                }
-                onChange={(e) => {
-                    updateDeviceExpiry(e.value);
-                }}
-                styles={linkExpiryStyle}
-            />
-        </Box>
+        <>
+            <EnteMenuItem
+                onClick={openShareExpiryOptionsModalView}
+                endIcon={<ChevronRight />}
+                subText={labelText}>
+                {constants.LINK_EXPIRY}
+            </EnteMenuItem>
+            <EnteDrawer
+                anchor="right"
+                open={shareExpiryOptionsModalView}
+                onClose={closeShareExpiryOptionsModalView}>
+                <DialogTitleWithCloseButton
+                    onClose={closeShareExpiryOptionsModalView}>
+                    {constants.LINK_EXPIRY}
+                </DialogTitleWithCloseButton>
+                <DialogContent>
+                    {/* <OptionWithDivider data={shareExpiryOptions} /> */}
+                    <tbody>
+                        {shareExpiryOptions.map((item) => (
+                            <tr key={item.label}>
+                                <td>
+                                    <EnteMenuItem
+                                        onClick={changeshareExpiryValue(
+                                            item.value()
+                                        )}>
+                                        {item.label}
+                                    </EnteMenuItem>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </DialogContent>
+            </EnteDrawer>
+        </>
     );
 }

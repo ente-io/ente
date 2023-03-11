@@ -114,8 +114,6 @@ export default function BeforeShare({
         <Box mt={3}>
             <EnteMenuItem
                 startIcon={<LinkIcon />}
-                endIcon={<LinkIcon />}
-                subText="never"
                 color="primary"
                 onClick={handleCollectionPublicSharing}>
                 {constants.CREATE_PUBLIC_SHARING}

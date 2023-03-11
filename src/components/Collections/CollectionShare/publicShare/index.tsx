@@ -3,11 +3,12 @@ import { Collection, PublicURL } from 'types/collection';
 import { appendCollectionKeyToShareURL } from 'utils/collection';
 import BeforeShare from './beforeShare';
 import PublicShareManage from './manage';
-import SidebarButton from 'components/Sidebar/Button';
 import ContentCopyIcon from '@mui/icons-material/ContentCopyOutlined';
 import constants from 'utils/strings/constants';
 import { Dialog, DialogTitle, DialogActions, Button } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
+import { EnteMenuItem } from 'components/Menu/menuItem';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 export default function PublicShare({
     collection,
@@ -63,23 +64,18 @@ export default function PublicShare({
         <>
             {publicShareProp ? (
                 <>
-                    <SidebarButton
+                    <EnteMenuItem
                         startIcon={<ContentCopyIcon />}
-                        variant="contained"
-                        color="secondary"
-                        sx={{ fontWeight: 'normal' }}
                         onClick={copyToClipboardHelper(publicShareUrl)}>
                         {constants.COPY_LINK}
-                    </SidebarButton>
+                    </EnteMenuItem>
 
-                    <SidebarButton
+                    <EnteMenuItem
                         startIcon={<LinkIcon />}
-                        variant="contained"
-                        color="secondary"
-                        sx={{ fontWeight: 'normal' }}
+                        endIcon={<ChevronRightIcon />}
                         onClick={openManageShare}>
                         {constants.MANAGE_LINK}
-                    </SidebarButton>
+                    </EnteMenuItem>
                     <PublicShareManage
                         open={manageShareModalView}
                         onClose={closeManageShare}

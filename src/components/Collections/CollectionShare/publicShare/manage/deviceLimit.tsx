@@ -1,11 +1,12 @@
-import { Box, Typography } from '@mui/material';
-import React from 'react';
-import Select from 'react-select';
-import { DropdownStyle } from 'styles/dropdown';
+import { ChevronRight } from '@mui/icons-material';
+import { DialogContent } from '@mui/material';
+import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
+import { EnteDrawer } from 'components/EnteDrawer';
+import { EnteMenuItem } from 'components/Menu/menuItem';
+import React, { useEffect, useState } from 'react';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { getDeviceLimitOptions } from 'utils/collection';
 import constants from 'utils/strings/constants';
-import { OptionWithDivider } from './selectComponents/OptionWithDivider';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -14,7 +15,6 @@ interface Iprops {
 }
 
 export function ManageDeviceLimit({
-    publicShareProp,
     collection,
     updatePublicShareURLHelper,
 }: Iprops) {
@@ -24,24 +24,56 @@ export function ManageDeviceLimit({
             deviceLimit: newLimit,
         });
     };
-
+    const [shareDeviceLimitModalView, setDeviceLimitModalView] =
+        useState(false);
+    const [shareDeviceLimitValue, setDeviceLimitValue] = useState(0);
+    useEffect(() => {
+        if (shareDeviceLimitModalView) {
+            setDeviceLimitModalView(true);
+        } else setDeviceLimitModalView(false);
+    }, [shareDeviceLimitModalView]);
+    const closeShareExpiryOptionsModalView = () =>
+        setDeviceLimitModalView(false);
+    const openShareExpiryOptionsModalView = () => setDeviceLimitModalView(true);
+    const changeshareExpiryValue = (value: number) => () => {
+        updateDeviceLimit(value);
+        setDeviceLimitValue(value);
+        setDeviceLimitModalView(false);
+    };
     return (
-        <Box>
-            <Typography mb={0.5}>{constants.LINK_DEVICE_LIMIT}</Typography>
-            <Select
-                menuPosition="fixed"
-                options={getDeviceLimitOptions()}
-                components={{
-                    Option: OptionWithDivider,
-                }}
-                isSearchable={false}
-                value={{
-                    label: publicShareProp?.deviceLimit.toString(),
-                    value: publicShareProp?.deviceLimit,
-                }}
-                onChange={(e) => updateDeviceLimit(e.value)}
-                styles={DropdownStyle}
-            />
-        </Box>
+        <>
+            <EnteMenuItem
+                onClick={openShareExpiryOptionsModalView}
+                endIcon={<ChevronRight />}
+                subText={String(shareDeviceLimitValue)}>
+                {constants.LINK_DEVICE_LIMIT}
+            </EnteMenuItem>
+            <EnteDrawer
+                anchor="right"
+                open={shareDeviceLimitModalView}
+                onClose={closeShareExpiryOptionsModalView}>
+                <DialogTitleWithCloseButton
+                    onClose={closeShareExpiryOptionsModalView}>
+                    {constants.LINK_EXPIRY}
+                </DialogTitleWithCloseButton>
+                <DialogContent>
+                    {/* <OptionWithDivider data={shareExpiryOptions} /> */}
+                    <tbody>
+                        {getDeviceLimitOptions().map((item) => (
+                            <tr key={item.label}>
+                                <td>
+                                    <EnteMenuItem
+                                        onClick={changeshareExpiryValue(
+                                            item.value
+                                        )}>
+                                        {item.label}
+                                    </EnteMenuItem>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </DialogContent>
+            </EnteDrawer>
+        </>
     );
 }

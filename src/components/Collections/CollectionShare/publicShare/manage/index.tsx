@@ -111,13 +111,11 @@ export default function PublicShareManage({
                         />
                         <EnteMenuItem
                             startIcon={<ContentCopyIcon />}
-                            color="secondary"
                             onClick={copyToClipboardHelper(publicShareUrl)}>
                             {constants.COPY_LINK}
                         </EnteMenuItem>
                         <EnteMenuItem
                             startIcon={<RemoveCircleOutline />}
-                            color="secondary"
                             onClick={disablePublicSharing}>
                             {constants.DELETE}
                         </EnteMenuItem>

@@ -1,8 +1,7 @@
-import { Box, Typography } from '@mui/material';
+import { EnteMenuItem } from 'components/Menu/menuItem';
 import React from 'react';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import constants from 'utils/strings/constants';
-import PublicShareSwitch from '../switch';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -23,12 +22,12 @@ export function ManagePublicCollect({
     };
 
     return (
-        <Box>
-            <Typography mb={0.5}>{constants.PUBLIC_COLLECT}</Typography>
-            <PublicShareSwitch
-                checked={publicShareProp?.enableCollect}
-                onChange={handleFileDownloadSetting}
-            />
-        </Box>
+        <EnteMenuItem
+            onClick={handleFileDownloadSetting}
+            color="primary"
+            hasSwitch={true}
+            checked={publicShareProp?.enableCollect}>
+            {constants.PUBLIC_COLLECT}
+        </EnteMenuItem>
     );
 }

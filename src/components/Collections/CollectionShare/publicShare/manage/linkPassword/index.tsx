@@ -1,10 +1,9 @@
-import { Box, Typography } from '@mui/material';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useState } from 'react';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import constants from 'utils/strings/constants';
 import { PublicLinkSetPassword } from './setPassword';
-import PublicShareSwitch from '../../switch';
+import { EnteMenuItem } from 'components/Menu/menuItem';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -49,16 +48,12 @@ export function ManageLinkPassword({
 
     return (
         <>
-            <Box>
-                <Typography mb={0.5}>
-                    {' '}
-                    {constants.LINK_PASSWORD_LOCK}
-                </Typography>
-                <PublicShareSwitch
-                    checked={!!publicShareProp?.passwordEnabled}
-                    onChange={handlePasswordChangeSetting}
-                />
-            </Box>
+            <EnteMenuItem
+                onClick={handlePasswordChangeSetting}
+                checked={!!publicShareProp?.passwordEnabled}
+                hasSwitch={true}>
+                {constants.LINK_PASSWORD_LOCK}
+            </EnteMenuItem>
             <PublicLinkSetPassword
                 open={changePasswordView}
                 onClose={closeConfigurePassword}
