@@ -430,16 +430,16 @@ class RemoteSyncService {
 
   Future<int?> _getCollectionID(DeviceCollection deviceCollection) async {
     if (deviceCollection.collectionID != null) {
-      final collectionByID =
+      final collection =
           _collectionsService.getCollectionByID(deviceCollection.collectionID!);
-      if (collectionByID == null || collectionByID.isDeleted) {
+      if (collection == null || collection.isDeleted) {
         _logger.warning(
           "Collection $deviceCollection.collectionID either deleted or missing "
           "for path ${deviceCollection.id}",
         );
         return null;
       }
-      return collectionByID.id;
+      return collection.id;
     } else {
       final collection =
           await _collectionsService.getOrCreateForPath(deviceCollection.name);
