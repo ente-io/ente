@@ -291,7 +291,9 @@ export default function ExportModal(props: Props) {
             setExportProgress(pausedStageProgress);
 
             addLogLine(
-                `pausedStageProgress ${JSON.stringify(pausedStageProgress)}`
+                `resuming export, pausedStageProgress: ${JSON.stringify(
+                    pausedStageProgress
+                )}`
             );
             const updateExportStatsWithOffset = (progress: ExportProgress) =>
                 updateExportProgress({

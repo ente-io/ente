@@ -155,7 +155,7 @@ class ExportService {
                 );
             }
             addLogLine(
-                `starting export, type=${exportType} filesToExportCount= ${filesToExport?.length} userPersonalFileCount: ${userPersonalFiles?.length}`
+                `starting export, type: ${exportType}, filesToExportCount: ${filesToExport?.length}, userPersonalFileCount: ${userPersonalFiles?.length}`
             );
 
             const collectionIDPathMap: CollectionIDPathMap =
