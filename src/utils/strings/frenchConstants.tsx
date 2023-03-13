@@ -93,7 +93,7 @@ const frenchConstants = {
             données sans une clé de récupération.
         </>
     ),
-    KEY_GENERATION_IN_PROGRESS_MESSAGE: 'Génération des clés de chiffrage...',
+    KEY_GENERATION_IN_PROGRESS_MESSAGE: 'Génération des clés de chiffrement...',
     PASSPHRASE_HINT: 'Mot de passe',
     CONFIRM_PASSPHRASE: 'Confirmer le mot de passe',
     PASSPHRASE_MATCH_ERROR: 'Les mots de passe ne correspondent pas',
@@ -148,7 +148,7 @@ const frenchConstants = {
     DOWNLOAD_UNCATEGORIZED: 'Télécharger les hors catégories',
     COPY_OPTION: 'Copier en PNG (Ctrl/Cmd - C)',
     TOGGLE_FULLSCREEN: 'Plein écran (F)',
-    ZOOM_IN_OUT: 'Zoom in/out',
+    ZOOM_IN_OUT: 'Zoom +/-',
     PREVIOUS: 'Précédent (←)',
     NEXT: 'Suivant (→)',
     NO_INTERNET_CONNECTION:
@@ -160,8 +160,8 @@ const frenchConstants = {
         </>
     ),
     UPLOAD_FIRST_PHOTO: 'Protéger',
-    UPLOAD_DROPZONE_MESSAGE: 'Drop to backup your files',
-    WATCH_FOLDER_DROPZONE_MESSAGE: 'Drop to add watched folder',
+    UPLOAD_DROPZONE_MESSAGE: 'Déposez pour sauvegarder vos fichiers',
+    WATCH_FOLDER_DROPZONE_MESSAGE: 'Déposez pour ajouter un dossier surveillé',
     TRASH_FILES_TITLE: 'Supprimer les fichiers?',
     TRASH_FILE_TITLE: 'Supprimer le fichier?',
     DELETE_FILES_TITLE: 'Supprimer immédiatement?',
