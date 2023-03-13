@@ -115,7 +115,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
               (!isFileOwner && (widget.file.caption?.isEmpty ?? true))
           ? const SizedBox.shrink()
           : Padding(
-              padding: const EdgeInsets.only(top: 8, bottom: 4),
+              padding: const EdgeInsets.only(top: 8, bottom: 24),
               child: isFileOwner
                   ? FileCaptionWidget(file: widget.file)
                   : FileCaptionReadyOnly(caption: widget.file.caption!),
@@ -194,15 +194,13 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
               ]),
             )
           : null,
-      InfoItemWidget(
-        key: const ValueKey("Albums"),
-        leadingIcon: Icons.folder_outlined,
-        title: "Albums",
-        subtitleSection: fileIsBackedup
-            ? _collectionsListOfFile(allCollectionIDsOfFile, _currentUserID!)
-            : _deviceFoldersListOfFile(allDeviceFoldersOfFile),
-        hasChipButtons: true,
-      ),
+      _isImage
+          ? InfoItemWidget(
+              leadingIcon: Icons.text_snippet_outlined,
+              title: "EXIF",
+              subtitleSection: _exifButton(file, _exif),
+            )
+          : null,
       FeatureFlagService.instance.isInternalUserOrDebugBuild()
           ? InfoItemWidget(
               key: const ValueKey("Objects"),
@@ -229,13 +227,15 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
               ]),
             )
           : null,
-      _isImage
-          ? InfoItemWidget(
-              leadingIcon: Icons.text_snippet_outlined,
-              title: "EXIF",
-              subtitleSection: _exifButton(file, _exif),
-            )
-          : null,
+      InfoItemWidget(
+        key: const ValueKey("Albums"),
+        leadingIcon: Icons.folder_outlined,
+        title: "Albums",
+        subtitleSection: fileIsBackedup
+            ? _collectionsListOfFile(allCollectionIDsOfFile, _currentUserID!)
+            : _deviceFoldersListOfFile(allDeviceFoldersOfFile),
+        hasChipButtons: true,
+      ),
     ];
 
     listTiles.removeWhere(
@@ -273,8 +273,11 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                     if (index.isOdd) {
                       return index == 1
                           ? const SizedBox.shrink()
-                          : const DividerWidget(
-                              dividerType: DividerType.menu,
+                          : const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 15.5),
+                              child: DividerWidget(
+                                dividerType: DividerType.menu,
+                              ),
                             );
                     } else {
                       return listTiles[index ~/ 2];
@@ -332,7 +335,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       if (chipButtons.isEmpty) {
         return const [
           ChipButtonWidget(
-            "No result",
+            "No results",
             noChips: true,
           )
         ];
