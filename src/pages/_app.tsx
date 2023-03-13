@@ -54,6 +54,7 @@ import { User } from 'types/user';
 import { SetTheme } from 'types/theme';
 import { useLocalState } from 'hooks/useLocalState';
 import { THEME_COLOR } from 'constants/theme';
+import 'i18n';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
