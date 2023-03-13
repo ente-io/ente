@@ -50,6 +50,7 @@ import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
 import { ExportType, ExportNotification, RecordType } from 'constants/export';
 import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
+import { addLogLine } from 'utils/logging';
 
 const LATEST_EXPORT_VERSION = 1;
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
@@ -129,6 +130,14 @@ class ExportService {
             }
             const exportRecord = await this.getExportRecord(exportDir);
 
+            addLogLine(
+                `export stats -> progress: ${JSON.stringify(
+                    exportRecord.progress
+                )} stage:${exportRecord.stage} queuedFilesCount: ${
+                    exportRecord?.queuedFiles?.length
+                } exportedFiles: ${exportRecord?.exportedFiles?.length}
+                failedFiles: ${exportRecord?.failedFiles?.length}`
+            );
             if (exportType === ExportType.NEW) {
                 filesToExport = getFilesUploadedAfterLastExport(
                     userPersonalFiles,
@@ -145,6 +154,10 @@ class ExportService {
                     exportRecord
                 );
             }
+            addLogLine(
+                `starting export, type: ${exportType}, filesToExportCount: ${filesToExport?.length}, userPersonalFileCount: ${userPersonalFiles?.length}`
+            );
+
             const collectionIDPathMap: CollectionIDPathMap =
                 getCollectionIDPathMapFromExportRecord(exportRecord);
             const newCollections = getCollectionsCreatedAfterLastExport(
