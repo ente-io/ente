@@ -12,7 +12,6 @@ import "package:photos/models/file_type.dart";
 import "package:photos/models/gallery_type.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/feature_flag_service.dart";
-import "package:photos/services/object_detection/object_detection_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -23,11 +22,11 @@ import 'package:photos/ui/viewer/file/file_caption_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import "package:photos/ui/viewer/file_details/exif_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
+import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/thumbnail_util.dart";
 
 class FileDetailsWidget extends StatefulWidget {
   final File file;
@@ -115,13 +114,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       showExifListTile ? BasicExifItemWidget(_exifData) : null,
       _isImage ? AllExifItemWidget(file, _exif) : null,
       FeatureFlagService.instance.isInternalUserOrDebugBuild()
-          ? InfoItemWidget(
-              key: const ValueKey("Objects"),
-              leadingIcon: Icons.image_search_outlined,
-              title: "Objects",
-              subtitleSection: _objectTags(file),
-              hasChipButtons: true,
-            )
+          ? ObjectsItemWidget(file)
           : null,
       (file.uploadedFileID != null && file.updationTime != null)
           ? InfoItemWidget(
@@ -205,30 +198,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         ),
       ),
     );
-  }
-
-  Future<List<ChipButtonWidget>> _objectTags(File file) async {
-    try {
-      final chipButtons = <ChipButtonWidget>[];
-      final objectTags = await getThumbnail(file).then((data) {
-        return ObjectDetectionService.instance.predict(data!);
-      });
-      for (String objectTag in objectTags) {
-        chipButtons.add(ChipButtonWidget(objectTag));
-      }
-      if (chipButtons.isEmpty) {
-        return const [
-          ChipButtonWidget(
-            "No results",
-            noChips: true,
-          )
-        ];
-      }
-      return chipButtons;
-    } catch (e, s) {
-      Logger("FileInfoWidget").info(e, s);
-      return [];
-    }
   }
 
   Future<List<ChipButtonWidget>> _deviceFoldersListOfFile(
