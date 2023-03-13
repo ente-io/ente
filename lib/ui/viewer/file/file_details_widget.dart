@@ -60,12 +60,12 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   };
 
   bool _isImage = false;
-  int? _currentUserID;
+  late int _currentUserID;
 
   @override
   void initState() {
     debugPrint('file_details_sheet initState');
-    _currentUserID = Configuration.instance.getUserID();
+    _currentUserID = Configuration.instance.getUserID()!;
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
     if (_isImage) {
