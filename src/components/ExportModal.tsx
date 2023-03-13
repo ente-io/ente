@@ -290,7 +290,9 @@ export default function ExportModal(props: Props) {
             const pausedStageProgress = exportRecord.progress;
             setExportProgress(pausedStageProgress);
 
-            addLogLine(`pausedStageProgress ${pausedStageProgress}`);
+            addLogLine(
+                `pausedStageProgress ${JSON.stringify(pausedStageProgress)}`
+            );
             const updateExportStatsWithOffset = (progress: ExportProgress) =>
                 updateExportProgress({
                     current: pausedStageProgress.current + progress.current,

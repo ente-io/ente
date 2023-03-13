@@ -131,8 +131,11 @@ class ExportService {
             const exportRecord = await this.getExportRecord(exportDir);
 
             addLogLine(
-                `export stats -> progress: ${exportRecord.progress} stage:${exportRecord.stage} queuedFilesCount: ${exportRecord?.queuedFiles?.length}
-                exportedFiles: ${exportRecord?.exportedFiles?.length}
+                `export stats -> progress: ${JSON.stringify(
+                    exportRecord.progress
+                )} stage:${exportRecord.stage} queuedFilesCount: ${
+                    exportRecord?.queuedFiles?.length
+                } exportedFiles: ${exportRecord?.exportedFiles?.length}
                 failedFiles: ${exportRecord?.failedFiles?.length}`
             );
             if (exportType === ExportType.NEW) {
