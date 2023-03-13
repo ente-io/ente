@@ -7,7 +7,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/viewer/file/file_info_widget.dart";
+import 'package:photos/ui/viewer/file/file_details_widget.dart';
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/toast_util.dart";
@@ -136,7 +136,7 @@ Future<void> showInfoSheet(BuildContext context, File file) async {
       return Padding(
         padding:
             EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: FileInfoWidget(file),
+        child: FileDetailsWidget(file),
       );
     },
   );

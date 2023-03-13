@@ -36,18 +36,18 @@ import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:photos/utils/toast_util.dart";
 
-class FileInfoWidget extends StatefulWidget {
+class FileDetailsWidget extends StatefulWidget {
   final File file;
-  const FileInfoWidget(
+  const FileDetailsWidget(
     this.file, {
     Key? key,
   }) : super(key: key);
 
   @override
-  State<FileInfoWidget> createState() => _FileInfoWidgetState();
+  State<FileDetailsWidget> createState() => _FileDetailsWidgetState();
 }
 
-class _FileInfoWidgetState extends State<FileInfoWidget> {
+class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   Map<String, IfdTag>? _exif;
   final Map<String, dynamic> _exifData = {
     "focalLength": null,
