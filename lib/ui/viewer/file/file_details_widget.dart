@@ -2,8 +2,6 @@ import "package:exif/exif.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
-import 'package:path/path.dart' as path;
-import 'package:photo_manager/photo_manager.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/ente_theme_data.dart";
@@ -17,7 +15,6 @@ import "package:photos/services/feature_flag_service.dart";
 import "package:photos/services/object_detection/object_detection_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/buttons/inline_button_widget.dart";
@@ -27,11 +24,10 @@ import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/viewer/file/exif_info_dialog.dart";
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
+import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
-import "package:photos/utils/file_util.dart";
-import "package:photos/utils/magic_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:photos/utils/toast_util.dart";
@@ -96,7 +92,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         file.uploadedFileID!,
       );
     }
-    final dateTime = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
     final dateTimeForUpdationTime =
         DateTime.fromMicrosecondsSinceEpoch(file.updationTime!);
 
@@ -108,8 +103,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         _exifData["takenOnDevice"] != null ||
         _exifData["exposureTime"] != null ||
         _exifData["ISO"] != null;
-    final bool showDimension =
-        _exifData["resolution"] != null && _exifData["megaPixels"] != null;
     final fileDetailsTiles = <Widget?>[
       !widget.file.isUploaded ||
               (!isFileOwner && (widget.file.caption?.isEmpty ?? true))
@@ -121,31 +114,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                   : FileCaptionReadyOnly(caption: widget.file.caption!),
             ),
       CreationTimeItem(file, _currentUserID),
-      InfoItemWidget(
-        key: const ValueKey("File name and info"),
-        leadingIcon:
-            _isImage ? Icons.photo_outlined : Icons.video_camera_back_outlined,
-        title: path.basenameWithoutExtension(file.displayName) +
-            path.extension(file.displayName).toUpperCase(),
-        subtitleSection: Future.value([
-          if (showDimension)
-            Text(
-              "${_exifData["megaPixels"]}MP  "
-              "${_exifData["resolution"]}  ",
-              style: subtitleTextTheme,
-            ),
-          _getFileSize(),
-          if ((file.fileType == FileType.video) &&
-              (file.localID != null || file.duration != 0))
-            _getVideoDuration(),
-        ]),
-        editOnTap: file.uploadedFileID == null || file.ownerID != _currentUserID
-            ? null
-            : () async {
-                await editFilename(context, file);
-                setState(() {});
-              },
-      ),
+      FilePropertiesWidget(file, _isImage, _exifData, _currentUserID),
       showExifListTile
           ? InfoItemWidget(
               key: const ValueKey("Basic EXIF"),
@@ -453,62 +422,5 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     if (exif["EXIF ISOSpeedRatings"] != null) {
       _exifData['ISO'] = exif["EXIF ISOSpeedRatings"].toString();
     }
-  }
-
-  Widget _getFileSize() {
-    Future<int> fileSizeFuture;
-    if (widget.file.fileSize != null) {
-      fileSizeFuture = Future.value(widget.file.fileSize);
-    } else {
-      fileSizeFuture = getFile(widget.file).then((f) => f!.length());
-    }
-    return FutureBuilder<int>(
-      future: fileSizeFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Text(
-            (snapshot.data! / (1024 * 1024)).toStringAsFixed(2) + " MB",
-            style: getEnteTextTheme(context).smallMuted,
-          );
-        } else {
-          return SizedBox.fromSize(
-            size: const Size.square(16),
-            child: EnteLoadingWidget(
-              padding: 3,
-              color: getEnteColorScheme(context).strokeMuted,
-            ),
-          );
-        }
-      },
-    );
-  }
-
-  Widget _getVideoDuration() {
-    if (widget.file.duration != 0) {
-      return Text(
-        secondsToHHMMSS(widget.file.duration!),
-        style: getEnteTextTheme(context).smallMuted,
-      );
-    }
-    return FutureBuilder<AssetEntity?>(
-      future: widget.file.getAsset,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Text(
-            snapshot.data!.videoDuration.toString().split(".")[0],
-            style: getEnteTextTheme(context).smallMuted,
-          );
-        } else {
-          return Center(
-            child: SizedBox.fromSize(
-              size: const Size.square(24),
-              child: const CupertinoActivityIndicator(
-                radius: 8,
-              ),
-            ),
-          );
-        }
-      },
-    );
   }
 }
