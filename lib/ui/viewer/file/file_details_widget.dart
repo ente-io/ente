@@ -1,7 +1,6 @@
 import "package:exif/exif.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import "package:logging/logging.dart";
 import 'package:path/path.dart' as path;
 import 'package:photo_manager/photo_manager.dart';
@@ -27,6 +26,7 @@ import "package:photos/ui/components/info_item_widget.dart";
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/viewer/file/exif_info_dialog.dart";
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
+import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
@@ -120,26 +120,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                   ? FileCaptionWidget(file: widget.file)
                   : FileCaptionReadyOnly(caption: widget.file.caption!),
             ),
-      InfoItemWidget(
-        key: const ValueKey("Creation time"),
-        leadingIcon: Icons.calendar_today_outlined,
-        title: getFullDate(
-          DateTime.fromMicrosecondsSinceEpoch(file.creationTime!),
-        ),
-        subtitleSection: Future.value([
-          Text(
-            getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
-            style: subtitleTextTheme,
-          ),
-        ]),
-        editOnTap: ((widget.file.ownerID == null ||
-                    widget.file.ownerID == _currentUserID) &&
-                widget.file.uploadedFileID != null)
-            ? () {
-                _showDateTimePicker(widget.file);
-              }
-            : null,
-      ),
+      CreationTimeItem(file, _currentUserID),
       InfoItemWidget(
         key: const ValueKey("File name and info"),
         leadingIcon:
@@ -529,36 +510,5 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         }
       },
     );
-  }
-
-  void _showDateTimePicker(File file) async {
-    final dateResult = await DatePicker.showDatePicker(
-      context,
-      minTime: DateTime(1800, 1, 1),
-      maxTime: DateTime.now(),
-      currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime!),
-      locale: LocaleType.en,
-      theme: Theme.of(context).colorScheme.dateTimePickertheme,
-    );
-    if (dateResult == null) {
-      return;
-    }
-    final dateWithTimeResult = await DatePicker.showTime12hPicker(
-      context,
-      showTitleActions: true,
-      currentTime: dateResult,
-      locale: LocaleType.en,
-      theme: Theme.of(context).colorScheme.dateTimePickertheme,
-    );
-    if (dateWithTimeResult != null) {
-      if (await editTime(
-        context,
-        List.of([widget.file]),
-        dateWithTimeResult.microsecondsSinceEpoch,
-      )) {
-        widget.file.creationTime = dateWithTimeResult.microsecondsSinceEpoch;
-        setState(() {});
-      }
-    }
   }
 }
