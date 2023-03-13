@@ -5,7 +5,7 @@ const MAX_LOG_SIZE = 50 * 1024 * 1024; // 50MB
 
 const FILE_STREAM_CHUNK_SIZE: number = 4 * 1024 * 1024;
 
-const SENTRY_DSN = 'https://e9268b784d1042a7a116f53c58ad2165@sentry.ente.io/5';
+const SENTRY_DSN = 'https://28650eea457d43538bd450b20e3c4efd@sentry.ente.io/8';
 
 const RELEASE_VERSION = require('../../package.json').version;
 
