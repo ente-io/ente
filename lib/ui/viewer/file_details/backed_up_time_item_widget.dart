@@ -4,9 +4,9 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/utils/date_time_util.dart";
 
-class BackedUpDateItemWidget extends StatelessWidget {
+class BackedUpTimeItemWidget extends StatelessWidget {
   final File file;
-  const BackedUpDateItemWidget(this.file, {super.key});
+  const BackedUpTimeItemWidget(this.file, {super.key});
 
   @override
   Widget build(BuildContext context) {

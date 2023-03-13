@@ -8,12 +8,12 @@ import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
 
-class FilePropertiesWidget extends StatefulWidget {
+class FilePropertiesItemWidget extends StatefulWidget {
   final File file;
   final bool isImage;
   final Map<String, dynamic> exifData;
   final int currentUserID;
-  const FilePropertiesWidget(
+  const FilePropertiesItemWidget(
     this.file,
     this.isImage,
     this.exifData,
@@ -21,10 +21,11 @@ class FilePropertiesWidget extends StatefulWidget {
     super.key,
   });
   @override
-  State<FilePropertiesWidget> createState() => _FilePropertiesWidgetState();
+  State<FilePropertiesItemWidget> createState() =>
+      _FilePropertiesItemWidgetState();
 }
 
-class _FilePropertiesWidgetState extends State<FilePropertiesWidget> {
+class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
   @override
   Widget build(BuildContext context) {
     return InfoItemWidget(

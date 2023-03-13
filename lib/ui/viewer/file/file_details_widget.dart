@@ -13,7 +13,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
 import "package:photos/ui/viewer/file_details/albums_item_widget.dart";
-import "package:photos/ui/viewer/file_details/backed_up_date_item_widget.dart";
+import 'package:photos/ui/viewer/file_details/backed_up_time_item_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import "package:photos/ui/viewer/file_details/exif_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
@@ -89,14 +89,14 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                   : FileCaptionReadyOnly(caption: widget.file.caption!),
             ),
       CreationTimeItem(file, _currentUserID),
-      FilePropertiesWidget(file, _isImage, _exifData, _currentUserID),
+      FilePropertiesItemWidget(file, _isImage, _exifData, _currentUserID),
       showExifListTile ? BasicExifItemWidget(_exifData) : null,
       _isImage ? AllExifItemWidget(file, _exif) : null,
       FeatureFlagService.instance.isInternalUserOrDebugBuild()
           ? ObjectsItemWidget(file)
           : null,
       (file.uploadedFileID != null && file.updationTime != null)
-          ? BackedUpDateItemWidget(file)
+          ? BackedUpTimeItemWidget(file)
           : null,
       AlbumsItemWidget(file, _currentUserID),
     ];
