@@ -64,7 +64,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
 
   @override
   void initState() {
-    debugPrint('file_info_dialog initState');
+    debugPrint('file_details_sheet initState');
     _currentUserID = Configuration.instance.getUserID();
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
@@ -110,10 +110,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         _exifData["ISO"] != null;
     final bool showDimension =
         _exifData["resolution"] != null && _exifData["megaPixels"] != null;
-    final listTiles = <Widget?>[
+    final fileDetailsTiles = <Widget?>[
       !widget.file.isUploaded ||
               (!isFileOwner && (widget.file.caption?.isEmpty ?? true))
-          ? const SizedBox.shrink()
+          ? const SizedBox(height: 16)
           : Padding(
               padding: const EdgeInsets.only(top: 8, bottom: 24),
               child: isFileOwner
@@ -212,7 +212,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           : null,
       (file.uploadedFileID != null && file.updationTime != null)
           ? InfoItemWidget(
-              key: const ValueKey("Backup date"),
+              key: const ValueKey("Backedup date"),
               leadingIcon: Icons.backup_outlined,
               title: getFullDate(
                 DateTime.fromMicrosecondsSinceEpoch(file.updationTime!),
@@ -238,7 +238,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ),
     ];
 
-    listTiles.removeWhere(
+    fileDetailsTiles.removeWhere(
       (element) => element == null,
     );
 
@@ -281,10 +281,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                               ),
                             );
                     } else {
-                      return listTiles[index ~/ 2];
+                      return fileDetailsTiles[index ~/ 2];
                     }
                   },
-                  childCount: (listTiles.length * 2) - 1,
+                  childCount: (fileDetailsTiles.length * 2) - 1,
                 ),
               )
             ],
@@ -493,7 +493,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           return SizedBox.fromSize(
             size: const Size.square(16),
             child: EnteLoadingWidget(
-              is20pts: true,
+              padding: 3,
               color: getEnteColorScheme(context).strokeMuted,
             ),
           );

@@ -51,22 +51,29 @@ class InfoItemWidget extends StatelessWidget {
                         child: FutureBuilder(
                           future: subtitleSection,
                           builder: (context, snapshot) {
+                            Widget child;
                             if (snapshot.hasData) {
                               final subtitle = snapshot.data as List<Widget>;
                               if (subtitle.isNotEmpty) {
-                                return Wrap(
+                                child = Wrap(
                                   runSpacing: 8,
                                   spacing: 8,
                                   children: subtitle,
                                 );
                               } else {
-                                return const SizedBox.shrink();
+                                child = const SizedBox.shrink();
                               }
                             } else {
-                              return const EnteLoadingWidget(
-                                is20pts: true,
+                              child = const EnteLoadingWidget(
+                                padding: 3,
+                                size: 11,
                               );
                             }
+                            return AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              switchInCurve: Curves.easeInOutExpo,
+                              child: child,
+                            );
                           },
                         ),
                       ),
