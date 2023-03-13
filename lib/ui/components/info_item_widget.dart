@@ -65,9 +65,10 @@ class InfoItemWidget extends StatelessWidget {
                                 child = const SizedBox.shrink();
                               }
                             } else {
-                              child = const EnteLoadingWidget(
+                              child = EnteLoadingWidget(
                                 padding: 3,
                                 size: 11,
+                                color: getEnteColorScheme(context).strokeMuted,
                               );
                             }
                             return AnimatedSwitcher(
