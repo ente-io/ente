@@ -14,6 +14,12 @@ class FeatureFlagService {
   static final FeatureFlagService instance =
       FeatureFlagService._privateConstructor();
   static const _featureFlagsKey = "feature_flags_key";
+  static final _internalUserIDs = const String.fromEnvironment(
+    "internal_user_ids",
+    defaultValue: "1,2,3,4,191",
+  ).split(",").map((element) {
+    return int.parse(element);
+  }).toSet();
 
   final _logger = Logger("FeatureFlagService");
   FeatureFlags? _featureFlags;
@@ -64,7 +70,10 @@ class FeatureFlagService {
 
   bool isInternalUserOrDebugBuild() {
     final String? email = Configuration.instance.getEmail();
-    return (email != null && email.endsWith("@ente.io")) || kDebugMode;
+    final userID = Configuration.instance.getUserID();
+    return (email != null && email.endsWith("@ente.io")) ||
+        _internalUserIDs.contains(userID) ||
+        kDebugMode;
   }
 
   Future<void> fetchFeatureFlags() async {
