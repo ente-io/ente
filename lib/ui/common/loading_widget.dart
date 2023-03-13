@@ -5,16 +5,19 @@ class EnteLoadingWidget extends StatelessWidget {
   final Color? color;
   final double size;
   final double padding;
+  final Alignment alignment;
   const EnteLoadingWidget({
     this.color,
     this.size = 14,
     this.padding = 5,
+    this.alignment = Alignment.center,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Align(
+      alignment: alignment,
       child: Padding(
         padding: EdgeInsets.all(padding),
         child: SizedBox.fromSize(

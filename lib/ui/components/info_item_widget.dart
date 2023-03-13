@@ -69,10 +69,11 @@ class InfoItemWidget extends StatelessWidget {
                                 padding: 3,
                                 size: 11,
                                 color: getEnteColorScheme(context).strokeMuted,
+                                alignment: Alignment.centerLeft,
                               );
                             }
                             return AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
+                              duration: const Duration(milliseconds: 200),
                               switchInCurve: Curves.easeInOutExpo,
                               child: child,
                             );
