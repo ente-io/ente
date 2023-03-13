@@ -34,6 +34,7 @@ import { CustomError } from 'utils/error';
 import { getLocalUserDetails } from 'utils/user';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
+import { addLogLine } from 'utils/logging';
 
 const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
@@ -289,6 +290,7 @@ export default function ExportModal(props: Props) {
             const pausedStageProgress = exportRecord.progress;
             setExportProgress(pausedStageProgress);
 
+            addLogLine(`pausedStageProgress ${pausedStageProgress}`);
             const updateExportStatsWithOffset = (progress: ExportProgress) =>
                 updateExportProgress({
                     current: pausedStageProgress.current + progress.current,
