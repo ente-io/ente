@@ -16,15 +16,17 @@ import "package:photos/models/gallery_type.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/feature_flag_service.dart";
 import "package:photos/services/object_detection/object_detection_service.dart";
+import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
+import "package:photos/ui/components/buttons/inline_button_widget.dart";
 import 'package:photos/ui/components/divider_widget.dart';
 import "package:photos/ui/components/info_item_widget.dart";
 import 'package:photos/ui/components/title_bar_widget.dart';
+import "package:photos/ui/viewer/file/exif_info_dialog.dart";
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
-import 'package:photos/ui/viewer/file/raw_exif_list_tile_widget.dart';
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
@@ -32,6 +34,7 @@ import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
+import "package:photos/utils/toast_util.dart";
 
 class FileInfoWidget extends StatefulWidget {
   final File file;
@@ -226,7 +229,13 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ]),
             )
           : null,
-      _isImage ? RawExifListTileWidget(_exif, widget.file) : null,
+      _isImage
+          ? InfoItemWidget(
+              leadingIcon: Icons.text_snippet_outlined,
+              title: "EXIF",
+              subtitleSection: _exifButton(file, _exif),
+            )
+          : null,
     ];
 
     listTiles.removeWhere(
@@ -279,6 +288,36 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         ),
       ),
     );
+  }
+
+  Future<List<InlineButtonWidget>> _exifButton(
+    File file,
+    Map<String, IfdTag>? exif,
+  ) {
+    late final String label;
+    late final VoidCallback? onTap;
+    if (exif == null) {
+      label = "Loading EXIF data...";
+      onTap = null;
+    } else if (exif.isNotEmpty) {
+      label = "View all EXIF data";
+      onTap = () => showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return ExifInfoDialog(file);
+            },
+            barrierColor: backdropFaintDark,
+          );
+    } else {
+      label = "No EXIF data";
+      onTap = () => showShortToast(context, "This image has no exif data");
+    }
+    return Future.value([
+      InlineButtonWidget(
+        label,
+        onTap,
+      )
+    ]);
   }
 
   Future<List<ChipButtonWidget>> _objectTags(File file) async {
