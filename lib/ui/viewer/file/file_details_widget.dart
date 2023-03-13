@@ -13,24 +13,21 @@ import "package:photos/models/gallery_type.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/feature_flag_service.dart";
 import "package:photos/services/object_detection/object_detection_service.dart";
-import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
-import "package:photos/ui/components/buttons/inline_button_widget.dart";
 import 'package:photos/ui/components/divider_widget.dart';
 import "package:photos/ui/components/info_item_widget.dart";
 import 'package:photos/ui/components/title_bar_widget.dart';
-import "package:photos/ui/viewer/file/exif_info_dialog.dart";
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
+import "package:photos/ui/viewer/file_details/exif_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
-import "package:photos/utils/toast_util.dart";
 
 class FileDetailsWidget extends StatefulWidget {
   final File file;
@@ -115,42 +112,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             ),
       CreationTimeItem(file, _currentUserID),
       FilePropertiesWidget(file, _isImage, _exifData, _currentUserID),
-      showExifListTile
-          ? InfoItemWidget(
-              key: const ValueKey("Basic EXIF"),
-              leadingIcon: Icons.camera_outlined,
-              title: _exifData["takenOnDevice"] ?? "--",
-              subtitleSection: Future.value([
-                if (_exifData["fNumber"] != null)
-                  Text(
-                    'ƒ/' + _exifData["fNumber"].toString(),
-                    style: subtitleTextTheme,
-                  ),
-                if (_exifData["exposureTime"] != null)
-                  Text(
-                    _exifData["exposureTime"],
-                    style: subtitleTextTheme,
-                  ),
-                if (_exifData["focalLength"] != null)
-                  Text(
-                    _exifData["focalLength"].toString() + "mm",
-                    style: subtitleTextTheme,
-                  ),
-                if (_exifData["ISO"] != null)
-                  Text(
-                    "ISO" + _exifData["ISO"].toString(),
-                    style: subtitleTextTheme,
-                  ),
-              ]),
-            )
-          : null,
-      _isImage
-          ? InfoItemWidget(
-              leadingIcon: Icons.text_snippet_outlined,
-              title: "EXIF",
-              subtitleSection: _exifButton(file, _exif),
-            )
-          : null,
+      showExifListTile ? BasicExifItemWidget(_exifData) : null,
+      _isImage ? AllExifItemWidget(file, _exif) : null,
       FeatureFlagService.instance.isInternalUserOrDebugBuild()
           ? InfoItemWidget(
               key: const ValueKey("Objects"),
@@ -242,36 +205,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         ),
       ),
     );
-  }
-
-  Future<List<InlineButtonWidget>> _exifButton(
-    File file,
-    Map<String, IfdTag>? exif,
-  ) {
-    late final String label;
-    late final VoidCallback? onTap;
-    if (exif == null) {
-      label = "Loading EXIF data...";
-      onTap = null;
-    } else if (exif.isNotEmpty) {
-      label = "View all EXIF data";
-      onTap = () => showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return ExifInfoDialog(file);
-            },
-            barrierColor: backdropFaintDark,
-          );
-    } else {
-      label = "No EXIF data";
-      onTap = () => showShortToast(context, "This image has no exif data");
-    }
-    return Future.value([
-      InlineButtonWidget(
-        label,
-        onTap,
-      )
-    ]);
   }
 
   Future<List<ChipButtonWidget>> _objectTags(File file) async {
