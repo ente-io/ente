@@ -19,12 +19,12 @@ import 'package:photos/ui/components/divider_widget.dart';
 import "package:photos/ui/components/info_item_widget.dart";
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
+import "package:photos/ui/viewer/file_details/backed_up_date_item_widget.dart";
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import "package:photos/ui/viewer/file_details/exif_item_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
-import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -88,8 +88,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         file.uploadedFileID!,
       );
     }
-    final dateTimeForUpdationTime =
-        DateTime.fromMicrosecondsSinceEpoch(file.updationTime!);
 
     if (_isImage && _exif != null) {
       _generateExifForDetails(_exif!);
@@ -117,21 +115,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           ? ObjectsItemWidget(file)
           : null,
       (file.uploadedFileID != null && file.updationTime != null)
-          ? InfoItemWidget(
-              key: const ValueKey("Backedup date"),
-              leadingIcon: Icons.backup_outlined,
-              title: getFullDate(
-                DateTime.fromMicrosecondsSinceEpoch(file.updationTime!),
-              ),
-              subtitleSection: Future.value([
-                Text(
-                  getTimeIn12hrFormat(dateTimeForUpdationTime) +
-                      "  " +
-                      dateTimeForUpdationTime.timeZoneName,
-                  style: subtitleTextTheme,
-                ),
-              ]),
-            )
+          ? BackedUpDateItemWidget(file)
           : null,
       InfoItemWidget(
         key: const ValueKey("Albums"),
