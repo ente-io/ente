@@ -84,7 +84,7 @@ class RemoteSyncService {
       _logger.info("Remote sync already in progress, skipping");
       // if current sync is silent but request sync is non-silent (demands UI
       // updates), update the syncSilently flag
-      if (_isExistingSyncSilent == true && silently == false) {
+      if (_isExistingSyncSilent && !silently) {
         _isExistingSyncSilent = false;
       }
       return _existingSync?.future;
