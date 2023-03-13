@@ -44,7 +44,7 @@ class RemoteSyncService {
   int _completedUploads = 0;
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
-  bool _existingSyncSilent = false;
+  bool _isExistingSyncSilent = false;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
   final String _isFirstRemoteSyncDone = "isFirstRemoteSyncDone";
@@ -84,13 +84,17 @@ class RemoteSyncService {
       _logger.info("Remote sync already in progress, skipping");
       // if current sync is silent but request sync is non-silent (demands UI
       // updates), update the syncSilently flag
-      if (_existingSyncSilent == true && silently == false) {
-        _existingSyncSilent = false;
+      if (_isExistingSyncSilent == true && silently == false) {
+        _isExistingSyncSilent = false;
       }
       return _existingSync?.future;
     }
     _existingSync = Completer<void>();
-    _existingSyncSilent = silently;
+    _isExistingSyncSilent = silently;
+    _logger.info(
+      "Starting remote sync " +
+          (silently ? "silently" : " with status updates"),
+    );
 
     try {
       // use flag to decide if we should start marking files for upload before
@@ -115,18 +119,20 @@ class RemoteSyncService {
       }
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
+      _logger.info("File upload complete");
       if (hasUploadedFiles) {
         await _pullDiff();
         _existingSync?.complete();
         _existingSync = null;
         await syncDeviceCollectionFilesForUpload();
         final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
+        _logger.info("hasMoreFilesToBackup?" + hasMoreFilesToBackup.toString());
         if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
           // Skipping a resync to ensure that files that were ignored in this
           // session are not processed now
           sync();
         } else {
-          debugPrint("Fire backup completed event");
+          _logger.info("Fire backup completed event");
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedBackup));
         }
       } else {
@@ -148,11 +154,12 @@ class RemoteSyncService {
         _logger.severe("Error executing remote sync ", e, s);
       }
     } finally {
-      _existingSyncSilent = false;
+      _isExistingSyncSilent = false;
     }
   }
 
   Future<void> _pullDiff() async {
+    _logger.info("Pulling remote diff");
     final isFirstSync = !_collectionsService.hasSyncedCollections();
     await _collectionsService.sync();
     // check and reset user's collection syncTime in past for older clients
@@ -179,6 +186,7 @@ class RemoteSyncService {
       );
       await _collectionsService.setCollectionSyncTime(c.id, c.updationTime);
     }
+    _logger.info("All updated collections synced");
   }
 
   Future<void> _resetAllCollectionsSyncTime() async {
@@ -193,7 +201,12 @@ class RemoteSyncService {
   }
 
   Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
-    if (!_existingSyncSilent) {
+    _logger.info(
+      "Syncing collection #" +
+          collectionID.toString() +
+          (_isExistingSyncSilent ? " silently" : ""),
+    );
+    if (!_isExistingSyncSilent) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
     }
     final diff =
@@ -252,10 +265,13 @@ class RemoteSyncService {
         collectionID,
         _collectionsService.getCollectionSyncTime(collectionID),
       );
+    } else {
+      _logger.info("Collection #" + collectionID.toString() + " synced");
     }
   }
 
   Future<void> syncDeviceCollectionFilesForUpload() async {
+    _logger.info("Syncing device collections to be uploaded");
     final int ownerID = _config.getUserID()!;
 
     final deviceCollections = await _db.getDeviceCollections();
@@ -279,15 +295,15 @@ class RemoteSyncService {
       if (localIDsToSync.isEmpty) {
         continue;
       }
-      await _createCollectionForDevicePath(deviceCollection);
-      if (deviceCollection.collectionID == -1) {
-        _logger.finest('DeviceCollection should not be -1 here');
+      final collectionID = await _getCollectionID(deviceCollection);
+      if (collectionID == null) {
+        _logger.warning('DeviceCollection was either deleted or missing');
         continue;
       }
 
       moreFilesMarkedForBackup = true;
       await _db.setCollectionIDForUnMappedLocalFiles(
-        deviceCollection.collectionID!,
+        collectionID,
         localIDsToSync,
       );
 
@@ -295,15 +311,13 @@ class RemoteSyncService {
       // the collection. This can happen when a user has marked a folder
       // for sync, then un-synced it and again tries to mark if for sync.
       final Set<String> existingMapping =
-          await _db.getLocalFileIDsForCollection(
-        deviceCollection.collectionID!,
-      );
+          await _db.getLocalFileIDsForCollection(collectionID);
       final Set<String> commonElements =
           localIDsToSync.intersection(existingMapping);
       if (commonElements.isNotEmpty) {
         debugPrint(
           "${commonElements.length} files already existing in "
-          "collection ${deviceCollection.collectionID} for ${deviceCollection.name}",
+          "collection $collectionID for ${deviceCollection.name}",
         );
         localIDsToSync.removeAll(commonElements);
       }
@@ -324,7 +338,7 @@ class RemoteSyncService {
           final String localID = existingFile.localID!;
           if (!fileFoundForLocalIDs.contains(localID)) {
             existingFile.generatedID = null;
-            existingFile.collectionID = deviceCollection.collectionID;
+            existingFile.collectionID = collectionID;
             existingFile.uploadedFileID = null;
             existingFile.ownerID = null;
             newFilesToInsert.add(existingFile);
@@ -414,26 +428,23 @@ class RemoteSyncService {
     }
   }
 
-  Future<void> _createCollectionForDevicePath(
-    DeviceCollection deviceCollection,
-  ) async {
-    int deviceCollectionID = deviceCollection.collectionID ?? -1;
-    if (deviceCollectionID != -1) {
+  Future<int?> _getCollectionID(DeviceCollection deviceCollection) async {
+    if (deviceCollection.collectionID != null) {
       final collectionByID =
-          _collectionsService.getCollectionByID(deviceCollectionID);
+          _collectionsService.getCollectionByID(deviceCollection.collectionID!);
       if (collectionByID == null || collectionByID.isDeleted) {
-        _logger.info(
-          "Collection $deviceCollectionID either deleted or missing "
+        _logger.warning(
+          "Collection $deviceCollection.collectionID either deleted or missing "
           "for path ${deviceCollection.id}",
         );
-        deviceCollectionID = -1;
+        return null;
       }
-    }
-    if (deviceCollectionID == -1) {
+      return collectionByID.id;
+    } else {
       final collection =
           await _collectionsService.getOrCreateForPath(deviceCollection.name);
       await _db.updateDeviceCollection(deviceCollection.id, collection.id);
-      deviceCollection.collectionID = collection.id;
+      return collection.id;
     }
   }
 
