@@ -2,14 +2,15 @@ import Box from '@mui/material/Box';
 import { Chip } from 'components/Chip';
 import { Legend } from 'components/PhotoViewer/styledComponents/Legend';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { EnteFile } from 'types/file';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import constants from 'utils/strings/constants';
 
 export function ObjectLabelList(props: {
     file: EnteFile;
     updateMLDataIndex: number;
 }) {
+    const { t } = useTranslation();
     const [objects, setObjects] = useState<Array<string>>([]);
     useEffect(() => {
         let didCancel = false;
@@ -34,9 +35,7 @@ export function ObjectLabelList(props: {
 
     return (
         <div>
-            <Legend sx={{ pb: 1, display: 'block' }}>
-                {constants.OBJECTS}
-            </Legend>
+            <Legend sx={{ pb: 1, display: 'block' }}>{t('OBJECTS')}</Legend>
             <Box
                 display={'flex'}
                 gap={1}

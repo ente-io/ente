@@ -1,8 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
-import constants from 'utils/strings/constants';
 import PublicShareSwitch from '../switch';
 
 interface Iprops {
@@ -16,6 +16,8 @@ export function ManageDownloadAccess({
     updatePublicShareURLHelper,
     collection,
 }: Iprops) {
+    const { t } = useTranslation();
+
     const appContext = useContext(AppContext);
 
     const handleFileDownloadSetting = () => {
@@ -31,11 +33,22 @@ export function ManageDownloadAccess({
 
     const disableFileDownload = () => {
         appContext.setDialogMessage({
-            title: constants.DISABLE_FILE_DOWNLOAD,
-            content: constants.DISABLE_FILE_DOWNLOAD_MESSAGE(),
-            close: { text: constants.CANCEL },
+            title: t('DISABLE_FILE_DOWNLOAD'),
+            content: (
+                <Trans>
+                    <p>
+                        Are you sure that you want to disable the download
+                        button for files?{' '}
+                    </p>{' '}
+                    <p>
+                        Viewers can still take screenshots or save a copy of
+                        your photos using external tools{' '}
+                    </p>
+                </Trans>
+            ),
+            close: { text: t('CANCEL') },
             proceed: {
-                text: constants.DISABLE,
+                text: t('DISABLE'),
                 action: () =>
                     updatePublicShareURLHelper({
                         collectionID: collection.id,
@@ -47,7 +60,7 @@ export function ManageDownloadAccess({
     };
     return (
         <Box>
-            <Typography mb={0.5}>{constants.FILE_DOWNLOAD}</Typography>
+            <Typography mb={0.5}>{t('FILE_DOWNLOAD')}</Typography>
             <PublicShareSwitch
                 checked={publicShareProp?.enableDownload ?? true}
                 onChange={handleFileDownloadSetting}

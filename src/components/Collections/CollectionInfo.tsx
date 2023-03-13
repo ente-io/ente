@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { FlexWrapper } from 'components/Container';
 import React from 'react';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
 interface Iprops {
     name: string;
     fileCount: number;
@@ -9,13 +9,14 @@ interface Iprops {
 }
 
 export function CollectionInfo({ name, fileCount, endIcon }: Iprops) {
+    const { t } = useTranslation();
     return (
         <div>
             <Typography variant="h3">{name}</Typography>
 
             <FlexWrapper>
                 <Typography variant="body2" color="text.secondary">
-                    {constants.PHOTO_COUNT(fileCount)}
+                    {t('photos_count', { count: fileCount })}
                 </Typography>
                 {endIcon && (
                     <Box

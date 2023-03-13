@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import {
@@ -22,6 +23,8 @@ import FormPaperTitle from 'components/Form/FormPaper/Title';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 export default function ChangePassword() {
+    const { t } = useTranslation();
+
     const [token, setToken] = useState<string>();
     const router = useRouter();
     const [user, setUser] = useState<User>();
@@ -48,7 +51,7 @@ export default function ChangePassword() {
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
         } catch (e) {
-            setFieldError('confirm', constants.PASSWORD_GENERATION_FAILED);
+            setFieldError('confirm', t('PASSWORD_GENERATION_FAILED'));
             return;
         }
         const encryptedKeyAttributes = await cryptoWorker.encryptToB64(
@@ -84,11 +87,11 @@ export default function ChangePassword() {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle>{constants.CHANGE_PASSWORD}</FormPaperTitle>
+                <FormPaperTitle>{t('CHANGE_PASSWORD')}</FormPaperTitle>
                 <SetPasswordForm
                     userEmail={user?.email}
                     callback={onSubmit}
-                    buttonText={constants.CHANGE_PASSWORD}
+                    buttonText={t('CHANGE_PASSWORD')}
                     back={
                         getData(LS_KEYS.SHOW_BACK_BUTTON)?.value
                             ? redirectToGallery
@@ -98,7 +101,7 @@ export default function ChangePassword() {
 
                 <FormPaperFooter>
                     <LinkButton onClick={router.back}>
-                        {constants.GO_BACK}
+                        {t('GO_BACK')}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>

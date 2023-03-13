@@ -5,10 +5,11 @@ import React, { useContext, useEffect } from 'react';
 import billingService from 'services/billingService';
 import { getFamilyPlanAdmin } from 'utils/user/family';
 import { preloadImage } from 'utils/common';
-import constants from 'utils/strings/constants';
 import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
+import { useTranslation } from 'react-i18next';
 
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
+    const { t } = useTranslation();
     const { setDialogMessage, isMobile } = useContext(AppContext);
 
     useEffect(() => {
@@ -20,23 +21,23 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
             await billingService.leaveFamily();
         } catch (e) {
             setDialogMessage({
-                title: constants.ERROR,
+                title: t('ERROR'),
                 close: { variant: 'danger' },
-                content: constants.UNKNOWN_ERROR,
+                content: t('UNKNOWN_ERROR'),
             });
         }
     }
     const confirmLeaveFamily = () =>
         setDialogMessage({
-            title: `${constants.LEAVE_FAMILY_PLAN}`,
-            content: constants.LEAVE_FAMILY_CONFIRM,
+            title: t('LEAVE_FAMILY_PLAN}'),
+            content: t('LEAVE_FAMILY_CONFIRM'),
             proceed: {
-                text: constants.LEAVE,
+                text: t('LEAVE'),
                 action: onLeaveFamilyClick,
                 variant: 'danger',
             },
             close: {
-                text: constants.CANCEL,
+                text: t('CANCEL'),
             },
         });
 
@@ -53,17 +54,17 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
             fullScreen={isMobile}>
             <DialogTitleWithCloseButton onClose={onClose}>
                 <Typography variant="h3" fontWeight={'bold'}>
-                    {constants.SUBSCRIPTION}
+                    {t('SUBSCRIPTION')}
                 </Typography>
                 <Typography color={'text.secondary'}>
-                    {constants.FAMILY_PLAN}
+                    {t('FAMILY_PLAN')}
                 </Typography>
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <VerticallyCentered>
                     <Box mb={4}>
                         <Typography color="text.secondary">
-                            {constants.FAMILY_SUBSCRIPTION_INFO}
+                            {t('FAMILY_SUBSCRIPTION_INFO')}
                         </Typography>
                         <Typography>
                             {getFamilyPlanAdmin(userDetails.familyData)?.email}
@@ -82,7 +83,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                             variant="outlined"
                             color="danger"
                             onClick={confirmLeaveFamily}>
-                            {constants.LEAVE_FAMILY_PLAN}
+                            {t('LEAVE_FAMILY_PLAN')}
                         </Button>
                     </FlexWrapper>
                 </VerticallyCentered>

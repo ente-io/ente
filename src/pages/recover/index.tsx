@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import {
     clearData,
     getData,
@@ -27,6 +28,8 @@ const bip39 = require('bip39');
 bip39.setDefaultWordlist('english');
 
 export default function Recover() {
+    const { t } = useTranslation();
+
     const router = useRouter();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const appContext = useContext(AppContext);
@@ -83,34 +86,34 @@ export default function Recover() {
             router.push(PAGES.CHANGE_PASSWORD);
         } catch (e) {
             logError(e, 'password recovery failed');
-            setFieldError(constants.INCORRECT_RECOVERY_KEY);
+            setFieldError(t('INCORRECT_RECOVERY_KEY'));
         }
     };
 
     const showNoRecoveryKeyMessage = () => {
         appContext.setDialogMessage({
-            title: constants.SORRY,
+            title: t('SORRY'),
             close: {},
-            content: constants.NO_RECOVERY_KEY_MESSAGE,
+            content: t('NO_RECOVERY_KEY_MESSAGE'),
         });
     };
 
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle>{constants.RECOVER_ACCOUNT}</FormPaperTitle>
+                <FormPaperTitle>{t('RECOVER_ACCOUNT')}</FormPaperTitle>
                 <SingleInputForm
                     callback={recover}
                     fieldType="text"
-                    placeholder={constants.RECOVERY_KEY_HINT}
-                    buttonText={constants.RECOVER}
+                    placeholder={t('RECOVERY_KEY_HINT')}
+                    buttonText={t('RECOVER')}
                 />
                 <FormPaperFooter style={{ justifyContent: 'space-between' }}>
                     <LinkButton onClick={showNoRecoveryKeyMessage}>
-                        {constants.NO_RECOVERY_KEY}
+                        {t('NO_RECOVERY_KEY')}
                     </LinkButton>
                     <LinkButton onClick={router.back}>
-                        {constants.GO_BACK}
+                        {t('GO_BACK')}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>

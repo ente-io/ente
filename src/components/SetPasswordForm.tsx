@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import constants from 'utils/strings/constants';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
 import { Box, Input, TextField, Typography } from '@mui/material';
 import { PasswordStrengthHint } from './PasswordStrength';
 import { isWeakPassword } from 'utils/crypto';
+import { Trans, useTranslation } from 'react-i18next';
 
 export interface SetPasswordFormProps {
     userEmail: string;
@@ -24,6 +24,7 @@ export interface SetPasswordFormValues {
     confirm: string;
 }
 function SetPasswordForm(props: SetPasswordFormProps) {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
 
     const onSubmit = async (
@@ -43,10 +44,10 @@ function SetPasswordForm(props: SetPasswordFormProps) {
             if (passphrase === confirm) {
                 await props.callback(passphrase, setFieldError);
             } else {
-                setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
+                setFieldError('confirm', t('PASSPHRASE_MATCH_ERROR'));
             }
         } catch (e) {
-            setFieldError('confirm', `${constants.UNKNOWN_ERROR} ${e.message}`);
+            setFieldError('confirm', `${t('UNKNOWN_ERROR} ${e.message}')}`);
         } finally {
             setLoading(false);
         }
@@ -56,8 +57,8 @@ function SetPasswordForm(props: SetPasswordFormProps) {
         <Formik<SetPasswordFormValues>
             initialValues={{ passphrase: '', confirm: '' }}
             validationSchema={Yup.object().shape({
-                passphrase: Yup.string().required(constants.REQUIRED),
-                confirm: Yup.string().required(constants.REQUIRED),
+                passphrase: Yup.string().required(t('REQUIRED')),
+                confirm: Yup.string().required(t('REQUIRED')),
             })}
             validateOnChange={false}
             validateOnBlur={false}
@@ -65,7 +66,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
             {({ values, errors, handleChange, handleSubmit }) => (
                 <form noValidate onSubmit={handleSubmit}>
                     <Typography mb={2} color="text.secondary" variant="body2">
-                        {constants.ENTER_ENC_PASSPHRASE}
+                        {t('ENTER_ENC_PASSPHRASE')}
                     </Typography>
 
                     <Input
@@ -82,7 +83,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         id="password"
                         autoComplete="new-password"
                         type="password"
-                        label={constants.PASSPHRASE_HINT}
+                        label={t('PASSPHRASE_HINT')}
                         value={values.passphrase}
                         onChange={handleChange('passphrase')}
                         error={Boolean(errors.passphrase)}
@@ -96,7 +97,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         id="confirm-password"
                         autoComplete="new-password"
                         type="password"
-                        label={constants.CONFIRM_PASSPHRASE}
+                        label={t('CONFIRM_PASSPHRASE')}
                         value={values.confirm}
                         onChange={handleChange('confirm')}
                         disabled={loading}
@@ -106,7 +107,11 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     <PasswordStrengthHint password={values.passphrase} />
 
                     <Typography my={2} variant="body2">
-                        {constants.PASSPHRASE_DISCLAIMER()}
+                        <Trans>
+                            We don't store your password, so if you forget it,{' '}
+                            <strong>we will not be able to help you </strong>
+                            recover your data without a recovery key.
+                        </Trans>
                     </Typography>
 
                     <Box my={4}>
@@ -122,7 +127,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                                 mt={1}
                                 color="text.secondary"
                                 variant="body2">
-                                {constants.KEY_GENERATION_IN_PROGRESS_MESSAGE}
+                                {t('KEY_GENERATION_IN_PROGRESS_MESSAGE')}
                             </Typography>
                         )}
                     </Box>

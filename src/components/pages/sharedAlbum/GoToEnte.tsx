@@ -2,7 +2,7 @@ import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import React, { useEffect, useState } from 'react';
 import { Button, styled } from '@mui/material';
 import { getDeviceOS, OS } from 'utils/common/deviceDetection';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
 
 export const NoStyleAnchor = styled('a')`
     color: inherit;
@@ -13,6 +13,8 @@ export const NoStyleAnchor = styled('a')`
 `;
 
 function GoToEnte() {
+    const { t } = useTranslation();
+
     const [os, setOS] = useState<OS>(OS.UNKNOWN);
 
     useEffect(() => {
@@ -22,9 +24,9 @@ function GoToEnte() {
 
     const getButtonText = (os: OS) => {
         if (os === OS.ANDROID || os === OS.IOS) {
-            return constants.INSTALL;
+            return t('INSTALL');
         } else {
-            return constants.SIGN_UP;
+            return t('SIGN_UP');
         }
     };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import { logoutUser, putAttributes } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
@@ -23,6 +24,8 @@ import FormPaper from 'components/Form/FormPaper';
 import FormTitle from 'components/Form/FormPaper/Title';
 
 export default function Generate() {
+    const { t } = useTranslation();
+
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
     const router = useRouter();
@@ -76,7 +79,7 @@ export default function Generate() {
             setRecoveryModalView(true);
         } catch (e) {
             logError(e, 'failed to generate password');
-            setFieldError('passphrase', constants.PASSWORD_GENERATION_FAILED);
+            setFieldError('passphrase', t('PASSWORD_GENERATION_FAILED'));
         }
     };
 
@@ -100,11 +103,11 @@ export default function Generate() {
             ) : (
                 <FormContainer>
                     <FormPaper>
-                        <FormTitle>{constants.SET_PASSPHRASE}</FormTitle>
+                        <FormTitle>{t('SET_PASSPHRASE')}</FormTitle>
                         <SetPasswordForm
                             userEmail={user?.email}
                             callback={onSubmit}
-                            buttonText={constants.SET_PASSPHRASE}
+                            buttonText={t('SET_PASSPHRASE')}
                             back={logoutUser}
                         />
                     </FormPaper>

@@ -7,7 +7,6 @@ import React, { useContext, useState } from 'react';
 import { updateShareableURL } from 'services/collectionService';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { sleep } from 'utils/common';
-import constants from 'utils/strings/constants';
 import {
     ManageSectionLabel,
     ManageSectionOptions,
@@ -16,6 +15,7 @@ import { ManageDownloadAccess } from './downloadAccess';
 import { handleSharingErrors } from 'utils/error/ui';
 import { SetPublicShareProp } from 'types/publicCollection';
 import { ManagePublicCollect } from './publicCollect';
+import { useTranslation } from 'react-i18next';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -28,6 +28,7 @@ export default function PublicShareManage({
     collection,
     setPublicShareProp,
 }: Iprops) {
+    const { t } = useTranslation();
     const galleryContext = useContext(GalleryContext);
 
     const [sharableLinkError, setSharableLinkError] = useState(null);
@@ -59,7 +60,7 @@ export default function PublicShareManage({
         <>
             <details>
                 <ManageSectionLabel onClick={scrollToEnd}>
-                    {constants.MANAGE_LINK}
+                    {t('MANAGE_LINK')}
                 </ManageSectionLabel>
                 <ManageSectionOptions>
                     <Stack spacing={1.5}>

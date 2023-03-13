@@ -4,7 +4,8 @@ import { Box, Divider, Stack, Typography } from '@mui/material';
 import { FreeFlowText, SpaceBetweenFlex } from 'components/Container';
 import CollectionCard from 'components/Collections/CollectionCard';
 import { ResultPreviewTile } from 'components/Collections/styledComponents';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import { components } from 'react-select';
 
 const { Option } = components;
@@ -15,37 +16,41 @@ export const OptionWithInfo = (props) => (
     </Option>
 );
 
-const LabelWithInfo = ({ data }: { data: SearchOption }) =>
-    !data.hide && (
-        <>
-            <Box className="main" px={2} py={1}>
-                <Typography variant="caption" mb={1}>
-                    {constants.SEARCH_TYPE(data.type)}
-                </Typography>
-                <SpaceBetweenFlex>
-                    <Box mr={1}>
-                        <FreeFlowText>
-                            <Typography fontWeight={'bold'}>
-                                {data.label}
+const LabelWithInfo = ({ data }: { data: SearchOption }) => {
+    const { t } = useTranslation();
+    return (
+        !data.hide && (
+            <>
+                <Box className="main" px={2} py={1}>
+                    <Typography variant="caption" mb={1}>
+                        {t('SEARCH_TYPE', { type: data.type })}
+                    </Typography>
+                    <SpaceBetweenFlex>
+                        <Box mr={1}>
+                            <FreeFlowText>
+                                <Typography fontWeight={'bold'}>
+                                    {data.label}
+                                </Typography>
+                            </FreeFlowText>
+                            <Typography color="text.secondary">
+                                {t('PHOTO_COUNT', { count: data.fileCount })}
                             </Typography>
-                        </FreeFlowText>
-                        <Typography color="text.secondary">
-                            {constants.PHOTO_COUNT(data.fileCount)}
-                        </Typography>
-                    </Box>
+                        </Box>
 
-                    <Stack direction={'row'} spacing={1}>
-                        {data.previewFiles.map((file) => (
-                            <CollectionCard
-                                key={file.id}
-                                latestFile={file}
-                                onClick={() => null}
-                                collectionTile={ResultPreviewTile}
-                            />
-                        ))}
-                    </Stack>
-                </SpaceBetweenFlex>
-            </Box>
-            <Divider sx={{ mx: 2, my: 1 }} />
-        </>
+                        <Stack direction={'row'} spacing={1}>
+                            {data.previewFiles.map((file) => (
+                                <CollectionCard
+                                    key={file.id}
+                                    latestFile={file}
+                                    onClick={() => null}
+                                    collectionTile={ResultPreviewTile}
+                                />
+                            ))}
+                        </Stack>
+                    </SpaceBetweenFlex>
+                </Box>
+                <Divider sx={{ mx: 2, my: 1 }} />
+            </>
+        )
     );
+};

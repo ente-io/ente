@@ -5,13 +5,13 @@ import {
     convertBytesToGBs,
     hasPaidSubscription,
 } from 'utils/billing';
-import constants from 'utils/strings/constants';
 import { FlexWrapper, FluidContainer } from 'components/Container';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import { PLAN_PERIOD } from 'constants/gallery';
 import Done from '@mui/icons-material/Done';
 import { Plan, Subscription } from 'types/billing';
 import { Badge } from 'components/Badge';
+import { useTranslation } from 'react-i18next';
 
 interface Iprops {
     plan: Plan;
@@ -57,6 +57,8 @@ export function PlanRow({
     disabled,
     popular,
 }: Iprops) {
+    const { t } = useTranslation();
+
     const handleClick = () => {
         !isUserSubscribedPlan(plan, subscription) && onPlanSelect(plan);
     };
@@ -71,10 +73,10 @@ export function PlanRow({
                 </Typography>
                 <FlexWrapper flexWrap={'wrap'} gap={1}>
                     <Typography variant="h3" color="text.secondary">
-                        {constants.GB}
+                        {t('GB')}
                     </Typography>
                     {popular && !hasPaidSubscription(subscription) && (
-                        <Badge>{constants.POPULAR}</Badge>
+                        <Badge>{t('POPULAR')}</Badge>
                     )}
                 </FlexWrapper>
             </TopAlignedFluidContainer>
@@ -94,8 +96,8 @@ export function PlanRow({
                         <Typography color="text.secondary" variant="body2">
                             {`/ ${
                                 plan.period === PLAN_PERIOD.MONTH
-                                    ? constants.MONTH_SHORT
-                                    : constants.YEAR
+                                    ? t('MONTH_SHORT')
+                                    : t('YEAR')
                             }`}
                         </Typography>
                     </Box>

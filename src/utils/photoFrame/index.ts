@@ -2,7 +2,7 @@ import { FILE_TYPE } from 'constants/file';
 import { EnteFile } from 'types/file';
 import { MergedSourceURL } from 'types/gallery';
 import { logError } from 'utils/sentry';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 
@@ -118,8 +118,10 @@ export async function updateFileSrcProps(
             <div class="pswp-item-container">
                 <img src="${file.msrc}" onContextMenu="return false;"/>
                 <div class="download-banner" >
-                    ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                    <a class="btn btn-outline-success" href=${convertedVideoURL} download="${file.metadata.title}"">Download</a>
+                    ${t('VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD')}
+                    <a class="btn btn-outline-success" href=${convertedVideoURL} download="${
+                file.metadata.title
+            }"">Download</a>
                 </div>
             </div>
             `;
@@ -140,8 +142,10 @@ export async function updateFileSrcProps(
                 <div class="pswp-item-container">
                     <img src="${file.msrc}" onContextMenu="return false;"/>
                     <div class="download-banner">
-                        ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                        <button class = "btn btn-outline-success" id = "download-btn-${file.id}">Download</button>
+                        ${t('VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD')}
+                        <button class = "btn btn-outline-success" id = "download-btn-${
+                            file.id
+                        }">Download</button>
                     </div>
                 </div>
                 `;

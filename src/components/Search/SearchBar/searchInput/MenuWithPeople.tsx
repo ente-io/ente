@@ -7,7 +7,7 @@ import { Row } from 'components/Container';
 import { Col } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import styled from '@mui/styled-engine';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
 
 const { Menu } = components;
 
@@ -30,6 +30,7 @@ const Caption = styled('span')`
 `;
 
 const MenuWithPeople = (props) => {
+    const { t } = useTranslation();
     const appContext = useContext(AppContext);
     // addLogLine("props.selectProps.options: ", selectRef);
     const peopleSuggestions = props.selectProps.options.filter(
@@ -48,7 +49,7 @@ const MenuWithPeople = (props) => {
                 {((appContext.mlSearchEnabled && indexStatus) ||
                     (people && people.length > 0)) && (
                     <LegendRow>
-                        <Legend>{constants.PEOPLE}</Legend>
+                        <Legend>{t('PEOPLE')}</Legend>
                     </LegendRow>
                 )}
                 {appContext.mlSearchEnabled && indexStatus && (

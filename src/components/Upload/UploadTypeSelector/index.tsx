@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useRef } from 'react';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import { default as FileUploadIcon } from '@mui/icons-material/ImageOutlined';
 import { default as FolderUploadIcon } from '@mui/icons-material/PermMediaOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -27,6 +28,8 @@ export default function UploadTypeSelector({
     uploadGoogleTakeoutZips,
     uploadTypeSelectorIntent,
 }: Iprops) {
+    const { t } = useTranslation();
+
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
@@ -57,11 +60,11 @@ export default function UploadTypeSelector({
             <DialogTitleWithCloseButton onClose={onClose}>
                 {uploadTypeSelectorIntent ===
                 UploadTypeSelectorIntent.collectPhotos
-                    ? constants.SELECT_PHOTOS
+                    ? t('SELECT_PHOTOS')
                     : uploadTypeSelectorIntent ===
                       UploadTypeSelectorIntent.import
-                    ? constants.IMPORT
-                    : constants.UPLOAD}
+                    ? t('IMPORT')
+                    : t('UPLOAD')}
             </DialogTitleWithCloseButton>
             <Box p={1.5} pt={0.5}>
                 <Stack spacing={0.5}>
@@ -70,25 +73,25 @@ export default function UploadTypeSelector({
                         <UploadTypeOption
                             onClick={uploadFiles}
                             startIcon={<FileUploadIcon />}>
-                            {constants.UPLOAD_FILES}
+                            {t('UPLOAD_FILES')}
                         </UploadTypeOption>
                     )}
                     <UploadTypeOption
                         onClick={uploadFolders}
                         startIcon={<FolderUploadIcon />}>
-                        {constants.UPLOAD_DIRS}
+                        {t('UPLOAD_DIRS')}
                     </UploadTypeOption>
                     {uploadTypeSelectorIntent !==
                         UploadTypeSelectorIntent.collectPhotos && (
                         <UploadTypeOption
                             onClick={uploadGoogleTakeoutZips}
                             startIcon={<GoogleIcon />}>
-                            {constants.UPLOAD_GOOGLE_TAKEOUT}
+                            {t('UPLOAD_GOOGLE_TAKEOUT')}
                         </UploadTypeOption>
                     )}
                 </Stack>
                 <Typography p={1.5} pt={4} color="text.secondary">
-                    {constants.DRAG_AND_DROP_HINT}
+                    {t('DRAG_AND_DROP_HINT')}
                 </Typography>
             </Box>
         </Dialog>

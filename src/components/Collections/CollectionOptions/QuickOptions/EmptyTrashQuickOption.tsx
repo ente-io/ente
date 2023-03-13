@@ -2,7 +2,7 @@ import { CollectionActions } from '..';
 import React from 'react';
 import { IconButton, Tooltip } from '@mui/material';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
 
 interface Iprops {
     handleCollectionAction: (
@@ -12,8 +12,10 @@ interface Iprops {
 }
 
 export function EmptyTrashQuickOption({ handleCollectionAction }: Iprops) {
+    const { t } = useTranslation();
+
     return (
-        <Tooltip title={constants.EMPTY_TRASH}>
+        <Tooltip title={t('EMPTY_TRASH')}>
             <IconButton
                 onClick={handleCollectionAction(
                     CollectionActions.CONFIRM_EMPTY_TRASH,

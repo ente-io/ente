@@ -13,7 +13,6 @@ import {
     SearchOption,
     SuggestionType,
 } from 'types/search';
-import constants from 'utils/strings/constants';
 import { ValueContainerWithIcon } from './valueContainerWithIcon';
 import { SelectStyles } from '../../../../styles/search';
 import AsyncSelect from 'react-select/async';
@@ -25,6 +24,7 @@ import { OptionWithInfo } from './optionWithInfo';
 import { SearchInputWrapper } from '../styledComponents';
 import MenuWithPeople from './MenuWithPeople';
 import { Person, Thing, WordGroup } from 'types/machineLearning';
+import { useTranslation } from 'react-i18next';
 
 interface Iprops {
     isOpen: boolean;
@@ -36,6 +36,8 @@ interface Iprops {
 }
 
 export default function SearchInput(props: Iprops) {
+    const { t } = useTranslation();
+
     const selectRef = useRef(null);
     const [value, setValue] = useState<SearchOption>(null);
     const appContext = useContext(AppContext);
@@ -140,7 +142,7 @@ export default function SearchInput(props: Iprops) {
                         />
                     ),
                 }}
-                placeholder={constants.SEARCH_HINT()}
+                placeholder={<span>{t('SEARCH_HINT')}</span>}
                 loadOptions={getOptions}
                 onChange={handleChange}
                 onFocus={handleOnFocus}

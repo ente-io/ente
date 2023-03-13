@@ -1,10 +1,13 @@
 import { Button, DialogActions } from '@mui/material';
 import { UPLOAD_STAGES, UPLOAD_RESULT } from 'constants/upload';
 import React, { useContext } from 'react';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import UploadProgressContext from 'contexts/uploadProgress';
 
 export function UploadProgressFooter() {
+    const { t } = useTranslation();
+
     const { uploadStage, finishedUploads, retryFailed, onClose } = useContext(
         UploadProgressContext
     );
@@ -15,11 +18,11 @@ export function UploadProgressFooter() {
                 (finishedUploads?.get(UPLOAD_RESULT.FAILED)?.length > 0 ||
                 finishedUploads?.get(UPLOAD_RESULT.BLOCKED)?.length > 0 ? (
                     <Button variant="contained" fullWidth onClick={retryFailed}>
-                        {constants.RETRY_FAILED}
+                        {t('RETRY_FAILED')}
                     </Button>
                 ) : (
                     <Button variant="contained" fullWidth onClick={onClose}>
-                        {constants.CLOSE}
+                        {t('CLOSE')}
                     </Button>
                 ))}
         </DialogActions>

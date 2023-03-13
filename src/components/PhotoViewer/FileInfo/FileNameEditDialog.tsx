@@ -1,10 +1,10 @@
 import React from 'react';
-import constants from 'utils/strings/constants';
 import { DialogContent, DialogTitle } from '@mui/material';
 import DialogBoxBase from 'components/DialogBox/base';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
+import { useTranslation } from 'react-i18next';
 
 export const FileNameEditDialog = ({
     isInEditMode,
@@ -13,6 +13,8 @@ export const FileNameEditDialog = ({
     extension,
     saveEdits,
 }) => {
+    const { t } = useTranslation();
+
     const onSubmit: SingleInputFormProps['callback'] = async (
         filename,
         setFieldError
@@ -21,7 +23,7 @@ export const FileNameEditDialog = ({
             await saveEdits(filename);
             closeEditMode();
         } catch (e) {
-            setFieldError(constants.UNKNOWN_ERROR);
+            setFieldError(t('UNKNOWN_ERROR'));
         }
     };
     return (
@@ -29,13 +31,13 @@ export const FileNameEditDialog = ({
             open={isInEditMode}
             onClose={closeEditMode}
             sx={{ zIndex: 1600 }}>
-            <DialogTitle>{constants.RENAME_FILE}</DialogTitle>
+            <DialogTitle>{t('RENAME_FILE')}</DialogTitle>
             <DialogContent>
                 <SingleInputForm
                     initialValue={filename}
                     callback={onSubmit}
-                    placeholder={constants.ENTER_FILE_NAME}
-                    buttonText={constants.RENAME}
+                    placeholder={t('ENTER_FILE_NAME')}
+                    buttonText={t('RENAME')}
                     fieldType="text"
                     caption={extension}
                     secondaryButtonAction={closeEditMode}

@@ -1,16 +1,18 @@
 import { Button, DialogActions, DialogContent } from '@mui/material';
 import React from 'react';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     startExport: () => void;
 }
 export default function ExportInit({ startExport }: Props) {
+    const { t } = useTranslation();
+
     return (
         <DialogContent>
             <DialogActions>
                 <Button size="large" color="accent" onClick={startExport}>
-                    {constants.START}
+                    {t('START')}
                 </Button>
             </DialogActions>
         </DialogContent>

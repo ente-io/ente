@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { downloadAsFile } from 'utils/file';
 import { getRecoveryKey } from 'utils/crypto';
-import constants from 'utils/strings/constants';
 import CodeBlock from '../CodeBlock';
 import {
     Button,
@@ -14,6 +13,7 @@ import * as bip39 from 'bip39';
 import { DashedBorderWrapper } from './styledComponents';
 import { AppContext } from 'pages/_app';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
+import { useTranslation } from 'react-i18next';
 
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -27,6 +27,8 @@ interface Props {
 }
 
 function RecoveryKey({ somethingWentWrong, ...props }: Props) {
+    const { t } = useTranslation();
+
     const appContext = useContext(AppContext);
     const [recoveryKey, setRecoveryKey] = useState(null);
 
@@ -58,25 +60,23 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
             onClose={props.onHide}
             maxWidth="xs">
             <DialogTitleWithCloseButton onClose={props.onHide}>
-                {constants.RECOVERY_KEY}
+                {t('RECOVERY_KEY')}
             </DialogTitleWithCloseButton>
             <DialogContent>
-                <Typography mb={3}>
-                    {constants.RECOVERY_KEY_DESCRIPTION}
-                </Typography>
+                <Typography mb={3}>{t('RECOVERY_KEY_DESCRIPTION')}</Typography>
                 <DashedBorderWrapper>
                     <CodeBlock code={recoveryKey} />
                     <Typography m={2}>
-                        {constants.KEY_NOT_STORED_DISCLAIMER}
+                        {t('KEY_NOT_STORED_DISCLAIMER')}
                     </Typography>
                 </DashedBorderWrapper>
             </DialogContent>
             <DialogActions>
                 <Button color="secondary" size="large" onClick={props.onHide}>
-                    {constants.SAVE_LATER}
+                    {t('SAVE_LATER')}
                 </Button>
                 <Button color="accent" size="large" onClick={onSaveClick}>
-                    {constants.SAVE}
+                    {t('SAVE')}
                 </Button>
             </DialogActions>
         </Dialog>

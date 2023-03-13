@@ -6,7 +6,6 @@ import {
     changeCollectionVisibility,
     downloadAllCollectionFiles,
 } from 'utils/collection';
-import constants from 'utils/strings/constants';
 import { SetCollectionNamerAttributes } from '../CollectionNamer';
 import { Collection } from 'types/collection';
 import { IsArchived } from 'utils/magicMetadata';
@@ -22,6 +21,7 @@ import { OnlyDownloadCollectionOption } from './OnlyDownloadCollectionOption';
 import { QuickOptions } from './QuickOptions';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import { HorizontalFlex } from 'components/Container';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -56,6 +56,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setCollectionNamerAttributes,
         showCollectionShareModal,
     } = props;
+
+    const { t } = useTranslation();
 
     const { startLoading, finishLoading, setDialogMessage } =
         useContext(AppContext);
@@ -124,8 +126,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 await callback(...args);
             } catch (e) {
                 setDialogMessage({
-                    title: constants.ERROR,
-                    content: constants.UNKNOWN_ERROR,
+                    title: t('ERROR'),
+                    content: t('UNKNOWN_ERROR'),
                     close: { variant: 'danger' },
                 });
             } finally {
@@ -176,8 +178,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const showRenameCollectionModal = () => {
         setCollectionNamerAttributes({
-            title: constants.RENAME_COLLECTION,
-            buttonText: constants.RENAME,
+            title: t('RENAME_COLLECTION'),
+            buttonText: t('RENAME'),
             autoFilledName: activeCollection.name,
             callback: handleCollectionAction(CollectionActions.RENAME),
         });
@@ -185,69 +187,81 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const confirmDeleteCollection = () => {
         setDialogMessage({
-            title: constants.DELETE_COLLECTION_TITLE,
-            content: constants.DELETE_COLLECTION_MESSAGE(),
+            title: t('DELETE_COLLECTION_TITLE'),
+            content: (
+                <Trans>
+                    Also delete the photos (and videos) present in this album
+                    from
+                    <span style={{ color: '#fff' }}> all </span> other albums
+                    they are part of?
+                </Trans>
+            ),
             proceed: {
-                text: constants.DELETE_PHOTOS,
+                text: t('DELETE_PHOTOS'),
                 action: handleCollectionAction(
                     CollectionActions.DELETE_WITH_FILES
                 ),
                 variant: 'danger',
             },
             secondary: {
-                text: constants.KEEP_PHOTOS,
+                text: t('KEEP_PHOTOS'),
                 action: handleCollectionAction(
                     CollectionActions.DELETE_BUT_KEEP_FILES
                 ),
                 variant: 'primary',
             },
             close: {
-                text: constants.CANCEL,
+                text: t('CANCEL'),
             },
         });
     };
 
     const confirmDownloadCollection = () => {
         setDialogMessage({
-            title: constants.DOWNLOAD_COLLECTION,
-            content: constants.DOWNLOAD_COLLECTION_MESSAGE(),
+            title: t('DOWNLOAD_COLLECTION'),
+            content: (
+                <Trans>
+                    <p>Are you sure you want to download the complete album?</p>
+                    <p>All files will be queued for download sequentially</p>
+                </Trans>
+            ),
             proceed: {
-                text: constants.DOWNLOAD,
+                text: t('DOWNLOAD'),
                 action: handleCollectionAction(CollectionActions.DOWNLOAD),
                 variant: 'accent',
             },
             close: {
-                text: constants.CANCEL,
+                text: t('CANCEL'),
             },
         });
     };
 
     const confirmEmptyTrash = () =>
         setDialogMessage({
-            title: constants.EMPTY_TRASH_TITLE,
-            content: constants.EMPTY_TRASH_MESSAGE,
+            title: t('EMPTY_TRASH_TITLE'),
+            content: t('EMPTY_TRASH_MESSAGE'),
 
             proceed: {
                 action: handleCollectionAction(CollectionActions.EMPTY_TRASH),
-                text: constants.EMPTY_TRASH,
+                text: t('EMPTY_TRASH'),
                 variant: 'danger',
             },
-            close: { text: constants.CANCEL },
+            close: { text: t('CANCEL') },
         });
 
     const confirmLeaveSharedAlbum = () => {
         setDialogMessage({
-            title: constants.LEAVE_SHARED_ALBUM_TITLE,
-            content: constants.LEAVE_SHARED_ALBUM_MESSAGE,
+            title: t('LEAVE_SHARED_ALBUM_TITLE'),
+            content: t('LEAVE_SHARED_ALBUM_MESSAGE'),
             proceed: {
-                text: constants.LEAVE_SHARED_ALBUM,
+                text: t('LEAVE_SHARED_ALBUM'),
                 action: handleCollectionAction(
                     CollectionActions.LEAVE_SHARED_ALBUM
                 ),
                 variant: 'danger',
             },
             close: {
-                text: constants.CANCEL,
+                text: t('CANCEL'),
             },
         });
     };
@@ -270,13 +284,13 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                   CollectionSummaryType.favorites ? (
                     <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
-                        downloadOptionText={constants.DOWNLOAD_FAVORITES}
+                        downloadOptionText={t('DOWNLOAD_FAVORITES')}
                     />
                 ) : collectionSummaryType ===
                   CollectionSummaryType.uncategorized ? (
                     <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
-                        downloadOptionText={constants.DOWNLOAD_UNCATEGORIZED}
+                        downloadOptionText={t('DOWNLOAD_UNCATEGORIZED')}
                     />
                 ) : collectionSummaryType ===
                   CollectionSummaryType.incomingShare ? (

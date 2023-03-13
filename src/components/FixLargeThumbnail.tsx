@@ -1,4 +1,3 @@
-import constants from 'utils/strings/constants';
 import DialogBox from './DialogBox';
 import React, { useEffect, useState } from 'react';
 import { ProgressBar, Button } from 'react-bootstrap';
@@ -9,6 +8,8 @@ import {
 } from 'services/migrateThumbnailService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { logError } from 'utils/sentry';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 
 export type SetProgressTracker = React.Dispatch<
     React.SetStateAction<{
@@ -29,21 +30,27 @@ export enum FIX_STATE {
     COMPLETED,
     COMPLETED_WITH_ERRORS,
 }
-function Message(props: { fixState: FIX_STATE }) {
+function Message({
+    fixState,
+    t,
+}: {
+    t: TFunction<'translation', undefined, 'translation'>;
+    fixState: FIX_STATE;
+}) {
     let message = null;
-    switch (props.fixState) {
+    switch (fixState) {
         case FIX_STATE.NOT_STARTED:
         case FIX_STATE.FIX_LATER:
-            message = constants.REPLACE_THUMBNAIL_NOT_STARTED();
+            message = t('REPLACE_THUMBNAIL_NOT_STARTED');
             break;
         case FIX_STATE.COMPLETED:
-            message = constants.REPLACE_THUMBNAIL_COMPLETED();
+            message = t('REPLACE_THUMBNAIL_COMPLETED');
             break;
         case FIX_STATE.NOOP:
-            message = constants.REPLACE_THUMBNAIL_NOOP();
+            message = t('REPLACE_THUMBNAIL_NOOP');
             break;
         case FIX_STATE.COMPLETED_WITH_ERRORS:
-            message = constants.REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR();
+            message = t('REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR');
             break;
     }
     return message ? (
@@ -53,6 +60,7 @@ function Message(props: { fixState: FIX_STATE }) {
     );
 }
 export default function FixLargeThumbnails(props: Props) {
+    const { t } = useTranslation();
     const [fixState, setFixState] = useState(FIX_STATE.NOT_STARTED);
     const [progressTracker, setProgressTracker] = useState({
         current: 0,
@@ -140,7 +148,7 @@ export default function FixLargeThumbnails(props: Props) {
             open={props.isOpen}
             onClose={props.hide}
             attributes={{
-                title: constants.COMPRESS_THUMBNAILS,
+                title: t('COMPRESS_THUMBNAILS'),
             }}>
             <div
                 style={{
@@ -150,7 +158,7 @@ export default function FixLargeThumbnails(props: Props) {
                     alignItems: 'center',
                     flexDirection: 'column',
                 }}>
-                <Message fixState={fixState} />
+                <Message t={t} fixState={fixState} />
 
                 {fixState === FIX_STATE.RUNNING && (
                     <>
@@ -162,7 +170,7 @@ export default function FixLargeThumbnails(props: Props) {
                             </ComfySpan>{' '}
                             <span style={{ marginLeft: '10px' }}>
                                 {' '}
-                                {constants.THUMBNAIL_REPLACED}
+                                {t('THUMBNAIL_REPLACED')}
                             </span>
                         </div>
                         <div
@@ -197,14 +205,14 @@ export default function FixLargeThumbnails(props: Props) {
                                 updateFixState(FIX_STATE.FIX_LATER);
                                 props.hide();
                             }}>
-                            {constants.FIX_THUMBNAIL_LATER}
+                            {t('FIX_THUMBNAIL_LATER')}
                         </Button>
                     ) : (
                         <Button
                             block
                             variant={'outline-secondary'}
                             onClick={props.hide}>
-                            {constants.CLOSE}
+                            {t('CLOSE')}
                         </Button>
                     )}
                     {(fixState === FIX_STATE.NOT_STARTED ||
@@ -217,7 +225,7 @@ export default function FixLargeThumbnails(props: Props) {
                                 block
                                 variant={'outline-success'}
                                 onClick={() => startFix()}>
-                                {constants.FIX_THUMBNAIL}
+                                {t('FIX_THUMBNAIL')}
                             </Button>
                         </>
                     )}

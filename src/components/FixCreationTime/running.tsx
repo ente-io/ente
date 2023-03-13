@@ -1,9 +1,10 @@
-import constants from 'utils/strings/constants';
 import { ComfySpan } from 'components/ExportInProgress';
 import React from 'react';
 import { ProgressBar } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 export default function FixCreationTimeRunning({ progressTracker }) {
+    const { t } = useTranslation();
     return (
         <>
             <div style={{ marginBottom: '10px' }}>
@@ -13,7 +14,7 @@ export default function FixCreationTimeRunning({ progressTracker }) {
                 </ComfySpan>{' '}
                 <span style={{ marginLeft: '10px' }}>
                     {' '}
-                    {constants.CREATION_TIME_UPDATED}
+                    {t('CREATION_TIME_UPDATED')}
                 </span>
             </div>
             <div

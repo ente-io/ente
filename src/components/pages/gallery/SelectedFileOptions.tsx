@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import { SetCollectionSelectorAttributes } from 'types/gallery';
 import { FluidContainer } from 'components/Container';
-import constants from 'utils/strings/constants';
 import { COLLECTION_OPS_TYPE } from 'utils/collection';
 import {
     ALL_SECTION,
@@ -23,6 +22,7 @@ import ArchiveIcon from '@mui/icons-material/ArchiveOutlined';
 import MoveIcon from '@mui/icons-material/ArrowForward';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import { getTrashFilesMessage } from 'utils/ui';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
@@ -67,12 +67,14 @@ const SelectedFileOptions = ({
     isIncomingSharedCollection,
     isInSearchMode,
 }: Props) => {
+    const { t } = useTranslation();
+
     const { setDialogMessage } = useContext(AppContext);
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: addToCollectionHelper,
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
-            title: constants.ADD_TO_COLLECTION,
+            title: t('ADD_TO_COLLECTION'),
             fromCollection: activeCollection,
         });
 
@@ -81,14 +83,14 @@ const SelectedFileOptions = ({
 
     const permanentlyDeleteHandler = () =>
         setDialogMessage({
-            title: constants.DELETE_FILES_TITLE,
-            content: constants.DELETE_FILES_MESSAGE,
+            title: t('DELETE_FILES_TITLE'),
+            content: t('DELETE_FILES_MESSAGE'),
             proceed: {
                 action: () => deleteFileHelper(true),
-                text: constants.DELETE,
+                text: t('DELETE'),
                 variant: 'danger',
             },
-            close: { text: constants.CANCEL },
+            close: { text: t('CANCEL') },
         });
 
     const restoreHandler = () =>
@@ -97,33 +99,33 @@ const SelectedFileOptions = ({
             showNextModal: showCreateCollectionModal(
                 COLLECTION_OPS_TYPE.RESTORE
             ),
-            title: constants.RESTORE_TO_COLLECTION,
+            title: t('RESTORE_TO_COLLECTION'),
         });
 
     const removeFromCollectionHandler = () => {
         if (ownCount === count) {
             setDialogMessage({
-                title: constants.REMOVE_FROM_COLLECTION,
-                content: constants.CONFIRM_SELF_REMOVE_MESSAGE(),
+                title: t('REMOVE_FROM_COLLECTION'),
+                content: t('CONFIRM_SELF_REMOVE_MESSAGE'),
 
                 proceed: {
                     action: removeFromCollectionHelper,
-                    text: constants.YES_REMOVE,
+                    text: t('YES_REMOVE'),
                     variant: 'primary',
                 },
-                close: { text: constants.CANCEL },
+                close: { text: t('CANCEL') },
             });
         } else {
             setDialogMessage({
-                title: constants.REMOVE_FROM_COLLECTION,
-                content: constants.CONFIRM_SELF_AND_OTHER_REMOVE_MESSAGE(),
+                title: t('REMOVE_FROM_COLLECTION'),
+                content: t('CONFIRM_SELF_AND_OTHER_REMOVE_MESSAGE'),
 
                 proceed: {
                     action: removeFromCollectionHelper,
-                    text: constants.YES_REMOVE,
+                    text: t('YES_REMOVE'),
                     variant: 'danger',
                 },
-                close: { text: constants.CANCEL },
+                close: { text: t('CANCEL') },
             });
         }
     };
@@ -132,7 +134,7 @@ const SelectedFileOptions = ({
         setCollectionSelectorAttributes({
             callback: moveToCollectionHelper,
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
-            title: constants.MOVE_TO_COLLECTION,
+            title: t('MOVE_TO_COLLECTION'),
             fromCollection: activeCollection,
         });
     };
@@ -144,29 +146,29 @@ const SelectedFileOptions = ({
                     <CloseIcon />
                 </IconButton>
                 <Box ml={1.5}>
-                    {count} {constants.SELECTED}{' '}
-                    {ownCount !== count && `(${ownCount} ${constants.YOURS})`}
+                    {count} {t('SELECTED')}{' '}
+                    {ownCount !== count && `(${ownCount} ${t('YOURS')})`}
                 </Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>
                 {isInSearchMode ? (
                     <>
-                        <Tooltip title={constants.FIX_CREATION_TIME}>
+                        <Tooltip title={t('FIX_CREATION_TIME')}>
                             <IconButton onClick={fixTimeHelper}>
                                 <ClockIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={constants.DOWNLOAD}>
+                        <Tooltip title={t('DOWNLOAD')}>
                             <IconButton onClick={downloadHelper}>
                                 <DownloadIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={constants.ADD}>
+                        <Tooltip title={t('ADD')}>
                             <IconButton onClick={addToCollection}>
                                 <AddIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={constants.ARCHIVE}>
+                        <Tooltip title={t('ARCHIVE')}>
                             <IconButton onClick={archiveFilesHelper}>
                                 <ArchiveIcon />
                             </IconButton>
@@ -174,12 +176,12 @@ const SelectedFileOptions = ({
                     </>
                 ) : activeCollection === TRASH_SECTION ? (
                     <>
-                        <Tooltip title={constants.RESTORE}>
+                        <Tooltip title={t('RESTORE')}>
                             <IconButton onClick={restoreHandler}>
                                 <RestoreIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={constants.DELETE_PERMANENTLY}>
+                        <Tooltip title={t('DELETE_PERMANENTLY')}>
                             <IconButton onClick={permanentlyDeleteHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -187,54 +189,54 @@ const SelectedFileOptions = ({
                     </>
                 ) : isUncategorizedCollection ? (
                     <>
-                        <Tooltip title={constants.DOWNLOAD}>
+                        <Tooltip title={t('DOWNLOAD')}>
                             <IconButton onClick={downloadHelper}>
                                 <DownloadIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={constants.MOVE}>
+                        <Tooltip title={t('MOVE')}>
                             <IconButton onClick={moveToCollection}>
                                 <MoveIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={constants.DELETE}>
+                        <Tooltip title={t('DELETE')}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
                         </Tooltip>
                     </>
                 ) : isIncomingSharedCollection ? (
-                    <Tooltip title={constants.DOWNLOAD}>
+                    <Tooltip title={t('DOWNLOAD')}>
                         <IconButton onClick={downloadHelper}>
                             <DownloadIcon />
                         </IconButton>
                     </Tooltip>
                 ) : (
                     <>
-                        <Tooltip title={constants.FIX_CREATION_TIME}>
+                        <Tooltip title={t('FIX_CREATION_TIME')}>
                             <IconButton onClick={fixTimeHelper}>
                                 <ClockIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={constants.DOWNLOAD}>
+                        <Tooltip title={t('DOWNLOAD')}>
                             <IconButton onClick={downloadHelper}>
                                 <DownloadIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={constants.ADD}>
+                        <Tooltip title={t('ADD')}>
                             <IconButton onClick={addToCollection}>
                                 <AddIcon />
                             </IconButton>
                         </Tooltip>
                         {activeCollection === ARCHIVE_SECTION && (
-                            <Tooltip title={constants.UNARCHIVE}>
+                            <Tooltip title={t('UNARCHIVE')}>
                                 <IconButton onClick={unArchiveFilesHelper}>
                                     <UnArchiveIcon />
                                 </IconButton>
                             </Tooltip>
                         )}
                         {activeCollection === ALL_SECTION && (
-                            <Tooltip title={constants.ARCHIVE}>
+                            <Tooltip title={t('ARCHIVE')}>
                                 <IconButton onClick={archiveFilesHelper}>
                                     <ArchiveIcon />
                                 </IconButton>
@@ -244,13 +246,13 @@ const SelectedFileOptions = ({
                             activeCollection !== ARCHIVE_SECTION &&
                             !isFavoriteCollection && (
                                 <>
-                                    <Tooltip title={constants.MOVE}>
+                                    <Tooltip title={t('MOVE')}>
                                         <IconButton onClick={moveToCollection}>
                                             <MoveIcon />
                                         </IconButton>
                                     </Tooltip>
 
-                                    <Tooltip title={constants.REMOVE}>
+                                    <Tooltip title={t('REMOVE')}>
                                         <IconButton
                                             onClick={
                                                 removeFromCollectionHandler
@@ -260,7 +262,7 @@ const SelectedFileOptions = ({
                                     </Tooltip>
                                 </>
                             )}
-                        <Tooltip title={constants.DELETE}>
+                        <Tooltip title={t('DELETE')}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>

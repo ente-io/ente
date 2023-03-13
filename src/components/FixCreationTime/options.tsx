@@ -3,7 +3,7 @@ import { FIX_OPTIONS } from '.';
 import { Form } from 'react-bootstrap';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
 import { Row, Value } from 'components/Container';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
 
 const Option = ({
     value,
@@ -38,13 +38,14 @@ const Option = ({
 );
 
 export default function FixCreationTimeOptions({ handleChange, values }) {
+    const { t } = useTranslation();
     return (
         <Form noValidate>
             <Row style={{ margin: '0' }}>
                 <Option
                     value={FIX_OPTIONS.DATE_TIME_ORIGINAL}
                     onChange={handleChange('option')}
-                    label={constants.DATE_TIME_ORIGINAL}
+                    label={t('DATE_TIME_ORIGINAL')}
                     selected={Number(values.option)}
                 />
             </Row>
@@ -52,7 +53,7 @@ export default function FixCreationTimeOptions({ handleChange, values }) {
                 <Option
                     value={FIX_OPTIONS.DATE_TIME_DIGITIZED}
                     onChange={handleChange('option')}
-                    label={constants.DATE_TIME_DIGITIZED}
+                    label={t('DATE_TIME_DIGITIZED')}
                     selected={Number(values.option)}
                 />
             </Row>
@@ -61,7 +62,7 @@ export default function FixCreationTimeOptions({ handleChange, values }) {
                     <Option
                         value={FIX_OPTIONS.CUSTOM_TIME}
                         onChange={handleChange('option')}
-                        label={constants.CUSTOM_TIME}
+                        label={t('CUSTOM_TIME')}
                         selected={Number(values.option)}
                     />
                 </Value>

@@ -1,6 +1,5 @@
 import React from 'react';
 
-import constants from 'utils/strings/constants';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
@@ -10,6 +9,7 @@ import { CustomError } from 'utils/error';
 import { Input } from '@mui/material';
 import { KeyAttributes, User } from 'types/user';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { useTranslation } from 'react-i18next';
 
 export interface VerifyMasterPasswordFormProps {
     user: User;
@@ -24,6 +24,7 @@ export default function VerifyMasterPasswordForm({
     callback,
     buttonText,
 }: VerifyMasterPasswordFormProps) {
+    const { t } = useTranslation();
     const verifyPassphrase: SingleInputFormProps['callback'] = async (
         passphrase,
         setFieldError
@@ -56,13 +57,13 @@ export default function VerifyMasterPasswordForm({
         } catch (e) {
             switch (e.message) {
                 case CustomError.WEAK_DEVICE:
-                    setFieldError(constants.WEAK_DEVICE);
+                    setFieldError(t('WEAK_DEVICE'));
                     break;
                 case CustomError.INCORRECT_PASSWORD:
-                    setFieldError(constants.INCORRECT_PASSPHRASE);
+                    setFieldError(t('INCORRECT_PASSPHRASE'));
                     break;
                 default:
-                    setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
+                    setFieldError(`${t('UNKNOWN_ERROR')} ${e.message}`);
             }
         }
     };
@@ -70,7 +71,7 @@ export default function VerifyMasterPasswordForm({
     return (
         <SingleInputForm
             callback={verifyPassphrase}
-            placeholder={constants.RETURN_PASSPHRASE_HINT}
+            placeholder={t('RETURN_PASSPHRASE_HINT')}
             buttonText={buttonText}
             hiddenPreInput={
                 <Input

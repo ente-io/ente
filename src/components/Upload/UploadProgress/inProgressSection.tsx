@@ -9,10 +9,13 @@ import {
     UploadProgressSectionTitle,
 } from './section';
 import UploadProgressContext from 'contexts/uploadProgress';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import { UPLOAD_STAGES } from 'constants/upload';
 
 export const InProgressSection = () => {
+    const { t } = useTranslation();
+
     const { inProgressUploads, hasLivePhotos, uploadFileNames, uploadStage } =
         useContext(UploadProgressContext);
     const fileList = inProgressUploads ?? [];
@@ -21,12 +24,12 @@ export const InProgressSection = () => {
         <UploadProgressSection>
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
                 {uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA
-                    ? constants.INPROGRESS_METADATA_EXTRACTION
-                    : constants.INPROGRESS_UPLOADS}
+                    ? t('INPROGRESS_METADATA_EXTRACTION')
+                    : t('INPROGRESS_UPLOADS')}
             </UploadProgressSectionTitle>
             <UploadProgressSectionContent>
                 {hasLivePhotos && (
-                    <SectionInfo>{constants.LIVE_PHOTOS_DETECTED}</SectionInfo>
+                    <SectionInfo>{t('LIVE_PHOTOS_DETECTED')}</SectionInfo>
                 )}
                 <FileList
                     fileList={fileList.map(({ localFileID, progress }) => (

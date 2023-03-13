@@ -1,9 +1,9 @@
 import React from 'react';
-import constants from 'utils/strings/constants';
 import DialogBox from './DialogBox';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import { Typography } from '@mui/material';
 import SingleInputForm from './SingleInputForm';
+import { useTranslation } from 'react-i18next';
 
 export default function UserNameInputDialog({
     open,
@@ -12,6 +12,7 @@ export default function UserNameInputDialog({
     toUploadFilesCount,
     uploaderName,
 }) {
+    const { t } = useTranslation();
     const handleSubmit = async (inputValue: string) => {
         onClose();
         await onNameSubmit(inputValue);
@@ -22,18 +23,18 @@ export default function UserNameInputDialog({
             open={open}
             onClose={onClose}
             attributes={{
-                title: constants.ENTER_NAME,
+                title: t('ENTER_NAME'),
                 icon: <AutoAwesomeOutlinedIcon />,
             }}>
             <Typography color={'text.secondary'} pb={1}>
-                {constants.PUBLIC_UPLOADER_NAME_MESSAGE}
+                {t('PUBLIC_UPLOADER_NAME_MESSAGE')}
             </Typography>
             <SingleInputForm
                 hiddenLabel
                 initialValue={uploaderName}
                 callback={handleSubmit}
-                placeholder={constants.NAME_PLACEHOLDER}
-                buttonText={constants.ADD_X_PHOTOS(toUploadFilesCount)}
+                placeholder={t('NAME_PLACEHOLDER')}
+                buttonText={t('add_photos', { count: toUploadFilesCount })}
                 fieldType="text"
                 blockButton
                 secondaryButtonAction={onClose}

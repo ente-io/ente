@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { getTwoFactorStatus } from 'services/userService';
 import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import TwoFactorModalSetupSection from './Setup';
 import TwoFactorModalManageSection from './Manage';
 import { Dialog, DialogContent, styled } from '@mui/material';
@@ -21,6 +22,8 @@ interface Props {
 }
 
 function TwoFactorModal(props: Props) {
+    const { t } = useTranslation();
+
     const [isTwoFactorEnabled, setTwoFactorStatus] = useState(false);
 
     useEffect(() => {
@@ -52,7 +55,7 @@ function TwoFactorModal(props: Props) {
     return (
         <TwoFactorDialog maxWidth="xs" open={props.show} onClose={props.onHide}>
             <DialogTitleWithCloseButton onClose={props.onHide}>
-                {constants.TWO_FACTOR_AUTHENTICATION}
+                {t('TWO_FACTOR_AUTHENTICATION')}
             </DialogTitleWithCloseButton>
             <DialogContent sx={{ px: 4 }}>
                 {isTwoFactorEnabled ? (

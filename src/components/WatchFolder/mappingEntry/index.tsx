@@ -6,7 +6,8 @@ import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderCopyOutlinedIcon from '@mui/icons-material/FolderCopyOutlined';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import MappingEntryOptions from './mappingEntryOptions';
 import { EntryHeading } from './entryHeading';
 import { UPLOAD_STRATEGY } from 'constants/upload';
@@ -17,6 +18,8 @@ interface Iprops {
 }
 
 export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
+    const { t } = useTranslation();
+
     const appContext = React.useContext(AppContext);
 
     const stopWatching = () => {
@@ -25,15 +28,15 @@ export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
 
     const confirmStopWatching = () => {
         appContext.setDialogMessage({
-            title: constants.STOP_WATCHING_FOLDER,
-            content: constants.STOP_WATCHING_DIALOG_MESSAGE,
+            title: t('STOP_WATCHING_FOLDER'),
+            content: t('STOP_WATCHING_DIALOG_MESSAGE'),
             close: {
-                text: constants.CANCEL,
+                text: t('CANCEL'),
                 variant: 'secondary',
             },
             proceed: {
                 action: stopWatching,
-                text: constants.YES_STOP,
+                text: t('YES_STOP'),
                 variant: 'danger',
             },
         });
@@ -44,11 +47,11 @@ export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
             <HorizontalFlex>
                 {mapping &&
                 mapping.uploadStrategy === UPLOAD_STRATEGY.SINGLE_COLLECTION ? (
-                    <Tooltip title={constants.UPLOADED_TO_SINGLE_COLLECTION}>
+                    <Tooltip title={t('UPLOADED_TO_SINGLE_COLLECTION')}>
                         <FolderOpenIcon />
                     </Tooltip>
                 ) : (
-                    <Tooltip title={constants.UPLOADED_TO_SEPARATE_COLLECTIONS}>
+                    <Tooltip title={t('UPLOADED_TO_SEPARATE_COLLECTIONS')}>
                         <FolderCopyOutlinedIcon />
                     </Tooltip>
                 )}

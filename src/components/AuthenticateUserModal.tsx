@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import constants from 'utils/strings/constants';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { AppContext } from 'pages/_app';
 import { KeyAttributes, User } from 'types/user';
@@ -9,6 +8,7 @@ import VerifyMasterPasswordForm, {
 } from 'components/VerifyMasterPasswordForm';
 import { Dialog, Stack, Typography } from '@mui/material';
 import { logError } from 'utils/sentry';
+import { useTranslation } from 'react-i18next';
 
 interface Iprops {
     open: boolean;
@@ -21,15 +21,16 @@ export default function AuthenticateUserModal({
     onClose,
     onAuthenticate,
 }: Iprops) {
+    const { t } = useTranslation();
     const { setDialogMessage } = useContext(AppContext);
     const [user, setUser] = useState<User>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
 
     const somethingWentWrong = () =>
         setDialogMessage({
-            title: constants.ERROR,
+            title: t('ERROR'),
             close: { variant: 'danger' },
-            content: constants.UNKNOWN_ERROR,
+            content: t('UNKNOWN_ERROR'),
         });
 
     useEffect(() => {
@@ -74,10 +75,10 @@ export default function AuthenticateUserModal({
             PaperProps={{ sx: { p: 1, maxWidth: '346px' } }}>
             <Stack spacing={3} p={1.5}>
                 <Typography variant="h3" px={1} py={0.5} fontWeight={'bold'}>
-                    {constants.PASSWORD}
+                    {t('PASSWORD')}
                 </Typography>
                 <VerifyMasterPasswordForm
-                    buttonText={constants.AUTHENTICATE}
+                    buttonText={t('AUTHENTICATE')}
                     callback={useMasterPassword}
                     user={user}
                     keyAttributes={keyAttributes}

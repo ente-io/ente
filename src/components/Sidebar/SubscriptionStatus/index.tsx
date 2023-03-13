@@ -10,7 +10,8 @@ import {
 } from 'utils/billing';
 import Box from '@mui/material/Box';
 import { UserDetails } from 'types/user';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import { Typography } from '@mui/material';
 import billingService from 'services/billingService';
 import { isPartOfFamily, isFamilyAdmin } from 'utils/user/family';
@@ -20,6 +21,8 @@ export default function SubscriptionStatus({
 }: {
     userDetails: UserDetails;
 }) {
+    const { t } = useTranslation();
+
     const { showPlanSelectorModal } = useContext(GalleryContext);
 
     const hasAMessage = useMemo(() => {
@@ -74,18 +77,22 @@ export default function SubscriptionStatus({
                 sx={{ cursor: handleClick && 'pointer' }}>
                 {isSubscriptionActive(userDetails.subscription)
                     ? isOnFreePlan(userDetails.subscription)
-                        ? constants.FREE_SUBSCRIPTION_INFO(
-                              userDetails.subscription?.expiryTime
-                          )
+                        ? t('FREE_SUBSCRIPTION_INFO', {
+                              data: new Date(
+                                  userDetails.subscription?.expiryTime
+                              ),
+                          })
                         : isSubscriptionCancelled(userDetails.subscription)
-                        ? constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
-                              userDetails.subscription?.expiryTime
-                          )
+                        ? t('RENEWAL_CANCELLED_SUBSCRIPTION_INFO', {
+                              data: new Date(
+                                  userDetails.subscription?.expiryTime
+                              ),
+                          })
                         : hasExceededStorageQuota(userDetails) &&
-                          constants.STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO(
-                              handleClick
-                          )
-                    : constants.SUBSCRIPTION_EXPIRED_MESSAGE(handleClick)}
+                          t('STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO', {
+                              handleClick,
+                          })
+                    : t('SUBSCRIPTION_EXPIRED_MESSAGE', { handleClick })}
             </Typography>
         </Box>
     );

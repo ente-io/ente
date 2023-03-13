@@ -2,8 +2,8 @@ import { CollectionActions } from '..';
 import React from 'react';
 import PeopleIcon from '@mui/icons-material/People';
 import { IconButton, Tooltip } from '@mui/material';
-import constants from 'utils/strings/constants';
 import { CollectionSummaryType } from 'constants/collection';
+import { useTranslation } from 'react-i18next';
 
 interface Iprops {
     handleCollectionAction: (
@@ -17,17 +17,19 @@ export function ShareQuickOption({
     handleCollectionAction,
     collectionSummaryType,
 }: Iprops) {
+    const { t } = useTranslation();
+
     return (
         <Tooltip
             title={
                 /*: collectionSummaryType ===
       CollectionSummaryType.incomingShare
-    ? constants.SHARING_DETAILS*/
+    ? t("SHARING_DETAILS*/
                 collectionSummaryType === CollectionSummaryType.outgoingShare ||
                 collectionSummaryType ===
                     CollectionSummaryType.sharedOnlyViaLink
-                    ? constants.MODIFY_SHARING
-                    : constants.SHARE_COLLECTION
+                    ? t('MODIFY_SHARING')
+                    : t('SHARE_COLLECTION')
             }>
             <IconButton
                 onClick={handleCollectionAction(

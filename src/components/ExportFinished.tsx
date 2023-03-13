@@ -1,7 +1,7 @@
 import { Button, DialogActions, DialogContent, Stack } from '@mui/material';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ExportStats } from 'types/export';
-import constants from 'utils/strings/constants';
 import { formatDateTime } from 'utils/time/format';
 import { FlexWrapper, Label, Value } from './Container';
 import { ComfySpan } from './ExportInProgress';
@@ -15,20 +15,21 @@ interface Props {
 }
 
 export default function ExportFinished(props: Props) {
+    const { t } = useTranslation();
     const totalFiles = props.exportStats.failed + props.exportStats.success;
     return (
         <>
             <DialogContent>
                 <Stack spacing={2.5}>
                     <FlexWrapper>
-                        <Label width="40%">{constants.LAST_EXPORT_TIME}</Label>
+                        <Label width="40%">{t('LAST_EXPORT_TIME')}</Label>
                         <Value width="60%">
                             {formatDateTime(props.lastExportTime)}
                         </Value>
                     </FlexWrapper>
                     <FlexWrapper>
                         <Label width="40%">
-                            {constants.SUCCESSFULLY_EXPORTED_FILES}
+                            {t('SUCCESSFULLY_EXPORTED_FILES')}
                         </Label>
                         <Value width="60%">
                             <ComfySpan>
@@ -39,7 +40,7 @@ export default function ExportFinished(props: Props) {
                     {props.exportStats.failed > 0 && (
                         <FlexWrapper>
                             <Label width="40%">
-                                {constants.FAILED_EXPORTED_FILES}
+                                {t('FAILED_EXPORTED_FILES')}
                             </Label>
                             <Value width="60%">
                                 <ComfySpan>
@@ -56,18 +57,18 @@ export default function ExportFinished(props: Props) {
                         size="large"
                         color="accent"
                         onClick={props.retryFailed}>
-                        {constants.RETRY_EXPORT_}
+                        {t('RETRY_EXPORT')}
                     </Button>
                 ) : (
                     <Button
                         size="large"
                         color="primary"
                         onClick={props.exportFiles}>
-                        {constants.EXPORT_AGAIN}
+                        {t('EXPORT_AGAIN')}
                     </Button>
                 )}
                 <Button color="secondary" size="large" onClick={props.onHide}>
-                    {constants.CLOSE}
+                    {t('CLOSE')}
                 </Button>
             </DialogActions>
         </>

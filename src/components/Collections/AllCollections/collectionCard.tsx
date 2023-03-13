@@ -1,9 +1,9 @@
 import { Typography } from '@mui/material';
-import constants from 'utils/strings/constants';
 import React from 'react';
 import CollectionCard from '../CollectionCard';
 import { CollectionSummary } from 'types/collection';
 import { AllCollectionTile, AllCollectionTileText } from '../styledComponents';
+import { useTranslation } from 'react-i18next';
 
 interface Iprops {
     collectionSummary: CollectionSummary;
@@ -14,6 +14,7 @@ export default function AllCollectionCard({
     onCollectionClick,
     collectionSummary,
 }: Iprops) {
+    const { t } = useTranslation();
     return (
         <CollectionCard
             collectionTile={AllCollectionTile}
@@ -22,7 +23,7 @@ export default function AllCollectionCard({
             <AllCollectionTileText>
                 <Typography>{collectionSummary.name}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                    {constants.PHOTO_COUNT(collectionSummary.fileCount)}
+                    {t('photos_count', { count: collectionSummary.fileCount })}
                 </Typography>
             </AllCollectionTileText>
         </CollectionCard>

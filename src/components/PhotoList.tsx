@@ -12,7 +12,6 @@ import {
     SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
     IMAGE_CONTAINER_MAX_WIDTH,
 } from 'constants/gallery';
-import constants from 'utils/strings/constants';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import { convertBytesToHumanReadable } from 'utils/file/size';
@@ -22,6 +21,7 @@ import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { SpecialPadding } from 'styles/SpecialPadding';
 import { formatDate } from 'utils/time/format';
+import { Trans, useTranslation } from 'react-i18next';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
@@ -178,6 +178,7 @@ export function PhotoList({
     getThumbnail,
     activeCollection,
 }: Props) {
+    const { t } = useTranslation();
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
@@ -229,14 +230,14 @@ export function PhotoList({
                 skipMerge = true;
                 groupByFileSize(timeStampList);
             } else {
-                groupByTime(timeStampList);
+                groupByTime(t, timeStampList);
             }
 
             if (!skipMerge) {
                 timeStampList = mergeTimeStampList(timeStampList, columns);
             }
             if (timeStampList.length === 1) {
-                timeStampList.push(getEmptyListItem());
+                timeStampList.push(getEmptyListItem(t));
             }
             timeStampList.push(getVacuumItem(timeStampList));
             if (publicCollectionGalleryContext.accessedThroughSharedURL) {
@@ -247,7 +248,7 @@ export function PhotoList({
                         )
                     );
                 }
-                timeStampList.push(getAlbumsFooter());
+                timeStampList.push(getAlbumsFooter(t));
             } else if (showAppDownloadBanner) {
                 timeStampList.push(getAppDownloadFooter());
             }
@@ -316,7 +317,7 @@ export function PhotoList({
                         getPhotoListFooter(
                             publicCollectionGalleryContext.photoListFooter
                         ),
-                        getAlbumsFooter(),
+                        getAlbumsFooter(t),
                     ];
                 }
             } else if (showAppDownloadBanner) {
@@ -375,7 +376,7 @@ export function PhotoList({
         }
     };
 
-    const groupByTime = (timeStampList: TimeStampListItem[]) => {
+    const groupByTime = (t, timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;
         let currentDate;
         filteredData.forEach((item, index) => {
@@ -391,12 +392,12 @@ export function PhotoList({
                 timeStampList.push({
                     itemType: ITEM_TYPE.TIME,
                     date: isSameDay(new Date(currentDate), new Date())
-                        ? constants.TODAY
+                        ? t('TODAY')
                         : isSameDay(
                               new Date(currentDate),
                               new Date(Date.now() - A_DAY)
                           )
-                        ? constants.YESTERDAY
+                        ? t('YESTERDAY')
                         : formatDate(currentDate),
                     id: currentDate.toString(),
                 });
@@ -450,12 +451,12 @@ export function PhotoList({
         };
     };
 
-    const getEmptyListItem = () => {
+    const getEmptyListItem = (t) => {
         return {
             itemType: ITEM_TYPE.OTHER,
             item: (
                 <NothingContainer span={columns}>
-                    <div>{constants.NOTHING_HERE}</div>
+                    <div>{t('NOTHING_HERE')}</div>
                 </NothingContainer>
             ),
             id: 'empty-list-banner',
@@ -493,23 +494,41 @@ export function PhotoList({
             item: (
                 <FooterContainer span={columns}>
                     <Typography variant="body2">
-                        {constants.INSTALL_MOBILE_APP()}
+                        <Trans>
+                            Install our{' '}
+                            <a
+                                href="https://play.google.com/store/apps/details?id=io.ente.photos"
+                                target="_blank"
+                                style={{ color: '#51cd7c' }}
+                                rel="noreferrer">
+                                Android
+                            </a>{' '}
+                            or{' '}
+                            <a
+                                href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                                style={{ color: '#51cd7c' }}
+                                target="_blank"
+                                rel="noreferrer">
+                                iOS app{' '}
+                            </a>
+                            to automatically backup all your photos
+                        </Trans>
                     </Typography>
                 </FooterContainer>
             ),
         };
     };
 
-    const getAlbumsFooter = () => {
+    const getAlbumsFooter = (t) => {
         return {
             itemType: ITEM_TYPE.MARKETING_FOOTER,
             height: ALBUM_FOOTER_HEIGHT,
             item: (
                 <AlbumFooterContainer span={columns}>
                     <Typography variant="body2">
-                        {constants.SHARED_USING}{' '}
+                        {t('SHARED_USING')}{' '}
                         <Link target="_blank" href={ENTE_WEBSITE_LINK}>
-                            {constants.ENTE_IO}
+                            {t('ENTE_IO')}
                         </Link>
                     </Typography>
                 </AlbumFooterContainer>
@@ -624,6 +643,7 @@ export function PhotoList({
     };
 
     const renderListItem = (
+        t,
         listItem: TimeStampListItem,
         isScrolling: boolean
     ) => {
@@ -646,9 +666,9 @@ export function PhotoList({
             case ITEM_TYPE.SIZE_AND_COUNT:
                 return (
                     <SizeAndCountContainer span={columns}>
-                        {listItem.fileCount} {constants.FILES},{' '}
+                        {listItem.fileCount} {t('FILES')},{' '}
                         {convertBytesToHumanReadable(listItem.fileSize || 0)}{' '}
-                        {constants.EACH}
+                        {t('EACH')}
                     </SizeAndCountContainer>
                 );
             case ITEM_TYPE.FILE: {
@@ -699,7 +719,7 @@ export function PhotoList({
                         columns={columns}
                         shrinkRatio={shrinkRatio}
                         groups={timeStampList[index].groups}>
-                        {renderListItem(timeStampList[index], isScrolling)}
+                        {renderListItem(t, timeStampList[index], isScrolling)}
                     </ListContainer>
                 </ListItem>
             )}

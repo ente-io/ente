@@ -1,6 +1,5 @@
 import EmailShare from './emailShare';
 import React, { useContext } from 'react';
-import constants from 'utils/strings/constants';
 import { Collection } from 'types/collection';
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
@@ -11,6 +10,7 @@ import { Divider } from '@mui/material';
 import { CollectionShareContainer } from './container';
 import PublicShare from './publicShare';
 import { AppContext } from 'pages/_app';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     open: boolean;
@@ -19,6 +19,7 @@ interface Props {
 }
 
 function CollectionShare(props: Props) {
+    const { t } = useTranslation();
     const { isMobile } = useContext(AppContext);
     const handleClose = dialogCloseHandler({
         onClose: props.onClose,
@@ -35,7 +36,7 @@ function CollectionShare(props: Props) {
                 onClose={handleClose}
                 fullScreen={isMobile}>
                 <DialogTitleWithCloseButton onClose={handleClose}>
-                    {constants.SHARE_COLLECTION}
+                    {t('SHARE_COLLECTION')}
                 </DialogTitleWithCloseButton>
                 <DialogContent>
                     <EmailShare collection={props.collection} />

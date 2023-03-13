@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import constants from 'utils/strings/constants';
 import { Plan } from 'types/billing';
 import {
     isUserSubscribedPlan,
@@ -27,6 +26,7 @@ import { PLAN_PERIOD } from 'constants/gallery';
 import FreeSubscriptionPlanSelectorCard from './free';
 import PaidSubscriptionPlanSelectorCard from './paid';
 import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     closeModal: any;
@@ -34,6 +34,8 @@ interface Props {
 }
 
 function PlanSelectorCard(props: Props) {
+    const { t } = useTranslation();
+
     const subscription = useMemo(() => getLocalUserSubscription(), []);
     const [plans, setPlans] = useLocalState<Plan[]>(LS_KEYS.PLANS);
 
@@ -87,11 +89,11 @@ function PlanSelectorCard(props: Props) {
                 logError(e, 'plan selector modal open failed');
                 props.closeModal();
                 appContext.setDialogMessage({
-                    title: constants.OPEN_PLAN_SELECTOR_MODAL_FAILED,
-                    content: constants.UNKNOWN_ERROR,
-                    close: { text: constants.CLOSE, variant: 'secondary' },
+                    title: t('OPEN_PLAN_SELECTOR_MODAL_FAILED'),
+                    content: t('UNKNOWN_ERROR'),
+                    close: { text: t('CLOSE'), variant: 'secondary' },
                     proceed: {
-                        text: constants.REOPEN_PLAN_SELECTOR_MODAL,
+                        text: t('REOPEN_PLAN_SELECTOR_MODAL'),
                         variant: 'accent',
                         action: onReopenClick,
                     },
@@ -114,19 +116,19 @@ function PlanSelectorCard(props: Props) {
             } catch (e) {
                 props.setLoading(false);
                 appContext.setDialogMessage({
-                    title: constants.ERROR,
-                    content: constants.SUBSCRIPTION_PURCHASE_FAILED,
+                    title: t('ERROR'),
+                    content: t('SUBSCRIPTION_PURCHASE_FAILED'),
                     close: { variant: 'danger' },
                 });
             }
         } else if (hasStripeSubscription(subscription)) {
             appContext.setDialogMessage({
-                title: `${constants.CONFIRM} ${reverseString(
-                    constants.UPDATE_SUBSCRIPTION
+                title: `${t('CONFIRM')} ${reverseString(
+                    t('UPDATE_SUBSCRIPTION')
                 )}`,
-                content: constants.UPDATE_SUBSCRIPTION_MESSAGE,
+                content: t('UPDATE_SUBSCRIPTION_MESSAGE'),
                 proceed: {
-                    text: constants.UPDATE_SUBSCRIPTION,
+                    text: t('UPDATE_SUBSCRIPTION'),
                     action: updateSubscription.bind(
                         null,
                         plan,
@@ -136,18 +138,18 @@ function PlanSelectorCard(props: Props) {
                     ),
                     variant: 'accent',
                 },
-                close: { text: constants.CANCEL },
+                close: { text: t('CANCEL') },
             });
         } else if (hasMobileSubscription(subscription)) {
             appContext.setDialogMessage({
-                title: constants.CANCEL_SUBSCRIPTION_ON_MOBILE,
-                content: constants.CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE,
+                title: t('CANCEL_SUBSCRIPTION_ON_MOBILE'),
+                content: t('CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE'),
                 close: { variant: 'secondary' },
             });
         } else {
             appContext.setDialogMessage({
-                title: constants.MANAGE_PLAN,
-                content: constants.MAIL_TO_MANAGE_SUBSCRIPTION,
+                title: t('MANAGE_PLAN'),
+                content: t('MAIL_TO_MANAGE_SUBSCRIPTION'),
                 close: { variant: 'secondary' },
             });
         }

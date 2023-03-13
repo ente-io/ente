@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import { GalleryContext } from 'pages/gallery';
 import {
     ARCHIVE_SECTION,
@@ -21,6 +22,8 @@ export default function ShortcutSection({
     closeSidebar,
     collectionSummaries,
 }: Iprops) {
+    const { t } = useTranslation();
+
     const galleryContext = useContext(GalleryContext);
     const [uncategorizedCollectionId, setUncategorizedCollectionID] =
         useState<number>();
@@ -54,7 +57,7 @@ export default function ShortcutSection({
         <>
             <ShortcutButton
                 startIcon={<CategoryIcon />}
-                label={constants.UNCATEGORIZED}
+                label={t('UNCATEGORIZED')}
                 onClick={openUncategorizedSection}
                 count={
                     collectionSummaries.get(uncategorizedCollectionId)
@@ -63,13 +66,13 @@ export default function ShortcutSection({
             />
             <ShortcutButton
                 startIcon={<DeleteOutline />}
-                label={constants.TRASH}
+                label={t('TRASH')}
                 count={collectionSummaries.get(TRASH_SECTION)?.fileCount}
                 onClick={openTrashSection}
             />
             <ShortcutButton
                 startIcon={<ArchiveOutlined />}
-                label={constants.ARCHIVE_SECTION_NAME}
+                label={t('ARCHIVE_SECTION_NAME')}
                 count={collectionSummaries.get(ARCHIVE_SECTION)?.fileCount}
                 onClick={openArchiveSection}
             />

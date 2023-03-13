@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useRef, useState } from 'react';
 import AppNavbar from 'components/Navbar/app';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import { useRouter } from 'next/router';
 import VerticallyCentered from 'components/Container';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -113,6 +114,8 @@ const redirectMap = new Map([
 ]);
 
 export default function App({ Component, err }) {
+    const { t } = useTranslation();
+
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(
@@ -166,7 +169,7 @@ export default function App({ Component, err }) {
                     setNotificationAttributes({
                         endIcon: <ArrowForward />,
                         variant: 'secondary',
-                        message: constants.UPDATE_AVAILABLE,
+                        message: t('UPDATE_AVAILABLE'),
                         onClick: () =>
                             setDialogMessage(
                                 getUpdateAvailableForDownloadMessage(updateInfo)
@@ -206,13 +209,10 @@ export default function App({ Component, err }) {
     useEffect(() => {
         if (process.env.NODE_ENV === 'production') {
             console.log(
-                `%c${constants.CONSOLE_WARNING_STOP}`,
+                `%c${t('CONSOLE_WARNING_STOP')}`,
                 'color: red; font-size: 52px;'
             );
-            console.log(
-                `%c${constants.CONSOLE_WARNING_DESC}`,
-                'font-size: 20px;'
-            );
+            console.log(`%c${t('CONSOLE_WARNING_DESC')}`, 'font-size: 20px;');
         }
 
         const redirectTo = async (redirect) => {
@@ -310,15 +310,15 @@ export default function App({ Component, err }) {
 
     const somethingWentWrong = () =>
         setDialogMessage({
-            title: constants.ERROR,
+            title: t('ERROR'),
             close: { variant: 'danger' },
-            content: constants.UNKNOWN_ERROR,
+            content: t('UNKNOWN_ERROR'),
         });
 
     return (
         <>
             <Head>
-                <title>{constants.TITLE}</title>
+                <title>{t('TITLE')}</title>
                 <meta
                     name="viewport"
                     content="initial-scale=1, width=device-width"
@@ -334,18 +334,20 @@ export default function App({ Component, err }) {
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar />}
                 <MessageContainer>
-                    {offline && constants.OFFLINE_MSG}
+                    {offline && t('OFFLINE_MSG')}
                 </MessageContainer>
                 {sharedFiles &&
                     (router.pathname === '/gallery' ? (
                         <MessageContainer>
-                            {constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}
+                            {t('FILES_TO_BE_UPLOADED', {
+                                count: sharedFiles.length,
+                            })}
                         </MessageContainer>
                     ) : (
                         <MessageContainer>
-                            {constants.LOGIN_TO_UPLOAD_FILES(
-                                sharedFiles.length
-                            )}
+                            {t('LOGIN_TO_UPLOAD_FILES', {
+                                count: sharedFiles.length,
+                            })}
                         </MessageContainer>
                     ))}
                 {flashMessage && (

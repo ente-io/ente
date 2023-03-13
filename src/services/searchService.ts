@@ -1,6 +1,7 @@
 import * as chrono from 'chrono-node';
 import { getAllPeople } from 'utils/machineLearning';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
 import { Collection } from 'types/collection';
@@ -144,16 +145,15 @@ export async function getIndexStatusSuggestion(): Promise<Suggestion> {
 
     let label;
     if (!indexStatus.localFilesSynced) {
-        label = constants.INDEXING_SCHEDULED;
+        label = t('INDEXING_SCHEDULED');
     } else if (indexStatus.outOfSyncFilesExists) {
-        label = constants.ANALYZING_PHOTOS(
-            indexStatus.nSyncedFiles,
-            indexStatus.nTotalFiles
-        );
+        label = t('ANALYZING_PHOTOS', {
+            indexStatus,
+        });
     } else if (!indexStatus.peopleIndexSynced) {
-        label = constants.INDEXING_PEOPLE(indexStatus.nSyncedFiles);
+        label = t('INDEXING_PEOPLE', { indexStatus });
     } else {
-        label = constants.INDEXING_DONE(indexStatus.nSyncedFiles);
+        label = t('INDEXING_DONE', { indexStatus });
     }
 
     return {

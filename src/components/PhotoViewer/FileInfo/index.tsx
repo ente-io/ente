@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react';
-import constants from 'utils/strings/constants';
 import { RenderFileName } from './RenderFileName';
 import { RenderCreationTime } from './RenderCreationTime';
 import { Box, DialogProps, Link, Stack, styled } from '@mui/material';
@@ -33,6 +32,7 @@ import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
 
 // import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
 import { AppContext } from 'pages/_app';
+import { useTranslation } from 'react-i18next';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
@@ -89,6 +89,8 @@ export function FileInfo({
     collectionNameMap,
     isTrashCollection,
 }: Iprops) {
+    const { t } = useTranslation();
+
     const appContext = useContext(AppContext);
     const [location, setLocation] = useState<Location>(null);
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
@@ -165,11 +167,7 @@ export function FileInfo({
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
-            <Titlebar
-                onClose={handleCloseInfo}
-                title={constants.INFO}
-                backIsClose
-            />
+            <Titlebar onClose={handleCloseInfo} title={t('INFO')} backIsClose />
             <Stack pt={1} pb={3} spacing={'20px'}>
                 <RenderCaption
                     shouldDisableEdits={shouldDisableEdits}
@@ -206,7 +204,7 @@ export function FileInfo({
                 {location && (
                     <InfoItem
                         icon={<LocationOnOutlined />}
-                        title={constants.LOCATION}
+                        title={t('LOCATION')}
                         caption={
                             <Link
                                 href={getOpenStreetMapLink({
@@ -215,7 +213,7 @@ export function FileInfo({
                                 })}
                                 target="_blank"
                                 sx={{ fontWeight: 'bold' }}>
-                                {constants.SHOW_ON_MAP}
+                                {t('SHOW_ON_MAP')}
                             </Link>
                         }
                         customEndButton={
@@ -232,7 +230,7 @@ export function FileInfo({
                 )}
                 <InfoItem
                     icon={<TextSnippetOutlined />}
-                    title={constants.DETAILS}
+                    title={t('DETAILS')}
                     caption={
                         typeof exif === 'undefined' ? (
                             <EnteSpinner size={11.33} />
@@ -244,10 +242,10 @@ export function FileInfo({
                                     color: 'text.secondary',
                                     fontWeight: 'bold',
                                 }}>
-                                {constants.VIEW_EXIF}
+                                {t('VIEW_EXIF')}
                             </LinkButton>
                         ) : (
-                            constants.NO_EXIF
+                            t('NO_EXIF')
                         )
                     }
                     hideEditOption

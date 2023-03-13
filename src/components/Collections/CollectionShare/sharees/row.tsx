@@ -5,14 +5,15 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from 'components/OverflowMenu/menu';
 
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
-import constants from 'utils/strings/constants';
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
     sharee: User;
     collectionUnshare: (sharee: User) => void;
 }
 const ShareeRow = ({ sharee, collectionUnshare }: IProps) => {
+    const { t } = useTranslation();
     const handleClick = () => collectionUnshare(sharee);
     return (
         <SpaceBetweenFlex>
@@ -30,7 +31,7 @@ const ShareeRow = ({ sharee, collectionUnshare }: IProps) => {
                     color="danger"
                     onClick={handleClick}
                     startIcon={<NotInterestedIcon />}>
-                    {constants.REMOVE}
+                    {t('REMOVE')}
                 </OverflowMenuOption>
             </OverflowMenu>
         </SpaceBetweenFlex>

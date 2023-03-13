@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { syncCollections, createAlbum } from 'services/collectionService';
-import constants from 'utils/strings/constants';
+import { Trans, useTranslation } from 'react-i18next';
+
 import UploadProgress from './UploadProgress';
 
 import UploadStrategyChoiceModal from './UploadStrategyChoiceModal';
@@ -86,6 +87,8 @@ interface Props {
 }
 
 export default function Uploader(props: Props) {
+    const { t } = useTranslation();
+
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
@@ -256,12 +259,24 @@ export default function Uploader(props: Props) {
             if (isCanvasBlocked()) {
                 addLogLine('canvas blocked, blocking upload');
                 appContext.setDialogMessage({
-                    title: constants.CANVAS_BLOCKED_TITLE,
+                    title: t('CANVAS_BLOCKED_TITLE'),
 
-                    content: constants.CANVAS_BLOCKED_MESSAGE(),
-                    close: { text: constants.CLOSE },
+                    content: (
+                        <Trans i18nKey="CANVAS_BLOCKED_MESSAGE">
+                            <p>
+                                It looks like your browser has disabled access
+                                to canvas, which is necessary to generate
+                                thumbnails for your photos
+                            </p>
+                            <p>
+                                Please enable access to your browser's canvas,
+                                or check out our desktop app
+                            </p>
+                        </Trans>
+                    ),
+                    close: { text: t('CLOSE') },
                     proceed: {
-                        text: constants.DOWNLOAD,
+                        text: t('DOWNLOAD'),
                         action: downloadApp,
                         variant: 'accent',
                     },
@@ -411,10 +426,10 @@ export default function Uploader(props: Props) {
                 closeUploadProgress();
                 logError(e, 'Failed to create album');
                 appContext.setDialogMessage({
-                    title: constants.ERROR,
+                    title: t('ERROR'),
 
                     close: { variant: 'danger' },
-                    content: constants.CREATE_ALBUM_FAILED,
+                    content: t('CREATE_ALBUM_FAILED'),
                 });
                 throw e;
             }
@@ -541,16 +556,16 @@ export default function Uploader(props: Props) {
             case CustomError.SUBSCRIPTION_EXPIRED:
                 notification = {
                     variant: 'danger',
-                    subtext: constants.SUBSCRIPTION_EXPIRED,
-                    message: constants.RENEW_NOW,
+                    subtext: t('SUBSCRIPTION_EXPIRED'),
+                    message: t('RENEW_NOW'),
                     onClick: () => billingService.redirectToCustomerPortal(),
                 };
                 break;
             case CustomError.STORAGE_QUOTA_EXCEEDED:
                 notification = {
                     variant: 'danger',
-                    subtext: constants.STORAGE_QUOTA_EXCEEDED,
-                    message: constants.UPGRADE_NOW,
+                    subtext: t('STORAGE_QUOTA_EXCEEDED'),
+                    message: t('UPGRADE_NOW'),
                     onClick: () => galleryContext.showPlanSelectorModal(),
                     startIcon: <DiscFullIcon />,
                 };
@@ -558,7 +573,7 @@ export default function Uploader(props: Props) {
             default:
                 notification = {
                     variant: 'danger',
-                    message: constants.UNKNOWN_ERROR,
+                    message: t('UNKNOWN_ERROR'),
                     onClick: () => null,
                 };
         }
@@ -578,8 +593,8 @@ export default function Uploader(props: Props) {
     };
     const showCollectionCreateModal = () => {
         props.setCollectionNamerAttributes({
-            title: constants.CREATE_COLLECTION,
-            buttonText: constants.CREATE,
+            title: t('CREATE_COLLECTION'),
+            buttonText: t('CREATE'),
             autoFilledName: null,
             callback: uploadToSingleNewCollection,
         });
@@ -647,7 +662,7 @@ export default function Uploader(props: Props) {
                 callback: uploadFilesToExistingCollection,
                 onCancel: handleCollectionSelectorCancel,
                 showNextModal,
-                title: constants.UPLOAD_TO_COLLECTION,
+                title: t('UPLOAD_TO_COLLECTION'),
             });
         } catch (e) {
             logError(e, 'handleCollectionCreationAndUpload failed');

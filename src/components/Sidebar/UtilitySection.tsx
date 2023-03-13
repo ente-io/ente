@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import SidebarButton from './Button';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 // import FixLargeThumbnails from 'components/FixLargeThumbnail';
 import RecoveryKey from 'components/RecoveryKey';
 import TwoFactorModal from 'components/TwoFactor/Modal';
@@ -18,6 +19,8 @@ import { isInternalUser } from 'utils/user';
 import Preferences from './Preferences';
 
 export default function UtilitySection({ closeSidebar }) {
+    const { t } = useTranslation();
+
     const router = useRouter();
     const {
         setDialogMessage,
@@ -64,8 +67,8 @@ export default function UtilitySection({ closeSidebar }) {
 
     const somethingWentWrong = () =>
         setDialogMessage({
-            title: constants.ERROR,
-            content: constants.RECOVER_KEY_GENERATION_FAILED,
+            title: t('ERROR'),
+            content: t('RECOVER_KEY_GENERATION_FAILED'),
             close: { variant: 'danger' },
         });
 
@@ -73,32 +76,32 @@ export default function UtilitySection({ closeSidebar }) {
         <>
             {isElectron() && (
                 <SidebarButton onClick={openWatchFolder}>
-                    {constants.WATCH_FOLDERS}
+                    {t('WATCH_FOLDERS')}
                 </SidebarButton>
             )}
             <SidebarButton onClick={openRecoveryKeyModal}>
-                {constants.RECOVERY_KEY}
+                {t('RECOVERY_KEY')}
             </SidebarButton>
             {isInternalUser() && (
                 <SpaceBetweenFlex sx={{ px: 1.5 }}>
-                    {constants.CHOSE_THEME}
+                    {t('CHOSE_THEME')}
                     <ThemeSwitcher theme={theme} setTheme={setTheme} />
                 </SpaceBetweenFlex>
             )}
             <SidebarButton onClick={openTwoFactorModal}>
-                {constants.TWO_FACTOR}
+                {t('TWO_FACTOR')}
             </SidebarButton>
             <SidebarButton onClick={redirectToChangePasswordPage}>
-                {constants.CHANGE_PASSWORD}
+                {t('CHANGE_PASSWORD')}
             </SidebarButton>
             <SidebarButton onClick={redirectToChangeEmailPage}>
-                {constants.CHANGE_EMAIL}
+                {t('CHANGE_EMAIL')}
             </SidebarButton>
             <SidebarButton onClick={redirectToDeduplicatePage}>
-                {constants.DEDUPLICATE_FILES}
+                {t('DEDUPLICATE_FILES')}
             </SidebarButton>
             <SidebarButton onClick={openPreferencesOptions}>
-                {constants.PREFERENCES}
+                {t('PREFERENCES')}
             </SidebarButton>
 
             <RecoveryKey

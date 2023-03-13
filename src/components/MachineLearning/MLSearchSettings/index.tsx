@@ -1,18 +1,19 @@
-import { Box, DialogProps } from '@mui/material';
+import { Box, DialogProps, Typography } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { AppContext } from 'pages/_app';
 import { useContext, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import {
     getFaceSearchEnabledStatus,
     updateFaceSearchEnabledStatus,
 } from 'services/userService';
 import { logError } from 'utils/sentry';
-import constants from 'utils/strings/constants';
 import EnableFaceSearch from './enableFaceSearch';
 import EnableMLSearch from './enableMLSearch';
 import ManageMLSearch from './manageMLSearch';
 
 const MLSearchSettings = ({ open, onClose, onRootClose }) => {
+    const { t } = useTranslation();
     const {
         updateMlSearchEnabled,
         mlSearchEnabled,
@@ -82,12 +83,23 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
 
     const confirmDisableFaceSearch = () => {
         setDialogMessage({
-            title: constants.DISABLE_FACE_SEARCH_TITLE,
-            content: constants.DISABLE_FACE_SEARCH_DESCRIPTION(),
-            close: { text: constants.CANCEL },
+            title: t('DISABLE_FACE_SEARCH_TITLE'),
+            content: (
+                <Typography>
+                    <Trans>
+                        ente will stop processing face geometry, and will also
+                        disable ML search (beta)
+                        <br />
+                        <br />
+                        You can reenable face search again if you wish, so this
+                        operation is safe
+                    </Trans>
+                </Typography>
+            ),
+            close: { text: t('CANCEL') },
             proceed: {
                 variant: 'primary',
-                text: constants.DISABLE_FACE_SEARCH,
+                text: t('DISABLE_FACE_SEARCH'),
                 action: disableFaceSearch,
             },
         });

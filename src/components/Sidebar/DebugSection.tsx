@@ -1,7 +1,8 @@
 import { AppContext } from 'pages/_app';
 import React, { useContext, useEffect, useState } from 'react';
 import { downloadAsFile } from 'utils/file';
-import constants from 'utils/strings/constants';
+import { Trans, useTranslation } from 'react-i18next';
+
 import { addLogLine, getDebugLogs } from 'utils/logging';
 import SidebarButton from './Button';
 import isElectron from 'is-electron';
@@ -15,6 +16,8 @@ import {
 } from '../../../tests/zip-file-reading.test';
 
 export default function DebugSection() {
+    const { t } = useTranslation();
+
     const appContext = useContext(AppContext);
     const [appVersion, setAppVersion] = useState<string>(null);
 
@@ -30,15 +33,26 @@ export default function DebugSection() {
 
     const confirmLogDownload = () =>
         appContext.setDialogMessage({
-            title: constants.DOWNLOAD_LOGS,
-            content: constants.DOWNLOAD_LOGS_MESSAGE(),
+            title: t('DOWNLOAD_LOGS'),
+            content: (
+                <Trans i18nKey={'DOWNLOAD_LOGS_MESSAGE'}>
+                    <p>
+                        This will download debug logs, which you can email to us
+                        to help debug your issue.
+                    </p>
+                    <p>
+                        Please note that file names will be included to help
+                        track issues with specific files.
+                    </p>
+                </Trans>
+            ),
             proceed: {
-                text: constants.DOWNLOAD,
+                text: t('DOWNLOAD'),
                 variant: 'accent',
                 action: downloadDebugLogs,
             },
             close: {
-                text: constants.CANCEL,
+                text: t('CANCEL'),
             },
         });
 
@@ -59,7 +73,7 @@ export default function DebugSection() {
                 onClick={confirmLogDownload}
                 typographyVariant="caption"
                 sx={{ fontWeight: 'normal', color: 'text.secondary' }}>
-                {constants.DOWNLOAD_UPLOAD_LOGS}
+                {t('DOWNLOAD_UPLOAD_LOGS')}
             </SidebarButton>
             {appVersion && (
                 <Typography p={1.5} color="text.secondary" variant="caption">

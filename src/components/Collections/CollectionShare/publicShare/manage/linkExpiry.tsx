@@ -4,7 +4,8 @@ import Select from 'react-select';
 import { linkExpiryStyle } from 'styles/linkExpiry';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import { shareExpiryOptions } from 'utils/collection';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import { formatDateTime } from 'utils/time/format';
 import { OptionWithDivider } from './selectComponents/OptionWithDivider';
 
@@ -19,6 +20,7 @@ export function ManageLinkExpiry({
     collection,
     updatePublicShareURLHelper,
 }: Iprops) {
+    const { t } = useTranslation();
     const updateDeviceExpiry = async (optionFn) => {
         return updatePublicShareURLHelper({
             collectionID: collection.id,
@@ -27,7 +29,7 @@ export function ManageLinkExpiry({
     };
     return (
         <Box>
-            <Typography mb={0.5}>{constants.LINK_EXPIRY}</Typography>
+            <Typography mb={0.5}>{t('LINK_EXPIRY')}</Typography>
             <Select
                 menuPosition="fixed"
                 options={shareExpiryOptions}

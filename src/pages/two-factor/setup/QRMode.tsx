@@ -1,7 +1,8 @@
 import React from 'react';
 import EnteSpinner from 'components/EnteSpinner';
 import { TwoFactorSecret } from 'types/user';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import {
     LoadingQRCode,
     QRCode,
@@ -18,9 +19,10 @@ export default function SetupQRMode({
     twoFactorSecret,
     changeToManualMode,
 }: Iprops) {
+    const { t } = useTranslation();
     return (
         <>
-            <Typography>{constants.TWO_FACTOR_QR_INSTRUCTION}</Typography>
+            <Typography>{t('TWO_FACTOR_QR_INSTRUCTION')}</Typography>
             {!twoFactorSecret ? (
                 <LoadingQRCode>
                     <EnteSpinner />
@@ -31,7 +33,7 @@ export default function SetupQRMode({
                 />
             )}
             <LinkButton onClick={changeToManualMode}>
-                {constants.ENTER_CODE_MANUALLY}
+                {t('ENTER_CODE_MANUALLY')}
             </LinkButton>
         </>
     );

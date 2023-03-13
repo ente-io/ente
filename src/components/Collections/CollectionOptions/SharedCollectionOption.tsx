@@ -1,8 +1,8 @@
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
 import React from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
-import constants from 'utils/strings/constants';
 import { CollectionActions } from '.';
+import { useTranslation } from 'react-i18next';
 
 interface Iprops {
     handleCollectionAction: (
@@ -12,6 +12,7 @@ interface Iprops {
 }
 
 export function SharedCollectionOption({ handleCollectionAction }: Iprops) {
+    const { t } = useTranslation();
     return (
         <OverflowMenuOption
             startIcon={<LogoutIcon />}
@@ -19,7 +20,7 @@ export function SharedCollectionOption({ handleCollectionAction }: Iprops) {
                 CollectionActions.CONFIRM_LEAVE_SHARED_ALBUM,
                 false
             )}>
-            {constants.LEAVE_ALBUM}
+            {t('LEAVE_ALBUM')}
         </OverflowMenuOption>
     );
 }

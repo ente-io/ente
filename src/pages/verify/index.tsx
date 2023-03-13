@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import { LS_KEYS, getData, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import {
@@ -27,6 +28,7 @@ import EnteSpinner from 'components/EnteSpinner';
 import VerticallyCentered from 'components/Container';
 
 export default function Verify() {
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [resend, setResend] = useState(0);
     const router = useRouter();
@@ -105,11 +107,11 @@ export default function Verify() {
             }
         } catch (e) {
             if (e?.status === 401) {
-                setFieldError(constants.INVALID_CODE);
+                setFieldError(t('INVALID_CODE'));
             } else if (e?.status === 410) {
-                setFieldError(constants.EXPIRED_CODE);
+                setFieldError(t('EXPIRED_CODE'));
             } else {
-                setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
+                setFieldError(`${t('UNKNOWN_ERROR')} ${e.message}`);
             }
         }
     };
@@ -133,29 +135,29 @@ export default function Verify() {
         <FormContainer>
             <FormPaper>
                 <FormPaperTitle sx={{ mb: 14, wordBreak: 'break-word' }}>
-                    {constants.EMAIL_SENT({ email })}
+                    {t('EMAIL_SENT', { email })}
                 </FormPaperTitle>
                 <Typography color={'text.secondary'} mb={2} variant="body2">
-                    {constants.CHECK_INBOX}
+                    {t('CHECK_INBOX')}
                 </Typography>
                 <SingleInputForm
                     fieldType="text"
                     autoComplete="one-time-code"
-                    placeholder={constants.ENTER_OTT}
-                    buttonText={constants.VERIFY}
+                    placeholder={t('ENTER_OTT')}
+                    buttonText={t('VERIFY')}
                     callback={onSubmit}
                 />
 
                 <FormPaperFooter style={{ justifyContent: 'space-between' }}>
                     {resend === 0 && (
                         <LinkButton onClick={resendEmail}>
-                            {constants.RESEND_MAIL}
+                            {t('RESEND_MAIL')}
                         </LinkButton>
                     )}
-                    {resend === 1 && <span>{constants.SENDING}</span>}
-                    {resend === 2 && <span>{constants.SENT}</span>}
+                    {resend === 1 && <span>{t('SENDING')}</span>}
+                    {resend === 2 && <span>{t('SENT')}</span>}
                     <LinkButton onClick={logoutUser}>
-                        {constants.CHANGE_EMAIL}
+                        {t('CHANGE_EMAIL')}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>

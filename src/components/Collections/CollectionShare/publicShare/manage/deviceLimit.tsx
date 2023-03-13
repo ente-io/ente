@@ -1,10 +1,10 @@
 import { Box, Typography } from '@mui/material';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Select from 'react-select';
 import { DropdownStyle } from 'styles/dropdown';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { getDeviceLimitOptions } from 'utils/collection';
-import constants from 'utils/strings/constants';
 import { OptionWithDivider } from './selectComponents/OptionWithDivider';
 
 interface Iprops {
@@ -18,6 +18,8 @@ export function ManageDeviceLimit({
     collection,
     updatePublicShareURLHelper,
 }: Iprops) {
+    const { t } = useTranslation();
+
     const updateDeviceLimit = async (newLimit: number) => {
         return updatePublicShareURLHelper({
             collectionID: collection.id,
@@ -27,7 +29,7 @@ export function ManageDeviceLimit({
 
     return (
         <Box>
-            <Typography mb={0.5}>{constants.LINK_DEVICE_LIMIT}</Typography>
+            <Typography mb={0.5}>{t('LINK_DEVICE_LIMIT')}</Typography>
             <Select
                 menuPosition="fixed"
                 options={getDeviceLimitOptions()}

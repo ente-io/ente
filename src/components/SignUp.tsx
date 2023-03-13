@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import { sendOtt } from 'services/userService';
@@ -21,6 +20,7 @@ import {
     Checkbox,
     FormControlLabel,
     FormGroup,
+    Link,
     TextField,
     Typography,
 } from '@mui/material';
@@ -29,6 +29,7 @@ import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import VerticallyCentered from './Container';
 import { PasswordStrengthHint } from './PasswordStrength';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface FormValues {
     email: string;
@@ -41,6 +42,7 @@ interface SignUpProps {
 }
 
 export default function SignUp(props: SignUpProps) {
+    const { t } = useTranslation();
     const router = useRouter();
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -51,7 +53,7 @@ export default function SignUp(props: SignUpProps) {
     ) => {
         try {
             if (passphrase !== confirm) {
-                setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
+                setFieldError('confirm', t('PASSPHRASE_MATCH_ERROR'));
                 return;
             }
             setLoading(true);
@@ -59,10 +61,7 @@ export default function SignUp(props: SignUpProps) {
                 setData(LS_KEYS.USER, { email });
                 await sendOtt(email);
             } catch (e) {
-                setFieldError(
-                    'confirm',
-                    `${constants.UNKNOWN_ERROR} ${e.message}`
-                );
+                setFieldError('confirm', `${t('UNKNOWN_ERROR} ${e.message}')}`);
                 throw e;
             }
             try {
@@ -82,7 +81,7 @@ export default function SignUp(props: SignUpProps) {
                 setJustSignedUp(true);
                 router.push(PAGES.VERIFY);
             } catch (e) {
-                setFieldError('confirm', constants.PASSWORD_GENERATION_FAILED);
+                setFieldError('confirm', t('PASSWORD_GENERATION_FAILED'));
                 throw e;
             }
         } catch (err) {
@@ -93,7 +92,7 @@ export default function SignUp(props: SignUpProps) {
 
     return (
         <>
-            <FormPaperTitle> {constants.SIGN_UP}</FormPaperTitle>
+            <FormPaperTitle> {t('SIGN_UP')}</FormPaperTitle>
             <Formik<FormValues>
                 initialValues={{
                     email: '',
@@ -102,10 +101,10 @@ export default function SignUp(props: SignUpProps) {
                 }}
                 validationSchema={Yup.object().shape({
                     email: Yup.string()
-                        .email(constants.EMAIL_ERROR)
-                        .required(constants.REQUIRED),
-                    passphrase: Yup.string().required(constants.REQUIRED),
-                    confirm: Yup.string().required(constants.REQUIRED),
+                        .email(t('EMAIL_ERROR'))
+                        .required(t('REQUIRED')),
+                    passphrase: Yup.string().required(t('REQUIRED')),
+                    confirm: Yup.string().required(t('REQUIRED')),
                 })}
                 validateOnChange={false}
                 validateOnBlur={false}
@@ -124,7 +123,7 @@ export default function SignUp(props: SignUpProps) {
                                 name="email"
                                 autoComplete="username"
                                 type="email"
-                                label={constants.ENTER_EMAIL}
+                                label={t('ENTER_EMAIL')}
                                 value={values.email}
                                 onChange={handleChange('email')}
                                 error={Boolean(errors.email)}
@@ -139,7 +138,7 @@ export default function SignUp(props: SignUpProps) {
                                 name="password"
                                 autoComplete="new-password"
                                 type="password"
-                                label={constants.PASSPHRASE_HINT}
+                                label={t('PASSPHRASE_HINT')}
                                 value={values.passphrase}
                                 onChange={handleChange('passphrase')}
                                 error={Boolean(errors.passphrase)}
@@ -153,7 +152,7 @@ export default function SignUp(props: SignUpProps) {
                                 name="confirm-password"
                                 autoComplete="new-password"
                                 type="password"
-                                label={constants.CONFIRM_PASSPHRASE}
+                                label={t('CONFIRM_PASSPHRASE')}
                                 value={values.confirm}
                                 onChange={handleChange('confirm')}
                                 error={Boolean(errors.confirm)}
@@ -181,14 +180,33 @@ export default function SignUp(props: SignUpProps) {
                                             color="accent"
                                         />
                                     }
-                                    label={constants.TERMS_AND_CONDITIONS()}
+                                    label={
+                                        <Trans>
+                                            <Typography variant="body2">
+                                                I agree to the{' '}
+                                                <Link
+                                                    href="https://ente.io/terms"
+                                                    target="_blank"
+                                                    rel="noreferrer">
+                                                    terms
+                                                </Link>{' '}
+                                                and{' '}
+                                                <Link
+                                                    href="https://ente.io/privacy"
+                                                    target="_blank"
+                                                    rel="noreferrer">
+                                                    privacy policy
+                                                </Link>{' '}
+                                            </Typography>
+                                        </Trans>
+                                    }
                                 />
                             </FormGroup>
                         </VerticallyCentered>
                         <Box my={4}>
                             <SubmitButton
                                 sx={{ my: 0 }}
-                                buttonText={constants.CREATE_ACCOUNT}
+                                buttonText={t('CREATE_ACCOUNT')}
                                 loading={loading}
                                 disabled={
                                     !acceptTerms ||
@@ -201,9 +219,7 @@ export default function SignUp(props: SignUpProps) {
                                     textAlign={'center'}
                                     color="text.secondary"
                                     variant="body2">
-                                    {
-                                        constants.KEY_GENERATION_IN_PROGRESS_MESSAGE
-                                    }
+                                    {t('KEY_GENERATION_IN_PROGRESS_MESSAGE')}
                                 </Typography>
                             )}
                         </Box>
@@ -213,7 +229,7 @@ export default function SignUp(props: SignUpProps) {
 
             <FormPaperFooter>
                 <LinkButton onClick={props.login}>
-                    {constants.ACCOUNT_EXISTS}
+                    {t('ACCOUNT_EXISTS')}
                 </LinkButton>
             </FormPaperFooter>
         </>

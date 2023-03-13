@@ -8,7 +8,8 @@ import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import { User } from 'types/user';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
-import constants from 'utils/strings/constants';
+import { Trans, useTranslation } from 'react-i18next';
+
 import LinkButton from 'components/pages/gallery/LinkButton';
 import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
@@ -16,6 +17,7 @@ import FormTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 
 export default function Home() {
+    const { t } = useTranslation();
     const [sessionID, setSessionID] = useState('');
     const appContext = useContext(AppContext);
 
@@ -39,9 +41,15 @@ export default function Home() {
 
     const showContactSupport = () => {
         appContext.setDialogMessage({
-            title: constants.CONTACT_SUPPORT,
+            title: t('CONTACT_SUPPORT'),
             close: {},
-            content: constants.NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE(),
+            content: (
+                <Trans i18nKey="NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE">
+                    Please drop an email to{' '}
+                    <a href="mailto:support@ente.io">support@ente.io</a> from
+                    your registered email address
+                </Trans>
+            ),
         });
     };
 
@@ -68,15 +76,12 @@ export default function Home() {
     return (
         <FormContainer>
             <FormPaper sx={{ maxWidth: '410px' }}>
-                <FormTitle>{constants.TWO_FACTOR}</FormTitle>
-                <VerifyTwoFactor
-                    onSubmit={onSubmit}
-                    buttonText={constants.VERIFY}
-                />
+                <FormTitle>{t('TWO_FACTOR')}</FormTitle>
+                <VerifyTwoFactor onSubmit={onSubmit} buttonText={t('VERIFY')} />
 
                 <FormPaperFooter>
                     <LinkButton onClick={showContactSupport}>
-                        {constants.LOST_DEVICE}
+                        {t('LOST_DEVICE')}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>

@@ -1,5 +1,6 @@
 import { Dialog, DialogContent } from '@mui/material';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import { UPLOAD_STAGES, UPLOAD_RESULT } from 'constants/upload';
 import React, { useContext, useEffect, useState } from 'react';
 import { UploadProgressFooter } from './footer';
@@ -13,6 +14,8 @@ import { APP_DOWNLOAD_URL } from 'utils/common';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
 
 export function UploadProgressDialog() {
+    const { t } = useTranslation();
+
     const { open, onClose, uploadStage, finishedUploads } = useContext(
         UploadProgressContext
     );
@@ -54,70 +57,70 @@ export function UploadProgressDialog() {
                         <>
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.UPLOADED}
-                                sectionTitle={constants.SUCCESSFUL_UPLOADS}
+                                sectionTitle={t('SUCCESSFUL_UPLOADS')}
                             />
                             <ResultSection
                                 uploadResult={
                                     UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
                                 }
-                                sectionTitle={
-                                    constants.THUMBNAIL_GENERATION_FAILED_UPLOADS
-                                }
-                                sectionInfo={
-                                    constants.THUMBNAIL_GENERATION_FAILED_INFO
-                                }
+                                sectionTitle={t(
+                                    'THUMBNAIL_GENERATION_FAILED_UPLOADS'
+                                )}
+                                sectionInfo={t(
+                                    'THUMBNAIL_GENERATION_FAILED_INFO'
+                                )}
                             />
 
                             {uploadStage === UPLOAD_STAGES.FINISH &&
                                 hasUnUploadedFiles && (
                                     <NotUploadSectionHeader>
-                                        {constants.FILE_NOT_UPLOADED_LIST}
+                                        {t('FILE_NOT_UPLOADED_LIST')}
                                     </NotUploadSectionHeader>
                                 )}
 
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.BLOCKED}
-                                sectionTitle={constants.BLOCKED_UPLOADS}
-                                sectionInfo={constants.ETAGS_BLOCKED(
-                                    APP_DOWNLOAD_URL
-                                )}
+                                sectionTitle={t('BLOCKED_UPLOADS')}
+                                sectionInfo={t('ETAGS_BLOCKED', {
+                                    url: APP_DOWNLOAD_URL,
+                                })}
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.FAILED}
-                                sectionTitle={constants.FAILED_UPLOADS}
+                                sectionTitle={t('FAILED_UPLOADS')}
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.SKIPPED_VIDEOS}
-                                sectionTitle={constants.SKIPPED_VIDEOS}
-                                sectionInfo={constants.SKIPPED_VIDEOS_INFO(
-                                    ENTE_WEBSITE_LINK
-                                )}
+                                sectionTitle={t('SKIPPED_VIDEOS')}
+                                sectionInfo={t('SKIPPED_VIDEOS_INFO', {
+                                    link: ENTE_WEBSITE_LINK,
+                                })}
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.ALREADY_UPLOADED}
-                                sectionTitle={constants.SKIPPED_FILES}
-                                sectionInfo={constants.SKIPPED_INFO}
+                                sectionTitle={t('SKIPPED_FILES')}
+                                sectionInfo={t('SKIPPED_INFO')}
                             />
                             <ResultSection
                                 uploadResult={
                                     UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE
                                 }
-                                sectionTitle={
-                                    constants.LARGER_THAN_AVAILABLE_STORAGE_UPLOADS
-                                }
-                                sectionInfo={
-                                    constants.LARGER_THAN_AVAILABLE_STORAGE_INFO
-                                }
+                                sectionTitle={t(
+                                    'LARGER_THAN_AVAILABLE_STORAGE_UPLOADS'
+                                )}
+                                sectionInfo={t(
+                                    'LARGER_THAN_AVAILABLE_STORAGE_INFO'
+                                )}
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.UNSUPPORTED}
-                                sectionTitle={constants.UNSUPPORTED_FILES}
-                                sectionInfo={constants.UNSUPPORTED_INFO}
+                                sectionTitle={t('UNSUPPORTED_FILES')}
+                                sectionInfo={t('UNSUPPORTED_INFO')}
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.TOO_LARGE}
-                                sectionTitle={constants.TOO_LARGE_UPLOADS}
-                                sectionInfo={constants.TOO_LARGE_INFO}
+                                sectionTitle={t('TOO_LARGE_UPLOADS')}
+                                sectionInfo={t('TOO_LARGE_INFO')}
                             />
                         </>
                     )}

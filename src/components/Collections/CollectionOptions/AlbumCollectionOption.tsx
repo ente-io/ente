@@ -4,10 +4,10 @@ import React from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import PeopleIcon from '@mui/icons-material/People';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import constants from 'utils/strings/constants';
 import { CollectionActions } from '.';
 import Unarchive from '@mui/icons-material/Unarchive';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
+import { useTranslation } from 'react-i18next';
 
 interface Iprops {
     IsArchived: boolean;
@@ -21,6 +21,7 @@ export function AlbumCollectionOption({
     IsArchived,
     handleCollectionAction,
 }: Iprops) {
+    const { t } = useTranslation();
     return (
         <>
             <OverflowMenuOption
@@ -29,7 +30,7 @@ export function AlbumCollectionOption({
                     false
                 )}
                 startIcon={<EditIcon />}>
-                {constants.RENAME_COLLECTION}
+                {t('RENAME_COLLECTION')}
             </OverflowMenuOption>
             {IsArchived ? (
                 <OverflowMenuOption
@@ -37,13 +38,13 @@ export function AlbumCollectionOption({
                         CollectionActions.UNARCHIVE
                     )}
                     startIcon={<Unarchive />}>
-                    {constants.UNARCHIVE_COLLECTION}
+                    {t('UNARCHIVE_COLLECTION')}
                 </OverflowMenuOption>
             ) : (
                 <OverflowMenuOption
                     onClick={handleCollectionAction(CollectionActions.ARCHIVE)}
                     startIcon={<ArchiveOutlined />}>
-                    {constants.ARCHIVE_COLLECTION}
+                    {t('ARCHIVE_COLLECTION')}
                 </OverflowMenuOption>
             )}
             <OverflowMenuOption
@@ -52,7 +53,7 @@ export function AlbumCollectionOption({
                     CollectionActions.CONFIRM_DELETE,
                     false
                 )}>
-                {constants.DELETE_COLLECTION}
+                {t('DELETE_COLLECTION')}
             </OverflowMenuOption>
             <OverflowMenuOption
                 onClick={handleCollectionAction(
@@ -60,7 +61,7 @@ export function AlbumCollectionOption({
                     false
                 )}
                 startIcon={<PeopleIcon />}>
-                {constants.SHARE_COLLECTION}
+                {t('SHARE_COLLECTION')}
             </OverflowMenuOption>
         </>
     );

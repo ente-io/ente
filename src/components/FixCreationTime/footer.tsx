@@ -1,13 +1,15 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import { FIX_STATE } from '.';
-import constants from 'utils/strings/constants';
 
 export default function FixCreationTimeFooter({
     fixState,
     startFix,
     ...props
 }) {
+    const { t } = useTranslation();
+
     return (
         fixState !== FIX_STATE.RUNNING && (
             <div
@@ -25,7 +27,7 @@ export default function FixCreationTimeFooter({
                         onClick={() => {
                             props.hide();
                         }}>
-                        {constants.CANCEL}
+                        {t('CANCEL')}
                     </Button>
                 )}
                 {fixState === FIX_STATE.COMPLETED && (
@@ -33,7 +35,7 @@ export default function FixCreationTimeFooter({
                         block
                         variant={'outline-secondary'}
                         onClick={props.hide}>
-                        {constants.CLOSE}
+                        {t('CLOSE')}
                     </Button>
                 )}
                 {(fixState === FIX_STATE.NOT_STARTED ||
@@ -45,7 +47,7 @@ export default function FixCreationTimeFooter({
                             block
                             variant={'outline-success'}
                             onClick={startFix}>
-                            {constants.FIX_CREATION_TIME}
+                            {t('FIX_CREATION_TIME')}
                         </Button>
                     </>
                 )}

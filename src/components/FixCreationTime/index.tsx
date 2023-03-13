@@ -1,4 +1,3 @@
-import constants from 'utils/strings/constants';
 import DialogBox from '../DialogBox';
 import React, { useContext, useEffect, useState } from 'react';
 import { updateCreationTimeWithExif } from 'services/updateCreationTimeWithExif';
@@ -9,6 +8,8 @@ import FixCreationTimeFooter from './footer';
 import { Formik } from 'formik';
 
 import FixCreationTimeOptions from './options';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 export interface FixCreationTimeAttributes {
     files: EnteFile[];
 }
@@ -37,22 +38,30 @@ interface formValues {
     customTime: Date;
 }
 
-function Message(props: { fixState: FIX_STATE }) {
+function Message({
+    fixState,
+    t,
+}: {
+    t: TFunction<'translations', undefined, 'translations'>;
+    fixState: FIX_STATE;
+}) {
     let message = null;
-    switch (props.fixState) {
+    switch (fixState) {
         case FIX_STATE.NOT_STARTED:
-            message = constants.UPDATE_CREATION_TIME_NOT_STARTED();
+            message = t('UPDATE_CREATION_TIME_NOT_STARTED');
             break;
         case FIX_STATE.COMPLETED:
-            message = constants.UPDATE_CREATION_TIME_COMPLETED();
+            message = t('UPDATE_CREATION_TIME_COMPLETED');
             break;
         case FIX_STATE.COMPLETED_WITH_ERRORS:
-            message = constants.UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR();
+            message = t('UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR');
             break;
     }
     return message ? <div>{message}</div> : <></>;
 }
 export default function FixCreationTime(props: Props) {
+    const { t } = useTranslation();
+
     const [fixState, setFixState] = useState(FIX_STATE.NOT_STARTED);
     const [progressTracker, setProgressTracker] = useState({
         current: 0,
@@ -99,8 +108,8 @@ export default function FixCreationTime(props: Props) {
             attributes={{
                 title:
                     fixState === FIX_STATE.RUNNING
-                        ? constants.FIX_CREATION_TIME_IN_PROGRESS
-                        : constants.FIX_CREATION_TIME,
+                        ? t('FIX_CREATION_TIME_IN_PROGRESS')
+                        : t('FIX_CREATION_TIME'),
                 nonClosable: true,
             }}>
             <div
@@ -112,7 +121,7 @@ export default function FixCreationTime(props: Props) {
                         ? { alignItems: 'center' }
                         : {}),
                 }}>
-                <Message fixState={fixState} />
+                <Message fixState={fixState} t={t} />
 
                 {fixState === FIX_STATE.RUNNING && (
                     <FixCreationTimeRunning progressTracker={progressTracker} />

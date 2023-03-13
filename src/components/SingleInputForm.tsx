@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers, FormikState } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
@@ -7,6 +6,7 @@ import TextField from '@mui/material/TextField';
 import ShowHidePassword from './Form/ShowHidePassword';
 import { FlexWrapper } from './Container';
 import { Button, FormHelperText } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 interface formValues {
     inputValue: string;
@@ -33,6 +33,7 @@ export interface SingleInputFormProps {
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
+    const { t } = useTranslation();
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
 
@@ -66,17 +67,17 @@ export default function SingleInputForm(props: SingleInputFormProps) {
         switch (props.fieldType) {
             case 'text':
                 return Yup.object().shape({
-                    inputValue: Yup.string().required(constants.REQUIRED),
+                    inputValue: Yup.string().required(t('REQUIRED')),
                 });
             case 'password':
                 return Yup.object().shape({
-                    inputValue: Yup.string().required(constants.REQUIRED),
+                    inputValue: Yup.string().required(t('REQUIRED')),
                 });
             case 'email':
                 return Yup.object().shape({
                     inputValue: Yup.string()
-                        .email(constants.EMAIL_ERROR)
-                        .required(constants.REQUIRED),
+                        .email(t('EMAIL_ERROR'))
+                        .required(t('REQUIRED')),
                 });
         }
     }, [props.fieldType]);
@@ -151,7 +152,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                                     },
                                 }}
                                 {...restSubmitButtonProps}>
-                                {constants.CANCEL}
+                                {t('CANCEL')}
                             </Button>
                         )}
                         <SubmitButton

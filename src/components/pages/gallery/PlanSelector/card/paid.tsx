@@ -4,8 +4,8 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { convertBytesToGBs, isSubscriptionCancelled } from 'utils/billing';
-import constants from 'utils/strings/constants';
 import { ManageSubscription } from '../manageSubscription';
 import { PeriodToggler } from '../periodToggler';
 import Plans from '../plans';
@@ -20,17 +20,19 @@ export default function PaidSubscriptionPlanSelectorCard({
     onPlanSelect,
     setLoading,
 }) {
+    const { t } = useTranslation();
+
     return (
         <>
             <Box pl={1.5} py={0.5}>
                 <SpaceBetweenFlex>
                     <Box>
                         <Typography variant="h3" fontWeight={'bold'}>
-                            {constants.SUBSCRIPTION}
+                            {t('SUBSCRIPTION')}
                         </Typography>
                         <Typography variant="body2" color={'text.secondary'}>
                             {convertBytesToGBs(subscription.storage, 2)}{' '}
-                            {constants.GB}
+                            {t('GB')}
                         </Typography>
                     </Box>
                     <IconButton onClick={closeModal} color="secondary">
@@ -41,9 +43,9 @@ export default function PaidSubscriptionPlanSelectorCard({
 
             <Box px={1.5}>
                 <Typography color={'text.secondary'} fontWeight={'bold'}>
-                    {constants.CURRENT_USAGE(
-                        `${convertBytesToGBs(usage, 2)} ${constants.GB}`
-                    )}
+                    {t('CURRENT_USAGE', {
+                        usage: `${convertBytesToGBs(usage, 2)} ${t('GB')}`,
+                    })}
                 </Typography>
             </Box>
 
@@ -62,7 +64,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                             variant="body2"
                             mt={0.5}
                             color="text.secondary">
-                            {constants.TWO_MONTHS_FREE}
+                            {t('TWO_MONTHS_FREE')}
                         </Typography>
                     </Box>
                     <Plans
@@ -77,12 +79,12 @@ export default function PaidSubscriptionPlanSelectorCard({
                 <Box py={1} px={1.5}>
                     <Typography color={'text.secondary'}>
                         {!isSubscriptionCancelled(subscription)
-                            ? constants.RENEWAL_ACTIVE_SUBSCRIPTION_STATUS(
-                                  subscription.expiryTime
-                              )
-                            : constants.RENEWAL_CANCELLED_SUBSCRIPTION_STATUS(
-                                  subscription.expiryTime
-                              )}
+                            ? t('RENEWAL_ACTIVE_SUBSCRIPTION_STATUS', {
+                                  date: new Date(subscription.expiryTime),
+                              })
+                            : t('RENEWAL_CANCELLED_SUBSCRIPTION_STATUS', {
+                                  date: new Date(subscription.expiryTime),
+                              })}
                     </Typography>
                 </Box>
             </Box>

@@ -1,7 +1,7 @@
 import { styled, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { PLAN_PERIOD } from 'constants/gallery';
 import React from 'react';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
 
 const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
     textTransform: 'none',
@@ -22,6 +22,7 @@ const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
 }));
 
 export function PeriodToggler({ planPeriod, togglePeriod }) {
+    const { t } = useTranslation();
     const handleChange = (_, newPlanPeriod: PLAN_PERIOD) => {
         if (newPlanPeriod !== null && newPlanPeriod !== planPeriod) {
             togglePeriod();
@@ -35,10 +36,10 @@ export function PeriodToggler({ planPeriod, togglePeriod }) {
             onChange={handleChange}
             color="primary">
             <CustomToggleButton value={PLAN_PERIOD.MONTH}>
-                {constants.MONTHLY}
+                {t('MONTHLY')}
             </CustomToggleButton>
             <CustomToggleButton value={PLAN_PERIOD.YEAR}>
-                {constants.YEARLY}
+                {t('YEARLY')}
             </CustomToggleButton>
         </ToggleButtonGroup>
     );

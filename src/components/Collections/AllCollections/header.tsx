@@ -6,8 +6,8 @@ import {
     IconButtonWithBG,
 } from 'components/Container';
 import CollectionSort from 'components/Collections/AllCollections/CollectionSort';
-import constants from 'utils/strings/constants';
 import Close from '@mui/icons-material/Close';
+import { useTranslation } from 'react-i18next';
 
 export default function AllCollectionsHeader({
     onClose,
@@ -15,16 +15,16 @@ export default function AllCollectionsHeader({
     collectionSortBy,
     setCollectionSortBy,
 }) {
+    const { t } = useTranslation();
+
     return (
         <DialogTitle>
             <FlexWrapper>
                 <FluidContainer mr={1.5}>
                     <Box>
-                        <Typography variant="h3">
-                            {constants.ALL_ALBUMS}
-                        </Typography>
+                        <Typography variant="h3">{t('ALL_ALBUMS')}</Typography>
                         <Typography variant="body2" color={'text.secondary'}>
-                            {`${collectionCount} ${constants.ALBUMS}`}
+                            {`${collectionCount} ${t('ALBUMS')}`}
                         </Typography>
                     </Box>
                 </FluidContainer>

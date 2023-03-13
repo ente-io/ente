@@ -2,7 +2,8 @@ import { UploadProgressDialog } from './dialog';
 import { MinimizedUploadProgress } from './minimized';
 import React, { useContext, useEffect, useState } from 'react';
 
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
+
 import { UPLOAD_STAGES } from 'constants/upload';
 import { AppContext } from 'pages/_app';
 import {
@@ -40,6 +41,8 @@ export default function UploadProgress({
     finishedUploads,
     ...props
 }: Props) {
+    const { t } = useTranslation();
+
     const appContext = useContext(AppContext);
     const [expanded, setExpanded] = useState(true);
 
@@ -55,15 +58,15 @@ export default function UploadProgress({
 
     function confirmCancelUpload() {
         appContext.setDialogMessage({
-            title: constants.STOP_UPLOADS_HEADER,
-            content: constants.STOP_ALL_UPLOADS_MESSAGE,
+            title: t('STOP_UPLOADS_HEADER'),
+            content: t('STOP_ALL_UPLOADS_MESSAGE'),
             proceed: {
-                text: constants.YES_STOP_UPLOADS,
+                text: t('YES_STOP_UPLOADS'),
                 variant: 'danger',
                 action: props.cancelUploads,
             },
             close: {
-                text: constants.NO,
+                text: t('NO'),
                 variant: 'secondary',
                 action: () => {},
             },

@@ -22,7 +22,14 @@ i18n
             escapeValue: false, // not needed for react as it escapes by default
         },
         react: {
-            transKeepBasicHtmlNodesFor: ['div', 'strong', 'h2', 'span', 'code'],
+            transKeepBasicHtmlNodesFor: [
+                'div',
+                'strong',
+                'h2',
+                'span',
+                'code',
+                'p',
+            ],
         },
     });
 

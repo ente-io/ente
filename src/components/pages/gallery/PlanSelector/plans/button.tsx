@@ -3,7 +3,7 @@ import Done from '@mui/icons-material/Done';
 import { Box, Button } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
-import constants from 'utils/strings/constants';
+import { useTranslation } from 'react-i18next';
 export function PlanIconButton({
     current,
     onClick,
@@ -23,6 +23,7 @@ export function PlanIconButton({
 }
 
 function CurrentPlanTileButton() {
+    const { t } = useTranslation();
     return (
         <Button
             color="accent"
@@ -37,7 +38,7 @@ function CurrentPlanTileButton() {
             onClick={() => null}
             variant={'outlined'}>
             <SpaceBetweenFlex>
-                {constants.ACTIVE}
+                {t('ACTIVE')}
                 <Done />
             </SpaceBetweenFlex>
         </Button>
@@ -45,6 +46,7 @@ function CurrentPlanTileButton() {
 }
 
 function NormalPlanTileButton({ onClick }) {
+    const { t } = useTranslation();
     return (
         <Button
             color="accent"
@@ -55,7 +57,7 @@ function NormalPlanTileButton({ onClick }) {
             onClick={onClick}
             variant={'contained'}>
             <SpaceBetweenFlex>
-                {constants.SUBSCRIBE}
+                {t('SUBSCRIBE')}
                 <ChevronRight />
             </SpaceBetweenFlex>
         </Button>
