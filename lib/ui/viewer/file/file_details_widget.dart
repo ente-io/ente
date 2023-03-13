@@ -277,6 +277,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                               padding: EdgeInsets.symmetric(vertical: 15.5),
                               child: DividerWidget(
                                 dividerType: DividerType.menu,
+                                divColorHasBlur: false,
                               ),
                             );
                     } else {
