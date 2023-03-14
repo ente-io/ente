@@ -47,7 +47,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                 setFieldError('confirm', t('PASSPHRASE_MATCH_ERROR'));
             }
         } catch (e) {
-            setFieldError('confirm', `${t('UNKNOWN_ERROR} ${e.message}')}`);
+            setFieldError('confirm', `${t('UNKNOWN_ERROR')} ${e.message}`);
         } finally {
             setLoading(false);
         }
@@ -107,7 +107,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     <PasswordStrengthHint password={values.passphrase} />
 
                     <Typography my={2} variant="body2">
-                        <Trans>
+                        <Trans i18nKey={'PASSPHRASE_DISCLAIMER'}>
                             We don't store your password, so if you forget it,{' '}
                             <strong>we will not be able to help you </strong>
                             recover your data without a recovery key.

@@ -33,4 +33,12 @@ i18n
         },
     });
 
+i18n.services.formatter.add('dateTime', (value, lng) => {
+    return new Date(value / 1000).toLocaleDateString(lng, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+});
+
 export default i18n;

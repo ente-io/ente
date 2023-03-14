@@ -494,7 +494,7 @@ export function PhotoList({
             item: (
                 <FooterContainer span={columns}>
                     <Typography variant="body2">
-                        <Trans>
+                        <Trans i18nKey={'INSTALL_MOBILE_APP'}>
                             Install our{' '}
                             <a
                                 href="https://play.google.com/store/apps/details?id=io.ente.photos"
@@ -509,9 +509,9 @@ export function PhotoList({
                                 style={{ color: '#51cd7c' }}
                                 target="_blank"
                                 rel="noreferrer">
-                                iOS app{' '}
+                                iOS
                             </a>
-                            to automatically backup all your photos
+                            app to automatically backup all your photos
                         </Trans>
                     </Typography>
                 </FooterContainer>

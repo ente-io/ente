@@ -80,10 +80,10 @@ export default function PaidSubscriptionPlanSelectorCard({
                     <Typography color={'text.secondary'}>
                         {!isSubscriptionCancelled(subscription)
                             ? t('RENEWAL_ACTIVE_SUBSCRIPTION_STATUS', {
-                                  date: new Date(subscription.expiryTime),
+                                  date: subscription.expiryTime,
                               })
                             : t('RENEWAL_CANCELLED_SUBSCRIPTION_STATUS', {
-                                  date: new Date(subscription.expiryTime),
+                                  date: subscription.expiryTime,
                               })}
                     </Typography>
                 </Box>

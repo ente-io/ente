@@ -53,8 +53,6 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
     const initiateDelete = async () => {
         try {
-            askToMailForDeletion();
-            return;
             const deleteChallengeResponse = await getAccountDeleteChallenge();
             setDeleteAccountChallenge(
                 deleteChallengeResponse.encryptedChallenge

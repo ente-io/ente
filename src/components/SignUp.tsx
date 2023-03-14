@@ -181,8 +181,11 @@ export default function SignUp(props: SignUpProps) {
                                         />
                                     }
                                     label={
-                                        <Trans>
-                                            <Typography variant="body2">
+                                        <Typography variant="body2">
+                                            <Trans
+                                                i18nKey={
+                                                    'TERMS_AND_CONDITIONS'
+                                                }>
                                                 I agree to the{' '}
                                                 <Link
                                                     href="https://ente.io/terms"
@@ -197,8 +200,8 @@ export default function SignUp(props: SignUpProps) {
                                                     rel="noreferrer">
                                                     privacy policy
                                                 </Link>{' '}
-                                            </Typography>
-                                        </Trans>
+                                            </Trans>
+                                        </Typography>
                                     }
                                 />
                             </FormGroup>

@@ -6,12 +6,12 @@ import router from 'next/router';
 import { changeEmail, sendOTTForEmailChange } from 'services/userService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
-import { Alert, TextField } from '@mui/material';
+import { Alert, TextField, Typography } from '@mui/material';
 import Container from './Container';
 import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import { sleep } from 'utils/common';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface formValues {
     email: string;
@@ -84,7 +84,17 @@ function ChangeEmailForm() {
                         <Alert
                             color="accent"
                             onClose={() => setShowMessage(false)}>
-                            {t('EMAIL_SENT', { email })}
+                            <span>
+                                <Trans i18nKey="EMAIL_SENT">
+                                    Verification code sent to{' '}
+                                    <Typography
+                                        component={'span'}
+                                        fontSize="inherit"
+                                        color="text.secondary">
+                                        {{ email }}
+                                    </Typography>
+                                </Trans>
+                            </span>
                         </Alert>
                     )}
                     <form noValidate onSubmit={handleSubmit}>

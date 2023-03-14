@@ -59,7 +59,7 @@ function StripeSubscriptionOptions({
         appContext.setDialogMessage({
             title: t('REACTIVATE_SUBSCRIPTION'),
             content: t('REACTIVATE_SUBSCRIPTION_MESSAGE', {
-                date: new Date(subscription.expiryTime),
+                date: subscription.expiryTime,
             }),
             proceed: {
                 text: t('REACTIVATE_SUBSCRIPTION'),

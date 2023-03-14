@@ -1,11 +1,13 @@
+import i18n from 'i18next';
+
 export function formatDateFull(date: number | Date) {
-    const dateTimeFormat1 = new Intl.DateTimeFormat('en-US', {
+    const dateTimeFormat1 = new Intl.DateTimeFormat(i18n.language, {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
     });
 
-    const dateTimeFormat2 = new Intl.DateTimeFormat('en-US', {
+    const dateTimeFormat2 = new Intl.DateTimeFormat(i18n.language, {
         year: 'numeric',
     });
 
@@ -15,7 +17,7 @@ export function formatDateFull(date: number | Date) {
 }
 
 export function formatDate(date: number | Date) {
-    const dateTimeFormat1 = new Intl.DateTimeFormat('en-US', {
+    const dateTimeFormat1 = new Intl.DateTimeFormat(i18n.language, {
         weekday: 'short',
         month: 'short',
         day: 'numeric',
@@ -23,7 +25,7 @@ export function formatDate(date: number | Date) {
     const withinYear =
         new Date().getFullYear() === new Date(date).getFullYear();
     const dateTimeFormat2 = !withinYear
-        ? new Intl.DateTimeFormat('en-US', {
+        ? new Intl.DateTimeFormat(i18n.language, {
               year: 'numeric',
           })
         : null;
@@ -34,7 +36,7 @@ export function formatDate(date: number | Date) {
 }
 
 export function formatDateTimeShort(date: number | Date) {
-    const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
+    const dateTimeFormat = new Intl.DateTimeFormat(i18n.language, {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -46,7 +48,7 @@ export function formatDateTimeShort(date: number | Date) {
 }
 
 export function formatTime(date: number | Date) {
-    const timeFormat = new Intl.DateTimeFormat('en-IN', {
+    const timeFormat = new Intl.DateTimeFormat(i18n.language, {
         timeStyle: 'short',
     });
     return timeFormat.format(date).toUpperCase();
@@ -69,7 +71,7 @@ export function formatDateRelative(date: number) {
         minute: 60 * 1000,
         second: 1000,
     };
-    const relativeDateFormat = new Intl.RelativeTimeFormat('en-IN', {
+    const relativeDateFormat = new Intl.RelativeTimeFormat(i18n.language, {
         localeMatcher: 'best fit',
         numeric: 'always',
         style: 'long',

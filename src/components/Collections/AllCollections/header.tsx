@@ -24,7 +24,7 @@ export default function AllCollectionsHeader({
                     <Box>
                         <Typography variant="h3">{t('ALL_ALBUMS')}</Typography>
                         <Typography variant="body2" color={'text.secondary'}>
-                            {`${collectionCount} ${t('ALBUMS')}`}
+                            {t('albums', { count: collectionCount })}
                         </Typography>
                     </Box>
                 </FluidContainer>

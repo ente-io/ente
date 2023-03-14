@@ -174,8 +174,10 @@ export default function Deduplicate() {
             }}>
             {duplicateFiles.length > 0 && (
                 <Info>
-                    {t('DEDUPLICATION_LOGIC_MESSAGE', {
-                        clubSameTimeFilesOnly,
+                    {t('DEDUPLICATE_BASED_ON', {
+                        context: clubSameTimeFilesOnly
+                            ? 'SIZE_AND_CAPTURE_TIME'
+                            : 'SIZE',
                     })}
                 </Info>
             )}

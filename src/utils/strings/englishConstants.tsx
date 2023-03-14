@@ -500,14 +500,10 @@ const englishConstants = {
     APERTURE: 'Aperture',
     ISO: 'ISO',
     SHOW_ALL: 'show all',
-    LOGIN_TO_UPLOAD_FILES: (count: number) =>
-        count === 1
-            ? `1 file received. login to upload`
-            : `${count} files received. login to upload`,
-    FILES_TO_BE_UPLOADED: (count: number) =>
-        count === 1
-            ? `1 file received. uploading in a jiffy`
-            : `${count} files received. uploading in a jiffy`,
+    login_to_upload_files_one: '1 file received. login to upload',
+    login_to_upload_files_other: '{{count}} files received. login to upload',
+    files_to_be_uploaded_one: '1 file received. uploading in a jiffy',
+    file_to_be_uploaded_other: '{{count}} files received. uploading in a jiffy',
     TWO_FACTOR: 'Two-factor',
     TWO_FACTOR_AUTHENTICATION: 'Two-factor authentication',
     TWO_FACTOR_QR_INSTRUCTION:

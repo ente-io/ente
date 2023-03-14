@@ -25,7 +25,7 @@ export function IndividualUsageSection({ usage, storage, fileCount }: Iprops) {
                     storage - usage
                 )} ${t('FREE')}`}</Typography>
                 <Typography variant="caption" fontWeight={'bold'}>
-                    {t('PHOTO_COUNT', { count: fileCount ?? 0 })}
+                    {t('photos_count', { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>
         </Box>

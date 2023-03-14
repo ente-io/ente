@@ -189,7 +189,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setDialogMessage({
             title: t('DELETE_COLLECTION_TITLE'),
             content: (
-                <Trans>
+                <Trans i18nKey={'DELETE_COLLECTION_MESSAGE'}>
                     Also delete the photos (and videos) present in this album
                     from
                     <span style={{ color: '#fff' }}> all </span> other albums
@@ -220,7 +220,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setDialogMessage({
             title: t('DOWNLOAD_COLLECTION'),
             content: (
-                <Trans>
+                <Trans i18nKey={'DOWNLOAD_COLLECTION_MESSAGE'}>
                     <p>Are you sure you want to download the complete album?</p>
                     <p>All files will be queued for download sequentially</p>
                 </Trans>

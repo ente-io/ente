@@ -10,15 +10,15 @@ export interface LocationSearchResponse {
 }
 
 export enum SuggestionType {
-    DATE,
-    LOCATION,
-    COLLECTION,
-    FILE_NAME,
-    PERSON,
-    INDEX_STATUS,
-    THING,
-    TEXT,
-    FILE_CAPTION,
+    DATE = 'DATE',
+    LOCATION = 'LOCATION',
+    COLLECTION = 'COLLECTION',
+    FILE_NAME = 'FILE_NAME',
+    PERSON = 'PERSON',
+    INDEX_STATUS = 'INDEX_STATUS',
+    THING = 'THING',
+    TEXT = 'TEXT',
+    FILE_CAPTION = 'FILE_CAPTION',
 }
 
 export interface DateValue {

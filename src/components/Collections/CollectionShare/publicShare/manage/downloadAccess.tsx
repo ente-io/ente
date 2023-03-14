@@ -35,11 +35,11 @@ export function ManageDownloadAccess({
         appContext.setDialogMessage({
             title: t('DISABLE_FILE_DOWNLOAD'),
             content: (
-                <Trans>
+                <Trans i18nKey={'DISABLE_FILE_DOWNLOAD_MESSAGE'}>
                     <p>
                         Are you sure that you want to disable the download
                         button for files?{' '}
-                    </p>{' '}
+                    </p>
                     <p>
                         Viewers can still take screenshots or save a copy of
                         your photos using external tools{' '}

@@ -10,11 +10,12 @@ import {
 } from 'utils/billing';
 import Box from '@mui/material/Box';
 import { UserDetails } from 'types/user';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Typography } from '@mui/material';
 import billingService from 'services/billingService';
 import { isPartOfFamily, isFamilyAdmin } from 'utils/user/family';
+import LinkButton from 'components/pages/gallery/LinkButton';
 
 export default function SubscriptionStatus({
     userDetails,
@@ -75,24 +76,34 @@ export default function SubscriptionStatus({
                 color={'text.secondary'}
                 onClick={handleClick && handleClick}
                 sx={{ cursor: handleClick && 'pointer' }}>
-                {isSubscriptionActive(userDetails.subscription)
-                    ? isOnFreePlan(userDetails.subscription)
-                        ? t('FREE_SUBSCRIPTION_INFO', {
-                              data: new Date(
-                                  userDetails.subscription?.expiryTime
-                              ),
-                          })
-                        : isSubscriptionCancelled(userDetails.subscription)
-                        ? t('RENEWAL_CANCELLED_SUBSCRIPTION_INFO', {
-                              data: new Date(
-                                  userDetails.subscription?.expiryTime
-                              ),
-                          })
-                        : hasExceededStorageQuota(userDetails) &&
-                          t('STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO', {
-                              handleClick,
-                          })
-                    : t('SUBSCRIPTION_EXPIRED_MESSAGE', { handleClick })}
+                {isSubscriptionActive(userDetails.subscription) ? (
+                    isOnFreePlan(userDetails.subscription) ? (
+                        t('FREE_SUBSCRIPTION_INFO', {
+                            date: userDetails.subscription?.expiryTime,
+                        })
+                    ) : isSubscriptionCancelled(userDetails.subscription) ? (
+                        t('RENEWAL_CANCELLED_SUBSCRIPTION_INFO', {
+                            date: userDetails.subscription?.expiryTime,
+                        })
+                    ) : (
+                        hasExceededStorageQuota(userDetails) && (
+                            <Trans
+                                i18nKey={
+                                    'STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO'
+                                }>
+                                You have exceeded your storage quota, please{' '}
+                                <LinkButton onClick={handleClick}>
+                                    upgrade
+                                </LinkButton>
+                            </Trans>
+                        )
+                    )
+                ) : (
+                    <Trans i18nKey={'SUBSCRIPTION_EXPIRED_MESSAGE'}>
+                        Your subscription has expired, please{' '}
+                        <LinkButton onClick={handleClick}> renew </LinkButton>
+                    </Trans>
+                )}
             </Typography>
         </Box>
     );

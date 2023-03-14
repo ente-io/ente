@@ -23,7 +23,7 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
             <>
                 <Box className="main" px={2} py={1}>
                     <Typography variant="caption" mb={1}>
-                        {t('SEARCH_TYPE', { type: data.type })}
+                        {t(`SEARCH_TYPE.${data.type}`)}
                     </Typography>
                     <SpaceBetweenFlex>
                         <Box mr={1}>

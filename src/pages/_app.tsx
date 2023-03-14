@@ -339,13 +339,13 @@ export default function App({ Component, err }) {
                 {sharedFiles &&
                     (router.pathname === '/gallery' ? (
                         <MessageContainer>
-                            {t('FILES_TO_BE_UPLOADED', {
+                            {t('files_to_be_uploaded', {
                                 count: sharedFiles.length,
                             })}
                         </MessageContainer>
                     ) : (
                         <MessageContainer>
-                            {t('LOGIN_TO_UPLOAD_FILES', {
+                            {t('login_to_upload_files', {
                                 count: sharedFiles.length,
                             })}
                         </MessageContainer>
