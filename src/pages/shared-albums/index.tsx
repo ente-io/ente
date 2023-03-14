@@ -17,7 +17,6 @@ import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
-import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { CustomError, parseSharingErrorCodes } from 'utils/error';
 import VerticallyCentered, { CenteredFlex } from 'components/Container';
@@ -70,10 +69,7 @@ export default function PublicCollectionGallery() {
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const [errorMessage, setErrorMessage] = useState<string>(null);
     const appContext = useContext(AppContext);
-    const [abuseReportFormView, setAbuseReportFormView] = useState(false);
     const [loading, setLoading] = useState(true);
-    const openReportForm = () => setAbuseReportFormView(true);
-    const closeReportForm = () => setAbuseReportFormView(false);
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
         useState<boolean>(false);
@@ -388,7 +384,6 @@ export default function PublicCollectionGallery() {
                 token: token.current,
                 passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
-                openReportForm,
                 photoListHeader,
                 photoListFooter,
             }}>
@@ -417,11 +412,6 @@ export default function PublicCollectionGallery() {
                         publicCollection?.publicURLs?.[0]?.enableDownload ??
                         true
                     }
-                />
-                <AbuseReportForm
-                    show={abuseReportFormView}
-                    close={closeReportForm}
-                    url={url.current}
                 />
                 {blockingLoad && (
                     <LoadingOverlay>
