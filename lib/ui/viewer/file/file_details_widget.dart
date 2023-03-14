@@ -2,15 +2,14 @@ import "package:exif/exif.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
-import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
-import 'package:photos/services/collections_service.dart';
 import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
+import "package:photos/ui/viewer/file_details/added_by_widget.dart";
 import "package:photos/ui/viewer/file_details/albums_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/backed_up_time_item_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
@@ -147,7 +146,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     }
     if (file.uploadedFileID != null && file.updationTime != null) {
       fileDetailsTiles.addAll(
-          [BackedUpTimeItemWidget(file), const FileDetialsDividerWidget()]);
+        [BackedUpTimeItemWidget(file), const FileDetialsDividerWidget()],
+      );
     }
     fileDetailsTiles.add(AlbumsItemWidget(file, _currentUserID));
 
@@ -174,7 +174,12 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                   onTap: () => Navigator.pop(context),
                 ),
               ),
-              SliverToBoxAdapter(child: addedBy(widget.file)),
+              SliverToBoxAdapter(
+                child: AddedByWidget(
+                  widget.file,
+                  _currentUserID,
+                ),
+              ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -186,34 +191,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget addedBy(File file) {
-    if (file.uploadedFileID == null) {
-      return const SizedBox.shrink();
-    }
-    String? addedBy;
-    if (file.ownerID == _currentUserID) {
-      if (file.pubMagicMetadata!.uploaderName != null) {
-        addedBy = file.pubMagicMetadata!.uploaderName;
-      }
-    } else {
-      final fileOwner = CollectionsService.instance
-          .getFileOwner(file.ownerID!, file.collectionID);
-      addedBy = fileOwner.email;
-    }
-    if (addedBy == null || addedBy.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    final enteTheme = Theme.of(context).colorScheme.enteTheme;
-    return Padding(
-      padding: const EdgeInsets.only(top: 4.0, bottom: 4.0, left: 16),
-      child: Text(
-        "Added by $addedBy",
-        style: enteTheme.textTheme.mini
-            .copyWith(color: enteTheme.colorScheme.textMuted),
       ),
     );
   }
