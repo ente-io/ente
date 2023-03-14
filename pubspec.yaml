@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 1.0.32+32
+version: 1.0.33+33
 publish_to: none
 
 environment:
@@ -27,7 +27,6 @@ dependencies:
   fk_user_agent: ^2.1.0
   flutter:
     sdk: flutter
-  flutter_animation_progress_bar: ^2.2.1
   flutter_bloc: ^8.0.1
   flutter_email_sender: ^5.1.0
   flutter_inappwebview: ^5.7.1
