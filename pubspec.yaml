@@ -27,7 +27,6 @@ dependencies:
   fk_user_agent: ^2.1.0
   flutter:
     sdk: flutter
-  flutter_animation_progress_bar: ^2.2.1
   flutter_bloc: ^8.0.1
   flutter_email_sender: ^5.1.0
   flutter_inappwebview: ^5.7.1
