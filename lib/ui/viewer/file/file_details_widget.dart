@@ -9,13 +9,13 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
-import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
 import "package:photos/ui/viewer/file_details/albums_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/backed_up_time_item_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import "package:photos/ui/viewer/file_details/exif_item_widget.dart";
+import "package:photos/ui/viewer/file_details/file_details_divider_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
 import "package:photos/utils/exif_util.dart";
@@ -78,7 +78,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         _exifData["takenOnDevice"] != null ||
         _exifData["exposureTime"] != null ||
         _exifData["ISO"] != null;
-    final fileDetailsTiles = <Widget?>[
+    //Make sure the bottom most tile is always the same one, that is it should
+    //not be rendered only if a condition is met.
+    final fileDetailsTiles = <Widget>[];
+    fileDetailsTiles.add(
       !widget.file.isUploaded ||
               (!isFileOwner && (widget.file.caption?.isEmpty ?? true))
           ? const SizedBox(height: 16)
@@ -88,16 +91,32 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                   ? FileCaptionWidget(file: widget.file)
                   : FileCaptionReadyOnly(caption: widget.file.caption!),
             ),
+    );
+    fileDetailsTiles.addAll([
       CreationTimeItem(file, _currentUserID),
+      const FileDetialsDividerWidget(),
       FilePropertiesItemWidget(file, _isImage, _exifData, _currentUserID),
-      if (showExifListTile) BasicExifItemWidget(_exifData),
-      if (_isImage) AllExifItemWidget(file, _exif),
-      if (FeatureFlagService.instance.isInternalUserOrDebugBuild())
-        ObjectsItemWidget(file),
-      if (file.uploadedFileID != null && file.updationTime != null)
-        BackedUpTimeItemWidget(file),
-      AlbumsItemWidget(file, _currentUserID),
-    ];
+      const FileDetialsDividerWidget(),
+    ]);
+    if (showExifListTile) {
+      fileDetailsTiles.addAll([
+        BasicExifItemWidget(_exifData),
+        const FileDetialsDividerWidget(),
+      ]);
+    }
+    if (_isImage) {
+      fileDetailsTiles.addAll(
+          [AllExifItemWidget(file, _exif), const FileDetialsDividerWidget()]);
+    }
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+      fileDetailsTiles
+          .addAll([ObjectsItemWidget(file), const FileDetialsDividerWidget()]);
+    }
+    if (file.uploadedFileID != null && file.updationTime != null) {
+      fileDetailsTiles.addAll(
+          [BackedUpTimeItemWidget(file), const FileDetialsDividerWidget()]);
+    }
+    fileDetailsTiles.add(AlbumsItemWidget(file, _currentUserID));
 
     return SafeArea(
       top: false,
@@ -126,22 +145,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    //Dividers occupy odd indexes
-                    if (index.isOdd) {
-                      return index == 1
-                          ? const SizedBox.shrink()
-                          : const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 15.5),
-                              child: DividerWidget(
-                                dividerType: DividerType.menu,
-                                divColorHasBlur: false,
-                              ),
-                            );
-                    } else {
-                      return fileDetailsTiles[index ~/ 2];
-                    }
+                    return fileDetailsTiles[index];
                   },
-                  childCount: (fileDetailsTiles.length * 2) - 1,
+                  childCount: fileDetailsTiles.length,
                 ),
               )
             ],
