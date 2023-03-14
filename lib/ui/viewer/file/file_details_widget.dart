@@ -90,20 +90,14 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             ),
       CreationTimeItem(file, _currentUserID),
       FilePropertiesItemWidget(file, _isImage, _exifData, _currentUserID),
-      showExifListTile ? BasicExifItemWidget(_exifData) : null,
-      _isImage ? AllExifItemWidget(file, _exif) : null,
-      FeatureFlagService.instance.isInternalUserOrDebugBuild()
-          ? ObjectsItemWidget(file)
-          : null,
-      (file.uploadedFileID != null && file.updationTime != null)
-          ? BackedUpTimeItemWidget(file)
-          : null,
+      if (showExifListTile) BasicExifItemWidget(_exifData),
+      if (_isImage) AllExifItemWidget(file, _exif),
+      if (FeatureFlagService.instance.isInternalUserOrDebugBuild())
+        ObjectsItemWidget(file),
+      if (file.uploadedFileID != null && file.updationTime != null)
+        BackedUpTimeItemWidget(file),
       AlbumsItemWidget(file, _currentUserID),
     ];
-
-    fileDetailsTiles.removeWhere(
-      (element) => element == null,
-    );
 
     return SafeArea(
       top: false,
