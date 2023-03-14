@@ -32,7 +32,7 @@ class FileDetailsWidget extends StatefulWidget {
 }
 
 class _FileDetailsWidgetState extends State<FileDetailsWidget> {
-  final ValueNotifier<Map<String, IfdTag>?> _exifNotifier = ValueNotifier(null);
+  Map<String, IfdTag>? _exif;
   final Map<String, dynamic> _exifData = {
     "focalLength": null,
     "fNumber": null,
@@ -53,22 +53,15 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
     if (_isImage) {
-      _exifNotifier.addListener(() {
-        if (_exifNotifier.value != null) {
-          _generateExifForDetails(_exifNotifier.value!);
-        }
-      });
       getExif(widget.file).then((exif) {
-        _exifNotifier.value = exif;
+        if (mounted) {
+          setState(() {
+            _exif = exif;
+          });
+        }
       });
     }
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _exifNotifier.dispose();
-    super.dispose();
   }
 
   @override
@@ -76,6 +69,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     final file = widget.file;
     final bool isFileOwner =
         file.ownerID == null || file.ownerID == _currentUserID;
+
+    if (_isImage && _exif != null) {
+      _generateExifForDetails(_exif!);
+    }
     final bool showExifListTile = _exifData["focalLength"] != null ||
         _exifData["fNumber"] != null ||
         _exifData["takenOnDevice"] != null ||
@@ -92,27 +89,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                   : FileCaptionReadyOnly(caption: widget.file.caption!),
             ),
       CreationTimeItem(file, _currentUserID),
-      ValueListenableBuilder(
-        valueListenable: _exifNotifier,
-        builder: (context, _, __) =>
-            FilePropertiesItemWidget(file, _isImage, _exifData, _currentUserID),
-      ),
-      showExifListTile
-          ? ValueListenableBuilder(
-              valueListenable: _exifNotifier,
-              builder: (context, _, __) {
-                return BasicExifItemWidget(_exifData);
-              },
-            )
-          : null,
-      _isImage
-          ? ValueListenableBuilder(
-              valueListenable: _exifNotifier,
-              builder: (context, value, _) {
-                return AllExifItemWidget(file, value as Map<String, IfdTag>?);
-              },
-            )
-          : null,
+      FilePropertiesItemWidget(file, _isImage, _exifData, _currentUserID),
+      showExifListTile ? BasicExifItemWidget(_exifData) : null,
+      _isImage ? AllExifItemWidget(file, _exif) : null,
       FeatureFlagService.instance.isInternalUserOrDebugBuild()
           ? ObjectsItemWidget(file)
           : null,

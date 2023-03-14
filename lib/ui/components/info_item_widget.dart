@@ -21,7 +21,7 @@ class InfoItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("$title InfoItemWidget.build -------");
+    debugPrint("InfoItemWidget.build -------");
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
