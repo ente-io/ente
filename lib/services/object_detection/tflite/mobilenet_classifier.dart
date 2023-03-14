@@ -124,7 +124,7 @@ class MobileNetClassifier extends Classifier {
         final label = _labels.elementAt(i);
 
         recognitions.add(
-          Recognition(i, "#" + label, score),
+          Recognition(i, label, score),
         );
       }
     }
