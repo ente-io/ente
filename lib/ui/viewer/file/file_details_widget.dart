@@ -32,7 +32,7 @@ class FileDetailsWidget extends StatefulWidget {
 }
 
 class _FileDetailsWidgetState extends State<FileDetailsWidget> {
-  Map<String, IfdTag>? _exif;
+  final ValueNotifier<Map<String, IfdTag>?> _exifNotifier = ValueNotifier(null);
   final Map<String, dynamic> _exifData = {
     "focalLength": null,
     "fNumber": null,
@@ -45,6 +45,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
 
   bool _isImage = false;
   late int _currentUserID;
+  bool showExifListTile = false;
 
   @override
   void initState() {
@@ -53,15 +54,27 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
     if (_isImage) {
-      getExif(widget.file).then((exif) {
-        if (mounted) {
-          setState(() {
-            _exif = exif;
-          });
+      _exifNotifier.addListener(() {
+        if (_exifNotifier.value != null) {
+          _generateExifForDetails(_exifNotifier.value!);
         }
+        showExifListTile = _exifData["focalLength"] != null ||
+            _exifData["fNumber"] != null ||
+            _exifData["takenOnDevice"] != null ||
+            _exifData["exposureTime"] != null ||
+            _exifData["ISO"] != null;
+      });
+      getExif(widget.file).then((exif) {
+        _exifNotifier.value = exif;
       });
     }
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _exifNotifier.dispose();
+    super.dispose();
   }
 
   @override
@@ -70,14 +83,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     final bool isFileOwner =
         file.ownerID == null || file.ownerID == _currentUserID;
 
-    if (_isImage && _exif != null) {
-      _generateExifForDetails(_exif!);
-    }
-    final bool showExifListTile = _exifData["focalLength"] != null ||
-        _exifData["fNumber"] != null ||
-        _exifData["takenOnDevice"] != null ||
-        _exifData["exposureTime"] != null ||
-        _exifData["ISO"] != null;
     //Make sure the bottom most tile is always the same one, that is it should
     //not be rendered only if a condition is met.
     final fileDetailsTiles = <Widget>[];
@@ -95,18 +100,46 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     fileDetailsTiles.addAll([
       CreationTimeItem(file, _currentUserID),
       const FileDetialsDividerWidget(),
-      FilePropertiesItemWidget(file, _isImage, _exifData, _currentUserID),
+      ValueListenableBuilder(
+        valueListenable: _exifNotifier,
+        builder: (context, _, __) => FilePropertiesItemWidget(
+          file,
+          _isImage,
+          _exifData,
+          _currentUserID,
+        ),
+      ),
       const FileDetialsDividerWidget(),
     ]);
-    if (showExifListTile) {
-      fileDetailsTiles.addAll([
-        BasicExifItemWidget(_exifData),
-        const FileDetialsDividerWidget(),
-      ]);
-    }
+    fileDetailsTiles.add(
+      ValueListenableBuilder(
+        valueListenable: _exifNotifier,
+        builder: (context, value, _) {
+          return showExifListTile
+              ? Column(
+                  children: [
+                    BasicExifItemWidget(_exifData),
+                    const FileDetialsDividerWidget(),
+                  ],
+                )
+              : const SizedBox.shrink();
+        },
+      ),
+    );
     if (_isImage) {
-      fileDetailsTiles.addAll(
-          [AllExifItemWidget(file, _exif), const FileDetialsDividerWidget()]);
+      fileDetailsTiles.addAll([
+        ValueListenableBuilder(
+          valueListenable: _exifNotifier,
+          builder: (context, value, _) {
+            return Column(
+              children: [
+                AllExifItemWidget(file, _exifNotifier.value),
+                const FileDetialsDividerWidget()
+              ],
+            );
+          },
+        )
+      ]);
     }
     if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
       fileDetailsTiles
