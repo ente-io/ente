@@ -141,6 +141,7 @@ class CollectionsService {
     for (final collection in collections) {
       _cacheCollectionAttributes(collection);
     }
+    _logger.info("Collections synced");
     watch.log("collection cache refresh");
     if (fetchedCollections.isNotEmpty) {
       Bus.instance.fire(

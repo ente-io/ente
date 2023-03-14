@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/local_authentication_service.dart';
@@ -157,7 +158,27 @@ class DeleteAccountPage extends StatelessWidget {
       if (choice.action != ButtonAction.first) {
         return;
       }
+
       Navigator.of(context).popUntil((route) => route.isFirst);
+      await showTextInputDialog(
+        context,
+        title: "Your account was deleted. Would you like to leave us a note?",
+        submitButtonLabel: "Send",
+        hintText: "Optional, as short as you like...",
+        alwaysShowSuccessState: true,
+        textCapitalization: TextCapitalization.words,
+        onSubmit: (String text) async {
+          // indicates user cancelled the rename request
+          if (text == "" || text.trim().isEmpty) {
+            return;
+          }
+          try {
+            await UserService.instance.sendFeedback(context, text);
+          } catch (e, s) {
+            Logger("Delete account").severe("Failed to send feedback", e, s);
+          }
+        },
+      );
     }
   }
 
