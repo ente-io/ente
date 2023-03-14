@@ -1,6 +1,6 @@
+import 'package:ente_auth/ui/linear_progress_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 
 class CodeTimerProgress extends StatefulWidget {
   final int period;
@@ -47,13 +47,9 @@ class _CodeTimerProgressState extends State<CodeTimerProgress>
 
   @override
   Widget build(BuildContext context) {
-    return FAProgressBar(
-      currentValue: _progress * 100,
-      size: 4,
-      animatedDuration: const Duration(milliseconds: 10),
-      progressColor: Colors.orange,
-      changeColorValue: 40,
-      changeProgressColor: Colors.green,
+    return LinearProgressWidget(
+      color: _progress > 0.4 ? Colors.green : Colors.orange,
+      fractionOfStorage: _progress,
     );
   }
 }
