@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/subscription.dart';
 import 'package:ente_auth/services/billing_service.dart';
@@ -28,7 +30,7 @@ class SupportDevWidget extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(vertical: 12.0, horizontal: 6),
                 child: Text(
-                  "${l10n.supportDevs}\n\n${l10n.supportDiscount}",
+                  "${l10n.supportDevs}${Platform.isAndroid ? "\n\n${l10n.supportDiscount}" : ""}",
                   textAlign: TextAlign.center,
                   style: DefaultTextStyle.of(context).style,
                 ),
