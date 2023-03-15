@@ -30,8 +30,8 @@ dependencies:
   collection: # dart
   computer: ^2.0.0
   confetti: ^0.6.0
-  crypto: ^3.0.2
   connectivity_plus: ^3.0.3
+  crypto: ^3.0.2
   cupertino_icons: ^1.0.0
   device_info: ^2.0.2
   dio: ^4.0.6
