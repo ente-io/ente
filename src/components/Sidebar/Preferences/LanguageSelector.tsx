@@ -1,7 +1,6 @@
 import { OptionWithDivider } from 'components/Collections/CollectionShare/publicShare/manage/selectComponents/OptionWithDivider';
 import { Language } from 'constants/locale';
 import { useLocalState } from 'hooks/useLocalState';
-import i18n from 'i18n';
 import { useRouter } from 'next/router';
 import Select from 'react-select';
 import { DropdownStyle } from 'styles/dropdown';
@@ -33,7 +32,6 @@ export const LanguageSelector = () => {
     const router = useRouter();
 
     const updateCurrentLocale = (newLocale: Language) => {
-        i18n.changeLanguage(newLocale);
         setUserLocale(newLocale);
         router.reload();
     };
