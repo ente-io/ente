@@ -181,7 +181,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                           _defaultSelection == dropdownValue ||
                           _feedbackTextCtrl.text.trim().length < 10,
                       onTap: () async => {await _initiateDelete(context)},
-                      shouldSurfaceExecutionStates: false,
+                      shouldSurfaceExecutionStates: true,
                     ),
                     const SizedBox(height: 8),
                     ButtonWidget(

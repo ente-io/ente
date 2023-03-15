@@ -233,13 +233,9 @@ class UserService {
   Future<DeleteChallengeResponse?> getDeleteChallenge(
     BuildContext context,
   ) async {
-    final dialog = createProgressDialog(context, "Please wait...");
-    await dialog.show();
     try {
       final response = await _enteDio.get("/users/delete-challenge");
       if (response.statusCode == 200) {
-        // clear data
-        await dialog.hide();
         return DeleteChallengeResponse(
           allowDelete: response.data["allowDelete"] as bool,
           encryptedChallenge: response.data["encryptedChallenge"],
@@ -249,7 +245,6 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
-      await dialog.hide();
       await showGenericErrorDialog(context: context);
       return null;
     }
