@@ -36,12 +36,9 @@ class ObjectDetectionService {
   Future<List<String>> predict(Uint8List bytes) async {
     try {
       final results = <String>{};
-      final objectResults = await _getObjects(bytes);
-      results.addAll(objectResults);
-      final mobileNetResults = await _getMobileNetResults(bytes);
-      results.addAll(mobileNetResults);
-      final sceneResults = await _getSceneResults(bytes);
-      results.addAll(sceneResults);
+      results.addAll(await _getObjects(bytes));
+      results.addAll(await _getMobileNetResults(bytes));
+      results.addAll(await _getSceneResults(bytes));
       return results.toList();
     } catch (e, s) {
       _logger.severe(e, s);
