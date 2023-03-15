@@ -2,7 +2,6 @@ import { OptionWithDivider } from 'components/Collections/CollectionShare/public
 import { LanguageLocale } from 'constants/locale';
 import { useLocalState } from 'hooks/useLocalState';
 import i18n from 'i18n';
-import { useRouter } from 'next/router';
 import Select from 'react-select';
 import { DropdownStyle } from 'styles/dropdown';
 import { LS_KEYS } from 'utils/storage/localStorage';
@@ -28,10 +27,9 @@ export const LanguageSelector = () => {
         LS_KEYS.LOCALE,
         i18n.language as LanguageLocale
     );
-    const router = useRouter();
     const updateCurrentLocale = (newLocale: LanguageLocale) => {
         setUserLocale(newLocale);
-        router.reload();
+        i18n.changeLanguage(newLocale);
     };
 
     return (
