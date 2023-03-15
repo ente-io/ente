@@ -1,3 +1,5 @@
+import "dart:math";
+
 import 'package:image/image.dart' as image_lib;
 import "package:logging/logging.dart";
 import "package:photos/services/object_detection/models/predictions.dart";
@@ -5,7 +7,19 @@ import "package:tflite_flutter/tflite_flutter.dart";
 import "package:tflite_flutter_helper/tflite_flutter_helper.dart";
 
 abstract class Classifier {
-  final _logger = Logger("Classifier");
+  // Path to the model
+  String get modelPath;
+
+  // Path to the labels
+  String get labelPath;
+
+  // Input size expected by the model (for eg. width = height = 224)
+  int get inputSize;
+
+  // Logger implementation for the specific classifier
+  Logger get logger;
+
+  Predictions? predict(image_lib.Image image);
 
   /// Instance of Interpreter
   late Interpreter _interpreter;
@@ -31,11 +45,6 @@ abstract class Classifier {
   /// Gets the output types
   List<TfLiteType> get outputTypes => _outputTypes;
 
-  String get modelPath;
-  String get labelPath;
-
-  Predictions? predict(image_lib.Image image);
-
   /// Loads interpreter from asset
   void loadModel(Interpreter? interpreter) async {
     try {
@@ -51,9 +60,9 @@ abstract class Classifier {
         _outputShapes.add(tensor.shape);
         _outputTypes.add(tensor.type);
       });
-      _logger.info("Interpreter initialized");
+      logger.info("Interpreter initialized");
     } catch (e, s) {
-      _logger.severe("Error while creating interpreter", e, s);
+      logger.severe("Error while creating interpreter", e, s);
     }
   }
 
@@ -61,9 +70,20 @@ abstract class Classifier {
   void loadLabels(List<String>? labels) async {
     try {
       _labels = labels ?? await FileUtil.loadLabels(labelPath);
-      _logger.info("Labels initialized");
+      logger.info("Labels initialized");
     } catch (e, s) {
-      _logger.severe("Error while loading labels", e, s);
+      logger.severe("Error while loading labels", e, s);
     }
+  }
+
+  /// Pre-process the image
+  TensorImage getProcessedImage(TensorImage inputImage) {
+    final padSize = max(inputImage.height, inputImage.width);
+    final imageProcessor = ImageProcessorBuilder()
+        .add(ResizeWithCropOrPadOp(padSize, padSize))
+        .add(ResizeOp(inputSize, inputSize, ResizeMethod.BILINEAR))
+        .build();
+    inputImage = imageProcessor.process(inputImage);
+    return inputImage;
   }
 }

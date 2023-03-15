@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:image/image.dart' as image_lib;
+import "package:logging/logging.dart";
 import 'package:photos/services/object_detection/models/predictions.dart';
 import 'package:photos/services/object_detection/models/recognition.dart';
 import "package:photos/services/object_detection/models/stats.dart";
@@ -10,7 +11,7 @@ import "package:tflite_flutter_helper/tflite_flutter_helper.dart";
 
 /// Classifier
 class CocoSSDClassifier extends Classifier {
-  static const int inputSize = 300;
+  static final _logger = Logger("CocoSSDClassifier");
   static const double threshold = 0.5;
 
   @override
@@ -19,7 +20,12 @@ class CocoSSDClassifier extends Classifier {
   @override
   String get labelPath => "assets/models/cocossd/labels.txt";
 
-  /// Number of results to show
+  @override
+  int get inputSize => 300;
+
+  @override
+  Logger get logger => _logger;
+
   static const int numResults = 10;
 
   CocoSSDClassifier({
@@ -40,7 +46,7 @@ class CocoSSDClassifier extends Classifier {
     TensorImage inputImage = TensorImage.fromImage(image);
 
     // Pre-process TensorImage
-    inputImage = _getProcessedImage(inputImage);
+    inputImage = getProcessedImage(inputImage);
 
     final preProcessElapsedTime =
         DateTime.now().millisecondsSinceEpoch - preProcessStart;
@@ -105,16 +111,5 @@ class CocoSSDClassifier extends Classifier {
         preProcessElapsedTime,
       ),
     );
-  }
-
-  /// Pre-process the image
-  TensorImage _getProcessedImage(TensorImage inputImage) {
-    final padSize = max(inputImage.height, inputImage.width);
-    final imageProcessor = ImageProcessorBuilder()
-        .add(ResizeWithCropOrPadOp(padSize, padSize))
-        .add(ResizeOp(inputSize, inputSize, ResizeMethod.BILINEAR))
-        .build();
-    inputImage = imageProcessor.process(inputImage);
-    return inputImage;
   }
 }

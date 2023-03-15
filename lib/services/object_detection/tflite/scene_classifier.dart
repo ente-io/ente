@@ -1,6 +1,5 @@
-import 'dart:math';
-
 import 'package:image/image.dart' as image_lib;
+import "package:logging/logging.dart";
 import 'package:photos/services/object_detection/models/predictions.dart';
 import 'package:photos/services/object_detection/models/recognition.dart';
 import "package:photos/services/object_detection/models/stats.dart";
@@ -10,7 +9,7 @@ import "package:tflite_flutter_helper/tflite_flutter_helper.dart";
 
 // Source: https://tfhub.dev/sayannath/lite-model/image-scene/1
 class SceneClassifier extends Classifier {
-  static const int inputSize = 224;
+  static final _logger = Logger("SceneClassifier");
   static const double threshold = 0.5;
 
   @override
@@ -18,6 +17,12 @@ class SceneClassifier extends Classifier {
 
   @override
   String get labelPath => "assets/models/scenes/labels.txt";
+
+  @override
+  int get inputSize => 224;
+
+  @override
+  Logger get logger => _logger;
 
   SceneClassifier({
     Interpreter? interpreter,
@@ -37,7 +42,7 @@ class SceneClassifier extends Classifier {
     TensorImage inputImage = TensorImage.fromImage(image);
 
     // Pre-process TensorImage
-    inputImage = _getProcessedImage(inputImage);
+    inputImage = getProcessedImage(inputImage);
     final list = inputImage.getTensorBuffer().getDoubleList();
     final input = list.reshape([1, inputSize, inputSize, 3]);
 
@@ -73,16 +78,5 @@ class SceneClassifier extends Classifier {
         preProcessElapsedTime,
       ),
     );
-  }
-
-  /// Pre-process the image
-  TensorImage _getProcessedImage(TensorImage inputImage) {
-    final padSize = max(inputImage.height, inputImage.width);
-    final imageProcessor = ImageProcessorBuilder()
-        .add(ResizeWithCropOrPadOp(padSize, padSize))
-        .add(ResizeOp(inputSize, inputSize, ResizeMethod.BILINEAR))
-        .build();
-    inputImage = imageProcessor.process(inputImage);
-    return inputImage;
   }
 }

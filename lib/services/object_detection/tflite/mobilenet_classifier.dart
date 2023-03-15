@@ -1,6 +1,5 @@
-import 'dart:math';
-
 import 'package:image/image.dart' as image_lib;
+import "package:logging/logging.dart";
 import 'package:photos/services/object_detection/models/predictions.dart';
 import 'package:photos/services/object_detection/models/recognition.dart';
 import "package:photos/services/object_detection/models/stats.dart";
@@ -10,7 +9,7 @@ import "package:tflite_flutter_helper/tflite_flutter_helper.dart";
 
 // Source: https://tfhub.dev/tensorflow/lite-model/mobilenet_v1_1.0_224/1/default/1
 class MobileNetClassifier extends Classifier {
-  static const int inputSize = 224;
+  static final _logger = Logger("MobileNetClassifier");
   static const double threshold = 0.5;
 
   @override
@@ -19,6 +18,12 @@ class MobileNetClassifier extends Classifier {
   @override
   String get labelPath =>
       "assets/models/mobilenet/labels_mobilenet_quant_v1_224.txt";
+
+  @override
+  int get inputSize => 224;
+
+  @override
+  Logger get logger => _logger;
 
   MobileNetClassifier({
     Interpreter? interpreter,
@@ -38,7 +43,7 @@ class MobileNetClassifier extends Classifier {
     TensorImage inputImage = TensorImage.fromImage(image);
 
     // Pre-process TensorImage
-    inputImage = _getProcessedImage(inputImage);
+    inputImage = getProcessedImage(inputImage);
 
     final preProcessElapsedTime =
         DateTime.now().millisecondsSinceEpoch - preProcessStart;
@@ -75,16 +80,5 @@ class MobileNetClassifier extends Classifier {
         preProcessElapsedTime,
       ),
     );
-  }
-
-  /// Pre-process the image
-  TensorImage _getProcessedImage(TensorImage inputImage) {
-    final padSize = max(inputImage.height, inputImage.width);
-    final imageProcessor = ImageProcessorBuilder()
-        .add(ResizeWithCropOrPadOp(padSize, padSize))
-        .add(ResizeOp(inputSize, inputSize, ResizeMethod.BILINEAR))
-        .build();
-    inputImage = imageProcessor.process(inputImage);
-    return inputImage;
   }
 }
