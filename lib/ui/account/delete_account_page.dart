@@ -151,7 +151,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                     )
                   : const SizedBox(height: 42),
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Checkbox(
                     value: _hasConfirmedDeletion,
@@ -167,6 +166,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       "Yes, I want to permanently delete this account and "
                       "all its data.",
                       style: getEnteTextTheme(context).bodyMuted,
+                      textAlign: TextAlign.left,
                     ),
                   )
                 ],
@@ -177,7 +177,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   children: [
                     ButtonWidget(
                       buttonType: ButtonType.critical,
-                      labelText: "Delete my account",
+                      labelText: "Confirm Account Deletion",
                       isDisabled: !_hasConfirmedDeletion ||
                           _defaultSelection == dropdownValue ||
                           _feedbackTextCtrl.text.trim().length < 10,
