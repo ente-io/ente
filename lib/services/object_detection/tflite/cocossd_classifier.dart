@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:image/image.dart' as imageLib;
+import 'package:image/image.dart' as image_lib;
 import "package:logging/logging.dart";
 import 'package:photos/services/object_detection/models/predictions.dart';
 import 'package:photos/services/object_detection/models/recognition.dart';
@@ -94,7 +94,7 @@ class CocoSSDClassifier extends Classifier {
   }
 
   @override
-  Predictions? predict(imageLib.Image image) {
+  Predictions? predict(image_lib.Image image) {
     final predictStartTime = DateTime.now().millisecondsSinceEpoch;
 
     final preProcessStart = DateTime.now().millisecondsSinceEpoch;
