@@ -7,13 +7,13 @@ import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 class InfoItemWidget extends StatelessWidget {
   final IconData leadingIcon;
   final VoidCallback? editOnTap;
-  final String title;
+  final String? title;
   final Future<List<Widget>> subtitleSection;
   final bool hasChipButtons;
   const InfoItemWidget({
     required this.leadingIcon,
     this.editOnTap,
-    required this.title,
+    this.title,
     required this.subtitleSection,
     this.hasChipButtons = false,
     super.key,
@@ -21,6 +21,53 @@ class InfoItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final children = <Widget>[];
+    if (title != null) {
+      children.addAll([
+        Text(
+          title!,
+          style: hasChipButtons
+              ? getEnteTextTheme(context).smallMuted
+              : getEnteTextTheme(context).body,
+        ),
+        SizedBox(height: hasChipButtons ? 8 : 4),
+      ]);
+    }
+
+    children.addAll([
+      Flexible(
+        child: FutureBuilder(
+          future: subtitleSection,
+          builder: (context, snapshot) {
+            Widget child;
+            if (snapshot.hasData) {
+              final subtitle = snapshot.data as List<Widget>;
+              if (subtitle.isNotEmpty) {
+                child = Wrap(
+                  runSpacing: 8,
+                  spacing: 8,
+                  children: subtitle,
+                );
+              } else {
+                child = const SizedBox.shrink();
+              }
+            } else {
+              child = EnteLoadingWidget(
+                padding: 3,
+                size: 11,
+                color: getEnteColorScheme(context).strokeMuted,
+                alignment: Alignment.centerLeft,
+              );
+            }
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              switchInCurve: Curves.easeInOutExpo,
+              child: child,
+            );
+          },
+        ),
+      ),
+    ]);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,47 +86,7 @@ class InfoItemWidget extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: hasChipButtons
-                            ? getEnteTextTheme(context).smallMuted
-                            : getEnteTextTheme(context).body,
-                      ),
-                      SizedBox(height: hasChipButtons ? 8 : 4),
-                      Flexible(
-                        child: FutureBuilder(
-                          future: subtitleSection,
-                          builder: (context, snapshot) {
-                            Widget child;
-                            if (snapshot.hasData) {
-                              final subtitle = snapshot.data as List<Widget>;
-                              if (subtitle.isNotEmpty) {
-                                child = Wrap(
-                                  runSpacing: 8,
-                                  spacing: 8,
-                                  children: subtitle,
-                                );
-                              } else {
-                                child = const SizedBox.shrink();
-                              }
-                            } else {
-                              child = EnteLoadingWidget(
-                                padding: 3,
-                                size: 11,
-                                color: getEnteColorScheme(context).strokeMuted,
-                                alignment: Alignment.centerLeft,
-                              );
-                            }
-                            return AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 200),
-                              switchInCurve: Curves.easeInOutExpo,
-                              child: child,
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                    children: children,
                   ),
                 ),
               ),

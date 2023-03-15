@@ -165,7 +165,9 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
-    - assets/models/
+    - assets/models/cocossd/
+    - assets/models/mobilenet/
+    - assets/models/scenes/
   fonts:
   - family: Inter
     fonts:
