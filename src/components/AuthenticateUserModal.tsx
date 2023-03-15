@@ -8,8 +8,7 @@ import VerifyMasterPasswordForm, {
 } from 'components/VerifyMasterPasswordForm';
 import { Dialog, Stack, Typography } from '@mui/material';
 import { logError } from 'utils/sentry';
-import { useTranslation } from 'react-i18next';
-
+import { t } from 'i18next';
 interface Iprops {
     open: boolean;
     onClose: () => void;
@@ -21,7 +20,6 @@ export default function AuthenticateUserModal({
     onClose,
     onAuthenticate,
 }: Iprops) {
-    const { t } = useTranslation();
     const { setDialogMessage } = useContext(AppContext);
     const [user, setUser] = useState<User>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();

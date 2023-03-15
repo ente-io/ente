@@ -22,7 +22,7 @@ import {
     createCollection,
     getCollectionSummaries,
 } from 'services/collectionService';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { checkSubscriptionPurchase } from 'utils/billing';
 
@@ -134,8 +134,6 @@ export const GalleryContext = createContext<GalleryContextType>(
 );
 
 export default function Gallery() {
-    const { t } = useTranslation();
-
     const router = useRouter();
     const [user, setUser] = useState(null);
     const [collections, setCollections] = useState<Collection[]>(null);

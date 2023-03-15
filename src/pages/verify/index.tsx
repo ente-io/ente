@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 import { LS_KEYS, getData, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
@@ -28,7 +29,6 @@ import EnteSpinner from 'components/EnteSpinner';
 import VerticallyCentered from 'components/Container';
 
 export default function Verify() {
-    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [resend, setResend] = useState(0);
     const router = useRouter();

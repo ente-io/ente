@@ -10,7 +10,8 @@ import {
 } from 'utils/billing';
 import Box from '@mui/material/Box';
 import { UserDetails } from 'types/user';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 import { Typography } from '@mui/material';
 import billingService from 'services/billingService';
@@ -22,8 +23,6 @@ export default function SubscriptionStatus({
 }: {
     userDetails: UserDetails;
 }) {
-    const { t } = useTranslation();
-
     const { showPlanSelectorModal } = useContext(GalleryContext);
 
     const hasAMessage = useMemo(() => {

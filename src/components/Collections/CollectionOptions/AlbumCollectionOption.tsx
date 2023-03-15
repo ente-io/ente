@@ -7,7 +7,7 @@ import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { CollectionActions } from '.';
 import Unarchive from '@mui/icons-material/Unarchive';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Iprops {
     IsArchived: boolean;
@@ -21,7 +21,6 @@ export function AlbumCollectionOption({
     IsArchived,
     handleCollectionAction,
 }: Iprops) {
-    const { t } = useTranslation();
     return (
         <>
             <OverflowMenuOption

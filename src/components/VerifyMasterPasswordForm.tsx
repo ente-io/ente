@@ -9,7 +9,7 @@ import { CustomError } from 'utils/error';
 import { Input } from '@mui/material';
 import { KeyAttributes, User } from 'types/user';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 export interface VerifyMasterPasswordFormProps {
     user: User;
@@ -24,7 +24,6 @@ export default function VerifyMasterPasswordForm({
     callback,
     buttonText,
 }: VerifyMasterPasswordFormProps) {
-    const { t } = useTranslation();
     const verifyPassphrase: SingleInputFormProps['callback'] = async (
         passphrase,
         setFieldError

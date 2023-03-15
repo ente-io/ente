@@ -6,7 +6,7 @@ import TextField from '@mui/material/TextField';
 import ShowHidePassword from './Form/ShowHidePassword';
 import { FlexWrapper } from './Container';
 import { Button, FormHelperText } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface formValues {
     inputValue: string;
@@ -33,7 +33,6 @@ export interface SingleInputFormProps {
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
-    const { t } = useTranslation();
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
 

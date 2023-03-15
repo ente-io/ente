@@ -4,7 +4,7 @@ import { Box, Divider, Stack, Typography } from '@mui/material';
 import { FreeFlowText, SpaceBetweenFlex } from 'components/Container';
 import CollectionCard from 'components/Collections/CollectionCard';
 import { ResultPreviewTile } from 'components/Collections/styledComponents';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { components } from 'react-select';
 
@@ -17,7 +17,6 @@ export const OptionWithInfo = (props) => (
 );
 
 const LabelWithInfo = ({ data }: { data: SearchOption }) => {
-    const { t } = useTranslation();
     return (
         !data.hide && (
             <>

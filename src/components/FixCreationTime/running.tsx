@@ -1,10 +1,9 @@
 import { ComfySpan } from 'components/ExportInProgress';
 import React from 'react';
 import { ProgressBar } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 export default function FixCreationTimeRunning({ progressTracker }) {
-    const { t } = useTranslation();
     return (
         <>
             <div style={{ marginBottom: '10px' }}>

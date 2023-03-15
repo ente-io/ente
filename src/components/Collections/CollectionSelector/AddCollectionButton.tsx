@@ -6,7 +6,7 @@ import {
 import React from 'react';
 import { styled } from '@mui/material';
 import { CenteredFlex, Overlay } from 'components/Container';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 const ImageContainer = styled(Overlay)`
     display: flex;
@@ -18,8 +18,6 @@ interface Iprops {
 }
 
 export default function AddCollectionButton({ showNextModal }: Iprops) {
-    const { t } = useTranslation();
-
     return (
         <CollectionCard
             collectionTile={AllCollectionTile}

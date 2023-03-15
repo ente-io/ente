@@ -29,7 +29,8 @@ import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import VerticallyCentered from './Container';
 import { PasswordStrengthHint } from './PasswordStrength';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 interface FormValues {
     email: string;
@@ -42,7 +43,6 @@ interface SignUpProps {
 }
 
 export default function SignUp(props: SignUpProps) {
-    const { t } = useTranslation();
     const router = useRouter();
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [loading, setLoading] = useState(false);

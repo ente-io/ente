@@ -3,14 +3,13 @@ import Close from '@mui/icons-material/Close';
 import { DialogTitle, Box, Typography, Stack } from '@mui/material';
 import { IconButtonWithBG, SpaceBetweenFlex } from 'components/Container';
 import { UPLOAD_STAGES } from 'constants/upload';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import UploadProgressContext from 'contexts/uploadProgress';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 
 const UploadProgressTitleText = ({ expanded }) => {
-    const { t } = useTranslation();
     return (
         <Typography variant={expanded ? 'title' : 'subtitle'}>
             {t('FILE_UPLOAD')}
@@ -19,8 +18,6 @@ const UploadProgressTitleText = ({ expanded }) => {
 };
 
 function UploadProgressSubtitleText() {
-    const { t } = useTranslation();
-
     const { uploadStage, uploadCounter } = useContext(UploadProgressContext);
 
     return (

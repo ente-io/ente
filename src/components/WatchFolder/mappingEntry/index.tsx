@@ -6,7 +6,7 @@ import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderCopyOutlinedIcon from '@mui/icons-material/FolderCopyOutlined';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import MappingEntryOptions from './mappingEntryOptions';
 import { EntryHeading } from './entryHeading';
@@ -18,8 +18,6 @@ interface Iprops {
 }
 
 export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
-    const { t } = useTranslation();
-
     const appContext = React.useContext(AppContext);
 
     const stopWatching = () => {

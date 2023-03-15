@@ -2,11 +2,9 @@ import React from 'react';
 import { COLLECTION_SORT_BY } from 'constants/collection';
 import SortByOptionCreator from './optionCreator';
 import { CollectionSortProps } from '.';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 export default function CollectionSortOptions(props: CollectionSortProps) {
-    const { t } = useTranslation();
-
     const SortByOption = SortByOptionCreator(props);
 
     return (

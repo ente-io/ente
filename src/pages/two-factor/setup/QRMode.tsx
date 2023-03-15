@@ -1,7 +1,7 @@
 import React from 'react';
 import EnteSpinner from 'components/EnteSpinner';
 import { TwoFactorSecret } from 'types/user';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import {
     LoadingQRCode,
@@ -19,7 +19,6 @@ export default function SetupQRMode({
     twoFactorSecret,
     changeToManualMode,
 }: Iprops) {
-    const { t } = useTranslation();
     return (
         <>
             <Typography>{t('TWO_FACTOR_QR_INSTRUCTION')}</Typography>

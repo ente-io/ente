@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
@@ -30,8 +30,6 @@ import VerifyMasterPasswordForm, {
 } from 'components/VerifyMasterPasswordForm';
 
 export default function Credentials() {
-    const { t } = useTranslation();
-
     const router = useRouter();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const appContext = useContext(AppContext);

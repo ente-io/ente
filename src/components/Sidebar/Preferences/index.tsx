@@ -5,14 +5,13 @@ import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import Titlebar from 'components/Titlebar';
 import isElectron from 'is-electron';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import AdvancedSettings from '../AdvancedSettings';
 import SidebarButton from '../Button';
 import { LanguageSelector } from './LanguageSelector';
 
 export default function Preferences({ open, onClose, onRootClose }) {
-    const { t } = useTranslation();
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
 
     const openAdvancedSettings = () => setAdvancedSettingsView(true);

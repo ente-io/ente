@@ -7,7 +7,8 @@ import uploadManager from 'services/upload/uploadManager';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 import FolderIcon from '@mui/icons-material/FolderOutlined';
 import { UploadTypeSelectorIntent } from 'types/gallery';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 import { EnteLogo } from './EnteLogo';
 
 const Wrapper = styled(Box)`
@@ -21,7 +22,6 @@ const NonDraggableImage = styled('img')`
 `;
 
 export default function EmptyScreen({ openUploader }) {
-    const { t } = useTranslation();
     const deduplicateContext = useContext(DeduplicateContext);
     return deduplicateContext.isOnDeduplicatePage ? (
         <VerticallyCentered>

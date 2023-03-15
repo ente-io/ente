@@ -12,14 +12,14 @@ import { EnteDrawer } from 'components/EnteDrawer';
 import Titlebar from 'components/Titlebar';
 import { FACE_SEARCH_PRIVACY_POLICY_LINK } from 'constants/urls';
 import { useEffect, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 export default function EnableFaceSearch({
     open,
     onClose,
     enableFaceSearch,
     onRootClose,
 }) {
-    const { t } = useTranslation();
     const [acceptTerms, setAcceptTerms] = useState(false);
 
     useEffect(() => {

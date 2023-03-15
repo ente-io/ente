@@ -1,7 +1,8 @@
 import { Stack } from '@mui/material';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 import { Subscription } from 'types/billing';
 import { SetLoading } from 'types/gallery';
 import {
@@ -24,7 +25,6 @@ export function ManageSubscription({
     closeModal,
     setLoading,
 }: Iprops) {
-    const { t } = useTranslation();
     const appContext = useContext(AppContext);
     const openFamilyPortal = () =>
         manageFamilyMethod(appContext.setDialogMessage, setLoading);
@@ -52,7 +52,6 @@ function StripeSubscriptionOptions({
     setLoading,
     closeModal,
 }: Iprops) {
-    const { t } = useTranslation();
     const appContext = useContext(AppContext);
 
     const confirmReactivation = () =>

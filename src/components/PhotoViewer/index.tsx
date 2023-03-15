@@ -39,7 +39,7 @@ import { styled } from '@mui/material';
 import { addLocalLog } from 'utils/logging';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -77,8 +77,6 @@ interface Iprops {
 }
 
 function PhotoViewer(props: Iprops) {
-    const { t } = useTranslation();
-
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] =
         useState<Photoswipe<Photoswipe.Options>>();

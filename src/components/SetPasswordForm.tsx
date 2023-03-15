@@ -5,7 +5,8 @@ import SubmitButton from './SubmitButton';
 import { Box, Input, TextField, Typography } from '@mui/material';
 import { PasswordStrengthHint } from './PasswordStrength';
 import { isWeakPassword } from 'utils/crypto';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 export interface SetPasswordFormProps {
     userEmail: string;
@@ -24,7 +25,6 @@ export interface SetPasswordFormValues {
     confirm: string;
 }
 function SetPasswordForm(props: SetPasswordFormProps) {
-    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
 
     const onSubmit = async (

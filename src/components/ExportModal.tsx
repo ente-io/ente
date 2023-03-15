@@ -34,7 +34,7 @@ import { getLocalUserDetails } from 'utils/user';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { addLogLine } from 'utils/logging';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
@@ -52,7 +52,6 @@ interface Props {
     onHide: () => void;
 }
 export default function ExportModal(props: Props) {
-    const { t } = useTranslation();
     const appContext = useContext(AppContext);
     const userDetails = useMemo(() => getLocalUserDetails(), []);
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
@@ -404,8 +403,6 @@ export default function ExportModal(props: Props) {
 }
 
 function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
-    const { t } = useTranslation();
-
     return (
         <FlexWrapper>
             <Label width="30%">{t('DESTINATION')}</Label>
@@ -435,8 +432,6 @@ function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
 }
 
 function ExportSize({ exportSize }) {
-    const { t } = useTranslation();
-
     return (
         <FlexWrapper>
             <Label width="30%">{t('EXPORT_SIZE')} </Label>
@@ -448,7 +443,6 @@ function ExportSize({ exportSize }) {
 }
 
 function ExportDirectoryOption({ selectExportDirectory }) {
-    const { t } = useTranslation();
     const handleClick = () => {
         try {
             selectExportDirectory();

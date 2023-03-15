@@ -6,13 +6,11 @@ import MLSearchSettings from 'components/MachineLearning/MLSearchSettings';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import Titlebar from 'components/Titlebar';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import SidebarButton from './Button';
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
-    const { t } = useTranslation();
-
     const [mlSearchSettingsView, setMlSearchSettingsView] = useState(false);
 
     const openMlSearchSettings = () => setMlSearchSettingsView(true);

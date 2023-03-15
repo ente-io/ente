@@ -10,7 +10,7 @@ import {
 import { ExportStage } from 'constants/export';
 import VerticallyCentered, { FlexWrapper } from './Container';
 import { ProgressBar } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 export const ComfySpan = styled('span')`
     word-spacing: 1rem;
@@ -26,7 +26,6 @@ interface Props {
 }
 
 export default function ExportInProgress(props: Props) {
-    const { t } = useTranslation();
     return (
         <>
             <DialogContent>

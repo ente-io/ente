@@ -4,7 +4,7 @@ import DialogBoxBase from 'components/DialogBox/base';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 export const FileNameEditDialog = ({
     isInEditMode,
@@ -13,8 +13,6 @@ export const FileNameEditDialog = ({
     extension,
     saveEdits,
 }) => {
-    const { t } = useTranslation();
-
     const onSubmit: SingleInputFormProps['callback'] = async (
         filename,
         setFieldError

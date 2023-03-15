@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
 import { makeHumanReadableStorage } from 'utils/billing';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { Progressbar } from '../../styledComponents';
 
@@ -12,8 +12,6 @@ interface Iprops {
     storage: number;
 }
 export function IndividualUsageSection({ usage, storage, fileCount }: Iprops) {
-    const { t } = useTranslation();
-
     return (
         <Box width="100%">
             <Progressbar value={Math.min((usage * 100) / storage, 100)} />

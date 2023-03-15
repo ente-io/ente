@@ -3,7 +3,7 @@ import React from 'react';
 import PeopleIcon from '@mui/icons-material/People';
 import { IconButton, Tooltip } from '@mui/material';
 import { CollectionSummaryType } from 'constants/collection';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Iprops {
     handleCollectionAction: (
@@ -17,8 +17,6 @@ export function ShareQuickOption({
     handleCollectionAction,
     collectionSummaryType,
 }: Iprops) {
-    const { t } = useTranslation();
-
     return (
         <Tooltip
             title={

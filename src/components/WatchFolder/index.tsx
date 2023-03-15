@@ -4,7 +4,7 @@ import { Button, Dialog, DialogContent, Stack } from '@mui/material';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 import UploadStrategyChoiceModal from 'components/Upload/UploadStrategyChoiceModal';
@@ -19,8 +19,6 @@ interface Iprops {
 }
 
 export default function WatchFolder({ open, onClose }: Iprops) {
-    const { t } = useTranslation();
-
     const [mappings, setMappings] = useState<WatchMapping[]>([]);
     const [inputFolderPath, setInputFolderPath] = useState('');
     const [choiceModalOpen, setChoiceModalOpen] = useState(false);

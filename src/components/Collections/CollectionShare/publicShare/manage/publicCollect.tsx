@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import PublicShareSwitch from '../switch';
 
@@ -15,7 +15,6 @@ export function ManagePublicCollect({
     updatePublicShareURLHelper,
     collection,
 }: Iprops) {
-    const { t } = useTranslation();
     const handleFileDownloadSetting = () => {
         updatePublicShareURLHelper({
             collectionID: collection.id,

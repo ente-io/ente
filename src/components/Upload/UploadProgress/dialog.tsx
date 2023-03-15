@@ -1,5 +1,5 @@
 import { Dialog, DialogContent } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { UPLOAD_STAGES, UPLOAD_RESULT } from 'constants/upload';
 import React, { useContext, useEffect, useState } from 'react';
@@ -14,8 +14,6 @@ import { APP_DOWNLOAD_URL } from 'utils/common';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
 
 export function UploadProgressDialog() {
-    const { t } = useTranslation();
-
     const { open, onClose, uploadStage, finishedUploads } = useContext(
         UploadProgressContext
     );

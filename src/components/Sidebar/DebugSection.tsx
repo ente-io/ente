@@ -1,7 +1,8 @@
 import { AppContext } from 'pages/_app';
 import React, { useContext, useEffect, useState } from 'react';
 import { downloadAsFile } from 'utils/file';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 import { addLogLine, getDebugLogs } from 'utils/logging';
 import SidebarButton from './Button';
@@ -16,8 +17,6 @@ import {
 } from '../../../tests/zip-file-reading.test';
 
 export default function DebugSection() {
-    const { t } = useTranslation();
-
     const appContext = useContext(AppContext);
     const [appVersion, setAppVersion] = useState<string>(null);
 

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import SidebarButton from './Button';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 // import FixLargeThumbnails from 'components/FixLargeThumbnail';
 import RecoveryKey from 'components/RecoveryKey';
@@ -19,8 +19,6 @@ import { isInternalUser } from 'utils/user';
 import Preferences from './Preferences';
 
 export default function UtilitySection({ closeSidebar }) {
-    const { t } = useTranslation();
-
     const router = useRouter();
     const {
         setDialogMessage,

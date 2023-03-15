@@ -22,7 +22,7 @@ import ArchiveIcon from '@mui/icons-material/ArchiveOutlined';
 import MoveIcon from '@mui/icons-material/ArrowForward';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import { getTrashFilesMessage } from 'utils/ui';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
@@ -67,8 +67,6 @@ const SelectedFileOptions = ({
     isIncomingSharedCollection,
     isInSearchMode,
 }: Props) => {
-    const { t } = useTranslation();
-
     const { setDialogMessage } = useContext(AppContext);
     const addToCollection = () =>
         setCollectionSelectorAttributes({

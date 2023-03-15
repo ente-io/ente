@@ -3,7 +3,7 @@ import DialogBox from './DialogBox';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import { Typography } from '@mui/material';
 import SingleInputForm from './SingleInputForm';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 export default function UserNameInputDialog({
     open,
@@ -12,7 +12,6 @@ export default function UserNameInputDialog({
     toUploadFilesCount,
     uploaderName,
 }) {
-    const { t } = useTranslation();
     const handleSubmit = async (inputValue: string) => {
         onClose();
         await onNameSubmit(inputValue);

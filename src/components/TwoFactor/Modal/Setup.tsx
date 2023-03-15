@@ -2,7 +2,7 @@ import React from 'react';
 import LockIcon from '@mui/icons-material/Lock';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import VerticallyCentered from 'components/Container';
 import { Button, Typography } from '@mui/material';
@@ -12,7 +12,6 @@ interface Iprops {
 }
 
 export default function TwoFactorModalSetupSection({ closeDialog }: Iprops) {
-    const { t } = useTranslation();
     const router = useRouter();
     const redirectToTwoFactorSetup = () => {
         closeDialog();

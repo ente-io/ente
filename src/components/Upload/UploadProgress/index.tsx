@@ -2,7 +2,7 @@ import { UploadProgressDialog } from './dialog';
 import { MinimizedUploadProgress } from './minimized';
 import React, { useContext, useEffect, useState } from 'react';
 
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { UPLOAD_STAGES } from 'constants/upload';
 import { AppContext } from 'pages/_app';
@@ -41,8 +41,6 @@ export default function UploadProgress({
     finishedUploads,
     ...props
 }: Props) {
-    const { t } = useTranslation();
-
     const appContext = useContext(AppContext);
     const [expanded, setExpanded] = useState(true);
 

@@ -11,7 +11,7 @@ import { PLAN_PERIOD } from 'constants/gallery';
 import Done from '@mui/icons-material/Done';
 import { Plan, Subscription } from 'types/billing';
 import { Badge } from 'components/Badge';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Iprops {
     plan: Plan;
@@ -57,8 +57,6 @@ export function PlanRow({
     disabled,
     popular,
 }: Iprops) {
-    const { t } = useTranslation();
-
     const handleClick = () => {
         !isUserSubscribedPlan(plan, subscription) && onPlanSelect(plan);
     };

@@ -3,7 +3,7 @@ import { FlexWrapper } from 'components/Container';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import {
     createShareableURL,
     deleteShareableURL,
@@ -22,8 +22,6 @@ export default function PublicShareControl({
     publicShareActive,
     setPublicShareProp,
 }: Iprops) {
-    const { t } = useTranslation();
-
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const [sharableLinkError, setSharableLinkError] = useState(null);

@@ -4,7 +4,7 @@ import SingleInputForm, {
 } from 'components/SingleInputForm';
 import DialogBoxBase from 'components/DialogBox/base';
 import { DialogContent, DialogTitle } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 export interface CollectionNamerAttributes {
     callback: (name: string) => void;
@@ -24,7 +24,6 @@ interface Props {
 }
 
 export default function CollectionNamer({ attributes, ...props }: Props) {
-    const { t } = useTranslation();
     if (!attributes) {
         return <></>;
     }

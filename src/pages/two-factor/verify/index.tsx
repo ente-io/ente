@@ -8,7 +8,8 @@ import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import { User } from 'types/user';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 import LinkButton from 'components/pages/gallery/LinkButton';
 import FormContainer from 'components/Form/FormContainer';
@@ -17,7 +18,6 @@ import FormTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 
 export default function Home() {
-    const { t } = useTranslation();
     const [sessionID, setSessionID] = useState('');
     const appContext = useContext(AppContext);
 

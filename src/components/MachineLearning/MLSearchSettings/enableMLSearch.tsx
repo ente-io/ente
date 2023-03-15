@@ -1,7 +1,8 @@
 import { Stack, Box, Button, Typography } from '@mui/material';
 import Titlebar from 'components/Titlebar';
 import { ML_BLOG_LINK } from 'constants/urls';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 import { openLink } from 'utils/common';
 
 export default function EnableMLSearch({
@@ -9,7 +10,6 @@ export default function EnableMLSearch({
     enableMlSearch,
     onRootClose,
 }) {
-    const { t } = useTranslation();
     return (
         <Stack spacing={'4px'} py={'12px'}>
             <Titlebar

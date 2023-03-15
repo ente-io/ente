@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import { FIX_STATE } from '.';
 
 export default function FixCreationTimeFooter({
@@ -8,8 +8,6 @@ export default function FixCreationTimeFooter({
     startFix,
     ...props
 }) {
-    const { t } = useTranslation();
-
     return (
         fixState !== FIX_STATE.RUNNING && (
             <div

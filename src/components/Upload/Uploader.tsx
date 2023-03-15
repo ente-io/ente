@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { syncCollections, createAlbum } from 'services/collectionService';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 import UploadProgress from './UploadProgress';
 
@@ -87,8 +88,6 @@ interface Props {
 }
 
 export default function Uploader(props: Props) {
-    const { t } = useTranslation();
-
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(

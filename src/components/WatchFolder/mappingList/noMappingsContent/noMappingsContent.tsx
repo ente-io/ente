@@ -1,14 +1,12 @@
 import { Stack, Typography } from '@mui/material';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { NoMappingsContainer } from '../../styledComponents';
 import { FlexWrapper } from 'components/Container';
 import { CheckmarkIcon } from './checkmarkIcon';
 
 export function NoMappingsContent() {
-    const { t } = useTranslation();
-
     return (
         <NoMappingsContainer>
             <Stack spacing={1}>

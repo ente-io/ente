@@ -9,13 +9,11 @@ import {
     UploadProgressSectionTitle,
 } from './section';
 import UploadProgressContext from 'contexts/uploadProgress';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { UPLOAD_STAGES } from 'constants/upload';
 
 export const InProgressSection = () => {
-    const { t } = useTranslation();
-
     const { inProgressUploads, hasLivePhotos, uploadFileNames, uploadStage } =
         useContext(UploadProgressContext);
     const fileList = inProgressUploads ?? [];

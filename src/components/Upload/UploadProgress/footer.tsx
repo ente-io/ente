@@ -1,13 +1,11 @@
 import { Button, DialogActions } from '@mui/material';
 import { UPLOAD_STAGES, UPLOAD_RESULT } from 'constants/upload';
 import React, { useContext } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import UploadProgressContext from 'contexts/uploadProgress';
 
 export function UploadProgressFooter() {
-    const { t } = useTranslation();
-
     const { uploadStage, finishedUploads, retryFailed, onClose } = useContext(
         UploadProgressContext
     );

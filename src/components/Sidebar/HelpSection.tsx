@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import SidebarButton from './Button';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import ExportModal from 'components/ExportModal';
 import exportService from 'services/exportService';
@@ -14,7 +14,6 @@ import { NoStyleAnchor } from 'components/pages/sharedAlbum/GoToEnte';
 import { openLink } from 'utils/common';
 
 export default function HelpSection() {
-    const { t } = useTranslation();
     const [exportModalView, setExportModalView] = useState(false);
 
     const { setDialogMessage } = useContext(AppContext);

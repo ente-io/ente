@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { logoutUser, putAttributes } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -24,8 +24,6 @@ import FormPaper from 'components/Form/FormPaper';
 import FormTitle from 'components/Form/FormPaper/Title';
 
 export default function Generate() {
-    const { t } = useTranslation();
-
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
     const router = useRouter();

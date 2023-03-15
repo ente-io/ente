@@ -3,7 +3,7 @@ import React from 'react';
 import CollectionCard from '../CollectionCard';
 import { CollectionSummary } from 'types/collection';
 import { AllCollectionTile, AllCollectionTileText } from '../styledComponents';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Iprops {
     collectionSummary: CollectionSummary;
@@ -14,7 +14,6 @@ export default function AllCollectionCard({
     onCollectionClick,
     collectionSummary,
 }: Iprops) {
-    const { t } = useTranslation();
     return (
         <CollectionCard
             collectionTile={AllCollectionTile}

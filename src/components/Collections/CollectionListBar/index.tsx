@@ -15,7 +15,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import { AppContext } from 'pages/_app';
 import { CollectionSummary } from 'types/collection';
 import CollectionSort from '../AllCollections/CollectionSort';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface IProps {
     activeCollection?: number;
@@ -33,8 +33,6 @@ export default function CollectionListBar(props: IProps) {
         collectionSummaries,
         showAllCollections,
     } = props;
-
-    const { t } = useTranslation();
 
     const appContext = useContext(AppContext);
 

@@ -20,7 +20,7 @@ import { AppContext } from 'pages/_app';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { CustomError, parseSharingErrorCodes } from 'utils/error';
 import VerticallyCentered, { CenteredFlex } from 'components/Container';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import EnteSpinner from 'components/EnteSpinner';
 import { PAGES } from 'constants/pages';
@@ -58,8 +58,6 @@ const Loader = () => (
     </VerticallyCentered>
 );
 export default function PublicCollectionGallery() {
-    const { t } = useTranslation();
-
     const token = useRef<string>(null);
     // passwordJWTToken refers to the jwt token which is used for album protected by password.
     const passwordJWTToken = useRef<string>(null);

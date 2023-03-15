@@ -26,7 +26,8 @@ import { PLAN_PERIOD } from 'constants/gallery';
 import FreeSubscriptionPlanSelectorCard from './free';
 import PaidSubscriptionPlanSelectorCard from './paid';
 import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Props {
     closeModal: any;
@@ -34,8 +35,6 @@ interface Props {
 }
 
 function PlanSelectorCard(props: Props) {
-    const { t } = useTranslation();
-
     const subscription = useMemo(() => getLocalUserSubscription(), []);
     const [plans, setPlans] = useLocalState<Plan[]>(LS_KEYS.PLANS);
 

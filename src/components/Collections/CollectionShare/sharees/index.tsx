@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import { unshareCollection } from 'services/collectionService';
 import { Collection } from 'types/collection';
 import ShareeRow from './row';
@@ -12,7 +12,6 @@ interface Iprops {
 }
 
 export function CollectionShareSharees({ collection }: Iprops) {
-    const { t } = useTranslation();
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
 

@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import PhotoFrame from 'components/PhotoFrame';
 import { ALL_SECTION } from 'constants/collection';
@@ -38,8 +38,6 @@ export const Info = styled('div')`
 `;
 
 export default function Deduplicate() {
-    const { t } = useTranslation();
-
     const {
         setDialogMessage,
         startLoading,

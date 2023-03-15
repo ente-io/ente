@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useRef, useState } from 'react';
 import AppNavbar from 'components/Navbar/app';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { useRouter } from 'next/router';
 import VerticallyCentered from 'components/Container';
@@ -114,8 +114,6 @@ const redirectMap = new Map([
 ]);
 
 export default function App({ Component, err }) {
-    const { t } = useTranslation();
-
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(

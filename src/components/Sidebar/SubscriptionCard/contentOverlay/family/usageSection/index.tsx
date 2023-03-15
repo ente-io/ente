@@ -3,7 +3,7 @@ import { FamilyUsageProgressBar } from './progressBar';
 import { Box, Stack, Typography } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Iprops {
     userUsage: number;
@@ -18,7 +18,6 @@ export function FamilyUsageSection({
     fileCount,
     totalStorage,
 }: Iprops) {
-    const { t } = useTranslation();
     return (
         <Box width="100%">
             <FamilyUsageProgressBar

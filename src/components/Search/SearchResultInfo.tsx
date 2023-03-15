@@ -3,14 +3,12 @@ import { CollectionInfo } from 'components/Collections/CollectionInfo';
 import { Typography } from '@mui/material';
 import { SearchResultSummary } from 'types/search';
 import { CollectionInfoBarWrapper } from 'components/Collections/styledComponents';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Iprops {
     searchResultSummary: SearchResultSummary;
 }
 export default function SearchResultInfo({ searchResultSummary }: Iprops) {
-    const { t } = useTranslation();
-
     if (!searchResultSummary) {
         return <></>;
     }

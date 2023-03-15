@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
@@ -23,8 +23,6 @@ import FormPaperTitle from 'components/Form/FormPaper/Title';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 export default function ChangePassword() {
-    const { t } = useTranslation();
-
     const [token, setToken] = useState<string>();
     const router = useRouter();
     const [user, setUser] = useState<User>();

@@ -1,6 +1,6 @@
 import { Button, DialogActions, DialogContent, Stack } from '@mui/material';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import { ExportStats } from 'types/export';
 import { formatDateTime } from 'utils/time/format';
 import { FlexWrapper, Label, Value } from './Container';
@@ -15,7 +15,6 @@ interface Props {
 }
 
 export default function ExportFinished(props: Props) {
-    const { t } = useTranslation();
     const totalFiles = props.exportStats.failed + props.exportStats.success;
     return (
         <>

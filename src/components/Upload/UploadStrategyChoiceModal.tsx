@@ -4,7 +4,7 @@ import DialogTitleWithCloseButton, {
     dialogCloseHandler,
 } from 'components/DialogBox/TitleWithCloseButton';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Props {
     uploadToMultipleCollection: () => void;
@@ -17,7 +17,6 @@ function UploadStrategyChoiceModal({
     uploadToSingleCollection,
     ...props
 }: Props) {
-    const { t } = useTranslation();
     const handleClose = dialogCloseHandler({
         onClose: props.onClose,
     });

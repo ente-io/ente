@@ -2,7 +2,8 @@ import { Box, DialogProps, Typography } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { AppContext } from 'pages/_app';
 import { useContext, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 import {
     getFaceSearchEnabledStatus,
     updateFaceSearchEnabledStatus,
@@ -13,7 +14,6 @@ import EnableMLSearch from './enableMLSearch';
 import ManageMLSearch from './manageMLSearch';
 
 const MLSearchSettings = ({ open, onClose, onRootClose }) => {
-    const { t } = useTranslation();
     const {
         updateMlSearchEnabled,
         mlSearchEnabled,

@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography } from '@mui/material';
 import CodeBlock from 'components/CodeBlock';
 import { TwoFactorSecret } from 'types/user';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import LinkButton from 'components/pages/gallery/LinkButton';
 
@@ -14,8 +14,6 @@ export default function SetupManualMode({
     twoFactorSecret,
     changeToQRMode,
 }: Iprops) {
-    const { t } = useTranslation();
-
     return (
         <>
             <Typography>{t('TWO_FACTOR_MANUAL_CODE_INSTRUCTION')}</Typography>

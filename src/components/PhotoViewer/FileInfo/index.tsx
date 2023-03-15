@@ -32,7 +32,7 @@ import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
 
 // import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
 import { AppContext } from 'pages/_app';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
@@ -89,8 +89,6 @@ export function FileInfo({
     collectionNameMap,
     isTrashCollection,
 }: Iprops) {
-    const { t } = useTranslation();
-
     const appContext = useContext(AppContext);
     const [location, setLocation] = useState<Location>(null);
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();

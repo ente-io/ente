@@ -8,7 +8,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import BackButton from '@mui/icons-material/ArrowBackOutlined';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { getTrashFilesMessage } from 'utils/ui';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 const VerticalLine = styled('div')`
     position: absolute;
@@ -37,8 +37,6 @@ export default function DeduplicateOptions({
     count,
     clearSelection,
 }: IProps) {
-    const { t } = useTranslation();
-
     const deduplicateContext = useContext(DeduplicateContext);
     const { setDialogMessage } = useContext(AppContext);
 

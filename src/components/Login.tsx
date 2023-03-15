@@ -8,14 +8,13 @@ import FormPaperFooter from './Form/FormPaper/Footer';
 import LinkButton from './pages/gallery/LinkButton';
 import SingleInputForm, { SingleInputFormProps } from './SingleInputForm';
 import { Input } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface LoginProps {
     signUp: () => void;
 }
 
 export default function Login(props: LoginProps) {
-    const { t } = useTranslation();
     const router = useRouter();
 
     useEffect(() => {

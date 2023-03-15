@@ -1,7 +1,8 @@
 import { Box, Typography } from '@mui/material';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import PublicShareSwitch from '../switch';
 
@@ -16,8 +17,6 @@ export function ManageDownloadAccess({
     updatePublicShareURLHelper,
     collection,
 }: Iprops) {
-    const { t } = useTranslation();
-
     const appContext = useContext(AppContext);
 
     const handleFileDownloadSetting = () => {

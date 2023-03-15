@@ -21,7 +21,8 @@ import { OnlyDownloadCollectionOption } from './OnlyDownloadCollectionOption';
 import { QuickOptions } from './QuickOptions';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import { HorizontalFlex } from 'components/Container';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -56,8 +57,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setCollectionNamerAttributes,
         showCollectionShareModal,
     } = props;
-
-    const { t } = useTranslation();
 
     const { startLoading, finishLoading, setDialogMessage } =
         useContext(AppContext);

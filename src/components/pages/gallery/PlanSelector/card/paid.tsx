@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import { convertBytesToGBs, isSubscriptionCancelled } from 'utils/billing';
 import { ManageSubscription } from '../manageSubscription';
 import { PeriodToggler } from '../periodToggler';
@@ -20,8 +20,6 @@ export default function PaidSubscriptionPlanSelectorCard({
     onPlanSelect,
     setLoading,
 }) {
-    const { t } = useTranslation();
-
     return (
         <>
             <Box pl={1.5} py={0.5}>

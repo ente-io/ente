@@ -2,7 +2,7 @@ import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import React, { useEffect, useState } from 'react';
 import { Button, styled } from '@mui/material';
 import { getDeviceOS, OS } from 'utils/common/deviceDetection';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 export const NoStyleAnchor = styled('a')`
     color: inherit;
@@ -13,8 +13,6 @@ export const NoStyleAnchor = styled('a')`
 `;
 
 function GoToEnte() {
-    const { t } = useTranslation();
-
     const [os, setOS] = useState<OS>(OS.UNKNOWN);
 
     useEffect(() => {

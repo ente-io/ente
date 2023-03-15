@@ -21,14 +21,14 @@ import {
 import AuthenticateUserModal from './AuthenticateUserModal';
 import { logError } from 'utils/sentry';
 import { decryptDeleteAccountChallenge } from 'utils/crypto';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Iprops {
     onClose: () => void;
     open: boolean;
 }
 const DeleteAccountModal = ({ open, onClose }: Iprops) => {
-    const { t } = useTranslation();
     const { setDialogMessage, isMobile } = useContext(AppContext);
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);

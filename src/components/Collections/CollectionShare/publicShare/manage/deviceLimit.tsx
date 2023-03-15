@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import Select from 'react-select';
 import { DropdownStyle } from 'styles/dropdown';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
@@ -18,8 +18,6 @@ export function ManageDeviceLimit({
     collection,
     updatePublicShareURLHelper,
 }: Iprops) {
-    const { t } = useTranslation();
-
     const updateDeviceLimit = async (newLimit: number) => {
         return updatePublicShareURLHelper({
             collectionID: collection.id,

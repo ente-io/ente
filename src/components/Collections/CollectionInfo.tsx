@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { FlexWrapper } from 'components/Container';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 interface Iprops {
     name: string;
     fileCount: number;
@@ -9,7 +9,6 @@ interface Iprops {
 }
 
 export function CollectionInfo({ name, fileCount, endIcon }: Iprops) {
-    const { t } = useTranslation();
     return (
         <div>
             <Typography variant="h3">{name}</Typography>

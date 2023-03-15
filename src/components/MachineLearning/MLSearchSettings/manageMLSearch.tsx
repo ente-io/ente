@@ -1,7 +1,7 @@
 import { Stack, Box, ButtonProps, TypographyVariant } from '@mui/material';
 import SidebarButton from 'components/Sidebar/Button';
 import Titlebar from 'components/Titlebar';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 type Iprops = ButtonProps<'button', { typographyVariant?: TypographyVariant }>;
 
@@ -20,7 +20,6 @@ export default function ManageMLSearch({
     handleDisableFaceSearch,
     onRootClose,
 }) {
-    const { t } = useTranslation();
     return (
         <Stack spacing={'4px'} py={'12px'}>
             <Titlebar

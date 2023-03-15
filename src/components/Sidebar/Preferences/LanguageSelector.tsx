@@ -2,7 +2,7 @@ import { OptionWithDivider } from 'components/Collections/CollectionShare/public
 import { Language } from 'constants/locale';
 import { useLocalState } from 'hooks/useLocalState';
 import i18n from 'i18n';
-import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Select from 'react-select';
 import { DropdownStyle } from 'styles/dropdown';
 import { getBestPossibleUserLocale } from 'utils/i18n';
@@ -30,9 +30,13 @@ export const LanguageSelector = () => {
         getBestPossibleUserLocale()
     );
 
-    useEffect(() => {
-        i18n.changeLanguage(userLocale);
-    }, [userLocale]);
+    const router = useRouter();
+
+    const updateCurrentLocale = (newLocale: Language) => {
+        i18n.changeLanguage(newLocale);
+        setUserLocale(newLocale);
+        router.reload();
+    };
 
     return (
         <Select
@@ -46,7 +50,7 @@ export const LanguageSelector = () => {
                 label: getLocaleDisplayName(userLocale),
                 value: userLocale,
             }}
-            onChange={(e) => setUserLocale(e.value)}
+            onChange={(e) => updateCurrentLocale(e.value)}
             styles={DropdownStyle}
         />
     );

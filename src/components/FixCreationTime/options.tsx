@@ -3,7 +3,7 @@ import { FIX_OPTIONS } from '.';
 import { Form } from 'react-bootstrap';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
 import { Row, Value } from 'components/Container';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 const Option = ({
     value,
@@ -38,7 +38,6 @@ const Option = ({
 );
 
 export default function FixCreationTimeOptions({ handleChange, values }) {
-    const { t } = useTranslation();
     return (
         <Form noValidate>
             <Row style={{ margin: '0' }}>

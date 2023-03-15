@@ -8,7 +8,7 @@ import {
 } from 'services/migrateThumbnailService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { logError } from 'utils/sentry';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import { TFunction } from 'i18next';
 
 export type SetProgressTracker = React.Dispatch<
@@ -60,7 +60,6 @@ function Message({
     );
 }
 export default function FixLargeThumbnails(props: Props) {
-    const { t } = useTranslation();
     const [fixState, setFixState] = useState(FIX_STATE.NOT_STARTED);
     const [progressTracker, setProgressTracker] = useState({
         current: 0,

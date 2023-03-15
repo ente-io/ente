@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { GalleryContext } from 'pages/gallery';
 import {
@@ -22,8 +22,6 @@ export default function ShortcutSection({
     closeSidebar,
     collectionSummaries,
 }: Iprops) {
-    const { t } = useTranslation();
-
     const galleryContext = useContext(GalleryContext);
     const [uncategorizedCollectionId, setUncategorizedCollectionID] =
         useState<number>();

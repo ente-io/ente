@@ -2,7 +2,7 @@ import React from 'react';
 import { ButtonProps, IconButton, styled } from '@mui/material';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { Button } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import uploadManager from 'services/upload/uploadManager';
 import { UploadTypeSelectorIntent } from 'types/gallery';
@@ -42,8 +42,6 @@ function UploadButton({
     disableShrink,
     icon,
 }: Iprops) {
-    const { t } = useTranslation();
-
     const onClickHandler = () => openUploader();
 
     return (

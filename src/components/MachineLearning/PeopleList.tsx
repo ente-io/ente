@@ -12,7 +12,7 @@ import { CACHES } from 'constants/cache';
 import { Legend } from 'components/PhotoViewer/styledComponents/Legend';
 import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 const FaceChipContainer = styled.div`
     display: flex;
@@ -78,7 +78,6 @@ export interface PhotoPeopleListProps extends PeopleListPropsBase {
 }
 
 export function PhotoPeopleList(props: PhotoPeopleListProps) {
-    const { t } = useTranslation();
     const [people, setPeople] = useState<Array<Person>>([]);
 
     useEffect(() => {
@@ -144,7 +143,6 @@ export function UnidentifiedFaces(props: {
     file: EnteFile;
     updateMLDataIndex: number;
 }) {
-    const { t } = useTranslation();
     const [faces, setFaces] = useState<Array<Face>>([]);
 
     useEffect(() => {

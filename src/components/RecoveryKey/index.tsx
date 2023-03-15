@@ -13,7 +13,7 @@ import * as bip39 from 'bip39';
 import { DashedBorderWrapper } from './styledComponents';
 import { AppContext } from 'pages/_app';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -27,8 +27,6 @@ interface Props {
 }
 
 function RecoveryKey({ somethingWentWrong, ...props }: Props) {
-    const { t } = useTranslation();
-
     const appContext = useContext(AppContext);
     const [recoveryKey, setRecoveryKey] = useState(null);
 

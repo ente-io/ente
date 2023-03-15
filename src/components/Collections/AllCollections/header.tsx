@@ -7,7 +7,7 @@ import {
 } from 'components/Container';
 import CollectionSort from 'components/Collections/AllCollections/CollectionSort';
 import Close from '@mui/icons-material/Close';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 export default function AllCollectionsHeader({
     onClose,
@@ -15,8 +15,6 @@ export default function AllCollectionsHeader({
     collectionSortBy,
     setCollectionSortBy,
 }) {
-    const { t } = useTranslation();
-
     return (
         <DialogTitle>
             <FlexWrapper>

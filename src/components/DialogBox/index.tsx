@@ -13,7 +13,7 @@ import DialogTitleWithCloseButton, {
 import DialogBoxBase from './base';
 import { DialogBoxAttributes } from 'types/dialogBox';
 import DialogIcon from './DialogIcon';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 type IProps = React.PropsWithChildren<
     Omit<DialogProps, 'onClose' | 'maxSize'> & {
@@ -33,8 +33,6 @@ export default function DialogBox({
     titleCloseButton,
     ...props
 }: IProps) {
-    const { t } = useTranslation();
-
     if (!attributes) {
         return <></>;
     }

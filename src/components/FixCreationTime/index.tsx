@@ -8,7 +8,7 @@ import FixCreationTimeFooter from './footer';
 import { Formik } from 'formik';
 
 import FixCreationTimeOptions from './options';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import { TFunction } from 'i18next';
 export interface FixCreationTimeAttributes {
     files: EnteFile[];
@@ -60,8 +60,6 @@ function Message({
     return message ? <div>{message}</div> : <></>;
 }
 export default function FixCreationTime(props: Props) {
-    const { t } = useTranslation();
-
     const [fixState, setFixState] = useState(FIX_STATE.NOT_STARTED);
     const [progressTracker, setProgressTracker] = useState({
         current: 0,

@@ -3,7 +3,7 @@ import Done from '@mui/icons-material/Done';
 import { Box, Button } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 export function PlanIconButton({
     current,
     onClick,
@@ -23,7 +23,6 @@ export function PlanIconButton({
 }
 
 function CurrentPlanTileButton() {
-    const { t } = useTranslation();
     return (
         <Button
             color="accent"
@@ -46,7 +45,6 @@ function CurrentPlanTileButton() {
 }
 
 function NormalPlanTileButton({ onClick }) {
-    const { t } = useTranslation();
     return (
         <Button
             color="accent"

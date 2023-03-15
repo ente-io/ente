@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import DoNotDisturbOutlinedIcon from '@mui/icons-material/DoNotDisturbOutlined';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
@@ -11,8 +11,6 @@ interface Iprops {
 }
 
 export default function MappingEntryOptions({ confirmStopWatching }: Iprops) {
-    const { t } = useTranslation();
-
     return (
         <OverflowMenu
             menuPaperProps={{

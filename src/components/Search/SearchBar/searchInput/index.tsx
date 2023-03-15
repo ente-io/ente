@@ -24,7 +24,7 @@ import { OptionWithInfo } from './optionWithInfo';
 import { SearchInputWrapper } from '../styledComponents';
 import MenuWithPeople from './MenuWithPeople';
 import { Person, Thing, WordGroup } from 'types/machineLearning';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Iprops {
     isOpen: boolean;
@@ -36,8 +36,6 @@ interface Iprops {
 }
 
 export default function SearchInput(props: Iprops) {
-    const { t } = useTranslation();
-
     const selectRef = useRef(null);
     const [value, setValue] = useState<SearchOption>(null);
     const appContext = useContext(AppContext);

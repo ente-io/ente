@@ -2,7 +2,7 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 import { Box, IconButton, styled, Typography } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 const RowContainer = styled(SpaceBetweenFlex)(({ theme }) => ({
     gap: theme.spacing(1.5),
@@ -13,7 +13,6 @@ const RowContainer = styled(SpaceBetweenFlex)(({ theme }) => ({
     },
 }));
 export function FreePlanRow({ closeModal }) {
-    const { t } = useTranslation();
     return (
         <RowContainer onClick={closeModal}>
             <Box>

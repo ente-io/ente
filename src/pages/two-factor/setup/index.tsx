@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { enableTwoFactor, setupTwoFactor } from 'services/userService';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import VerticallyCentered from 'components/Container';
 import { useRouter } from 'next/router';
@@ -22,8 +22,6 @@ export enum SetupMode {
 }
 
 export default function SetupTwoFactor() {
-    const { t } = useTranslation();
-
     const [twoFactorSecret, setTwoFactorSecret] =
         useState<TwoFactorSecret>(null);
 

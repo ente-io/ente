@@ -3,7 +3,7 @@ import React from 'react';
 
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { CollectionActions } from '.';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Iprops {
     handleCollectionAction: (
@@ -13,7 +13,6 @@ interface Iprops {
 }
 
 export function TrashCollectionOption({ handleCollectionAction }: Iprops) {
-    const { t } = useTranslation();
     return (
         <OverflowMenuOption
             color="danger"

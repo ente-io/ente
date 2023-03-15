@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getTwoFactorStatus } from 'services/userService';
 import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import TwoFactorModalSetupSection from './Setup';
 import TwoFactorModalManageSection from './Manage';
@@ -22,8 +22,6 @@ interface Props {
 }
 
 function TwoFactorModal(props: Props) {
-    const { t } = useTranslation();
-
     const [isTwoFactorEnabled, setTwoFactorStatus] = useState(false);
 
     useEffect(() => {

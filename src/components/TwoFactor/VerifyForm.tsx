@@ -2,7 +2,7 @@
 import { Formik, FormikHelpers } from 'formik';
 import React, { FC, useRef, useState } from 'react';
 import OtpInput from 'react-otp-input';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import SubmitButton from 'components/SubmitButton';
 import VerticallyCentered, { CenteredFlex } from 'components/Container';
@@ -24,7 +24,6 @@ export type VerifyTwoFactorCallback = (
 ) => Promise<void>;
 
 export default function VerifyTwoFactor(props: Props) {
-    const { t } = useTranslation();
     const [waiting, setWaiting] = useState(false);
     const otpInputRef = useRef(null);
     const [success, setSuccess] = useState(false);

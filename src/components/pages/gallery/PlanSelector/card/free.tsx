@@ -2,7 +2,7 @@ import { Stack } from '@mui/material';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import { PeriodToggler } from '../periodToggler';
 import Plans from '../plans';
 
@@ -14,8 +14,6 @@ export default function FreeSubscriptionPlanSelectorCard({
     togglePeriod,
     onPlanSelect,
 }) {
-    const { t } = useTranslation();
-
     return (
         <>
             <Typography variant="h3" fontWeight={'bold'}>

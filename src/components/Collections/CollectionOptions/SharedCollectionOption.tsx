@@ -2,7 +2,7 @@ import { OverflowMenuOption } from 'components/OverflowMenu/option';
 import React from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { CollectionActions } from '.';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Iprops {
     handleCollectionAction: (
@@ -12,7 +12,6 @@ interface Iprops {
 }
 
 export function SharedCollectionOption({ handleCollectionAction }: Iprops) {
-    const { t } = useTranslation();
     return (
         <OverflowMenuOption
             startIcon={<LogoutIcon />}

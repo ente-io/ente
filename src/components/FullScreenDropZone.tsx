@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { styled } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { AppContext } from 'pages/_app';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 const CloseButtonWrapper = styled('div')`
     position: absolute;
@@ -42,7 +42,6 @@ type Props = React.PropsWithChildren<{
 }>;
 
 export default function FullScreenDropZone(props: Props) {
-    const { t } = useTranslation();
     const appContext = useContext(AppContext);
 
     const [isDragActive, setIsDragActive] = useState(false);

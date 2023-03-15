@@ -10,7 +10,7 @@ import { Divider } from '@mui/material';
 import { CollectionShareContainer } from './container';
 import PublicShare from './publicShare';
 import { AppContext } from 'pages/_app';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Props {
     open: boolean;
@@ -19,7 +19,6 @@ interface Props {
 }
 
 function CollectionShare(props: Props) {
-    const { t } = useTranslation();
     const { isMobile } = useContext(AppContext);
     const handleClose = dialogCloseHandler({
         onClose: props.onClose,

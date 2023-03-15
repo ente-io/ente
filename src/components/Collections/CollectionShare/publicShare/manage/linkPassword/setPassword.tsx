@@ -3,7 +3,7 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 export function PublicLinkSetPassword({
@@ -14,7 +14,6 @@ export function PublicLinkSetPassword({
     updatePublicShareURLHelper,
     setChangePasswordView,
 }) {
-    const { t } = useTranslation();
     const savePassword: SingleInputFormProps['callback'] = async (
         passphrase,
         setFieldError

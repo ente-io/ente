@@ -6,7 +6,7 @@ import Titlebar from 'components/Titlebar';
 import { Box } from '@mui/system';
 import CopyButton from 'components/CodeBlock/CopyButton';
 import { formatDateFull } from 'utils/time/format';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 const ExifItem = styled(Box)`
     padding-left: 8px;
@@ -39,8 +39,6 @@ export function ExifData(props: {
     filename: string;
     onInfoClose: () => void;
 }) {
-    const { t } = useTranslation();
-
     const { exif, open, onClose, filename, onInfoClose } = props;
 
     if (!exif) {

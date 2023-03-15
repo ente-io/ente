@@ -4,7 +4,7 @@ import Select from 'react-select';
 import { linkExpiryStyle } from 'styles/linkExpiry';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import { shareExpiryOptions } from 'utils/collection';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { formatDateTime } from 'utils/time/format';
 import { OptionWithDivider } from './selectComponents/OptionWithDivider';
@@ -20,7 +20,6 @@ export function ManageLinkExpiry({
     collection,
     updatePublicShareURLHelper,
 }: Iprops) {
-    const { t } = useTranslation();
     const updateDeviceExpiry = async (optionFn) => {
         return updatePublicShareURLHelper({
             collectionID: collection.id,

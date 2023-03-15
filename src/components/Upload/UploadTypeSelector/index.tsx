@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { default as FileUploadIcon } from '@mui/icons-material/ImageOutlined';
 import { default as FolderUploadIcon } from '@mui/icons-material/PermMediaOutlined';
@@ -28,8 +28,6 @@ export default function UploadTypeSelector({
     uploadGoogleTakeoutZips,
     uploadTypeSelectorIntent,
 }: Iprops) {
-    const { t } = useTranslation();
-
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );

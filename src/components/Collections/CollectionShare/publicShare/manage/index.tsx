@@ -15,7 +15,7 @@ import { ManageDownloadAccess } from './downloadAccess';
 import { handleSharingErrors } from 'utils/error/ui';
 import { SetPublicShareProp } from 'types/publicCollection';
 import { ManagePublicCollect } from './publicCollect';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -28,7 +28,6 @@ export default function PublicShareManage({
     collection,
     setPublicShareProp,
 }: Iprops) {
-    const { t } = useTranslation();
     const galleryContext = useContext(GalleryContext);
 
     const [sharableLinkError, setSharableLinkError] = useState(null);

@@ -11,7 +11,8 @@ import Container from './Container';
 import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import { sleep } from 'utils/common';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 interface formValues {
     email: string;
@@ -19,7 +20,6 @@ interface formValues {
 }
 
 function ChangeEmailForm() {
-    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
     const ottInputRef = useRef(null);

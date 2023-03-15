@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
@@ -13,8 +13,6 @@ interface Iprops {
 }
 
 export default function TwoFactorModalManageSection(props: Iprops) {
-    const { t } = useTranslation();
-
     const { closeDialog } = props;
     const { setDialogMessage } = useContext(AppContext);
 

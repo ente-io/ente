@@ -21,7 +21,8 @@ import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { SpecialPadding } from 'styles/SpecialPadding';
 import { formatDate } from 'utils/time/format';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
@@ -178,7 +179,6 @@ export function PhotoList({
     getThumbnail,
     activeCollection,
 }: Props) {
-    const { t } = useTranslation();
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext

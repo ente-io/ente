@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 import {
     clearData,
@@ -28,8 +28,6 @@ const bip39 = require('bip39');
 bip39.setDefaultWordlist('english');
 
 export default function Recover() {
-    const { t } = useTranslation();
-
     const router = useRouter();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const appContext = useContext(AppContext);

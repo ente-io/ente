@@ -11,7 +11,7 @@ import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
 import * as Yup from 'yup';
 import Close from '@mui/icons-material/Close';
 import Done from '@mui/icons-material/Done';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface formValues {
     caption: string;
@@ -27,8 +27,6 @@ export function RenderCaption({
     scheduleUpdate: () => void;
     refreshPhotoswipe: () => void;
 }) {
-    const { t } = useTranslation();
-
     const [caption, setCaption] = useState(
         file?.pubMagicMetadata?.data.caption
     );

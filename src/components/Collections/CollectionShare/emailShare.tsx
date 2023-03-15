@@ -3,7 +3,7 @@ import SingleInputForm, {
 } from 'components/SingleInputForm';
 import { GalleryContext } from 'pages/gallery';
 import React, { useContext } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import { shareCollection } from 'services/collectionService';
 import { User } from 'types/user';
 import { handleSharingErrors } from 'utils/error/ui';
@@ -11,7 +11,6 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CollectionShareSharees } from './sharees';
 
 export default function EmailShare({ collection }) {
-    const { t } = useTranslation();
     const galleryContext = useContext(GalleryContext);
 
     const collectionShare: SingleInputFormProps['callback'] = async (

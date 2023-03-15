@@ -4,7 +4,7 @@ import React, { useContext, useState } from 'react';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import { PublicLinkSetPassword } from './setPassword';
 import PublicShareSwitch from '../../switch';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -17,8 +17,6 @@ export function ManageLinkPassword({
     publicShareProp,
     updatePublicShareURLHelper,
 }: Iprops) {
-    const { t } = useTranslation();
-
     const appContext = useContext(AppContext);
     const [changePasswordView, setChangePasswordView] = useState(false);
 

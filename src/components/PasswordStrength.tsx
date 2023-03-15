@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material';
 import { PasswordStrength } from 'constants/crypto';
 import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 import { estimatePasswordStrength } from 'utils/crypto';
 import { FlexWrapper } from './Container';
 
@@ -10,7 +10,6 @@ export const PasswordStrengthHint = ({
 }: {
     password: string;
 }): JSX.Element => {
-    const { t } = useTranslation();
     const passwordStrength = useMemo(
         () => estimatePasswordStrength(password),
         [password]

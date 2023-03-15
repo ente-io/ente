@@ -7,7 +7,7 @@ import {
     SvgIconProps,
     Tooltip,
 } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 export default function CopyButton({
     code,
@@ -18,7 +18,6 @@ export default function CopyButton({
     color?: IconButtonProps['color'];
     size?: SvgIconProps['fontSize'];
 }) {
-    const { t } = useTranslation();
     const [copied, setCopied] = useState<boolean>(false);
 
     const copyToClipboardHelper = (text: string) => () => {

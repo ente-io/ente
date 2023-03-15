@@ -1,7 +1,7 @@
 import { Box, styled, Typography } from '@mui/material';
 import React from 'react';
 import { convertBytesToGBs, makeHumanReadableStorage } from 'utils/billing';
-import { useTranslation } from 'react-i18next';
+import { t } from 'i18next';
 
 const MobileSmallBox = styled(Box)`
     display: none;
@@ -21,8 +21,6 @@ interface Iprops {
     storage: number;
 }
 export default function StorageSection({ usage, storage }: Iprops) {
-    const { t } = useTranslation();
-
     return (
         <Box width="100%">
             <Typography variant="body2" color={'text.secondary'}>
