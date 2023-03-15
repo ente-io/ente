@@ -47,7 +47,6 @@
     "heic-convert": "^1.2.4",
     "http-proxy-middleware": "^1.0.5",
     "i18next": "^22.4.11",
-    "i18next-browser-languagedetector": "^7.0.1",
     "i18next-http-backend": "^2.1.1",
     "idb": "^7.0.0",
     "is-electron": "^2.2.0",
