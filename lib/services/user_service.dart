@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/public_keys_db.dart';
@@ -23,7 +25,9 @@ import 'package:photos/ui/account/ott_verification_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/password_reentry_page.dart';
 import 'package:photos/ui/account/two_factor_authentication_page.dart';
+import 'package:photos/ui/account/two_factor_recovery_page.dart';
 import 'package:photos/ui/account/two_factor_setup_page.dart';
+import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -110,6 +114,13 @@ class UserService {
       _logger.severe(e);
       unawaited(showGenericErrorDialog(context: context));
     }
+  }
+
+  Future<void> sendFeedback(BuildContext context, String feedback) async {
+    await _dio.post(
+      _config.getHttpEndpoint() + "/anonymous/feedback",
+      data: {"feedback": feedback},
+    );
   }
 
   // getPublicKey returns null value if email id is not
@@ -489,6 +500,147 @@ class UserService {
     }
   }
 
+  Future<void> recoverTwoFactor(BuildContext context, String sessionID) async {
+    final dialog = createProgressDialog(context, "Please wait...");
+    await dialog.show();
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/two-factor/recover",
+        queryParameters: {
+          "sessionID": sessionID,
+        },
+      );
+      if (response.statusCode == 200) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return TwoFactorRecoveryPage(
+                sessionID,
+                response.data["encryptedSecret"],
+                response.data["secretDecryptionNonce"],
+              );
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      }
+    } on DioError catch (e) {
+      _logger.severe(e);
+      if (e.response != null && e.response!.statusCode == 404) {
+        showToast(context, "Session expired");
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const LoginPage();
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      } else {
+        showErrorDialog(
+          context,
+          "Oops",
+          "Something went wrong, please try again",
+        );
+      }
+    } catch (e) {
+      _logger.severe(e);
+      showErrorDialog(
+        context,
+        "Oops",
+        "Something went wrong, please try again",
+      );
+    } finally {
+      await dialog.hide();
+    }
+  }
+
+  Future<void> removeTwoFactor(
+    BuildContext context,
+    String sessionID,
+    String recoveryKey,
+    String encryptedSecret,
+    String secretDecryptionNonce,
+  ) async {
+    final dialog = createProgressDialog(context, "Please wait...");
+    await dialog.show();
+    String secret;
+    try {
+      if (recoveryKey.contains(' ')) {
+        if (recoveryKey.split(' ').length != mnemonicKeyWordCount) {
+          throw AssertionError(
+            'recovery code should have $mnemonicKeyWordCount words',
+          );
+        }
+        recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
+      }
+      secret = CryptoUtil.bin2base64(
+        await CryptoUtil.decrypt(
+          CryptoUtil.base642bin(encryptedSecret),
+          CryptoUtil.hex2bin(recoveryKey.trim()),
+          CryptoUtil.base642bin(secretDecryptionNonce),
+        ),
+      );
+    } catch (e) {
+      await dialog.hide();
+      await showErrorDialog(
+        context,
+        "Incorrect recovery key",
+        "The recovery key you entered is incorrect",
+      );
+      return;
+    }
+    try {
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/users/two-factor/remove",
+        data: {
+          "sessionID": sessionID,
+          "secret": secret,
+        },
+      );
+      if (response.statusCode == 200) {
+        showShortToast(context, "Two-factor authentication successfully reset");
+        await _saveConfiguration(response);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const PasswordReentryPage();
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      }
+    } on DioError catch (e) {
+      _logger.severe(e);
+      if (e.response != null && e.response!.statusCode == 404) {
+        showToast(context, "Session expired");
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const LoginPage();
+            },
+          ),
+          (route) => route.isFirst,
+        );
+      } else {
+        showErrorDialog(
+          context,
+          "Oops",
+          "Something went wrong, please try again",
+        );
+      }
+    } catch (e) {
+      _logger.severe(e);
+      showErrorDialog(
+        context,
+        "Oops",
+        "Something went wrong, please try again",
+      );
+    } finally {
+      await dialog.hide();
+    }
+  }
+
   Future<void> setupTwoFactor(BuildContext context, Completer completer) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
@@ -518,13 +670,26 @@ class UserService {
     String secret,
     String code,
   ) async {
+    Uint8List recoveryKey;
+    try {
+      recoveryKey = await getOrCreateRecoveryKey(context);
+    } catch (e) {
+      showGenericErrorDialog(context: context);
+      return false;
+    }
     final dialog = createProgressDialog(context, "Verifying...");
     await dialog.show();
+    final encryptionResult =
+        CryptoUtil.encryptSync(CryptoUtil.base642bin(secret), recoveryKey);
     try {
       await _enteDio.post(
         "/users/two-factor/enable",
         data: {
-          "code": code
+          "code": code,
+          "encryptedTwoFactorSecret":
+              CryptoUtil.bin2base64(encryptionResult.encryptedData!),
+          "twoFactorSecretDecryptionNonce":
+              CryptoUtil.bin2base64(encryptionResult.nonce!),
         },
       );
       await dialog.hide();

@@ -16,7 +16,7 @@ import 'package:photos/models/location.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
-import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/tools/editor/filtered_image.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';

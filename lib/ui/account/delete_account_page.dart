@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -157,7 +158,27 @@ class DeleteAccountPage extends StatelessWidget {
       if (choice.action != ButtonAction.first) {
         return;
       }
+
       Navigator.of(context).popUntil((route) => route.isFirst);
+      await showTextInputDialog(
+        context,
+        title: "Your account was deleted. Would you like to leave us a note?",
+        submitButtonLabel: "Send",
+        hintText: "Optional, as short as you like...",
+        alwaysShowSuccessState: true,
+        textCapitalization: TextCapitalization.words,
+        onSubmit: (String text) async {
+          // indicates user cancelled the rename request
+          if (text == "" || text.trim().isEmpty) {
+            return;
+          }
+          try {
+            await UserService.instance.sendFeedback(context, text);
+          } catch (e, s) {
+            Logger("Delete account").severe("Failed to send feedback", e, s);
+          }
+        },
+      );
     }
   }
 

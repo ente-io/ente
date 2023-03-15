@@ -11,15 +11,21 @@ enum DividerType {
 class DividerWidget extends StatelessWidget {
   final DividerType dividerType;
   final Color bgColor;
+  final bool divColorHasBlur;
+  final EdgeInsets? padding;
   const DividerWidget({
     required this.dividerType,
     this.bgColor = Colors.transparent,
+    this.divColorHasBlur = true,
+    this.padding,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    final dividerColor = getEnteColorScheme(context).blurStrokeFaint;
+    final dividerColor = divColorHasBlur
+        ? getEnteColorScheme(context).blurStrokeFaint
+        : getEnteColorScheme(context).strokeFaint;
 
     if (dividerType == DividerType.solid) {
       return Container(
@@ -38,6 +44,7 @@ class DividerWidget extends StatelessWidget {
 
     return Container(
       color: bgColor,
+      padding: padding ?? EdgeInsets.zero,
       child: Row(
         children: [
           SizedBox(

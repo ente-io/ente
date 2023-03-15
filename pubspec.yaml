@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.7.31+431
+version: 0.7.33+433
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
@@ -75,7 +75,7 @@ dependencies:
   intl: ^0.17.0
   like_button: ^2.0.2
   loading_animations: ^2.1.0
-  local_auth: ^1.1.5
+  local_auth: ^2.1.5
   logging: ^1.0.1
   lottie: ^1.2.2
   media_extension: ^1.0.1

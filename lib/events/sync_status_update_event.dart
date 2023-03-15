@@ -1,6 +1,10 @@
+import "package:logging/logging.dart";
+
 import 'package:photos/events/event.dart';
 
 class SyncStatusUpdate extends Event {
+  static final _logger = Logger("SyncStatusUpdate");
+
   final SyncStatus status;
   final int? completed;
   final int? total;
@@ -18,6 +22,7 @@ class SyncStatusUpdate extends Event {
     this.reason = "",
     this.error,
   }) {
+    _logger.info("Creating sync status: " + status.toString());
     timestamp = DateTime.now().microsecondsSinceEpoch;
   }
 }

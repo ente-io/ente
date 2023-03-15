@@ -21,7 +21,7 @@ import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/collections/trash_button_widget.dart';
 import 'package:photos/ui/collections/uncat_collections_button_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import "package:photos/ui/components/icon_button_widget.dart";
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/viewer/actions/delete_empty_albums.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/local_settings.dart';

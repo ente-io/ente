@@ -32,11 +32,13 @@ class AppLock extends StatefulWidget {
   final Duration backgroundLockLatency;
   final ThemeData? darkTheme;
   final ThemeData? lightTheme;
+  final ThemeMode savedThemeMode;
 
   const AppLock({
     Key? key,
     required this.builder,
     required this.lockScreen,
+    required this.savedThemeMode,
     this.enabled = true,
     this.backgroundLockLatency = const Duration(seconds: 0),
     this.darkTheme,
@@ -103,7 +105,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
     return MaterialApp(
       home: this.widget.enabled ? this._lockScreen : this.widget.builder(null),
       navigatorKey: _navigatorKey,
-      themeMode: ThemeMode.system,
+      themeMode: widget.savedThemeMode,
       theme: widget.lightTheme,
       darkTheme: widget.darkTheme,
       supportedLocales: AppLocalizations.supportedLocales,

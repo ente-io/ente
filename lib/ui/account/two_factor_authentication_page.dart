@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
-import "package:photos/utils/dialog_util.dart";
 import 'package:pinput/pin_put/pin_put.dart';
 
 class TwoFactorAuthenticationPage extends StatefulWidget {
@@ -124,11 +123,7 @@ class _TwoFactorAuthenticationPageState
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
-            showErrorDialog(
-              context,
-              "Contact support",
-              "Please drop an email to support@ente.io from your registered email address",
-            );
+            UserService.instance.recoverTwoFactor(context, widget.sessionID);
           },
           child: Container(
             padding: const EdgeInsets.all(10),
