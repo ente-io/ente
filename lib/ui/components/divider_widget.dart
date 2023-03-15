@@ -12,10 +12,12 @@ class DividerWidget extends StatelessWidget {
   final DividerType dividerType;
   final Color bgColor;
   final bool divColorHasBlur;
+  final EdgeInsets? padding;
   const DividerWidget({
     required this.dividerType,
     this.bgColor = Colors.transparent,
     this.divColorHasBlur = true,
+    this.padding,
     super.key,
   });
 
@@ -42,6 +44,7 @@ class DividerWidget extends StatelessWidget {
 
     return Container(
       color: bgColor,
+      padding: padding ?? EdgeInsets.zero,
       child: Row(
         children: [
           SizedBox(
