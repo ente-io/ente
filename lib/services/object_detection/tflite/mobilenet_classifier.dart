@@ -95,7 +95,7 @@ class MobileNetClassifier extends Classifier {
     return inputImage;
   }
 
-  /// Runs object detection on the input image
+  @override
   Predictions? predict(imageLib.Image image) {
     final predictStartTime = DateTime.now().millisecondsSinceEpoch;
 
