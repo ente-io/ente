@@ -113,6 +113,8 @@ const redirectMap = new Map([
     ['families', getFamilyPortalRedirectURL],
 ]);
 
+const APP_NAME = 'ente Photos';
+
 export default function App({ Component, err }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
@@ -316,7 +318,7 @@ export default function App({ Component, err }) {
     return (
         <>
             <Head>
-                <title>{t('TITLE')}</title>
+                <title>{APP_NAME}</title>
                 <meta
                     name="viewport"
                     content="initial-scale=1, width=device-width"
