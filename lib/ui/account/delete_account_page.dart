@@ -221,15 +221,28 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   }
 
   Future<void> _initiateDelete(BuildContext context) async {
-    final deleteChallengeResponse =
-        await UserService.instance.getDeleteChallenge(context);
-    if (deleteChallengeResponse == null) {
-      return;
-    }
-    if (deleteChallengeResponse.allowDelete) {
-      await _delete(context, deleteChallengeResponse);
-    } else {
-      await _requestEmailForDeletion(context);
+    final choice = await showChoiceDialog(
+      context,
+      title: "Confirm Account Deletion",
+      body: "You are about to permanently delete your account and all its data."
+          "\nThis action is irreversible.",
+      firstButtonLabel: "Delete Account Permanently",
+      firstButtonType: ButtonType.critical,
+      firstButtonOnTap: () async {
+        final deleteChallengeResponse =
+            await UserService.instance.getDeleteChallenge(context);
+        if (deleteChallengeResponse == null) {
+          return;
+        }
+        if (deleteChallengeResponse.allowDelete) {
+          await _delete(context, deleteChallengeResponse);
+        } else {
+          await _requestEmailForDeletion(context);
+        }
+      },
+    );
+    if (choice!.action == ButtonAction.error) {
+      await showGenericErrorDialog(context: context);
     }
   }
 
