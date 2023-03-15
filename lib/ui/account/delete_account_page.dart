@@ -241,6 +241,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
           await _requestEmailForDeletion(context);
         }
       },
+      isDismissible: false,
     );
     if (choice!.action == ButtonAction.error) {
       await showGenericErrorDialog(context: context);
