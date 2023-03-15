@@ -55,7 +55,7 @@ import { User } from 'types/user';
 import { SetTheme } from 'types/theme';
 import { useLocalState } from 'hooks/useLocalState';
 import { THEME_COLOR } from 'constants/theme';
-typeof window !== 'undefined' && require('i18n');
+import { setupI18n } from 'i18n';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -113,10 +113,9 @@ const redirectMap = new Map([
     ['families', getFamilyPortalRedirectURL],
 ]);
 
-const APP_NAME = 'ente Photos';
-
 export default function App({ Component, err }) {
     const router = useRouter();
+    const [i18nIsReady, setI18nIsReady] = useState<boolean>(true);
     const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(
         typeof window !== 'undefined' && !window.navigator.onLine
@@ -140,6 +139,10 @@ export default function App({ Component, err }) {
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
     const [theme, setTheme] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
+
+    useEffect(() => {
+        setupI18n().finally(() => setI18nIsReady(false));
+    }, []);
 
     useEffect(() => {
         HTTPService.getInterceptors().response.use(
@@ -318,7 +321,7 @@ export default function App({ Component, err }) {
     return (
         <>
             <Head>
-                <title>{APP_NAME}</title>
+                <title>{t('TITLE')}</title>
                 <meta
                     name="viewport"
                     content="initial-scale=1, width=device-width"
@@ -397,7 +400,7 @@ export default function App({ Component, err }) {
                         setTheme,
                         somethingWentWrong,
                     }}>
-                    {loading ? (
+                    {loading || i18nIsReady ? (
                         <VerticallyCentered>
                             <EnteSpinner>
                                 <span className="sr-only">Loading...</span>
