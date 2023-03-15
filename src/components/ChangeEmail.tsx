@@ -84,17 +84,15 @@ function ChangeEmailForm() {
                         <Alert
                             color="accent"
                             onClose={() => setShowMessage(false)}>
-                            <span>
-                                <Trans i18nKey="EMAIL_SENT">
-                                    Verification code sent to{' '}
-                                    <Typography
-                                        component={'span'}
-                                        fontSize="inherit"
-                                        color="text.secondary">
-                                        {{ email }}
-                                    </Typography>
-                                </Trans>
-                            </span>
+                            <Trans i18nKey="EMAIL_SENT">
+                                Verification code sent to{' '}
+                                <Typography
+                                    component={'span'}
+                                    fontSize="inherit"
+                                    color="text.secondary">
+                                    {{ email }}
+                                </Typography>
+                            </Trans>
                         </Alert>
                     )}
                     <form noValidate onSubmit={handleSubmit}>

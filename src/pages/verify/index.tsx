@@ -135,17 +135,15 @@ export default function Verify() {
         <FormContainer>
             <FormPaper>
                 <FormPaperTitle sx={{ mb: 14, wordBreak: 'break-word' }}>
-                    <span>
-                        <Trans i18nKey="EMAIL_SENT">
-                            Verification code sent to{' '}
-                            <Typography
-                                component={'span'}
-                                fontSize="inherit"
-                                color="text.secondary">
-                                {{ email }}
-                            </Typography>
-                        </Trans>
-                    </span>
+                    <Trans i18nKey="EMAIL_SENT">
+                        Verification code sent to{' '}
+                        <Typography
+                            component={'span'}
+                            fontSize="inherit"
+                            color="text.secondary">
+                            {{ email }}
+                        </Typography>
+                    </Trans>
                 </FormPaperTitle>
                 <Typography color={'text.secondary'} mb={2} variant="body2">
                     {t('CHECK_INBOX')}

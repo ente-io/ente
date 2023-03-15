@@ -228,9 +228,9 @@
         "THING": "Chose",
         "FILE_CAPTION": "Description"
     },
-    "photos_count_zero": "Aucune photo",
+    "photos_count_zero": "Pas de souvenirs",
     "photos_count_one": "1 photo",
-    "photos_count_many": "{{count}} photos",
+    "photos_count_other": "{{count}} photos",
     "TERMS_AND_CONDITIONS": "I agree to the <2>terms</2> and <6>privacy policy</6>",
     "CONFIRM_PASSWORD_NOT_SAVED": "<p>Je comprend que si je perd le mot de passe,je peux perdre mes données puisque mes données sont{' '}<1>chiffrées de bout en bout</1>avec ente</p>",
     "ADD_TO_COLLECTION": "Ajouter à l'album",

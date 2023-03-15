@@ -33,7 +33,7 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
                                 </Typography>
                             </FreeFlowText>
                             <Typography color="text.secondary">
-                                {t('PHOTO_COUNT', { count: data.fileCount })}
+                                {t('photos_count', { count: data.fileCount })}
                             </Typography>
                         </Box>
 
