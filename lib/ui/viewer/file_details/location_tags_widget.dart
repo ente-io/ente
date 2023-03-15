@@ -28,11 +28,17 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return InfoItemWidget(
-      leadingIcon: Icons.add_location_alt_outlined,
-      title: "Add location",
-      subtitleSection: locationTagChips,
-      hasChipButtons: hasChipButtons,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 500),
+      switchInCurve: Curves.easeInOutExpo,
+      switchOutCurve: Curves.easeInOutExpo,
+      child: InfoItemWidget(
+        key: ValueKey(title),
+        leadingIcon: Icons.add_location_alt_outlined,
+        title: title,
+        subtitleSection: locationTagChips,
+        hasChipButtons: hasChipButtons,
+      ),
     );
   }
 
