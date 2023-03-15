@@ -537,7 +537,7 @@
     "ML_MORE_DETAILS": "More details",
     "ENABLE_FACE_SEARCH": "Enable face search",
     "ENABLE_FACE_SEARCH_TITLE": "Enable face search?",
-    "ENABLE_FACE_SEARCH_DESCRIPTION": "If you enable face search, ente will extract face geometry from your photos. This will happen on your device, and any generated biometric data will be end-to-encrypted.<1></1><2></2><3>Please click here for more details about this feature in our privacy policy</3>",
+    "ENABLE_FACE_SEARCH_DESCRIPTION": "If you enable face search, ente will extract face geometry from your photos. This will happen on your device, and any generated biometric data will be end-to-encrypted.<br/><br/><3>Please click here for more details about this feature in our privacy policy</3>",
     "DISABLE_BETA": "Disable beta",
     "DISABLE_FACE_SEARCH": "Disable face search",
     "DISABLE_FACE_SEARCH_TITLE": "Disable face search?",
