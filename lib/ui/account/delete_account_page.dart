@@ -26,7 +26,6 @@ class DeleteAccountPage extends StatefulWidget {
 class _DeleteAccountPageState extends State<DeleteAccountPage> {
   bool _hasConfirmedDeletion = false;
   final _feedbackTextCtrl = TextEditingController();
-  final _focusNode = FocusNode();
   final String _defaultSelection = 'Select reason';
   late String dropdownValue = _defaultSelection;
   late List<String> deletionReason = [
@@ -123,7 +122,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 controller: _feedbackTextCtrl,
                 autofocus: false,
                 autocorrect: false,
-                focusNode: _focusNode,
                 keyboardType: TextInputType.multiline,
                 minLines: 3,
                 maxLines: null,
@@ -131,22 +129,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   setState(() {});
                 },
               ),
-              (_focusNode.hasFocus || _hasConfirmedDeletion) &&
-                      _feedbackTextCtrl.text.trim().length < 10
-                  ? SizedBox(
-                      height: 42,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 4.0),
-                        child: Text(
-                          "This field requires a minimum of 10 "
-                          "characters",
-                          style: getEnteTextTheme(context)
-                              .smallBold
-                              .copyWith(color: colorScheme.warning700),
-                        ),
-                      ),
-                    )
-                  : const SizedBox(height: 42),
+              const SizedBox(height: 24),
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -183,8 +166,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       buttonType: ButtonType.critical,
                       labelText: "Confirm Account Deletion",
                       isDisabled: !_hasConfirmedDeletion ||
-                          _defaultSelection == dropdownValue ||
-                          _feedbackTextCtrl.text.trim().length < 10,
+                          _defaultSelection == dropdownValue,
                       onTap: () async => {await _initiateDelete(context)},
                       shouldSurfaceExecutionStates: true,
                     ),
