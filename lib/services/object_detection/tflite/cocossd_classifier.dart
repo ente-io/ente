@@ -25,8 +25,8 @@ class CocoSSDClassifier extends Classifier {
   /// Result score threshold
   static const double threshold = 0.5;
 
-  static const String modelFileName = "model.tflite";
-  static const String labelFileName = "labels.txt";
+  static const String modelPath = "models/cocossd/model.tflite";
+  static const String labelPath = "assets/models/cocossd/labels.txt";
 
   /// [ImageProcessor] used to pre-process the image
   ImageProcessor? imageProcessor;
@@ -56,7 +56,7 @@ class CocoSSDClassifier extends Classifier {
     try {
       _interpreter = interpreter ??
           await Interpreter.fromAsset(
-            "models/cocossd/" + modelFileName,
+            modelPath,
             options: InterpreterOptions()..threads = 4,
           );
       final outputTensors = _interpreter.getOutputTensors();
@@ -75,8 +75,7 @@ class CocoSSDClassifier extends Classifier {
   /// Loads labels from assets
   void loadLabels(List<String>? labels) async {
     try {
-      _labels = labels ??
-          await FileUtil.loadLabels("assets/models/cocossd/" + labelFileName);
+      _labels = labels ?? await FileUtil.loadLabels(labelPath);
       _logger.info("Labels initialized");
     } catch (e, s) {
       _logger.severe("Error while loading labels", e, s);

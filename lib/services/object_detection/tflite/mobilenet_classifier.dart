@@ -25,8 +25,10 @@ class MobileNetClassifier extends Classifier {
   /// Result score threshold
   static const double threshold = 0.5;
 
-  static const String modelFileName = "mobilenet_v1_1.0_224_quant.tflite";
-  static const String labelFileName = "labels_mobilenet_quant_v1_224.txt";
+  static const String modelPath =
+      "models/mobilenet/mobilenet_v1_1.0_224_quant.tflite";
+  static const String labelPath =
+      "assets/models/mobilenet/labels_mobilenet_quant_v1_224.txt";
 
   /// [ImageProcessor] used to pre-process the image
   ImageProcessor? imageProcessor;
@@ -56,7 +58,7 @@ class MobileNetClassifier extends Classifier {
     try {
       _interpreter = interpreter ??
           await Interpreter.fromAsset(
-            "models/mobilenet/" + modelFileName,
+            modelPath,
             options: InterpreterOptions()..threads = 4,
           );
       final outputTensors = _interpreter.getOutputTensors();
@@ -75,8 +77,7 @@ class MobileNetClassifier extends Classifier {
   /// Loads labels from assets
   void loadLabels(List<String>? labels) async {
     try {
-      _labels = labels ??
-          await FileUtil.loadLabels("assets/models/mobilenet/" + labelFileName);
+      _labels = labels ?? await FileUtil.loadLabels(labelPath);
       _logger.info("Labels initialized");
     } catch (e, s) {
       _logger.severe("Error while loading labels", e, s);
