@@ -116,10 +116,14 @@ class UserService {
     }
   }
 
-  Future<void> sendFeedback(BuildContext context, String feedback) async {
+  Future<void> sendFeedback(
+    BuildContext context,
+    String feedback, {
+    String type = "SubCancellation",
+  }) async {
     await _dio.post(
       _config.getHttpEndpoint() + "/anonymous/feedback",
-      data: {"feedback": feedback},
+      data: {"feedback": feedback, "type": "type"},
     );
   }
 
