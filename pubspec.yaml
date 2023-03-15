@@ -167,6 +167,7 @@ flutter:
     - assets/
     - assets/models/cocossd/
     - assets/models/mobilenet/
+    - assets/models/scenes/
   fonts:
   - family: Inter
     fonts:
