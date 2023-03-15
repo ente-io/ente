@@ -7,6 +7,7 @@ import "package:photos/models/file_type.dart";
 import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
+import "package:photos/ui/components/divider_widget.dart";
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
 import "package:photos/ui/viewer/file_details/added_by_widget.dart";
@@ -14,7 +15,6 @@ import "package:photos/ui/viewer/file_details/albums_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/backed_up_time_item_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
-import "package:photos/ui/viewer/file_details/file_details_divider_widget.dart";
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
 import "package:photos/utils/exif_util.dart";
@@ -98,7 +98,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     );
     fileDetailsTiles.addAll([
       CreationTimeItem(file, _currentUserID),
-      const FileDetialsDividerWidget(),
+      const FileDetailsDivider(),
       ValueListenableBuilder(
         valueListenable: _exifNotifier,
         builder: (context, _, __) => FilePropertiesItemWidget(
@@ -108,7 +108,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           _currentUserID,
         ),
       ),
-      const FileDetialsDividerWidget(),
+      const FileDetailsDivider(),
     ]);
     fileDetailsTiles.add(
       ValueListenableBuilder(
@@ -118,7 +118,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
               ? Column(
                   children: [
                     BasicExifItemWidget(_exifData),
-                    const FileDetialsDividerWidget(),
+                    const FileDetailsDivider(),
                   ],
                 )
               : const SizedBox.shrink();
@@ -133,7 +133,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             return Column(
               children: [
                 AllExifItemWidget(file, _exifNotifier.value),
-                const FileDetialsDividerWidget()
+                const FileDetailsDivider(),
               ],
             );
           },
@@ -141,12 +141,17 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ]);
     }
     if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
-      fileDetailsTiles
-          .addAll([ObjectsItemWidget(file), const FileDetialsDividerWidget()]);
+      fileDetailsTiles.addAll([
+        ObjectsItemWidget(file),
+        const FileDetailsDivider(),
+      ]);
     }
     if (file.uploadedFileID != null && file.updationTime != null) {
       fileDetailsTiles.addAll(
-        [BackedUpTimeItemWidget(file), const FileDetialsDividerWidget()],
+        [
+          BackedUpTimeItemWidget(file),
+          const FileDetailsDivider(),
+        ],
       );
     }
     fileDetailsTiles.add(AlbumsItemWidget(file, _currentUserID));
@@ -232,5 +237,19 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     if (exif["EXIF ISOSpeedRatings"] != null) {
       _exifData['ISO'] = exif["EXIF ISOSpeedRatings"].toString();
     }
+  }
+}
+
+class FileDetailsDivider extends StatelessWidget {
+  const FileDetailsDivider({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    const dividerPadding = EdgeInsets.symmetric(vertical: 15.5);
+    return const DividerWidget(
+      dividerType: DividerType.menu,
+      divColorHasBlur: false,
+      padding: dividerPadding,
+    );
   }
 }
