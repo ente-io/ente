@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import "package:dropdown_button2/dropdown_button2.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
@@ -25,16 +26,17 @@ class DeleteAccountPage extends StatefulWidget {
 class _DeleteAccountPageState extends State<DeleteAccountPage> {
   bool _hasConfirmedDeletion = false;
   final _feedbackTextCtrl = TextEditingController();
-  final _focusNode = FocusNode();
   final String _defaultSelection = 'Select reason';
-  late String dropdownValue = _defaultSelection;
-  late List<String> deletionReason = [
+  late String _dropdownValue = _defaultSelection;
+  late final List<String> _deletionReason = [
     _defaultSelection,
     'It’s missing a key feature that I need',
+    'The app or a certain feature does not \nbehave as I think it should',
     'I found another service that I like better',
     'I use a different account',
     'My reason isn’t listed',
   ];
+  final List<int> _reasonIndexesWhereFeedbackIsNecessary = [1, 2, 5];
 
   @override
   Widget build(BuildContext context) {
@@ -66,25 +68,20 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               Container(
                 width: double.infinity,
                 height: 48,
-                padding: const EdgeInsets.only(left: 16, right: 6),
                 decoration: BoxDecoration(
                   color: colorScheme.fillFaint,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: DropdownButton<String>(
+                child: DropdownButton2<String>(
                   alignment: AlignmentDirectional.topStart,
-                  value: dropdownValue,
-                  icon: Icon(
-                    Icons.expand_more_outlined,
-                    color: colorScheme.strokeMuted,
-                  ),
+                  value: _dropdownValue,
                   onChanged: (String? newValue) {
                     setState(() {
-                      dropdownValue = newValue!;
+                      _dropdownValue = newValue!;
                     });
                   },
                   underline: const SizedBox(),
-                  items: deletionReason
+                  items: _deletionReason
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -102,8 +99,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               ),
               const SizedBox(height: 24),
               Text(
-                "We are sorry to see you go. Please explain why you are "
-                "leaving to help us improve.",
+                "We are sorry to see you go. Please share your feedback to "
+                "help us improve.",
                 style: getEnteTextTheme(context).body,
               ),
               const SizedBox(height: 4),
@@ -127,7 +124,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 controller: _feedbackTextCtrl,
                 autofocus: false,
                 autocorrect: false,
-                focusNode: _focusNode,
                 keyboardType: TextInputType.multiline,
                 minLines: 3,
                 maxLines: null,
@@ -135,15 +131,13 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   setState(() {});
                 },
               ),
-              (_focusNode.hasFocus || _hasConfirmedDeletion) &&
-                      _feedbackTextCtrl.text.trim().length < 10
+              _shouldAskForFeedback()
                   ? SizedBox(
                       height: 42,
                       child: Padding(
                         padding: const EdgeInsets.only(top: 4.0),
                         child: Text(
-                          "This field requires a minimum of 10 "
-                          "characters",
+                          "Kindly help us with this information",
                           style: getEnteTextTheme(context)
                               .smallBold
                               .copyWith(color: colorScheme.warning700),
@@ -151,26 +145,33 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       ),
                     )
                   : const SizedBox(height: 42),
-              Row(
-                children: [
-                  Checkbox(
-                    value: _hasConfirmedDeletion,
-                    side: CheckboxTheme.of(context).side,
-                    onChanged: (value) {
-                      setState(() {
-                        _hasConfirmedDeletion = value!;
-                      });
-                    },
-                  ),
-                  Expanded(
-                    child: Text(
-                      "Yes, I want to permanently delete this account and "
-                      "all its data.",
-                      style: getEnteTextTheme(context).bodyMuted,
-                      textAlign: TextAlign.left,
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _hasConfirmedDeletion = !_hasConfirmedDeletion;
+                  });
+                },
+                child: Row(
+                  children: [
+                    Checkbox(
+                      value: _hasConfirmedDeletion,
+                      side: CheckboxTheme.of(context).side,
+                      onChanged: (value) {
+                        setState(() {
+                          _hasConfirmedDeletion = value!;
+                        });
+                      },
                     ),
-                  )
-                ],
+                    Expanded(
+                      child: Text(
+                        "Yes, I want to permanently delete this account and "
+                        "all its data.",
+                        style: getEnteTextTheme(context).bodyMuted,
+                        textAlign: TextAlign.left,
+                      ),
+                    )
+                  ],
+                ),
               ),
               Expanded(
                 child: Column(
@@ -179,10 +180,10 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                     ButtonWidget(
                       buttonType: ButtonType.critical,
                       labelText: "Confirm Account Deletion",
-                      isDisabled: !_hasConfirmedDeletion ||
-                          _defaultSelection == dropdownValue ||
-                          _feedbackTextCtrl.text.trim().length < 10,
-                      onTap: () async => {await _initiateDelete(context)},
+                      isDisabled: _shouldBlockDeletion(),
+                      onTap: () async {
+                        await _initiateDelete(context);
+                      },
                       shouldSurfaceExecutionStates: true,
                     ),
                     const SizedBox(height: 8),
@@ -208,16 +209,41 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     );
   }
 
+  bool _shouldBlockDeletion() {
+    return !_hasConfirmedDeletion ||
+        _dropdownValue == _defaultSelection ||
+        _shouldAskForFeedback();
+  }
+
+  bool _shouldAskForFeedback() {
+    return (_reasonIndexesWhereFeedbackIsNecessary
+            .contains(_deletionReason.indexOf(_dropdownValue)) &&
+        _feedbackTextCtrl.text.trim().isEmpty);
+  }
+
   Future<void> _initiateDelete(BuildContext context) async {
-    final deleteChallengeResponse =
-        await UserService.instance.getDeleteChallenge(context);
-    if (deleteChallengeResponse == null) {
-      return;
-    }
-    if (deleteChallengeResponse.allowDelete) {
-      await _delete(context, deleteChallengeResponse);
-    } else {
-      await _requestEmailForDeletion(context);
+    final choice = await showChoiceDialog(
+      context,
+      title: "Confirm Account Deletion",
+      body: "You are about to permanently delete your account and all its data."
+          "\nThis action is irreversible.",
+      firstButtonLabel: "Delete Account Permanently",
+      firstButtonType: ButtonType.critical,
+      firstButtonOnTap: () async {
+        final deleteChallengeResponse =
+            await UserService.instance.getDeleteChallenge(context);
+        if (deleteChallengeResponse == null) {
+          return;
+        }
+        if (deleteChallengeResponse.allowDelete) {
+          await _delete(context, deleteChallengeResponse);
+        } else {
+          await _requestEmailForDeletion(context);
+        }
+      },
+    );
+    if (choice!.action == ButtonAction.error) {
+      await showGenericErrorDialog(context: context);
     }
   }
 
@@ -237,7 +263,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       await UserService.instance.deleteAccount(
         context,
         challengeResponseStr,
-        reasonCategory: dropdownValue,
+        reasonCategory: _dropdownValue,
         feedback: _feedbackTextCtrl.text.trim(),
       );
       Navigator.of(context).popUntil((route) => route.isFirst);
