@@ -87,7 +87,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
         final asset = await widget.file.getAsset;
         subSectionWidgets.add(
           Text(
-            asset!.videoDuration.toString().split(".")[0],
+            asset?.videoDuration.toString().split(".")[0] ?? "",
             style: getEnteTextTheme(context).smallMuted,
           ),
         );
