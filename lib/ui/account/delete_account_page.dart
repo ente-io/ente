@@ -27,14 +27,15 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   bool _hasConfirmedDeletion = false;
   final _feedbackTextCtrl = TextEditingController();
   final String _defaultSelection = 'Select reason';
-  late String dropdownValue = _defaultSelection;
-  late List<String> deletionReason = [
+  late String _dropdownValue = _defaultSelection;
+  late final List<String> _deletionReason = [
     _defaultSelection,
     'It’s missing a key feature that I need',
     'I found another service that I like better',
     'I use a different account',
     'My reason isn’t listed',
   ];
+  final List<int> _reasonIndexesWhereFeedbackIsNecessary = [1, 4];
 
   @override
   Widget build(BuildContext context) {
@@ -72,14 +73,14 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 ),
                 child: DropdownButton2<String>(
                   alignment: AlignmentDirectional.topStart,
-                  value: dropdownValue,
+                  value: _dropdownValue,
                   onChanged: (String? newValue) {
                     setState(() {
-                      dropdownValue = newValue!;
+                      _dropdownValue = newValue!;
                     });
                   },
                   underline: const SizedBox(),
-                  items: deletionReason
+                  items: _deletionReason
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -129,7 +130,20 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   setState(() {});
                 },
               ),
-              const SizedBox(height: 24),
+              _shouldAskForFeedback()
+                  ? SizedBox(
+                      height: 42,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 4.0),
+                        child: Text(
+                          "Kindly help us with this information",
+                          style: getEnteTextTheme(context)
+                              .smallBold
+                              .copyWith(color: colorScheme.warning700),
+                        ),
+                      ),
+                    )
+                  : const SizedBox(height: 42),
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -165,9 +179,10 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                     ButtonWidget(
                       buttonType: ButtonType.critical,
                       labelText: "Confirm Account Deletion",
-                      isDisabled: !_hasConfirmedDeletion ||
-                          _defaultSelection == dropdownValue,
-                      onTap: () async => {await _initiateDelete(context)},
+                      isDisabled: _shouldBlockDeletion(),
+                      onTap: () async {
+                        await _initiateDelete(context);
+                      },
                       shouldSurfaceExecutionStates: true,
                     ),
                     const SizedBox(height: 8),
@@ -191,6 +206,18 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
         ),
       ),
     );
+  }
+
+  bool _shouldBlockDeletion() {
+    return !_hasConfirmedDeletion ||
+        _dropdownValue == _defaultSelection ||
+        _shouldAskForFeedback();
+  }
+
+  bool _shouldAskForFeedback() {
+    return (_reasonIndexesWhereFeedbackIsNecessary
+            .contains(_deletionReason.indexOf(_dropdownValue)) &&
+        _feedbackTextCtrl.text.trim().isEmpty);
   }
 
   Future<void> _initiateDelete(BuildContext context) async {
@@ -222,7 +249,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       await UserService.instance.deleteAccount(
         context,
         challengeResponseStr,
-        reasonCategory: dropdownValue,
+        reasonCategory: _dropdownValue,
         feedback: _feedbackTextCtrl.text.trim(),
       );
       Navigator.of(context).popUntil((route) => route.isFirst);
