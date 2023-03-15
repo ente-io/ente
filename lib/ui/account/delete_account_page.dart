@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/user_service.dart';
@@ -10,6 +11,7 @@ import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
+import "package:photos/utils/toast_util.dart";
 
 class DeleteAccountPage extends StatefulWidget {
   const DeleteAccountPage({
@@ -213,49 +215,37 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       return;
     }
     if (deleteChallengeResponse.allowDelete) {
-      await _confirmAndDelete(context, deleteChallengeResponse);
+      await _delete(context, deleteChallengeResponse);
     } else {
       await _requestEmailForDeletion(context);
     }
   }
 
-  Future<void> _confirmAndDelete(
+  Future<void> _delete(
     BuildContext context,
     DeleteChallengeResponse response,
   ) async {
-    final choice = await showChoiceDialog(
-      context,
-      title: 'Are you sure you want to delete your account?',
-      body:
-          'Your uploaded data will be scheduled for deletion, and your account'
-          ' will be permanently deleted. \n\nThis action is not reversible.',
-      firstButtonLabel: "Delete my account",
-      isCritical: true,
-      firstButtonOnTap: () async {
-        final decryptChallenge = CryptoUtil.openSealSync(
-          CryptoUtil.base642bin(response.encryptedChallenge),
-          CryptoUtil.base642bin(
-            Configuration.instance.getKeyAttributes()!.publicKey,
-          ),
-          Configuration.instance.getSecretKey()!,
-        );
-        final challengeResponseStr = utf8.decode(decryptChallenge);
-        await UserService.instance.deleteAccount(
-          context,
-          challengeResponseStr,
-          reasonCategory: dropdownValue,
-          feedback: _feedbackTextCtrl.text.trim(),
-        );
-      },
-    );
-    if (choice!.action == ButtonAction.error) {
+    try {
+      final decryptChallenge = CryptoUtil.openSealSync(
+        CryptoUtil.base642bin(response.encryptedChallenge),
+        CryptoUtil.base642bin(
+          Configuration.instance.getKeyAttributes()!.publicKey,
+        ),
+        Configuration.instance.getSecretKey()!,
+      );
+      final challengeResponseStr = utf8.decode(decryptChallenge);
+      await UserService.instance.deleteAccount(
+        context,
+        challengeResponseStr,
+        reasonCategory: dropdownValue,
+        feedback: _feedbackTextCtrl.text.trim(),
+      );
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      showShortToast(context, "Your account has been deleted");
+    } catch (e, s) {
+      Logger("DeleteAccount").severe("failed to delete", e, s);
       showGenericErrorDialog(context: context);
     }
-    if (choice.action != ButtonAction.first) {
-      return;
-    }
-
-    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   Future<void> _requestEmailForDeletion(BuildContext context) async {
