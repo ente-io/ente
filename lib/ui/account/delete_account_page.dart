@@ -151,26 +151,33 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       ),
                     )
                   : const SizedBox(height: 42),
-              Row(
-                children: [
-                  Checkbox(
-                    value: _hasConfirmedDeletion,
-                    side: CheckboxTheme.of(context).side,
-                    onChanged: (value) {
-                      setState(() {
-                        _hasConfirmedDeletion = value!;
-                      });
-                    },
-                  ),
-                  Expanded(
-                    child: Text(
-                      "Yes, I want to permanently delete this account and "
-                      "all its data.",
-                      style: getEnteTextTheme(context).bodyMuted,
-                      textAlign: TextAlign.left,
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _hasConfirmedDeletion = !_hasConfirmedDeletion;
+                  });
+                },
+                child: Row(
+                  children: [
+                    Checkbox(
+                      value: _hasConfirmedDeletion,
+                      side: CheckboxTheme.of(context).side,
+                      onChanged: (value) {
+                        setState(() {
+                          _hasConfirmedDeletion = value!;
+                        });
+                      },
                     ),
-                  )
-                ],
+                    Expanded(
+                      child: Text(
+                        "Yes, I want to permanently delete this account and "
+                        "all its data.",
+                        style: getEnteTextTheme(context).bodyMuted,
+                        textAlign: TextAlign.left,
+                      ),
+                    )
+                  ],
+                ),
               ),
               Expanded(
                 child: Column(
