@@ -9,9 +9,9 @@ import 'package:ente_auth/ui/settings/account_section_widget.dart';
 import 'package:ente_auth/ui/settings/app_version_widget.dart';
 import 'package:ente_auth/ui/settings/danger_section_widget.dart';
 import 'package:ente_auth/ui/settings/data_section_widget.dart';
-import 'package:ente_auth/ui/settings/made_with_love_widget.dart';
 import 'package:ente_auth/ui/settings/security_section_widget.dart';
 import 'package:ente_auth/ui/settings/social_section_widget.dart';
+import 'package:ente_auth/ui/settings/support_dev_widget.dart';
 import 'package:ente_auth/ui/settings/support_section_widget.dart';
 import 'package:ente_auth/ui/settings/theme_switch_widget.dart';
 import 'package:ente_auth/ui/settings/title_bar_widget.dart';
@@ -84,7 +84,7 @@ class SettingsPage extends StatelessWidget {
       sectionSpacing,
       const DangerSectionWidget(),
       const AppVersionWidget(),
-      const MadeWithLoveWidget(),
+      const SupportDevWidget(),
       const Padding(
         padding: EdgeInsets.only(bottom: 60),
       ),

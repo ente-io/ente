@@ -55,6 +55,8 @@
   "incorrectPassword": "Incorrect password",
   "welcomeBackTitle": "Welcome back!",
   "madeWithLoveAtPrefix": "made with ❤️ at ",
+  "supportDevs" : "Subscribe to <bold-green>ente Photos</bold-green> to support this project.",
+  "supportDiscount" : "Use coupon code \"AUTH\" to get 10% off first year",
   "changeEmail": "change email",
   "ok": "OK",
   "cancel": "Cancel",
