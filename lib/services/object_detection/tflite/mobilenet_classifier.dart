@@ -9,6 +9,7 @@ import "package:photos/services/object_detection/tflite/classifier.dart";
 import "package:tflite_flutter/tflite_flutter.dart";
 import "package:tflite_flutter_helper/tflite_flutter_helper.dart";
 
+// Source: https://tfhub.dev/tensorflow/lite-model/mobilenet_v1_1.0_224/1/default/1
 class MobileNetClassifier extends Classifier {
   final _logger = Logger("MobileNetClassifier");
 
