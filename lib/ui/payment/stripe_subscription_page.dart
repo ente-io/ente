@@ -2,6 +2,7 @@ import 'dart:async';
 
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
@@ -55,6 +56,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   bool _isStripeSubscriber = false;
   bool _showYearlyPlan = false;
   EnteColorScheme colorScheme = darkScheme;
+  final Logger logger = Logger("StripeSubscriptionPage");
 
   @override
   void initState() {
@@ -382,6 +384,28 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       );
     }
     await _dialog.hide();
+    if (!isAutoRenewDisabled && mounted) {
+      await showTextInputDialog(
+        context,
+        title: "Your subscription was cancelled. Would you like to share the "
+            "reason?",
+        submitButtonLabel: "Send",
+        hintText: "Optional, as short as you like...",
+        alwaysShowSuccessState: true,
+        textCapitalization: TextCapitalization.words,
+        onSubmit: (String text) async {
+          // indicates user cancelled the rename request
+          if (text == "" || text.trim().isEmpty) {
+            return;
+          }
+          try {
+            await UserService.instance.sendFeedback(context, text);
+          } catch (e, s) {
+            logger.severe("Failed to send feedback", e, s);
+          }
+        },
+      );
+    }
   }
 
   List<Widget> _getStripePlanWidgets() {
