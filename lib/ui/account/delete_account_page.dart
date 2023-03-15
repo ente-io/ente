@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import "package:dropdown_button2/dropdown_button2.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
@@ -66,18 +67,13 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               Container(
                 width: double.infinity,
                 height: 48,
-                padding: const EdgeInsets.only(left: 16, right: 6),
                 decoration: BoxDecoration(
                   color: colorScheme.fillFaint,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: DropdownButton<String>(
+                child: DropdownButton2<String>(
                   alignment: AlignmentDirectional.topStart,
                   value: dropdownValue,
-                  icon: Icon(
-                    Icons.expand_more_outlined,
-                    color: colorScheme.strokeMuted,
-                  ),
                   onChanged: (String? newValue) {
                     setState(() {
                       dropdownValue = newValue!;

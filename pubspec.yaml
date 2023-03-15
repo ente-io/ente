@@ -37,6 +37,7 @@ dependencies:
   dio: ^4.0.6
   dots_indicator: ^2.0.0
   dotted_border: ^2.0.0+2
+  dropdown_button2: ^2.0.0
   email_validator: ^2.0.1
   equatable: ^2.0.5
   event_bus: ^2.0.0
