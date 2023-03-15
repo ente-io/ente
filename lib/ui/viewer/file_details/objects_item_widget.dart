@@ -24,19 +24,21 @@ class ObjectsItemWidget extends StatelessWidget {
   Future<List<ChipButtonWidget>> _objectTags(File file) async {
     try {
       final chipButtons = <ChipButtonWidget>[];
-      final objectTags = await getThumbnail(file).then((data) {
-        return ObjectDetectionService.instance.predict(data!);
-      });
-      for (String objectTag in objectTags) {
-        chipButtons.add(ChipButtonWidget(objectTag));
+      var objectTags = <String>[];
+      final thumbnail = await getThumbnail(file);
+      if (thumbnail != null) {
+        objectTags = await ObjectDetectionService.instance.predict(thumbnail);
       }
-      if (chipButtons.isEmpty) {
+      if (objectTags.isEmpty) {
         return const [
           ChipButtonWidget(
             "No results",
             noChips: true,
           )
         ];
+      }
+      for (String objectTag in objectTags) {
+        chipButtons.add(ChipButtonWidget(objectTag));
       }
       return chipButtons;
     } catch (e, s) {
