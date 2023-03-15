@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import Backend from 'i18next-http-backend';
+import { getBestPossibleUserLocale } from 'utils/i18n';
 
 i18n
     // i18next-http-backend
@@ -32,6 +33,8 @@ i18n
             ],
         },
     });
+
+i18n.changeLanguage(getBestPossibleUserLocale());
 
 i18n.services.formatter.add('dateTime', (value, lng) => {
     return new Date(value / 1000).toLocaleDateString(lng, {

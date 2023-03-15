@@ -2,6 +2,7 @@ import { OptionWithDivider } from 'components/Collections/CollectionShare/public
 import { Language } from 'constants/locale';
 import { useLocalState } from 'hooks/useLocalState';
 import i18n from 'i18n';
+import { useEffect } from 'react';
 import Select from 'react-select';
 import { DropdownStyle } from 'styles/dropdown';
 import { getBestPossibleUserLocale } from 'utils/i18n';
@@ -26,12 +27,12 @@ const getLanguageOptions = () => {
 export const LanguageSelector = () => {
     const [userLocale, setUserLocale] = useLocalState(
         LS_KEYS.LOCALE,
-        getBestPossibleUserLocale(i18n.languages)
+        getBestPossibleUserLocale()
     );
-    const updateCurrentLocale = (newLocale: Language) => {
-        setUserLocale(newLocale);
-        i18n.changeLanguage(newLocale);
-    };
+
+    useEffect(() => {
+        i18n.changeLanguage(userLocale);
+    }, [userLocale]);
 
     return (
         <Select
@@ -45,7 +46,7 @@ export const LanguageSelector = () => {
                 label: getLocaleDisplayName(userLocale),
                 value: userLocale,
             }}
-            onChange={(e) => updateCurrentLocale(e.value)}
+            onChange={(e) => setUserLocale(e.value)}
             styles={DropdownStyle}
         />
     );
