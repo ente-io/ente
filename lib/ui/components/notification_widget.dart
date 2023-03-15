@@ -3,7 +3,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/theme/text_style.dart';
-import 'package:photos/ui/components/icon_button_widget.dart';
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 
 // CreateNotificationType enum
 enum NotificationType {

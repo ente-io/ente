@@ -5,7 +5,7 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
-import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 
 class DeleteEmptyAlbums extends StatefulWidget {

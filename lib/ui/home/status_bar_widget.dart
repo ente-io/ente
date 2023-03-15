@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/notification_event.dart';
@@ -24,6 +25,8 @@ class StatusBarWidget extends StatefulWidget {
 }
 
 class _StatusBarWidgetState extends State<StatusBarWidget> {
+  static final _logger = Logger("StatusBarWidget");
+
   late StreamSubscription<SyncStatusUpdate> _subscription;
   late StreamSubscription<NotificationEvent> _notificationSubscription;
   bool _showStatus = false;
@@ -33,6 +36,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   @override
   void initState() {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
+      _logger.info("Received event " + event.toString());
       if (event.status == SyncStatus.error) {
         setState(() {
           _syncError = event.error;

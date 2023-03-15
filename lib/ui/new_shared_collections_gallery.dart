@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collection_action_sheet.dart";
-import "package:photos/ui/components/button_widget.dart";
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/empty_state_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/utils/share_util.dart";

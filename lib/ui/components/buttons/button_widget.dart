@@ -350,7 +350,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                                       },
                                     ),
                               EnteLoadingWidget(
-                                is20pts: true,
+                                padding: 3,
                                 color: loadingIconColor,
                               ),
                             ],

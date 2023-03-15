@@ -1,4 +1,4 @@
-import "package:photos/ui/components/button_widget.dart";
+import 'package:photos/ui/components/buttons/button_widget.dart';
 
 class ButtonResult {
   ///action can be null when action for the button that is returned when popping

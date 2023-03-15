@@ -6,7 +6,7 @@ import "package:photos/models/user_details.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/components/icon_button_widget.dart";
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/utils/data_util.dart";

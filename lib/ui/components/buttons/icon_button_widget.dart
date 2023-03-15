@@ -43,6 +43,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasPressedState = widget.onTap != null;
     final colorTheme = getEnteColorScheme(context);
     iconStateColor ??
         (iconStateColor = widget.defaultColor ??
@@ -52,9 +53,9 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
     return widget.disableGestureDetector
         ? _iconButton(colorTheme)
         : GestureDetector(
-            onTapDown: _onTapDown,
-            onTapUp: _onTapUp,
-            onTapCancel: _onTapCancel,
+            onTapDown: hasPressedState ? _onTapDown : null,
+            onTapUp: hasPressedState ? _onTapUp : null,
+            onTapCancel: hasPressedState ? _onTapCancel : null,
             onTap: widget.onTap,
             child: _iconButton(colorTheme),
           );
