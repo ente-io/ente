@@ -157,7 +157,22 @@ class AccountSectionWidget extends StatelessWidget {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            routeToPage(context, const DeleteAccountPage());
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
+              context,
+              "Please authenticate to initiate account deletion",
+            );
+            if (hasAuthenticated) {
+              unawaited(
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return const DeleteAccountPage();
+                    },
+                  ),
+                ),
+              );
+            }
           },
         ),
         sectionOptionSpacing,
