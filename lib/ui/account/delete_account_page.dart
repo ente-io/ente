@@ -97,8 +97,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               ),
               const SizedBox(height: 24),
               Text(
-                "We are sorry to see you go. Please explain why you are "
-                "leaving to help us improve.",
+                "We are sorry to see you go. Please share your feedback to "
+                "help us improve.",
                 style: getEnteTextTheme(context).body,
               ),
               const SizedBox(height: 4),
