@@ -240,7 +240,12 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
           Configuration.instance.getSecretKey()!,
         );
         final challengeResponseStr = utf8.decode(decryptChallenge);
-        await UserService.instance.deleteAccount(context, challengeResponseStr);
+        await UserService.instance.deleteAccount(
+          context,
+          challengeResponseStr,
+          reasonCategory: dropdownValue,
+          feedback: _feedbackTextCtrl.text.trim(),
+        );
       },
     );
     if (choice!.action == ButtonAction.error) {

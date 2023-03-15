@@ -257,13 +257,17 @@ class UserService {
 
   Future<void> deleteAccount(
     BuildContext context,
-    String challengeResponse,
-  ) async {
+    String challengeResponse, {
+    required String reasonCategory,
+    required String feedback,
+  }) async {
     try {
       final response = await _enteDio.delete(
         "/users/delete",
         data: {
           "challenge": challengeResponse,
+          "reasonCategory": reasonCategory,
+          "feedback": feedback,
         },
       );
       if (response.statusCode == 200) {
