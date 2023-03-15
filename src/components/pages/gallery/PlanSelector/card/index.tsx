@@ -18,7 +18,7 @@ import billingService from 'services/billingService';
 import { SetLoading } from 'types/gallery';
 import { logError } from 'utils/sentry';
 import { AppContext } from 'pages/_app';
-import { Stack } from '@mui/material';
+import { Link, Stack } from '@mui/material';
 import { useLocalState } from 'hooks/useLocalState';
 import { LS_KEYS } from 'utils/storage/localStorage';
 import { getLocalUserDetails } from 'utils/user';
@@ -26,7 +26,7 @@ import { PLAN_PERIOD } from 'constants/gallery';
 import FreeSubscriptionPlanSelectorCard from './free';
 import PaidSubscriptionPlanSelectorCard from './paid';
 import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 interface Props {
     closeModal: any;
@@ -149,7 +149,15 @@ function PlanSelectorCard(props: Props) {
         } else {
             appContext.setDialogMessage({
                 title: t('MANAGE_PLAN'),
-                content: t('MAIL_TO_MANAGE_SUBSCRIPTION'),
+                content: (
+                    <Trans i18nKey={'MAIL_TO_MANAGE_SUBSCRIPTION'}>
+                        Please contact us at{' '}
+                        <Link href={`mailto:support@ente.io`}>
+                            support@ente.io
+                        </Link>{' '}
+                        to manage your subscription
+                    </Trans>
+                ),
                 close: { variant: 'secondary' },
             });
         }
