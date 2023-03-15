@@ -366,17 +366,19 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     );
   }
 
-  Future<void> toggleStripeSubscription(bool isRenewCancelled) async {
+  // toggleStripeSubscription, based on current auto renew status, will
+  // toggle the auto renew status of the user's subscription
+  Future<void> toggleStripeSubscription(bool isAutoRenewDisabled) async {
     await _dialog.show();
     try {
-      isRenewCancelled
+      isAutoRenewDisabled
           ? await _billingService.activateStripeSubscription()
           : await _billingService.cancelStripeSubscription();
       await _fetchSub();
     } catch (e) {
       showShortToast(
         context,
-        isRenewCancelled ? 'Failed to renew' : 'Failed to cancel',
+        isAutoRenewDisabled ? 'Failed to renew' : 'Failed to cancel',
       );
     }
     await _dialog.hide();
