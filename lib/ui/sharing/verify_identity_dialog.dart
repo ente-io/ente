@@ -10,7 +10,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/services/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/components/button_widget.dart";
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/utils/share_util.dart";
 

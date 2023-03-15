@@ -8,7 +8,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/bottom_action_bar/action_bar_widget.dart';
-import 'package:photos/ui/components/icon_button_widget.dart';
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 
 class BottomActionBarWidget extends StatelessWidget {
   final String? text;

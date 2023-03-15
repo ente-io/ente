@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photos/ui/components/icon_button_widget.dart';
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/viewer/search/search_widget.dart';
 
 class HomeHeaderWidget extends StatefulWidget {

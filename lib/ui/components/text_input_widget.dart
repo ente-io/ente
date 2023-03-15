@@ -77,9 +77,11 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         selection: TextSelection.collapsed(offset: widget.initialValue!.length),
       );
     }
-    _textController.addListener(() {
-      widget.onChange!.call(_textController.text);
-    });
+    if (widget.onChange != null) {
+      _textController.addListener(() {
+        widget.onChange!.call(_textController.text);
+      });
+    }
     _obscureTextNotifier = ValueNotifier(widget.isPasswordInput);
     _obscureTextNotifier.addListener(_safeRefresh);
     super.initState();
