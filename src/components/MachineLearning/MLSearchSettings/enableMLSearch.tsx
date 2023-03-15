@@ -21,7 +21,7 @@ export default function EnableMLSearch({
                 <Box px={'8px'}>
                     {' '}
                     <Typography color="text.secondary">
-                        <Trans i18nKey={'ML_SEARCH_DESCRIPTION'}>
+                        <Trans i18nKey={'ENABLE_ML_SEARCH_DESCRIPTION'}>
                             This will enable on-device machine learning and face
                             search which will start analyzing your uploaded
                             photos locally.
