@@ -28,6 +28,7 @@ class EnteColorScheme {
   final Color strokeFaint;
 
   // Fixed Colors
+  final Color primaryGreen;
   final Color primary700;
   final Color primary500;
   final Color primary400;
@@ -53,6 +54,7 @@ class EnteColorScheme {
     this.strokeBase,
     this.strokeMuted,
     this.strokeFaint, {
+    this.primaryGreen = _primaryGreen,
     this.primary700 = _primary700,
     this.primary500 = _primary500,
     this.primary400 = _primary400,
@@ -142,6 +144,8 @@ const Color strokeMutedDark = Color.fromRGBO(255, 255, 255, 0.24);
 const Color strokeFaintDark = Color.fromRGBO(255, 255, 255, 0.16);
 
 // Fixed Colors
+
+const Color _primaryGreen = Color.fromRGBO(29, 185, 84, 1);
 
 const Color _primary700 = Color.fromARGB(255, 164, 0, 182);
 const Color _primary500 = Color.fromARGB(255, 204, 10, 101);
