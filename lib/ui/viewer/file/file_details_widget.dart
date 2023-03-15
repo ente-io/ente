@@ -16,6 +16,7 @@ import 'package:photos/ui/viewer/file_details/backed_up_time_item_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
+import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
 import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
 import "package:photos/utils/exif_util.dart";
 
@@ -125,6 +126,12 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         },
       ),
     );
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+      fileDetailsTiles.addAll([
+        LocationTagsWidget(widget.file),
+        const FileDetailsDivider(),
+      ]);
+    }
     if (_isImage) {
       fileDetailsTiles.addAll([
         ValueListenableBuilder(
