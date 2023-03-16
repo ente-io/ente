@@ -43,7 +43,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
         await UserService.instance.getUserDetailsV2(memoryCount: false);
     final referralView =
         await StorageBonusService.instance.getGateway().getReferralView();
-    return Tuple2(referralView, cachedUserDetails!);
+    return Tuple2(referralView, cachedUserDetails);
   }
 
   @override
