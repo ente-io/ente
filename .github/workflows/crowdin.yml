@@ -23,6 +23,7 @@ jobs:
           download_translations: true
           localization_branch_name: l10n_translations
           create_pull_request: true
+          skip_untranslated_strings: true
           pull_request_title: 'New  Translations'
           pull_request_body: 'New translations via [Crowdin GH Action](https://github.com/crowdin/github-action)'
           pull_request_base_branch_name: 'main'
