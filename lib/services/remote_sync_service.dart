@@ -433,7 +433,7 @@ class RemoteSyncService {
   }
 
   Future<int?> _getCollectionID(DeviceCollection deviceCollection) async {
-    if (deviceCollection.collectionID != null) {
+    if (deviceCollection.hasCollectionID()) {
       final collection =
           _collectionsService.getCollectionByID(deviceCollection.collectionID!);
       if (collection == null || collection.isDeleted) {

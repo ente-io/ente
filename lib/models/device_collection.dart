@@ -11,6 +11,10 @@ class DeviceCollection {
   int? collectionID;
   File? thumbnail;
 
+  bool hasCollectionID() {
+    return collectionID != null && collectionID! != -1;
+  }
+
   DeviceCollection(
     this.id,
     this.name, {
