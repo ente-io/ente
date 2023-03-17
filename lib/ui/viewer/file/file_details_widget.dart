@@ -46,6 +46,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   bool _isImage = false;
   late int _currentUserID;
   bool showExifListTile = false;
+  bool hasGPSData = false;
 
   @override
   void initState() {
@@ -53,6 +54,11 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     _currentUserID = Configuration.instance.getUserID()!;
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
+    _exifNotifier.addListener(() {
+      if (_exifNotifier.value != null) {
+        hasGPSData = _haGPSData(_exifNotifier.value!);
+      }
+    });
     if (_isImage) {
       _exifNotifier.addListener(() {
         if (_exifNotifier.value != null) {
@@ -64,10 +70,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             _exifData["exposureTime"] != null ||
             _exifData["ISO"] != null;
       });
-      getExif(widget.file).then((exif) {
-        _exifNotifier.value = exif;
-      });
     }
+    getExif(widget.file).then((exif) {
+      _exifNotifier.value = exif;
+    });
     super.initState();
   }
 
@@ -128,8 +134,19 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     );
     if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
       fileDetailsTiles.addAll([
-        LocationTagsWidget(widget.file),
-        const FileDetailsDivider(),
+        ValueListenableBuilder(
+          valueListenable: _exifNotifier,
+          builder: (context, _, __) {
+            return hasGPSData
+                ? Column(
+                    children: [
+                      LocationTagsWidget(widget.file),
+                      const FileDetailsDivider(),
+                    ],
+                  )
+                : const SizedBox.shrink();
+          },
+        )
       ]);
     }
     if (_isImage) {
@@ -205,6 +222,17 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         ),
       ),
     );
+  }
+
+  bool _haGPSData(Map<String, IfdTag> exif) {
+    return exif["GPS GPSLatitude"] != null &&
+        exif["GPS GPSLongitude"] != null &&
+        exif["GPS GPSLatitudeRef"] != null &&
+        exif["GPS GPSLongitudeRef"] != null &&
+        exif["GPS GPSLatitude"].toString() != "" &&
+        exif["GPS GPSLongitude"].toString() != "" &&
+        exif["GPS GPSLatitudeRef"].toString() != "" &&
+        exif["GPS GPSLongitudeRef"].toString() != "";
   }
 
   _generateExifForDetails(Map<String, IfdTag> exif) {

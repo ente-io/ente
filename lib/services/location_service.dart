@@ -99,3 +99,12 @@ class LocationService {
     return map;
   }
 }
+
+class GPSData {
+  String latRef;
+  List<double> lat;
+  String longRef;
+  List<double> long;
+
+  GPSData(this.latRef, this.lat, this.longRef, this.long);
+}
