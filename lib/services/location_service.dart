@@ -1,6 +1,8 @@
 import "dart:collection";
 import "dart:convert";
+import "dart:math";
 
+import "package:photos/core/constants.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LocationService {
@@ -22,20 +24,36 @@ class LocationService {
   Future<void> addLocation(
     String location,
     double lat,
-    double lon,
+    double long,
     int radius,
   ) async {
     final list = getLocations();
+    //The area enclosed by the location tag will be a circle on a 3D spherical
+    //globe and an ellipse on a 2D Mercator projection (2D map)
+    //a & b are the semi-major and semi-minor axes of the ellipse
+    //Converting the unit from kilometers to degrees for a and b as that is
+    //the unit on the caritesian plane
+    final a = (radius * _scaleFactor(lat)) / kilometersPerDegree;
+    final b = radius / kilometersPerDegree;
+    final center = [lat, long];
     final data = {
-      "id": list.length,
       "name": location,
-      "lat": lat,
-      "lon": lon,
       "radius": radius,
+      "a": a,
+      "b": b,
+      "center": center,
     };
     final encodedMap = json.encode(data);
     list.add(encodedMap);
     await prefs!.setStringList('locations', list);
+  }
+
+  ///The area bounded by the location tag becomes more elliptical with increase
+  ///in the magnitude of the latitude on the caritesian plane. When latitude is
+  ///0 degrees, the ellipse is a circle with a = b = r. When latitude incrases,
+  ///the major axis (a) has to be scaled by the secant of the latitude.
+  double _scaleFactor(double lat) {
+    return 1 / cos(lat * (pi / 180));
   }
 
   Future<void> addFileToLocation(int locationId, int fileId) async {
