@@ -5,6 +5,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import "package:photos/services/feature_flag_service.dart";
+import "package:photos/services/location_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
@@ -40,7 +41,11 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     "takenOnDevice": null,
     "exposureTime": null,
     "ISO": null,
-    "megaPixels": null
+    "megaPixels": null,
+    "lat": null,
+    "long": null,
+    "latRef": null,
+    "longRef": null,
   };
 
   bool _isImage = false;
@@ -56,7 +61,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         widget.file.fileType == FileType.livePhoto;
     _exifNotifier.addListener(() {
       if (_exifNotifier.value != null) {
-        hasGPSData = _haGPSData(_exifNotifier.value!);
+        _generateExifForLocation(_exifNotifier.value!);
+        hasGPSData = _haGPSData();
       }
     });
     if (_isImage) {
@@ -140,7 +146,14 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             return hasGPSData
                 ? Column(
                     children: [
-                      LocationTagsWidget(widget.file),
+                      LocationTagsWidget(
+                        GPSData(
+                          _exifData["latRef"],
+                          _exifData["lat"],
+                          _exifData["longRef"],
+                          _exifData["long"],
+                        ).toSignedDecimalDegreeCoordinates(),
+                      ),
                       const FileDetailsDivider(),
                     ],
                   )
@@ -224,15 +237,34 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     );
   }
 
-  bool _haGPSData(Map<String, IfdTag> exif) {
-    return exif["GPS GPSLatitude"] != null &&
-        exif["GPS GPSLongitude"] != null &&
-        exif["GPS GPSLatitudeRef"] != null &&
-        exif["GPS GPSLongitudeRef"] != null &&
-        exif["GPS GPSLatitude"].toString() != "" &&
-        exif["GPS GPSLongitude"].toString() != "" &&
-        exif["GPS GPSLatitudeRef"].toString() != "" &&
-        exif["GPS GPSLongitudeRef"].toString() != "";
+  bool _haGPSData() {
+    return _exifData["lat"] != null &&
+        _exifData["long"] != null &&
+        _exifData["latRef"] != null &&
+        _exifData["longRef"] != null;
+  }
+
+  _generateExifForLocation(Map<String, IfdTag> exif) {
+    if (exif["GPS GPSLatitude"] != null) {
+      _exifData["lat"] = exif["GPS GPSLatitude"]!
+          .values
+          .toList()
+          .map((e) => ((e as Ratio).numerator / e.denominator))
+          .toList();
+    }
+    if (exif["GPS GPSLongitude"] != null) {
+      _exifData["long"] = exif["GPS GPSLongitude"]!
+          .values
+          .toList()
+          .map((e) => ((e as Ratio).numerator / e.denominator))
+          .toList();
+    }
+    if (exif["GPS GPSLatitudeRef"] != null) {
+      _exifData["latRef"] = exif["GPS GPSLatitudeRef"].toString();
+    }
+    if (exif["GPS GPSLongitudeRef"] != null) {
+      _exifData["longRef"] = exif["GPS GPSLongitudeRef"].toString();
+    }
   }
 
   _generateExifForDetails(Map<String, IfdTag> exif) {

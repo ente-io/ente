@@ -107,4 +107,13 @@ class GPSData {
   List<double> long;
 
   GPSData(this.latRef, this.lat, this.longRef, this.long);
+
+  List<double> toSignedDecimalDegreeCoordinates() {
+    final latSign = latRef == "N" ? 1 : -1;
+    final longSign = longRef == "E" ? 1 : -1;
+    return [
+      latSign * lat[0] + lat[1] / 60 + lat[2] / 3600,
+      longSign * long[0] + long[1] / 60 + long[2] / 3600
+    ];
+  }
 }
