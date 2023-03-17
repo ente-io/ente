@@ -77,9 +77,11 @@ export default function SubscriptionStatus({
                 sx={{ cursor: handleClick && 'pointer' }}>
                 {isSubscriptionActive(userDetails.subscription) ? (
                     isOnFreePlan(userDetails.subscription) ? (
-                        t('FREE_SUBSCRIPTION_INFO', {
-                            date: userDetails.subscription?.expiryTime,
-                        })
+                        <Trans i18nKey={'FREE_SUBSCRIPTION_INFO'}>
+                            You are on the <strong>free</strong> plan that
+                            expires on{' '}
+                            {{ date: userDetails.subscription?.expiryTime }}
+                        </Trans>
                     ) : isSubscriptionCancelled(userDetails.subscription) ? (
                         t('RENEWAL_CANCELLED_SUBSCRIPTION_INFO', {
                             date: userDetails.subscription?.expiryTime,

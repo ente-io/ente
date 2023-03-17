@@ -9,6 +9,7 @@ import { convertBytesToGBs, isSubscriptionCancelled } from 'utils/billing';
 import { ManageSubscription } from '../manageSubscription';
 import { PeriodToggler } from '../periodToggler';
 import Plans from '../plans';
+import { Trans } from 'react-i18next';
 
 export default function PaidSubscriptionPlanSelectorCard({
     plans,
@@ -41,9 +42,16 @@ export default function PaidSubscriptionPlanSelectorCard({
 
             <Box px={1.5}>
                 <Typography color={'text.secondary'} fontWeight={'bold'}>
-                    {t('CURRENT_USAGE', {
-                        usage: `${convertBytesToGBs(usage, 2)} ${t('GB')}`,
-                    })}
+                    <Trans i18nKey="CURRENT_USAGE">
+                        Current usage:{' '}
+                        <strong>
+                            {{
+                                usage: `${convertBytesToGBs(usage, 2)} ${t(
+                                    'GB'
+                                )}`,
+                            }}
+                        </strong>
+                    </Trans>
                 </Typography>
             </Box>
 

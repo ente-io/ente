@@ -8,6 +8,7 @@ import ElectronUpdateService from 'services/electron/update';
 import { AppUpdateInfo } from 'types/electron';
 import InfoOutlined from '@mui/icons-material/InfoRounded';
 import { Trans } from 'react-i18next';
+import { Subscription } from 'types/billing';
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
         title: t('DOWNLOAD_APP'),
@@ -114,3 +115,19 @@ export const getExportDirectoryDoesNotExistMessage =
         ),
         close: {},
     });
+
+export const getSubscriptionPurchaseSuccessMessage = (
+    subscription: Subscription
+): DialogBoxAttributes => ({
+    title: t('SUBSCRIPTION_PURCHASE_SUCCESS_TITLE'),
+    close: { variant: 'accent' },
+    content: (
+        <Trans i18nKey="SUBSCRIPTION_PURCHASE_SUCCESS">
+            <p>We've received your payment</p>
+            <p>
+                Your subscription is valid till{' '}
+                <strong>{{ date: subscription?.expiryTime }}</strong>
+            </p>
+        </Trans>
+    ),
+});

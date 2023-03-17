@@ -28,6 +28,7 @@ import PaidSubscriptionPlanSelectorCard from './paid';
 import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
+import { SUPPORT_EMAIL } from 'constants/urls';
 
 interface Props {
     closeModal: any;
@@ -151,8 +152,8 @@ function PlanSelectorCard(props: Props) {
                 content: (
                     <Trans i18nKey={'MAIL_TO_MANAGE_SUBSCRIPTION'}>
                         Please contact us at{' '}
-                        <Link href={`mailto:support@ente.io`}>
-                            support@ente.io
+                        <Link href={`mailto:${SUPPORT_EMAIL}`}>
+                            {{ link: SUPPORT_EMAIL }}
                         </Link>{' '}
                         to manage your subscription
                     </Trans>

@@ -23,6 +23,7 @@ import { logError } from 'utils/sentry';
 import { decryptDeleteAccountChallenge } from 'utils/crypto';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
+import { FEEDBACK_EMAIL } from 'constants/urls';
 
 interface Iprops {
     onClose: () => void;
@@ -71,7 +72,15 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const confirmAccountDeletion = () => {
         setDialogMessage({
             title: t('CONFIRM_ACCOUNT_DELETION_TITLE'),
-            content: t('CONFIRM_ACCOUNT_DELETION_MESSAGE'),
+            content: (
+                <Trans i18nKey="CONFIRM_ACCOUNT_DELETION_MESSAGE">
+                    <p>
+                        Your uploaded data will be scheduled for deletion, and
+                        your account will be permanently deleted.
+                    </p>
+                    <p>This action is not reversible.</p>
+                </Trans>
+            ),
             proceed: {
                 text: t('DELETE'),
                 action: solveChallengeAndDeleteAccount,
@@ -151,8 +160,8 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                             </p>
                             <p>
                                 Please write to us at{' '}
-                                <Link href="mailto:feedback@ente.io">
-                                    feedback@ente.io
+                                <Link href={`mailto:${FEEDBACK_EMAIL}`}>
+                                    {{ link: FEEDBACK_EMAIL }}
                                 </Link>
                                 , maybe there is a way we can help.
                             </p>

@@ -11,6 +11,7 @@ import { getFamilyPortalRedirectURL } from 'services/userService';
 import { openLink } from 'utils/common';
 import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
 import { UserDetails } from 'types/user';
+import { getSubscriptionPurchaseSuccessMessage } from 'utils/ui';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
@@ -261,13 +262,9 @@ export async function checkSubscriptionPurchase(
                 const subscription = await billingService.verifySubscription(
                     sessionId as string
                 );
-                setDialogMessage({
-                    title: t('SUBSCRIPTION_PURCHASE_SUCCESS_TITLE'),
-                    close: { variant: 'accent' },
-                    content: t('SUBSCRIPTION_PURCHASE_SUCCESS', {
-                        date: new Date(subscription?.expiryTime),
-                    }),
-                });
+                setDialogMessage(
+                    getSubscriptionPurchaseSuccessMessage(subscription)
+                );
             } catch (e) {
                 setDialogMessage({
                     title: t('ERROR'),

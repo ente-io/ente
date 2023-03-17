@@ -4,3 +4,9 @@ export const ML_BLOG_LINK = 'https://ente.io/blog/desktop-ml-beta';
 
 export const FACE_SEARCH_PRIVACY_POLICY_LINK =
     'https://ente.io/privacy#8-biometric-information-privacy-policy';
+
+export const SUPPORT_EMAIL = 'support@ente.io';
+
+export const APP_DOWNLOAD_URL = 'https://ente.io/download/desktop';
+
+export const FEEDBACK_EMAIL = 'feedback@ente.io';

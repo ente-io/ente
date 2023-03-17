@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from '@mui/material';
+import { Box, Dialog, DialogContent, Link } from '@mui/material';
 import { t } from 'i18next';
 
 import { UPLOAD_STAGES, UPLOAD_RESULT } from 'constants/upload';
@@ -10,8 +10,9 @@ import { ResultSection } from './resultSection';
 import { NotUploadSectionHeader } from './styledComponents';
 import UploadProgressContext from 'contexts/uploadProgress';
 import { dialogCloseHandler } from 'components/DialogBox/TitleWithCloseButton';
-import { APP_DOWNLOAD_URL } from 'utils/common';
+import { APP_DOWNLOAD_URL } from 'constants/urls';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
+import { Trans } from 'react-i18next';
 
 export function UploadProgressDialog() {
     const { open, onClose, uploadStage, finishedUploads } = useContext(
@@ -79,9 +80,28 @@ export function UploadProgressDialog() {
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.BLOCKED}
                                 sectionTitle={t('BLOCKED_UPLOADS')}
-                                sectionInfo={t('ETAGS_BLOCKED', {
-                                    url: APP_DOWNLOAD_URL,
-                                })}
+                                sectionInfo={
+                                    <Trans i18nKey={'ETAGS_BLOCKED'}>
+                                        <Box mb={1}>
+                                            We were unable to upload the
+                                            following files because of your
+                                            browser configuration.
+                                        </Box>
+                                        <Box>
+                                            Please disable any addons that might
+                                            be preventing ente from using{' '}
+                                            <code>eTags</code> to upload large
+                                            files, or use our{' '}
+                                            <Link
+                                                href={APP_DOWNLOAD_URL}
+                                                target="_blank">
+                                                desktop app
+                                            </Link>{' '}
+                                            for a more reliable import
+                                            experience.
+                                        </Box>
+                                    </Trans>
+                                }
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.FAILED}
@@ -90,9 +110,24 @@ export function UploadProgressDialog() {
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.SKIPPED_VIDEOS}
                                 sectionTitle={t('SKIPPED_VIDEOS')}
-                                sectionInfo={t('SKIPPED_VIDEOS_INFO', {
-                                    link: ENTE_WEBSITE_LINK,
-                                })}
+                                sectionInfo={
+                                    <Trans i18nKey={'SKIPPED_VIDEOS_INFO'}>
+                                        <Box mb={1}>
+                                            Presently we do not support adding
+                                            videos via public links.
+                                        </Box>
+                                        <Box>
+                                            To share videos, please{' '}
+                                            <Link
+                                                href={ENTE_WEBSITE_LINK}
+                                                target="_blank">
+                                                signup
+                                            </Link>{' '}
+                                            for ente and share with the intended
+                                            recipients using their email.
+                                        </Box>
+                                    </Trans>
+                                }
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.ALREADY_UPLOADED}
