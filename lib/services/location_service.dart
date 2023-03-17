@@ -15,7 +15,7 @@ class LocationService {
     prefs ??= await SharedPreferences.getInstance();
   }
 
-  List<String> getLocations() {
+  List<String> getAllLocationTags() {
     var list = prefs!.getStringList('locations');
     list ??= [];
     return list;
@@ -27,7 +27,7 @@ class LocationService {
     double long,
     int radius,
   ) async {
-    final list = getLocations();
+    final list = getAllLocationTags();
     //The area enclosed by the location tag will be a circle on a 3D spherical
     //globe and an ellipse on a 2D Mercator projection (2D map)
     //a & b are the semi-major and semi-minor axes of the ellipse
@@ -56,6 +56,23 @@ class LocationService {
     return 1 / cos(lat * (pi / 180));
   }
 
+  List<String> enclosingLocationTags(List<double> coordinates) {
+    final result = List<String>.of([]);
+    final allLocationTags = getAllLocationTags();
+    for (var locationTag in allLocationTags) {
+      final locationJson = json.decode(locationTag);
+      final a = locationJson["a"];
+      final b = locationJson["b"];
+      final center = locationJson["center"];
+      final x = coordinates[0] - center[0];
+      final y = coordinates[1] - center[1];
+      if ((x * x) / (a * a) + (y * y) / (b * b) <= 1) {
+        result.add(locationJson["name"]);
+      }
+    }
+    return result;
+  }
+
   Future<void> addFileToLocation(int locationId, int fileId) async {
     final list = getFilesByLocation(locationId.toString());
     list.add(fileId.toString());
@@ -69,7 +86,7 @@ class LocationService {
   }
 
   List<String> getLocationsByFileID(int fileId) {
-    final locationList = getLocations();
+    final locationList = getAllLocationTags();
     final locations = List<dynamic>.of([]);
     for (String locationString in locationList) {
       final locationJson = json.decode(locationString);

@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:photos/services/location_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/buttons/inline_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
@@ -41,8 +42,8 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   }
 
   Future<List<Widget>> _getLocationTags() async {
-    final locationTags = [];
-    // LocationService.instance.getLocationsByFileID(widget.file.generatedID!);
+    final locationTags =
+        LocationService.instance.enclosingLocationTags(widget.coordinates);
     if (locationTags.isEmpty) {
       return [
         InlineButtonWidget("Group nearby photos", () {}),

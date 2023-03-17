@@ -272,7 +272,7 @@ class SearchService {
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
-    final locations = LocationService.instance.getLocations();
+    final locations = LocationService.instance.getAllLocationTags();
     for (String location in locations) {
       final locationJson = json.decode(location);
       final locationName = locationJson["name"].toString();
