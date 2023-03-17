@@ -183,24 +183,22 @@ export default function SignUp(props: SignUpProps) {
                                     label={
                                         <Typography variant="body2">
                                             <Trans
-                                                i18nKey={
-                                                    'TERMS_AND_CONDITIONS'
-                                                }>
-                                                I agree to the{' '}
-                                                <Link
-                                                    href="https://ente.io/terms"
-                                                    target="_blank"
-                                                    rel="noreferrer">
-                                                    terms
-                                                </Link>{' '}
-                                                and{' '}
-                                                <Link
-                                                    href="https://ente.io/privacy"
-                                                    target="_blank"
-                                                    rel="noreferrer">
-                                                    privacy policy
-                                                </Link>{' '}
-                                            </Trans>
+                                                i18nKey={'TERMS_AND_CONDITIONS'}
+                                                components={{
+                                                    a: (
+                                                        <Link
+                                                            href="https://ente.io/terms"
+                                                            target="_blank"
+                                                        />
+                                                    ),
+                                                    b: (
+                                                        <Link
+                                                            href="https://ente.io/privacy"
+                                                            target="_blank"
+                                                        />
+                                                    ),
+                                                }}
+                                            />
                                         </Typography>
                                     }
                                 />

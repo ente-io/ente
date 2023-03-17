@@ -23,6 +23,7 @@ import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import { HorizontalFlex } from 'components/Container';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
+import { Box } from '@mui/material';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -188,12 +189,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setDialogMessage({
             title: t('DELETE_COLLECTION_TITLE'),
             content: (
-                <Trans i18nKey={'DELETE_COLLECTION_MESSAGE'}>
-                    Also delete the photos (and videos) present in this album
-                    from
-                    <span style={{ color: '#fff' }}> all </span> other albums
-                    they are part of?
-                </Trans>
+                <Trans
+                    i18nKey={'DELETE_COLLECTION_MESSAGE'}
+                    components={{
+                        a: <Box component={'span'} color="text.primary" />,
+                    }}
+                />
             ),
             proceed: {
                 text: t('DELETE_PHOTOS'),
@@ -218,12 +219,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const confirmDownloadCollection = () => {
         setDialogMessage({
             title: t('DOWNLOAD_COLLECTION'),
-            content: (
-                <Trans i18nKey={'DOWNLOAD_COLLECTION_MESSAGE'}>
-                    <p>Are you sure you want to download the complete album?</p>
-                    <p>All files will be queued for download sequentially</p>
-                </Trans>
-            ),
+            content: <Trans i18nKey={'DOWNLOAD_COLLECTION_MESSAGE'} />,
             proceed: {
                 text: t('DOWNLOAD'),
                 action: handleCollectionAction(CollectionActions.DOWNLOAD),

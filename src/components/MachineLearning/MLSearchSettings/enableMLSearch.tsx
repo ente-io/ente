@@ -21,22 +21,7 @@ export default function EnableMLSearch({
                 <Box px={'8px'}>
                     {' '}
                     <Typography color="text.secondary">
-                        <Trans i18nKey={'ENABLE_ML_SEARCH_DESCRIPTION'}>
-                            This will enable on-device machine learning and face
-                            search which will start analyzing your uploaded
-                            photos locally.
-                            <br />
-                            <br />
-                            For the first run after login or enabling this
-                            feature, it will download all images on local device
-                            to analyze them. So please only enable this if you
-                            are ok with bandwidth and local processing of all
-                            images in your photo library.
-                            <br />
-                            <br />
-                            If this is the first time you're enabling this,
-                            we'll also ask your permission to process face data.
-                        </Trans>
+                        <Trans i18nKey={'ENABLE_ML_SEARCH_DESCRIPTION'} />
                     </Typography>
                 </Box>
                 <Stack px={'8px'} spacing={'8px'}>

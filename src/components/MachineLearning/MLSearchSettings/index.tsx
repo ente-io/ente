@@ -86,14 +86,7 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
             title: t('DISABLE_FACE_SEARCH_TITLE'),
             content: (
                 <Typography>
-                    <Trans i18nKey={'DISABLE_FACE_SEARCH_DESCRIPTION'}>
-                        ente will stop processing face geometry, and will also
-                        disable ML search (beta)
-                        <br />
-                        <br />
-                        You can reenable face search again if you wish, so this
-                        operation is safe
-                    </Trans>
+                    <Trans i18nKey={'DISABLE_FACE_SEARCH_DESCRIPTION'} />
                 </Typography>
             ),
             close: { text: t('CANCEL') },

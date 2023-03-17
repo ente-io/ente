@@ -54,25 +54,22 @@ export default function EnableFaceSearch({
                 />
                 <Stack py={'20px'} px={'8px'} spacing={'32px'}>
                     <Typography color="text.secondary" px={'8px'}>
-                        <Trans i18nKey={'ENABLE_FACE_SEARCH_DESCRIPTION'}>
-                            If you enable face search, ente will extract face
-                            geometry from your photos. This will happen on your
-                            device, and any generated biometric data will be
-                            end-to-encrypted.
-                            <br />
-                            <br />
-                            <Link
-                                target={'_blank'}
-                                href={FACE_SEARCH_PRIVACY_POLICY_LINK}
-                                underline="always"
-                                sx={{
-                                    color: 'inherit',
-                                    textDecorationColor: 'inherit',
-                                }}>
-                                Please click here for more details about this
-                                feature in our privacy policy
-                            </Link>
-                        </Trans>
+                        <Trans
+                            i18nKey={'ENABLE_FACE_SEARCH_DESCRIPTION'}
+                            components={{
+                                a: (
+                                    <Link
+                                        target={'_blank'}
+                                        href={FACE_SEARCH_PRIVACY_POLICY_LINK}
+                                        underline="always"
+                                        sx={{
+                                            color: 'inherit',
+                                            textDecorationColor: 'inherit',
+                                        }}
+                                    />
+                                ),
+                            }}
+                        />
                     </Typography>
                     <FormGroup sx={{ width: '100%' }}>
                         <FormControlLabel

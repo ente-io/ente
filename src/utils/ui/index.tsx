@@ -91,15 +91,9 @@ export const getRootLevelFileWithFolderNotAllowMessage =
         icon: <InfoOutlined />,
         title: t('ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED'),
         content: (
-            <Trans i18nKey={'ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE'}>
-                <p>
-                    You have dragged and dropped a mixture of files and folders.
-                </p>
-                <p>
-                    Please provide either only files, or only folders when
-                    selecting option to create separate albums
-                </p>
-            </Trans>
+            <Trans
+                i18nKey={'ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE'}
+            />
         ),
         close: {},
     });
@@ -107,12 +101,7 @@ export const getRootLevelFileWithFolderNotAllowMessage =
 export const getExportDirectoryDoesNotExistMessage =
     (): DialogBoxAttributes => ({
         title: t('EXPORT_DIRECTORY_DOES_NOT_EXIST'),
-        content: (
-            <Trans i18nKey={'EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE'}>
-                <p>The export directory you have selected does not exist.</p>
-                <p> Please select a valid directory.</p>
-            </Trans>
-        ),
+        content: <Trans i18nKey={'EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE'} />,
         close: {},
     });
 
@@ -122,12 +111,9 @@ export const getSubscriptionPurchaseSuccessMessage = (
     title: t('SUBSCRIPTION_PURCHASE_SUCCESS_TITLE'),
     close: { variant: 'accent' },
     content: (
-        <Trans i18nKey="SUBSCRIPTION_PURCHASE_SUCCESS">
-            <p>We've received your payment</p>
-            <p>
-                Your subscription is valid till{' '}
-                <strong>{{ date: subscription?.expiryTime }}</strong>
-            </p>
-        </Trans>
+        <Trans
+            i18nKey="SUBSCRIPTION_PURCHASE_SUCCESS"
+            values={{ date: subscription?.expiryTime }}
+        />
     ),
 });

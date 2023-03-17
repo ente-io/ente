@@ -42,16 +42,12 @@ export default function PaidSubscriptionPlanSelectorCard({
 
             <Box px={1.5}>
                 <Typography color={'text.secondary'} fontWeight={'bold'}>
-                    <Trans i18nKey="CURRENT_USAGE">
-                        Current usage:{' '}
-                        <strong>
-                            {{
-                                usage: `${convertBytesToGBs(usage, 2)} ${t(
-                                    'GB'
-                                )}`,
-                            }}
-                        </strong>
-                    </Trans>
+                    <Trans
+                        i18nKey="CURRENT_USAGE"
+                        values={{
+                            usage: `${convertBytesToGBs(usage, 2)} GB`,
+                        }}
+                    />
                 </Typography>
             </Box>
 

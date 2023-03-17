@@ -150,13 +150,13 @@ function PlanSelectorCard(props: Props) {
             appContext.setDialogMessage({
                 title: t('MANAGE_PLAN'),
                 content: (
-                    <Trans i18nKey={'MAIL_TO_MANAGE_SUBSCRIPTION'}>
-                        Please contact us at{' '}
-                        <Link href={`mailto:${SUPPORT_EMAIL}`}>
-                            {{ link: SUPPORT_EMAIL }}
-                        </Link>{' '}
-                        to manage your subscription
-                    </Trans>
+                    <Trans
+                        i18nKey={'MAIL_TO_MANAGE_SUBSCRIPTION'}
+                        components={{
+                            a: <Link href={`mailto:${SUPPORT_EMAIL}`} />,
+                        }}
+                        values={{ emailID: SUPPORT_EMAIL }}
+                    />
                 ),
                 close: { variant: 'secondary' },
             });

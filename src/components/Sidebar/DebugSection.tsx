@@ -33,18 +33,7 @@ export default function DebugSection() {
     const confirmLogDownload = () =>
         appContext.setDialogMessage({
             title: t('DOWNLOAD_LOGS'),
-            content: (
-                <Trans i18nKey={'DOWNLOAD_LOGS_MESSAGE'}>
-                    <p>
-                        This will download debug logs, which you can email to us
-                        to help debug your issue.
-                    </p>
-                    <p>
-                        Please note that file names will be included to help
-                        track issues with specific files.
-                    </p>
-                </Trans>
-            ),
+            content: <Trans i18nKey={'DOWNLOAD_LOGS_MESSAGE'} />,
             proceed: {
                 text: t('DOWNLOAD'),
                 variant: 'accent',

@@ -1,4 +1,4 @@
-import { Box, Dialog, DialogContent, Link } from '@mui/material';
+import { Dialog, DialogContent, Link } from '@mui/material';
 import { t } from 'i18next';
 
 import { UPLOAD_STAGES, UPLOAD_RESULT } from 'constants/upload';
@@ -81,26 +81,17 @@ export function UploadProgressDialog() {
                                 uploadResult={UPLOAD_RESULT.BLOCKED}
                                 sectionTitle={t('BLOCKED_UPLOADS')}
                                 sectionInfo={
-                                    <Trans i18nKey={'ETAGS_BLOCKED'}>
-                                        <Box mb={1}>
-                                            We were unable to upload the
-                                            following files because of your
-                                            browser configuration.
-                                        </Box>
-                                        <Box>
-                                            Please disable any addons that might
-                                            be preventing ente from using{' '}
-                                            <code>eTags</code> to upload large
-                                            files, or use our{' '}
-                                            <Link
-                                                href={APP_DOWNLOAD_URL}
-                                                target="_blank">
-                                                desktop app
-                                            </Link>{' '}
-                                            for a more reliable import
-                                            experience.
-                                        </Box>
-                                    </Trans>
+                                    <Trans
+                                        i18nKey={'ETAGS_BLOCKED'}
+                                        components={{
+                                            a: (
+                                                <Link
+                                                    href={APP_DOWNLOAD_URL}
+                                                    target="_blank"
+                                                />
+                                            ),
+                                        }}
+                                    />
                                 }
                             />
                             <ResultSection
@@ -111,22 +102,17 @@ export function UploadProgressDialog() {
                                 uploadResult={UPLOAD_RESULT.SKIPPED_VIDEOS}
                                 sectionTitle={t('SKIPPED_VIDEOS')}
                                 sectionInfo={
-                                    <Trans i18nKey={'SKIPPED_VIDEOS_INFO'}>
-                                        <Box mb={1}>
-                                            Presently we do not support adding
-                                            videos via public links.
-                                        </Box>
-                                        <Box>
-                                            To share videos, please{' '}
-                                            <Link
-                                                href={ENTE_WEBSITE_LINK}
-                                                target="_blank">
-                                                signup
-                                            </Link>{' '}
-                                            for ente and share with the intended
-                                            recipients using their email.
-                                        </Box>
-                                    </Trans>
+                                    <Trans
+                                        i18nKey={'SKIPPED_VIDEOS_INFO'}
+                                        components={{
+                                            a: (
+                                                <Link
+                                                    href={ENTE_WEBSITE_LINK}
+                                                    target="_blank"
+                                                />
+                                            ),
+                                        }}
+                                    />
                                 }
                             />
                             <ResultSection

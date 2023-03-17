@@ -16,6 +16,8 @@ import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
+import { Link } from '@mui/material';
+import { SUPPORT_EMAIL } from 'constants/urls';
 
 export default function Home() {
     const [sessionID, setSessionID] = useState('');
@@ -44,11 +46,13 @@ export default function Home() {
             title: t('CONTACT_SUPPORT'),
             close: {},
             content: (
-                <Trans i18nKey="NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE">
-                    Please drop an email to{' '}
-                    <a href="mailto:support@ente.io">support@ente.io</a> from
-                    your registered email address
-                </Trans>
+                <Trans
+                    i18nKey="NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE"
+                    components={{
+                        a: <Link href={`mailto:${SUPPORT_EMAIL}`} />,
+                    }}
+                    values={{ emailID: SUPPORT_EMAIL }}
+                />
             ),
         });
     };

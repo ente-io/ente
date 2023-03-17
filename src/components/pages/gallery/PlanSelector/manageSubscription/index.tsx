@@ -77,17 +77,7 @@ function StripeSubscriptionOptions({
     const confirmCancel = () =>
         appContext.setDialogMessage({
             title: t('CANCEL_SUBSCRIPTION'),
-            content: (
-                <Trans i18nKey={'CANCEL_SUBSCRIPTION_MESSAGE'}>
-                    <p>
-                        All of your data will be deleted from our servers at the
-                        end of this billing period.
-                    </p>
-                    <p>
-                        Are you sure that you want to cancel your subscription?
-                    </p>
-                </Trans>
-            ),
+            content: <Trans i18nKey={'CANCEL_SUBSCRIPTION_MESSAGE'} />,
             proceed: {
                 text: t('CANCEL_SUBSCRIPTION'),
                 action: cancelSubscription.bind(

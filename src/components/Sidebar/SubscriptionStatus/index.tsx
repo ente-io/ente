@@ -77,11 +77,12 @@ export default function SubscriptionStatus({
                 sx={{ cursor: handleClick && 'pointer' }}>
                 {isSubscriptionActive(userDetails.subscription) ? (
                     isOnFreePlan(userDetails.subscription) ? (
-                        <Trans i18nKey={'FREE_SUBSCRIPTION_INFO'}>
-                            You are on the <strong>free</strong> plan that
-                            expires on{' '}
-                            {{ date: userDetails.subscription?.expiryTime }}
-                        </Trans>
+                        <Trans
+                            i18nKey={'FREE_SUBSCRIPTION_INFO'}
+                            values={{
+                                date: userDetails.subscription?.expiryTime,
+                            }}
+                        />
                     ) : isSubscriptionCancelled(userDetails.subscription) ? (
                         t('RENEWAL_CANCELLED_SUBSCRIPTION_INFO', {
                             date: userDetails.subscription?.expiryTime,
@@ -91,19 +92,20 @@ export default function SubscriptionStatus({
                             <Trans
                                 i18nKey={
                                     'STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO'
-                                }>
-                                You have exceeded your storage quota, please{' '}
-                                <LinkButton onClick={handleClick}>
-                                    upgrade
-                                </LinkButton>
-                            </Trans>
+                                }
+                                components={{
+                                    a: <LinkButton onClick={handleClick} />,
+                                }}
+                            />
                         )
                     )
                 ) : (
-                    <Trans i18nKey={'SUBSCRIPTION_EXPIRED_MESSAGE'}>
-                        Your subscription has expired, please{' '}
-                        <LinkButton onClick={handleClick}> renew </LinkButton>
-                    </Trans>
+                    <Trans
+                        i18nKey={'SUBSCRIPTION_EXPIRED_MESSAGE'}
+                        components={{
+                            a: <LinkButton onClick={handleClick} />,
+                        }}
+                    />
                 )}
             </Typography>
         </Box>

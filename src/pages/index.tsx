@@ -187,10 +187,7 @@ export default function LandingPage() {
                                         /images/onboarding-lock/3x.png 3x"
                                 />
                                 <FeatureText>
-                                    <Trans i18nKey={'HERO_SLIDE_1_TITLE'}>
-                                        <div>Private backups</div>
-                                        <div> for your memories</div>
-                                    </Trans>
+                                    <Trans i18nKey={'HERO_SLIDE_1_TITLE'} />
                                 </FeatureText>
                                 <TextContainer>
                                     {t('HERO_SLIDE_1')}
@@ -203,10 +200,7 @@ export default function LandingPage() {
                                         /images/onboarding-safe/3x.png 3x"
                                 />
                                 <FeatureText>
-                                    <Trans i18nKey={'HERO_SLIDE_2_TITLE'}>
-                                        <div>Safely stored </div>
-                                        <div>at a fallout shelter</div>
-                                    </Trans>
+                                    <Trans i18nKey={'HERO_SLIDE_2_TITLE'} />
                                 </FeatureText>
                                 <TextContainer>
                                     {t('HERO_SLIDE_2')}
@@ -219,10 +213,7 @@ export default function LandingPage() {
                                         /images/onboarding-sync/3x.png 3x"
                                 />
                                 <FeatureText>
-                                    <Trans i18nKey={'HERO_SLIDE_3_TITLE'}>
-                                        <div>Available</div>
-                                        <div> everywhere</div>
-                                    </Trans>
+                                    <Trans i18nKey={'HERO_SLIDE_3_TITLE'} />
                                 </FeatureText>
                                 <TextContainer>
                                     {t('HERO_SLIDE_3')}

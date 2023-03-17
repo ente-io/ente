@@ -16,7 +16,7 @@ import { clearKeys } from 'utils/storage/sessionStorage';
 import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import { KeyAttributes, EmailVerificationResponse, User } from 'types/user';
-import { Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
@@ -135,15 +135,18 @@ export default function Verify() {
         <FormContainer>
             <FormPaper>
                 <FormPaperTitle sx={{ mb: 14, wordBreak: 'break-word' }}>
-                    <Trans i18nKey="EMAIL_SENT">
-                        Verification code sent to{' '}
-                        <Typography
-                            component={'span'}
-                            fontSize="inherit"
-                            color="text.secondary">
-                            {{ email }}
-                        </Typography>
-                    </Trans>
+                    <Trans
+                        i18nKey="EMAIL_SENT"
+                        components={{
+                            a: (
+                                <Box
+                                    color="text.secondary"
+                                    component={'span'}
+                                />
+                            ),
+                        }}
+                        values={{ email }}
+                    />
                 </FormPaperTitle>
                 <Typography color={'text.secondary'} mb={2} variant="body2">
                     {t('CHECK_INBOX')}

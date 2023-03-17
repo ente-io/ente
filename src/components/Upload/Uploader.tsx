@@ -260,19 +260,7 @@ export default function Uploader(props: Props) {
                 appContext.setDialogMessage({
                     title: t('CANVAS_BLOCKED_TITLE'),
 
-                    content: (
-                        <Trans i18nKey="CANVAS_BLOCKED_MESSAGE">
-                            <p>
-                                It looks like your browser has disabled access
-                                to canvas, which is necessary to generate
-                                thumbnails for your photos
-                            </p>
-                            <p>
-                                Please enable access to your browser's canvas,
-                                or check out our desktop app
-                            </p>
-                        </Trans>
-                    ),
+                    content: <Trans i18nKey="CANVAS_BLOCKED_MESSAGE" />,
                     close: { text: t('CLOSE') },
                     proceed: {
                         text: t('DOWNLOAD'),

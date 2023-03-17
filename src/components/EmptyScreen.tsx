@@ -42,12 +42,15 @@ export default function EmptyScreen({ openUploader }) {
                     pb: 1.5,
                 }}>
                 <VerticallyCentered sx={{ flex: 'none' }}>
-                    <Trans i18nKey={'WELCOME_TO_ENTE'}>
-                        <Typography variant="h3" color="text.secondary" mb={1}>
-                            Welcome to <EnteLogo />
-                        </Typography>
-                        <h2>End to end encrypted photo storage and sharing</h2>
-                    </Trans>
+                    <Typography variant="h3" color="text.secondary" mb={1}>
+                        <Trans
+                            i18nKey="WELCOME_TO_ENTE_HEADING"
+                            components={{ a: <EnteLogo /> }}
+                        />
+                    </Typography>
+                    <Typography variant="title">
+                        {t('WELCOME_TO_ENTE_SUBHEADING')}
+                    </Typography>
                 </VerticallyCentered>
                 <Typography variant="body1" mt={3.5} color="text.secondary">
                     {t('WHERE_YOUR_BEST_PHOTOS_LIVE')}

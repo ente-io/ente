@@ -23,7 +23,7 @@ import { logError } from 'utils/sentry';
 import { decryptDeleteAccountChallenge } from 'utils/crypto';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
-import { FEEDBACK_EMAIL } from 'constants/urls';
+import { DELETE_ACCOUNT_EMAIL, FEEDBACK_EMAIL } from 'constants/urls';
 
 interface Iprops {
     onClose: () => void;
@@ -72,15 +72,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const confirmAccountDeletion = () => {
         setDialogMessage({
             title: t('CONFIRM_ACCOUNT_DELETION_TITLE'),
-            content: (
-                <Trans i18nKey="CONFIRM_ACCOUNT_DELETION_MESSAGE">
-                    <p>
-                        Your uploaded data will be scheduled for deletion, and
-                        your account will be permanently deleted.
-                    </p>
-                    <p>This action is not reversible.</p>
-                </Trans>
-            ),
+            content: <Trans i18nKey="CONFIRM_ACCOUNT_DELETION_MESSAGE" />,
             proceed: {
                 text: t('DELETE'),
                 action: solveChallengeAndDeleteAccount,
@@ -94,16 +86,13 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         setDialogMessage({
             title: t('DELETE_ACCOUNT'),
             content: (
-                <Trans i18nKey="DELETE_ACCOUNT_MESSAGE">
-                    <p>
-                        Please send an email to
-                        <Link href="mailto:account-deletion@ente.io">
-                            account-deletion@ente.io
-                        </Link>
-                        from your registered email address.
-                    </p>
-                    <p>Your request will be processed within 72 hours.</p>
-                </Trans>
+                <Trans
+                    i18nKey="DELETE_ACCOUNT_MESSAGE"
+                    components={{
+                        a: <Link href={`mailto:${DELETE_ACCOUNT_EMAIL}`} />,
+                    }}
+                    values={{ emailID: DELETE_ACCOUNT_EMAIL }}
+                />
             ),
             proceed: {
                 text: t('DELETE'),
@@ -153,19 +142,13 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                     </VerticallyCentered>
 
                     <Typography color="text.secondary" px={1.5}>
-                        <Trans i18nKey="ASK_FOR_FEEDBACK">
-                            <p>
-                                We'll be sorry to see you go. Are you facing
-                                some issue?
-                            </p>
-                            <p>
-                                Please write to us at{' '}
-                                <Link href={`mailto:${FEEDBACK_EMAIL}`}>
-                                    {{ link: FEEDBACK_EMAIL }}
-                                </Link>
-                                , maybe there is a way we can help.
-                            </p>
-                        </Trans>
+                        <Trans
+                            i18nKey="ASK_FOR_FEEDBACK"
+                            components={{
+                                a: <Link href={`mailto:${FEEDBACK_EMAIL}`} />,
+                            }}
+                            values={{ emailID: FEEDBACK_EMAIL }}
+                        />
                     </Typography>
 
                     <Stack spacing={1} px={2} sx={{ width: '100%' }}>

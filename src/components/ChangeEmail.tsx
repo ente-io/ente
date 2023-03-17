@@ -6,7 +6,7 @@ import router from 'next/router';
 import { changeEmail, sendOTTForEmailChange } from 'services/userService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
-import { Alert, TextField, Typography } from '@mui/material';
+import { Alert, Box, TextField } from '@mui/material';
 import Container from './Container';
 import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
@@ -84,15 +84,18 @@ function ChangeEmailForm() {
                         <Alert
                             color="accent"
                             onClose={() => setShowMessage(false)}>
-                            <Trans i18nKey="EMAIL_SENT">
-                                Verification code sent to{' '}
-                                <Typography
-                                    component={'span'}
-                                    fontSize="inherit"
-                                    color="text.secondary">
-                                    {{ email }}
-                                </Typography>
-                            </Trans>
+                            <Trans
+                                i18nKey="EMAIL_SENT"
+                                components={{
+                                    a: (
+                                        <Box
+                                            color="text.secondary"
+                                            component={'span'}
+                                        />
+                                    ),
+                                }}
+                                values={{ email }}
+                            />
                         </Alert>
                     )}
                     <form noValidate onSubmit={handleSubmit}>

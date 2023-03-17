@@ -494,25 +494,25 @@ export function PhotoList({
             item: (
                 <FooterContainer span={columns}>
                     <Typography variant="body2">
-                        <Trans i18nKey={'INSTALL_MOBILE_APP'}>
-                            Install our{' '}
-                            <a
-                                href="https://play.google.com/store/apps/details?id=io.ente.photos"
-                                target="_blank"
-                                style={{ color: '#51cd7c' }}
-                                rel="noreferrer">
-                                Android
-                            </a>{' '}
-                            or{' '}
-                            <a
-                                href="https://apps.apple.com/in/app/ente-photos/id1542026904"
-                                style={{ color: '#51cd7c' }}
-                                target="_blank"
-                                rel="noreferrer">
-                                iOS
-                            </a>
-                            app to automatically backup all your photos
-                        </Trans>
+                        <Trans
+                            i18nKey={'INSTALL_MOBILE_APP'}
+                            components={{
+                                a: (
+                                    <Link
+                                        href="https://play.google.com/store/apps/details?id=io.ente.photos"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    />
+                                ),
+                                b: (
+                                    <Link
+                                        href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    />
+                                ),
+                            }}
+                        />
                     </Typography>
                 </FooterContainer>
             ),

@@ -107,11 +107,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     <PasswordStrengthHint password={values.passphrase} />
 
                     <Typography my={2} variant="body2">
-                        <Trans i18nKey={'PASSPHRASE_DISCLAIMER'}>
-                            We don't store your password, so if you forget it,
-                            <strong>we will not be able to help you </strong>
-                            recover your data without a recovery key.
-                        </Trans>
+                        <Trans i18nKey={'PASSPHRASE_DISCLAIMER'} />
                     </Typography>
 
                     <Box my={4}>
