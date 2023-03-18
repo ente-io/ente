@@ -106,6 +106,10 @@ If you have feature requests, please create a [GitHub issue](https://github.com/
 If you wish to support us, please ⭐
 [star](https://github.com/ente-io/auth/stargazers) this project.
 
+## 🙌 Translation
+[![Crowdin](https://badges.crowdin.net/ente-authenticator-app/localized.svg)](https://crowdin.com/project/ente-authenticator-app)
+
+If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-authenticator-app) to get started. Thank you for your support.
 
 ## 💜 Community
 
