@@ -14,4 +14,5 @@ export enum PAGES {
     SHARED_ALBUMS = '/shared-albums',
     // ML_DEBUG = '/ml-debug',
     DEDUPLICATE = '/deduplicate',
+    AUTHENICATOR = '/authenticator',
 }

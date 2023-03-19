@@ -800,6 +800,7 @@ const englishConstants = {
     UPLOAD_GOOGLE_TAKEOUT: 'Google takeout',
     CANCEL_UPLOADS: 'Cancel uploads',
     DEDUPLICATE_FILES: 'Deduplicate files',
+    AUTHENTICATOR_SECTION: 'Authenticator',
     NO_DUPLICATES_FOUND: "You've no duplicate files that can be cleared",
     CLUB_BY_CAPTURE_TIME: 'Club by capture time',
     FILES: 'Files',

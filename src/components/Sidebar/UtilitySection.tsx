@@ -62,6 +62,8 @@ export default function UtilitySection({ closeSidebar }) {
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
 
+    const redirectToAuthenticatorPage = () => router.push(PAGES.AUTHENICATOR);
+
     const somethingWentWrong = () =>
         setDialogMessage({
             title: constants.ERROR,
@@ -97,6 +99,11 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
+            {isInternalUser() && (
+                <SidebarButton onClick={redirectToAuthenticatorPage}>
+                    {constants.AUTHENTICATOR_SECTION}
+                </SidebarButton>
+            )}
             <SidebarButton onClick={openPreferencesOptions}>
                 {constants.PREFERENCES}
             </SidebarButton>
