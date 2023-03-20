@@ -33,7 +33,7 @@ class Gallery extends StatefulWidget {
   final Stream<FilesUpdatedEvent>? reloadEvent;
   final List<Stream<Event>>? forceReloadEvents;
   final Set<EventType> removalEventTypes;
-  final SelectedFiles selectedFiles;
+  final SelectedFiles? selectedFiles;
   final String tagPrefix;
   final Widget? header;
   final Widget? footer;
@@ -43,8 +43,8 @@ class Gallery extends StatefulWidget {
 
   const Gallery({
     required this.asyncLoader,
-    required this.selectedFiles,
     required this.tagPrefix,
+    this.selectedFiles,
     this.initialFiles,
     this.reloadEvent,
     this.forceReloadEvents,
