@@ -44,9 +44,6 @@ export const getAuthCodes = async (): Promise<Code[]> => {
             }
             return 0;
         });
-        // remove all entries from authCodes
-        authCodes.splice(0, authCodes.length);
-
         return authCodes;
     } catch (e) {
         logError(e, 'get authenticator entities failed');
