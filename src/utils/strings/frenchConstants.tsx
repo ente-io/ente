@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import Link from '@mui/material/Link';
+import { EnteLogo } from 'components/EnteLogo';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import React from 'react';
 import { SuggestionType } from 'types/search';
@@ -93,7 +94,7 @@ const frenchConstants = {
             données sans une clé de récupération.
         </>
     ),
-        WELCOME_TO_ENTE: () => (
+    WELCOME_TO_ENTE: () => (
         <>
             <Typography variant="h3" color="text.secondary" mb={1}>
                 Bienvenue sur <EnteLogo />
