@@ -99,7 +99,7 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
-            {!isInternalUser() && (
+            {isInternalUser() && (
                 <SidebarButton onClick={redirectToAuthenticatorPage}>
                     {constants.AUTHENTICATOR_SECTION}
                 </SidebarButton>
