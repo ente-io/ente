@@ -78,13 +78,18 @@ const OTPPage = () => {
                 alignItems: 'center',
                 justifyContent: 'flex-start',
             }}>
+            <div style={{ marginBottom: '2rem' }} />
             <h2>ente Authenticator</h2>
-            <input
-                type="text"
-                placeholder="Search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            {filteredCodes.length === 0 && searchTerm.length === 0 ? (
+                <></>
+            ) : (
+                <input
+                    type="text"
+                    placeholder="Search"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            )}
 
             <div style={{ marginBottom: '1rem' }} />
             {filteredCodes.length === 0 ? (
