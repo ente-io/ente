@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import OTPDisplay from 'components/Authenicator/OTPDisplay';
 import { getAuthCodes } from 'services/authenticator/authenticatorService';
 import { Button } from '@mui/material';
+import { CustomError } from 'utils/error';
 
 const OTPPage = () => {
     const [codes, setCodes] = useState([]);
@@ -10,10 +11,20 @@ const OTPPage = () => {
     useEffect(() => {
         const fetchCodes = async () => {
             try {
-                getAuthCodes().then((res) => {
-                    setCodes(res);
-                });
+                getAuthCodes()
+                    .then((res) => {
+                        setCodes(res);
+                    })
+                    .catch((err) => {
+                        if (err.message === CustomError.KEY_MISSING) {
+                            window.location.href = '/';
+                            return;
+                        }
+
+                        console.error('something wrong here', err);
+                    });
             } catch (error) {
+                console.error('something wrong where asdas');
                 console.error(error);
             }
         };
