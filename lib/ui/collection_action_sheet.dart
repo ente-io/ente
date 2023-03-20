@@ -160,6 +160,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                             },
                             cancellable: true,
                             shouldUnfocusOnCancelOrSubmit: true,
+                            borderRadius: 2,
                           ),
                         ),
                         _getCollectionItems(filesCount),

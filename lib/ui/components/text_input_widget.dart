@@ -16,6 +16,7 @@ class TextInputWidget extends StatefulWidget {
   final Alignment? alignMessage;
   final bool? autoFocus;
   final int? maxLength;
+  final double borderRadius;
 
   ///TextInputWidget will listen to this notifier and executes onSubmit when
   ///notified.
@@ -50,6 +51,7 @@ class TextInputWidget extends StatefulWidget {
     this.isPasswordInput = false,
     this.cancellable = false,
     this.shouldUnfocusOnCancelOrSubmit = false,
+    this.borderRadius = 8,
     super.key,
   });
 
@@ -113,7 +115,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     }
     textInputChildren.add(
       ClipRRect(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        borderRadius: BorderRadius.all(Radius.circular(widget.borderRadius)),
         child: Material(
           child: TextFormField(
             textCapitalization: widget.textCapitalization!,
