@@ -39,8 +39,8 @@ class LocationService {
     final data = {
       "name": location,
       "radius": radius,
-      "a": a,
-      "b": b,
+      "aSquare": a * a,
+      "bSquare": b * b,
       "center": center,
     };
     final encodedMap = json.encode(data);
@@ -61,12 +61,12 @@ class LocationService {
     final allLocationTags = getAllLocationTags();
     for (var locationTag in allLocationTags) {
       final locationJson = json.decode(locationTag);
-      final a = locationJson["a"];
-      final b = locationJson["b"];
+      final aSquare = locationJson["aSquare"];
+      final bSquare = locationJson["bSquare"];
       final center = locationJson["center"];
       final x = coordinates[0] - center[0];
       final y = coordinates[1] - center[1];
-      if ((x * x) / (a * a) + (y * y) / (b * b) <= 1) {
+      if ((x * x) / (aSquare) + (y * y) / (bSquare) <= 1) {
         result.add(locationJson["name"]);
       }
     }
