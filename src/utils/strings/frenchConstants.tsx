@@ -563,7 +563,7 @@ const frenchConstants = {
     LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE:
         'Votre navigateur ou un complément bloque ente qui ne peut sauvegarder les données sur votre stockage local. Veuillez relancer cette page après avoir changé de mode de navigation.',
     RETRY: 'Réessayer',
-    SEND_OTT: 'Envoyer l'OTP',
+    SEND_OTT: "Envoyer l'OTP",
     EMAIl_ALREADY_OWNED: 'Cet e-mail est déjà pris',
     EMAIL_UDPATE_SUCCESSFUL: 'Votre e-mail a été mis à jour',
     UPLOAD_FAILED: 'Échec du chargement',
