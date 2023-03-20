@@ -37,14 +37,16 @@ class ChipButtonWidget extends StatelessWidget {
                       size: 17,
                     )
                   : const SizedBox.shrink(),
-              const SizedBox(width: 4),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  label ?? "",
-                  style: getEnteTextTheme(context).smallBold,
-                ),
-              )
+              if (label != null && leadingIcon != null)
+                const SizedBox(width: 4),
+              if (label != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    label!,
+                    style: getEnteTextTheme(context).smallBold,
+                  ),
+                )
             ],
           ),
         ),
