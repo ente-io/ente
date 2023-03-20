@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TOTP, HOTP } from 'otpauth';
+import { Code } from 'types/authenticator/code';
 import TimerProgress from './TimerProgress';
 
 const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
@@ -82,59 +83,64 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
     );
 };
 
-const OTPDisplay = ({
-    secret,
-    type,
-    algorithm,
-    timePeriod,
-    issuer,
-    account,
-}) => {
+interface OTPDisplayProps {
+    codeInfo: Code;
+}
+
+const OTPDisplay = (props: OTPDisplayProps) => {
+    const { codeInfo } = props;
     const [code, setCode] = useState('');
     const [nextcode, setNextCode] = useState('');
 
     const generateCodes = () => {
         const currentTime = new Date().getTime();
-        if (type.toLowerCase() === 'totp') {
+        if (codeInfo.type.toLowerCase() === 'totp') {
             const totp = new TOTP({
-                secret,
-                algorithm,
-                period: timePeriod ?? 30,
+                secret: codeInfo.secret,
+                algorithm: codeInfo.algorithm,
+                period: codeInfo.period ?? Code.defaultPeriod,
+                digits: codeInfo.digits,
             });
             setCode(totp.generate());
             setNextCode(
-                totp.generate({ timestamp: currentTime + timePeriod * 1000 })
+                totp.generate({
+                    timestamp: currentTime + codeInfo.period * 1000,
+                })
             );
-        } else if (type.toLowerCase() === 'hotp') {
-            const hotp = new HOTP({ secret, counter: 0, algorithm });
+        } else if (codeInfo.type.toLowerCase() === 'hotp') {
+            const hotp = new HOTP({
+                secret: codeInfo.secret,
+                counter: 0,
+                algorithm: codeInfo.algorithm,
+            });
             setCode(hotp.generate());
             setNextCode(hotp.generate({ counter: 1 }));
         }
     };
 
     useEffect(() => {
+        generateCodes();
         let intervalId;
-        // compare case insensitive type
 
-        if (type.toLowerCase() === 'totp') {
+        if (codeInfo.type.toLowerCase() === 'totp') {
             intervalId = setInterval(() => {
                 generateCodes();
             }, 1000);
-        } else if (type.toLowerCase() === 'hotp') {
+        } else if (codeInfo.type.toLowerCase() === 'hotp') {
             intervalId = setInterval(() => {
                 generateCodes();
             }, 1000);
         }
 
         return () => clearInterval(intervalId);
-    }, [secret, type, algorithm, timePeriod]);
+    }, [codeInfo]);
 
     return (
         <div style={{ padding: '8px' }}>
-            <TimerProgress period={timePeriod} />
+            <TimerProgress period={codeInfo.period ?? Code.defaultPeriod} />
             <TOTPDisplay
-                issuer={issuer}
-                account={account}
+                issuer={codeInfo.issuer}
+                account={codeInfo.account}
                 code={code}
                 nextCode={nextcode}
             />
