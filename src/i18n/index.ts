@@ -19,6 +19,7 @@ export const setupI18n = async () => {
                 escapeValue: false, // not needed for react as it escapes by default
             },
             react: {
+                useSuspense: false,
                 transKeepBasicHtmlNodesFor: [
                     'div',
                     'strong',

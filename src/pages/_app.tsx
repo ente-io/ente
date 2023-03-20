@@ -113,9 +113,11 @@ const redirectMap = new Map([
     ['families', getFamilyPortalRedirectURL],
 ]);
 
+const APP_TITLE = 'ente Photos';
+
 export default function App({ Component, err }) {
     const router = useRouter();
-    const [i18nIsReady, setI18nIsReady] = useState<boolean>(true);
+    const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(
         typeof window !== 'undefined' && !window.navigator.onLine
@@ -141,7 +143,7 @@ export default function App({ Component, err }) {
     const [theme, setTheme] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
 
     useEffect(() => {
-        setupI18n().finally(() => setI18nIsReady(false));
+        setupI18n().finally(() => setIsI18nReady(true));
     }, []);
 
     useEffect(() => {
@@ -210,14 +212,16 @@ export default function App({ Component, err }) {
     const resetSharedFiles = () => setSharedFiles(null);
 
     useEffect(() => {
-        if (process.env.NODE_ENV === 'production') {
+        if (isI18nReady) {
             console.log(
                 `%c${t('CONSOLE_WARNING_STOP')}`,
                 'color: red; font-size: 52px;'
             );
             console.log(`%c${t('CONSOLE_WARNING_DESC')}`, 'font-size: 20px;');
         }
+    }, [isI18nReady]);
 
+    useEffect(() => {
         const redirectTo = async (redirect) => {
             if (
                 redirectMap.has(redirect) &&
@@ -321,7 +325,7 @@ export default function App({ Component, err }) {
     return (
         <>
             <Head>
-                <title>{t('TITLE')}</title>
+                <title>{isI18nReady ? t('TITLE') : APP_TITLE}</title>
                 <meta
                     name="viewport"
                     content="initial-scale=1, width=device-width"
@@ -400,7 +404,7 @@ export default function App({ Component, err }) {
                         setTheme,
                         somethingWentWrong,
                     }}>
-                    {loading || i18nIsReady ? (
+                    {loading || !isI18nReady ? (
                         <VerticallyCentered>
                             <EnteSpinner>
                                 <span className="sr-only">Loading...</span>
