@@ -5,6 +5,7 @@ import "package:photos/services/location_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/buttons/inline_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
+import "package:photos/ui/viewer/file/add_location_sheet.dart";
 
 class LocationTagsWidget extends StatefulWidget {
   final List<double> coordinates;
@@ -46,7 +47,10 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         LocationService.instance.enclosingLocationTags(widget.coordinates);
     if (locationTags.isEmpty) {
       return [
-        InlineButtonWidget("Group nearby photos", () {}),
+        InlineButtonWidget(
+          "Group nearby photos",
+          () => showAddLocationSheet(context),
+        ),
       ];
     }
     setState(() {
@@ -54,6 +58,14 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       leadingIcon = Icons.pin_drop_outlined;
       hasChipButtons = true;
     });
-    return locationTags.map((e) => ChipButtonWidget(e)).toList();
+    final result = locationTags.map((e) => ChipButtonWidget(e)).toList();
+    result.add(
+      ChipButtonWidget(
+        null,
+        leadingIcon: Icons.add_outlined,
+        onTap: () => showAddLocationSheet(context),
+      ),
+    );
+    return result;
   }
 }
