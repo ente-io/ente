@@ -124,7 +124,7 @@ Future<void> showSingleFileDeleteSheet(
   }
 }
 
-Future<void> showInfoSheet(BuildContext context, File file) async {
+Future<void> showDetailsSheet(BuildContext context, File file) async {
   final colorScheme = getEnteColorScheme(context);
   return showBarModalBottomSheet(
     topControl: const SizedBox.shrink(),

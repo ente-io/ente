@@ -372,7 +372,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 color: Colors.white, //same for both themes
               ),
               onPressed: () {
-                showInfoSheet(context, file);
+                showDetailsSheet(context, file);
               },
             ),
             IconButton(

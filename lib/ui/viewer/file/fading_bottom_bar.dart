@@ -75,7 +75,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
               color: Colors.white,
             ),
             onPressed: () async {
-              await _displayInfo(widget.file);
+              await _displayDetails(widget.file);
               safeRefresh(); //to instantly show the new caption if keypad is closed after pressing 'done' - here the caption will be updated before the bottom sheet is closed
               await Future.delayed(
                 const Duration(milliseconds: 500),
@@ -267,7 +267,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     );
   }
 
-  Future<void> _displayInfo(File file) async {
-    await showInfoSheet(context, file);
+  Future<void> _displayDetails(File file) async {
+    await showDetailsSheet(context, file);
   }
 }
