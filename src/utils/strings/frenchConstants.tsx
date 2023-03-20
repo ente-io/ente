@@ -90,7 +90,7 @@ const frenchConstants = {
     PASSPHRASE_DISCLAIMER: () => (
         <>
             Nous ne stockons pas votre mot de passe, donc si vous le perdez,{' '}
-            <strong>nous ne pourrons pas vous aider</strong>à récupérer vos
+            <strong>nous ne pourrons pas vous aider</strong> à récupérer vos
             données sans une clé de récupération.
         </>
     ),
@@ -169,7 +169,7 @@ const frenchConstants = {
             Protégez votre premier souvenir avec<strong> ente </strong>
         </>
     ),
-    UPLOAD_FIRST_PHOTO: 'Protéger',
+    UPLOAD_FIRST_PHOTO: 'Chargez votre 1ere photo',
     UPLOAD_DROPZONE_MESSAGE: 'Déposez pour sauvegarder vos fichiers',
     WATCH_FOLDER_DROPZONE_MESSAGE: 'Déposez pour ajouter un dossier surveillé',
     TRASH_FILES_TITLE: 'Supprimer les fichiers?',
@@ -202,7 +202,7 @@ const frenchConstants = {
     SAVE_LATER: 'Plus tard',
     SAVE: 'Sauvegarder la clé',
     RECOVERY_KEY_DESCRIPTION:
-        'Si vous oubliez votre mot de passe, la seule façon de récupérer vos données est grâce à cette clé.',
+        'Si vous oubliez votre mot de passe, la seule façon de récupérer vos données sera grâce à cette clé.',
     RECOVER_KEY_GENERATION_FAILED:
         'Le code de récupération ne peut être généré, veuillez réessayer',
     KEY_NOT_STORED_DISCLAIMER:
@@ -444,7 +444,7 @@ const frenchConstants = {
         `${
             count === 1
                 ? '1 memory'
-                : `${formatNumberWithCommas(count)} memories`
+                : `${formatNumberWithCommas(count)} souvenirs`
         }`,
     TERMS_AND_CONDITIONS: () => (
         <Typography variant="body2">
@@ -527,7 +527,7 @@ const frenchConstants = {
     INCORRECT_CODE: 'Code non valide',
     RECOVER_TWO_FACTOR: 'Récupérer la double-authentification',
     TWO_FACTOR_INFO:
-        'Ajouter une couche de sécurité supplémentaire afin de nécessiter plus que simplement votre e-mail et mot de passe pour vous connecter à votre compte',
+        'Rajoutez une couche de sécurité supplémentaire afin de pas utiliser simplement votre e-mail et mot de passe pour vous connecter à votre compte',
     DISABLE_TWO_FACTOR_LABEL: 'Désactiver la double-authentification',
     UPDATE_TWO_FACTOR_LABEL: 'Mise à jour de votre appareil identificateur',
     DISABLE: 'Désactiver',
@@ -563,7 +563,7 @@ const frenchConstants = {
     LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE:
         'Votre navigateur ou un complément bloque ente qui ne peut sauvegarder les données sur votre stockage local. Veuillez relancer cette page après avoir changé de mode de navigation.',
     RETRY: 'Réessayer',
-    SEND_OTT: 'Envoyer OTP',
+    SEND_OTT: 'Envoyer l'OTP',
     EMAIl_ALREADY_OWNED: 'Cet e-mail est déjà pris',
     EMAIL_UDPATE_SUCCESSFUL: 'Votre e-mail a été mis à jour',
     UPLOAD_FAILED: 'Échec du chargement',
@@ -627,7 +627,7 @@ const frenchConstants = {
     UPLOAD_TO_COLLECTION: "Charger dans l'album",
     UNCATEGORIZED: 'Aucune catégorie',
     MOVE_TO_UNCATEGORIZED: 'Déplacer vers aucune catégorie',
-    ARCHIVE: 'Archiver',
+    ARCHIVE: 'Archivé',
     ARCHIVE_COLLECTION: "Archiver l'album",
     ARCHIVE_SECTION_NAME: 'Archiver',
     ALL_SECTION_NAME: 'Tous',
