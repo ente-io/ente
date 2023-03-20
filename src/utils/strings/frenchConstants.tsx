@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import Link from '@mui/material/Link';
+import { EnteLogo } from 'components/EnteLogo';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import React from 'react';
 import { SuggestionType } from 'types/search';
@@ -20,22 +21,22 @@ const dateString = function (date) {
 const frenchConstants = {
     HERO_SLIDE_1_TITLE: () => (
         <>
-            <div>Private backups</div>
-            <div> for your memories</div>
+            <div>Sauvegardes personnelles</div>
+            <div> de vos souvenirs</div>
         </>
     ),
     HERO_SLIDE_1: 'Chiffrement de bout en bout par défaut',
     HERO_SLIDE_2_TITLE: () => (
         <>
-            <div>Safely stored </div>
-            <div>at a fallout shelter</div>
+            <div>Sécurisé </div>
+            <div>dans un abri antiatomique</div>
         </>
     ),
     HERO_SLIDE_2: 'Conçu pour survivre',
     HERO_SLIDE_3_TITLE: () => (
         <>
-            <div>Available</div>
-            <div> everywhere</div>
+            <div>Disponible</div>
+            <div> partout</div>
         </>
     ),
     HERO_SLIDE_3: 'Android, iOS, Web, Ordinateur',
@@ -93,6 +94,15 @@ const frenchConstants = {
             données sans une clé de récupération.
         </>
     ),
+    WELCOME_TO_ENTE: () => (
+        <>
+            <Typography variant="h3" color="text.secondary" mb={1}>
+                Bienvenue sur <EnteLogo />
+            </Typography>
+            <h2>Stockage et partage photo avec cryptage de bout en bout</h2>
+        </>
+    ),
+    WHERE_YOUR_BEST_PHOTOS_LIVE: 'Là où vivent vos meilleures photos',
     KEY_GENERATION_IN_PROGRESS_MESSAGE: 'Génération des clés de chiffrement...',
     PASSPHRASE_HINT: 'Mot de passe',
     CONFIRM_PASSPHRASE: 'Confirmer le mot de passe',
@@ -553,7 +563,7 @@ const frenchConstants = {
     LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE:
         'Votre navigateur ou un complément bloque ente qui ne peut sauvegarder les données sur votre stockage local. Veuillez relancer cette page après avoir changé de mode de navigation.',
     RETRY: 'Réessayer',
-    SEND_OTT: 'Envoyer l'OTP',
+    SEND_OTT: "Envoyer l'OTP",
     EMAIl_ALREADY_OWNED: 'Cet e-mail est déjà pris',
     EMAIL_UDPATE_SUCCESSFUL: 'Votre e-mail a été mis à jour',
     UPLOAD_FAILED: 'Échec du chargement',
