@@ -1,83 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import OTPDisplay from 'components/Authenicator/OTPDisplay';
-const random = [
-    {
-        issuer: 'Google',
-        account: 'example@gmail.com',
-        secret: '6GJ2E2RQKJ36BY6A',
-        type: 'TOTP',
-        algorithm: 'SHA1',
-        period: 30,
-    },
-    {
-        issuer: 'Facebook',
-        account: 'example@gmail.com',
-        secret: 'RVZJ7N6KJKJGQ2VX',
-        type: 'TOTP',
-        algorithm: 'SHA256',
-        period: 60,
-    },
-    {
-        issuer: 'Twitter',
-        account: 'example@gmail.com',
-        secret: 'ZPUE6KJ3WGZ3HPKJ',
-        type: 'TOTP',
-        algorithm: 'SHA256',
-        period: 60,
-    },
-    {
-        issuer: 'GitHub',
-        account: 'example@gmail.com',
-        secret: 'AG6U5KJYHPRRNRZI',
-        type: 'TOTP',
-        algorithm: 'SHA1',
-        period: 30,
-    },
-    {
-        issuer: 'Amazon',
-        account: 'example@gmail.com',
-        secret: 'Q2FR2KJVKJFFKMWZ',
-        type: 'TOTP',
-        algorithm: 'SHA256',
-        period: 60,
-    },
-    {
-        issuer: 'LinkedIn',
-        account: 'example@gmail.com',
-        secret: 'SWRG4KJ4J3LNDW2Z',
-        type: 'TOTP',
-        algorithm: 'SHA256',
-        period: 60,
-    },
-    {
-        issuer: 'Dropbox',
-        account: 'example@gmail.com',
-        secret: 'G5U6OKJU3JRM72ZK',
-        type: 'TOTP',
-        algorithm: 'SHA1',
-        period: 30,
-    },
-];
+import { getAuthCodes } from 'services/authenticator/authenticatorService';
 
 const OTPPage = () => {
-    const [secrets, setSecrets] = useState([]);
+    const [codes, setCodes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        const fetchSecrets = async () => {
+        const fetchCodes = async () => {
             try {
-                setSecrets(random);
+                getAuthCodes().then((res) => {
+                    setCodes(res);
+                });
             } catch (error) {
                 console.error(error);
             }
         };
-        fetchSecrets();
+        fetchCodes();
     }, []);
 
-    const filteredSecrets = secrets.filter(
+    const filteredCodes = codes.filter(
         (secret) =>
-            secret.issuer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            secret.account.toLowerCase().includes(searchTerm.toLowerCase())
+            (secret.issuer ?? '')
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase()) ||
+            (secret.account ?? '')
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -98,7 +47,7 @@ const OTPPage = () => {
             />
 
             <div style={{ marginBottom: '1rem' }} />
-            {filteredSecrets.length === 0 ? (
+            {filteredCodes.length === 0 ? (
                 <div
                     style={{
                         alignItems: 'center',
@@ -111,16 +60,8 @@ const OTPPage = () => {
                     <p>Download ente auth mobile app to manage your secrets</p> */}
                 </div>
             ) : (
-                filteredSecrets.map((secret) => (
-                    <OTPDisplay
-                        key={secret.secret}
-                        secret={secret.secret}
-                        type={secret.type}
-                        algorithm={secret.algorithm}
-                        timePeriod={secret.period}
-                        issuer={secret.issuer}
-                        account={secret.account}
-                    />
+                filteredCodes.map((code) => (
+                    <OTPDisplay codeInfo={code} key={code.id} />
                 ))
             )}
         </div>
