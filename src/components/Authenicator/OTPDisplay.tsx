@@ -91,30 +91,35 @@ const OTPDisplay = (props: OTPDisplayProps) => {
     const { codeInfo } = props;
     const [code, setCode] = useState('');
     const [nextcode, setNextCode] = useState('');
+    const [codeErr, setCodeErr] = useState('');
 
     const generateCodes = () => {
-        const currentTime = new Date().getTime();
-        if (codeInfo.type.toLowerCase() === 'totp') {
-            const totp = new TOTP({
-                secret: codeInfo.secret,
-                algorithm: codeInfo.algorithm,
-                period: codeInfo.period ?? Code.defaultPeriod,
-                digits: codeInfo.digits,
-            });
-            setCode(totp.generate());
-            setNextCode(
-                totp.generate({
-                    timestamp: currentTime + codeInfo.period * 1000,
-                })
-            );
-        } else if (codeInfo.type.toLowerCase() === 'hotp') {
-            const hotp = new HOTP({
-                secret: codeInfo.secret,
-                counter: 0,
-                algorithm: codeInfo.algorithm,
-            });
-            setCode(hotp.generate());
-            setNextCode(hotp.generate({ counter: 1 }));
+        try {
+            const currentTime = new Date().getTime();
+            if (codeInfo.type.toLowerCase() === 'totp') {
+                const totp = new TOTP({
+                    secret: codeInfo.secret,
+                    algorithm: codeInfo.algorithm,
+                    period: codeInfo.period ?? Code.defaultPeriod,
+                    digits: codeInfo.digits,
+                });
+                setCode(totp.generate());
+                setNextCode(
+                    totp.generate({
+                        timestamp: currentTime + codeInfo.period * 1000,
+                    })
+                );
+            } else if (codeInfo.type.toLowerCase() === 'hotp') {
+                const hotp = new HOTP({
+                    secret: codeInfo.secret,
+                    counter: 0,
+                    algorithm: codeInfo.algorithm,
+                });
+                setCode(hotp.generate());
+                setNextCode(hotp.generate({ counter: 1 }));
+            }
+        } catch (err) {
+            setCodeErr(err.message);
         }
     };
 
@@ -138,12 +143,28 @@ const OTPDisplay = (props: OTPDisplayProps) => {
     return (
         <div style={{ padding: '8px' }}>
             <TimerProgress period={codeInfo.period ?? Code.defaultPeriod} />
-            <TOTPDisplay
-                issuer={codeInfo.issuer}
-                account={codeInfo.account}
-                code={code}
-                nextCode={nextcode}
-            />
+            {codeErr === '' ? (
+                <TOTPDisplay
+                    issuer={codeInfo.issuer}
+                    account={codeInfo.account}
+                    code={code}
+                    nextCode={nextcode}
+                />
+            ) : (
+                <div
+                    style={{
+                        padding: '4px 16px',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        minWidth: '320px',
+                        borderRadius: '4px',
+                        backgroundColor: 'rgba(40, 40, 40, 0.6)',
+                        justifyContent: 'space-between',
+                    }}>
+                    <p>{codeErr}</p>
+                    <p>{codeInfo.rawData ?? 'no rawdata'}</p>
+                </div>
+            )}
         </div>
     );
 };

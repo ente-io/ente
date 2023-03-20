@@ -28,8 +28,19 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                         entity.header,
                         authentitorKey
                     );
-                    return Code.fromRawData(entity.id, decryptedCode);
+                    try {
+                        return Code.fromRawData(entity.id, decryptedCode);
+                    } catch (e) {
+                        console.log(
+                            'failed to parse code',
+                            e,
+                            entity.id,
+                            decryptedCode
+                        );
+                        return null;
+                    }
                 })
+                .filter((f) => f !== null || f !== undefined)
         );
         // sort by issuer name which can be undefined also
         authCodes.sort((a, b) => {
