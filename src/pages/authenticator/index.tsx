@@ -3,8 +3,11 @@ import OTPDisplay from 'components/Authenicator/OTPDisplay';
 import { getAuthCodes } from 'services/authenticator/authenticatorService';
 import { Button } from '@mui/material';
 import { CustomError } from 'utils/error';
+import { PAGES } from 'constants/pages';
+import { useRouter } from 'next/router';
 
 const OTPPage = () => {
+    const router = useRouter();
     const [codes, setCodes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -17,10 +20,12 @@ const OTPPage = () => {
                     })
                     .catch((err) => {
                         if (err.message === CustomError.KEY_MISSING) {
-                            window.location.href = '/';
+                            router.push({
+                                pathname: PAGES.CREDENTIALS,
+                                query: { redirectPage: PAGES.AUTHENICATOR },
+                            });
                             return;
                         }
-
                         console.error('something wrong here', err);
                     });
             } catch (error) {
