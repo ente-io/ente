@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/services/collections_service.dart";
@@ -43,7 +44,6 @@ class AddLocationSheet extends StatefulWidget {
 }
 
 class _AddLocationSheetState extends State<AddLocationSheet> {
-  final values = <double>[2, 10, 20, 40, 80, 200, 400, 1200];
   int selectedIndex = 4;
   ValueNotifier<int?> memoriesCountNotifier = ValueNotifier(null);
   @override
@@ -158,8 +158,8 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                                               });
                                             },
                                             min: 0,
-                                            max: values.length - 1,
-                                            divisions: values.length - 1,
+                                            max: radiusValues.length - 1,
+                                            divisions: radiusValues.length - 1,
                                           ),
                                         ),
                                       ),
@@ -288,7 +288,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   }
 
   double _selectedRadius() {
-    return values[selectedIndex];
+    return radiusValues[selectedIndex];
   }
 }
 
