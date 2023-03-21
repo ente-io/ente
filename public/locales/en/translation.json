@@ -561,5 +561,12 @@
         "MB": "MB",
         "GB": "GB",
         "TB": "TB"
+    },
+    "AFTER_TIME": {
+        "HOUR": "after an hour",
+        "DAY": "after a day",
+        "WEEK": "after a week",
+        "MONTH": "after a month",
+        "YEAR": "after a year"
     }
 }

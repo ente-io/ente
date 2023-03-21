@@ -559,5 +559,12 @@
         "MB": "Mo",
         "GB": "Go",
         "TB": "To"
+    },
+    "AFTER_TIME": {
+        "HOUR": "dans une heure",
+        "DAY": "dans un jour",
+        "WEEK": "dans une semaine",
+        "MONTH": "dans un mois",
+        "YEAR": "dans un an"
     }
 }

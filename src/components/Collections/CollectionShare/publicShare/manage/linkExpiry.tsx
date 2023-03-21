@@ -31,7 +31,7 @@ export function ManageLinkExpiry({
             <Typography mb={0.5}>{t('LINK_EXPIRY')}</Typography>
             <Select
                 menuPosition="fixed"
-                options={shareExpiryOptions}
+                options={shareExpiryOptions()}
                 isSearchable={false}
                 value={null}
                 components={{
@@ -40,7 +40,7 @@ export function ManageLinkExpiry({
                 placeholder={
                     publicShareProp?.validTill
                         ? formatDateTime(publicShareProp?.validTill / 1000)
-                        : 'never'
+                        : t('LINK_EXPIRY_NEVER')
                 }
                 onChange={(e) => {
                     updateDeviceExpiry(e.value);
