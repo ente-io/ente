@@ -46,7 +46,7 @@ class Code {
           account +
           "?algorithm=SHA1&digits=6&issuer=" +
           issuer +
-          "period=30&secret=" +
+          "&period=30&secret=" +
           secret,
     );
   }
@@ -76,6 +76,9 @@ class Code {
 
   static String _getIssuer(Uri uri) {
     try {
+      if (uri.queryParameters.containsKey("issuer")) {
+        return uri.queryParameters['issuer']!;
+      }
       final String path = Uri.decodeComponent(uri.path);
       return path.split(':')[0].substring(1);
     } catch (e) {
