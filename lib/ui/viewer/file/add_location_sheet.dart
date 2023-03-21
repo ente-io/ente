@@ -224,6 +224,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                 return result;
               },
               tagPrefix: "Add location",
+              shouldCollateFilesByDay: false,
             ),
           ),
         ],

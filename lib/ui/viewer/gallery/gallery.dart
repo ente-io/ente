@@ -40,6 +40,7 @@ class Gallery extends StatefulWidget {
   final Widget emptyState;
   final String? albumName;
   final double scrollBottomSafeArea;
+  final bool shouldCollateFilesByDay;
 
   const Gallery({
     required this.asyncLoader,
@@ -54,6 +55,7 @@ class Gallery extends StatefulWidget {
     this.emptyState = const EmptyState(),
     this.scrollBottomSafeArea = 120.0,
     this.albumName = '',
+    this.shouldCollateFilesByDay = true,
     Key? key,
   }) : super(key: key);
 
@@ -168,7 +170,8 @@ class _GalleryState extends State<Gallery> {
 
   // Collates files and returns `true` if it resulted in a gallery reload
   bool _onFilesLoaded(List<File> files) {
-    final updatedCollatedFiles = _collateFiles(files);
+    final updatedCollatedFiles =
+        widget.shouldCollateFilesByDay ? _collateFiles(files) : [files];
     if (_collatedFiles.length != updatedCollatedFiles.length ||
         _collatedFiles.isEmpty) {
       if (mounted) {
@@ -246,6 +249,7 @@ class _GalleryState extends State<Gallery> {
               .on<GalleryIndexUpdatedEvent>()
               .where((event) => event.tag == widget.tagPrefix)
               .map((event) => event.index),
+          widget.shouldCollateFilesByDay,
           logTag: _logTag,
           photoGirdSize: _photoGridSize,
         );

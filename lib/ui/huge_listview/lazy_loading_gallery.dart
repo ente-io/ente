@@ -37,6 +37,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final String? logTag;
   final Stream<int> currentIndexStream;
   final int photoGirdSize;
+  final bool areFilesCollatedByDay;
   LazyLoadingGallery(
     this.files,
     this.index,
@@ -45,7 +46,8 @@ class LazyLoadingGallery extends StatefulWidget {
     this.asyncLoader,
     this.selectedFiles,
     this.tag,
-    this.currentIndexStream, {
+    this.currentIndexStream,
+    this.areFilesCollatedByDay, {
     this.logTag = "",
     this.photoGirdSize = photoGridSizeDefault,
     Key? key,
@@ -190,11 +192,12 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            getDayWidget(
-              context,
-              _files[0].creationTime!,
-              widget.photoGirdSize,
-            ),
+            if (widget.areFilesCollatedByDay)
+              getDayWidget(
+                context,
+                _files[0].creationTime!,
+                widget.photoGirdSize,
+              ),
             ValueListenableBuilder(
               valueListenable: _showSelectAllButton,
               builder: (context, dynamic value, _) {
