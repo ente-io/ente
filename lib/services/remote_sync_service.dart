@@ -438,8 +438,9 @@ class RemoteSyncService {
           _collectionsService.getCollectionByID(deviceCollection.collectionID!);
       if (collection == null || collection.isDeleted) {
         _logger.warning(
-          "Collection $deviceCollection.collectionID either deleted or missing "
-          "for path ${deviceCollection.id}",
+          "Collection ${deviceCollection.collectionID} either deleted or "
+          "missing "
+          "for pathID ${deviceCollection.id}",
         );
         return null;
       }
