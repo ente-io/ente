@@ -73,6 +73,21 @@ class LocationService {
     return result;
   }
 
+  isFileInsideLocationTag(
+    List<double> center,
+    List<double> fileCoordinates,
+    int radius,
+  ) {
+    final a = (radius * _scaleFactor(center[0])) / kilometersPerDegree;
+    final b = radius / kilometersPerDegree;
+    final x = center[0] - fileCoordinates[0];
+    final y = center[1] - fileCoordinates[1];
+    if ((x * x) / (a * a) + (y * y) / (b * b) <= 1) {
+      return true;
+    }
+    return false;
+  }
+
   Future<void> addFileToLocation(int locationId, int fileId) async {
     final list = getFilesByLocation(locationId.toString());
     list.add(fileId.toString());

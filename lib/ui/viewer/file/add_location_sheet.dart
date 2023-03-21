@@ -5,6 +5,7 @@ import "package:photos/db/files_db.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/ignored_files_service.dart";
+import "package:photos/services/location_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -61,6 +62,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
           ),
           Expanded(
             child: Gallery(
+              key: ValueKey(_selectedRadius()),
               header: Column(
                 children: [
                   Padding(
@@ -91,8 +93,8 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                                   Expanded(
                                     flex: 6,
                                     child: Text(
-                                      values[selectedIndex].toInt().toString(),
-                                      style: values[selectedIndex] != 1200
+                                      _selectedRadius().toInt().toString(),
+                                      style: _selectedRadius() != 1200
                                           ? textTheme.largeBold
                                           : textTheme.bodyBold,
                                       textAlign: TextAlign.center,
@@ -151,6 +153,8 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                                             onChanged: (value) {
                                               setState(() {
                                                 selectedIndex = value.toInt();
+                                                memoriesCountNotifier.value =
+                                                    null;
                                               });
                                             },
                                             min: 0,
@@ -254,12 +258,21 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                 // hide ignored files from home page UI
                 final ignoredIDs =
                     await IgnoredFilesService.instance.ignoredIDs;
-                result.files.removeWhere(
-                  (f) =>
-                      f.uploadedFileID == null &&
-                      IgnoredFilesService.instance
-                          .shouldSkipUpload(ignoredIDs, f),
-                );
+                result.files.removeWhere((f) {
+                  assert(
+                    f.location != null &&
+                        f.location!.latitude != null &&
+                        f.location!.longitude != null,
+                  );
+                  return f.uploadedFileID == null &&
+                          IgnoredFilesService.instance
+                              .shouldSkipUpload(ignoredIDs, f) ||
+                      !LocationService.instance.isFileInsideLocationTag(
+                        widget.coordinates,
+                        [f.location!.latitude!, f.location!.longitude!],
+                        _selectedRadius().toInt(),
+                      );
+                });
                 if (!result.hasMore) {
                   memoriesCountNotifier.value = result.files.length;
                 }
@@ -272,6 +285,10 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
         ],
       ),
     );
+  }
+
+  double _selectedRadius() {
+    return values[selectedIndex];
   }
 }
 
