@@ -511,7 +511,7 @@
     "CURRENT_USAGE": "L'utilisation actuelle est de <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "Le navigateur que vous utilisez n'est pas assez puissant pour chiffrer vos photos. Veuillez essayer de vous connecter à ente sur votre ordinateur, ou télécharger l'appli ente mobile/ordinateur.",
     "DRAG_AND_DROP_HINT": "Sinon glissez déposez dans la fenêtre ente",
-    "ASK_FOR_FEEDBACK": "<p>Nous serrions navré de vous voir partir. Avez-vous rencontré des problèmes?</p><p>Veuillez nous écrire à{' '}<1>{{link}}/1>,nous pouvons peut-être vous aider.</p>",
+    "ASK_FOR_FEEDBACK": "<p>Nous serrions navré de vous voir partir. Avez-vous rencontré des problèmes?</p><p>Veuillez nous écrire à <a>{{emailID}}</a>,nous pouvons peut-être vous aider.</p>",
     "SEND_FEEDBACK": "Oui, envoyer un commentaire",
     "CONFIRM_ACCOUNT_DELETION_TITLE": "Êtes-vous certains de vouloir supprimer votre compte?",
     "CONFIRM_ACCOUNT_DELETION_MESSAGE": "<p> Vos données chargées seront programmées pour suppression, et votre comptre sera supprimé définitivement .</p><p>Cette action n'est pas reversible.</p>",
