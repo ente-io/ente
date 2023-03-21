@@ -6,7 +6,8 @@ import MLSearchSettings from 'components/MachineLearning/MLSearchSettings';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import Titlebar from 'components/Titlebar';
 import { useState } from 'react';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import SidebarButton from './Button';
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
@@ -39,7 +40,7 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
             <Stack spacing={'4px'} py={'12px'}>
                 <Titlebar
                     onClose={onClose}
-                    title={constants.ADVANCED}
+                    title={t('ADVANCED')}
                     onRootClose={handleRootClose}
                 />
 
@@ -47,7 +48,7 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                     <Stack py="20px" spacing="24px">
                         <Box>
                             <MenuSectionTitle
-                                title={constants.LABS}
+                                title={t('LABS')}
                                 icon={<ScienceIcon />}
                             />
                             <SidebarButton
@@ -55,7 +56,7 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                                 color="secondary"
                                 endIcon={<ChevronRight />}
                                 onClick={openMlSearchSettings}>
-                                {constants.ML_SEARCH}
+                                {t('ML_SEARCH')}
                             </SidebarButton>
                         </Box>
                     </Stack>

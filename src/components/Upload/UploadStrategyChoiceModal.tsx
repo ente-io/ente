@@ -4,7 +4,7 @@ import DialogTitleWithCloseButton, {
     dialogCloseHandler,
 } from 'components/DialogBox/TitleWithCloseButton';
 import React from 'react';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
 
 interface Props {
     uploadToMultipleCollection: () => void;
@@ -24,12 +24,12 @@ function UploadStrategyChoiceModal({
     return (
         <Dialog open={props.open} onClose={handleClose}>
             <DialogTitleWithCloseButton onClose={handleClose}>
-                {constants.MULTI_FOLDER_UPLOAD}
+                {t('MULTI_FOLDER_UPLOAD')}
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <CenteredFlex mb={1}>
                     <Typography color="text.secondary">
-                        {constants.UPLOAD_STRATEGY_CHOICE}
+                        {t('UPLOAD_STRATEGY_CHOICE')}
                     </Typography>
                 </CenteredFlex>
                 <SpaceBetweenFlex px={2}>
@@ -40,10 +40,10 @@ function UploadStrategyChoiceModal({
                             props.onClose();
                             uploadToSingleCollection();
                         }}>
-                        {constants.UPLOAD_STRATEGY_SINGLE_COLLECTION}
+                        {t('UPLOAD_STRATEGY_SINGLE_COLLECTION')}
                     </Button>
 
-                    <strong>{constants.OR}</strong>
+                    <strong>{t('OR')}</strong>
 
                     <Button
                         size="medium"
@@ -52,7 +52,7 @@ function UploadStrategyChoiceModal({
                             props.onClose();
                             uploadToMultipleCollection();
                         }}>
-                        {constants.UPLOAD_STRATEGY_COLLECTION_PER_FOLDER}
+                        {t('UPLOAD_STRATEGY_COLLECTION_PER_FOLDER')}
                     </Button>
                 </SpaceBetweenFlex>
             </DialogContent>

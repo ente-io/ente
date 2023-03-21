@@ -1,6 +1,5 @@
 import { FluidContainer } from 'components/Container';
 import { SelectionBar } from '../../Navbar/SelectionBar';
-import constants from 'utils/strings/constants';
 import React, { useContext } from 'react';
 import { Box, IconButton, styled, Tooltip } from '@mui/material';
 import { DeduplicateContext } from 'pages/deduplicate';
@@ -9,6 +8,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import BackButton from '@mui/icons-material/ArrowBackOutlined';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { getTrashFilesMessage } from 'utils/ui';
+import { t } from 'i18next';
 
 const VerticalLine = styled('div')`
     position: absolute;
@@ -56,7 +56,7 @@ export default function DeduplicateOptions({
                     </IconButton>
                 )}
                 <Box ml={1.5}>
-                    {count} {constants.SELECTED}
+                    {count} {t('SELECTED')}
                 </Box>
             </FluidContainer>
             <input
@@ -73,11 +73,11 @@ export default function DeduplicateOptions({
                         !deduplicateContext.clubSameTimeFilesOnly
                     );
                 }}></input>
-            <CheckboxText>{constants.CLUB_BY_CAPTURE_TIME}</CheckboxText>
+            <CheckboxText>{t('CLUB_BY_CAPTURE_TIME')}</CheckboxText>
             <div>
                 <VerticalLine />
             </div>
-            <Tooltip title={constants.DELETE}>
+            <Tooltip title={t('DELETE')}>
                 <IconButton onClick={trashHandler}>
                     <DeleteIcon />
                 </IconButton>

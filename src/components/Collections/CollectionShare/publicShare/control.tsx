@@ -3,13 +3,13 @@ import { FlexWrapper } from 'components/Container';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useState } from 'react';
+import { t } from 'i18next';
 import {
     createShareableURL,
     deleteShareableURL,
 } from 'services/collectionService';
 import { Collection, PublicURL } from 'types/collection';
 import { handleSharingErrors } from 'utils/error/ui';
-import constants from 'utils/strings/constants';
 import PublicShareSwitch from './switch';
 interface Iprops {
     collection: Collection;
@@ -56,11 +56,11 @@ export default function PublicShareControl({
 
     const confirmDisablePublicSharing = () => {
         appContext.setDialogMessage({
-            title: constants.DISABLE_PUBLIC_SHARING,
-            content: constants.DISABLE_PUBLIC_SHARING_MESSAGE,
-            close: { text: constants.CANCEL },
+            title: t('DISABLE_PUBLIC_SHARING'),
+            content: t('DISABLE_PUBLIC_SHARING_MESSAGE'),
+            close: { text: t('CANCEL') },
             proceed: {
-                text: constants.DISABLE,
+                text: t('DISABLE'),
                 action: disablePublicSharing,
                 variant: 'danger',
             },
@@ -78,7 +78,7 @@ export default function PublicShareControl({
     return (
         <Box mt={3}>
             <FlexWrapper>
-                <FlexWrapper>{constants.PUBLIC_SHARING}</FlexWrapper>
+                <FlexWrapper>{t('PUBLIC_SHARING')}</FlexWrapper>
 
                 <PublicShareSwitch
                     color="accent"

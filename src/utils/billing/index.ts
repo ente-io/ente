@@ -1,16 +1,17 @@
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import billingService from 'services/billingService';
 import { Plan, Subscription } from 'types/billing';
 import { NextRouter } from 'next/router';
 import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS } from '../storage/localStorage';
-import { CustomError } from '../error';
 import { logError } from '../sentry';
 import { SetDialogBoxAttributes } from 'types/dialogBox';
 import { getFamilyPortalRedirectURL } from 'services/userService';
 import { openLink } from 'utils/common';
 import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
 import { UserDetails } from 'types/user';
+import { getSubscriptionPurchaseSuccessMessage } from 'utils/ui';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
@@ -43,7 +44,7 @@ export function makeHumanReadableStorage(
     { roundUp } = { roundUp: false }
 ): string {
     if (bytes <= 0) {
-        return '0 MB';
+        return `0 ${t('STORAGE_UNITS.MB')}`;
     }
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
 
@@ -65,7 +66,7 @@ export function makeHumanReadableStorage(
         }
     }
 
-    return `${quantity} ${unit}`;
+    return `${quantity} ${t(`STORAGE_UNITS.${unit}`)}`;
 }
 
 export function hasPaidSubscription(subscription: Subscription) {
@@ -150,8 +151,8 @@ export async function updateSubscription(
         await billingService.updateSubscription(plan.stripeID);
     } catch (err) {
         setDialogMessage({
-            title: constants.ERROR,
-            content: constants.SUBSCRIPTION_UPDATE_FAILED,
+            title: t('ERROR'),
+            content: t('SUBSCRIPTION_UPDATE_FAILED'),
             close: { variant: 'danger' },
         });
     } finally {
@@ -169,14 +170,14 @@ export async function cancelSubscription(
         setLoading(true);
         await billingService.cancelSubscription();
         setDialogMessage({
-            title: constants.SUCCESS,
-            content: constants.SUBSCRIPTION_CANCEL_SUCCESS,
+            title: t('SUCCESS'),
+            content: t('SUBSCRIPTION_CANCEL_SUCCESS'),
             close: { variant: 'accent' },
         });
     } catch (e) {
         setDialogMessage({
-            title: constants.ERROR,
-            content: constants.SUBSCRIPTION_CANCEL_FAILED,
+            title: t('ERROR'),
+            content: t('SUBSCRIPTION_CANCEL_FAILED'),
             close: { variant: 'danger' },
         });
     } finally {
@@ -194,14 +195,14 @@ export async function activateSubscription(
         setLoading(true);
         await billingService.activateSubscription();
         setDialogMessage({
-            title: constants.SUCCESS,
-            content: constants.SUBSCRIPTION_ACTIVATE_SUCCESS,
+            title: t('SUCCESS'),
+            content: t('SUBSCRIPTION_ACTIVATE_SUCCESS'),
             close: { variant: 'accent' },
         });
     } catch (e) {
         setDialogMessage({
-            title: constants.ERROR,
-            content: constants.SUBSCRIPTION_ACTIVATE_FAILED,
+            title: t('ERROR'),
+            content: t('SUBSCRIPTION_ACTIVATE_FAILED'),
             close: { variant: 'danger' },
         });
     } finally {
@@ -220,8 +221,8 @@ export async function updatePaymentMethod(
     } catch (error) {
         setLoading(false);
         setDialogMessage({
-            title: constants.ERROR,
-            content: constants.UNKNOWN_ERROR,
+            title: t('ERROR'),
+            content: t('UNKNOWN_ERROR'),
             close: { variant: 'danger' },
         });
     }
@@ -238,8 +239,8 @@ export async function manageFamilyMethod(
     } catch (error) {
         logError(error, 'failed to redirect to family portal');
         setDialogMessage({
-            title: constants.ERROR,
-            content: constants.UNKNOWN_ERROR,
+            title: t('ERROR'),
+            content: t('UNKNOWN_ERROR'),
             close: { variant: 'danger' },
         });
     } finally {
@@ -261,17 +262,13 @@ export async function checkSubscriptionPurchase(
                 const subscription = await billingService.verifySubscription(
                     sessionId as string
                 );
-                setDialogMessage({
-                    title: constants.SUBSCRIPTION_PURCHASE_SUCCESS_TITLE,
-                    close: { variant: 'accent' },
-                    content: constants.SUBSCRIPTION_PURCHASE_SUCCESS(
-                        subscription?.expiryTime
-                    ),
-                });
+                setDialogMessage(
+                    getSubscriptionPurchaseSuccessMessage(subscription)
+                );
             } catch (e) {
                 setDialogMessage({
-                    title: constants.ERROR,
-                    content: CustomError.SUBSCRIPTION_VERIFICATION_ERROR,
+                    title: t('ERROR'),
+                    content: t('SUBSCRIPTION_VERIFICATION_ERROR'),
                     close: {},
                 });
             }
@@ -290,18 +287,18 @@ function handleFailureReason(
     switch (reason) {
         case FAILURE_REASON.CANCELED:
             setDialogMessage({
-                title: constants.MESSAGE,
-                content: constants.SUBSCRIPTION_PURCHASE_CANCELLED,
+                title: t('MESSAGE'),
+                content: t('SUBSCRIPTION_PURCHASE_CANCELLED'),
                 close: { variant: 'danger' },
             });
             break;
         case FAILURE_REASON.REQUIRE_PAYMENT_METHOD:
             setDialogMessage({
-                title: constants.UPDATE_PAYMENT_METHOD,
-                content: constants.UPDATE_PAYMENT_METHOD_MESSAGE,
+                title: t('UPDATE_PAYMENT_METHOD'),
+                content: t('UPDATE_PAYMENT_METHOD_MESSAGE'),
 
                 proceed: {
-                    text: constants.UPDATE_PAYMENT_METHOD,
+                    text: t('UPDATE_PAYMENT_METHOD'),
                     variant: 'accent',
                     action: updatePaymentMethod.bind(
                         null,
@@ -310,17 +307,17 @@ function handleFailureReason(
                         setLoading
                     ),
                 },
-                close: { text: constants.CANCEL },
+                close: { text: t('CANCEL') },
             });
             break;
 
         case FAILURE_REASON.AUTHENTICATION_FAILED:
             setDialogMessage({
-                title: constants.UPDATE_PAYMENT_METHOD,
-                content: constants.STRIPE_AUTHENTICATION_FAILED,
+                title: t('UPDATE_PAYMENT_METHOD'),
+                content: t('STRIPE_AUTHENTICATION_FAILED'),
 
                 proceed: {
-                    text: constants.UPDATE_PAYMENT_METHOD,
+                    text: t('UPDATE_PAYMENT_METHOD'),
                     variant: 'accent',
                     action: updatePaymentMethod.bind(
                         null,
@@ -329,14 +326,14 @@ function handleFailureReason(
                         setLoading
                     ),
                 },
-                close: { text: constants.CANCEL },
+                close: { text: t('CANCEL') },
             });
             break;
 
         default:
             setDialogMessage({
-                title: constants.ERROR,
-                content: constants.SUBSCRIPTION_PURCHASE_FAILED,
+                title: t('ERROR'),
+                content: t('SUBSCRIPTION_PURCHASE_FAILED'),
                 close: { variant: 'danger' },
             });
     }

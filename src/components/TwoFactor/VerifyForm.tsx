@@ -2,7 +2,8 @@
 import { Formik, FormikHelpers } from 'formik';
 import React, { FC, useRef, useState } from 'react';
 import OtpInput from 'react-otp-input';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import SubmitButton from 'components/SubmitButton';
 import VerticallyCentered, { CenteredFlex } from 'components/Container';
 import { Box, Typography, TypographyProps } from '@mui/material';
@@ -45,7 +46,7 @@ export default function VerifyTwoFactor(props: Props) {
             for (let i = 0; i < 6; i++) {
                 otpInputRef.current?.focusPrevInput();
             }
-            setFieldError('otp', `${constants.UNKNOWN_ERROR} ${e.message}`);
+            setFieldError('otp', `${t('UNKNOWN_ERROR')} ${e.message}`);
         }
         setWaiting(false);
     };
@@ -70,7 +71,7 @@ export default function VerifyTwoFactor(props: Props) {
                             mb={2}
                             variant="body2"
                             color="text.secondary">
-                            {constants.ENTER_TWO_FACTOR_OTP}
+                            {t('ENTER_TWO_FACTOR_OTP')}
                         </Typography>
                         <Box my={2}>
                             <OtpInput
@@ -89,7 +90,7 @@ export default function VerifyTwoFactor(props: Props) {
                             {errors.otp && (
                                 <CenteredFlex sx={{ mt: 1 }}>
                                     <InvalidInputMessage>
-                                        {constants.INCORRECT_CODE}
+                                        {t('INCORRECT_CODE')}
                                     </InvalidInputMessage>
                                 </CenteredFlex>
                             )}

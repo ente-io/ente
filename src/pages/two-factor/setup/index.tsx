@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { enableTwoFactor, setupTwoFactor } from 'services/userService';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import VerticallyCentered from 'components/Container';
 import { useRouter } from 'next/router';
 import VerifyTwoFactor, {
@@ -60,16 +61,16 @@ export default function SetupTwoFactor() {
                     <VerticallyCentered sx={{ p: 3 }}>
                         <Box mb={4}>
                             <Typography variant="title">
-                                {constants.TWO_FACTOR}
+                                {t('TWO_FACTOR')}
                             </Typography>
                         </Box>
                         <TwoFactorSetup twoFactorSecret={twoFactorSecret} />
                         <VerifyTwoFactor
                             onSubmit={onSubmit}
-                            buttonText={constants.ENABLE}
+                            buttonText={t('ENABLE')}
                         />
                         <LinkButton sx={{ mt: 2 }} onClick={router.back}>
-                            {constants.GO_BACK}
+                            {t('GO_BACK')}
                         </LinkButton>
                     </VerticallyCentered>
                 </CardContent>

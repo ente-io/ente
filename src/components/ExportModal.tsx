@@ -17,7 +17,6 @@ import { sleep } from 'utils/common';
 import { getExportRecordFileUID } from 'utils/export';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import constants from 'utils/strings/constants';
 import { FlexWrapper, Label, Value } from './Container';
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
@@ -35,6 +34,7 @@ import { getLocalUserDetails } from 'utils/user';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { addLogLine } from 'utils/logging';
+import { t } from 'i18next';
 
 const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
@@ -384,7 +384,7 @@ export default function ExportModal(props: Props) {
     return (
         <Dialog open={props.show} onClose={props.onHide} maxWidth="xs">
             <DialogTitleWithCloseButton onClose={props.onHide}>
-                {constants.EXPORT_DATA}
+                {t('EXPORT_DATA')}
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <Stack spacing={2}>
@@ -405,11 +405,11 @@ export default function ExportModal(props: Props) {
 function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
     return (
         <FlexWrapper>
-            <Label width="30%">{constants.DESTINATION}</Label>
+            <Label width="30%">{t('DESTINATION')}</Label>
             <Value width="70%">
                 {!exportFolder ? (
                     <Button color={'accent'} onClick={selectExportDirectory}>
-                        {constants.SELECT_FOLDER}
+                        {t('SELECT_FOLDER')}
                     </Button>
                 ) : (
                     <>
@@ -434,7 +434,7 @@ function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
 function ExportSize({ exportSize }) {
     return (
         <FlexWrapper>
-            <Label width="30%">{constants.EXPORT_SIZE} </Label>
+            <Label width="30%">{t('EXPORT_SIZE')} </Label>
             <Value width="70%">
                 {exportSize ? `${exportSize}` : <EnteSpinner />}
             </Value>
@@ -464,7 +464,7 @@ function ExportDirectoryOption({ selectExportDirectory }) {
             <OverflowMenuOption
                 onClick={handleClick}
                 startIcon={<FolderIcon />}>
-                {constants.CHANGE_FOLDER}
+                {t('CHANGE_FOLDER')}
             </OverflowMenuOption>
         </OverflowMenu>
     );

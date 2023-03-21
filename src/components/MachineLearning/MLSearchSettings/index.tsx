@@ -1,13 +1,14 @@
-import { Box, DialogProps } from '@mui/material';
+import { Box, DialogProps, Typography } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { AppContext } from 'pages/_app';
 import { useContext, useState } from 'react';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 import {
     getFaceSearchEnabledStatus,
     updateFaceSearchEnabledStatus,
 } from 'services/userService';
 import { logError } from 'utils/sentry';
-import constants from 'utils/strings/constants';
 import EnableFaceSearch from './enableFaceSearch';
 import EnableMLSearch from './enableMLSearch';
 import ManageMLSearch from './manageMLSearch';
@@ -82,12 +83,16 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
 
     const confirmDisableFaceSearch = () => {
         setDialogMessage({
-            title: constants.DISABLE_FACE_SEARCH_TITLE,
-            content: constants.DISABLE_FACE_SEARCH_DESCRIPTION(),
-            close: { text: constants.CANCEL },
+            title: t('DISABLE_FACE_SEARCH_TITLE'),
+            content: (
+                <Typography>
+                    <Trans i18nKey={'DISABLE_FACE_SEARCH_DESCRIPTION'} />
+                </Typography>
+            ),
+            close: { text: t('CANCEL') },
             proceed: {
                 variant: 'primary',
-                text: constants.DISABLE_FACE_SEARCH,
+                text: t('DISABLE_FACE_SEARCH'),
                 action: disableFaceSearch,
             },
         });

@@ -6,8 +6,8 @@ import {
     IconButtonWithBG,
 } from 'components/Container';
 import CollectionSort from 'components/Collections/AllCollections/CollectionSort';
-import constants from 'utils/strings/constants';
 import Close from '@mui/icons-material/Close';
+import { t } from 'i18next';
 
 export default function AllCollectionsHeader({
     onClose,
@@ -20,11 +20,9 @@ export default function AllCollectionsHeader({
             <FlexWrapper>
                 <FluidContainer mr={1.5}>
                     <Box>
-                        <Typography variant="h3">
-                            {constants.ALL_ALBUMS}
-                        </Typography>
+                        <Typography variant="h3">{t('ALL_ALBUMS')}</Typography>
                         <Typography variant="body2" color={'text.secondary'}>
-                            {`${collectionCount} ${constants.ALBUMS}`}
+                            {t('albums', { count: collectionCount })}
                         </Typography>
                     </Box>
                 </FluidContainer>

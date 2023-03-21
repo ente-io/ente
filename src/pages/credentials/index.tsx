@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { PAGES } from 'constants/pages';
@@ -104,20 +105,20 @@ export default function Credentials() {
     return (
         <FormContainer>
             <FormPaper style={{ minWidth: '320px' }}>
-                <FormPaperTitle>{constants.PASSWORD}</FormPaperTitle>
+                <FormPaperTitle>{t('PASSWORD')}</FormPaperTitle>
 
                 <VerifyMasterPasswordForm
-                    buttonText={constants.VERIFY_PASSPHRASE}
+                    buttonText={t('VERIFY_PASSPHRASE')}
                     callback={useMasterPassword}
                     user={user}
                     keyAttributes={keyAttributes}
                 />
                 <FormPaperFooter style={{ justifyContent: 'space-between' }}>
                     <LinkButton onClick={redirectToRecoverPage}>
-                        {constants.FORGOT_PASSWORD}
+                        {t('FORGOT_PASSWORD')}
                     </LinkButton>
                     <LinkButton onClick={logoutUser}>
-                        {constants.CHANGE_EMAIL}
+                        {t('CHANGE_EMAIL')}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>
