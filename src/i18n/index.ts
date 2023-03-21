@@ -30,6 +30,7 @@ export const setupI18n = async () => {
                     'br',
                 ],
             },
+            load: 'languageOnly',
         });
 
     i18n.services.formatter.add('dateTime', (value, lng) => {
