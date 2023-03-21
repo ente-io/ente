@@ -44,7 +44,7 @@ export function makeHumanReadableStorage(
     { roundUp } = { roundUp: false }
 ): string {
     if (bytes <= 0) {
-        return '0 MB';
+        return `0 ${t('STORAGE_UNITS.MB')}`;
     }
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
 
@@ -66,7 +66,7 @@ export function makeHumanReadableStorage(
         }
     }
 
-    return `${quantity} ${unit}`;
+    return `${quantity} ${t(`STORAGE_UNITS.${unit}`)}`;
 }
 
 export function hasPaidSubscription(subscription: Subscription) {

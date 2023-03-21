@@ -45,7 +45,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                     <Trans
                         i18nKey="CURRENT_USAGE"
                         values={{
-                            usage: `${convertBytesToGBs(usage, 2)} GB`,
+                            usage: `${convertBytesToGBs(usage, 2)} ${t('GB')}`,
                         }}
                     />
                 </Typography>
