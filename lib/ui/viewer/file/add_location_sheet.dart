@@ -260,6 +260,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                       IgnoredFilesService.instance
                           .shouldSkipUpload(ignoredIDs, f),
                 );
+                memoriesCountNotifier.value = result.files.length;
                 return result;
               },
               tagPrefix: "Add location",
