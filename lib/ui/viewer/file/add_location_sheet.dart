@@ -121,130 +121,134 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
             ),
           ),
           Expanded(
-            child: Gallery(
-              key: ValueKey(_selectedRadius()),
-              header: Column(
-                children: [
-                  Padding(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: [
+                      const TextInputWidget(
+                        hintText: "Location name",
+                        borderRadius: 2,
+                      ),
+                      const SizedBox(height: 24),
+                      const RadiusPickerWidget(),
+                      const SizedBox(height: 24),
+                      Text(
+                        "A location groups all photos that were taken within some radius of a photo",
+                        style: textTheme.smallMuted,
+                      ),
+                    ],
+                  ),
+                ),
+                const DividerWidget(
+                  dividerType: DividerType.solid,
+                  padding: EdgeInsets.only(top: 24, bottom: 20),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      children: [
-                        const TextInputWidget(
-                          hintText: "Location name",
-                          borderRadius: 2,
-                        ),
-                        const SizedBox(height: 24),
-                        const RadiusPickerWidget(),
-                        const SizedBox(height: 24),
-                        Text(
-                          "A location groups all photos that were taken within some radius of a photo",
-                          style: textTheme.smallMuted,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const DividerWidget(
-                    dividerType: DividerType.solid,
-                    padding: EdgeInsets.only(top: 24, bottom: 20),
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: ValueListenableBuilder(
-                        valueListenable: memoriesCountNotifier,
-                        builder: (context, value, _) {
-                          Widget widget;
-                          if (value == null) {
-                            widget = RepaintBoundary(
-                              child: EnteLoadingWidget(
-                                size: 14,
-                                color: colorScheme.strokeMuted,
-                                alignment: Alignment.centerLeft,
-                                padding: 3,
-                              ),
-                            );
-                          } else {
-                            widget = Text(
-                              value == 1 ? "1 memory" : "$value memories",
-                              style: textTheme.body,
-                            );
-                          }
-                          return Align(
-                            alignment: Alignment.centerLeft,
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 250),
-                              switchInCurve: Curves.easeInOutExpo,
-                              switchOutCurve: Curves.easeInOutExpo,
-                              child: widget,
+                    child: ValueListenableBuilder(
+                      valueListenable: memoriesCountNotifier,
+                      builder: (context, value, _) {
+                        Widget widget;
+                        if (value == null) {
+                          widget = RepaintBoundary(
+                            child: EnteLoadingWidget(
+                              size: 14,
+                              color: colorScheme.strokeMuted,
+                              alignment: Alignment.centerLeft,
+                              padding: 3,
                             ),
                           );
-                        },
-                      ),
+                        } else {
+                          widget = Text(
+                            value == 1 ? "1 memory" : "$value memories",
+                            style: textTheme.body,
+                          );
+                        }
+                        return Align(
+                          alignment: Alignment.centerLeft,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 250),
+                            switchInCurve: Curves.easeInOutExpo,
+                            switchOutCurve: Curves.easeInOutExpo,
+                            child: widget,
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  const SizedBox(height: 24),
-                ],
-              ),
-              asyncLoader: (
-                creationStartTime,
-                creationEndTime, {
-                limit,
-                asc,
-              }) async {
-                final ownerID = Configuration.instance.getUserID();
-                final hasSelectedAllForBackup =
-                    Configuration.instance.hasSelectedAllFoldersForBackup();
-                final collectionsToHide =
-                    CollectionsService.instance.collectionsHiddenFromTimeline();
-                FileLoadResult result;
-                if (hasSelectedAllForBackup) {
-                  result = await FilesDB.instance.getAllLocalAndUploadedFiles(
-                    creationStartTime,
-                    creationEndTime,
-                    ownerID!,
-                    limit: limit,
-                    asc: asc,
-                    ignoredCollectionIDs: collectionsToHide,
-                    onlyFilesWithLocation: true,
-                  );
-                } else {
-                  result = await FilesDB.instance.getAllPendingOrUploadedFiles(
-                    creationStartTime,
-                    creationEndTime,
-                    ownerID!,
-                    limit: limit,
-                    asc: asc,
-                    ignoredCollectionIDs: collectionsToHide,
-                    onlyFilesWithLocation: true,
-                  );
-                }
+                ),
+                const SizedBox(height: 24),
+                Expanded(
+                  child: Gallery(
+                    key: ValueKey(_selectedRadius()),
+                    asyncLoader: (
+                      creationStartTime,
+                      creationEndTime, {
+                      limit,
+                      asc,
+                    }) async {
+                      final ownerID = Configuration.instance.getUserID();
+                      final hasSelectedAllForBackup = Configuration.instance
+                          .hasSelectedAllFoldersForBackup();
+                      final collectionsToHide = CollectionsService.instance
+                          .collectionsHiddenFromTimeline();
+                      FileLoadResult result;
+                      if (hasSelectedAllForBackup) {
+                        result =
+                            await FilesDB.instance.getAllLocalAndUploadedFiles(
+                          creationStartTime,
+                          creationEndTime,
+                          ownerID!,
+                          limit: limit,
+                          asc: asc,
+                          ignoredCollectionIDs: collectionsToHide,
+                          onlyFilesWithLocation: true,
+                        );
+                      } else {
+                        result =
+                            await FilesDB.instance.getAllPendingOrUploadedFiles(
+                          creationStartTime,
+                          creationEndTime,
+                          ownerID!,
+                          limit: limit,
+                          asc: asc,
+                          ignoredCollectionIDs: collectionsToHide,
+                          onlyFilesWithLocation: true,
+                        );
+                      }
 
-                // hide ignored files from home page UI
-                final ignoredIDs =
-                    await IgnoredFilesService.instance.ignoredIDs;
-                result.files.removeWhere((f) {
-                  assert(
-                    f.location != null &&
-                        f.location!.latitude != null &&
-                        f.location!.longitude != null,
-                  );
-                  return f.uploadedFileID == null &&
-                          IgnoredFilesService.instance
-                              .shouldSkipUpload(ignoredIDs, f) ||
-                      !LocationService.instance.isFileInsideLocationTag(
-                        InheritedLocationTagData.of(context).coordinates,
-                        [f.location!.latitude!, f.location!.longitude!],
-                        _selectedRadius().toInt(),
-                      );
-                });
-                if (!result.hasMore) {
-                  memoriesCountNotifier.value = result.files.length;
-                }
-                return result;
-              },
-              tagPrefix: "Add location",
-              shouldCollateFilesByDay: false,
+                      // hide ignored files from home page UI
+                      final ignoredIDs =
+                          await IgnoredFilesService.instance.ignoredIDs;
+                      result.files.removeWhere((f) {
+                        assert(
+                          f.location != null &&
+                              f.location!.latitude != null &&
+                              f.location!.longitude != null,
+                        );
+                        return f.uploadedFileID == null &&
+                                IgnoredFilesService.instance
+                                    .shouldSkipUpload(ignoredIDs, f) ||
+                            !LocationService.instance.isFileInsideLocationTag(
+                              InheritedLocationTagData.of(context).coordinates,
+                              [f.location!.latitude!, f.location!.longitude!],
+                              _selectedRadius().toInt(),
+                            );
+                      });
+                      if (!result.hasMore) {
+                        memoriesCountNotifier.value = result.files.length;
+                      }
+                      return result;
+                    },
+                    tagPrefix: "Add location",
+                    shouldCollateFilesByDay: false,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
