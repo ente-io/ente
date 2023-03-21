@@ -7,6 +7,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/text_input_widget.dart";
@@ -43,6 +44,7 @@ class AddLocationSheet extends StatefulWidget {
 class _AddLocationSheetState extends State<AddLocationSheet> {
   final values = <double>[2, 10, 20, 40, 80, 200, 400, 1200];
   int selectedIndex = 4;
+  ValueNotifier<int?> memoriesCountNotifier = ValueNotifier(null);
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
@@ -174,8 +176,45 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                   ),
                   const DividerWidget(
                     dividerType: DividerType.solid,
-                    padding: EdgeInsets.symmetric(vertical: 24),
+                    padding: EdgeInsets.only(top: 24, bottom: 20),
                   ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ValueListenableBuilder(
+                        valueListenable: memoriesCountNotifier,
+                        builder: (context, value, _) {
+                          Widget widget;
+                          if (value == null) {
+                            widget = RepaintBoundary(
+                              child: EnteLoadingWidget(
+                                size: 14,
+                                color: colorScheme.strokeMuted,
+                                alignment: Alignment.centerLeft,
+                                padding: 3,
+                              ),
+                            );
+                          } else {
+                            widget = Text(
+                              value == 1 ? "1 memory" : "$value memories",
+                              style: textTheme.body,
+                            );
+                          }
+                          return Align(
+                            alignment: Alignment.centerLeft,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 250),
+                              switchInCurve: Curves.easeInOutExpo,
+                              switchOutCurve: Curves.easeInOutExpo,
+                              child: widget,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
               asyncLoader: (
