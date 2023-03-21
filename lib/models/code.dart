@@ -46,7 +46,7 @@ class Code {
           account +
           "?algorithm=SHA1&digits=6&issuer=" +
           issuer +
-          "period=30&secret=" +
+          "&period=30&secret=" +
           secret,
     );
   }
