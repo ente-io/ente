@@ -67,10 +67,10 @@ And [star this repo](https://github.com/ente-io/photos-web/stargazers)!
 <br/>
 
 ## 🌍 Translate
+[![Crowdin](https://badges.crowdin.net/ente-photos-web/localized.svg)](https://crowdin.com/project/ente-photos-web)
 
-Create a copy of
-[src/utils/strings/englishConstants.tsx](src/utils/strings/englishConstants.tsx)
-and open a PR.
+If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-photos-web) to get started. Thank you for your support.
+
 
 <br/>
 
