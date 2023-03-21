@@ -119,6 +119,7 @@ const OTPDisplay = (props: OTPDisplayProps) => {
                 setNextCode(hotp.generate({ counter: 1 }));
             }
         } catch (err) {
+            console.log('codeInfo', codeInfo);
             setCodeErr(err.message);
         }
     };
