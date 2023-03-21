@@ -49,7 +49,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       return [
         InlineButtonWidget(
           "Group nearby photos",
-          () => showAddLocationSheet(context),
+          () => showAddLocationSheet(context, widget.coordinates),
         ),
       ];
     }
@@ -63,7 +63,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       ChipButtonWidget(
         null,
         leadingIcon: Icons.add_outlined,
-        onTap: () => showAddLocationSheet(context),
+        onTap: () => showAddLocationSheet(context, widget.coordinates),
       ),
     );
     return result;
