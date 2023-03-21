@@ -76,6 +76,9 @@ class Code {
 
   static String _getIssuer(Uri uri) {
     try {
+      if (uri.queryParameters.containsKey("issuer")) {
+        return uri.queryParameters['issuer']!;
+      }
       final String path = Uri.decodeComponent(uri.path);
       return path.split(':')[0].substring(1);
     } catch (e) {
