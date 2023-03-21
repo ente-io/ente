@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
@@ -16,7 +17,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Enter your email address"),
+      title: Text(S.of(context).enterYourEmailAddress),
       content: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
