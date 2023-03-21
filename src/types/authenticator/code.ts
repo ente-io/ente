@@ -12,6 +12,7 @@ type AlgorithmType =
 
 export class Code {
     static readonly defaultDigits = 6;
+    static readonly defaultAlgo = 'sha1';
     static readonly defaultPeriod = 30;
 
     // id for the corresponding auth entity
@@ -70,12 +71,14 @@ export class Code {
         });
 
         const uri = URI.parse(santizedRawData);
-        let uriPath = uri.path;
+        let uriPath = decodeURIComponent(uri.path);
         if (
             uriPath.startsWith('/otpauth://') ||
             uriPath.startsWith('otpauth://')
         ) {
             uriPath = uriPath.split('otpauth://')[1];
+        } else if (uriPath.startsWith('otpauth%3A//')) {
+            uriPath = uriPath.split('otpauth%3A//')[1];
         }
 
         return new Code(
@@ -94,7 +97,11 @@ export class Code {
     private static _getAccount(uriPath: string): string {
         try {
             const path = decodeURIComponent(uriPath);
-            return path.split(':')[1];
+            if (path.includes(':')) {
+                return path.split(':')[1];
+            } else if (path.includes('/')) {
+                return path.split('/')[1];
+            }
         } catch (e) {
             return '';
         }
@@ -122,7 +129,7 @@ export class Code {
 
     private static _getDigits(uriParams): number {
         try {
-            return parseInt(uriParams['digits'], 10);
+            return parseInt(uriParams['digits'], 10) || Code.defaultDigits;
         } catch (e) {
             return Code.defaultDigits;
         }

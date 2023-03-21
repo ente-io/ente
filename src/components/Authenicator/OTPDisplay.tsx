@@ -99,9 +99,9 @@ const OTPDisplay = (props: OTPDisplayProps) => {
             if (codeInfo.type.toLowerCase() === 'totp') {
                 const totp = new TOTP({
                     secret: codeInfo.secret,
-                    algorithm: codeInfo.algorithm,
+                    algorithm: codeInfo.algorithm ?? Code.defaultAlgo,
                     period: codeInfo.period ?? Code.defaultPeriod,
-                    digits: codeInfo.digits,
+                    digits: codeInfo.digits ?? Code.defaultDigits,
                 });
                 setCode(totp.generate());
                 setNextCode(
