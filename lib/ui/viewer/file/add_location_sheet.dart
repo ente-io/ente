@@ -4,6 +4,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file_load_result.dart";
+import "package:photos/models/typedefs.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/location_service.dart";
@@ -20,7 +21,8 @@ showAddLocationSheet(BuildContext context, List<double> coordinates) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
-      return AddLocationSheet(coordinates);
+      return LocationTagDataStateProvider(
+          coordinates, const AddLocationSheet());
     },
     shape: const RoundedRectangleBorder(
       side: BorderSide(width: 0),
@@ -35,16 +37,74 @@ showAddLocationSheet(BuildContext context, List<double> coordinates) {
   );
 }
 
-class AddLocationSheet extends StatefulWidget {
+class LocationTagDataStateProvider extends StatefulWidget {
   final List<double> coordinates;
-  const AddLocationSheet(this.coordinates, {super.key});
+  final Widget child;
+  const LocationTagDataStateProvider(this.coordinates, this.child, {super.key});
+
+  @override
+  State<LocationTagDataStateProvider> createState() =>
+      _LocationTagDataStateProviderState();
+}
+
+class _LocationTagDataStateProviderState
+    extends State<LocationTagDataStateProvider> {
+  int selectedIndex = 4;
+  late List<double> coordinates;
+  @override
+  void initState() {
+    coordinates = widget.coordinates;
+    super.initState();
+  }
+
+  void _updateSelectedIndex(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InheritedLocationTagData(
+      selectedIndex,
+      coordinates,
+      _updateSelectedIndex,
+      child: widget.child,
+    );
+  }
+}
+
+class InheritedLocationTagData extends InheritedWidget {
+  final int selectedIndex;
+  final List<double> coordinates;
+  final VoidCallbackParamInt updateSelectedIndex;
+  const InheritedLocationTagData(
+    this.selectedIndex,
+    this.coordinates,
+    this.updateSelectedIndex, {
+    required super.child,
+    super.key,
+  });
+
+  static InheritedLocationTagData of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<InheritedLocationTagData>()!;
+  }
+
+  @override
+  bool updateShouldNotify(InheritedLocationTagData oldWidget) {
+    return oldWidget.selectedIndex != selectedIndex;
+  }
+}
+
+class AddLocationSheet extends StatefulWidget {
+  const AddLocationSheet({super.key});
 
   @override
   State<AddLocationSheet> createState() => _AddLocationSheetState();
 }
 
 class _AddLocationSheetState extends State<AddLocationSheet> {
-  int selectedIndex = 4;
   ValueNotifier<int?> memoriesCountNotifier = ValueNotifier(null);
   @override
   Widget build(BuildContext context) {
@@ -149,13 +209,15 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                                         ),
                                         child: RepaintBoundary(
                                           child: Slider(
-                                            value: selectedIndex.toDouble(),
+                                            value: InheritedLocationTagData.of(
+                                              context,
+                                            ).selectedIndex.toDouble(),
                                             onChanged: (value) {
-                                              setState(() {
-                                                selectedIndex = value.toInt();
-                                                memoriesCountNotifier.value =
-                                                    null;
-                                              });
+                                              InheritedLocationTagData.of(
+                                                context,
+                                              ).updateSelectedIndex(
+                                                value.toInt(),
+                                              );
                                             },
                                             min: 0,
                                             max: radiusValues.length - 1,
@@ -268,7 +330,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           IgnoredFilesService.instance
                               .shouldSkipUpload(ignoredIDs, f) ||
                       !LocationService.instance.isFileInsideLocationTag(
-                        widget.coordinates,
+                        InheritedLocationTagData.of(context).coordinates,
                         [f.location!.latitude!, f.location!.longitude!],
                         _selectedRadius().toInt(),
                       );
@@ -288,7 +350,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   }
 
   double _selectedRadius() {
-    return radiusValues[selectedIndex];
+    return radiusValues[InheritedLocationTagData.of(context).selectedIndex];
   }
 }
 
