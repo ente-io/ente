@@ -1,10 +1,15 @@
-import { Button, DialogActions, DialogContent, Stack } from '@mui/material';
+import {
+    Button,
+    DialogActions,
+    DialogContent,
+    Stack,
+    Typography,
+} from '@mui/material';
 import React from 'react';
 import { t } from 'i18next';
 import { ExportStats } from 'types/export';
 import { formatDateTime } from 'utils/time/format';
-import { FlexWrapper, Label, Value } from './Container';
-import { ComfySpan } from './ExportInProgress';
+import { SpaceBetweenFlex } from './Container';
 
 interface Props {
     onHide: () => void;
@@ -17,30 +22,28 @@ export default function ExportFinished(props: Props) {
     return (
         <>
             <DialogContent>
-                <Stack spacing={2.5}>
-                    <FlexWrapper>
-                        <Label width="40%">{t('LAST_EXPORT_TIME')}</Label>
-                        <Value width="60%">
+                <Stack spacing={2.5} pr={2}>
+                    <SpaceBetweenFlex>
+                        <Typography color="text.secondary">
+                            {t('LAST_EXPORT_TIME')}
+                        </Typography>
+                        <Typography>
                             {formatDateTime(props.lastExportTime)}
-                        </Value>
-                    </FlexWrapper>
-                    <FlexWrapper>
-                        <Label width="40%">
+                        </Typography>
+                    </SpaceBetweenFlex>
+                    <SpaceBetweenFlex>
+                        <Typography color="text.secondary">
                             {t('SUCCESSFULLY_EXPORTED_FILES')}
-                        </Label>
-                        <Value width="60%">{props.exportStats.success}</Value>
-                    </FlexWrapper>
+                        </Typography>
+                        <Typography>{props.exportStats.success}</Typography>
+                    </SpaceBetweenFlex>
                     {props.exportStats.failed > 0 && (
-                        <FlexWrapper>
-                            <Label width="40%">
+                        <SpaceBetweenFlex>
+                            <Typography color="text.secondary">
                                 {t('FAILED_EXPORTED_FILES')}
-                            </Label>
-                            <Value width="60%">
-                                <ComfySpan>
-                                    {props.exportStats.failed}
-                                </ComfySpan>
-                            </Value>
-                        </FlexWrapper>
+                            </Typography>
+                            <Typography>{props.exportStats.failed}</Typography>
+                        </SpaceBetweenFlex>
                     )}
                 </Stack>
             </DialogContent>

@@ -4,17 +4,18 @@ import exportService from 'services/exportService';
 import { ExportProgress, ExportStats } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
 import {
+    Box,
     Button,
     Dialog,
     DialogContent,
     Divider,
-    Stack,
     styled,
     Tooltip,
+    Typography,
 } from '@mui/material';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { FlexWrapper, Label, Value } from './Container';
+import { SpaceBetweenFlex, VerticallyCenteredFlex } from './Container';
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';
@@ -263,14 +264,12 @@ export default function ExportModal(props: Props) {
                 {t('EXPORT_DATA')}
             </DialogTitleWithCloseButton>
             <DialogContent>
-                <Stack spacing={2}>
-                    <ExportDirectory
-                        exportFolder={exportFolder}
-                        selectExportDirectory={selectExportDirectory}
-                        exportStage={exportStage}
-                    />
-                    <TotalFileCount totalFileCount={totalFileCount} />
-                </Stack>
+                <ExportDirectory
+                    exportFolder={exportFolder}
+                    selectExportDirectory={selectExportDirectory}
+                    exportStage={exportStage}
+                />
+                <TotalFileCount totalFileCount={totalFileCount} />
             </DialogContent>
             <Divider />
             <ExportDynamicContent />
@@ -280,39 +279,43 @@ export default function ExportModal(props: Props) {
 
 function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
     return (
-        <FlexWrapper>
-            <Label width="30%">{t('DESTINATION')}</Label>
-            <Value width="70%">
+        <SpaceBetweenFlex minHeight={'40px'}>
+            <Typography color="text.secondary">{t('DESTINATION')}</Typography>
+            <>
                 {!exportFolder ? (
                     <Button color={'accent'} onClick={selectExportDirectory}>
                         {t('SELECT_FOLDER')}
                     </Button>
                 ) : (
-                    <>
+                    <VerticallyCenteredFlex>
                         <Tooltip title={exportFolder}>
                             <ExportFolderPathContainer>
                                 {exportFolder}
                             </ExportFolderPathContainer>
                         </Tooltip>
-                        {(exportStage === ExportStage.FINISHED ||
-                            exportStage === ExportStage.INIT) && (
+                        {exportStage === ExportStage.FINISHED ||
+                        exportStage === ExportStage.INIT ? (
                             <ExportDirectoryOption
                                 selectExportDirectory={selectExportDirectory}
                             />
+                        ) : (
+                            <Box sx={{ width: '48px' }} />
                         )}
-                    </>
+                    </VerticallyCenteredFlex>
                 )}
-            </Value>
-        </FlexWrapper>
+            </>
+        </SpaceBetweenFlex>
     );
 }
 
 function TotalFileCount({ totalFileCount }) {
     return (
-        <FlexWrapper>
-            <Label width="30%">{t('TOTAL_FILE_COUNT')} </Label>
-            <Value width="70%">{totalFileCount}</Value>
-        </FlexWrapper>
+        <SpaceBetweenFlex minHeight={'40px'} pr={2}>
+            <Typography color={'text.secondary'}>
+                {t('TOTAL_FILE_COUNT')}{' '}
+            </Typography>
+            <Typography>{totalFileCount}</Typography>
+        </SpaceBetweenFlex>
     );
 }
 
