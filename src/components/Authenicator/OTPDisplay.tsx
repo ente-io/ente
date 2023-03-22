@@ -83,6 +83,26 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
     );
 };
 
+function BadCodeInfo({ codeInfo, codeErr }) {
+    const [showRawData, setShowRawData] = useState(false);
+
+    return (
+        <div className="code-info">
+            <div>{codeInfo.title}</div>
+            <div>{codeErr}</div>
+            <div>
+                {showRawData ? (
+                    <div onClick={() => setShowRawData(false)}>
+                        {codeInfo.rawData ?? 'no raw data'}
+                    </div>
+                ) : (
+                    <div onClick={() => setShowRawData(true)}>Show rawData</div>
+                )}
+            </div>
+        </div>
+    );
+}
+
 interface OTPDisplayProps {
     codeInfo: Code;
 }
@@ -119,7 +139,6 @@ const OTPDisplay = (props: OTPDisplayProps) => {
                 setNextCode(hotp.generate({ counter: 1 }));
             }
         } catch (err) {
-            console.log('codeInfo', codeInfo);
             setCodeErr(err.message);
         }
     };
@@ -152,19 +171,7 @@ const OTPDisplay = (props: OTPDisplayProps) => {
                     nextCode={nextcode}
                 />
             ) : (
-                <div
-                    style={{
-                        padding: '4px 16px',
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        minWidth: '320px',
-                        borderRadius: '4px',
-                        backgroundColor: 'rgba(40, 40, 40, 0.6)',
-                        justifyContent: 'space-between',
-                    }}>
-                    <p>{codeErr}</p>
-                    <p>{codeInfo.rawData ?? 'no rawdata'}</p>
-                </div>
+                <BadCodeInfo codeInfo={codeInfo} codeErr={codeErr} />
             )}
         </div>
     );
