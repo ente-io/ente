@@ -212,11 +212,19 @@ export default function ExportModal(props: Props) {
         }
     };
 
+    // =================
+    // HANDLERS
+    // =================
+
     const startExportHandler = () => {
         void startExport();
     };
     const stopExportHandler = () => {
         void stopExport();
+    };
+
+    const changeExportDirectoryHandler = () => {
+        void changeExportDirectory();
     };
 
     const ExportDynamicContent = () => {
@@ -256,7 +264,7 @@ export default function ExportModal(props: Props) {
             <DialogContent>
                 <ExportDirectory
                     exportFolder={exportFolder}
-                    changeExportDirectory={changeExportDirectory}
+                    changeExportDirectory={changeExportDirectoryHandler}
                     exportStage={exportStage}
                 />
                 <TotalFileCount totalFileCount={totalFileCount} />
