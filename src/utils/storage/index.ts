@@ -1,3 +1,4 @@
+import { Language } from 'constants/locale';
 import { getData, LS_KEYS, setData } from './localStorage';
 
 export const isFirstLogin = () =>
@@ -20,4 +21,8 @@ export function getLivePhotoInfoShownCount() {
 
 export function setLivePhotoInfoShownCount(count) {
     setData(LS_KEYS.LIVE_PHOTO_INFO_SHOWN_COUNT, { count });
+}
+
+export function getUserLocale(): Language {
+    return getData(LS_KEYS.LOCALE)?.value;
 }

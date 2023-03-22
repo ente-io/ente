@@ -1,8 +1,8 @@
 import { Stack, Typography } from '@mui/material';
 import { EnteMenuItem } from 'components/Menu/menuItem';
 import React from 'react';
+import { t } from 'i18next';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
-import constants from 'utils/strings/constants';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -31,7 +31,7 @@ export function ManagePublicCollect({
                 checked={publicShareProp?.enableCollect}
                 isTopOfList={true}
                 isBottomOfList={true}>
-                {constants.PUBLIC_COLLECT}
+                {t('PUBLIC_COLLECT')}
             </EnteMenuItem>
             <Typography
                 color="text.secondary"
@@ -39,7 +39,7 @@ export function ManagePublicCollect({
                 paddingLeft={1.75}
                 paddingTop={0.75}
                 paddingBottom={0.75}>
-                {constants.PUBLIC_COLLECT_SUBTEXT}
+                {t('PUBLIC_COLLECT_SUBTEXT')}
             </Typography>
         </Stack>
     );

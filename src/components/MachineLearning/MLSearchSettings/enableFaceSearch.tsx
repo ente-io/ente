@@ -1,17 +1,19 @@
 import {
     Stack,
-    Box,
     Button,
     FormGroup,
     Checkbox,
     FormControlLabel,
     DialogProps,
+    Typography,
+    Link,
 } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import Titlebar from 'components/Titlebar';
+import { FACE_SEARCH_PRIVACY_POLICY_LINK } from 'constants/urls';
 import { useEffect, useState } from 'react';
-import constants from 'utils/strings/constants';
-
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 export default function EnableFaceSearch({
     open,
     onClose,
@@ -47,13 +49,28 @@ export default function EnableFaceSearch({
             <Stack spacing={'4px'} py={'12px'}>
                 <Titlebar
                     onClose={onClose}
-                    title={constants.ENABLE_FACE_SEARCH_TITLE}
+                    title={t('ENABLE_FACE_SEARCH_TITLE')}
                     onRootClose={handleRootClose}
                 />
                 <Stack py={'20px'} px={'8px'} spacing={'32px'}>
-                    <Box px={'8px'}>
-                        {constants.ENABLE_FACE_SEARCH_DESCRIPTION()}
-                    </Box>
+                    <Typography color="text.secondary" px={'8px'}>
+                        <Trans
+                            i18nKey={'ENABLE_FACE_SEARCH_DESCRIPTION'}
+                            components={{
+                                a: (
+                                    <Link
+                                        target={'_blank'}
+                                        href={FACE_SEARCH_PRIVACY_POLICY_LINK}
+                                        underline="always"
+                                        sx={{
+                                            color: 'inherit',
+                                            textDecorationColor: 'inherit',
+                                        }}
+                                    />
+                                ),
+                            }}
+                        />
+                    </Typography>
                     <FormGroup sx={{ width: '100%' }}>
                         <FormControlLabel
                             sx={{
@@ -70,7 +87,7 @@ export default function EnableFaceSearch({
                                     }
                                 />
                             }
-                            label={constants.FACE_SEARCH_CONFIRMATION}
+                            label={t('FACE_SEARCH_CONFIRMATION')}
                         />
                     </FormGroup>
                     <Stack px={'8px'} spacing={'8px'}>
@@ -79,13 +96,13 @@ export default function EnableFaceSearch({
                             size="large"
                             disabled={!acceptTerms}
                             onClick={enableFaceSearch}>
-                            {constants.ENABLE_FACE_SEARCH}
+                            {t('ENABLE_FACE_SEARCH')}
                         </Button>
                         <Button
                             color={'secondary'}
                             size="large"
                             onClick={onClose}>
-                            {constants.CANCEL}
+                            {t('CANCEL')}
                         </Button>
                     </Stack>
                 </Stack>

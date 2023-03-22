@@ -7,6 +7,8 @@ import { logError } from 'utils/sentry';
 import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { PasswordStrength } from 'constants/crypto';
+import zxcvbn from 'zxcvbn';
 
 export async function generateKeyAttributes(
     passphrase: string
@@ -56,6 +58,10 @@ export async function generateKeyAttributes(
     return { keyAttributes, masterKey };
 }
 
+// We encrypt the masterKey, with an intermediate key derived from the
+// passphrase (with Interactive mem and ops limits) to avoid saving it to local
+// storage in plain text. This means that on the web user will always have to
+// enter their passphrase to access their masterKey.
 export async function generateAndSaveIntermediateKeyAttributes(
     passphrase: string,
     existingKeyAttributes: KeyAttributes,
@@ -89,7 +95,9 @@ export const saveKeyInSessionStore = async (
     fromDesktop?: boolean
 ) => {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-    const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
+    const sessionKeyAttributes = await cryptoWorker.generateKeyAndEncryptToB64(
+        key
+    );
     setKey(keyType, sessionKeyAttributes);
     if (isElectron() && !fromDesktop) {
         safeStorageService.setEncryptionKey(key);
@@ -124,6 +132,8 @@ export const getRecoveryKey = async () => {
     }
 };
 
+// Used only for legacy users for whom we did not generate recovery keys during
+// sign up
 async function createNewRecoveryKey() {
     const masterKey = await getActualKey();
     const existingAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
@@ -155,6 +165,7 @@ async function createNewRecoveryKey() {
 
     return recoveryKey;
 }
+
 export async function decryptAndStoreToken(masterKey: string) {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const user = getData(LS_KEYS.USER);
@@ -167,13 +178,13 @@ export async function decryptAndStoreToken(masterKey: string) {
             keyAttributes.secretKeyDecryptionNonce,
             masterKey
         );
-        const URLUnsafeB64DecryptedToken = await cryptoWorker.boxSealOpen(
+        const urlUnsafeB64DecryptedToken = await cryptoWorker.boxSealOpen(
             encryptedToken,
             keyAttributes.publicKey,
             secretKey
         );
         const decryptedTokenBytes = await cryptoWorker.fromB64(
-            URLUnsafeB64DecryptedToken
+            urlUnsafeB64DecryptedToken
         );
         decryptedToken = await cryptoWorker.toURLSafeB64(decryptedTokenBytes);
         setData(LS_KEYS.USER, {
@@ -211,3 +222,22 @@ export async function decryptDeleteAccountChallenge(
     const utf8DecryptedChallenge = atob(b64DecryptedChallenge);
     return utf8DecryptedChallenge;
 }
+
+export function estimatePasswordStrength(password: string): PasswordStrength {
+    if (!password) {
+        return PasswordStrength.WEAK;
+    }
+
+    const zxcvbnResult = zxcvbn(password);
+    if (zxcvbnResult.score < 2) {
+        return PasswordStrength.WEAK;
+    } else if (zxcvbnResult.score < 3) {
+        return PasswordStrength.MODERATE;
+    } else {
+        return PasswordStrength.STRONG;
+    }
+}
+
+export const isWeakPassword = (password: string) => {
+    return estimatePasswordStrength(password) === PasswordStrength.WEAK;
+};

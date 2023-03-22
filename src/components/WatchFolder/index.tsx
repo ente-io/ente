@@ -4,7 +4,8 @@ import { Button, Dialog, DialogContent, Stack } from '@mui/material';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 import UploadStrategyChoiceModal from 'components/Upload/UploadStrategyChoiceModal';
 import { UPLOAD_STRATEGY } from 'constants/upload';
@@ -112,7 +113,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
                 <DialogTitleWithCloseButton
                     onClose={onClose}
                     sx={{ '&&&': { padding: '32px 16px 16px 24px' } }}>
-                    {constants.WATCHED_FOLDERS}
+                    {t('WATCHED_FOLDERS')}
                 </DialogTitleWithCloseButton>
                 <DialogContent sx={{ flex: 1 }}>
                     <Stack spacing={1} p={1.5} height={'100%'}>
@@ -129,7 +130,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
                                 style={{
                                     marginLeft: '8px',
                                 }}></span>
-                            {constants.ADD_FOLDER}
+                            {t('ADD_FOLDER')}
                         </Button>
                     </Stack>
                 </DialogContent>

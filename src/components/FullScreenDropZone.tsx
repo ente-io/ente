@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { styled } from '@mui/material';
-import constants from 'utils/strings/constants';
 import CloseIcon from '@mui/icons-material/Close';
 import { AppContext } from 'pages/_app';
+import { t } from 'i18next';
 
 const CloseButtonWrapper = styled('div')`
     position: absolute;
@@ -87,8 +87,8 @@ export default function FullScreenDropZone(props: Props) {
                         <CloseIcon />
                     </CloseButtonWrapper>
                     {appContext.watchFolderView
-                        ? constants.WATCH_FOLDER_DROPZONE_MESSAGE
-                        : constants.UPLOAD_DROPZONE_MESSAGE}
+                        ? t('WATCH_FOLDER_DROPZONE_MESSAGE')
+                        : t('UPLOAD_DROPZONE_MESSAGE')}
                 </Overlay>
             )}
             {props.children}

@@ -1,6 +1,5 @@
 import ScrollButton from 'components/Collections/CollectionListBar/ScrollButton';
 import React, { useContext, useEffect } from 'react';
-import constants from 'utils/strings/constants';
 import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
 import { Box, IconButton, Typography } from '@mui/material';
 import {
@@ -16,6 +15,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import { AppContext } from 'pages/_app';
 import { CollectionSummary } from 'types/collection';
 import CollectionSort from '../AllCollections/CollectionSort';
+import { t } from 'i18next';
 
 interface IProps {
     activeCollection?: number;
@@ -62,7 +62,7 @@ export default function CollectionListBar(props: IProps) {
     return (
         <CollectionListBarWrapper>
             <SpaceBetweenFlex mb={1}>
-                <Typography>{constants.ALBUMS}</Typography>
+                <Typography>{t('ALBUMS')}</Typography>
                 {appContext.isMobile && (
                     <Box display="flex" alignItems={'center'} gap={1}>
                         <CollectionSort

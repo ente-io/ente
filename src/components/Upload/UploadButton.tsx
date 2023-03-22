@@ -2,7 +2,8 @@ import React from 'react';
 import { ButtonProps, IconButton, styled } from '@mui/material';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { Button } from '@mui/material';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import uploadManager from 'services/upload/uploadManager';
 import { UploadTypeSelectorIntent } from 'types/gallery';
 
@@ -55,7 +56,7 @@ function UploadButton({
                 className="desktop-button"
                 color={color ?? 'secondary'}
                 startIcon={icon ?? <FileUploadOutlinedIcon />}>
-                {text ?? constants.UPLOAD}
+                {text ?? t('UPLOAD')}
             </Button>
 
             <IconButton

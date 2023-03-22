@@ -1,5 +1,4 @@
 import React from 'react';
-import constants from 'utils/strings/constants';
 
 import { Stack, styled, Typography } from '@mui/material';
 import { FileInfoSidebar } from '.';
@@ -7,6 +6,7 @@ import Titlebar from 'components/Titlebar';
 import { Box } from '@mui/system';
 import CopyButton from 'components/CodeBlock/CopyButton';
 import { formatDateFull } from 'utils/time/format';
+import { t } from 'i18next';
 
 const ExifItem = styled(Box)`
     padding-left: 8px;
@@ -53,7 +53,7 @@ export function ExifData(props: {
         <FileInfoSidebar open={open} onClose={onClose}>
             <Titlebar
                 onClose={onClose}
-                title={constants.EXIF}
+                title={t('EXIF')}
                 caption={filename}
                 onRootClose={handleRootClose}
                 actionButton={

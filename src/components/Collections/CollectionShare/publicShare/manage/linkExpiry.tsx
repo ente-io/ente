@@ -6,7 +6,8 @@ import { EnteMenuItem } from 'components/Menu/menuItem';
 import React, { useEffect, useState } from 'react';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import { shareExpiryOptions } from 'utils/collection';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import { formatDateTime } from 'utils/time/format';
 
 interface Iprops {
@@ -58,7 +59,7 @@ export function ManageLinkExpiry({
                 subText={labelText}
                 isTopOfList={true}
                 isBottomOfList={true}>
-                {constants.LINK_EXPIRY}
+                {t('LINK_EXPIRY')}
             </EnteMenuItem>
             <EnteDrawer
                 anchor="right"
@@ -66,12 +67,12 @@ export function ManageLinkExpiry({
                 onClose={closeShareExpiryOptionsModalView}>
                 <DialogTitleWithCloseButton
                     onClose={closeShareExpiryOptionsModalView}>
-                    {constants.LINK_EXPIRY}
+                    {t('LINK_EXPIRY')}
                 </DialogTitleWithCloseButton>
                 <DialogContent>
                     {/* <OptionWithDivider data={shareExpiryOptions} /> */}
                     <tbody>
-                        {shareExpiryOptions.map((item) => (
+                        {shareExpiryOptions().map((item) => (
                             <tr key={item.label}>
                                 <td>
                                     <EnteMenuItem

@@ -1,6 +1,5 @@
 import EmailShare from './emailShare';
 import React from 'react';
-import constants from 'utils/strings/constants';
 import { Collection } from 'types/collection';
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
@@ -10,6 +9,7 @@ import { Typography } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import PublicShare from './publicShare';
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
+import { t } from 'i18next';
 
 interface Props {
     open: boolean;
@@ -30,14 +30,14 @@ function CollectionShare(props: Props) {
         <>
             <EnteDrawer anchor="right" open={props.open} onClose={handleClose}>
                 <DialogTitleWithCloseButton onClose={handleClose}>
-                    {constants.SHARE_COLLECTION}
+                    {t('SHARE_COLLECTION')}
                 </DialogTitleWithCloseButton>
                 <DialogContent>
                     <Typography color="text.secondary" variant="body2">
                         <WorkspacesIcon
                             style={{ fontSize: 17, marginRight: 8 }}
                         />
-                        {constants.ADD_EMAIL_TITLE}
+                        {t('ADD_EMAIL_TITLE')}
                     </Typography>
                     <EmailShare collection={props.collection} />
                     <PublicShare collection={props.collection} />

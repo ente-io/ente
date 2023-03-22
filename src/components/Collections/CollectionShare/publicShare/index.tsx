@@ -4,7 +4,6 @@ import { appendCollectionKeyToShareURL } from 'utils/collection';
 import BeforeShare from './beforeShare';
 import PublicShareManage from './manage';
 import ContentCopyIcon from '@mui/icons-material/ContentCopyOutlined';
-import constants from 'utils/strings/constants';
 import PublicIcon from '@mui/icons-material/Public';
 
 import {
@@ -21,6 +20,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import VerticallyCentered from 'components/Container';
 import DialogBoxBase from 'components/DialogBox/base';
 import { Check } from '@mui/icons-material';
+import { t } from 'i18next';
 
 export default function PublicShare({
     collection,
@@ -84,20 +84,20 @@ export default function PublicShare({
                             <PublicIcon
                                 style={{ fontSize: 17, marginRight: 8 }}
                             />
-                            {constants.PUBLIC_LINK_ENABLED}
+                            {t('PUBLIC_LINK_ENABLED')}
                         </Typography>
                         <EnteMenuItem
                             startIcon={<ContentCopyIcon />}
                             onClick={copyToClipboardHelper(publicShareUrl)}
                             isTopOfList={true}>
-                            {constants.COPY_LINK}
+                            {t('COPY_LINK')}
                         </EnteMenuItem>
                         <EnteMenuItem
                             startIcon={<LinkIcon />}
                             endIcon={<ChevronRightIcon />}
                             onClick={openManageShare}
                             isBottomOfList={true}>
-                            {constants.MANAGE_LINK}
+                            {t('MANAGE_LINK')}
                         </EnteMenuItem>
                     </Stack>
                     <PublicShareManage
@@ -120,7 +120,7 @@ export default function PublicShare({
                         <DialogContent>
                             <VerticallyCentered>
                                 <Typography fontWeight={'bold'}>
-                                    {constants.PUBLIC_LINK_CREATED}
+                                    {t('PUBLIC_LINK_CREATED')}
                                 </Typography>
                                 <Box pt={2}>
                                     <Check sx={{ fontSize: '48px' }} />
@@ -132,14 +132,14 @@ export default function PublicShare({
                                 onClick={handleCancel}
                                 color="secondary"
                                 size={'large'}>
-                                {constants.DONE}
+                                {t('DONE')}
                             </Button>
                             <Button
                                 onClick={copyToClipboardHelper(publicShareUrl)}
                                 size={'large'}
                                 color="primary"
                                 autoFocus>
-                                {constants.COPY_LINK}
+                                {t('COPY_LINK')}
                             </Button>
                         </DialogActions>
                     </DialogBoxBase>

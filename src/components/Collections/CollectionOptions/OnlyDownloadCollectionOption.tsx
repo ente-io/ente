@@ -2,9 +2,8 @@ import { OverflowMenuOption } from 'components/OverflowMenu/option';
 import React from 'react';
 
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
-import constants from 'utils/strings/constants';
 import { CollectionActions } from '.';
-
+import { t } from 'i18next';
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,
@@ -15,7 +14,7 @@ interface Iprops {
 
 export function OnlyDownloadCollectionOption({
     handleCollectionAction,
-    downloadOptionText = constants.DOWNLOAD,
+    downloadOptionText = t('DOWNLOAD'),
 }: Iprops) {
     return (
         <OverflowMenuOption

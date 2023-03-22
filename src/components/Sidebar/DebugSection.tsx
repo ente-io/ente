@@ -1,7 +1,9 @@
 import { AppContext } from 'pages/_app';
 import React, { useContext, useEffect, useState } from 'react';
 import { downloadAsFile } from 'utils/file';
-import constants from 'utils/strings/constants';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
+
 import { addLogLine, getDebugLogs } from 'utils/logging';
 import SidebarButton from './Button';
 import isElectron from 'is-electron';
@@ -30,15 +32,15 @@ export default function DebugSection() {
 
     const confirmLogDownload = () =>
         appContext.setDialogMessage({
-            title: constants.DOWNLOAD_LOGS,
-            content: constants.DOWNLOAD_LOGS_MESSAGE(),
+            title: t('DOWNLOAD_LOGS'),
+            content: <Trans i18nKey={'DOWNLOAD_LOGS_MESSAGE'} />,
             proceed: {
-                text: constants.DOWNLOAD,
+                text: t('DOWNLOAD'),
                 variant: 'accent',
                 action: downloadDebugLogs,
             },
             close: {
-                text: constants.CANCEL,
+                text: t('CANCEL'),
             },
         });
 
@@ -59,7 +61,7 @@ export default function DebugSection() {
                 onClick={confirmLogDownload}
                 typographyVariant="caption"
                 sx={{ fontWeight: 'normal', color: 'text.secondary' }}>
-                {constants.DOWNLOAD_UPLOAD_LOGS}
+                {t('DOWNLOAD_UPLOAD_LOGS')}
             </SidebarButton>
             {appVersion && (
                 <Typography p={1.5} color="text.secondary" variant="caption">

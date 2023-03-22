@@ -9,7 +9,8 @@ import {
     UploadProgressSectionTitle,
 } from './section';
 import UploadProgressContext from 'contexts/uploadProgress';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import { UPLOAD_STAGES } from 'constants/upload';
 
 export const InProgressSection = () => {
@@ -21,12 +22,12 @@ export const InProgressSection = () => {
         <UploadProgressSection>
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
                 {uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA
-                    ? constants.INPROGRESS_METADATA_EXTRACTION
-                    : constants.INPROGRESS_UPLOADS}
+                    ? t('INPROGRESS_METADATA_EXTRACTION')
+                    : t('INPROGRESS_UPLOADS')}
             </UploadProgressSectionTitle>
             <UploadProgressSectionContent>
                 {hasLivePhotos && (
-                    <SectionInfo>{constants.LIVE_PHOTOS_DETECTED}</SectionInfo>
+                    <SectionInfo>{t('LIVE_PHOTOS_DETECTED')}</SectionInfo>
                 )}
                 <FileList
                     fileList={fileList.map(({ localFileID, progress }) => (

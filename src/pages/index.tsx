@@ -7,7 +7,8 @@ import { useRouter } from 'next/router';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import EnteSpinner from 'components/EnteSpinner';
 import SignUp from 'components/SignUp';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import localForage from 'utils/storage/localForage';
 import { logError } from 'utils/sentry';
 import { PAGES } from 'constants/pages';
@@ -17,6 +18,7 @@ import safeStorageService from 'services/electron/safeStorage';
 import { saveKeyInSessionStore } from 'utils/crypto';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { getAlbumsURL } from 'utils/common/apiUtil';
+import { Trans } from 'react-i18next';
 
 const Container = styled('div')`
     display: flex;
@@ -153,10 +155,10 @@ export default function LandingPage() {
         } catch (e) {
             logError(e, 'usage in incognito mode tried');
             appContext.setDialogMessage({
-                title: constants.LOCAL_STORAGE_NOT_ACCESSIBLE,
+                title: t('LOCAL_STORAGE_NOT_ACCESSIBLE'),
 
                 nonClosable: true,
-                content: constants.LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE,
+                content: t('LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE'),
             });
         } finally {
             setLoading(false);
@@ -185,10 +187,10 @@ export default function LandingPage() {
                                         /images/onboarding-lock/3x.png 3x"
                                 />
                                 <FeatureText>
-                                    {constants.HERO_SLIDE_1_TITLE()}
+                                    <Trans i18nKey={'HERO_SLIDE_1_TITLE'} />
                                 </FeatureText>
                                 <TextContainer>
-                                    {constants.HERO_SLIDE_1}
+                                    {t('HERO_SLIDE_1')}
                                 </TextContainer>
                             </Carousel.Item>
                             <Carousel.Item>
@@ -198,10 +200,10 @@ export default function LandingPage() {
                                         /images/onboarding-safe/3x.png 3x"
                                 />
                                 <FeatureText>
-                                    {constants.HERO_SLIDE_2_TITLE()}
+                                    <Trans i18nKey={'HERO_SLIDE_2_TITLE'} />
                                 </FeatureText>
                                 <TextContainer>
-                                    {constants.HERO_SLIDE_2}
+                                    {t('HERO_SLIDE_2')}
                                 </TextContainer>
                             </Carousel.Item>
                             <Carousel.Item>
@@ -211,10 +213,10 @@ export default function LandingPage() {
                                         /images/onboarding-sync/3x.png 3x"
                                 />
                                 <FeatureText>
-                                    {constants.HERO_SLIDE_3_TITLE()}
+                                    <Trans i18nKey={'HERO_SLIDE_3_TITLE'} />
                                 </FeatureText>
                                 <TextContainer>
-                                    {constants.HERO_SLIDE_3}
+                                    {t('HERO_SLIDE_3')}
                                 </TextContainer>
                             </Carousel.Item>
                         </Carousel>
@@ -224,10 +226,10 @@ export default function LandingPage() {
                             color="accent"
                             size="large"
                             onClick={redirectToSignupPage}>
-                            {constants.NEW_USER}
+                            {t('NEW_USER')}
                         </Button>
                         <Button size="large" onClick={redirectToLoginPage}>
-                            {constants.EXISTING_USER}
+                            {t('EXISTING_USER')}
                         </Button>
                     </MobileBox>
                     <DesktopBox>

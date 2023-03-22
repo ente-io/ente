@@ -1,5 +1,6 @@
 import React from 'react';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import DoNotDisturbOutlinedIcon from '@mui/icons-material/DoNotDisturbOutlined';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from 'components/OverflowMenu/menu';
@@ -24,7 +25,7 @@ export default function MappingEntryOptions({ confirmStopWatching }: Iprops) {
                 color="danger"
                 onClick={confirmStopWatching}
                 startIcon={<DoNotDisturbOutlinedIcon />}>
-                {constants.STOP_WATCHING}
+                {t('STOP_WATCHING')}
             </OverflowMenuOption>
         </OverflowMenu>
     );
