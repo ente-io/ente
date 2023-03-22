@@ -10,12 +10,10 @@ interface Props {
     onHide: () => void;
     lastExportTime: number;
     exportStats: ExportStats;
-    exportFiles: () => void;
-    retryFailed: () => void;
+    startExport: () => void;
 }
 
 export default function ExportFinished(props: Props) {
-    const totalFiles = props.exportStats.failed + props.exportStats.success;
     return (
         <>
             <DialogContent>
@@ -30,11 +28,7 @@ export default function ExportFinished(props: Props) {
                         <Label width="40%">
                             {t('SUCCESSFULLY_EXPORTED_FILES')}
                         </Label>
-                        <Value width="60%">
-                            <ComfySpan>
-                                {props.exportStats.success} / {totalFiles}
-                            </ComfySpan>
-                        </Value>
+                        <Value width="60%">{props.exportStats.success}</Value>
                     </FlexWrapper>
                     {props.exportStats.failed > 0 && (
                         <FlexWrapper>
@@ -43,7 +37,7 @@ export default function ExportFinished(props: Props) {
                             </Label>
                             <Value width="60%">
                                 <ComfySpan>
-                                    {props.exportStats.failed} / {totalFiles}
+                                    {props.exportStats.failed}
                                 </ComfySpan>
                             </Value>
                         </FlexWrapper>
@@ -51,23 +45,14 @@ export default function ExportFinished(props: Props) {
                 </Stack>
             </DialogContent>
             <DialogActions>
-                {props.exportStats.failed !== 0 ? (
-                    <Button
-                        size="large"
-                        color="accent"
-                        onClick={props.retryFailed}>
-                        {t('RETRY_EXPORT')}
-                    </Button>
-                ) : (
-                    <Button
-                        size="large"
-                        color="primary"
-                        onClick={props.exportFiles}>
-                        {t('EXPORT_AGAIN')}
-                    </Button>
-                )}
                 <Button color="secondary" size="large" onClick={props.onHide}>
                     {t('CLOSE')}
+                </Button>
+                <Button
+                    size="large"
+                    color="primary"
+                    onClick={props.startExport}>
+                    {t('EXPORT_AGAIN')}
                 </Button>
             </DialogActions>
         </>
