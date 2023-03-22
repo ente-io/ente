@@ -4,9 +4,6 @@ export enum ExportNotification {
     START = 'Export started',
     IN_PROGRESS = 'Export already in progress',
     FINISH = 'Export finished',
-    FAILED = 'Export failed',
-    ABORT = 'Export aborted',
-    PAUSE = 'Export paused',
     UP_TO_DATE = `No new files to export`,
 }
 

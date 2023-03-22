@@ -21,11 +21,6 @@ export interface ElectronAPIs {
     saveFileToDisk: (path: string, file: any) => Promise<void>;
     selectRootDirectory: () => Promise<string>;
     sendNotification: (content: string) => void;
-    showOnTray: (content?: any) => void;
-    registerResumeExportListener: (resumeExport: () => void) => void;
-    registerStopExportListener: (abortExport: () => void) => void;
-    registerPauseExportListener: (pauseExport: () => void) => void;
-    registerRetryFailedExportListener: (retryFailedExport: () => void) => void;
     getExportRecord: (filePath: string) => Promise<string>;
     setExportRecord: (filePath: string, data: string) => Promise<void>;
     showUploadFilesDialog: () => Promise<ElectronFile[]>;

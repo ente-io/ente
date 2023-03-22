@@ -53,8 +53,7 @@ import { addLogLine } from 'utils/logging';
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
 class ExportService {
-    electronAPIs: ElectronAPIs;
-
+    private electronAPIs: ElectronAPIs;
     private exportInProgress: Promise<void> = null;
     private exportRecordUpdater = new QueueProcessor<void>(1);
     private stopExport: boolean = false;
@@ -86,7 +85,6 @@ class ExportService {
                 );
                 return await this.exportInProgress;
             }
-            this.electronAPIs.showOnTray('starting export');
             const exportDir = getData(LS_KEYS.EXPORT)?.folder;
             if (!exportDir) {
                 // no-export folder set
@@ -190,11 +188,6 @@ class ExportService {
                 return;
             }
             this.stopExport = false;
-            const failedFileCount = 0;
-
-            this.electronAPIs.showOnTray({
-                export_progress: `0 / ${files.length} files exported`,
-            });
             this.electronAPIs.sendNotification(ExportNotification.START);
 
             for (const [index, file] of files.entries()) {
@@ -225,24 +218,10 @@ class ExportService {
                         RecordType.FAILED
                     );
                 }
-                this.electronAPIs.showOnTray({
-                    export_progress: `${index + 1} / ${
-                        files.length
-                    } files exported`,
-                });
                 updateProgress(index + 1);
             }
-            if (this.stopExport) {
-                this.electronAPIs.sendNotification(ExportNotification.ABORT);
-                this.electronAPIs.showOnTray();
-            } else if (failedFileCount > 0) {
-                this.electronAPIs.sendNotification(ExportNotification.FAILED);
-                this.electronAPIs.showOnTray({
-                    retry_export: `Retry failed exports`,
-                });
-            } else {
+            if (!this.stopExport) {
                 this.electronAPIs.sendNotification(ExportNotification.FINISH);
-                this.electronAPIs.showOnTray();
             }
         } catch (e) {
             logError(e, 'fileExporter failed');
