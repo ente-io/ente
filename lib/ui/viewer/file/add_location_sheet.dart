@@ -53,7 +53,7 @@ class LocationTagDataStateProvider extends StatefulWidget {
 
 class _LocationTagDataStateProviderState
     extends State<LocationTagDataStateProvider> {
-  int selectedIndex = 4;
+  int selectedIndex = defaultRadiusValueIndex;
   late List<double> coordinates;
   final Debouncer _debouncer = Debouncer(const Duration(milliseconds: 300));
   @override
@@ -228,7 +228,7 @@ class RadiusPickerWidget extends StatefulWidget {
 }
 
 class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
-  double selectedIndex = 4;
+  double selectedIndex = defaultRadiusValueIndex.toDouble();
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
