@@ -77,32 +77,43 @@ class ExportService {
     }
 
     enableContinuousExport(startExport: () => void) {
-        if (this.continuousExportEventListener) {
-            return;
-        }
-        startExport();
-        this.continuousExportEventListener = () => {
-            addLogLine('continuous export triggered');
-            if (this.exportInProgress) {
-                addLogLine('export in progress, skipping');
+        try {
+            if (this.continuousExportEventListener) {
                 return;
             }
             startExport();
-        };
-        eventBus.addListener(
-            Events.LOCAL_FILES_UPDATED,
-            this.continuousExportEventListener
-        );
+            this.continuousExportEventListener = () => {
+                addLogLine('continuous export triggered');
+                if (this.exportInProgress) {
+                    addLogLine('export in progress, skipping');
+                    return;
+                }
+                startExport();
+            };
+            eventBus.addListener(
+                Events.LOCAL_FILES_UPDATED,
+                this.continuousExportEventListener
+            );
+        } catch (e) {
+            logError(e, 'failed to enableContinuousExport ');
+            throw e;
+        }
     }
 
     disableContinuousExport() {
-        if (!this.continuousExportEventListener) {
-            return;
+        try {
+            if (!this.continuousExportEventListener) {
+                return;
+            }
+            eventBus.removeListener(
+                Events.LOCAL_FILES_UPDATED,
+                this.continuousExportEventListener
+            );
+            this.continuousExportEventListener = null;
+        } catch (e) {
+            logError(e, 'failed to disableContinuousExport');
+            throw e;
         }
-        eventBus.removeListener(
-            Events.LOCAL_FILES_UPDATED,
-            this.continuousExportEventListener
-        );
     }
 
     stopRunningExport() {

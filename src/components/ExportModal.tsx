@@ -84,13 +84,14 @@ export default function ExportModal(props: Props) {
     }, []);
 
     useEffect(() => {
-        if (!isElectron()) {
-            return;
-        }
-        if (continuousExport) {
-            exportService.enableContinuousExport(startExport);
-        } else {
-            exportService.disableContinuousExport();
+        try {
+            if (continuousExport) {
+                exportService.enableContinuousExport(startExport);
+            } else {
+                exportService.disableContinuousExport();
+            }
+        } catch (e) {
+            logError(e, 'error handling continuousExport change');
         }
     }, [continuousExport]);
 
