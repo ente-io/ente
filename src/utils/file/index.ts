@@ -31,6 +31,7 @@ import { addLogLine } from 'utils/logging';
 import { CustomError } from 'utils/error';
 import { convertBytesToHumanReadable } from './size';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { getLocalFiles } from 'services/fileService';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -586,3 +587,12 @@ export function getUserPersonalFiles(files: EnteFile[]) {
     }
     return files.filter((file) => file.ownerID === user.id);
 }
+
+export const getTotalFileCount = async () => {
+    try {
+        const userPersonalFiles = getUserPersonalFiles(await getLocalFiles());
+        return userPersonalFiles.length;
+    } catch (e) {
+        logError(e, 'updateTotalFileCount failed');
+    }
+};

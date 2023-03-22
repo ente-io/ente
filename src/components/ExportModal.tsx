@@ -2,7 +2,6 @@ import isElectron from 'is-electron';
 import React, { useEffect, useState, useContext } from 'react';
 import exportService from 'services/exportService';
 import { ExportProgress, ExportStats } from 'types/export';
-import { getLocalFiles } from 'services/fileService';
 import {
     Box,
     Button,
@@ -28,7 +27,8 @@ import { OverflowMenuOption } from './OverflowMenu/option';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
-import { getUserPersonalFiles } from 'utils/file';
+import { getTotalFileCount } from 'utils/file';
+import { eventBus, Events } from 'services/events';
 
 const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
@@ -69,6 +69,11 @@ export default function ExportModal(props: Props) {
         }
         try {
             setExportFolder(getData(LS_KEYS.EXPORT)?.folder);
+            const localFileUpdateHandler = async () => {
+                setTotalFileCount(await getTotalFileCount());
+            };
+            localFileUpdateHandler();
+            eventBus.on(Events.LOCAL_FILES_UPDATED, localFileUpdateHandler);
         } catch (e) {
             logError(e, 'error in exportModal');
         }
@@ -96,24 +101,6 @@ export default function ExportModal(props: Props) {
         };
         void main();
     }, [exportFolder]);
-
-    useEffect(() => {
-        if (!props.show) {
-            return;
-        }
-        void updateTotalFileCount();
-    }, [props.show]);
-
-    const updateTotalFileCount = async () => {
-        try {
-            const userPersonalFiles = getUserPersonalFiles(
-                await getLocalFiles()
-            );
-            setTotalFileCount(userPersonalFiles?.length ?? 0);
-        } catch (e) {
-            logError(e, 'updateTotalFileCount failed');
-        }
-    };
 
     // =============
     // STATE UPDATERS
@@ -182,9 +169,9 @@ export default function ExportModal(props: Props) {
     const startExport = async () => {
         try {
             await preExportRun();
-
             const exportRecord = await exportService.getExportRecord();
-            const exportedFileCount = exportRecord?.exportedFiles?.length ?? 0;
+            const totalFileCount = await getTotalFileCount();
+            const exportedFileCount = exportRecord.exportedFiles?.length ?? 0;
             setExportProgress({
                 current: exportedFileCount,
                 total: totalFileCount,
@@ -212,32 +199,17 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    // =================
-    // HANDLERS
-    // =================
-
-    const startExportHandler = () => {
-        void startExport();
-    };
-    const stopExportHandler = () => {
-        void stopExport();
-    };
-
-    const changeExportDirectoryHandler = () => {
-        void changeExportDirectory();
-    };
-
     const ExportDynamicContent = () => {
         switch (exportStage) {
             case ExportStage.INIT:
-                return <ExportInit startExport={startExportHandler} />;
+                return <ExportInit startExport={startExport} />;
 
             case ExportStage.INPROGRESS:
                 return (
                     <ExportInProgress
                         exportStage={exportStage}
                         exportProgress={exportProgress}
-                        stopExport={stopExportHandler}
+                        stopExport={stopExport}
                         closeExportDialog={props.onHide}
                     />
                 );
@@ -247,7 +219,7 @@ export default function ExportModal(props: Props) {
                         onHide={props.onHide}
                         lastExportTime={lastExportTime}
                         exportStats={exportStats}
-                        startExport={startExportHandler}
+                        startExport={startExport}
                     />
                 );
 
@@ -264,7 +236,7 @@ export default function ExportModal(props: Props) {
             <DialogContent>
                 <ExportDirectory
                     exportFolder={exportFolder}
-                    changeExportDirectory={changeExportDirectoryHandler}
+                    changeExportDirectory={changeExportDirectory}
                     exportStage={exportStage}
                 />
                 <TotalFileCount totalFileCount={totalFileCount} />
@@ -277,7 +249,7 @@ export default function ExportModal(props: Props) {
 
 function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (
-        <SpaceBetweenFlex minHeight={'40px'}>
+        <SpaceBetweenFlex minHeight={'48px'}>
             <Typography color="text.secondary">{t('DESTINATION')}</Typography>
             <>
                 {!exportFolder ? (
@@ -297,7 +269,7 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
                                 changeExportDirectory={changeExportDirectory}
                             />
                         ) : (
-                            <Box sx={{ width: '48px' }} />
+                            <Box sx={{ width: '16px' }} />
                         )}
                     </VerticallyCenteredFlex>
                 )}
