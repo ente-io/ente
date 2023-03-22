@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useState } from 'react';
@@ -11,6 +11,7 @@ import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { handleSharingErrors } from 'utils/error/ui';
 import constants from 'utils/strings/constants';
 import { EnteMenuItem } from 'components/Menu/menuItem';
+import PublicIcon from '@mui/icons-material/Public';
 interface Iprops {
     publicShareProp;
     collection: Collection;
@@ -111,17 +112,23 @@ export default function BeforeShare({
         }
     };
     return (
-        <Box mt={3}>
+        <Stack>
+            <Typography color="text.secondary" variant="body2" padding={1}>
+                <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
+                {constants.LINK_SHARE_TITLE}
+            </Typography>
             <EnteMenuItem
                 startIcon={<LinkIcon />}
                 color="primary"
-                onClick={handleCollectionPublicSharing}>
+                onClick={handleCollectionPublicSharing}
+                isTopOfList={true}>
                 {constants.CREATE_PUBLIC_SHARING}
             </EnteMenuItem>
             <EnteMenuItem
                 startIcon={<LinkIcon />}
                 color="primary"
-                onClick={handleCollecPhotosPublicSharing}>
+                onClick={handleCollecPhotosPublicSharing}
+                isBottomOfList={true}>
                 {constants.COLLECT_PHOTOS}
             </EnteMenuItem>
             {sharableLinkError && (
@@ -135,6 +142,6 @@ export default function BeforeShare({
                     {sharableLinkError}
                 </Typography>
             )}
-        </Box>
+        </Stack>
     );
 }

@@ -73,7 +73,7 @@ export default function PublicShareManage({
                     {constants.SHARE_COLLECTION}
                 </DialogTitleWithCloseButton>
                 <DialogContent>
-                    <Stack spacing={1.5}>
+                    <Stack spacing={3}>
                         <ManagePublicCollect
                             collection={collection}
                             publicShareProp={publicShareProp}
@@ -88,36 +88,43 @@ export default function PublicShareManage({
                                 updatePublicShareURLHelper
                             }
                         />
-                        <ManageDeviceLimit
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                        <ManageDownloadAccess
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                        <ManageLinkPassword
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
+                        <Stack>
+                            <ManageDeviceLimit
+                                collection={collection}
+                                publicShareProp={publicShareProp}
+                                updatePublicShareURLHelper={
+                                    updatePublicShareURLHelper
+                                }
+                            />
+                            <ManageDownloadAccess
+                                collection={collection}
+                                publicShareProp={publicShareProp}
+                                updatePublicShareURLHelper={
+                                    updatePublicShareURLHelper
+                                }
+                            />
+                            <ManageLinkPassword
+                                collection={collection}
+                                publicShareProp={publicShareProp}
+                                updatePublicShareURLHelper={
+                                    updatePublicShareURLHelper
+                                }
+                            />
+                        </Stack>
                         <EnteMenuItem
                             startIcon={<ContentCopyIcon />}
-                            onClick={copyToClipboardHelper(publicShareUrl)}>
+                            onClick={copyToClipboardHelper(publicShareUrl)}
+                            isTopOfList={true}
+                            isBottomOfList={true}>
                             {constants.COPY_LINK}
                         </EnteMenuItem>
                         <EnteMenuItem
+                            color="danger"
                             startIcon={<RemoveCircleOutline />}
-                            onClick={disablePublicSharing}>
-                            {constants.DELETE}
+                            onClick={disablePublicSharing}
+                            isTopOfList={true}
+                            isBottomOfList={true}>
+                            {constants.REMOVE_LINK}
                         </EnteMenuItem>
                     </Stack>
                     {sharableLinkError && (

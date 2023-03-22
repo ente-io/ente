@@ -6,9 +6,10 @@ import DialogTitleWithCloseButton, {
     dialogCloseHandler,
 } from 'components/DialogBox/TitleWithCloseButton';
 import DialogContent from '@mui/material/DialogContent';
-import { Divider } from '@mui/material';
+import { Typography } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import PublicShare from './publicShare';
+import WorkspacesIcon from '@mui/icons-material/Workspaces';
 
 interface Props {
     open: boolean;
@@ -32,8 +33,13 @@ function CollectionShare(props: Props) {
                     {constants.SHARE_COLLECTION}
                 </DialogTitleWithCloseButton>
                 <DialogContent>
+                    <Typography color="text.secondary" variant="body2">
+                        <WorkspacesIcon
+                            style={{ fontSize: 17, marginRight: 8 }}
+                        />
+                        {constants.ADD_EMAIL_TITLE}
+                    </Typography>
                     <EmailShare collection={props.collection} />
-                    <Divider />
                     <PublicShare collection={props.collection} />
                 </DialogContent>
             </EnteDrawer>

@@ -5,7 +5,16 @@ import BeforeShare from './beforeShare';
 import PublicShareManage from './manage';
 import ContentCopyIcon from '@mui/icons-material/ContentCopyOutlined';
 import constants from 'utils/strings/constants';
-import { Dialog, DialogTitle, DialogActions, Button } from '@mui/material';
+import PublicIcon from '@mui/icons-material/Public';
+
+import {
+    Dialog,
+    DialogTitle,
+    DialogActions,
+    Button,
+    Stack,
+    Typography,
+} from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import { EnteMenuItem } from 'components/Menu/menuItem';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -64,18 +73,30 @@ export default function PublicShare({
         <>
             {publicShareProp ? (
                 <>
-                    <EnteMenuItem
-                        startIcon={<ContentCopyIcon />}
-                        onClick={copyToClipboardHelper(publicShareUrl)}>
-                        {constants.COPY_LINK}
-                    </EnteMenuItem>
-
-                    <EnteMenuItem
-                        startIcon={<LinkIcon />}
-                        endIcon={<ChevronRightIcon />}
-                        onClick={openManageShare}>
-                        {constants.MANAGE_LINK}
-                    </EnteMenuItem>
+                    <Stack>
+                        <Typography
+                            color="text.secondary"
+                            variant="body2"
+                            padding={1}>
+                            <PublicIcon
+                                style={{ fontSize: 17, marginRight: 8 }}
+                            />
+                            {constants.PUBLIC_LINK_ENABLED}
+                        </Typography>
+                        <EnteMenuItem
+                            startIcon={<ContentCopyIcon />}
+                            onClick={copyToClipboardHelper(publicShareUrl)}
+                            isTopOfList={true}>
+                            {constants.COPY_LINK}
+                        </EnteMenuItem>
+                        <EnteMenuItem
+                            startIcon={<LinkIcon />}
+                            endIcon={<ChevronRightIcon />}
+                            onClick={openManageShare}
+                            isBottomOfList={true}>
+                            {constants.MANAGE_LINK}
+                        </EnteMenuItem>
+                    </Stack>
                     <PublicShareManage
                         open={manageShareModalView}
                         onClose={closeManageShare}
