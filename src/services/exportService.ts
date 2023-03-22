@@ -38,7 +38,11 @@ import {
 import { updateFileCreationDateInEXIF } from './upload/exifService';
 import QueueProcessor from './queueProcessor';
 import { Collection } from 'types/collection';
-import { CollectionIDPathMap, ExportRecord } from 'types/export';
+import {
+    CollectionIDPathMap,
+    ExportRecord,
+    ExportRecordV1,
+} from 'types/export';
 import { User } from 'types/user';
 import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
 import { ExportNotification, RecordType } from 'constants/export';
@@ -46,7 +50,6 @@ import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
 import { addLogLine } from 'utils/logging';
 
-const LATEST_EXPORT_VERSION = 1;
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
 class ExportService {
@@ -74,7 +77,7 @@ class ExportService {
     stopRunningExport() {
         this.stopExport = true;
     }
-    async exportFiles(updateProgress: (current: number) => Promise<void>) {
+    async exportFiles(updateProgress: (current: number) => void) {
         try {
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             if (this.exportInProgress) {
@@ -115,15 +118,6 @@ class ExportService {
                 );
             }
             const exportRecord = await this.getExportRecord(exportDir);
-
-            addLogLine(
-                `export stats -> progress: ${JSON.stringify(
-                    exportRecord.progress
-                )} stage:${exportRecord.stage} queuedFilesCount: ${
-                    exportRecord?.queuedFiles?.length
-                } exportedFiles: ${exportRecord?.exportedFiles?.length}
-                failedFiles: ${exportRecord?.failedFiles?.length}`
-            );
 
             const filesToExport = getUnExportedFiles(
                 userPersonalFiles,
@@ -168,7 +162,7 @@ class ExportService {
         newCollections: Collection[],
         renamedCollections: Collection[],
         collectionIDPathMap: CollectionIDPathMap,
-        updateProgress: (current: number) => Promise<void>,
+        updateProgress: (current: number) => void,
         exportDir: string
     ): Promise<void> {
         try {
@@ -196,7 +190,6 @@ class ExportService {
                 return;
             }
             this.stopExport = false;
-            await this.addFilesQueuedRecord(exportDir, files);
             const failedFileCount = 0;
 
             this.electronAPIs.showOnTray({
@@ -237,7 +230,7 @@ class ExportService {
                         files.length
                     } files exported`,
                 });
-                await updateProgress(index + 1);
+                updateProgress(index + 1);
             }
             if (this.stopExport) {
                 this.electronAPIs.sendNotification(ExportNotification.ABORT);
@@ -256,11 +249,6 @@ class ExportService {
             throw e;
         }
     }
-    async addFilesQueuedRecord(folder: string, files: EnteFile[]) {
-        const exportRecord = await this.getExportRecord(folder);
-        exportRecord.queuedFiles = files.map(getExportRecordFileUID);
-        await this.updateExportRecord(exportRecord, folder);
-    }
 
     async addFileExportedRecord(
         folder: string,
@@ -270,9 +258,6 @@ class ExportService {
         try {
             const fileUID = getExportRecordFileUID(file);
             const exportRecord = await this.getExportRecord(folder);
-            exportRecord.queuedFiles = exportRecord.queuedFiles.filter(
-                (queuedFilesUID) => queuedFilesUID !== fileUID
-            );
             if (type === RecordType.SUCCESS) {
                 if (!exportRecord.exportedFiles) {
                     exportRecord.exportedFiles = [];
@@ -291,7 +276,6 @@ class ExportService {
                 }
             }
             exportRecord.exportedFiles = dedupe(exportRecord.exportedFiles);
-            exportRecord.queuedFiles = dedupe(exportRecord.queuedFiles);
             exportRecord.failedFiles = dedupe(exportRecord.failedFiles);
             await this.updateExportRecord(exportRecord, folder);
         } catch (e) {
@@ -317,14 +301,17 @@ class ExportService {
         await this.updateExportRecord(exportRecord, folder);
     }
 
-    async updateExportRecord(newData: ExportRecord, folder?: string) {
+    async updateExportRecord(newData: Partial<ExportRecord>, folder?: string) {
         const response = this.exportRecordUpdater.queueUpRequest(() =>
             this.updateExportRecordHelper(folder, newData)
         );
         await response.promise;
     }
 
-    async updateExportRecordHelper(folder: string, newData: ExportRecord) {
+    async updateExportRecordHelper(
+        folder: string,
+        newData: Partial<ExportRecord>
+    ) {
         try {
             if (!folder) {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
@@ -532,7 +519,7 @@ class ExportService {
         allFiles: EnteFile[]
     ) {
         const exportRecord = await this.getExportRecord(exportDir);
-        const currentVersion = exportRecord?.version ?? 0;
+        let currentVersion = exportRecord?.version ?? 0;
         if (currentVersion === 0) {
             const collectionIDPathMap = new Map<number, string>();
 
@@ -545,9 +532,16 @@ class ExportService {
                 getExportedFiles(allFiles, exportRecord),
                 collectionIDPathMap
             );
-
+            currentVersion++;
             await this.updateExportRecord({
-                version: LATEST_EXPORT_VERSION,
+                version: currentVersion,
+            });
+        }
+        if (currentVersion === 1) {
+            await this.removeDeprecatedExportRecordProperties();
+            currentVersion++;
+            await this.updateExportRecord({
+                version: currentVersion,
             });
         }
     }
@@ -627,6 +621,17 @@ class ExportService {
                 newFileMetadataSavePath
             );
         }
+    }
+
+    private async removeDeprecatedExportRecordProperties() {
+        const exportRecord = (await this.getExportRecord()) as ExportRecordV1;
+        if (exportRecord?.queuedFiles) {
+            exportRecord.queuedFiles = undefined;
+        }
+        if (exportRecord?.progress) {
+            exportRecord.progress = undefined;
+        }
+        await this.updateExportRecord(exportRecord);
     }
 }
 export default new ExportService();

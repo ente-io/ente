@@ -87,9 +87,6 @@ export default function ExportModal(props: Props) {
                 const exportInfo = await exportService.getExportRecord();
                 setExportStage(exportInfo?.stage ?? ExportStage.INIT);
                 setLastExportTime(exportInfo?.lastAttemptTimestamp);
-                setExportProgress(
-                    exportInfo?.progress ?? { current: 0, total: 0 }
-                );
                 setExportStats({
                     success: exportInfo?.exportedFiles?.length ?? 0,
                     failed: exportInfo?.failedFiles?.length ?? 0,
@@ -140,11 +137,6 @@ export default function ExportModal(props: Props) {
         await exportService.updateExportRecord({
             lastAttemptTimestamp: newTime,
         });
-    };
-
-    const updateExportProgress = async (newProgress: ExportProgress) => {
-        setExportProgress(newProgress);
-        await exportService.updateExportRecord({ progress: newProgress });
     };
 
     // ======================
@@ -198,13 +190,13 @@ export default function ExportModal(props: Props) {
 
             const exportRecord = await exportService.getExportRecord();
             const exportedFileCount = exportRecord?.exportedFiles?.length ?? 0;
-            updateExportProgress({
+            setExportProgress({
                 current: exportedFileCount,
                 total: totalFileCount,
             });
 
             const updateExportStatsWithOffset = (current: number) =>
-                updateExportProgress({
+                setExportProgress({
                     current: exportedFileCount + current,
                     total: totalFileCount,
                 });
