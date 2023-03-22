@@ -570,5 +570,11 @@
         "YEAR": "after a year"
     },
     "STOP_EXPORT": "Stop",
-    "EXPORT_PROGRESS": "<a>{{progress.current}} / {{progress.total}}</a> files exported"
+    "EXPORT_PROGRESS": "<a>{{progress.current}} / {{progress.total}}</a> files exported",
+    "EXPORT_NOTIFICATION": {
+        "START": "Export started",
+        "IN_PROGRESS": "Export already in progress",
+        "FINISH": "Export finished",
+        "UP_TO_DATE": "No new files to export"
+    }
 }

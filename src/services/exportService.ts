@@ -45,10 +45,11 @@ import {
 } from 'types/export';
 import { User } from 'types/user';
 import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
-import { ExportNotification, RecordType } from 'constants/export';
+import { RecordType } from 'constants/export';
 import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
 import { addLogLine } from 'utils/logging';
+import { t } from 'i18next';
 
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
@@ -81,7 +82,7 @@ class ExportService {
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             if (this.exportInProgress) {
                 this.electronAPIs.sendNotification(
-                    ExportNotification.IN_PROGRESS
+                    t('EXPORT_NOTIFICATION.IN_PROGRESS')
                 );
                 return await this.exportInProgress;
             }
@@ -183,12 +184,12 @@ class ExportService {
             }
             if (!files?.length) {
                 this.electronAPIs.sendNotification(
-                    ExportNotification.UP_TO_DATE
+                    t('EXPORT_NOTIFICATION.UP_TO_DATE')
                 );
                 return;
             }
             this.stopExport = false;
-            this.electronAPIs.sendNotification(ExportNotification.START);
+            this.electronAPIs.sendNotification(t('EXPORT_NOTIFICATION.START'));
 
             for (const [index, file] of files.entries()) {
                 if (this.stopExport) {
@@ -221,7 +222,9 @@ class ExportService {
                 updateProgress(index + 1);
             }
             if (!this.stopExport) {
-                this.electronAPIs.sendNotification(ExportNotification.FINISH);
+                this.electronAPIs.sendNotification(
+                    t('EXPORT_NOTIFICATION.FINISH')
+                );
             }
         } catch (e) {
             logError(e, 'fileExporter failed');
