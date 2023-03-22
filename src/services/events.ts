@@ -7,6 +7,7 @@ export enum Events {
     LOGOUT = 'logout',
     FILE_UPLOADED = 'fileUploaded',
     LOCAL_FILES_UPDATED = 'localFilesUpdated',
+    REMOTE_SYNCED = 'remoteSynced',
 }
 
 export const eventBus = new EventEmitter<Events>();
