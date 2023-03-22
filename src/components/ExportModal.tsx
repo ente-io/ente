@@ -117,11 +117,6 @@ export default function ExportModal(props: Props) {
         void main();
     }, [exportFolder]);
 
-    const updateTotalFileCount = async () => {
-        const userPersonalFiles = getUserPersonalFiles(await getLocalFiles());
-        setTotalFileCount(userPersonalFiles?.length ?? 0);
-    };
-
     useEffect(() => {
         if (!props.show) {
             return;
@@ -168,6 +163,18 @@ export default function ExportModal(props: Props) {
         };
         void main();
     }, [props.show]);
+
+    const updateTotalFileCount = async () => {
+        try {
+            const userPersonalFiles = getUserPersonalFiles(
+                await getLocalFiles()
+            );
+            setTotalFileCount(userPersonalFiles?.length ?? 0);
+        } catch (e) {
+            logError(e, 'updateTotalFileCount failed');
+            throw e;
+        }
+    };
 
     // =============
     // STATE UPDATERS
