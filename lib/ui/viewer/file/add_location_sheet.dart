@@ -183,70 +183,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                 ),
                 const SizedBox(height: 24),
                 Expanded(
-                  child: Gallery(
-                    key: ValueKey(_selectedRadius()),
-                    asyncLoader: (
-                      creationStartTime,
-                      creationEndTime, {
-                      limit,
-                      asc,
-                    }) async {
-                      final ownerID = Configuration.instance.getUserID();
-                      final hasSelectedAllForBackup = Configuration.instance
-                          .hasSelectedAllFoldersForBackup();
-                      final collectionsToHide = CollectionsService.instance
-                          .collectionsHiddenFromTimeline();
-                      FileLoadResult result;
-                      if (hasSelectedAllForBackup) {
-                        result =
-                            await FilesDB.instance.getAllLocalAndUploadedFiles(
-                          creationStartTime,
-                          creationEndTime,
-                          ownerID!,
-                          limit: limit,
-                          asc: asc,
-                          ignoredCollectionIDs: collectionsToHide,
-                          onlyFilesWithLocation: true,
-                        );
-                      } else {
-                        result =
-                            await FilesDB.instance.getAllPendingOrUploadedFiles(
-                          creationStartTime,
-                          creationEndTime,
-                          ownerID!,
-                          limit: limit,
-                          asc: asc,
-                          ignoredCollectionIDs: collectionsToHide,
-                          onlyFilesWithLocation: true,
-                        );
-                      }
-
-                      // hide ignored files from home page UI
-                      final ignoredIDs =
-                          await IgnoredFilesService.instance.ignoredIDs;
-                      result.files.removeWhere((f) {
-                        assert(
-                          f.location != null &&
-                              f.location!.latitude != null &&
-                              f.location!.longitude != null,
-                        );
-                        return f.uploadedFileID == null &&
-                                IgnoredFilesService.instance
-                                    .shouldSkipUpload(ignoredIDs, f) ||
-                            !LocationService.instance.isFileInsideLocationTag(
-                              InheritedLocationTagData.of(context).coordinates,
-                              [f.location!.latitude!, f.location!.longitude!],
-                              _selectedRadius().toInt(),
-                            );
-                      });
-                      if (!result.hasMore) {
-                        memoriesCountNotifier.value = result.files.length;
-                      }
-                      return result;
-                    },
-                    tagPrefix: "Add location",
-                    shouldCollateFilesByDay: false,
-                  ),
+                  child: AddToLocationGalleryWidget(memoriesCountNotifier),
                 ),
               ],
             ),
@@ -254,10 +191,6 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
         ],
       ),
     );
-  }
-
-  double _selectedRadius() {
-    return radiusValues[InheritedLocationTagData.of(context).selectedIndex];
   }
 }
 
@@ -378,6 +311,94 @@ class RadiusPickerWidget extends StatelessWidget {
   }
 
   double _selectedRadius(BuildContext context) {
+    return radiusValues[InheritedLocationTagData.of(context).selectedIndex];
+  }
+}
+
+class AddToLocationGalleryWidget extends StatefulWidget {
+  final ValueNotifier<int?> memoriesCountNotifier;
+  const AddToLocationGalleryWidget(this.memoriesCountNotifier, {super.key});
+
+  @override
+  State<AddToLocationGalleryWidget> createState() =>
+      _AddToLocationGalleryWidgetState();
+}
+
+class _AddToLocationGalleryWidgetState
+    extends State<AddToLocationGalleryWidget> {
+  late final Future<FileLoadResult> fileLoadResult;
+
+  @override
+  void initState() {
+    final ownerID = Configuration.instance.getUserID();
+    final hasSelectedAllForBackup =
+        Configuration.instance.hasSelectedAllFoldersForBackup();
+    final collectionsToHide =
+        CollectionsService.instance.collectionsHiddenFromTimeline();
+    if (hasSelectedAllForBackup) {
+      fileLoadResult = FilesDB.instance.getAllLocalAndUploadedFiles(
+        galleryLoadStartTime,
+        galleryLoadEndTime,
+        ownerID!,
+        limit: null,
+        asc: true,
+        ignoredCollectionIDs: collectionsToHide,
+        onlyFilesWithLocation: true,
+      );
+    } else {
+      fileLoadResult = FilesDB.instance.getAllPendingOrUploadedFiles(
+        galleryLoadStartTime,
+        galleryLoadEndTime,
+        ownerID!,
+        limit: null,
+        asc: true,
+        ignoredCollectionIDs: collectionsToHide,
+        onlyFilesWithLocation: true,
+      );
+    }
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Gallery(
+      key: ValueKey(_selectedRadius()),
+      asyncLoader: (
+        creationStartTime,
+        creationEndTime, {
+        limit,
+        asc,
+      }) async {
+        final FileLoadResult result = await fileLoadResult;
+
+        // hide ignored files from home page UI
+        final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+        result.files.removeWhere((f) {
+          assert(
+            f.location != null &&
+                f.location!.latitude != null &&
+                f.location!.longitude != null,
+          );
+          return f.uploadedFileID == null &&
+                  IgnoredFilesService.instance
+                      .shouldSkipUpload(ignoredIDs, f) ||
+              !LocationService.instance.isFileInsideLocationTag(
+                InheritedLocationTagData.of(context).coordinates,
+                [f.location!.latitude!, f.location!.longitude!],
+                _selectedRadius().toInt(),
+              );
+        });
+        if (!result.hasMore) {
+          widget.memoriesCountNotifier.value = result.files.length;
+        }
+        return result;
+      },
+      tagPrefix: "Add location",
+      shouldCollateFilesByDay: false,
+    );
+  }
+
+  double _selectedRadius() {
     return radiusValues[InheritedLocationTagData.of(context).selectedIndex];
   }
 }
