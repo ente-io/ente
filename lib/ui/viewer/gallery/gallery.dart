@@ -42,6 +42,7 @@ class Gallery extends StatefulWidget {
   final double scrollBottomSafeArea;
   final bool shouldCollateFilesByDay;
   final Widget loadingWidget;
+  final bool disableScroll;
 
   const Gallery({
     required this.asyncLoader,
@@ -58,6 +59,7 @@ class Gallery extends StatefulWidget {
     this.albumName = '',
     this.shouldCollateFilesByDay = true,
     this.loadingWidget = const EnteLoadingWidget(),
+    this.disableScroll = false,
     Key? key,
   }) : super(key: key);
 
@@ -216,6 +218,7 @@ class _GalleryState extends State<Gallery> {
       startIndex: 0,
       totalCount: _collatedFiles.length,
       isDraggableScrollbarEnabled: _collatedFiles.length > 10,
+      disableScroll: widget.disableScroll,
       waitBuilder: (_) {
         return const EnteLoadingWidget();
       },
