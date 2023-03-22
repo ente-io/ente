@@ -14,60 +14,9 @@ import autoLauncher from '../services/autoLauncher';
 import { isPlatform } from './common/platform';
 import ElectronLog from 'electron-log';
 
-export function buildContextMenu(
-    mainWindow: BrowserWindow,
-    args: any = {}
-): Menu {
+export function buildContextMenu(mainWindow: BrowserWindow): Menu {
     // eslint-disable-next-line camelcase
-    const {
-        export_progress: exportProgress,
-        retry_export: retryExport,
-        paused,
-    } = args;
     const contextMenu = Menu.buildFromTemplate([
-        ...(exportProgress
-            ? [
-                  {
-                      label: exportProgress,
-                      click: () => mainWindow.show(),
-                  },
-                  ...(paused
-                      ? [
-                            {
-                                label: 'Resume export',
-                                click: () =>
-                                    mainWindow.webContents.send(
-                                        'resume-export'
-                                    ),
-                            },
-                        ]
-                      : [
-                            {
-                                label: 'Pause export',
-                                click: () =>
-                                    mainWindow.webContents.send('pause-export'),
-                            },
-                            {
-                                label: 'Stop export',
-                                click: () =>
-                                    mainWindow.webContents.send('stop-export'),
-                            },
-                        ]),
-              ]
-            : []),
-        ...(retryExport
-            ? [
-                  {
-                      label: 'Export failed',
-                      click: null,
-                  },
-                  {
-                      label: 'Retry export',
-                      click: () => mainWindow.webContents.send('retry-export'),
-                  },
-              ]
-            : []),
-        { type: 'separator' },
         {
             label: 'Open ente',
             click: function () {
