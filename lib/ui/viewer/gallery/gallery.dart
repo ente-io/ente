@@ -41,6 +41,7 @@ class Gallery extends StatefulWidget {
   final String? albumName;
   final double scrollBottomSafeArea;
   final bool shouldCollateFilesByDay;
+  final Widget loadingWidget;
 
   const Gallery({
     required this.asyncLoader,
@@ -56,6 +57,7 @@ class Gallery extends StatefulWidget {
     this.scrollBottomSafeArea = 120.0,
     this.albumName = '',
     this.shouldCollateFilesByDay = true,
+    this.loadingWidget = const EnteLoadingWidget(),
     Key? key,
   }) : super(key: key);
 
@@ -201,7 +203,7 @@ class _GalleryState extends State<Gallery> {
   Widget build(BuildContext context) {
     _logger.finest("Building Gallery  ${widget.tagPrefix}");
     if (!_hasLoadedFiles) {
-      return const EnteLoadingWidget();
+      return widget.loadingWidget;
     }
     _photoGridSize = LocalSettings.instance.getPhotoGridSize();
     return _getListView();

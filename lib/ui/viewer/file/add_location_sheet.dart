@@ -383,6 +383,7 @@ class _AddToLocationGalleryWidgetState
   Widget build(BuildContext context) {
     return Gallery(
       key: ValueKey(_selectedRadius()),
+      loadingWidget: const SizedBox.shrink(),
       asyncLoader: (
         creationStartTime,
         creationEndTime, {
