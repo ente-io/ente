@@ -109,7 +109,6 @@ import { checkConnectivity } from 'utils/error/ui';
 import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
 import ElectronService from 'services/electron/common';
 import uploadManager from 'services/upload/uploadManager';
-import { eventBus, Events } from 'services/events';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -371,7 +370,6 @@ export default function Gallery() {
             setDeletedFileIds(new Set());
             !silent && finishLoading();
         }
-        eventBus.emit(Events.REMOTE_SYNCED);
         syncInProgress.current = false;
         if (resync.current) {
             resync.current = false;

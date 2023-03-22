@@ -87,7 +87,7 @@ class ExportService {
             startExport();
         };
         eventBus.addListener(
-            Events.REMOTE_SYNCED,
+            Events.LOCAL_FILES_UPDATED,
             this.continuousExportEventListener
         );
     }
