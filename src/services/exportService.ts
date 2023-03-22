@@ -50,6 +50,7 @@ import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
 import { addLogLine } from 'utils/logging';
 import { t } from 'i18next';
+import { eventBus, Events } from './events';
 
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
@@ -60,6 +61,7 @@ class ExportService {
     private stopExport: boolean = false;
     private allElectronAPIsExist: boolean = false;
     private fileReader: FileReader = null;
+    private continuousExportEventListener: () => void;
 
     constructor() {
         this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -72,6 +74,32 @@ class ExportService {
             logError(e, 'failed to selectExportDirectory ');
             throw e;
         }
+    }
+
+    enableContinuousExport(startExport: () => void) {
+        startExport();
+        this.continuousExportEventListener = () => {
+            addLogLine('continuous export triggered');
+            if (this.exportInProgress) {
+                addLogLine('export in progress, skipping');
+                return;
+            }
+            startExport();
+        };
+        eventBus.addListener(
+            Events.REMOTE_SYNCED,
+            this.continuousExportEventListener
+        );
+    }
+
+    disableContinuousExport() {
+        if (!this.continuousExportEventListener) {
+            return;
+        }
+        eventBus.removeListener(
+            Events.REMOTE_SYNCED,
+            this.continuousExportEventListener
+        );
     }
 
     stopRunningExport() {
