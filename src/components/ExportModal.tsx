@@ -1,5 +1,5 @@
 import isElectron from 'is-electron';
-import React, { useEffect, useMemo, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import exportService from 'services/exportService';
 import { ExportProgress, ExportStats } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
@@ -23,18 +23,16 @@ import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';
 import FolderIcon from '@mui/icons-material/Folder';
 import { ExportStage, ExportType } from 'constants/export';
-import EnteSpinner from './EnteSpinner';
 import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from './OverflowMenu/menu';
 import { OverflowMenuOption } from './OverflowMenu/option';
-import { convertBytesToHumanReadable } from 'utils/file/size';
 import { CustomError } from 'utils/error';
-import { getLocalUserDetails } from 'utils/user';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { addLogLine } from 'utils/logging';
 import { t } from 'i18next';
+import { getUserPersonalFiles } from 'utils/file';
 
 const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
@@ -53,10 +51,9 @@ interface Props {
 }
 export default function ExportModal(props: Props) {
     const appContext = useContext(AppContext);
-    const userDetails = useMemo(() => getLocalUserDetails(), []);
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState('');
-    const [exportSize, setExportSize] = useState('');
+    const [totalFileCount, setTotalFileCount] = useState(0);
     const [exportProgress, setExportProgress] = useState<ExportProgress>({
         current: 0,
         total: 0,
@@ -120,11 +117,17 @@ export default function ExportModal(props: Props) {
         void main();
     }, [exportFolder]);
 
+    const updateExportInfo = async () => {
+        const userPersonalFiles = getUserPersonalFiles(await getLocalFiles());
+        setTotalFileCount(userPersonalFiles?.length ?? 0);
+    };
+
     useEffect(() => {
         if (!props.show) {
             return;
         }
         const main = async () => {
+            await updateExportInfo();
             const user: User = getData(LS_KEYS.USER);
             if (exportStage === ExportStage.FINISHED) {
                 try {
@@ -165,10 +168,6 @@ export default function ExportModal(props: Props) {
         };
         void main();
     }, [props.show]);
-
-    useEffect(() => {
-        setExportSize(convertBytesToHumanReadable(userDetails?.usage));
-    }, [userDetails]);
 
     // =============
     // STATE UPDATERS
@@ -393,7 +392,7 @@ export default function ExportModal(props: Props) {
                         selectExportDirectory={selectExportDirectory}
                         exportStage={exportStage}
                     />
-                    <ExportSize exportSize={exportSize} />
+                    <ExportFileCount exportFileCount={totalFileCount} />
                 </Stack>
             </DialogContent>
             <Divider />
@@ -431,13 +430,11 @@ function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
     );
 }
 
-function ExportSize({ exportSize }) {
+function ExportFileCount({ exportFileCount }) {
     return (
         <FlexWrapper>
-            <Label width="30%">{t('EXPORT_SIZE')} </Label>
-            <Value width="70%">
-                {exportSize ? `${exportSize}` : <EnteSpinner />}
-            </Value>
+            <Label width="30%">{t('EXPORT_FILE_COUNT')} </Label>
+            <Value width="70%">{exportFileCount}</Value>
         </FlexWrapper>
     );
 }

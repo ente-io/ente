@@ -578,3 +578,11 @@ export function getLatestVersionFiles(files: EnteFile[]) {
         (file) => !file.isDeleted
     );
 }
+
+export function getUserPersonalFiles(files: EnteFile[]) {
+    const user: User = getData(LS_KEYS.USER);
+    if (!user?.id) {
+        throw Error('user missing');
+    }
+    return files.filter((file) => file.ownerID === user.id);
+}
