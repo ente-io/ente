@@ -19,6 +19,7 @@ import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/utils/debouncer.dart";
 
 showAddLocationSheet(BuildContext context, List<double> coordinates) {
   showBarModalBottomSheet(
@@ -54,6 +55,7 @@ class _LocationTagDataStateProviderState
     extends State<LocationTagDataStateProvider> {
   int selectedIndex = 4;
   late List<double> coordinates;
+  final Debouncer _debouncer = Debouncer(const Duration(milliseconds: 300));
   @override
   void initState() {
     coordinates = widget.coordinates;
@@ -61,8 +63,13 @@ class _LocationTagDataStateProviderState
   }
 
   void _updateSelectedIndex(int index) {
-    setState(() {
-      selectedIndex = index;
+    _debouncer.cancelDebounce();
+    _debouncer.run(() async {
+      if (mounted) {
+        setState(() {
+          selectedIndex = index;
+        });
+      }
     });
   }
 
@@ -212,10 +219,16 @@ class CustomTrackShape extends RoundedRectSliderTrackShape {
   }
 }
 
-class RadiusPickerWidget extends StatelessWidget {
+class RadiusPickerWidget extends StatefulWidget {
   final ValueNotifier<int?> memoriesCountNotifier;
   const RadiusPickerWidget(this.memoriesCountNotifier, {super.key});
 
+  @override
+  State<RadiusPickerWidget> createState() => _RadiusPickerWidgetState();
+}
+
+class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
+  double selectedIndex = 4;
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
@@ -287,16 +300,18 @@ class RadiusPickerWidget extends StatelessWidget {
                     ),
                     child: RepaintBoundary(
                       child: Slider(
-                        value: InheritedLocationTagData.of(
-                          context,
-                        ).selectedIndex.toDouble(),
+                        value: selectedIndex,
                         onChanged: (value) {
+                          setState(() {
+                            selectedIndex = value;
+                          });
+
                           InheritedLocationTagData.of(
                             context,
                           ).updateSelectedIndex(
                             value.toInt(),
                           );
-                          memoriesCountNotifier.value = null;
+                          widget.memoriesCountNotifier.value = null;
                         },
                         min: 0,
                         max: radiusValues.length - 1,
