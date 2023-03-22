@@ -79,6 +79,7 @@ class ExportService {
     enableContinuousExport(startExport: () => void) {
         try {
             if (this.continuousExportEventListener) {
+                addLogLine('continuous export already enabled');
                 return;
             }
             startExport();
@@ -103,6 +104,7 @@ class ExportService {
     disableContinuousExport() {
         try {
             if (!this.continuousExportEventListener) {
+                addLogLine('continuous export already disabled');
                 return;
             }
             eventBus.removeListener(
