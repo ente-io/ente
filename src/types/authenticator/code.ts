@@ -51,7 +51,8 @@ export class Code {
     static fromRawData(id: string, rawData: string): Code {
         let santizedRawData = rawData
             .replace(/\+/g, '%2B')
-            .replace(/:/g, '%3A');
+            .replace(/:/g, '%3A')
+            .replaceAll('\r', '');
         if (santizedRawData.startsWith('"')) {
             santizedRawData = santizedRawData.substring(1);
         }
