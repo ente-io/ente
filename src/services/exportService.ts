@@ -77,6 +77,9 @@ class ExportService {
     }
 
     enableContinuousExport(startExport: () => void) {
+        if (this.continuousExportEventListener) {
+            return;
+        }
         startExport();
         this.continuousExportEventListener = () => {
             addLogLine('continuous export triggered');
@@ -97,7 +100,7 @@ class ExportService {
             return;
         }
         eventBus.removeListener(
-            Events.REMOTE_SYNCED,
+            Events.LOCAL_FILES_UPDATED,
             this.continuousExportEventListener
         );
     }
