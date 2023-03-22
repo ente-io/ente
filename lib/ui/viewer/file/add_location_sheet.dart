@@ -132,10 +132,10 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                         borderRadius: 2,
                       ),
                       const SizedBox(height: 24),
-                      const RadiusPickerWidget(),
+                      RadiusPickerWidget(memoriesCountNotifier),
                       const SizedBox(height: 24),
                       Text(
-                        "A location groups all photos that were taken within some radius of a photo",
+                        "A location tag groups all photos that were taken within some radius of a photo",
                         style: textTheme.smallMuted,
                       ),
                     ],
@@ -277,7 +277,8 @@ class CustomTrackShape extends RoundedRectSliderTrackShape {
 }
 
 class RadiusPickerWidget extends StatelessWidget {
-  const RadiusPickerWidget({super.key});
+  final ValueNotifier<int?> memoriesCountNotifier;
+  const RadiusPickerWidget(this.memoriesCountNotifier, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -359,6 +360,7 @@ class RadiusPickerWidget extends StatelessWidget {
                           ).updateSelectedIndex(
                             value.toInt(),
                           );
+                          memoriesCountNotifier.value = null;
                         },
                         min: 0,
                         max: radiusValues.length - 1,
