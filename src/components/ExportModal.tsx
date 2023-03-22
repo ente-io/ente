@@ -25,7 +25,6 @@ import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from './OverflowMenu/menu';
 import { OverflowMenuOption } from './OverflowMenu/option';
-import { CustomError } from 'utils/error';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
@@ -142,9 +141,6 @@ export default function ExportModal(props: Props) {
 
     const preExportRun = async () => {
         const exportFolder = getData(LS_KEYS.EXPORT)?.folder;
-        if (!exportFolder) {
-            await selectExportDirectory();
-        }
         const exportFolderExists = exportService.exists(exportFolder);
         if (!exportFolderExists) {
             appContext.setDialogMessage(
@@ -161,15 +157,6 @@ export default function ExportModal(props: Props) {
         await syncExportStatsWithRecord();
     };
 
-    const selectExportDirectory = async () => {
-        const newFolder = await exportService.selectExportDirectory();
-        if (newFolder) {
-            updateExportFolder(newFolder);
-        } else {
-            throw Error(CustomError.REQUEST_CANCELLED);
-        }
-    };
-
     const syncExportStatsWithRecord = async () => {
         const exportRecord = await exportService.getExportRecord();
         const failed = exportRecord?.failedFiles?.length ?? 0;
@@ -180,6 +167,17 @@ export default function ExportModal(props: Props) {
     // =============
     // UI functions
     // =============
+
+    const changeExportDirectory = async () => {
+        try {
+            const newFolder = await exportService.selectExportDirectory();
+            if (newFolder) {
+                updateExportFolder(newFolder);
+            }
+        } catch (e) {
+            logError(e, 'selectExportDirectory failed');
+        }
+    };
 
     const startExport = async () => {
         try {
@@ -201,9 +199,7 @@ export default function ExportModal(props: Props) {
 
             await postExportRun();
         } catch (e) {
-            if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, 'resumeExport failed');
-            }
+            logError(e, 'resumeExport failed');
         }
     };
 
@@ -212,9 +208,7 @@ export default function ExportModal(props: Props) {
             exportService.stopRunningExport();
             await postExportRun();
         } catch (e) {
-            if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, 'stopExport failed');
-            }
+            logError(e, 'stopExport failed');
         }
     };
 
@@ -262,7 +256,7 @@ export default function ExportModal(props: Props) {
             <DialogContent>
                 <ExportDirectory
                     exportFolder={exportFolder}
-                    selectExportDirectory={selectExportDirectory}
+                    changeExportDirectory={changeExportDirectory}
                     exportStage={exportStage}
                 />
                 <TotalFileCount totalFileCount={totalFileCount} />
@@ -273,13 +267,13 @@ export default function ExportModal(props: Props) {
     );
 }
 
-function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
+function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (
         <SpaceBetweenFlex minHeight={'40px'}>
             <Typography color="text.secondary">{t('DESTINATION')}</Typography>
             <>
                 {!exportFolder ? (
-                    <Button color={'accent'} onClick={selectExportDirectory}>
+                    <Button color={'accent'} onClick={changeExportDirectory}>
                         {t('SELECT_FOLDER')}
                     </Button>
                 ) : (
@@ -292,7 +286,7 @@ function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
                         {exportStage === ExportStage.FINISHED ||
                         exportStage === ExportStage.INIT ? (
                             <ExportDirectoryOption
-                                selectExportDirectory={selectExportDirectory}
+                                changeExportDirectory={changeExportDirectory}
                             />
                         ) : (
                             <Box sx={{ width: '48px' }} />
@@ -315,16 +309,7 @@ function TotalFileCount({ totalFileCount }) {
     );
 }
 
-function ExportDirectoryOption({ selectExportDirectory }) {
-    const handleClick = () => {
-        try {
-            selectExportDirectory();
-        } catch (e) {
-            if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, 'startExport failed');
-            }
-        }
-    };
+function ExportDirectoryOption({ changeExportDirectory }) {
     return (
         <OverflowMenu
             triggerButtonProps={{
@@ -335,7 +320,7 @@ function ExportDirectoryOption({ selectExportDirectory }) {
             ariaControls={'export-option'}
             triggerButtonIcon={<MoreHoriz />}>
             <OverflowMenuOption
-                onClick={handleClick}
+                onClick={changeExportDirectory}
                 startIcon={<FolderIcon />}>
                 {t('CHANGE_FOLDER')}
             </OverflowMenuOption>
