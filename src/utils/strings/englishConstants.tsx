@@ -157,6 +157,7 @@ const englishConstants = {
     DOWNLOAD_UNCATEGORIZED: 'Download uncategorized',
     COPY_OPTION: 'Copy as PNG (Ctrl/Cmd - C)',
     COPY_LINK: 'Copy link',
+    DONE: 'Done',
     TOGGLE_FULLSCREEN: 'Toggle fullscreen (F)',
     ZOOM_IN_OUT: 'Zoom in/out',
     PREVIOUS: 'Previous (←)',

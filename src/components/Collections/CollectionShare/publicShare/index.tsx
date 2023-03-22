@@ -8,16 +8,19 @@ import constants from 'utils/strings/constants';
 import PublicIcon from '@mui/icons-material/Public';
 
 import {
-    Dialog,
-    DialogTitle,
     DialogActions,
     Button,
     Stack,
     Typography,
+    DialogContent,
+    Box,
 } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import { EnteMenuItem } from 'components/Menu/menuItem';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import VerticallyCentered from 'components/Container';
+import DialogBoxBase from 'components/DialogBox/base';
+import { Check } from '@mui/icons-material';
 
 export default function PublicShare({
     collection,
@@ -105,7 +108,7 @@ export default function PublicShare({
                         setPublicShareProp={setPublicShareProp}
                         publicShareUrl={publicShareUrl}
                     />
-                    <Dialog
+                    <DialogBoxBase
                         open={isFirstShareProp}
                         onClose={handleCancel}
                         disablePortal
@@ -114,21 +117,32 @@ export default function PublicShare({
                         PaperProps={{
                             sx: { p: 1, justifyContent: 'flex-end' },
                         }}>
-                        <DialogTitle>
-                            {constants.PUBLIC_LINK_CREATED}
-                        </DialogTitle>
+                        <DialogContent>
+                            <VerticallyCentered>
+                                <Typography fontWeight={'bold'}>
+                                    {constants.PUBLIC_LINK_CREATED}
+                                </Typography>
+                                <Box pt={2}>
+                                    <Check sx={{ fontSize: '48px' }} />
+                                </Box>
+                            </VerticallyCentered>
+                        </DialogContent>
                         <DialogActions>
-                            <Button onClick={handleCancel} color="primary">
-                                Cancel
+                            <Button
+                                onClick={handleCancel}
+                                color="secondary"
+                                size={'large'}>
+                                {constants.DONE}
                             </Button>
                             <Button
                                 onClick={copyToClipboardHelper(publicShareUrl)}
+                                size={'large'}
                                 color="primary"
                                 autoFocus>
                                 {constants.COPY_LINK}
                             </Button>
                         </DialogActions>
-                    </Dialog>
+                    </DialogBoxBase>
                 </>
             ) : (
                 <BeforeShare
