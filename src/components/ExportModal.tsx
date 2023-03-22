@@ -117,7 +117,7 @@ export default function ExportModal(props: Props) {
         void main();
     }, [exportFolder]);
 
-    const updateExportInfo = async () => {
+    const updateTotalFileCount = async () => {
         const userPersonalFiles = getUserPersonalFiles(await getLocalFiles());
         setTotalFileCount(userPersonalFiles?.length ?? 0);
     };
@@ -127,7 +127,7 @@ export default function ExportModal(props: Props) {
             return;
         }
         const main = async () => {
-            await updateExportInfo();
+            await updateTotalFileCount();
             const user: User = getData(LS_KEYS.USER);
             if (exportStage === ExportStage.FINISHED) {
                 try {
@@ -392,7 +392,7 @@ export default function ExportModal(props: Props) {
                         selectExportDirectory={selectExportDirectory}
                         exportStage={exportStage}
                     />
-                    <ExportFileCount exportFileCount={totalFileCount} />
+                    <TotalFileCount totalFileCount={totalFileCount} />
                 </Stack>
             </DialogContent>
             <Divider />
@@ -430,11 +430,11 @@ function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
     );
 }
 
-function ExportFileCount({ exportFileCount }) {
+function TotalFileCount({ totalFileCount }) {
     return (
         <FlexWrapper>
-            <Label width="30%">{t('EXPORT_FILE_COUNT')} </Label>
-            <Value width="70%">{exportFileCount}</Value>
+            <Label width="30%">{t('FILE_COUNT')} </Label>
+            <Value width="70%">{totalFileCount}</Value>
         </FlexWrapper>
     );
 }

@@ -300,7 +300,7 @@
     "EXPORT_DATA": "Export data",
     "SELECT_FOLDER": "Select folder",
     "DESTINATION": "Destination",
-    "EXPORT_FILE_COUNT": "File count",
+    "FILE_COUNT": "File count",
     "START": "Start",
     "EXPORT_IN_PROGRESS": "Export in progress...",
     "PAUSE": "Pause",
