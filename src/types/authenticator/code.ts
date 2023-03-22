@@ -121,8 +121,16 @@ export class Code {
                 }
                 return issuer;
             }
-            const path = decodeURIComponent(uriPath);
-            return path.split(':')[0].substring(1);
+            let path = decodeURIComponent(uriPath);
+            if (path.startsWith('totp/') || path.startsWith('hotp/')) {
+                path = path.substring(5);
+            }
+            if (path.includes(':')) {
+                return path.split(':')[0];
+            } else if (path.includes('-')) {
+                return path.split('-')[0];
+            }
+            return path;
         } catch (e) {
             return '';
         }
