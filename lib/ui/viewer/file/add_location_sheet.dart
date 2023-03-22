@@ -1,8 +1,11 @@
+import 'dart:developer' as dev;
+
 import 'package:flutter/material.dart';
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/typedefs.dart";
 import "package:photos/services/collections_service.dart";
@@ -327,6 +330,7 @@ class AddToLocationGalleryWidget extends StatefulWidget {
 class _AddToLocationGalleryWidgetState
     extends State<AddToLocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
+  late Future<void> removeIgnoredFiles;
 
   @override
   void initState() {
@@ -356,6 +360,7 @@ class _AddToLocationGalleryWidgetState
         onlyFilesWithLocation: true,
       );
     }
+    removeIgnoredFiles = _removeIgnoredFiles(fileLoadResult);
     super.initState();
   }
 
@@ -370,28 +375,32 @@ class _AddToLocationGalleryWidgetState
         asc,
       }) async {
         final FileLoadResult result = await fileLoadResult;
-
-        // hide ignored files from home page UI
-        final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-        result.files.removeWhere((f) {
+        //wait for ignored files to be removed after init
+        await removeIgnoredFiles;
+        final stopWatch = Stopwatch()..start();
+        final copyOfFiles = List<File>.from(result.files);
+        copyOfFiles.removeWhere((f) {
           assert(
             f.location != null &&
                 f.location!.latitude != null &&
                 f.location!.longitude != null,
           );
-          return f.uploadedFileID == null &&
-                  IgnoredFilesService.instance
-                      .shouldSkipUpload(ignoredIDs, f) ||
-              !LocationService.instance.isFileInsideLocationTag(
-                InheritedLocationTagData.of(context).coordinates,
-                [f.location!.latitude!, f.location!.longitude!],
-                _selectedRadius().toInt(),
-              );
+          return !LocationService.instance.isFileInsideLocationTag(
+            InheritedLocationTagData.of(context).coordinates,
+            [f.location!.latitude!, f.location!.longitude!],
+            _selectedRadius().toInt(),
+          );
         });
-        if (!result.hasMore) {
-          widget.memoriesCountNotifier.value = result.files.length;
-        }
-        return result;
+        dev.log(
+            "Time taken to get all files in a location tag: ${stopWatch.elapsedMilliseconds} ms");
+        stopWatch.stop();
+        // if (!result.hasMore) {
+        widget.memoriesCountNotifier.value = copyOfFiles.length;
+        // }
+        return FileLoadResult(
+          copyOfFiles,
+          result.hasMore,
+        );
       },
       tagPrefix: "Add location",
       shouldCollateFilesByDay: false,
@@ -400,5 +409,14 @@ class _AddToLocationGalleryWidgetState
 
   double _selectedRadius() {
     return radiusValues[InheritedLocationTagData.of(context).selectedIndex];
+  }
+
+  Future<void> _removeIgnoredFiles(Future<FileLoadResult> result) async {
+    final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+    (await result).files.removeWhere(
+          (f) =>
+              f.uploadedFileID == null &&
+              IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
+        );
   }
 }
