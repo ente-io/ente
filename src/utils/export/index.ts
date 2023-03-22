@@ -79,7 +79,7 @@ export const getCollectionsRenamedAfterLastExport = (
     return renamedCollections;
 };
 
-export const getFilesUploadedAfterLastExport = (
+export const getUnExportedFiles = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {

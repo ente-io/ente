@@ -3,7 +3,6 @@ import React, { useEffect, useState, useContext } from 'react';
 import exportService from 'services/exportService';
 import { ExportProgress, ExportStats } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
-import { User } from 'types/user';
 import {
     Button,
     Dialog,
@@ -13,8 +12,6 @@ import {
     styled,
     Tooltip,
 } from '@mui/material';
-import { sleep } from 'utils/common';
-import { getExportRecordFileUID } from 'utils/export';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { FlexWrapper, Label, Value } from './Container';
@@ -22,7 +19,7 @@ import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';
 import FolderIcon from '@mui/icons-material/Folder';
-import { ExportStage, ExportType } from 'constants/export';
+import { ExportStage } from 'constants/export';
 import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from './OverflowMenu/menu';
@@ -30,7 +27,6 @@ import { OverflowMenuOption } from './OverflowMenu/option';
 import { CustomError } from 'utils/error';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
-import { addLogLine } from 'utils/logging';
 import { t } from 'i18next';
 import { getUserPersonalFiles } from 'utils/file';
 
@@ -77,15 +73,6 @@ export default function ExportModal(props: Props) {
             exportService.electronAPIs.registerStopExportListener(
                 stopExportHandler
             );
-            exportService.electronAPIs.registerPauseExportListener(
-                pauseExportHandler
-            );
-            exportService.electronAPIs.registerResumeExportListener(
-                resumeExportHandler
-            );
-            exportService.electronAPIs.registerRetryFailedExportListener(
-                retryFailedExportHandler
-            );
         } catch (e) {
             logError(e, 'error in exportModal');
         }
@@ -108,7 +95,7 @@ export default function ExportModal(props: Props) {
                     failed: exportInfo?.failedFiles?.length ?? 0,
                 });
                 if (exportInfo?.stage === ExportStage.INPROGRESS) {
-                    await resumeExport();
+                    await startExport();
                 }
             } catch (e) {
                 logError(e, 'error handling exportFolder change');
@@ -121,47 +108,7 @@ export default function ExportModal(props: Props) {
         if (!props.show) {
             return;
         }
-        const main = async () => {
-            await updateTotalFileCount();
-            const user: User = getData(LS_KEYS.USER);
-            if (exportStage === ExportStage.FINISHED) {
-                try {
-                    const localFiles = await getLocalFiles();
-                    const userPersonalFiles = localFiles.filter(
-                        (file) => file.ownerID === user?.id
-                    );
-                    const exportRecord = await exportService.getExportRecord();
-                    const exportedFileCnt = exportRecord.exportedFiles?.length;
-                    const failedFilesCnt = exportRecord.failedFiles?.length;
-                    const syncedFilesCnt = userPersonalFiles.length;
-                    if (syncedFilesCnt > exportedFileCnt + failedFilesCnt) {
-                        await updateExportProgress({
-                            current: exportedFileCnt + failedFilesCnt,
-                            total: syncedFilesCnt,
-                        });
-                        const exportFileUIDs = new Set([
-                            ...exportRecord.exportedFiles,
-                            ...exportRecord.failedFiles,
-                        ]);
-                        const unExportedFiles = userPersonalFiles.filter(
-                            (file) =>
-                                !exportFileUIDs.has(
-                                    getExportRecordFileUID(file)
-                                )
-                        );
-                        await exportService.addFilesQueuedRecord(
-                            exportFolder,
-                            unExportedFiles
-                        );
-                        await updateExportStage(ExportStage.PAUSED);
-                    }
-                } catch (e) {
-                    setExportStage(ExportStage.INIT);
-                    logError(e, 'error while updating exportModal on reopen');
-                }
-            }
-        };
-        void main();
+        void updateTotalFileCount();
     }, [props.show]);
 
     const updateTotalFileCount = async () => {
@@ -172,7 +119,6 @@ export default function ExportModal(props: Props) {
             setTotalFileCount(userPersonalFiles?.length ?? 0);
         } catch (e) {
             logError(e, 'updateTotalFileCount failed');
-            throw e;
         }
     };
 
@@ -218,15 +164,12 @@ export default function ExportModal(props: Props) {
             return;
         }
         await updateExportStage(ExportStage.INPROGRESS);
-        await sleep(100);
     };
-    const postExportRun = async (exportResult?: { paused?: boolean }) => {
-        if (!exportResult?.paused) {
-            await updateExportStage(ExportStage.FINISHED);
-            await sleep(100);
-            await updateExportTime(Date.now());
-            await syncExportStatsWithRecord();
-        }
+
+    const postExportRun = async () => {
+        await updateExportStage(ExportStage.FINISHED);
+        await updateExportTime(Date.now());
+        await syncExportStatsWithRecord();
     };
 
     const selectExportDirectory = async () => {
@@ -252,15 +195,25 @@ export default function ExportModal(props: Props) {
     const startExport = async () => {
         try {
             await preExportRun();
-            await updateExportProgress({ current: 0, total: 0 });
-            const exportResult = await exportService.exportFiles(
-                updateExportProgress,
-                ExportType.NEW
-            );
-            await postExportRun(exportResult);
+
+            const exportRecord = await exportService.getExportRecord();
+            const exportedFileCount = exportRecord?.exportedFiles?.length ?? 0;
+            updateExportProgress({
+                current: exportedFileCount,
+                total: totalFileCount,
+            });
+
+            const updateExportStatsWithOffset = (current: number) =>
+                updateExportProgress({
+                    current: exportedFileCount + current,
+                    total: totalFileCount,
+                });
+            await exportService.exportFiles(updateExportStatsWithOffset);
+
+            await postExportRun();
         } catch (e) {
             if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, 'startExport failed');
+                logError(e, 'resumeExport failed');
             }
         }
     };
@@ -276,83 +229,11 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const pauseExport = async () => {
-        try {
-            await updateExportStage(ExportStage.PAUSED);
-            exportService.pauseRunningExport();
-            await postExportRun({ paused: true });
-        } catch (e) {
-            if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, 'pauseExport failed');
-            }
-        }
-    };
-
-    const resumeExport = async () => {
-        try {
-            const exportRecord = await exportService.getExportRecord();
-            await preExportRun();
-
-            const pausedStageProgress = exportRecord.progress;
-            setExportProgress(pausedStageProgress);
-
-            addLogLine(
-                `resuming export, pausedStageProgress: ${JSON.stringify(
-                    pausedStageProgress
-                )}`
-            );
-            const updateExportStatsWithOffset = (progress: ExportProgress) =>
-                updateExportProgress({
-                    current: pausedStageProgress.current + progress.current,
-                    total: pausedStageProgress.current + progress.total,
-                });
-            const exportResult = await exportService.exportFiles(
-                updateExportStatsWithOffset,
-                ExportType.PENDING
-            );
-
-            await postExportRun(exportResult);
-        } catch (e) {
-            if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, 'resumeExport failed');
-            }
-        }
-    };
-
-    const retryFailedExport = async () => {
-        try {
-            await preExportRun();
-            await updateExportProgress({
-                current: 0,
-                total: exportStats.failed,
-            });
-
-            const exportResult = await exportService.exportFiles(
-                updateExportProgress,
-                ExportType.RETRY_FAILED
-            );
-            await postExportRun(exportResult);
-        } catch (e) {
-            if (e.message !== CustomError.REQUEST_CANCELLED) {
-                logError(e, 'retryFailedExport failed');
-            }
-        }
-    };
-
     const startExportHandler = () => {
         void startExport();
     };
     const stopExportHandler = () => {
         void stopExport();
-    };
-    const pauseExportHandler = () => {
-        void pauseExport();
-    };
-    const resumeExportHandler = () => {
-        void resumeExport();
-    };
-    const retryFailedExportHandler = () => {
-        void retryFailedExport();
     };
 
     const ExportDynamicContent = () => {
@@ -361,14 +242,12 @@ export default function ExportModal(props: Props) {
                 return <ExportInit startExport={startExportHandler} />;
 
             case ExportStage.INPROGRESS:
-            case ExportStage.PAUSED:
                 return (
                     <ExportInProgress
                         exportStage={exportStage}
                         exportProgress={exportProgress}
-                        resumeExport={resumeExportHandler}
-                        cancelExport={stopExportHandler}
-                        pauseExport={pauseExportHandler}
+                        stopExport={stopExportHandler}
+                        closeExportDialog={props.onHide}
                     />
                 );
             case ExportStage.FINISHED:
@@ -377,8 +256,7 @@ export default function ExportModal(props: Props) {
                         onHide={props.onHide}
                         lastExportTime={lastExportTime}
                         exportStats={exportStats}
-                        exportFiles={startExportHandler}
-                        retryFailed={retryFailedExportHandler}
+                        startExport={startExportHandler}
                     />
                 );
 
@@ -440,7 +318,7 @@ function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
 function TotalFileCount({ totalFileCount }) {
     return (
         <FlexWrapper>
-            <Label width="30%">{t('FILE_COUNT')} </Label>
+            <Label width="30%">{t('TOTAL_FILE_COUNT')} </Label>
             <Value width="70%">{totalFileCount}</Value>
         </FlexWrapper>
     );

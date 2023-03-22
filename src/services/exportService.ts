@@ -1,8 +1,6 @@
 import { runningInBrowser } from 'utils/common';
 import {
-    getExportQueuedFiles,
-    getExportFailedFiles,
-    getFilesUploadedAfterLastExport,
+    getUnExportedFiles,
     dedupe,
     getGoogleLikeMetadataFile,
     getExportRecordFileUID,
@@ -40,14 +38,10 @@ import {
 import { updateFileCreationDateInEXIF } from './upload/exifService';
 import QueueProcessor from './queueProcessor';
 import { Collection } from 'types/collection';
-import {
-    ExportProgress,
-    CollectionIDPathMap,
-    ExportRecord,
-} from 'types/export';
+import { CollectionIDPathMap, ExportRecord } from 'types/export';
 import { User } from 'types/user';
 import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
-import { ExportType, ExportNotification, RecordType } from 'constants/export';
+import { ExportNotification, RecordType } from 'constants/export';
 import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
 import { addLogLine } from 'utils/logging';
@@ -58,10 +52,9 @@ const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 class ExportService {
     electronAPIs: ElectronAPIs;
 
-    private exportInProgress: Promise<{ paused: boolean }> = null;
+    private exportInProgress: Promise<void> = null;
     private exportRecordUpdater = new QueueProcessor<void>(1);
     private stopExport: boolean = false;
-    private pauseExport: boolean = false;
     private allElectronAPIsExist: boolean = false;
     private fileReader: FileReader = null;
 
@@ -81,13 +74,7 @@ class ExportService {
     stopRunningExport() {
         this.stopExport = true;
     }
-    pauseRunningExport() {
-        this.pauseExport = true;
-    }
-    async exportFiles(
-        updateProgress: (progress: ExportProgress) => Promise<void>,
-        exportType: ExportType
-    ) {
+    async exportFiles(updateProgress: (current: number) => Promise<void>) {
         try {
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             if (this.exportInProgress) {
@@ -104,7 +91,6 @@ class ExportService {
             }
             const user: User = getData(LS_KEYS.USER);
 
-            let filesToExport: EnteFile[];
             const localFiles = await getLocalFiles();
             const userPersonalFiles = localFiles
                 .filter((file) => file.ownerID === user?.id)
@@ -138,24 +124,14 @@ class ExportService {
                 } exportedFiles: ${exportRecord?.exportedFiles?.length}
                 failedFiles: ${exportRecord?.failedFiles?.length}`
             );
-            if (exportType === ExportType.NEW) {
-                filesToExport = getFilesUploadedAfterLastExport(
-                    userPersonalFiles,
-                    exportRecord
-                );
-            } else if (exportType === ExportType.RETRY_FAILED) {
-                filesToExport = getExportFailedFiles(
-                    userPersonalFiles,
-                    exportRecord
-                );
-            } else {
-                filesToExport = getExportQueuedFiles(
-                    userPersonalFiles,
-                    exportRecord
-                );
-            }
+
+            const filesToExport = getUnExportedFiles(
+                userPersonalFiles,
+                exportRecord
+            );
+
             addLogLine(
-                `starting export, type: ${exportType}, filesToExportCount: ${filesToExport?.length}, userPersonalFileCount: ${userPersonalFiles?.length}`
+                `starting export, filesToExportCount: ${filesToExport?.length}, userPersonalFileCount: ${userPersonalFiles?.length}`
             );
 
             const collectionIDPathMap: CollectionIDPathMap =
@@ -192,9 +168,9 @@ class ExportService {
         newCollections: Collection[],
         renamedCollections: Collection[],
         collectionIDPathMap: CollectionIDPathMap,
-        updateProgress: (progress: ExportProgress) => Promise<void>,
+        updateProgress: (current: number) => Promise<void>,
         exportDir: string
-    ): Promise<{ paused: boolean }> {
+    ): Promise<void> {
         try {
             if (newCollections?.length) {
                 await this.createNewCollectionFolders(
@@ -217,30 +193,19 @@ class ExportService {
                 this.electronAPIs.sendNotification(
                     ExportNotification.UP_TO_DATE
                 );
-                return { paused: false };
+                return;
             }
             this.stopExport = false;
-            this.pauseExport = false;
             await this.addFilesQueuedRecord(exportDir, files);
             const failedFileCount = 0;
 
             this.electronAPIs.showOnTray({
                 export_progress: `0 / ${files.length} files exported`,
             });
-            await updateProgress({
-                current: 0,
-                total: files.length,
-            });
             this.electronAPIs.sendNotification(ExportNotification.START);
 
             for (const [index, file] of files.entries()) {
-                if (this.stopExport || this.pauseExport) {
-                    if (this.pauseExport) {
-                        this.electronAPIs.showOnTray({
-                            export_progress: `${index} / ${files.length} files exported (paused)`,
-                            paused: true,
-                        });
-                    }
+                if (this.stopExport) {
                     break;
                 }
                 const collectionPath = collectionIDPathMap.get(
@@ -272,17 +237,11 @@ class ExportService {
                         files.length
                     } files exported`,
                 });
-                await updateProgress({
-                    current: index + 1,
-                    total: files.length,
-                });
+                await updateProgress(index + 1);
             }
             if (this.stopExport) {
                 this.electronAPIs.sendNotification(ExportNotification.ABORT);
                 this.electronAPIs.showOnTray();
-            } else if (this.pauseExport) {
-                this.electronAPIs.sendNotification(ExportNotification.PAUSE);
-                return { paused: true };
             } else if (failedFileCount > 0) {
                 this.electronAPIs.sendNotification(ExportNotification.FAILED);
                 this.electronAPIs.showOnTray({
@@ -292,7 +251,6 @@ class ExportService {
                 this.electronAPIs.sendNotification(ExportNotification.FINISH);
                 this.electronAPIs.showOnTray();
             }
-            return { paused: false };
         } catch (e) {
             logError(e, 'fileExporter failed');
             throw e;

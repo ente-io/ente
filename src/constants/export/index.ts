@@ -15,14 +15,7 @@ export enum RecordType {
     FAILED = 'failed',
 }
 export enum ExportStage {
-    INIT,
-    INPROGRESS,
-    PAUSED,
-    FINISHED,
-}
-
-export enum ExportType {
-    NEW,
-    PENDING,
-    RETRY_FAILED,
+    INIT = 0,
+    INPROGRESS = 1,
+    FINISHED = 3,
 }
