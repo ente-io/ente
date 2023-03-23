@@ -1,5 +1,6 @@
 import { ExportStage } from 'constants/export';
 
+export type CollectionIDNameMap = Map<number, string>;
 export type CollectionIDPathMap = Map<number, string>;
 export interface ExportProgress {
     current: number;
