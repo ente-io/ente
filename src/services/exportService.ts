@@ -250,7 +250,7 @@ class ExportService {
                     let collectionPath = collectionIDPathMap.get(
                         file.collectionID
                     );
-                    if (!collectionPath) {
+                    if (!collectionPath || !this.exists(collectionPath)) {
                         collectionPath = await this.createNewCollectionFolder(
                             exportDir,
                             file.collectionID,
