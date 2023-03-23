@@ -54,6 +54,8 @@ import { eventBus, Events } from './events';
 
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
+export const ENTE_EXPORT_DIRECTORY = 'ente Photos';
+
 class ExportService {
     private electronAPIs: ElectronAPIs;
     private exportInProgress: Promise<void> = null;
@@ -67,12 +69,20 @@ class ExportService {
         this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.electronAPIs?.exists;
     }
-    async selectExportDirectory() {
+
+    async changeExportDirectory(callback: (newExportDir: string) => void) {
         try {
-            return await this.electronAPIs.selectRootDirectory();
+            const newRootDir = await this.electronAPIs.selectRootDirectory();
+            if (!newRootDir) {
+                return;
+            }
+            const newExportDir = `${newRootDir}/${ENTE_EXPORT_DIRECTORY}`;
+            await this.electronAPIs.checkExistsAndCreateCollectionDir(
+                newExportDir
+            );
+            callback(newExportDir);
         } catch (e) {
-            logError(e, 'failed to selectExportDirectory ');
-            throw e;
+            logError(e, 'changeExportDirectory failed');
         }
     }
 

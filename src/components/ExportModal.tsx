@@ -186,15 +186,8 @@ export default function ExportModal(props: Props) {
     // UI functions
     // =============
 
-    const changeExportDirectory = async () => {
-        try {
-            const newFolder = await exportService.selectExportDirectory();
-            if (newFolder) {
-                updateExportFolder(newFolder);
-            }
-        } catch (e) {
-            logError(e, 'selectExportDirectory failed');
-        }
+    const changeExportDirectory = () => {
+        void exportService.changeExportDirectory(updateExportFolder);
     };
 
     const toggleContinuousExport = () => {
@@ -225,7 +218,7 @@ export default function ExportModal(props: Props) {
 
             await postExportRun();
         } catch (e) {
-            logError(e, 'resumeExport failed');
+            logError(e, 'startExport failed');
         }
     };
 
