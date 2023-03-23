@@ -42,6 +42,7 @@ import {
     openLogDirectory,
     getSentryUserID,
     getAppVersion,
+    openDirectory,
 } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
@@ -103,4 +104,5 @@ windowObject['ElectronAPIs'] = {
     generateImageThumbnail,
     logRendererProcessMemoryUsage,
     registerForegroundEventListener,
+    openDirectory,
 };

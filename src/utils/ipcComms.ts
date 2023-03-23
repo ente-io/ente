@@ -113,6 +113,10 @@ export default function setupIpcComs(
         shell.openPath(app.getPath('logs'));
     });
 
+    ipcMain.handle('open-dir', (_, dirPath) => {
+        shell.openPath(dirPath);
+    });
+
     ipcMain.on('update-and-restart', () => {
         updateAndRestart();
     });
