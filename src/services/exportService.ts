@@ -86,6 +86,14 @@ class ExportService {
         }
     }
 
+    async openExportDirectory(exportFolder: string) {
+        try {
+            await this.electronAPIs.openDirectory(exportFolder);
+        } catch (e) {
+            logError(e, 'openExportDirectory failed');
+        }
+    }
+
     enableContinuousExport(startExport: () => void) {
         try {
             if (this.continuousExportEventListener) {

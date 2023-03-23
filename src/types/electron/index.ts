@@ -89,4 +89,5 @@ export interface ElectronAPIs {
     ) => Promise<Uint8Array>;
     logRendererProcessMemoryUsage: (message: string) => Promise<void>;
     registerForegroundEventListener: (onForeground: () => void) => void;
+    openDirectory: (dirPath: string) => Promise<void>;
 }
