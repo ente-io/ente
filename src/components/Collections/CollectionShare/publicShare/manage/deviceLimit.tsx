@@ -48,8 +48,7 @@ export function ManageDeviceLimit({
             <EnteMenuItem
                 onClick={openShareExpiryOptionsModalView}
                 endIcon={<ChevronRight />}
-                subText={String(shareDeviceLimitValue)}
-                isTopOfList={true}>
+                subText={String(shareDeviceLimitValue)}>
                 {t('LINK_DEVICE_LIMIT')}
             </EnteMenuItem>
             <EnteDrawer

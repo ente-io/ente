@@ -122,15 +122,13 @@ export default function BeforeShare({
                 <EnteMenuItem
                     startIcon={<LinkIcon />}
                     color="primary"
-                    onClick={handleCollectionPublicSharing}
-                    isTopOfList={true}>
+                    onClick={handleCollectionPublicSharing}>
                     {t('CREATE_PUBLIC_SHARING')}
                 </EnteMenuItem>
                 <EnteMenuItem
                     startIcon={<LinkIcon />}
                     color="primary"
-                    onClick={handleCollecPhotosPublicSharing}
-                    isBottomOfList={true}>
+                    onClick={handleCollecPhotosPublicSharing}>
                     {t('COLLECT_PHOTOS')}
                 </EnteMenuItem>
             </EnteMenuItemGroup>

@@ -60,9 +60,7 @@ export function ManageLinkExpiry({
             <EnteMenuItem
                 onClick={openShareExpiryOptionsModalView}
                 endIcon={<ChevronRight />}
-                subText={labelText}
-                isTopOfList={true}
-                isBottomOfList={true}>
+                subText={labelText}>
                 {t('LINK_EXPIRY')}
             </EnteMenuItem>
             <EnteDrawer

@@ -28,9 +28,7 @@ export function ManagePublicCollect({
                 onClick={handleFileDownloadSetting}
                 color="primary"
                 hasSwitch={true}
-                checked={publicShareProp?.enableCollect}
-                isTopOfList={true}
-                isBottomOfList={true}>
+                checked={publicShareProp?.enableCollect}>
                 {t('PUBLIC_COLLECT')}
             </EnteMenuItem>
             <Typography

@@ -90,15 +90,13 @@ export default function PublicShare({
                         <EnteMenuItemGroup>
                             <EnteMenuItem
                                 startIcon={<ContentCopyIcon />}
-                                onClick={copyToClipboardHelper(publicShareUrl)}
-                                isTopOfList={true}>
+                                onClick={copyToClipboardHelper(publicShareUrl)}>
                                 {t('COPY_LINK')}
                             </EnteMenuItem>
                             <EnteMenuItem
                                 startIcon={<LinkIcon />}
                                 endIcon={<ChevronRightIcon />}
-                                onClick={openManageShare}
-                                isBottomOfList={true}>
+                                onClick={openManageShare}>
                                 {t('MANAGE_LINK')}
                             </EnteMenuItem>
                         </EnteMenuItemGroup>

@@ -114,17 +114,13 @@ export default function PublicShareManage({
                         </EnteMenuItemGroup>
                         <EnteMenuItem
                             startIcon={<ContentCopyIcon />}
-                            onClick={copyToClipboardHelper(publicShareUrl)}
-                            isTopOfList={true}
-                            isBottomOfList={true}>
+                            onClick={copyToClipboardHelper(publicShareUrl)}>
                             {t('COPY_LINK')}
                         </EnteMenuItem>
                         <EnteMenuItem
                             color="danger"
                             startIcon={<RemoveCircleOutline />}
-                            onClick={disablePublicSharing}
-                            isTopOfList={true}
-                            isBottomOfList={true}>
+                            onClick={disablePublicSharing}>
                             {t('REMOVE_LINK')}
                         </EnteMenuItem>
                     </Stack>

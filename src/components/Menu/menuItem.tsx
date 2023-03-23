@@ -19,8 +19,6 @@ interface Iprops {
     children?: any;
     hasSwitch?: boolean;
     checked?: boolean;
-    isTopOfList?: boolean;
-    isBottomOfList?: boolean;
 }
 export function EnteMenuItem({
     onClick,
