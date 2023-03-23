@@ -227,7 +227,6 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                   child: CollectionsListWidget(
                     searchResults,
                     widget.actionType,
-                    widget.showOptionToCreateNewAlbum,
                     widget.selectedFiles,
                     widget.sharedFiles,
                     _searchQuery,

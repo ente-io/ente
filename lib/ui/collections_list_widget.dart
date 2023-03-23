@@ -30,7 +30,6 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 class CollectionsListWidget extends StatelessWidget {
   final List<CollectionWithThumbnail> collectionsWithThumbnail;
   final CollectionActionType actionType;
-  final bool showOptionToCreateNewAlbum;
   final SelectedFiles? selectedFiles;
   final List<SharedMediaFile>? sharedFiles;
   final String searchQuery;
@@ -39,7 +38,6 @@ class CollectionsListWidget extends StatelessWidget {
   CollectionsListWidget(
     this.collectionsWithThumbnail,
     this.actionType,
-    this.showOptionToCreateNewAlbum,
     this.selectedFiles,
     this.sharedFiles,
     this.searchQuery,
