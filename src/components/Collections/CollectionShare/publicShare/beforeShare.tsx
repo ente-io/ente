@@ -20,6 +20,7 @@ interface Iprops {
     setIsFirstShareProp: (value: boolean) => void;
 }
 import LinkIcon from '@mui/icons-material/Link';
+import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
 
 export default function BeforeShare({
     collection,
@@ -117,20 +118,22 @@ export default function BeforeShare({
                 <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
                 {t('LINK_SHARE_TITLE')}
             </Typography>
-            <EnteMenuItem
-                startIcon={<LinkIcon />}
-                color="primary"
-                onClick={handleCollectionPublicSharing}
-                isTopOfList={true}>
-                {t('CREATE_PUBLIC_SHARING')}
-            </EnteMenuItem>
-            <EnteMenuItem
-                startIcon={<LinkIcon />}
-                color="primary"
-                onClick={handleCollecPhotosPublicSharing}
-                isBottomOfList={true}>
-                {t('COLLECT_PHOTOS')}
-            </EnteMenuItem>
+            <EnteMenuItemGroup>
+                <EnteMenuItem
+                    startIcon={<LinkIcon />}
+                    color="primary"
+                    onClick={handleCollectionPublicSharing}
+                    isTopOfList={true}>
+                    {t('CREATE_PUBLIC_SHARING')}
+                </EnteMenuItem>
+                <EnteMenuItem
+                    startIcon={<LinkIcon />}
+                    color="primary"
+                    onClick={handleCollecPhotosPublicSharing}
+                    isBottomOfList={true}>
+                    {t('COLLECT_PHOTOS')}
+                </EnteMenuItem>
+            </EnteMenuItemGroup>
             {sharableLinkError && (
                 <Typography
                     textAlign={'center'}

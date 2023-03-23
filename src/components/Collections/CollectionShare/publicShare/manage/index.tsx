@@ -21,6 +21,7 @@ import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { EnteMenuItem } from 'components/Menu/menuItem';
 import { t } from 'i18next';
+import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
 interface Iprops {
     publicShareProp: PublicURL;
     collection: Collection;
@@ -88,7 +89,7 @@ export default function PublicShareManage({
                                 updatePublicShareURLHelper
                             }
                         />
-                        <Stack>
+                        <EnteMenuItemGroup>
                             <ManageDeviceLimit
                                 collection={collection}
                                 publicShareProp={publicShareProp}
@@ -110,7 +111,7 @@ export default function PublicShareManage({
                                     updatePublicShareURLHelper
                                 }
                             />
-                        </Stack>
+                        </EnteMenuItemGroup>
                         <EnteMenuItem
                             startIcon={<ContentCopyIcon />}
                             onClick={copyToClipboardHelper(publicShareUrl)}

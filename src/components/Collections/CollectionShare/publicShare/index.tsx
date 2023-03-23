@@ -21,6 +21,7 @@ import VerticallyCentered from 'components/Container';
 import DialogBoxBase from 'components/DialogBox/base';
 import { Check } from '@mui/icons-material';
 import { t } from 'i18next';
+import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
 
 export default function PublicShare({
     collection,
@@ -86,19 +87,21 @@ export default function PublicShare({
                             />
                             {t('PUBLIC_LINK_ENABLED')}
                         </Typography>
-                        <EnteMenuItem
-                            startIcon={<ContentCopyIcon />}
-                            onClick={copyToClipboardHelper(publicShareUrl)}
-                            isTopOfList={true}>
-                            {t('COPY_LINK')}
-                        </EnteMenuItem>
-                        <EnteMenuItem
-                            startIcon={<LinkIcon />}
-                            endIcon={<ChevronRightIcon />}
-                            onClick={openManageShare}
-                            isBottomOfList={true}>
-                            {t('MANAGE_LINK')}
-                        </EnteMenuItem>
+                        <EnteMenuItemGroup>
+                            <EnteMenuItem
+                                startIcon={<ContentCopyIcon />}
+                                onClick={copyToClipboardHelper(publicShareUrl)}
+                                isTopOfList={true}>
+                                {t('COPY_LINK')}
+                            </EnteMenuItem>
+                            <EnteMenuItem
+                                startIcon={<LinkIcon />}
+                                endIcon={<ChevronRightIcon />}
+                                onClick={openManageShare}
+                                isBottomOfList={true}>
+                                {t('MANAGE_LINK')}
+                            </EnteMenuItem>
+                        </EnteMenuItemGroup>
                     </Stack>
                     <PublicShareManage
                         open={manageShareModalView}
