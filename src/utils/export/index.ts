@@ -13,20 +13,6 @@ import { formatDateTimeShort } from 'utils/time/format';
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
 
-export const getExportQueuedFiles = (
-    allFiles: EnteFile[],
-    exportRecord: ExportRecord
-) => {
-    const queuedFiles = new Set(exportRecord?.queuedFiles);
-    const unExportedFiles = allFiles.filter((file) => {
-        if (queuedFiles.has(getExportRecordFileUID(file))) {
-            return true;
-        }
-        return false;
-    });
-    return unExportedFiles;
-};
-
 export const getCollectionsCreatedAfterLastExport = (
     collections: Collection[],
     exportRecord: ExportRecord
@@ -79,7 +65,7 @@ export const getCollectionsRenamedAfterLastExport = (
     return renamedCollections;
 };
 
-export const getFilesUploadedAfterLastExport = (
+export const getUnExportedFiles = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
