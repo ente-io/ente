@@ -576,5 +576,6 @@
         "IN_PROGRESS": "Export already in progress",
         "FINISH": "Export finished",
         "UP_TO_DATE": "No new files to export"
-    }
+    },
+    "CONTINUOUS_EXPORT": "Continuous export"
 }

@@ -32,3 +32,8 @@ export interface ExportRecord {
     failedFiles: string[];
     exportedCollectionPaths: ExportedCollectionPaths;
 }
+
+export interface ExportSettings {
+    folder: string;
+    continuousExport: boolean;
+}

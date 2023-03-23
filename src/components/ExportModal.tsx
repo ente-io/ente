@@ -1,7 +1,7 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState, useContext } from 'react';
 import exportService from 'services/exportService';
-import { ExportProgress, ExportStats } from 'types/export';
+import { ExportProgress, ExportSettings, ExportStats } from 'types/export';
 import {
     Box,
     Button,
@@ -9,6 +9,7 @@ import {
     DialogContent,
     Divider,
     styled,
+    Switch,
     Tooltip,
     Typography,
 } from '@mui/material';
@@ -49,6 +50,7 @@ export default function ExportModal(props: Props) {
     const appContext = useContext(AppContext);
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState('');
+    const [continuousExport, setContinuousExport] = useState(false);
     const [totalFileCount, setTotalFileCount] = useState(0);
     const [exportProgress, setExportProgress] = useState<ExportProgress>({
         current: 0,
@@ -68,7 +70,9 @@ export default function ExportModal(props: Props) {
             return;
         }
         try {
-            setExportFolder(getData(LS_KEYS.EXPORT)?.folder);
+            const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
+            setExportFolder(exportSettings?.folder);
+            setContinuousExport(exportSettings?.continuousExport);
             const localFileUpdateHandler = async () => {
                 setTotalFileCount(await getTotalFileCount());
             };
@@ -78,6 +82,18 @@ export default function ExportModal(props: Props) {
             logError(e, 'error in exportModal');
         }
     }, []);
+
+    useEffect(() => {
+        try {
+            if (continuousExport) {
+                exportService.enableContinuousExport(startExport);
+            } else {
+                exportService.disableContinuousExport();
+            }
+        } catch (e) {
+            logError(e, 'error handling continuousExport change');
+        }
+    }, [continuousExport]);
 
     useEffect(() => {
         if (!exportFolder) {
@@ -106,8 +122,23 @@ export default function ExportModal(props: Props) {
     // STATE UPDATERS
     // ==============
     const updateExportFolder = (newFolder: string) => {
+        const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
+        const updatedExportSettings: ExportSettings = {
+            ...exportSettings,
+            folder: newFolder,
+        };
+        setData(LS_KEYS.EXPORT, updatedExportSettings);
         setExportFolder(newFolder);
-        setData(LS_KEYS.EXPORT, { folder: newFolder });
+    };
+
+    const updateContinuousExport = (updatedContinuousExport: boolean) => {
+        const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
+        const updatedExportSettings: ExportSettings = {
+            ...exportSettings,
+            continuousExport: updatedContinuousExport,
+        };
+        setData(LS_KEYS.EXPORT, updatedExportSettings);
+        setContinuousExport(updatedContinuousExport);
     };
 
     const updateExportStage = async (newStage: ExportStage) => {
@@ -163,6 +194,14 @@ export default function ExportModal(props: Props) {
             }
         } catch (e) {
             logError(e, 'selectExportDirectory failed');
+        }
+    };
+
+    const toggleContinuousExport = () => {
+        try {
+            updateContinuousExport(!continuousExport);
+        } catch (e) {
+            logError(e, 'toggleContinuousExport failed');
         }
     };
 
@@ -240,6 +279,10 @@ export default function ExportModal(props: Props) {
                     exportStage={exportStage}
                 />
                 <TotalFileCount totalFileCount={totalFileCount} />
+                <ContinuousExport
+                    continuousExport={continuousExport}
+                    toggleContinuousExport={toggleContinuousExport}
+                />
             </DialogContent>
             <Divider />
             <ExportDynamicContent />
@@ -305,5 +348,22 @@ function ExportDirectoryOption({ changeExportDirectory }) {
                 {t('CHANGE_FOLDER')}
             </OverflowMenuOption>
         </OverflowMenu>
+    );
+}
+
+function ContinuousExport({ continuousExport, toggleContinuousExport }) {
+    return (
+        <SpaceBetweenFlex minHeight={'40px'}>
+            <Typography color="text.secondary">
+                {t('CONTINUOUS_EXPORT')}
+            </Typography>
+            <Box>
+                <Switch
+                    color="accent"
+                    checked={continuousExport}
+                    onChange={toggleContinuousExport}
+                />
+            </Box>
+        </SpaceBetweenFlex>
     );
 }
