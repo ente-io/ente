@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import constants from 'utils/strings/constants';
 import DoneIcon from '@mui/icons-material/Done';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import {
@@ -8,6 +7,7 @@ import {
     SvgIconProps,
     Tooltip,
 } from '@mui/material';
+import { t } from 'i18next';
 
 export default function CopyButton({
     code,
@@ -29,7 +29,7 @@ export default function CopyButton({
         <Tooltip
             arrow
             open={copied}
-            title={constants.COPIED}
+            title={t('COPIED')}
             PopperProps={{ sx: { zIndex: 2000 } }}>
             <IconButton onClick={copyToClipboardHelper(code)} color={color}>
                 {copied ? (

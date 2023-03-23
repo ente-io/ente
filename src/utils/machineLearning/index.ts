@@ -20,7 +20,6 @@ import {
     MlFileData,
     Person,
     Versioned,
-    DetectedText,
 } from 'types/machineLearning';
 // import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 import { getRenderableImage } from 'utils/file';
@@ -215,9 +214,6 @@ export function getAllObjectsFromMap(
     return [...allObjectsMap.values()].flat();
 }
 
-export function getAllTextFromMap(allTextMap: Map<number, DetectedText[]>) {
-    return [...allTextMap.values()].flat();
-}
 export async function getLocalFile(fileId: number) {
     const localFiles = await getLocalFiles();
     return localFiles.find((f) => f.id === fileId);

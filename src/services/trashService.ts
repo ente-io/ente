@@ -9,6 +9,7 @@ import { getCollection } from './collectionService';
 
 import HTTPService from './HTTPService';
 import { EncryptedTrashItem, Trash } from 'types/trash';
+import { EnteFile } from 'types/file';
 
 const TRASH = 'file-trash';
 const TRASH_TIME = 'trash-time';
@@ -49,6 +50,7 @@ async function getLastSyncTime() {
 }
 export async function syncTrash(
     collections: Collection[],
+    files: EnteFile[],
     setFiles: SetFiles
 ): Promise<void> {
     const trash = await getLocalTrash();
@@ -64,6 +66,7 @@ export async function syncTrash(
     const updatedTrash = await updateTrash(
         collectionMap,
         lastSyncTime,
+        files,
         setFiles,
         trash
     );
@@ -73,6 +76,7 @@ export async function syncTrash(
 export const updateTrash = async (
     collections: Map<number, Collection>,
     sinceTime: number,
+    files: EnteFile[],
     setFiles: SetFiles,
     currentTrash: Trash
 ): Promise<Trash> => {
@@ -123,7 +127,7 @@ export const updateTrash = async (
                 time = resp.data.diff.slice(-1)[0].updatedAt;
             }
 
-            setFiles((files) =>
+            setFiles(
                 sortFiles([...(files ?? []), ...getTrashedFiles(updatedTrash)])
             );
             await localForage.setItem(TRASH, updatedTrash);

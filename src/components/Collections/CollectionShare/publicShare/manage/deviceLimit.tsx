@@ -3,10 +3,10 @@ import { DialogContent } from '@mui/material';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { EnteMenuItem } from 'components/Menu/menuItem';
+import { t } from 'i18next';
 import React, { useEffect, useState } from 'react';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { getDeviceLimitOptions } from 'utils/collection';
-import constants from 'utils/strings/constants';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -50,7 +50,7 @@ export function ManageDeviceLimit({
                 endIcon={<ChevronRight />}
                 subText={String(shareDeviceLimitValue)}
                 isTopOfList={true}>
-                {constants.LINK_DEVICE_LIMIT}
+                {t('LINK_DEVICE_LIMIT')}
             </EnteMenuItem>
             <EnteDrawer
                 anchor="right"
@@ -58,7 +58,7 @@ export function ManageDeviceLimit({
                 onClose={closeShareExpiryOptionsModalView}>
                 <DialogTitleWithCloseButton
                     onClose={closeShareExpiryOptionsModalView}>
-                    {constants.LINK_EXPIRY}
+                    {t('LINK_EXPIRY')}
                 </DialogTitleWithCloseButton>
                 <DialogContent>
                     {/* <OptionWithDivider data={shareExpiryOptions} /> */}

@@ -7,10 +7,10 @@ import {
     DialogContent,
     styled,
 } from '@mui/material';
-import constants from 'utils/strings/constants';
 import { ExportStage } from 'constants/export';
 import VerticallyCentered, { FlexWrapper } from './Container';
 import { ProgressBar } from 'react-bootstrap';
+import { t } from 'i18next';
 
 export const ComfySpan = styled('span')`
     word-spacing: 1rem;
@@ -64,21 +64,21 @@ export default function ExportInProgress(props: Props) {
                         size="large"
                         onClick={props.resumeExport}
                         color="accent">
-                        {constants.RESUME}
+                        {t('RESUME')}
                     </Button>
                 ) : (
                     <Button
                         size="large"
                         onClick={props.pauseExport}
                         color="primary">
-                        {constants.PAUSE}
+                        {t('PAUSE')}
                     </Button>
                 )}
                 <Button
                     size="large"
                     onClick={props.cancelExport}
                     color="secondary">
-                    {constants.CANCEL}
+                    {t('CANCEL')}
                 </Button>
             </DialogActions>
         </>

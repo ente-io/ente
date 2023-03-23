@@ -7,7 +7,6 @@ import {
     removeFromFavorites,
 } from 'services/collectionService';
 import { EnteFile } from 'types/file';
-import constants from 'utils/strings/constants';
 import exifr from 'exifr';
 import {
     downloadFile,
@@ -40,6 +39,7 @@ import { styled } from '@mui/material';
 import { addLocalLog } from 'utils/logging';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
+import { t } from 'i18next';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -539,7 +539,7 @@ function PhotoViewer(props: Iprops) {
                             onMouseEnter={livePhotoBtnOptions.show}
                             onMouseLeave={livePhotoBtnOptions.hide}
                             disabled={livePhotoBtnOptions.loading}>
-                            {livePhotoBtnHTML} {constants.LIVE}
+                            {livePhotoBtnHTML} {t('LIVE')}
                         </LivePhotoBtn>
                     )}
                     <div className="pswp__container">
@@ -553,13 +553,13 @@ function PhotoViewer(props: Iprops) {
 
                             <button
                                 className="pswp__button pswp__button--close"
-                                title={constants.CLOSE_OPTION}
+                                title={t('CLOSE_OPTION')}
                             />
 
                             {props.enableDownload && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={constants.DOWNLOAD_OPTION}
+                                    title={t('DOWNLOAD_OPTION')}
                                     onClick={() =>
                                         downloadFileHelper(photoSwipe.currItem)
                                     }>
@@ -569,7 +569,7 @@ function PhotoViewer(props: Iprops) {
                             {props.enableDownload && shouldShowCopyOption && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={constants.COPY_OPTION}
+                                    title={t('COPY_OPTION')}
                                     onClick={() =>
                                         copyToClipboardHelper(
                                             photoSwipe.currItem as EnteFile
@@ -582,7 +582,7 @@ function PhotoViewer(props: Iprops) {
                                 !props.isTrashCollection && (
                                     <button
                                         className="pswp__button pswp__button--custom"
-                                        title={constants.DELETE_OPTION}
+                                        title={t('DELETE_OPTION')}
                                         onClick={() => {
                                             confirmTrashFile(
                                                 photoSwipe?.currItem as EnteFile
@@ -593,17 +593,17 @@ function PhotoViewer(props: Iprops) {
                                 )}
                             <button
                                 className="pswp__button pswp__button--zoom"
-                                title={constants.ZOOM_IN_OUT}
+                                title={t('ZOOM_IN_OUT')}
                             />
                             <button
                                 className="pswp__button pswp__button--fs"
-                                title={constants.TOGGLE_FULLSCREEN}
+                                title={t('TOGGLE_FULLSCREEN')}
                             />
 
                             {!props.isIncomingSharedCollection && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={constants.INFO_OPTION}
+                                    title={t('INFO_OPTION')}
                                     onClick={handleOpenInfo}>
                                     <InfoIcon fontSize="small" />
                                 </button>
@@ -613,8 +613,8 @@ function PhotoViewer(props: Iprops) {
                                     <button
                                         title={
                                             isFav
-                                                ? constants.UNFAVORITE_OPTION
-                                                : constants.FAVORITE_OPTION
+                                                ? t('UNFAVORITE_OPTION')
+                                                : t('FAVORITE_OPTION')
                                         }
                                         className="pswp__button pswp__button--custom"
                                         onClick={() => {
@@ -643,12 +643,12 @@ function PhotoViewer(props: Iprops) {
                         </div>
                         <button
                             className="pswp__button pswp__button--arrow--left"
-                            title={constants.PREVIOUS}>
+                            title={t('PREVIOUS')}>
                             <ChevronLeft sx={{ pointerEvents: 'none' }} />
                         </button>
                         <button
                             className="pswp__button pswp__button--arrow--right"
-                            title={constants.NEXT}>
+                            title={t('NEXT')}>
                             <ChevronRight sx={{ pointerEvents: 'none' }} />
                         </button>
                         <div className="pswp__caption pswp-custom-caption-container">

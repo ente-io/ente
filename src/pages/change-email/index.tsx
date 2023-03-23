@@ -1,6 +1,7 @@
 import VerticallyCentered from 'components/Container';
 import React, { useEffect } from 'react';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import router from 'next/router';
 import ChangeEmailForm from 'components/ChangeEmail';
 import { PAGES } from 'constants/pages';
@@ -19,7 +20,7 @@ function ChangeEmailPage() {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle>{constants.CHANGE_EMAIL}</FormPaperTitle>
+                <FormPaperTitle>{t('CHANGE_EMAIL')}</FormPaperTitle>
                 <ChangeEmailForm />
             </FormPaper>
         </VerticallyCentered>

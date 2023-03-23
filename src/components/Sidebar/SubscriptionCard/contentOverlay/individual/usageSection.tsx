@@ -2,7 +2,8 @@ import { Box, Typography } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
 import { makeHumanReadableStorage } from 'utils/billing';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import { Progressbar } from '../../styledComponents';
 
 interface Iprops {
@@ -20,9 +21,9 @@ export function IndividualUsageSection({ usage, storage, fileCount }: Iprops) {
                 }}>
                 <Typography variant="caption">{`${makeHumanReadableStorage(
                     storage - usage
-                )} ${constants.FREE}`}</Typography>
+                )} ${t('FREE')}`}</Typography>
                 <Typography variant="caption" fontWeight={'bold'}>
-                    {constants.PHOTO_COUNT(fileCount ?? 0)}
+                    {t('photos_count', { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>
         </Box>

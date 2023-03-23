@@ -1,17 +1,18 @@
 import { Formik, FormikHelpers } from 'formik';
 import React, { useRef, useState } from 'react';
 import * as Yup from 'yup';
-import constants from 'utils/strings/constants';
 import SubmitButton from 'components/SubmitButton';
 import router from 'next/router';
 import { changeEmail, sendOTTForEmailChange } from 'services/userService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
-import { Alert, TextField } from '@mui/material';
+import { Alert, Box, TextField } from '@mui/material';
 import Container from './Container';
 import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import { sleep } from 'utils/common';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 
 interface formValues {
     email: string;
@@ -40,7 +41,7 @@ function ChangeEmailForm() {
                 ottInputRef.current?.focus();
             }, 250);
         } catch (e) {
-            setFieldError('email', `${constants.EMAIl_ALREADY_OWNED}`);
+            setFieldError('email', t('EMAIl_ALREADY_OWNED}'));
         }
         setLoading(false);
     };
@@ -59,7 +60,7 @@ function ChangeEmailForm() {
             router.push(PAGES.GALLERY);
         } catch (e) {
             setLoading(false);
-            setFieldError('ott', `${constants.INCORRECT_CODE}`);
+            setFieldError('ott', t('INCORRECT_CODE'));
         }
     };
 
@@ -70,11 +71,9 @@ function ChangeEmailForm() {
             initialValues={{ email: '' }}
             validationSchema={Yup.object().shape({
                 email: Yup.string()
-                    .email(constants.EMAIL_ERROR)
-                    .required(constants.REQUIRED),
-                ott:
-                    ottInputVisible &&
-                    Yup.string().required(constants.REQUIRED),
+                    .email(t('EMAIL_ERROR'))
+                    .required(t('REQUIRED')),
+                ott: ottInputVisible && Yup.string().required(t('REQUIRED')),
             })}
             validateOnChange={false}
             validateOnBlur={false}
@@ -85,7 +84,18 @@ function ChangeEmailForm() {
                         <Alert
                             color="accent"
                             onClose={() => setShowMessage(false)}>
-                            {constants.EMAIL_SENT({ email })}
+                            <Trans
+                                i18nKey="EMAIL_SENT"
+                                components={{
+                                    a: (
+                                        <Box
+                                            color="text.secondary"
+                                            component={'span'}
+                                        />
+                                    ),
+                                }}
+                                values={{ email }}
+                            />
                         </Alert>
                     )}
                     <form noValidate onSubmit={handleSubmit}>
@@ -96,7 +106,7 @@ function ChangeEmailForm() {
                                     readOnly: ottInputVisible,
                                 }}
                                 type="email"
-                                label={constants.ENTER_EMAIL}
+                                label={t('ENTER_EMAIL')}
                                 value={values.email}
                                 onChange={handleChange('email')}
                                 error={Boolean(errors.email)}
@@ -108,7 +118,7 @@ function ChangeEmailForm() {
                                 <TextField
                                     fullWidth
                                     type="text"
-                                    label={constants.ENTER_OTT}
+                                    label={t('ENTER_OTT')}
                                     value={values.ott}
                                     onChange={handleChange('ott')}
                                     error={Boolean(errors.ott)}
@@ -122,8 +132,8 @@ function ChangeEmailForm() {
                                 loading={loading}
                                 buttonText={
                                     !ottInputVisible
-                                        ? constants.SEND_OTT
-                                        : constants.VERIFY
+                                        ? t('SEND_OTT')
+                                        : t('VERIFY')
                                 }
                             />
                         </Container>
@@ -138,11 +148,11 @@ function ChangeEmailForm() {
                                 onClick={() =>
                                     setShowOttInputVisibility(false)
                                 }>
-                                {constants.CHANGE_EMAIL}?
+                                {t('CHANGE_EMAIL')}?
                             </LinkButton>
                         )}
                         <LinkButton onClick={goToGallery}>
-                            {constants.GO_BACK}
+                            {t('GO_BACK')}
                         </LinkButton>
                     </FormPaperFooter>
                 </>

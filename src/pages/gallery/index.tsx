@@ -22,7 +22,8 @@ import {
     createCollection,
     getCollectionSummaries,
 } from 'services/collectionService';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import { checkSubscriptionPurchase } from 'utils/billing';
 
 import FullScreenDropZone from 'components/FullScreenDropZone';
@@ -105,6 +106,8 @@ import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
 import { checkConnectivity } from 'utils/error/ui';
+import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
+import ElectronService from 'services/electron/common';
 import uploadManager from 'services/upload/uploadManager';
 
 export const DeadCenter = styled('div')`
@@ -140,7 +143,7 @@ export default function Gallery() {
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
-    const [hasPersonalFiles, setHasPersonalFiles] = useState(false);
+    const [hasNoPersonalFiles, setHasNoPersonalFiles] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
         ownCount: 0,
         count: 0,
@@ -218,12 +221,12 @@ export default function Gallery() {
 
     const showSessionExpiredMessage = () =>
         setDialogMessage({
-            title: constants.SESSION_EXPIRED,
-            content: constants.SESSION_EXPIRED_MESSAGE,
+            title: t('SESSION_EXPIRED'),
+            content: t('SESSION_EXPIRED_MESSAGE'),
 
             nonClosable: true,
             proceed: {
-                text: constants.LOGIN,
+                text: t('LOGIN'),
                 action: logoutUser,
                 variant: 'accent',
             },
@@ -262,6 +265,12 @@ export default function Gallery() {
             setIsFirstLoad(false);
             setJustSignedUp(false);
             setIsFirstFetch(false);
+            setInterval(() => {
+                syncWithRemote(false, true);
+            }, SYNC_INTERVAL_IN_MICROSECONDS);
+            ElectronService.registerForegroundEventListener(() =>
+                syncWithRemote(false, true)
+            );
         };
         main();
     }, []);
@@ -292,9 +301,9 @@ export default function Gallery() {
         if (activeCollection !== ALL_SECTION) {
             collectionURL += '?collection=';
             if (activeCollection === ARCHIVE_SECTION) {
-                collectionURL += constants.ARCHIVE;
+                collectionURL += t('ARCHIVE');
             } else if (activeCollection === TRASH_SECTION) {
-                collectionURL += constants.TRASH;
+                collectionURL += t('TRASH');
             } else if (activeCollection === DUMMY_UNCATEGORIZED_SECTION) {
                 collectionURL += UNCATEGORIZED_COLLECTION_NAME;
             } else {
@@ -344,8 +353,8 @@ export default function Gallery() {
             !silent && startLoading();
             const collections = await syncCollections();
             setCollections(collections);
-            await syncFiles(collections, setFiles);
-            await syncTrash(collections, setFiles);
+            const files = await syncFiles(collections, setFiles);
+            await syncTrash(collections, files, setFiles);
         } catch (e) {
             logError(e, 'syncWithRemote failed');
             switch (e.message) {
@@ -364,7 +373,7 @@ export default function Gallery() {
         syncInProgress.current = false;
         if (resync.current) {
             resync.current = false;
-            syncWithRemote();
+            setTimeout(() => syncWithRemote(), 0);
         }
     };
 
@@ -385,11 +394,10 @@ export default function Gallery() {
             archivedCollections
         );
         setCollectionSummaries(collectionSummaries);
-        const incomingShareFiles = files.filter(
+        const hasNoPersonalFiles = files.every(
             (file) => file.ownerID !== user.id
         );
-        const hasPersonalFiles = files.length - incomingShareFiles.length > 0;
-        setHasPersonalFiles(hasPersonalFiles);
+        setHasNoPersonalFiles(hasNoPersonalFiles);
     };
 
     const clearSelection = function () {
@@ -426,10 +434,10 @@ export default function Gallery() {
             } catch (e) {
                 logError(e, 'collection ops failed', { ops });
                 setDialogMessage({
-                    title: constants.ERROR,
+                    title: t('ERROR'),
 
                     close: { variant: 'danger' },
-                    content: constants.UNKNOWN_ERROR,
+                    content: t('UNKNOWN_ERROR'),
                 });
             } finally {
                 finishLoading();
@@ -453,18 +461,18 @@ export default function Gallery() {
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
-                        title: constants.ERROR,
+                        title: t('ERROR'),
 
                         close: { variant: 'danger' },
-                        content: constants.NOT_FILE_OWNER,
+                        content: t('NOT_FILE_OWNER'),
                     });
                     return;
             }
             setDialogMessage({
-                title: constants.ERROR,
+                title: t('ERROR'),
 
                 close: { variant: 'danger' },
-                content: constants.UNKNOWN_ERROR,
+                content: t('UNKNOWN_ERROR'),
             });
         } finally {
             await syncWithRemote(false, true);
@@ -485,10 +493,10 @@ export default function Gallery() {
             } catch (e) {
                 logError(e, 'create and collection ops failed', { ops });
                 setDialogMessage({
-                    title: constants.ERROR,
+                    title: t('ERROR'),
 
                     close: { variant: 'danger' },
-                    content: constants.UNKNOWN_ERROR,
+                    content: t('UNKNOWN_ERROR'),
                 });
             } finally {
                 finishLoading();
@@ -496,8 +504,8 @@ export default function Gallery() {
         };
         return () =>
             setCollectionNamerAttributes({
-                title: constants.CREATE_COLLECTION,
-                buttonText: constants.CREATE,
+                title: t('CREATE_COLLECTION'),
+                buttonText: t('CREATE'),
                 autoFilledName: '',
                 callback,
             });
@@ -521,17 +529,17 @@ export default function Gallery() {
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
-                        title: constants.ERROR,
+                        title: t('ERROR'),
 
                         close: { variant: 'danger' },
-                        content: constants.NOT_FILE_OWNER,
+                        content: t('NOT_FILE_OWNER'),
                     });
             }
             setDialogMessage({
-                title: constants.ERROR,
+                title: t('ERROR'),
 
                 close: { variant: 'danger' },
-                content: constants.UNKNOWN_ERROR,
+                content: t('UNKNOWN_ERROR'),
             });
         } finally {
             await syncWithRemote(false, true);
@@ -604,7 +612,7 @@ export default function Gallery() {
                 {isFirstLoad && (
                     <CenteredFlex>
                         <Typography color="text.secondary" variant="body2">
-                            {constants.INITIAL_LOAD_DELAY_WARNING}
+                            {t('INITIAL_LOAD_DELAY_WARNING')}
                         </Typography>
                     </CenteredFlex>
                 )}
@@ -701,7 +709,7 @@ export default function Gallery() {
                     setSelected={setSelected}
                     selected={selected}
                     isFirstLoad={isFirstLoad}
-                    hasPersonalFiles={hasPersonalFiles}
+                    hasNoPersonalFiles={hasNoPersonalFiles}
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     search={search}

@@ -1,6 +1,7 @@
 import VerticallyCentered from 'components/Container';
 import React, { useContext, useEffect, useState } from 'react';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import { AppContext } from './_app';
 
 export default function NotFound() {
@@ -15,7 +16,7 @@ export default function NotFound() {
             {loading ? (
                 <span className="sr-only">Loading...</span>
             ) : (
-                constants.NOT_FOUND
+                t('NOT_FOUND')
             )}
         </VerticallyCentered>
     );

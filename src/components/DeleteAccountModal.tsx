@@ -6,11 +6,11 @@ import {
     Typography,
     Button,
     Stack,
+    Link,
 } from '@mui/material';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useEffect, useState } from 'react';
 import { preloadImage, initiateEmail } from 'utils/common';
-import constants from 'utils/strings/constants';
 import VerticallyCentered from './Container';
 import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
 import {
@@ -21,6 +21,9 @@ import {
 import AuthenticateUserModal from './AuthenticateUserModal';
 import { logError } from 'utils/sentry';
 import { decryptDeleteAccountChallenge } from 'utils/crypto';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
+import { DELETE_ACCOUNT_EMAIL, FEEDBACK_EMAIL } from 'constants/urls';
 
 interface Iprops {
     onClose: () => void;
@@ -44,9 +47,9 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
     const somethingWentWrong = () =>
         setDialogMessage({
-            title: constants.ERROR,
+            title: t('ERROR'),
             close: { variant: 'danger' },
-            content: constants.UNKNOWN_ERROR,
+            content: t('UNKNOWN_ERROR'),
         });
 
     const initiateDelete = async () => {
@@ -68,29 +71,37 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
     const confirmAccountDeletion = () => {
         setDialogMessage({
-            title: constants.CONFIRM_ACCOUNT_DELETION_TITLE,
-            content: constants.CONFIRM_ACCOUNT_DELETION_MESSAGE,
+            title: t('CONFIRM_ACCOUNT_DELETION_TITLE'),
+            content: <Trans i18nKey="CONFIRM_ACCOUNT_DELETION_MESSAGE" />,
             proceed: {
-                text: constants.DELETE,
+                text: t('DELETE'),
                 action: solveChallengeAndDeleteAccount,
                 variant: 'danger',
             },
-            close: { text: constants.CANCEL },
+            close: { text: t('CANCEL') },
         });
     };
 
     const askToMailForDeletion = () => {
         setDialogMessage({
-            title: constants.DELETE_ACCOUNT,
-            content: constants.DELETE_ACCOUNT_MESSAGE(),
+            title: t('DELETE_ACCOUNT'),
+            content: (
+                <Trans
+                    i18nKey="DELETE_ACCOUNT_MESSAGE"
+                    components={{
+                        a: <Link href={`mailto:${DELETE_ACCOUNT_EMAIL}`} />,
+                    }}
+                    values={{ emailID: DELETE_ACCOUNT_EMAIL }}
+                />
+            ),
             proceed: {
-                text: constants.DELETE,
+                text: t('DELETE'),
                 action: () => {
                     initiateEmail('account-deletion@ente.io');
                 },
                 variant: 'danger',
             },
-            close: { text: constants.CANCEL },
+            close: { text: t('CANCEL') },
         });
     };
 
@@ -117,7 +128,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 fullScreen={isMobile}>
                 <DialogTitleWithCloseButton onClose={onClose}>
                     <Typography variant="h3" fontWeight={'bold'}>
-                        {constants.DELETE_ACCOUNT}
+                        {t('DELETE_ACCOUNT')}
                     </Typography>
                 </DialogTitleWithCloseButton>
                 <DialogContent>
@@ -131,7 +142,13 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                     </VerticallyCentered>
 
                     <Typography color="text.secondary" px={1.5}>
-                        {constants.ASK_FOR_FEEDBACK}
+                        <Trans
+                            i18nKey="ASK_FOR_FEEDBACK"
+                            components={{
+                                a: <Link href={`mailto:${FEEDBACK_EMAIL}`} />,
+                            }}
+                            values={{ emailID: FEEDBACK_EMAIL }}
+                        />
                     </Typography>
 
                     <Stack spacing={1} px={2} sx={{ width: '100%' }}>
@@ -140,7 +157,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                             color="accent"
                             onClick={sendFeedbackMail}
                             startIcon={<TickIcon />}>
-                            {constants.SEND_FEEDBACK}
+                            {t('SEND_FEEDBACK')}
                         </Button>
                         <Button
                             size="large"
@@ -148,7 +165,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                             color="danger"
                             onClick={initiateDelete}
                             startIcon={<NoAccountsIcon />}>
-                            {constants.DELETE_ACCOUNT}
+                            {t('DELETE_ACCOUNT')}
                         </Button>
                     </Stack>
                 </DialogContent>

@@ -10,7 +10,7 @@ export default function DialogIcon({ icon }: { icon: React.ReactNode }) {
                     width: '48px',
                     height: '48px',
                 },
-                color: 'stroke.secondary',
+                color: 'stroke.muted',
             }}>
             {icon}
         </Box>

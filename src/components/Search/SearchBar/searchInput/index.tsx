@@ -13,7 +13,6 @@ import {
     SearchOption,
     SuggestionType,
 } from 'types/search';
-import constants from 'utils/strings/constants';
 import { ValueContainerWithIcon } from './valueContainerWithIcon';
 import { SelectStyles } from '../../../../styles/search';
 import AsyncSelect from 'react-select/async';
@@ -25,6 +24,7 @@ import { OptionWithInfo } from './optionWithInfo';
 import { SearchInputWrapper } from '../styledComponents';
 import MenuWithPeople from './MenuWithPeople';
 import { Person, Thing, WordGroup } from 'types/machineLearning';
+import { t } from 'i18next';
 
 interface Iprops {
     isOpen: boolean;
@@ -99,6 +99,9 @@ export default function SearchInput(props: Iprops) {
             case SuggestionType.FILE_NAME:
                 search = { files: selectedOption.value as number[] };
                 break;
+            case SuggestionType.FILE_CAPTION:
+                search = { files: selectedOption.value as number[] };
+                break;
             case SuggestionType.PERSON:
                 search = { person: selectedOption.value as Person };
                 break;
@@ -137,7 +140,7 @@ export default function SearchInput(props: Iprops) {
                         />
                     ),
                 }}
-                placeholder={constants.SEARCH_HINT()}
+                placeholder={<span>{t('SEARCH_HINT')}</span>}
                 loadOptions={getOptions}
                 onChange={handleChange}
                 onFocus={handleOnFocus}

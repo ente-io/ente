@@ -17,11 +17,11 @@ import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
-import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { CustomError, parseSharingErrorCodes } from 'utils/error';
 import VerticallyCentered, { CenteredFlex } from 'components/Container';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import EnteSpinner from 'components/EnteSpinner';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
@@ -67,10 +67,7 @@ export default function PublicCollectionGallery() {
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const [errorMessage, setErrorMessage] = useState<string>(null);
     const appContext = useContext(AppContext);
-    const [abuseReportFormView, setAbuseReportFormView] = useState(false);
     const [loading, setLoading] = useState(true);
-    const openReportForm = () => setAbuseReportFormView(true);
-    const closeReportForm = () => setAbuseReportFormView(false);
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
         useState<boolean>(false);
@@ -118,12 +115,12 @@ export default function PublicCollectionGallery() {
 
     const showPublicLinkExpiredMessage = () =>
         appContext.setDialogMessage({
-            title: constants.LINK_EXPIRED,
-            content: constants.LINK_EXPIRED_MESSAGE,
+            title: t('LINK_EXPIRED'),
+            content: t('LINK_EXPIRED_MESSAGE'),
 
             nonClosable: true,
             proceed: {
-                text: constants.LOGIN,
+                text: t('LOGIN'),
                 action: logoutUser,
                 variant: 'accent',
             },
@@ -216,7 +213,7 @@ export default function PublicCollectionGallery() {
                         <UploadButton
                             disableShrink
                             openUploader={openUploader}
-                            text={constants.ADD_MORE_PHOTOS}
+                            text={t('ADD_MORE_PHOTOS')}
                             color="accent"
                             icon={<AddPhotoAlternateOutlined />}
                         />
@@ -281,8 +278,8 @@ export default function PublicCollectionGallery() {
             ) {
                 setErrorMessage(
                     parsedError.message === CustomError.TOO_MANY_REQUESTS
-                        ? constants.LINK_TOO_MANY_REQUESTS
-                        : constants.LINK_EXPIRED_MESSAGE
+                        ? t('LINK_TOO_MANY_REQUESTS')
+                        : t('LINK_EXPIRED_MESSAGE')
                 );
                 // share has been disabled
                 // local cache should be cleared
@@ -318,7 +315,7 @@ export default function PublicCollectionGallery() {
                 );
             } catch (e) {
                 logError(e, 'failed to derive key for verifyLinkPassword');
-                setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
+                setFieldError(`${t('UNKNOWN_ERROR')} ${e.message}`);
                 return;
             }
             const collectionUID = getPublicCollectionUID(token.current);
@@ -332,7 +329,7 @@ export default function PublicCollectionGallery() {
             } catch (e) {
                 const parsedError = parseSharingErrorCodes(e);
                 if (parsedError.message === CustomError.TOKEN_EXPIRED) {
-                    setFieldError(constants.INCORRECT_PASSPHRASE);
+                    setFieldError(t('INCORRECT_PASSPHRASE'));
                     return;
                 }
                 throw e;
@@ -341,7 +338,7 @@ export default function PublicCollectionGallery() {
             appContext.finishLoading();
         } catch (e) {
             logError(e, 'failed to verifyLinkPassword');
-            setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
+            setFieldError(`${t('UNKNOWN_ERROR')} ${e.message}`);
         }
     };
 
@@ -357,17 +354,17 @@ export default function PublicCollectionGallery() {
             return (
                 <FormContainer>
                     <FormPaper>
-                        <FormPaperTitle>{constants.PASSWORD}</FormPaperTitle>
+                        <FormPaperTitle>{t('PASSWORD')}</FormPaperTitle>
                         <Typography
                             color={'text.secondary'}
                             mb={2}
                             variant="body2">
-                            {constants.LINK_PASSWORD}
+                            {t('LINK_PASSWORD')}
                         </Typography>
                         <SingleInputForm
                             callback={verifyLinkPassword}
-                            placeholder={constants.RETURN_PASSPHRASE_HINT}
-                            buttonText={constants.UNLOCK}
+                            placeholder={t('RETURN_PASSPHRASE_HINT')}
+                            buttonText={t('UNLOCK')}
                             fieldType="password"
                         />
                     </FormPaper>
@@ -375,9 +372,7 @@ export default function PublicCollectionGallery() {
             );
         }
         if (!publicFiles) {
-            return (
-                <VerticallyCentered>{constants.NOT_FOUND}</VerticallyCentered>
-            );
+            return <VerticallyCentered>{t('NOT_FOUND')}</VerticallyCentered>;
         }
     }
 
@@ -387,7 +382,6 @@ export default function PublicCollectionGallery() {
                 token: token.current,
                 passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
-                openReportForm,
                 photoListHeader,
                 photoListFooter,
             }}>
@@ -416,11 +410,6 @@ export default function PublicCollectionGallery() {
                         publicCollection?.publicURLs?.[0]?.enableDownload ??
                         true
                     }
-                />
-                <AbuseReportForm
-                    show={abuseReportFormView}
-                    close={closeReportForm}
-                    url={url.current}
                 />
                 {blockingLoad && (
                     <LoadingOverlay>

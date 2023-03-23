@@ -2,6 +2,7 @@ import { Stack, Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useState } from 'react';
+import { t } from 'i18next';
 import {
     createShareableURL,
     deleteShareableURL,
@@ -9,7 +10,6 @@ import {
 } from 'services/collectionService';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { handleSharingErrors } from 'utils/error/ui';
-import constants from 'utils/strings/constants';
 import { EnteMenuItem } from 'components/Menu/menuItem';
 import PublicIcon from '@mui/icons-material/Public';
 interface Iprops {
@@ -61,11 +61,11 @@ export default function BeforeShare({
 
     const confirmDisablePublicSharing = () => {
         appContext.setDialogMessage({
-            title: constants.DISABLE_PUBLIC_SHARING,
-            content: constants.DISABLE_PUBLIC_SHARING_MESSAGE,
-            close: { text: constants.CANCEL },
+            title: t('DISABLE_PUBLIC_SHARING'),
+            content: t('DISABLE_PUBLIC_SHARING_MESSAGE'),
+            close: { text: t('CANCEL') },
             proceed: {
-                text: constants.DISABLE,
+                text: t('DISABLE'),
                 action: disablePublicSharing,
                 variant: 'danger',
             },
@@ -115,21 +115,21 @@ export default function BeforeShare({
         <Stack>
             <Typography color="text.secondary" variant="body2" padding={1}>
                 <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
-                {constants.LINK_SHARE_TITLE}
+                {t('LINK_SHARE_TITLE')}
             </Typography>
             <EnteMenuItem
                 startIcon={<LinkIcon />}
                 color="primary"
                 onClick={handleCollectionPublicSharing}
                 isTopOfList={true}>
-                {constants.CREATE_PUBLIC_SHARING}
+                {t('CREATE_PUBLIC_SHARING')}
             </EnteMenuItem>
             <EnteMenuItem
                 startIcon={<LinkIcon />}
                 color="primary"
                 onClick={handleCollecPhotosPublicSharing}
                 isBottomOfList={true}>
-                {constants.COLLECT_PHOTOS}
+                {t('COLLECT_PHOTOS')}
             </EnteMenuItem>
             {sharableLinkError && (
                 <Typography

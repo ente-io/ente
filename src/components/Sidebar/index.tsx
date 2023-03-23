@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import ShortcutSection from './ShortcutSection';
 import UtilitySection from './UtilitySection';
@@ -21,8 +21,19 @@ export default function Sidebar({
     sidebarView,
     closeSidebar,
 }: Iprops) {
+    const drawerSidebarPaperRef = React.useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (!sidebarView && drawerSidebarPaperRef.current) {
+            drawerSidebarPaperRef.current.scrollTop = 0;
+        }
+    }, [sidebarView]);
+
     return (
-        <DrawerSidebar open={sidebarView} onClose={closeSidebar} keepMounted>
+        <DrawerSidebar
+            open={sidebarView}
+            onClose={closeSidebar}
+            keepMounted
+            PaperProps={{ ref: drawerSidebarPaperRef }}>
             <HeaderSection closeSidebar={closeSidebar} />
             <Divider />
             <UserDetailsSection sidebarView={sidebarView} />

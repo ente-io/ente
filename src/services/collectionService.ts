@@ -42,13 +42,6 @@ import {
     FAVORITE_COLLECTION_NAME,
     DUMMY_UNCATEGORIZED_SECTION,
 } from 'constants/collection';
-// constants strings are used instead of english strings to avoid importing MUI components
-// which reference window object, which is not available in web worker
-import {
-    ALL_SECTION_NAME,
-    ARCHIVE_SECTION_NAME,
-    TRASH_SECTION_NAME,
-} from 'constants/strings';
 import {
     NEW_COLLECTION_MAGIC_METADATA,
     SUB_TYPE,
@@ -66,6 +59,9 @@ import {
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
+import { REQUEST_BATCH_SIZE } from 'constants/api';
+import { batch } from 'utils/common';
+import { t } from 'i18next';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -255,6 +251,7 @@ export const getCollection = async (
 };
 
 export const getCollectionLatestFiles = (
+    user: User,
     files: EnteFile[],
     archivedCollections: Set<number>
 ): CollectionLatestFiles => {
@@ -274,6 +271,7 @@ export const getCollectionLatestFiles = (
             !latestFiles.has(ALL_SECTION) &&
             !IsArchived(file) &&
             !file.isTrashed &&
+            file.ownerID === user.id &&
             !archivedCollections.has(file.collectionID)
         ) {
             latestFiles.set(ALL_SECTION, file);
@@ -403,21 +401,24 @@ export const addToCollection = async (
 ) => {
     try {
         const token = getToken();
-        const fileKeysEncryptedWithNewCollection =
-            await encryptWithNewCollectionKey(collection, files);
+        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFiles) {
+            const fileKeysEncryptedWithNewCollection =
+                await encryptWithNewCollectionKey(collection, batch);
 
-        const requestBody: AddToCollectionRequest = {
-            collectionID: collection.id,
-            files: fileKeysEncryptedWithNewCollection,
-        };
-        await HTTPService.post(
-            `${ENDPOINT}/collections/add-files`,
-            requestBody,
-            null,
-            {
-                'X-Auth-Token': token,
-            }
-        );
+            const requestBody: AddToCollectionRequest = {
+                collectionID: collection.id,
+                files: fileKeysEncryptedWithNewCollection,
+            };
+            await HTTPService.post(
+                `${ENDPOINT}/collections/add-files`,
+                requestBody,
+                null,
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+        }
     } catch (e) {
         logError(e, 'Add to collection Failed ');
         throw e;
@@ -430,21 +431,24 @@ export const restoreToCollection = async (
 ) => {
     try {
         const token = getToken();
-        const fileKeysEncryptedWithNewCollection =
-            await encryptWithNewCollectionKey(collection, files);
+        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFiles) {
+            const fileKeysEncryptedWithNewCollection =
+                await encryptWithNewCollectionKey(collection, batch);
 
-        const requestBody: AddToCollectionRequest = {
-            collectionID: collection.id,
-            files: fileKeysEncryptedWithNewCollection,
-        };
-        await HTTPService.post(
-            `${ENDPOINT}/collections/restore-files`,
-            requestBody,
-            null,
-            {
-                'X-Auth-Token': token,
-            }
-        );
+            const requestBody: AddToCollectionRequest = {
+                collectionID: collection.id,
+                files: fileKeysEncryptedWithNewCollection,
+            };
+            await HTTPService.post(
+                `${ENDPOINT}/collections/restore-files`,
+                requestBody,
+                null,
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+        }
     } catch (e) {
         logError(e, 'restore to collection Failed ');
         throw e;
@@ -457,22 +461,25 @@ export const moveToCollection = async (
 ) => {
     try {
         const token = getToken();
-        const fileKeysEncryptedWithNewCollection =
-            await encryptWithNewCollectionKey(toCollection, files);
+        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFiles) {
+            const fileKeysEncryptedWithNewCollection =
+                await encryptWithNewCollectionKey(toCollection, batch);
 
-        const requestBody: MoveToCollectionRequest = {
-            fromCollectionID: fromCollectionID,
-            toCollectionID: toCollection.id,
-            files: fileKeysEncryptedWithNewCollection,
-        };
-        await HTTPService.post(
-            `${ENDPOINT}/collections/move-files`,
-            requestBody,
-            null,
-            {
-                'X-Auth-Token': token,
-            }
-        );
+            const requestBody: MoveToCollectionRequest = {
+                fromCollectionID: fromCollectionID,
+                toCollectionID: toCollection.id,
+                files: fileKeysEncryptedWithNewCollection,
+            };
+            await HTTPService.post(
+                `${ENDPOINT}/collections/move-files`,
+                requestBody,
+                null,
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+        }
     } catch (e) {
         logError(e, 'move to collection Failed ');
         throw e;
@@ -603,18 +610,20 @@ export const removeNonUserFiles = async (
     try {
         const fileIDs = nonUserFiles.map((f) => f.id);
         const token = getToken();
+        const batchedFileIDs = batch(fileIDs, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFileIDs) {
+            const request: RemoveFromCollectionRequest = {
+                collectionID,
+                fileIDs: batch,
+            };
 
-        const request: RemoveFromCollectionRequest = {
-            collectionID,
-            fileIDs,
-        };
-
-        await HTTPService.post(
-            `${ENDPOINT}/collections/v3/remove-files`,
-            request,
-            null,
-            { 'X-Auth-Token': token }
-        );
+            await HTTPService.post(
+                `${ENDPOINT}/collections/v3/remove-files`,
+                request,
+                null,
+                { 'X-Auth-Token': token }
+            );
+        }
     } catch (e) {
         logError(e, 'remove non user files failed ');
         throw e;
@@ -943,6 +952,7 @@ export async function getCollectionSummaries(
 ): Promise<CollectionSummaries> {
     const collectionSummaries: CollectionSummaries = new Map();
     const collectionLatestFiles = getCollectionLatestFiles(
+        user,
         files,
         archivedCollections
     );
@@ -1043,7 +1053,7 @@ function getAllCollectionSummaries(
 ): CollectionSummary {
     return {
         id: ALL_SECTION,
-        name: ALL_SECTION_NAME,
+        name: t('ALL_SECTION_NAME'),
         type: CollectionSummaryType.all,
         latestFile: collectionsLatestFile.get(ALL_SECTION),
         fileCount: collectionFilesCount.get(ALL_SECTION) || 0,
@@ -1054,7 +1064,7 @@ function getAllCollectionSummaries(
 function getDummyUncategorizedCollectionSummaries(): CollectionSummary {
     return {
         id: ALL_SECTION,
-        name: UNCATEGORIZED_COLLECTION_NAME,
+        name: t('UNCATEGORIZED'),
         type: CollectionSummaryType.uncategorized,
         latestFile: null,
         fileCount: 0,
@@ -1068,7 +1078,7 @@ function getArchivedCollectionSummaries(
 ): CollectionSummary {
     return {
         id: ARCHIVE_SECTION,
-        name: ARCHIVE_SECTION_NAME,
+        name: t('ARCHIVE_SECTION_NAME'),
         type: CollectionSummaryType.archive,
         latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
@@ -1082,7 +1092,7 @@ function getTrashedCollectionSummaries(
 ): CollectionSummary {
     return {
         id: TRASH_SECTION,
-        name: TRASH_SECTION_NAME,
+        name: t('TRASH'),
         type: CollectionSummaryType.trash,
         latestFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,

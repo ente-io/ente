@@ -2,9 +2,9 @@ import { Box, Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
+import { t } from 'i18next';
 import { unshareCollection } from 'services/collectionService';
 import { Collection } from 'types/collection';
-import constants from 'utils/strings/constants';
 import ShareeRow from './row';
 
 interface Iprops {
@@ -32,7 +32,7 @@ export function CollectionShareSharees({ collection }: Iprops) {
     return (
         <Box mb={3}>
             <Typography variant="body2" color="text.secondary">
-                {constants.SHAREES}
+                {t('SHAREES')}
             </Typography>
             {collection.sharees?.map((sharee) => (
                 <ShareeRow

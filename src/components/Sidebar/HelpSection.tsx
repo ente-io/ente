@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import SidebarButton from './Button';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import ExportModal from 'components/ExportModal';
 import exportService from 'services/exportService';
 import { getEndpoint } from 'utils/common/apiUtil';
@@ -35,16 +36,16 @@ export default function HelpSection() {
     return (
         <>
             <SidebarButton onClick={openFeedbackURL}>
-                {constants.REQUEST_FEATURE}
+                {t('REQUEST_FEATURE')}
             </SidebarButton>
             <SidebarButton
                 LinkComponent={NoStyleAnchor}
                 href="mailto:contact@ente.io">
-                {constants.SUPPORT}
+                {t('SUPPORT')}
             </SidebarButton>
             <SidebarButton onClick={exportFiles}>
                 <div style={{ display: 'flex' }}>
-                    {constants.EXPORT}
+                    {t('EXPORT')}
                     <div style={{ width: '20px' }} />
                     {exportService.isExportInProgress() && (
                         <EnteSpinner size="20px" />

@@ -2,8 +2,8 @@ import { OverflowMenuOption } from 'components/OverflowMenu/option';
 import React from 'react';
 
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import constants from 'utils/strings/constants';
 import { CollectionActions } from '.';
+import { t } from 'i18next';
 
 interface Iprops {
     handleCollectionAction: (
@@ -21,7 +21,7 @@ export function TrashCollectionOption({ handleCollectionAction }: Iprops) {
                 CollectionActions.CONFIRM_EMPTY_TRASH,
                 false
             )}>
-            {constants.EMPTY_TRASH}
+            {t('EMPTY_TRASH')}
         </OverflowMenuOption>
     );
 }

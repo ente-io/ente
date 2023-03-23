@@ -9,7 +9,6 @@ import {
     updateShareableURL,
 } from 'services/collectionService';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
-import constants from 'utils/strings/constants';
 import { ManageDownloadAccess } from './downloadAccess';
 import { handleSharingErrors } from 'utils/error/ui';
 import { SetPublicShareProp } from 'types/publicCollection';
@@ -21,6 +20,7 @@ import DialogTitleWithCloseButton, {
 import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { EnteMenuItem } from 'components/Menu/menuItem';
+import { t } from 'i18next';
 interface Iprops {
     publicShareProp: PublicURL;
     collection: Collection;
@@ -70,7 +70,7 @@ export default function PublicShareManage({
         <>
             <EnteDrawer anchor="right" open={open} onClose={handleClose}>
                 <DialogTitleWithCloseButton onClose={handleClose}>
-                    {constants.SHARE_COLLECTION}
+                    {t('SHARE_COLLECTION')}
                 </DialogTitleWithCloseButton>
                 <DialogContent>
                     <Stack spacing={3}>
@@ -116,7 +116,7 @@ export default function PublicShareManage({
                             onClick={copyToClipboardHelper(publicShareUrl)}
                             isTopOfList={true}
                             isBottomOfList={true}>
-                            {constants.COPY_LINK}
+                            {t('COPY_LINK')}
                         </EnteMenuItem>
                         <EnteMenuItem
                             color="danger"
@@ -124,7 +124,7 @@ export default function PublicShareManage({
                             onClick={disablePublicSharing}
                             isTopOfList={true}
                             isBottomOfList={true}>
-                            {constants.REMOVE_LINK}
+                            {t('REMOVE_LINK')}
                         </EnteMenuItem>
                     </Stack>
                     {sharableLinkError && (

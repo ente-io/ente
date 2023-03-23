@@ -32,8 +32,6 @@ export function EnteMenuItem({
     children,
     hasSwitch = false,
     checked,
-    isTopOfList = false,
-    isBottomOfList = false,
 }: Iprops) {
     const menuContext = useContext(OverflowMenuContext);
     // const [buttonState, setButtonState] = useState<
@@ -54,17 +52,14 @@ export function EnteMenuItem({
         <MenuItem
             onClick={handleClick}
             sx={{
-                minWidth: 220,
+                minWidth: '220px',
                 color: (theme) => theme.palette[color].main,
                 backgroundColor: (theme) => theme.palette.background.overPaper,
                 padding: 1.5,
                 '& .MuiSvgIcon-root': {
                     fontSize: '20px',
                 },
-                borderTopLeftRadius: isTopOfList ? 8 : 0,
-                borderTopRightRadius: isTopOfList ? 8 : 0,
-                borderBottomLeftRadius: isBottomOfList ? 8 : 0,
-                borderBottomRightRadius: isBottomOfList ? 8 : 0,
+                borderRadius: '8px',
             }}>
             <SpaceBetweenFlex>
                 <HorizontalFlex>

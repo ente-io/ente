@@ -1,6 +1,7 @@
 import * as chrono from 'chrono-node';
 import { getAllPeople } from 'utils/machineLearning';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
 import { Collection } from 'types/collection';
@@ -16,7 +17,6 @@ import {
     SuggestionType,
 } from 'types/search';
 import ObjectService from './machineLearning/objectService';
-import textService from './machineLearning/textService';
 import { getFormattedDate, isInsideBox, isSameDayAnyYear } from 'utils/search';
 import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
@@ -44,9 +44,9 @@ export const getAutoCompleteSuggestions =
             ...getYearSuggestion(searchPhrase),
             ...getDateSuggestion(searchPhrase),
             ...getCollectionSuggestion(searchPhrase, collections),
-            getFileSuggestion(searchPhrase, files),
+            getFileNameSuggestion(searchPhrase, files),
+            getFileCaptionSuggestion(searchPhrase, files),
             ...(await getThingSuggestion(searchPhrase)),
-            ...(await getWordSuggestion(searchPhrase)),
         ];
 
         return convertSuggestionsToOptions(suggestions, files);
@@ -145,16 +145,15 @@ export async function getIndexStatusSuggestion(): Promise<Suggestion> {
 
     let label;
     if (!indexStatus.localFilesSynced) {
-        label = constants.INDEXING_SCHEDULED;
+        label = t('INDEXING_SCHEDULED');
     } else if (indexStatus.outOfSyncFilesExists) {
-        label = constants.ANALYZING_PHOTOS(
-            indexStatus.nSyncedFiles,
-            indexStatus.nTotalFiles
-        );
+        label = t('ANALYZING_PHOTOS', {
+            indexStatus,
+        });
     } else if (!indexStatus.peopleIndexSynced) {
-        label = constants.INDEXING_PEOPLE(indexStatus.nSyncedFiles);
+        label = t('INDEXING_PEOPLE', { indexStatus });
     } else {
-        label = constants.INDEXING_DONE(indexStatus.nSyncedFiles);
+        label = t('INDEXING_DONE', { indexStatus });
     }
 
     return {
@@ -191,13 +190,25 @@ function getCollectionSuggestion(
     );
 }
 
-function getFileSuggestion(
+function getFileNameSuggestion(
     searchPhrase: string,
     files: EnteFile[]
 ): Suggestion {
-    const matchedFiles = searchFiles(searchPhrase, files);
+    const matchedFiles = searchFilesByName(searchPhrase, files);
     return {
         type: SuggestionType.FILE_NAME,
+        value: matchedFiles.map((file) => file.id),
+        label: searchPhrase,
+    };
+}
+
+function getFileCaptionSuggestion(
+    searchPhrase: string,
+    files: EnteFile[]
+): Suggestion {
+    const matchedFiles = searchFilesByCaption(searchPhrase, files);
+    return {
+        type: SuggestionType.FILE_CAPTION,
         value: matchedFiles.map((file) => file.id),
         label: searchPhrase,
     };
@@ -230,19 +241,6 @@ async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
     );
 }
 
-async function getWordSuggestion(searchPhrase: string): Promise<Suggestion[]> {
-    const wordResults = await searchText(searchPhrase);
-
-    return wordResults.map(
-        (searchResult) =>
-            ({
-                type: SuggestionType.TEXT,
-                value: searchResult,
-                label: searchResult.word,
-            } as Suggestion)
-    );
-}
-
 function searchCollection(
     searchPhrase: string,
     collections: Collection[]
@@ -252,13 +250,26 @@ function searchCollection(
     );
 }
 
-function searchFiles(searchPhrase: string, files: EnteFile[]) {
+function searchFilesByName(searchPhrase: string, files: EnteFile[]) {
     const user = getData(LS_KEYS.USER) as User;
     if (!user) return [];
     return files.filter(
         (file) =>
             file.ownerID === user.id &&
             file.metadata.title.toLowerCase().includes(searchPhrase)
+    );
+}
+
+function searchFilesByCaption(searchPhrase: string, files: EnteFile[]) {
+    const user = getData(LS_KEYS.USER) as User;
+    if (!user) return [];
+    return files.filter(
+        (file) =>
+            file.ownerID === user.id &&
+            file.pubMagicMetadata &&
+            file.pubMagicMetadata.data.caption
+                ?.toLowerCase()
+                .includes(searchPhrase)
     );
 }
 
@@ -300,13 +311,6 @@ async function searchThing(searchPhrase: string) {
     return things.filter((thing) =>
         thing.name.toLocaleLowerCase().includes(searchPhrase)
     );
-}
-
-async function searchText(searchPhrase: string) {
-    const texts = await textService.clusterWords();
-    return texts
-        .filter((text) => text.word.toLocaleLowerCase().includes(searchPhrase))
-        .slice(0, 4);
 }
 
 function isSearchedFile(user: User, file: EnteFile, search: Search) {
@@ -364,6 +368,9 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
             return { collection: option.value as number };
 
         case SuggestionType.FILE_NAME:
+            return { files: option.value as number[] };
+
+        case SuggestionType.FILE_CAPTION:
             return { files: option.value as number[] };
 
         case SuggestionType.PERSON:

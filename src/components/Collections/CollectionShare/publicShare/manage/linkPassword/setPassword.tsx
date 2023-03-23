@@ -3,8 +3,8 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
 import React from 'react';
+import { t } from 'i18next';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
-import constants from 'utils/strings/constants';
 
 export function PublicLinkSetPassword({
     open,
@@ -50,12 +50,12 @@ export function PublicLinkSetPassword({
             PaperProps={{ sx: { p: 1 } }}>
             <Stack spacing={3} p={1.5}>
                 <Typography variant="h3" px={1} py={0.5} fontWeight={'bold'}>
-                    {constants.PASSWORD_LOCK}
+                    {t('PASSWORD_LOCK')}
                 </Typography>
                 <SingleInputForm
                     callback={savePassword}
-                    placeholder={constants.RETURN_PASSPHRASE_HINT}
-                    buttonText={constants.LOCK}
+                    placeholder={t('RETURN_PASSPHRASE_HINT')}
+                    buttonText={t('LOCK')}
                     fieldType="password"
                     secondaryButtonAction={onClose}
                     submitButtonProps={{ sx: { mt: 1, mb: 2 } }}

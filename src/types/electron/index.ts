@@ -93,4 +93,5 @@ export interface ElectronAPIs {
         maxSize: number
     ) => Promise<Uint8Array>;
     logRendererProcessMemoryUsage: (message: string) => Promise<void>;
+    registerForegroundEventListener: (onForeground: () => void) => void;
 }
