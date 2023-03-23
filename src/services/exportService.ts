@@ -77,9 +77,7 @@ class ExportService {
                 return;
             }
             const newExportDir = `${newRootDir}/${ENTE_EXPORT_DIRECTORY}`;
-            await this.electronAPIs.checkExistsAndCreateCollectionDir(
-                newExportDir
-            );
+            await this.electronAPIs.checkExistsAndCreateDir(newExportDir);
             callback(newExportDir);
         } catch (e) {
             logError(e, 'changeExportDirectory failed');
@@ -408,10 +406,10 @@ class ExportService {
                 exportFolder,
                 collection
             );
-            await this.electronAPIs.checkExistsAndCreateCollectionDir(
+            await this.electronAPIs.checkExistsAndCreateDir(
                 collectionFolderPath
             );
-            await this.electronAPIs.checkExistsAndCreateCollectionDir(
+            await this.electronAPIs.checkExistsAndCreateDir(
                 getMetadataFolderPath(collectionFolderPath)
             );
             await this.addCollectionExportedRecord(

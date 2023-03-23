@@ -9,7 +9,7 @@ export interface AppUpdateInfo {
 
 export interface ElectronAPIs {
     exists: (path: string) => boolean;
-    checkExistsAndCreateCollectionDir: (dirPath: string) => Promise<void>;
+    checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
     checkExistsAndRename: (
         oldDirPath: string,
         newDirPath: string
