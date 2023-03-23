@@ -11,6 +11,7 @@ const PublicShareSwitch = styled((props: SwitchProps) => (
     width: 40,
     height: 24,
     padding: 0,
+    borderRadius: 8,
     '& .MuiSwitch-switchBase': {
         padding: 0,
         margin: 2,
