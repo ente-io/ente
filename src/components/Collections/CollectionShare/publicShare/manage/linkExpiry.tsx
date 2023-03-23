@@ -29,7 +29,11 @@ export function ManageLinkExpiry({
     const [shareExpiryOptionsModalView, setShareExpiryOptionsModalView] =
         useState(false);
     const [shareExpiryValue, setShareExpiryValue] = useState(0);
-    const [labelText, setLabelText] = useState('never');
+    const [labelText, setLabelText] = useState(
+        publicShareProp?.validTill
+            ? formatDateTime(publicShareProp?.validTill / 1000)
+            : 'never'
+    );
     useEffect(() => {
         if (shareExpiryOptionsModalView) {
             setShareExpiryOptionsModalView(true);

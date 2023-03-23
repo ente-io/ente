@@ -16,6 +16,7 @@ interface Iprops {
 
 export function ManageDeviceLimit({
     collection,
+    publicShareProp,
     updatePublicShareURLHelper,
 }: Iprops) {
     const updateDeviceLimit = async (newLimit: number) => {
@@ -26,7 +27,9 @@ export function ManageDeviceLimit({
     };
     const [shareDeviceLimitModalView, setDeviceLimitModalView] =
         useState(false);
-    const [shareDeviceLimitValue, setDeviceLimitValue] = useState(0);
+    const [shareDeviceLimitValue, setDeviceLimitValue] = useState(
+        publicShareProp.deviceLimit
+    );
     useEffect(() => {
         if (shareDeviceLimitModalView) {
             setDeviceLimitModalView(true);
