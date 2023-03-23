@@ -384,49 +384,67 @@ class _AddToLocationGalleryWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 6000,
-      child: Gallery(
-        key: ValueKey(_selectedRadius()),
-        loadingWidget: const SizedBox.shrink(),
-        disableScroll: true,
-        asyncLoader: (
-          creationStartTime,
-          creationEndTime, {
-          limit,
-          asc,
-        }) async {
-          final FileLoadResult result = await fileLoadResult;
-          //wait for ignored files to be removed after init
-          await removeIgnoredFiles;
-          final stopWatch = Stopwatch()..start();
-          final copyOfFiles = List<File>.from(result.files);
-          copyOfFiles.removeWhere((f) {
-            assert(
-              f.location != null &&
-                  f.location!.latitude != null &&
-                  f.location!.longitude != null,
-            );
-            return !LocationService.instance.isFileInsideLocationTag(
-              InheritedLocationTagData.of(context).coordinates,
-              [f.location!.latitude!, f.location!.longitude!],
-              _selectedRadius().toInt(),
-            );
-          });
-          dev.log(
-              "Time taken to get all files in a location tag: ${stopWatch.elapsedMilliseconds} ms");
-          stopWatch.stop();
-          // if (!result.hasMore) {
-          widget.memoriesCountNotifier.value = copyOfFiles.length;
-          // }
-          return FileLoadResult(
-            copyOfFiles,
-            result.hasMore,
+    final selectedRadius = _selectedRadius().toInt();
+    late final int memoryCount;
+    Future<FileLoadResult> filterFiles() async {
+      final FileLoadResult result = await fileLoadResult;
+      //wait for ignored files to be removed after init
+      await removeIgnoredFiles;
+      final stopWatch = Stopwatch()..start();
+      final copyOfFiles = List<File>.from(result.files);
+      copyOfFiles.removeWhere((f) {
+        assert(
+          f.location != null &&
+              f.location!.latitude != null &&
+              f.location!.longitude != null,
+        );
+        return !LocationService.instance.isFileInsideLocationTag(
+          InheritedLocationTagData.of(context).coordinates,
+          [f.location!.latitude!, f.location!.longitude!],
+          selectedRadius,
+        );
+      });
+      dev.log(
+        "Time taken to get all files in a location tag: ${stopWatch.elapsedMilliseconds} ms",
+      );
+      stopWatch.stop();
+      memoryCount = copyOfFiles.length;
+      widget.memoriesCountNotifier.value = copyOfFiles.length;
+      return Future.value(
+        FileLoadResult(
+          copyOfFiles,
+          result.hasMore,
+        ),
+      );
+    }
+
+    return FutureBuilder(
+      key: ValueKey(selectedRadius),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return SizedBox(
+            height: 4000,
+            child: Gallery(
+              key: ValueKey(selectedRadius),
+              loadingWidget: const SizedBox.shrink(),
+              disableScroll: true,
+              asyncLoader: (
+                creationStartTime,
+                creationEndTime, {
+                limit,
+                asc,
+              }) async {
+                return snapshot.data as FileLoadResult;
+              },
+              tagPrefix: "Add location",
+              shouldCollateFilesByDay: false,
+            ),
           );
-        },
-        tagPrefix: "Add location",
-        shouldCollateFilesByDay: false,
-      ),
+        } else {
+          return const SizedBox.shrink();
+        }
+      },
+      future: filterFiles(),
     );
   }
 
