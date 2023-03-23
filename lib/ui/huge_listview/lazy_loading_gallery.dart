@@ -406,7 +406,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         mainAxisSpacing: 2,
         crossAxisCount: widget.photoGridSize!,
       ),
-      padding: const EdgeInsets.all(0),
+      padding: const EdgeInsets.symmetric(vertical: (galleryGridSpacing / 2)),
     );
   }
 

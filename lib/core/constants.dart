@@ -63,3 +63,5 @@ const kilometersPerDegree = 111.16;
 const radiusValues = <double>[2, 10, 20, 40, 80, 200, 400, 1200];
 
 const defaultRadiusValueIndex = 4;
+
+const galleryGridSpacing = 2.0;
