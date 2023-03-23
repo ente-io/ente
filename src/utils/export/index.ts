@@ -152,16 +152,17 @@ export const sanitizeName = (name: string) =>
 
 export const getUniqueCollectionFolderPath = (
     dir: string,
-    collection: Collection
+    collectionID: number,
+    collectionName: string
 ): string => {
     if (!exportService.checkAllElectronAPIsExists()) {
-        return getOldCollectionFolderPath(dir, collection);
+        return getOldCollectionFolderPath(dir, collectionID, collectionName);
     }
-    let collectionFolderPath = `${dir}/${sanitizeName(collection.name)}`;
+    let collectionFolderPath = `${dir}/${sanitizeName(collectionName)}`;
     let count = 1;
     while (exportService.exists(collectionFolderPath)) {
         collectionFolderPath = `${dir}/${sanitizeName(
-            collection.name
+            collectionName
         )}(${count})`;
         count++;
     }
@@ -210,8 +211,9 @@ export const getFileSavePath = (
 
 export const getOldCollectionFolderPath = (
     dir: string,
-    collection: Collection
-) => `${dir}/${collection.id}_${oldSanitizeName(collection.name)}`;
+    collectionID: number,
+    collectionName: string
+) => `${dir}/${collectionID}_${oldSanitizeName(collectionName)}`;
 
 export const getOldFileSavePath = (
     collectionFolderPath: string,

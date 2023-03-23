@@ -577,5 +577,5 @@
         "FINISH": "Export finished",
         "UP_TO_DATE": "No new files to export"
     },
-    "CONTINUOUS_EXPORT": "Continuous export"
+    "CONTINUOUS_EXPORT": "Sync continuously"
 }

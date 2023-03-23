@@ -30,13 +30,13 @@ import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
 import { getTotalFileCount } from 'utils/file';
 import { eventBus, Events } from 'services/events';
+import LinkButton from './pages/gallery/LinkButton';
 
-const ExportFolderPathContainer = styled('span')`
+const ExportFolderPathContainer = styled(LinkButton)`
+    width: 262px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 100%;
-
     /* Beginning of string */
     direction: rtl;
     text-align: left;
@@ -186,15 +186,12 @@ export default function ExportModal(props: Props) {
     // UI functions
     // =============
 
-    const changeExportDirectory = async () => {
-        try {
-            const newFolder = await exportService.selectExportDirectory();
-            if (newFolder) {
-                updateExportFolder(newFolder);
-            }
-        } catch (e) {
-            logError(e, 'selectExportDirectory failed');
-        }
+    const handleChangeExportDirectoryClick = () => {
+        void exportService.changeExportDirectory(updateExportFolder);
+    };
+
+    const handleOpenExportDirectoryClick = () => {
+        void exportService.openExportDirectory(exportFolder);
     };
 
     const toggleContinuousExport = () => {
@@ -225,7 +222,7 @@ export default function ExportModal(props: Props) {
 
             await postExportRun();
         } catch (e) {
-            logError(e, 'resumeExport failed');
+            logError(e, 'startExport failed');
         }
     };
 
@@ -275,8 +272,9 @@ export default function ExportModal(props: Props) {
             <DialogContent>
                 <ExportDirectory
                     exportFolder={exportFolder}
-                    changeExportDirectory={changeExportDirectory}
+                    changeExportDirectory={handleChangeExportDirectoryClick}
                     exportStage={exportStage}
+                    openExportDirectory={handleOpenExportDirectoryClick}
                 />
                 <TotalFileCount totalFileCount={totalFileCount} />
                 <ContinuousExport
@@ -290,10 +288,17 @@ export default function ExportModal(props: Props) {
     );
 }
 
-function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
+function ExportDirectory({
+    exportFolder,
+    changeExportDirectory,
+    exportStage,
+    openExportDirectory,
+}) {
     return (
         <SpaceBetweenFlex minHeight={'48px'}>
-            <Typography color="text.secondary">{t('DESTINATION')}</Typography>
+            <Typography color="text.secondary" mr={'16px'}>
+                {t('DESTINATION')}
+            </Typography>
             <>
                 {!exportFolder ? (
                     <Button color={'accent'} onClick={changeExportDirectory}>
@@ -301,11 +306,13 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
                     </Button>
                 ) : (
                     <VerticallyCenteredFlex>
-                        <Tooltip title={exportFolder}>
-                            <ExportFolderPathContainer>
-                                {exportFolder}
-                            </ExportFolderPathContainer>
-                        </Tooltip>
+                        <ExportFolderPathContainer
+                            onClick={openExportDirectory}>
+                            <Tooltip title={exportFolder}>
+                                <span>{exportFolder}</span>
+                            </Tooltip>
+                        </ExportFolderPathContainer>
+
                         {exportStage === ExportStage.FINISHED ||
                         exportStage === ExportStage.INIT ? (
                             <ExportDirectoryOption

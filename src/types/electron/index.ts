@@ -9,7 +9,7 @@ export interface AppUpdateInfo {
 
 export interface ElectronAPIs {
     exists: (path: string) => boolean;
-    checkExistsAndCreateCollectionDir: (dirPath: string) => Promise<void>;
+    checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
     checkExistsAndRename: (
         oldDirPath: string,
         newDirPath: string
@@ -89,4 +89,5 @@ export interface ElectronAPIs {
     ) => Promise<Uint8Array>;
     logRendererProcessMemoryUsage: (message: string) => Promise<void>;
     registerForegroundEventListener: (onForeground: () => void) => void;
+    openDirectory: (dirPath: string) => Promise<void>;
 }
