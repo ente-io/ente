@@ -20,6 +20,7 @@ import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/local_settings.dart";
 
 showAddLocationSheet(BuildContext context, List<double> coordinates) {
   showBarModalBottomSheet(
@@ -349,6 +350,7 @@ class _AddToLocationGalleryWidgetState
     extends State<AddToLocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
   late Future<void> removeIgnoredFiles;
+  double heightOfGallery = 0;
 
   @override
   void initState() {
@@ -423,7 +425,7 @@ class _AddToLocationGalleryWidgetState
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return SizedBox(
-            height: 4000,
+            height: _galleryHeight(memoryCount),
             child: Gallery(
               key: ValueKey(selectedRadius),
               loadingWidget: const SizedBox.shrink(),
@@ -459,5 +461,21 @@ class _AddToLocationGalleryWidgetState
               f.uploadedFileID == null &&
               IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
         );
+  }
+
+  double _galleryHeight(int memoryCount) {
+    final photoGridSize = LocalSettings.instance.getPhotoGridSize();
+    final totalWhiteSpaceBetweenPhotos =
+        galleryGridSpacing * (photoGridSize - 1);
+
+    final thumbnailHeight =
+        ((MediaQuery.of(context).size.width - totalWhiteSpaceBetweenPhotos) /
+            photoGridSize);
+
+    final numberOfRows = (memoryCount / photoGridSize).ceil();
+
+    final galleryHeight = (thumbnailHeight * numberOfRows) +
+        (galleryGridSpacing * (numberOfRows - 1));
+    return galleryHeight + 120;
   }
 }
