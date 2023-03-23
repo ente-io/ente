@@ -54,18 +54,15 @@ class CollectionsListWidget extends StatelessWidget {
         : selectedFiles?.files.length ?? 0;
 
     if (collectionsWithThumbnail.isEmpty) {
+      if (shouldShowCreateAlbum) {
+        return _getNewAlbumWidget(context, filesCount);
+      }
       return const EmptyState();
     }
     return ListView.separated(
       itemBuilder: (context, index) {
         if (index == 0 && shouldShowCreateAlbum) {
-          return GestureDetector(
-            onTap: () async {
-              await _createNewAlbumOnTap(context, filesCount);
-            },
-            behavior: HitTestBehavior.opaque,
-            child: const NewAlbumListItemWidget(),
-          );
+          return _getNewAlbumWidget(context, filesCount);
         }
         final item =
             collectionsWithThumbnail[index - (shouldShowCreateAlbum ? 1 : 0)];
@@ -84,6 +81,16 @@ class CollectionsListWidget extends StatelessWidget {
           collectionsWithThumbnail.length + (shouldShowCreateAlbum ? 1 : 0),
       shrinkWrap: true,
       physics: const BouncingScrollPhysics(),
+    );
+  }
+
+  GestureDetector _getNewAlbumWidget(BuildContext context, int filesCount) {
+    return GestureDetector(
+      onTap: () async {
+        await _createNewAlbumOnTap(context, filesCount);
+      },
+      behavior: HitTestBehavior.opaque,
+      child: const NewAlbumListItemWidget(),
     );
   }
 
