@@ -28,7 +28,7 @@ import { getEncryptionKey, setEncryptionKey } from './api/safeStorage';
 import { clearElectronStore } from './api/electronStore';
 import { openDiskCache, deleteDiskCache } from './api/cache';
 import {
-    checkExistsAndCreateCollectionDir,
+    checkExistsAndCreateDir,
     checkExistsAndRename,
     saveStreamToDisk,
     saveFileToDisk,
@@ -62,7 +62,7 @@ const windowObject: any = window;
 
 windowObject['ElectronAPIs'] = {
     exists,
-    checkExistsAndCreateCollectionDir,
+    checkExistsAndCreateDir,
     checkExistsAndRename,
     saveStreamToDisk,
     saveFileToDisk,
