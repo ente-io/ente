@@ -286,14 +286,16 @@ export default function ExportModal(props: Props) {
 function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (
         <SpaceBetweenFlex minHeight={'48px'}>
-            <Typography color="text.secondary">{t('DESTINATION')}</Typography>
+            <Typography color="text.secondary" mr={'16px'}>
+                {t('DESTINATION')}
+            </Typography>
             <>
                 {!exportFolder ? (
                     <Button color={'accent'} onClick={changeExportDirectory}>
                         {t('SELECT_FOLDER')}
                     </Button>
                 ) : (
-                    <VerticallyCenteredFlex>
+                    <VerticallyCenteredFlex maxWidth={'310px'}>
                         <Tooltip title={exportFolder}>
                             <ExportFolderPathContainer>
                                 {exportFolder}
