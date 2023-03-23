@@ -51,8 +51,7 @@ export function ManageLinkPassword({
             <EnteMenuItem
                 onClick={handlePasswordChangeSetting}
                 checked={!!publicShareProp?.passwordEnabled}
-                hasSwitch={true}
-                isBottomOfList={true}>
+                hasSwitch={true}>
                 {t('LINK_PASSWORD_LOCK')}
             </EnteMenuItem>
             <PublicLinkSetPassword
