@@ -518,12 +518,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       margin: const EdgeInsets.only(bottom: 6),
       child: Column(
         children: [
-          _isFreePlanUser()
-              ? Text(
-                  "2 months free on yearly plans",
-                  style: getEnteTextTheme(context).miniMuted,
-                )
-              : const SizedBox.shrink(),
           RepaintBoundary(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -539,10 +533,17 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                     await _filterStripeForUI();
                   },
                 ),
-                planText("Yearly", !_showYearlyPlan)
+                planText("Yearly", !_showYearlyPlan),
               ],
             ),
           ),
+          _isFreePlanUser()
+              ? Text(
+                  "2 months free on yearly plans",
+                  style: getEnteTextTheme(context).miniMuted,
+                )
+              : const SizedBox.shrink(),
+          const Padding(padding: EdgeInsets.all(8)),
         ],
       ),
     );
