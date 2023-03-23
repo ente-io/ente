@@ -26,7 +26,9 @@ showAddLocationSheet(BuildContext context, List<double> coordinates) {
     context: context,
     builder: (context) {
       return LocationTagDataStateProvider(
-          coordinates, const AddLocationSheet());
+        coordinates,
+        const AddLocationSheet(),
+      );
     },
     shape: const RoundedRectangleBorder(
       side: BorderSide(width: 0),
@@ -131,71 +133,72 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
             ),
           ),
           Expanded(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      const TextInputWidget(
-                        hintText: "Location name",
-                        borderRadius: 2,
-                      ),
-                      const SizedBox(height: 24),
-                      RadiusPickerWidget(memoriesCountNotifier),
-                      const SizedBox(height: 24),
-                      Text(
-                        "A location tag groups all photos that were taken within some radius of a photo",
-                        style: textTheme.smallMuted,
-                      ),
-                    ],
-                  ),
-                ),
-                const DividerWidget(
-                  dividerType: DividerType.solid,
-                  padding: EdgeInsets.only(top: 24, bottom: 20),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  child: Padding(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ValueListenableBuilder(
-                      valueListenable: memoriesCountNotifier,
-                      builder: (context, value, _) {
-                        Widget widget;
-                        if (value == null) {
-                          widget = RepaintBoundary(
-                            child: EnteLoadingWidget(
-                              size: 14,
-                              color: colorScheme.strokeMuted,
-                              alignment: Alignment.centerLeft,
-                              padding: 3,
-                            ),
-                          );
-                        } else {
-                          widget = Text(
-                            value == 1 ? "1 memory" : "$value memories",
-                            style: textTheme.body,
-                          );
-                        }
-                        return Align(
-                          alignment: Alignment.centerLeft,
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 250),
-                            switchInCurve: Curves.easeInOutExpo,
-                            switchOutCurve: Curves.easeInOutExpo,
-                            child: widget,
-                          ),
-                        );
-                      },
+                    child: Column(
+                      children: [
+                        const TextInputWidget(
+                          hintText: "Location name",
+                          borderRadius: 2,
+                        ),
+                        const SizedBox(height: 24),
+                        RadiusPickerWidget(memoriesCountNotifier),
+                        const SizedBox(height: 24),
+                        Text(
+                          "A location tag groups all photos that were taken within some radius of a photo",
+                          style: textTheme.smallMuted,
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Expanded(
-                  child: AddToLocationGalleryWidget(memoriesCountNotifier),
-                ),
-              ],
+                  const DividerWidget(
+                    dividerType: DividerType.solid,
+                    padding: EdgeInsets.only(top: 24, bottom: 20),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ValueListenableBuilder(
+                        valueListenable: memoriesCountNotifier,
+                        builder: (context, value, _) {
+                          Widget widget;
+                          if (value == null) {
+                            widget = RepaintBoundary(
+                              child: EnteLoadingWidget(
+                                size: 14,
+                                color: colorScheme.strokeMuted,
+                                alignment: Alignment.centerLeft,
+                                padding: 3,
+                              ),
+                            );
+                          } else {
+                            widget = Text(
+                              value == 1 ? "1 memory" : "$value memories",
+                              style: textTheme.body,
+                            );
+                          }
+                          return Align(
+                            alignment: Alignment.centerLeft,
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 250),
+                              switchInCurve: Curves.easeInOutExpo,
+                              switchOutCurve: Curves.easeInOutExpo,
+                              child: widget,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  AddToLocationGalleryWidget(memoriesCountNotifier),
+                ],
+              ),
             ),
           ),
         ],
@@ -381,45 +384,49 @@ class _AddToLocationGalleryWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return Gallery(
-      key: ValueKey(_selectedRadius()),
-      loadingWidget: const SizedBox.shrink(),
-      asyncLoader: (
-        creationStartTime,
-        creationEndTime, {
-        limit,
-        asc,
-      }) async {
-        final FileLoadResult result = await fileLoadResult;
-        //wait for ignored files to be removed after init
-        await removeIgnoredFiles;
-        final stopWatch = Stopwatch()..start();
-        final copyOfFiles = List<File>.from(result.files);
-        copyOfFiles.removeWhere((f) {
-          assert(
-            f.location != null &&
-                f.location!.latitude != null &&
-                f.location!.longitude != null,
+    return SizedBox(
+      height: 6000,
+      child: Gallery(
+        key: ValueKey(_selectedRadius()),
+        loadingWidget: const SizedBox.shrink(),
+        disableScroll: true,
+        asyncLoader: (
+          creationStartTime,
+          creationEndTime, {
+          limit,
+          asc,
+        }) async {
+          final FileLoadResult result = await fileLoadResult;
+          //wait for ignored files to be removed after init
+          await removeIgnoredFiles;
+          final stopWatch = Stopwatch()..start();
+          final copyOfFiles = List<File>.from(result.files);
+          copyOfFiles.removeWhere((f) {
+            assert(
+              f.location != null &&
+                  f.location!.latitude != null &&
+                  f.location!.longitude != null,
+            );
+            return !LocationService.instance.isFileInsideLocationTag(
+              InheritedLocationTagData.of(context).coordinates,
+              [f.location!.latitude!, f.location!.longitude!],
+              _selectedRadius().toInt(),
+            );
+          });
+          dev.log(
+              "Time taken to get all files in a location tag: ${stopWatch.elapsedMilliseconds} ms");
+          stopWatch.stop();
+          // if (!result.hasMore) {
+          widget.memoriesCountNotifier.value = copyOfFiles.length;
+          // }
+          return FileLoadResult(
+            copyOfFiles,
+            result.hasMore,
           );
-          return !LocationService.instance.isFileInsideLocationTag(
-            InheritedLocationTagData.of(context).coordinates,
-            [f.location!.latitude!, f.location!.longitude!],
-            _selectedRadius().toInt(),
-          );
-        });
-        dev.log(
-            "Time taken to get all files in a location tag: ${stopWatch.elapsedMilliseconds} ms");
-        stopWatch.stop();
-        // if (!result.hasMore) {
-        widget.memoriesCountNotifier.value = copyOfFiles.length;
-        // }
-        return FileLoadResult(
-          copyOfFiles,
-          result.hasMore,
-        );
-      },
-      tagPrefix: "Add location",
-      shouldCollateFilesByDay: false,
+        },
+        tagPrefix: "Add location",
+        shouldCollateFilesByDay: false,
+      ),
     );
   }
 
