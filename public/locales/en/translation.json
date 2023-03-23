@@ -300,7 +300,7 @@
     "EXPORT_DATA": "Export data",
     "SELECT_FOLDER": "Select folder",
     "DESTINATION": "Destination",
-    "EXPORT_SIZE": "Export size",
+    "TOTAL_FILE_COUNT": "Total file count",
     "START": "Start",
     "EXPORT_IN_PROGRESS": "Export in progress...",
     "PAUSE": "Pause",
@@ -577,5 +577,13 @@
     "PUBLIC_LINK_CREATED": "Public link created",
     "PUBLIC_LINK_ENABLED": "Public link enabled",
     "COLLECT_PHOTOS": "Collect photos",
-    "PUBLIC_COLLECT_SUBTEXT": "Allow people with the link to also add photos to the shared album."
-}
+    "PUBLIC_COLLECT_SUBTEXT": "Allow people with the link to also add photos to the shared album.",
+    "STOP_EXPORT": "Stop",
+    "EXPORT_PROGRESS": "<a>{{progress.current}} / {{progress.total}}</a> files exported",
+    "EXPORT_NOTIFICATION": {
+        "START": "Export started",
+        "IN_PROGRESS": "Export already in progress",
+        "FINISH": "Export finished",
+        "UP_TO_DATE": "No new files to export"
+    },
+    "CONTINUOUS_EXPORT": "Sync continuously"}

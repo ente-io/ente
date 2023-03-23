@@ -9,7 +9,7 @@ export interface AppUpdateInfo {
 
 export interface ElectronAPIs {
     exists: (path: string) => boolean;
-    checkExistsAndCreateCollectionDir: (dirPath: string) => Promise<void>;
+    checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
     checkExistsAndRename: (
         oldDirPath: string,
         newDirPath: string
@@ -21,11 +21,6 @@ export interface ElectronAPIs {
     saveFileToDisk: (path: string, file: any) => Promise<void>;
     selectRootDirectory: () => Promise<string>;
     sendNotification: (content: string) => void;
-    showOnTray: (content?: any) => void;
-    registerResumeExportListener: (resumeExport: () => void) => void;
-    registerStopExportListener: (abortExport: () => void) => void;
-    registerPauseExportListener: (pauseExport: () => void) => void;
-    registerRetryFailedExportListener: (retryFailedExport: () => void) => void;
     getExportRecord: (filePath: string) => Promise<string>;
     setExportRecord: (filePath: string, data: string) => Promise<void>;
     showUploadFilesDialog: () => Promise<ElectronFile[]>;
@@ -94,4 +89,5 @@ export interface ElectronAPIs {
     ) => Promise<Uint8Array>;
     logRendererProcessMemoryUsage: (message: string) => Promise<void>;
     registerForegroundEventListener: (onForeground: () => void) => void;
+    openDirectory: (dirPath: string) => Promise<void>;
 }

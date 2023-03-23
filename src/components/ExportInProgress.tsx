@@ -11,8 +11,10 @@ import { ExportStage } from 'constants/export';
 import VerticallyCentered, { FlexWrapper } from './Container';
 import { ProgressBar } from 'react-bootstrap';
 import { t } from 'i18next';
+import { Trans } from 'react-i18next';
 
 export const ComfySpan = styled('span')`
+    padding: 0 0.5rem;
     word-spacing: 1rem;
     color: #ddd;
 `;
@@ -20,9 +22,8 @@ export const ComfySpan = styled('span')`
 interface Props {
     exportStage: ExportStage;
     exportProgress: ExportProgress;
-    resumeExport: () => void;
-    cancelExport: () => void;
-    pauseExport: () => void;
+    stopExport: () => void;
+    closeExportDialog: () => void;
 }
 
 export default function ExportInProgress(props: Props) {
@@ -31,17 +32,15 @@ export default function ExportInProgress(props: Props) {
             <DialogContent>
                 <VerticallyCentered>
                     <Box mb={1.5}>
-                        <ComfySpan>
-                            {' '}
-                            {props.exportProgress.current} /{' '}
-                            {props.exportProgress.total}{' '}
-                        </ComfySpan>{' '}
-                        <span>
-                            {' '}
-                            files exported{' '}
-                            {props.exportStage === ExportStage.PAUSED &&
-                                `(paused)`}
-                        </span>
+                        <Trans
+                            i18nKey={'EXPORT_PROGRESS'}
+                            components={{
+                                a: <ComfySpan />,
+                            }}
+                            values={{
+                                progress: props.exportProgress,
+                            }}
+                        />
                     </Box>
                     <FlexWrapper px={1}>
                         <ProgressBar
@@ -50,35 +49,21 @@ export default function ExportInProgress(props: Props) {
                                 (props.exportProgress.current * 100) /
                                     props.exportProgress.total
                             )}
-                            animated={
-                                !(props.exportStage === ExportStage.PAUSED)
-                            }
+                            animated
                             variant="upload-progress-bar"
                         />
                     </FlexWrapper>
                 </VerticallyCentered>
             </DialogContent>
             <DialogActions>
-                {props.exportStage === ExportStage.PAUSED ? (
-                    <Button
-                        size="large"
-                        onClick={props.resumeExport}
-                        color="accent">
-                        {t('RESUME')}
-                    </Button>
-                ) : (
-                    <Button
-                        size="large"
-                        onClick={props.pauseExport}
-                        color="primary">
-                        {t('PAUSE')}
-                    </Button>
-                )}
                 <Button
+                    color="secondary"
                     size="large"
-                    onClick={props.cancelExport}
-                    color="secondary">
-                    {t('CANCEL')}
+                    onClick={props.closeExportDialog}>
+                    {t('CLOSE')}
+                </Button>
+                <Button size="large" color="danger" onClick={props.stopExport}>
+                    {t('STOP_EXPORT')}
                 </Button>
             </DialogActions>
         </>
