@@ -18,6 +18,15 @@ export const getAppVersion = async (): Promise<string> => {
     }
 };
 
+export const openDirectory = async (dirPath: string): Promise<void> => {
+    try {
+        await ipcRenderer.invoke('open-dir', dirPath);
+    } catch (e) {
+        logError(e, 'error while opening directory');
+        throw e;
+    }
+};
+
 export {
     logToDisk,
     openLogDirectory,

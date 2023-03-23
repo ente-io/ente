@@ -6,7 +6,7 @@ export const exists = (path: string) => {
     return fs.existsSync(path);
 };
 
-export const checkExistsAndCreateCollectionDir = async (dirPath: string) => {
+export const checkExistsAndCreateDir = async (dirPath: string) => {
     if (!fs.existsSync(dirPath)) {
         await fs.mkdir(dirPath);
     }
