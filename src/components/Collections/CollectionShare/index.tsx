@@ -45,7 +45,7 @@ function CollectionShare(props: Props) {
                         title={t('SHARE_COLLECTION')}
                         onRootClose={handleRootClose}
                     />
-                    <Stack py={'20px'} px={'8px'} spacing={'32px'}>
+                    <Stack py={'20px'} px={'8px'}>
                         <MenuSectionTitle
                             title={t('ADD_EMAIL_TITLE')}
                             icon={<WorkspacesIcon />}
