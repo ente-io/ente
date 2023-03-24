@@ -33,6 +33,8 @@ class TextInputWidget extends StatefulWidget {
   final bool shouldSurfaceExecutionStates;
   final TextCapitalization? textCapitalization;
   final bool isPasswordInput;
+
+  ///Clear comes in the form of a suffix icon. It is unrelated to onCancel.
   final bool isClearable;
   final bool shouldUnfocusOnClearOrSubmit;
   final FocusNode? focusNode;
