@@ -1,13 +1,13 @@
 import { ChevronRight } from '@mui/icons-material';
-import { DialogContent } from '@mui/material';
+import { DialogContent, Divider } from '@mui/material';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { EnteMenuItem } from 'components/Menu/menuItem';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import { shareExpiryOptions } from 'utils/collection';
 import { t } from 'i18next';
-
+import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
 import { formatDateTime } from 'utils/time/format';
 
 interface Iprops {
@@ -31,44 +31,30 @@ export function ManageLinkExpiry({
     const [shareExpiryOptionsModalView, setShareExpiryOptionsModalView] =
         useState(false);
 
-    const [shareExpiryValue, setShareExpiryValue] = useState(0);
-
-    const [labelText, setLabelText] = useState(
-        publicShareProp?.validTill
-            ? formatDateTime(publicShareProp?.validTill / 1000)
-            : 'never'
-    );
-
     const closeShareExpiryOptionsModalView = () =>
         setShareExpiryOptionsModalView(false);
 
     const openShareExpiryOptionsModalView = () =>
         setShareExpiryOptionsModalView(true);
 
-    const changeShareExpiryValue = (value: number) => () => {
-        updateDeviceExpiry(value);
-        setLabelText(
-            publicShareProp?.validTill
-                ? formatDateTime(publicShareProp?.validTill / 1000)
-                : 'never'
-        );
-        setShareExpiryValue(value);
-        shareExpiryValue;
+    const changeShareExpiryValue = (value: number) => async () => {
+        await updateDeviceExpiry(value);
+        publicShareProp.validTill = value;
         setShareExpiryOptionsModalView(false);
     };
 
-    useEffect(() => {
-        if (shareExpiryOptionsModalView) {
-            setShareExpiryOptionsModalView(true);
-        } else setShareExpiryOptionsModalView(false);
-    }, [shareExpiryOptionsModalView]);
+    const shareExpireOption = useMemo(() => shareExpiryOptions(), []);
 
     return (
         <>
             <EnteMenuItem
                 onClick={openShareExpiryOptionsModalView}
                 endIcon={<ChevronRight />}
-                subText={labelText}>
+                subText={
+                    publicShareProp?.validTill
+                        ? formatDateTime(publicShareProp?.validTill / 1000)
+                        : 'never'
+                }>
                 {t('LINK_EXPIRY')}
             </EnteMenuItem>
             <EnteDrawer
@@ -80,20 +66,22 @@ export function ManageLinkExpiry({
                     {t('LINK_EXPIRY')}
                 </DialogTitleWithCloseButton>
                 <DialogContent>
-                    <tbody>
-                        {shareExpiryOptions().map((item) => (
-                            <tr key={item.label}>
-                                <td>
-                                    <EnteMenuItem
-                                        onClick={changeShareExpiryValue(
-                                            item.value()
-                                        )}>
-                                        {item.label}
-                                    </EnteMenuItem>
-                                </td>
-                            </tr>
+                    <EnteMenuItemGroup>
+                        {shareExpireOption.map((item, index) => (
+                            <>
+                                <EnteMenuItem
+                                    key={item.value()}
+                                    onClick={changeShareExpiryValue(
+                                        item.value()
+                                    )}>
+                                    {item.label}
+                                </EnteMenuItem>
+                                {index !== shareExpireOption.length - 1 && (
+                                    <Divider sx={{ '&&&': { m: 0 } }} />
+                                )}
+                            </>
                         ))}
-                    </tbody>
+                    </EnteMenuItemGroup>
                 </DialogContent>
             </EnteDrawer>
         </>

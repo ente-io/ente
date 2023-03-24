@@ -1,10 +1,11 @@
 import { ChevronRight } from '@mui/icons-material';
-import { DialogContent } from '@mui/material';
+import { DialogContent, Divider } from '@mui/material';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { EnteMenuItem } from 'components/Menu/menuItem';
+import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
 import { t } from 'i18next';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { getDeviceLimitOptions } from 'utils/collection';
 
@@ -30,17 +31,12 @@ export function ManageDeviceLimit({
         setChangeDeviceLimitView(false);
     const openShareExpiryOptionsModalView = () =>
         setChangeDeviceLimitView(true);
-    const changeDeviceLimitValue = (value: number) => () => {
-        updateDeviceLimit(value);
+    const changeDeviceLimitValue = (value: number) => async () => {
+        await updateDeviceLimit(value);
         publicShareProp.deviceLimit = value;
         setChangeDeviceLimitView(false);
     };
-
-    useEffect(() => {
-        if (changeDeviceLimitView) {
-            setChangeDeviceLimitView(true);
-        } else setChangeDeviceLimitView(false);
-    }, [changeDeviceLimitView]);
+    const deviceLimitOptions = useMemo(() => getDeviceLimitOptions(), []);
 
     return (
         <>
@@ -59,20 +55,20 @@ export function ManageDeviceLimit({
                     {t('LINK_EXPIRY')}
                 </DialogTitleWithCloseButton>
                 <DialogContent>
-                    <tbody>
-                        {getDeviceLimitOptions().map((item) => (
-                            <tr key={item.label}>
-                                <td>
-                                    <EnteMenuItem
-                                        onClick={changeDeviceLimitValue(
-                                            item.value
-                                        )}>
-                                        {item.label}
-                                    </EnteMenuItem>
-                                </td>
-                            </tr>
+                    <EnteMenuItemGroup>
+                        {deviceLimitOptions.map((item) => (
+                            <>
+                                <EnteMenuItem
+                                    key={item.label}
+                                    onClick={changeDeviceLimitValue(
+                                        item.value
+                                    )}>
+                                    {item.label}
+                                </EnteMenuItem>
+                                <Divider sx={{ '&&&': { m: 0 } }} />
+                            </>
                         ))}
-                    </tbody>
+                    </EnteMenuItemGroup>
                 </DialogContent>
             </EnteDrawer>
         </>
