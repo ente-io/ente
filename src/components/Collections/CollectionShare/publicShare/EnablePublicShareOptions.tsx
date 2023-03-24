@@ -15,15 +15,15 @@ interface Iprops {
     publicShareProp;
     collection: Collection;
     setPublicShareProp: (value: PublicURL) => void;
-    setIsFirstShareProp: (value: boolean) => void;
+    setCopyLinkModalView: (value: boolean) => void;
 }
 import LinkIcon from '@mui/icons-material/Link';
 import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
 
-export default function BeforeShare({
+export default function EnablePublicShareOptions({
     collection,
     setPublicShareProp,
-    setIsFirstShareProp,
+    setCopyLinkModalView,
 }: Iprops) {
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
@@ -34,7 +34,7 @@ export default function BeforeShare({
             appContext.startLoading();
             const publicURL = await createShareableURL(collection);
             setPublicShareProp(publicURL);
-            setIsFirstShareProp(true);
+            setCopyLinkModalView(true);
             await galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);

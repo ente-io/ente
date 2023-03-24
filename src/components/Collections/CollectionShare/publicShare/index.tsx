@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Collection, PublicURL } from 'types/collection';
 import { appendCollectionKeyToShareURL } from 'utils/collection';
-import BeforeShare from './beforeShare';
+import EnablePublicShareOptions from './EnablePublicShareOptions';
 import PublicShareManage from './manage';
 import ContentCopyIcon from '@mui/icons-material/ContentCopyOutlined';
 import PublicIcon from '@mui/icons-material/Public';
@@ -30,8 +30,8 @@ export default function PublicShare({
 }) {
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
     const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
-    const [isFirstShareProp, setIsFirstShareProp] = useState(false);
-    const [manageShareModalView, setManageShareModalView] = useState(false);
+    const [copyLinkModalView, setCopyLinkModalView] = useState(false);
+    const [manageShareView, setManageShareView] = useState(false);
 
     useEffect(() => {
         if (collection.publicURLs?.length) {
@@ -55,11 +55,11 @@ export default function PublicShare({
         navigator.clipboard.writeText(text);
     };
     const handleCancel = () => {
-        setIsFirstShareProp(false);
+        setCopyLinkModalView(false);
     };
 
-    const closeManageShare = () => setManageShareModalView(false);
-    const openManageShare = () => setManageShareModalView(true);
+    const closeManageShare = () => setManageShareView(false);
+    const openManageShare = () => setManageShareView(true);
     return (
         <>
             {publicShareProp ? (
@@ -89,7 +89,7 @@ export default function PublicShare({
                         </EnteMenuItemGroup>
                     </Stack>
                     <PublicShareManage
-                        open={manageShareModalView}
+                        open={manageShareView}
                         onClose={closeManageShare}
                         publicShareProp={publicShareProp}
                         collection={collection}
@@ -98,15 +98,15 @@ export default function PublicShare({
                     />
                 </>
             ) : (
-                <BeforeShare
+                <EnablePublicShareOptions
                     publicShareProp={publicShareProp}
                     setPublicShareProp={setPublicShareProp}
                     collection={collection}
-                    setIsFirstShareProp={setIsFirstShareProp}
+                    setCopyLinkModalView={setCopyLinkModalView}
                 />
             )}
             <DialogBoxBase
-                open={isFirstShareProp}
+                open={copyLinkModalView}
                 onClose={handleCancel}
                 disablePortal
                 BackdropProps={{ sx: { position: 'absolute' } }}
