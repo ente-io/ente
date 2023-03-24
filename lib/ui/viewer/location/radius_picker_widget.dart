@@ -28,9 +28,10 @@ class RadiusPickerWidget extends StatefulWidget {
 }
 
 class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
-  double selectedIndex = defaultRadiusValueIndex.toDouble();
+  int selectedRadiusIndex = defaultRadiusValueIndex;
   @override
   Widget build(BuildContext context) {
+    final radiusValue = radiusValues[selectedRadiusIndex];
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     return Row(
@@ -51,8 +52,8 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
               Expanded(
                 flex: 6,
                 child: Text(
-                  _selectedRadius(context).toInt().toString(),
-                  style: _selectedRadius(context) != 1200
+                  radiusValue.toString(),
+                  style: radiusValue != 1200
                       ? textTheme.largeBold
                       : textTheme.bodyBold,
                   textAlign: TextAlign.center,
@@ -100,10 +101,10 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
                     ),
                     child: RepaintBoundary(
                       child: Slider(
-                        value: selectedIndex,
+                        value: selectedRadiusIndex.toDouble(),
                         onChanged: (value) {
                           setState(() {
-                            selectedIndex = value;
+                            selectedRadiusIndex = value.toInt();
                           });
 
                           InheritedLocationTagData.of(
@@ -126,10 +127,5 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
         ),
       ],
     );
-  }
-
-  double _selectedRadius(BuildContext context) {
-    return radiusValues[
-        InheritedLocationTagData.of(context).selectedRadiusIndex];
   }
 }

@@ -61,7 +61,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedRadius = _selectedRadius().toInt();
+    final selectedRadius = _selectedRadius();
     late final int memoryCount;
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
@@ -125,7 +125,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
     );
   }
 
-  double _selectedRadius() {
+  int _selectedRadius() {
     return radiusValues[
         InheritedLocationTagData.of(context).selectedRadiusIndex];
   }
