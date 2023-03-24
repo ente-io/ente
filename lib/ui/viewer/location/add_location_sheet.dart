@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
+import "package:photos/core/constants.dart";
+import "package:photos/services/location_service.dart";
 import "package:photos/states/add_location_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
+import "package:photos/ui/components/keyboard/keybiard_oveylay.dart";
+import "package:photos/ui/components/keyboard/keyboard_top_button.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/location/add_location_gallery_widget.dart";
@@ -44,6 +48,26 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   //When memoriesCountNotifier is null, we show the loading widget in the
   //memories count section which also means the gallery is loading.
   ValueNotifier<int?> memoriesCountNotifier = ValueNotifier(null);
+  //The value of this notifier has no significance.
+  ValueNotifier<bool> submitNotifer = ValueNotifier(false);
+  ValueNotifier<bool> cancelNotifier = ValueNotifier(false);
+  final _focusNode = FocusNode();
+  Widget? keyboardTopButtons;
+
+  @override
+  void initState() {
+    _focusNode.addListener(_focusNodeListener);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(_focusNodeListener);
+    submitNotifer.dispose();
+    cancelNotifier.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
@@ -67,9 +91,27 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       children: [
-                        const TextInputWidget(
+                        TextInputWidget(
                           hintText: "Location name",
                           borderRadius: 2,
+                          focusNode: _focusNode,
+                          submitNotifier: submitNotifer,
+                          cancelNotifier: cancelNotifier,
+                          onSubmit: (string) async {
+                            final locationData =
+                                InheritedLocationTagData.of(context);
+                            final coordinates = locationData.coordinates;
+                            final radius =
+                                radiusValues[locationData.selectedRadiusIndex];
+                            LocationService.instance.addLocation(
+                              string,
+                              coordinates.first,
+                              coordinates.last,
+                              radius,
+                            );
+                          },
+                          shouldUnfocusOnClearOrSubmit: true,
+                          alwaysShowSuccessState: true,
                         ),
                         const SizedBox(height: 24),
                         RadiusPickerWidget(memoriesCountNotifier),
@@ -130,5 +172,22 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
         ],
       ),
     );
+  }
+
+  void _focusNodeListener() {
+    final bool hasFocus = _focusNode.hasFocus;
+    keyboardTopButtons ??= KeyboardTopButton(
+      onDoneTap: () {
+        submitNotifer.value = !submitNotifer.value;
+      },
+      onCancelTap: () {
+        cancelNotifier.value = !cancelNotifier.value;
+      },
+    );
+    if (hasFocus) {
+      KeyboardOverlay.showOverlay(context, keyboardTopButtons!);
+    } else {
+      KeyboardOverlay.removeOverlay();
+    }
   }
 }
