@@ -41,6 +41,8 @@ class AddLocationSheet extends StatefulWidget {
 }
 
 class _AddLocationSheetState extends State<AddLocationSheet> {
+  //When memoriesCountNotifier is null, we show the loading widget in the
+  //memories count section which also means the gallery is loading.
   ValueNotifier<int?> memoriesCountNotifier = ValueNotifier(null);
   @override
   Widget build(BuildContext context) {

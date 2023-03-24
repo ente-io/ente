@@ -29,32 +29,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
 
   @override
   void initState() {
-    final ownerID = Configuration.instance.getUserID();
-    final hasSelectedAllForBackup =
-        Configuration.instance.hasSelectedAllFoldersForBackup();
-    final collectionsToHide =
-        CollectionsService.instance.collectionsHiddenFromTimeline();
-    if (hasSelectedAllForBackup) {
-      fileLoadResult = FilesDB.instance.getAllLocalAndUploadedFiles(
-        galleryLoadStartTime,
-        galleryLoadEndTime,
-        ownerID!,
-        limit: null,
-        asc: true,
-        ignoredCollectionIDs: collectionsToHide,
-        onlyFilesWithLocation: true,
-      );
-    } else {
-      fileLoadResult = FilesDB.instance.getAllPendingOrUploadedFiles(
-        galleryLoadStartTime,
-        galleryLoadEndTime,
-        ownerID!,
-        limit: null,
-        asc: true,
-        ignoredCollectionIDs: collectionsToHide,
-        onlyFilesWithLocation: true,
-      );
-    }
+    fileLoadResult = _fetchAllFilesWithLocationData();
     removeIgnoredFiles = _removeIgnoredFiles(fileLoadResult);
     super.initState();
   }
@@ -153,5 +128,34 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
     final galleryHeight = (thumbnailHeight * numberOfRows) +
         (galleryGridSpacing * (numberOfRows - 1));
     return galleryHeight + 120;
+  }
+
+  Future<FileLoadResult> _fetchAllFilesWithLocationData() {
+    final ownerID = Configuration.instance.getUserID();
+    final hasSelectedAllForBackup =
+        Configuration.instance.hasSelectedAllFoldersForBackup();
+    final collectionsToHide =
+        CollectionsService.instance.collectionsHiddenFromTimeline();
+    if (hasSelectedAllForBackup) {
+      return FilesDB.instance.getAllLocalAndUploadedFiles(
+        galleryLoadStartTime,
+        galleryLoadEndTime,
+        ownerID!,
+        limit: null,
+        asc: true,
+        ignoredCollectionIDs: collectionsToHide,
+        onlyFilesWithLocation: true,
+      );
+    } else {
+      return FilesDB.instance.getAllPendingOrUploadedFiles(
+        galleryLoadStartTime,
+        galleryLoadEndTime,
+        ownerID!,
+        limit: null,
+        asc: true,
+        ignoredCollectionIDs: collectionsToHide,
+        onlyFilesWithLocation: true,
+      );
+    }
   }
 }
