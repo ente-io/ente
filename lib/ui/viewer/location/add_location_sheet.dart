@@ -97,19 +97,9 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           focusNode: _focusNode,
                           submitNotifier: submitNotifer,
                           cancelNotifier: cancelNotifier,
-                          onSubmit: (string) async {
-                            final locationData =
-                                InheritedLocationTagData.of(context);
-                            final coordinates = locationData.coordinates;
-                            final radius =
-                                radiusValues[locationData.selectedRadiusIndex];
-                            LocationService.instance.addLocation(
-                              string,
-                              coordinates.first,
-                              coordinates.last,
-                              radius,
-                            );
-                          },
+                          popNavAfterSubmission: true,
+                          onSubmit: (locationName) async =>
+                              _addLocationTag(locationName),
                           shouldUnfocusOnClearOrSubmit: true,
                           alwaysShowSuccessState: true,
                         ),
@@ -171,6 +161,18 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
           ),
         ],
       ),
+    );
+  }
+
+  void _addLocationTag(String locationName) {
+    final locationData = InheritedLocationTagData.of(context);
+    final coordinates = locationData.coordinates;
+    final radius = radiusValues[locationData.selectedRadiusIndex];
+    LocationService.instance.addLocation(
+      locationName,
+      coordinates.first,
+      coordinates.last,
+      radius,
     );
   }
 
