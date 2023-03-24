@@ -1,5 +1,5 @@
 /** Enums of supported locale */
-export enum locale {
+export enum Language {
     en = 'en',
     fr = 'fr',
 }

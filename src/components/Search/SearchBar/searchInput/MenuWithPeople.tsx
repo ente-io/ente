@@ -7,7 +7,7 @@ import { Row } from 'components/Container';
 import { Col } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import styled from '@mui/styled-engine';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
 
 const { Menu } = components;
 
@@ -48,7 +48,7 @@ const MenuWithPeople = (props) => {
                 {((appContext.mlSearchEnabled && indexStatus) ||
                     (people && people.length > 0)) && (
                     <LegendRow>
-                        <Legend>{constants.PEOPLE}</Legend>
+                        <Legend>{t('PEOPLE')}</Legend>
                     </LegendRow>
                 )}
                 {appContext.mlSearchEnabled && indexStatus && (

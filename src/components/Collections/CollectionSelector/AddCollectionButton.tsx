@@ -5,8 +5,8 @@ import {
 } from 'components/Collections/styledComponents';
 import React from 'react';
 import { styled } from '@mui/material';
-import constants from 'utils/strings/constants';
 import { CenteredFlex, Overlay } from 'components/Container';
+import { t } from 'i18next';
 
 const ImageContainer = styled(Overlay)`
     display: flex;
@@ -24,7 +24,7 @@ export default function AddCollectionButton({ showNextModal }: Iprops) {
             onClick={() => showNextModal()}
             latestFile={null}>
             <AllCollectionTileText>
-                {constants.CREATE_COLLECTION}
+                {t('CREATE_COLLECTION')}
             </AllCollectionTileText>
             <ImageContainer>
                 <CenteredFlex>+</CenteredFlex>

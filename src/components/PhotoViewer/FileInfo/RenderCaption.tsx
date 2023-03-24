@@ -9,9 +9,9 @@ import { MAX_CAPTION_SIZE } from 'constants/file';
 import { Formik } from 'formik';
 import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
 import * as Yup from 'yup';
-import constants from 'utils/strings/constants';
 import Close from '@mui/icons-material/Close';
 import Done from '@mui/icons-material/Done';
+import { t } from 'i18next';
 
 interface formValues {
     caption: string;
@@ -70,7 +70,7 @@ export function RenderCaption({
                 validationSchema={Yup.object().shape({
                     caption: Yup.string().max(
                         MAX_CAPTION_SIZE,
-                        constants.CAPTION_CHARACTER_LIMIT
+                        t('CAPTION_CHARACTER_LIMIT')
                     ),
                 })}
                 validateOnBlur={false}
@@ -90,7 +90,7 @@ export function RenderCaption({
                             name="caption"
                             type="text"
                             multiline
-                            placeholder={constants.CAPTION_PLACEHOLDER}
+                            placeholder={t('CAPTION_PLACEHOLDER')}
                             value={values.caption}
                             onChange={handleChange('caption')}
                             error={Boolean(errors.caption)}

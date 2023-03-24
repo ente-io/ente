@@ -42,13 +42,6 @@ import {
     FAVORITE_COLLECTION_NAME,
     DUMMY_UNCATEGORIZED_SECTION,
 } from 'constants/collection';
-// constants strings are used instead of english strings to avoid importing MUI components
-// which reference window object, which is not available in web worker
-import {
-    ALL_SECTION_NAME,
-    ARCHIVE_SECTION_NAME,
-    TRASH_SECTION_NAME,
-} from 'constants/strings';
 import {
     NEW_COLLECTION_MAGIC_METADATA,
     SUB_TYPE,
@@ -68,6 +61,7 @@ import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
 import { REQUEST_BATCH_SIZE } from 'constants/api';
 import { batch } from 'utils/common';
+import { t } from 'i18next';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -1059,7 +1053,7 @@ function getAllCollectionSummaries(
 ): CollectionSummary {
     return {
         id: ALL_SECTION,
-        name: ALL_SECTION_NAME,
+        name: t('ALL_SECTION_NAME'),
         type: CollectionSummaryType.all,
         latestFile: collectionsLatestFile.get(ALL_SECTION),
         fileCount: collectionFilesCount.get(ALL_SECTION) || 0,
@@ -1070,7 +1064,7 @@ function getAllCollectionSummaries(
 function getDummyUncategorizedCollectionSummaries(): CollectionSummary {
     return {
         id: ALL_SECTION,
-        name: UNCATEGORIZED_COLLECTION_NAME,
+        name: t('UNCATEGORIZED'),
         type: CollectionSummaryType.uncategorized,
         latestFile: null,
         fileCount: 0,
@@ -1084,7 +1078,7 @@ function getArchivedCollectionSummaries(
 ): CollectionSummary {
     return {
         id: ARCHIVE_SECTION,
-        name: ARCHIVE_SECTION_NAME,
+        name: t('ARCHIVE_SECTION_NAME'),
         type: CollectionSummaryType.archive,
         latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
@@ -1098,7 +1092,7 @@ function getTrashedCollectionSummaries(
 ): CollectionSummary {
     return {
         id: TRASH_SECTION,
-        name: TRASH_SECTION_NAME,
+        name: t('TRASH'),
         type: CollectionSummaryType.trash,
         latestFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,

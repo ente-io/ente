@@ -1,10 +1,10 @@
 import React from 'react';
-import constants from 'utils/strings/constants';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
 import DialogBoxBase from 'components/DialogBox/base';
 import { DialogContent, DialogTitle } from '@mui/material';
+import { t } from 'i18next';
 
 export interface CollectionNamerAttributes {
     callback: (name: string) => void;
@@ -35,7 +35,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
             attributes.callback(albumName);
             props.onHide();
         } catch (e) {
-            setFieldError(constants.UNKNOWN_ERROR);
+            setFieldError(t('UNKNOWN_ERROR'));
         }
     };
 
@@ -47,7 +47,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
                     callback={onSubmit}
                     fieldType="text"
                     buttonText={attributes.buttonText}
-                    placeholder={constants.ENTER_ALBUM_NAME}
+                    placeholder={t('ENTER_ALBUM_NAME')}
                     initialValue={attributes.autoFilledName}
                     submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
                     secondaryButtonAction={props.onHide}

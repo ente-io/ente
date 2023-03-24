@@ -12,7 +12,6 @@ export const ServerErrorCodes = {
 };
 
 export const CustomError = {
-    SUBSCRIPTION_VERIFICATION_ERROR: 'Subscription verification failed',
     THUMBNAIL_GENERATION_FAILED: 'thumbnail generation failed',
     VIDEO_PLAYBACK_FAILED: 'video playback failed',
     ETAG_MISSING: 'no header/etag present in response body',

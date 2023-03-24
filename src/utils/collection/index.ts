@@ -33,6 +33,7 @@ import {
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 import { getAlbumsURL } from 'utils/common/apiUtil';
 import bs58 from 'bs58';
+import { t } from 'i18next';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -115,26 +116,26 @@ export function getDeviceLimitOptions() {
     return [2, 5, 10, 25, 50].map((i) => _intSelectOption(i));
 }
 
-export const shareExpiryOptions = [
-    { label: 'never', value: () => 0 },
+export const shareExpiryOptions = () => [
+    { label: t('LINK_EXPIRY_NEVER'), value: () => 0 },
     {
-        label: 'after 1 hour',
+        label: t('AFTER_TIME.HOUR'),
         value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),
     },
     {
-        label: 'after 1 day',
+        label: t('AFTER_TIME.DAY'),
         value: () => getUnixTimeInMicroSecondsWithDelta({ days: 1 }),
     },
     {
-        label: 'after 1 week',
+        label: t('AFTER_TIME.WEEK'),
         value: () => getUnixTimeInMicroSecondsWithDelta({ days: 7 }),
     },
     {
-        label: 'after 1 month',
+        label: t('AFTER_TIME.MONTH'),
         value: () => getUnixTimeInMicroSecondsWithDelta({ months: 1 }),
     },
     {
-        label: 'after 1 year',
+        label: t('AFTER_TIME.YEAR'),
         value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
     },
 ];

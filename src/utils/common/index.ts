@@ -1,7 +1,6 @@
 import { CustomError } from 'utils/error';
 import isElectron from 'is-electron';
-
-export const APP_DOWNLOAD_URL = 'https://ente.io/download/desktop';
+import { APP_DOWNLOAD_URL } from 'constants/urls';
 
 export function runningInBrowser() {
     return typeof window !== 'undefined';

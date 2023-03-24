@@ -3,16 +3,19 @@ import Close from '@mui/icons-material/Close';
 import { DialogTitle, Box, Typography, Stack } from '@mui/material';
 import { IconButtonWithBG, SpaceBetweenFlex } from 'components/Container';
 import { UPLOAD_STAGES } from 'constants/upload';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import UploadProgressContext from 'contexts/uploadProgress';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 
-const UploadProgressTitleText = ({ expanded }) => (
-    <Typography variant={expanded ? 'title' : 'subtitle'}>
-        {constants.FILE_UPLOAD}
-    </Typography>
-);
+const UploadProgressTitleText = ({ expanded }) => {
+    return (
+        <Typography variant={expanded ? 'title' : 'subtitle'}>
+            {t('FILE_UPLOAD')}
+        </Typography>
+    );
+};
 
 function UploadProgressSubtitleText() {
     const { uploadStage, uploadCounter } = useContext(UploadProgressContext);
@@ -20,10 +23,10 @@ function UploadProgressSubtitleText() {
     return (
         <Typography color="text.secondary">
             {uploadStage === UPLOAD_STAGES.UPLOADING
-                ? constants.UPLOAD_STAGE_MESSAGE[uploadStage](uploadCounter)
+                ? t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`, { uploadCounter })
                 : uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA
-                ? constants.UPLOAD_STAGE_MESSAGE[uploadStage](uploadCounter)
-                : constants.UPLOAD_STAGE_MESSAGE[uploadStage]}
+                ? t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`, { uploadCounter })
+                : t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`)}
         </Typography>
     );
 }

@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { Button, Stack, styled, Typography } from '@mui/material';
-import constants from 'utils/strings/constants';
 import { DeduplicateContext } from 'pages/deduplicate';
 import VerticallyCentered, { FlexWrapper } from './Container';
 import { Box } from '@mui/material';
@@ -8,6 +7,9 @@ import uploadManager from 'services/upload/uploadManager';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 import FolderIcon from '@mui/icons-material/FolderOutlined';
 import { UploadTypeSelectorIntent } from 'types/gallery';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
+import { EnteLogo } from './EnteLogo';
 
 const Wrapper = styled(Box)`
     display: flex;
@@ -28,7 +30,7 @@ export default function EmptyScreen({ openUploader }) {
                     color: '#a6a6a6',
                     fontSize: '18px',
                 }}>
-                {constants.NO_DUPLICATES_FOUND}
+                {t('NO_DUPLICATES_FOUND')}
             </div>
         </VerticallyCentered>
     ) : (
@@ -40,10 +42,18 @@ export default function EmptyScreen({ openUploader }) {
                     pb: 1.5,
                 }}>
                 <VerticallyCentered sx={{ flex: 'none' }}>
-                    {constants.WELCOME_TO_ENTE()}
+                    <Typography variant="h3" color="text.secondary" mb={1}>
+                        <Trans
+                            i18nKey="WELCOME_TO_ENTE_HEADING"
+                            components={{ a: <EnteLogo /> }}
+                        />
+                    </Typography>
+                    <Typography variant="title">
+                        {t('WELCOME_TO_ENTE_SUBHEADING')}
+                    </Typography>
                 </VerticallyCentered>
                 <Typography variant="body1" mt={3.5} color="text.secondary">
-                    {constants.WHERE_YOUR_BEST_PHOTOS_LIVE}
+                    {t('WHERE_YOUR_BEST_PHOTOS_LIVE')}
                 </Typography>
             </Stack>
             <NonDraggableImage
@@ -73,7 +83,7 @@ export default function EmptyScreen({ openUploader }) {
                     }}>
                     <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
                         <AddPhotoAlternateIcon />
-                        {constants.UPLOAD_FIRST_PHOTO}
+                        {t('UPLOAD_FIRST_PHOTO')}
                     </FlexWrapper>
                 </Button>
                 <Button
@@ -94,7 +104,7 @@ export default function EmptyScreen({ openUploader }) {
                     }}>
                     <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
                         <FolderIcon />
-                        {constants.IMPORT_YOUR_FOLDERS}
+                        {t('IMPORT_YOUR_FOLDERS')}
                     </FlexWrapper>
                 </Button>
             </VerticallyCentered>

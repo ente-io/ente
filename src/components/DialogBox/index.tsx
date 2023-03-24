@@ -1,5 +1,4 @@
 import React from 'react';
-import constants from 'utils/strings/constants';
 import {
     Breakpoint,
     Button,
@@ -14,6 +13,7 @@ import DialogTitleWithCloseButton, {
 import DialogBoxBase from './base';
 import { DialogBoxAttributes } from 'types/dialogBox';
 import DialogIcon from './DialogIcon';
+import { t } from 'i18next';
 
 type IProps = React.PropsWithChildren<
     Omit<DialogProps, 'onClose' | 'maxSize'> & {
@@ -81,7 +81,7 @@ export default function DialogBox({
                                         attributes.close?.action();
                                     onClose();
                                 }}>
-                                {attributes.close?.text ?? constants.OK}
+                                {attributes.close?.text ?? t('OK')}
                             </Button>
                         )}
                         {attributes.proceed && (

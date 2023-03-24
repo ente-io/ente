@@ -1,4 +1,5 @@
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
+
 import PhotoFrame from 'components/PhotoFrame';
 import { ALL_SECTION } from 'constants/collection';
 import { AppContext } from 'pages/_app';
@@ -127,17 +128,17 @@ export default function Deduplicate() {
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
-                        title: constants.ERROR,
+                        title: t('ERROR'),
 
                         close: { variant: 'danger' },
-                        content: constants.NOT_FILE_OWNER,
+                        content: t('NOT_FILE_OWNER'),
                     });
             }
             setDialogMessage({
-                title: constants.ERROR,
+                title: t('ERROR'),
 
                 close: { variant: 'danger' },
-                content: constants.UNKNOWN_ERROR,
+                content: t('UNKNOWN_ERROR'),
             });
         } finally {
             await syncWithRemote();
@@ -171,9 +172,11 @@ export default function Deduplicate() {
             }}>
             {duplicateFiles.length > 0 && (
                 <Info>
-                    {constants.DEDUPLICATION_LOGIC_MESSAGE(
-                        clubSameTimeFilesOnly
-                    )}
+                    {t('DEDUPLICATE_BASED_ON', {
+                        context: clubSameTimeFilesOnly
+                            ? 'SIZE_AND_CAPTURE_TIME'
+                            : 'SIZE',
+                    })}
                 </Info>
             )}
             <PhotoFrame

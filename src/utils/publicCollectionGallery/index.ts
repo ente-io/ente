@@ -6,7 +6,6 @@ const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType 
         token: null,
         passwordToken: null,
         accessedThroughSharedURL: false,
-        openReportForm: () => null,
         photoListHeader: null,
         photoListFooter: null,
     };

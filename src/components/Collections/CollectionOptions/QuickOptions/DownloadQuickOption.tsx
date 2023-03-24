@@ -2,8 +2,8 @@ import { CollectionActions } from '..';
 import React from 'react';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import { IconButton, Tooltip } from '@mui/material';
-import constants from 'utils/strings/constants';
 import { CollectionSummaryType } from 'constants/collection';
+import { t } from 'i18next';
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,
@@ -20,11 +20,11 @@ export function DownloadQuickOption({
         <Tooltip
             title={
                 collectionSummaryType === CollectionSummaryType.favorites
-                    ? constants.DOWNLOAD_FAVORITES
+                    ? t('DOWNLOAD_FAVORITES')
                     : collectionSummaryType ===
                       CollectionSummaryType.uncategorized
-                    ? constants.DOWNLOAD_UNCATEGORIZED
-                    : constants.DOWNLOAD_COLLECTION
+                    ? t('DOWNLOAD_UNCATEGORIZED')
+                    : t('DOWNLOAD_COLLECTION')
             }>
             <IconButton
                 onClick={handleCollectionAction(

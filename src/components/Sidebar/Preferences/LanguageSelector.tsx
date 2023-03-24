@@ -1,23 +1,23 @@
 import { OptionWithDivider } from 'components/Collections/CollectionShare/publicShare/manage/selectComponents/OptionWithDivider';
-import { locale } from 'constants/locale';
+import { Language } from 'constants/locale';
 import { useLocalState } from 'hooks/useLocalState';
 import { useRouter } from 'next/router';
 import Select from 'react-select';
 import { DropdownStyle } from 'styles/dropdown';
+import { getBestPossibleUserLocale } from 'utils/i18n';
 import { LS_KEYS } from 'utils/storage/localStorage';
-import { getBestPossibleUserLocale } from 'utils/strings';
 
-const getLocaleDisplayName = (l: locale) => {
+const getLocaleDisplayName = (l: Language) => {
     switch (l) {
-        case locale.en:
+        case Language.en:
             return 'English';
-        case locale.fr:
+        case Language.fr:
             return 'Français';
     }
 };
 
 const getLanguageOptions = () => {
-    return Object.values(locale).map((lang) => ({
+    return Object.values(Language).map((lang) => ({
         label: getLocaleDisplayName(lang),
         value: lang,
     }));
@@ -28,8 +28,10 @@ export const LanguageSelector = () => {
         LS_KEYS.LOCALE,
         getBestPossibleUserLocale()
     );
+
     const router = useRouter();
-    const updateCurrentLocale = (newLocale: locale) => {
+
+    const updateCurrentLocale = (newLocale: Language) => {
         setUserLocale(newLocale);
         router.reload();
     };

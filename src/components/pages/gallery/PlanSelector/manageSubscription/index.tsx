@@ -1,6 +1,8 @@
 import { Stack } from '@mui/material';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
+import { Trans } from 'react-i18next';
+import { t } from 'i18next';
 import { Subscription } from 'types/billing';
 import { SetLoading } from 'types/gallery';
 import {
@@ -11,7 +13,6 @@ import {
     hasStripeSubscription,
     isSubscriptionCancelled,
 } from 'utils/billing';
-import constants from 'utils/strings/constants';
 import ManageSubscriptionButton from './button';
 interface Iprops {
     subscription: Subscription;
@@ -40,7 +41,7 @@ export function ManageSubscription({
             <ManageSubscriptionButton
                 color="secondary"
                 onClick={openFamilyPortal}>
-                {constants.MANAGE_FAMILY_PORTAL}
+                {t('MANAGE_FAMILY_PORTAL')}
             </ManageSubscriptionButton>
         </Stack>
     );
@@ -55,12 +56,12 @@ function StripeSubscriptionOptions({
 
     const confirmReactivation = () =>
         appContext.setDialogMessage({
-            title: constants.REACTIVATE_SUBSCRIPTION,
-            content: constants.REACTIVATE_SUBSCRIPTION_MESSAGE(
-                subscription.expiryTime
-            ),
+            title: t('REACTIVATE_SUBSCRIPTION'),
+            content: t('REACTIVATE_SUBSCRIPTION_MESSAGE', {
+                date: subscription.expiryTime,
+            }),
             proceed: {
-                text: constants.REACTIVATE_SUBSCRIPTION,
+                text: t('REACTIVATE_SUBSCRIPTION'),
                 action: activateSubscription.bind(
                     null,
                     appContext.setDialogMessage,
@@ -70,15 +71,15 @@ function StripeSubscriptionOptions({
                 variant: 'accent',
             },
             close: {
-                text: constants.CANCEL,
+                text: t('CANCEL'),
             },
         });
     const confirmCancel = () =>
         appContext.setDialogMessage({
-            title: constants.CANCEL_SUBSCRIPTION,
-            content: constants.CANCEL_SUBSCRIPTION_MESSAGE(),
+            title: t('CANCEL_SUBSCRIPTION'),
+            content: <Trans i18nKey={'CANCEL_SUBSCRIPTION_MESSAGE'} />,
             proceed: {
-                text: constants.CANCEL_SUBSCRIPTION,
+                text: t('CANCEL_SUBSCRIPTION'),
                 action: cancelSubscription.bind(
                     null,
                     appContext.setDialogMessage,
@@ -88,7 +89,7 @@ function StripeSubscriptionOptions({
                 variant: 'danger',
             },
             close: {
-                text: constants.NEVERMIND,
+                text: t('NEVERMIND'),
             },
         });
     const openManagementPortal = updatePaymentMethod.bind(
@@ -102,19 +103,19 @@ function StripeSubscriptionOptions({
                 <ManageSubscriptionButton
                     color="secondary"
                     onClick={confirmReactivation}>
-                    {constants.REACTIVATE_SUBSCRIPTION}
+                    {t('REACTIVATE_SUBSCRIPTION')}
                 </ManageSubscriptionButton>
             ) : (
                 <ManageSubscriptionButton
                     color="secondary"
                     onClick={confirmCancel}>
-                    {constants.CANCEL_SUBSCRIPTION}
+                    {t('CANCEL_SUBSCRIPTION')}
                 </ManageSubscriptionButton>
             )}
             <ManageSubscriptionButton
                 color="secondary"
                 onClick={openManagementPortal}>
-                {constants.MANAGEMENT_PORTAL}
+                {t('MANAGEMENT_PORTAL')}
             </ManageSubscriptionButton>
         </>
     );

@@ -1,4 +1,3 @@
-import constants from 'utils/strings/constants';
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { sendOtt } from 'services/userService';
@@ -9,6 +8,7 @@ import FormPaperFooter from './Form/FormPaper/Footer';
 import LinkButton from './pages/gallery/LinkButton';
 import SingleInputForm, { SingleInputFormProps } from './SingleInputForm';
 import { Input } from '@mui/material';
+import { t } from 'i18next';
 
 interface LoginProps {
     signUp: () => void;
@@ -37,25 +37,25 @@ export default function Login(props: LoginProps) {
             setData(LS_KEYS.USER, { email });
             router.push(PAGES.VERIFY);
         } catch (e) {
-            setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
+            setFieldError(`${t('UNKNOWN_ERROR} ${e.message}')}`);
         }
     };
 
     return (
         <>
-            <FormPaperTitle>{constants.LOGIN}</FormPaperTitle>
+            <FormPaperTitle>{t('LOGIN')}</FormPaperTitle>
             <SingleInputForm
                 callback={loginUser}
                 fieldType="email"
-                placeholder={constants.ENTER_EMAIL}
-                buttonText={constants.LOGIN}
+                placeholder={t('ENTER_EMAIL')}
+                buttonText={t('LOGIN')}
                 autoComplete="username"
                 hiddenPostInput={<Input hidden type="password" value="" />}
             />
 
             <FormPaperFooter>
                 <LinkButton onClick={props.signUp}>
-                    {constants.NO_ACCOUNT}
+                    {t('NO_ACCOUNT')}
                 </LinkButton>
             </FormPaperFooter>
         </>

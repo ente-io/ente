@@ -3,7 +3,7 @@ import Done from '@mui/icons-material/Done';
 import { Box, Button } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
 export function PlanIconButton({
     current,
     onClick,
@@ -37,7 +37,7 @@ function CurrentPlanTileButton() {
             onClick={() => null}
             variant={'outlined'}>
             <SpaceBetweenFlex>
-                {constants.ACTIVE}
+                {t('ACTIVE')}
                 <Done />
             </SpaceBetweenFlex>
         </Button>
@@ -55,7 +55,7 @@ function NormalPlanTileButton({ onClick }) {
             onClick={onClick}
             variant={'contained'}>
             <SpaceBetweenFlex>
-                {constants.SUBSCRIBE}
+                {t('SUBSCRIBE')}
                 <ChevronRight />
             </SpaceBetweenFlex>
         </Button>

@@ -3,7 +3,7 @@ import { FamilyUsageProgressBar } from './progressBar';
 import { Box, Stack, Typography } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
-import constants from 'utils/strings/constants';
+import { t } from 'i18next';
 
 interface Iprops {
     userUsage: number;
@@ -30,11 +30,11 @@ export function FamilyUsageSection({
                     marginTop: 1.5,
                 }}>
                 <Stack direction={'row'} spacing={1.5}>
-                    <Legend label={constants.YOU} color="text.primary" />
-                    <Legend label={constants.FAMILY} color="text.secondary" />
+                    <Legend label={t('YOU')} color="text.primary" />
+                    <Legend label={t('FAMILY')} color="text.secondary" />
                 </Stack>
                 <Typography variant="caption" fontWeight={'bold'}>
-                    {constants.PHOTO_COUNT(fileCount ?? 0)}
+                    {t('photos_count', { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>
         </Box>
