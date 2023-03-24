@@ -5,11 +5,11 @@ import DialogTitleWithCloseButton, {
     dialogCloseHandler,
 } from 'components/DialogBox/TitleWithCloseButton';
 import DialogContent from '@mui/material/DialogContent';
-import { Typography } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import PublicShare from './publicShare';
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import { t } from 'i18next';
+import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 
 interface Props {
     open: boolean;
@@ -33,12 +33,10 @@ function CollectionShare(props: Props) {
                     {t('SHARE_COLLECTION')}
                 </DialogTitleWithCloseButton>
                 <DialogContent>
-                    <Typography color="text.secondary" variant="body2">
-                        <WorkspacesIcon
-                            style={{ fontSize: 17, marginRight: 8 }}
-                        />
-                        {t('ADD_EMAIL_TITLE')}
-                    </Typography>
+                    <MenuSectionTitle
+                        title={t('ADD_EMAIL_TITLE')}
+                        icon={<WorkspacesIcon />}
+                    />
                     <EmailShare collection={props.collection} />
                     <PublicShare collection={props.collection} />
                 </DialogContent>

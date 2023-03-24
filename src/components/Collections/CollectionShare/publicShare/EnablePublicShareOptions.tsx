@@ -19,6 +19,7 @@ interface Iprops {
 }
 import LinkIcon from '@mui/icons-material/Link';
 import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
+import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 
 export default function EnablePublicShareOptions({
     collection,
@@ -70,10 +71,10 @@ export default function EnablePublicShareOptions({
     };
     return (
         <Stack>
-            <Typography color="text.secondary" variant="body2" padding={1}>
-                <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
-                {t('LINK_SHARE_TITLE')}
-            </Typography>
+            <MenuSectionTitle
+                title={t('LINK_SHARE_TITLE')}
+                icon={<PublicIcon />}
+            />
             <EnteMenuItemGroup>
                 <EnteMenuItem
                     startIcon={<LinkIcon />}
