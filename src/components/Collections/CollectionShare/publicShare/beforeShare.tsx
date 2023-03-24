@@ -5,7 +5,6 @@ import React, { useContext, useState } from 'react';
 import { t } from 'i18next';
 import {
     createShareableURL,
-    deleteShareableURL,
     updateShareableURL,
 } from 'services/collectionService';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
@@ -15,7 +14,6 @@ import PublicIcon from '@mui/icons-material/Public';
 interface Iprops {
     publicShareProp;
     collection: Collection;
-    publicShareActive: boolean;
     setPublicShareProp: (value: PublicURL) => void;
     setIsFirstShareProp: (value: boolean) => void;
 }
@@ -24,7 +22,6 @@ import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
 
 export default function BeforeShare({
     collection,
-    publicShareActive,
     setPublicShareProp,
     setIsFirstShareProp,
 }: Iprops) {
@@ -37,6 +34,7 @@ export default function BeforeShare({
             appContext.startLoading();
             const publicURL = await createShareableURL(collection);
             setPublicShareProp(publicURL);
+            setIsFirstShareProp(true);
             await galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
@@ -46,32 +44,6 @@ export default function BeforeShare({
         }
     };
 
-    const disablePublicSharing = async () => {
-        try {
-            appContext.startLoading();
-            await deleteShareableURL(collection);
-            setPublicShareProp(null);
-            await galleryContext.syncWithRemote(false, true);
-        } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            setSharableLinkError(errorMessage);
-        } finally {
-            appContext.finishLoading();
-        }
-    };
-
-    const confirmDisablePublicSharing = () => {
-        appContext.setDialogMessage({
-            title: t('DISABLE_PUBLIC_SHARING'),
-            content: t('DISABLE_PUBLIC_SHARING_MESSAGE'),
-            close: { text: t('CANCEL') },
-            proceed: {
-                text: t('DISABLE'),
-                action: disablePublicSharing,
-                variant: 'danger',
-            },
-        });
-    };
     const updatePublicShareURLHelper = async (req: UpdatePublicURL) => {
         try {
             galleryContext.setBlockingLoad(true);
@@ -86,31 +58,15 @@ export default function BeforeShare({
     };
     const handleCollectionPublicSharing = () => {
         setSharableLinkError(null);
-        updatePublicShareURLHelper({
-            collectionID: collection.id,
-            enableCollect: false,
-        });
-        if (publicShareActive) {
-            confirmDisablePublicSharing();
-            setIsFirstShareProp(false);
-        } else {
-            createSharableURLHelper();
-            setIsFirstShareProp(true);
-        }
+        createSharableURLHelper();
     };
-    const handleCollecPhotosPublicSharing = () => {
+    const handleCollecPhotosPublicSharing = async () => {
         setSharableLinkError(null);
-        updatePublicShareURLHelper({
+        await createSharableURLHelper();
+        await updatePublicShareURLHelper({
             collectionID: collection.id,
             enableCollect: true,
         });
-        if (publicShareActive) {
-            confirmDisablePublicSharing();
-            setIsFirstShareProp(false);
-        } else {
-            createSharableURLHelper();
-            setIsFirstShareProp(true);
-        }
     };
     return (
         <Stack>

@@ -62,6 +62,7 @@ export default function PublicShareManage({
         //appContext.startLoading();
         await deleteShareableURL(collection);
         setPublicShareProp(null);
+        onClose();
         // await galleryContext.syncWithRemote(false, true);
     };
     const copyToClipboardHelper = (text: string) => () => {

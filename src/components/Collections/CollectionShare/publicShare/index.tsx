@@ -51,19 +51,6 @@ export default function PublicShare({
         }
     }, [publicShareProp]);
 
-    useEffect(() => {
-        if (isFirstShareProp) {
-            setIsFirstShareProp(true);
-            setManageShareModalView(false);
-        } else setIsFirstShareProp(false);
-    }, [isFirstShareProp]);
-
-    useEffect(() => {
-        if (manageShareModalView) {
-            setManageShareModalView(true);
-        } else setManageShareModalView(false);
-    }, [manageShareModalView]);
-
     const copyToClipboardHelper = (text: string) => () => {
         navigator.clipboard.writeText(text);
     };
@@ -109,51 +96,50 @@ export default function PublicShare({
                         setPublicShareProp={setPublicShareProp}
                         publicShareUrl={publicShareUrl}
                     />
-                    <DialogBoxBase
-                        open={isFirstShareProp}
-                        onClose={handleCancel}
-                        disablePortal
-                        BackdropProps={{ sx: { position: 'absolute' } }}
-                        sx={{ position: 'absolute' }}
-                        PaperProps={{
-                            sx: { p: 1, justifyContent: 'flex-end' },
-                        }}>
-                        <DialogContent>
-                            <VerticallyCentered>
-                                <Typography fontWeight={'bold'}>
-                                    {t('PUBLIC_LINK_CREATED')}
-                                </Typography>
-                                <Box pt={2}>
-                                    <Check sx={{ fontSize: '48px' }} />
-                                </Box>
-                            </VerticallyCentered>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button
-                                onClick={handleCancel}
-                                color="secondary"
-                                size={'large'}>
-                                {t('DONE')}
-                            </Button>
-                            <Button
-                                onClick={copyToClipboardHelper(publicShareUrl)}
-                                size={'large'}
-                                color="primary"
-                                autoFocus>
-                                {t('COPY_LINK')}
-                            </Button>
-                        </DialogActions>
-                    </DialogBoxBase>
                 </>
             ) : (
                 <BeforeShare
                     publicShareProp={publicShareProp}
                     setPublicShareProp={setPublicShareProp}
                     collection={collection}
-                    publicShareActive={!!publicShareProp}
                     setIsFirstShareProp={setIsFirstShareProp}
                 />
             )}
+            <DialogBoxBase
+                open={isFirstShareProp}
+                onClose={handleCancel}
+                disablePortal
+                BackdropProps={{ sx: { position: 'absolute' } }}
+                sx={{ position: 'absolute' }}
+                PaperProps={{
+                    sx: { p: 1, justifyContent: 'flex-end' },
+                }}>
+                <DialogContent>
+                    <VerticallyCentered>
+                        <Typography fontWeight={'bold'}>
+                            {t('PUBLIC_LINK_CREATED')}
+                        </Typography>
+                        <Box pt={2}>
+                            <Check sx={{ fontSize: '48px' }} />
+                        </Box>
+                    </VerticallyCentered>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={handleCancel}
+                        color="secondary"
+                        size={'large'}>
+                        {t('DONE')}
+                    </Button>
+                    <Button
+                        onClick={copyToClipboardHelper(publicShareUrl)}
+                        size={'large'}
+                        color="primary"
+                        autoFocus>
+                        {t('COPY_LINK')}
+                    </Button>
+                </DialogActions>
+            </DialogBoxBase>
         </>
     );
 }
