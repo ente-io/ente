@@ -26,6 +26,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
   late Future<void> removeIgnoredFiles;
   double heightOfGallery = 0;
+  late int memoryCount;
 
   @override
   void initState() {
@@ -37,7 +38,6 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
   @override
   Widget build(BuildContext context) {
     final selectedRadius = _selectedRadius();
-    late final int memoryCount;
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
       //wait for ignored files to be removed after init
