@@ -15,7 +15,7 @@ class LocationTagDataStateProvider extends StatefulWidget {
 
 class _LocationTagDataStateProviderState
     extends State<LocationTagDataStateProvider> {
-  int selectedIndex = defaultRadiusValueIndex;
+  int selectedRaduisIndex = defaultRadiusValueIndex;
   late List<double> coordinates;
   final Debouncer _debouncer = Debouncer(const Duration(milliseconds: 300));
   @override
@@ -29,7 +29,7 @@ class _LocationTagDataStateProviderState
     _debouncer.run(() async {
       if (mounted) {
         setState(() {
-          selectedIndex = index;
+          selectedRaduisIndex = index;
         });
       }
     });
@@ -38,7 +38,7 @@ class _LocationTagDataStateProviderState
   @override
   Widget build(BuildContext context) {
     return InheritedLocationTagData(
-      selectedIndex,
+      selectedRaduisIndex,
       coordinates,
       _updateSelectedIndex,
       child: widget.child,
@@ -47,11 +47,11 @@ class _LocationTagDataStateProviderState
 }
 
 class InheritedLocationTagData extends InheritedWidget {
-  final int selectedIndex;
+  final int selectedRadiusIndex;
   final List<double> coordinates;
   final VoidCallbackParamInt updateSelectedIndex;
   const InheritedLocationTagData(
-    this.selectedIndex,
+    this.selectedRadiusIndex,
     this.coordinates,
     this.updateSelectedIndex, {
     required super.child,
@@ -65,6 +65,6 @@ class InheritedLocationTagData extends InheritedWidget {
 
   @override
   bool updateShouldNotify(InheritedLocationTagData oldWidget) {
-    return oldWidget.selectedIndex != selectedIndex;
+    return oldWidget.selectedRadiusIndex != selectedRadiusIndex;
   }
 }

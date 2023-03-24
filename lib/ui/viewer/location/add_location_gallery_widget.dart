@@ -126,7 +126,8 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
   }
 
   double _selectedRadius() {
-    return radiusValues[InheritedLocationTagData.of(context).selectedIndex];
+    return radiusValues[
+        InheritedLocationTagData.of(context).selectedRadiusIndex];
   }
 
   Future<void> _removeIgnoredFiles(Future<FileLoadResult> result) async {

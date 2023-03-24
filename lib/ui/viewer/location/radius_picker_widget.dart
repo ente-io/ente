@@ -129,6 +129,7 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
   }
 
   double _selectedRadius(BuildContext context) {
-    return radiusValues[InheritedLocationTagData.of(context).selectedIndex];
+    return radiusValues[
+        InheritedLocationTagData.of(context).selectedRadiusIndex];
   }
 }
