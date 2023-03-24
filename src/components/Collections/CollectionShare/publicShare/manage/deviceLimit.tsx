@@ -70,7 +70,7 @@ export function ManageDeviceLimit({
                     />
                     <Stack py={'20px'} px={'8px'} spacing={'32px'}>
                         <EnteMenuItemGroup>
-                            {deviceLimitOptions.map((item) => (
+                            {deviceLimitOptions.map((item, index) => (
                                 <>
                                     <EnteMenuItem
                                         key={item.label}
@@ -79,7 +79,10 @@ export function ManageDeviceLimit({
                                         )}>
                                         {item.label}
                                     </EnteMenuItem>
-                                    <Divider sx={{ '&&&': { m: 0 } }} />
+                                    {index !==
+                                        deviceLimitOptions.length - 1 && (
+                                        <Divider sx={{ '&&&': { m: 0 } }} />
+                                    )}
                                 </>
                             ))}
                         </EnteMenuItemGroup>
