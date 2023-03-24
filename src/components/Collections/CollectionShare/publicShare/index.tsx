@@ -2,24 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Collection, PublicURL } from 'types/collection';
 import { appendCollectionKeyToShareURL } from 'utils/collection';
 import EnablePublicShareOptions from './EnablePublicShareOptions';
+import CopyLinkModal from './copyLinkModal';
 import PublicShareManage from './manage';
 import ContentCopyIcon from '@mui/icons-material/ContentCopyOutlined';
 import PublicIcon from '@mui/icons-material/Public';
 
-import {
-    DialogActions,
-    Button,
-    Stack,
-    Typography,
-    DialogContent,
-    Box,
-} from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import { EnteMenuItem } from 'components/Menu/menuItem';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import VerticallyCentered from 'components/Container';
-import DialogBoxBase from 'components/DialogBox/base';
-import { Check } from '@mui/icons-material';
 import { t } from 'i18next';
 import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
 
@@ -53,6 +44,7 @@ export default function PublicShare({
 
     const copyToClipboardHelper = (text: string) => () => {
         navigator.clipboard.writeText(text);
+        handleCancel();
     };
     const handleCancel = () => {
         setCopyLinkModalView(false);
@@ -105,41 +97,12 @@ export default function PublicShare({
                     setCopyLinkModalView={setCopyLinkModalView}
                 />
             )}
-            <DialogBoxBase
+            <CopyLinkModal
                 open={copyLinkModalView}
                 onClose={handleCancel}
-                disablePortal
-                BackdropProps={{ sx: { position: 'absolute' } }}
-                sx={{ position: 'absolute' }}
-                PaperProps={{
-                    sx: { p: 1, justifyContent: 'flex-end' },
-                }}>
-                <DialogContent>
-                    <VerticallyCentered>
-                        <Typography fontWeight={'bold'}>
-                            {t('PUBLIC_LINK_CREATED')}
-                        </Typography>
-                        <Box pt={2}>
-                            <Check sx={{ fontSize: '48px' }} />
-                        </Box>
-                    </VerticallyCentered>
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        onClick={handleCancel}
-                        color="secondary"
-                        size={'large'}>
-                        {t('DONE')}
-                    </Button>
-                    <Button
-                        onClick={copyToClipboardHelper(publicShareUrl)}
-                        size={'large'}
-                        color="primary"
-                        autoFocus>
-                        {t('COPY_LINK')}
-                    </Button>
-                </DialogActions>
-            </DialogBoxBase>
+                handleCancel={handleCancel}
+                copyToClipboardHelper={copyToClipboardHelper(publicShareUrl)}
+            />
         </>
     );
 }
