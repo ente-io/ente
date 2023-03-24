@@ -16,8 +16,10 @@ import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
 
 export default function PublicShare({
     collection,
+    onRootClose,
 }: {
     collection: Collection;
+    onRootClose: () => void;
 }) {
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
     const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
@@ -83,6 +85,7 @@ export default function PublicShare({
                     <PublicShareManage
                         open={manageShareView}
                         onClose={closeManageShare}
+                        onRootClose={onRootClose}
                         publicShareProp={publicShareProp}
                         collection={collection}
                         setPublicShareProp={setPublicShareProp}
