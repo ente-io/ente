@@ -5,7 +5,7 @@ import "package:photos/services/location_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/buttons/inline_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
-import "package:photos/ui/viewer/file/add_location_sheet.dart";
+import 'package:photos/ui/viewer/location/add_location_sheet.dart';
 
 class LocationTagsWidget extends StatefulWidget {
   final List<double> coordinates;
