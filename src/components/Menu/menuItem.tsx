@@ -32,19 +32,11 @@ export function EnteMenuItem({
     checked,
 }: Iprops) {
     const menuContext = useContext(OverflowMenuContext);
-    // const [buttonState, setButtonState] = useState<
-    //     'Default' | 'Loading' | 'Success'
-    // >('Default');
     const handleClick = () => {
-        // setButtonState('Loading');
         onClick();
         if (!keepOpenAfterClick) {
             menuContext.close();
         }
-        // setButtonState('Success');
-        // setTimeout(() => {
-        //     setButtonState('Default');
-        // }, 2000);
     };
     return (
         <MenuItem
@@ -88,7 +80,6 @@ export function EnteMenuItem({
                     {endIcon && (
                         <Box
                             sx={{
-                                padding: 0,
                                 marginLeft: 1,
                             }}>
                             {endIcon}

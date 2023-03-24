@@ -27,24 +27,25 @@ export function ManageLinkExpiry({
             validTill: optionFn,
         });
     };
+
     const [shareExpiryOptionsModalView, setShareExpiryOptionsModalView] =
         useState(false);
+
     const [shareExpiryValue, setShareExpiryValue] = useState(0);
+
     const [labelText, setLabelText] = useState(
         publicShareProp?.validTill
             ? formatDateTime(publicShareProp?.validTill / 1000)
             : 'never'
     );
-    useEffect(() => {
-        if (shareExpiryOptionsModalView) {
-            setShareExpiryOptionsModalView(true);
-        } else setShareExpiryOptionsModalView(false);
-    }, [shareExpiryOptionsModalView]);
+
     const closeShareExpiryOptionsModalView = () =>
         setShareExpiryOptionsModalView(false);
+
     const openShareExpiryOptionsModalView = () =>
         setShareExpiryOptionsModalView(true);
-    const changeshareExpiryValue = (value: number) => () => {
+
+    const changeShareExpiryValue = (value: number) => () => {
         updateDeviceExpiry(value);
         setLabelText(
             publicShareProp?.validTill
@@ -55,6 +56,13 @@ export function ManageLinkExpiry({
         shareExpiryValue;
         setShareExpiryOptionsModalView(false);
     };
+
+    useEffect(() => {
+        if (shareExpiryOptionsModalView) {
+            setShareExpiryOptionsModalView(true);
+        } else setShareExpiryOptionsModalView(false);
+    }, [shareExpiryOptionsModalView]);
+
     return (
         <>
             <EnteMenuItem
@@ -72,13 +80,12 @@ export function ManageLinkExpiry({
                     {t('LINK_EXPIRY')}
                 </DialogTitleWithCloseButton>
                 <DialogContent>
-                    {/* <OptionWithDivider data={shareExpiryOptions} /> */}
                     <tbody>
                         {shareExpiryOptions().map((item) => (
                             <tr key={item.label}>
                                 <td>
                                     <EnteMenuItem
-                                        onClick={changeshareExpiryValue(
+                                        onClick={changeShareExpiryValue(
                                             item.value()
                                         )}>
                                         {item.label}

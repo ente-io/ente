@@ -25,48 +25,46 @@ export function ManageDeviceLimit({
             deviceLimit: newLimit,
         });
     };
-    const [shareDeviceLimitModalView, setDeviceLimitModalView] =
-        useState(false);
-    const [shareDeviceLimitValue, setDeviceLimitValue] = useState(
-        publicShareProp.deviceLimit
-    );
-    useEffect(() => {
-        if (shareDeviceLimitModalView) {
-            setDeviceLimitModalView(true);
-        } else setDeviceLimitModalView(false);
-    }, [shareDeviceLimitModalView]);
+    const [changeDeviceLimitView, setChangeDeviceLimitView] = useState(false);
     const closeShareExpiryOptionsModalView = () =>
-        setDeviceLimitModalView(false);
-    const openShareExpiryOptionsModalView = () => setDeviceLimitModalView(true);
-    const changeshareExpiryValue = (value: number) => () => {
+        setChangeDeviceLimitView(false);
+    const openShareExpiryOptionsModalView = () =>
+        setChangeDeviceLimitView(true);
+    const changeDeviceLimitValue = (value: number) => () => {
         updateDeviceLimit(value);
-        setDeviceLimitValue(value);
-        setDeviceLimitModalView(false);
+        publicShareProp.deviceLimit = value;
+        setChangeDeviceLimitView(false);
     };
+
+    useEffect(() => {
+        if (changeDeviceLimitView) {
+            setChangeDeviceLimitView(true);
+        } else setChangeDeviceLimitView(false);
+    }, [changeDeviceLimitView]);
+
     return (
         <>
             <EnteMenuItem
                 onClick={openShareExpiryOptionsModalView}
                 endIcon={<ChevronRight />}
-                subText={String(shareDeviceLimitValue)}>
+                subText={String(publicShareProp.deviceLimit)}>
                 {t('LINK_DEVICE_LIMIT')}
             </EnteMenuItem>
             <EnteDrawer
                 anchor="right"
-                open={shareDeviceLimitModalView}
+                open={changeDeviceLimitView}
                 onClose={closeShareExpiryOptionsModalView}>
                 <DialogTitleWithCloseButton
                     onClose={closeShareExpiryOptionsModalView}>
                     {t('LINK_EXPIRY')}
                 </DialogTitleWithCloseButton>
                 <DialogContent>
-                    {/* <OptionWithDivider data={shareExpiryOptions} /> */}
                     <tbody>
                         {getDeviceLimitOptions().map((item) => (
                             <tr key={item.label}>
                                 <td>
                                     <EnteMenuItem
-                                        onClick={changeshareExpiryValue(
+                                        onClick={changeDeviceLimitValue(
                                             item.value
                                         )}>
                                         {item.label}
