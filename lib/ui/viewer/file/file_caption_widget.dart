@@ -66,7 +66,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   final _focusNode = FocusNode();
   String? editedCaption;
   String hintText = fileCaptionDefaultHint;
-  Widget? keyboardTopButtoms;
+  Widget? keyboardTopButtons;
 
   @override
   void initState() {
@@ -172,12 +172,12 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       editedCaption = caption;
     }
     final bool hasFocus = _focusNode.hasFocus;
-    keyboardTopButtoms ??= KeyboardTopButton(
+    keyboardTopButtons ??= KeyboardTopButton(
       onDoneTap: onDoneTap,
       onCancelTap: onCancelTap,
     );
     if (hasFocus) {
-      KeyboardOverlay.showOverlay(context, keyboardTopButtoms!);
+      KeyboardOverlay.showOverlay(context, keyboardTopButtons!);
     } else {
       KeyboardOverlay.removeOverlay();
     }
