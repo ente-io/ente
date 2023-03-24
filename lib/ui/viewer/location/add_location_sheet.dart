@@ -15,13 +15,17 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/location/add_location_gallery_widget.dart";
 import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
-showAddLocationSheet(BuildContext context, List<double> coordinates) {
+showAddLocationSheet(
+  BuildContext context,
+  List<double> coordinates,
+  VoidCallback onLocationAdded,
+) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
       return LocationTagDataStateProvider(
         coordinates,
-        const AddLocationSheet(),
+        AddLocationSheet(onLocationAdded),
       );
     },
     shape: const RoundedRectangleBorder(
@@ -38,7 +42,8 @@ showAddLocationSheet(BuildContext context, List<double> coordinates) {
 }
 
 class AddLocationSheet extends StatefulWidget {
-  const AddLocationSheet({super.key});
+  final VoidCallback onLocationAdded;
+  const AddLocationSheet(this.onLocationAdded, {super.key});
 
   @override
   State<AddLocationSheet> createState() => _AddLocationSheetState();
@@ -98,8 +103,9 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           submitNotifier: submitNotifer,
                           cancelNotifier: cancelNotifier,
                           popNavAfterSubmission: true,
-                          onSubmit: (locationName) async =>
-                              _addLocationTag(locationName),
+                          onSubmit: (locationName) async {
+                            await _addLocationTag(locationName);
+                          },
                           shouldUnfocusOnClearOrSubmit: true,
                           alwaysShowSuccessState: true,
                         ),
@@ -164,16 +170,17 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
     );
   }
 
-  void _addLocationTag(String locationName) {
+  Future<void> _addLocationTag(String locationName) async {
     final locationData = InheritedLocationTagData.of(context);
     final coordinates = locationData.coordinates;
     final radius = radiusValues[locationData.selectedRadiusIndex];
-    LocationService.instance.addLocation(
+    await LocationService.instance.addLocation(
       locationName,
       coordinates.first,
       coordinates.last,
       radius,
     );
+    widget.onLocationAdded.call();
   }
 
   void _focusNodeListener() {

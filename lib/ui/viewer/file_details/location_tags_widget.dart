@@ -19,7 +19,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   String title = "Add location";
   IconData leadingIcon = Icons.add_location_alt_outlined;
   bool hasChipButtons = false;
-  late final Future<List<Widget>> locationTagChips;
+  late Future<List<Widget>> locationTagChips;
   @override
   void initState() {
     locationTagChips = _getLocationTags();
@@ -49,7 +49,13 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       return [
         InlineButtonWidget(
           "Group nearby photos",
-          () => showAddLocationSheet(context, widget.coordinates),
+          () => showAddLocationSheet(
+            context,
+            widget.coordinates,
+            () {
+              locationTagChips = _getLocationTags();
+            },
+          ),
         ),
       ];
     }
@@ -63,7 +69,14 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       ChipButtonWidget(
         null,
         leadingIcon: Icons.add_outlined,
-        onTap: () => showAddLocationSheet(context, widget.coordinates),
+        onTap: () => showAddLocationSheet(
+          context,
+          widget.coordinates,
+          //This callback is for reloading the locationTogsWidget after adding a new location tag.
+          () {
+            locationTagChips = _getLocationTags();
+          },
+        ),
       ),
     );
     return result;
