@@ -158,8 +158,8 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                                 _searchQuery = value;
                               });
                             },
-                            cancellable: true,
-                            shouldUnfocusOnCancelOrSubmit: true,
+                            isClearable: true,
+                            shouldUnfocusOnClearOrSubmit: true,
                             borderRadius: 2,
                           ),
                         ),

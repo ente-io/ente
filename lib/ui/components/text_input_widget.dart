@@ -21,6 +21,10 @@ class TextInputWidget extends StatefulWidget {
   ///TextInputWidget will listen to this notifier and executes onSubmit when
   ///notified.
   final ValueNotifier? submitNotifier;
+
+  ///TextInputWidget will listen to this notifier and clears and unfocuses the
+  ///textFiled when notified.
+  final ValueNotifier? cancelNotifier;
   final bool alwaysShowSuccessState;
   final bool showOnlyLoadingState;
   final FutureVoidCallbackParamStr? onSubmit;
@@ -29,8 +33,9 @@ class TextInputWidget extends StatefulWidget {
   final bool shouldSurfaceExecutionStates;
   final TextCapitalization? textCapitalization;
   final bool isPasswordInput;
-  final bool cancellable;
-  final bool shouldUnfocusOnCancelOrSubmit;
+  final bool isClearable;
+  final bool shouldUnfocusOnClearOrSubmit;
+  final FocusNode? focusNode;
   const TextInputWidget({
     this.onSubmit,
     this.onChange,
@@ -43,15 +48,17 @@ class TextInputWidget extends StatefulWidget {
     this.autoFocus,
     this.maxLength,
     this.submitNotifier,
+    this.cancelNotifier,
     this.alwaysShowSuccessState = false,
     this.showOnlyLoadingState = false,
     this.popNavAfterSubmission = false,
     this.shouldSurfaceExecutionStates = true,
     this.textCapitalization = TextCapitalization.none,
     this.isPasswordInput = false,
-    this.cancellable = false,
-    this.shouldUnfocusOnCancelOrSubmit = false,
+    this.isClearable = false,
+    this.shouldUnfocusOnClearOrSubmit = false,
     this.borderRadius = 8,
+    this.focusNode,
     super.key,
   });
 
@@ -72,6 +79,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   @override
   void initState() {
     widget.submitNotifier?.addListener(_onSubmit);
+    widget.cancelNotifier?.addListener(_onCancel);
 
     if (widget.initialValue != null) {
       _textController.value = TextEditingValue(
@@ -92,6 +100,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   @override
   void dispose() {
     widget.submitNotifier?.removeListener(_onSubmit);
+    widget.cancelNotifier?.removeListener(_onCancel);
     _obscureTextNotifier.dispose();
     _textController.dispose();
     super.dispose();
@@ -121,6 +130,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
             textCapitalization: widget.textCapitalization!,
             autofocus: widget.autoFocus ?? false,
             controller: _textController,
+            focusNode: widget.focusNode,
             inputFormatters: widget.maxLength != null
                 ? [LengthLimitingTextInputFormatter(50)]
                 : null,
@@ -157,9 +167,9 @@ class _TextInputWidgetState extends State<TextInputWidget> {
                     obscureTextNotifier: _obscureTextNotifier,
                     isPasswordInput: widget.isPasswordInput,
                     textController: _textController,
-                    isCancellable: widget.cancellable,
-                    shouldUnfocusOnCancelOrSubmit:
-                        widget.shouldUnfocusOnCancelOrSubmit,
+                    isClearable: widget.isClearable,
+                    shouldUnfocusOnClearOrSubmit:
+                        widget.shouldUnfocusOnClearOrSubmit,
                   ),
                 ),
               ),
@@ -226,7 +236,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         });
       }),
     );
-    if (widget.shouldUnfocusOnCancelOrSubmit) {
+    if (widget.shouldUnfocusOnClearOrSubmit) {
       FocusScope.of(context).unfocus();
     }
     try {
@@ -305,6 +315,11 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     }
   }
 
+  void _onCancel() {
+    _textController.clear();
+    FocusScope.of(context).unfocus();
+  }
+
   void _popNavigatorStack(BuildContext context, {Exception? e}) {
     Navigator.of(context).canPop() ? Navigator.of(context).pop(e) : null;
   }
@@ -317,8 +332,8 @@ class SuffixIconWidget extends StatelessWidget {
   final TextEditingController textController;
   final ValueNotifier? obscureTextNotifier;
   final bool isPasswordInput;
-  final bool isCancellable;
-  final bool shouldUnfocusOnCancelOrSubmit;
+  final bool isClearable;
+  final bool shouldUnfocusOnClearOrSubmit;
 
   const SuffixIconWidget({
     required this.executionState,
@@ -326,8 +341,8 @@ class SuffixIconWidget extends StatelessWidget {
     required this.textController,
     this.obscureTextNotifier,
     this.isPasswordInput = false,
-    this.isCancellable = false,
-    this.shouldUnfocusOnCancelOrSubmit = false,
+    this.isClearable = false,
+    this.shouldUnfocusOnClearOrSubmit = false,
     super.key,
   });
 
@@ -337,11 +352,11 @@ class SuffixIconWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     if (executionState == ExecutionState.idle ||
         !shouldSurfaceExecutionStates) {
-      if (isCancellable) {
+      if (isClearable) {
         trailingWidget = GestureDetector(
           onTap: () {
             textController.clear();
-            if (shouldUnfocusOnCancelOrSubmit) {
+            if (shouldUnfocusOnClearOrSubmit) {
               FocusScope.of(context).unfocus();
             }
           },
