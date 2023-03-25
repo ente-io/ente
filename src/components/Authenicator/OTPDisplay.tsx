@@ -112,6 +112,7 @@ const OTPDisplay = (props: OTPDisplayProps) => {
     const [code, setCode] = useState('');
     const [nextCode, setNextCode] = useState('');
     const [codeErr, setCodeErr] = useState('');
+    const generateCodeInterval = 1000;
 
     const generateCodes = () => {
         try {
@@ -145,19 +146,18 @@ const OTPDisplay = (props: OTPDisplayProps) => {
 
     useEffect(() => {
         generateCodes();
-        let intervalId;
+        const codeType = codeInfo.type;
+        const intervalId =
+            codeType.toLowerCase() === 'totp' ||
+            codeType.toLowerCase() === 'hotp'
+                ? setInterval(() => {
+                      generateCodes();
+                  }, generateCodeInterval)
+                : null;
 
-        if (codeInfo.type.toLowerCase() === 'totp') {
-            intervalId = setInterval(() => {
-                generateCodes();
-            }, 1000);
-        } else if (codeInfo.type.toLowerCase() === 'hotp') {
-            intervalId = setInterval(() => {
-                generateCodes();
-            }, 1000);
-        }
-
-        return () => clearInterval(intervalId);
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
     }, [codeInfo]);
 
     return (
