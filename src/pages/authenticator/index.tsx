@@ -12,24 +12,20 @@ const OTPPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
+        // refactor this code
         const fetchCodes = async () => {
             try {
-                getAuthCodes()
-                    .then((res) => {
-                        setCodes(res);
-                    })
-                    .catch((err) => {
-                        if (err.message === CustomError.KEY_MISSING) {
-                            router.push({
-                                pathname: PAGES.CREDENTIALS,
-                                query: { redirectPage: PAGES.AUTH },
-                            });
-                            return;
-                        }
-                        // do not log errors
+                const res = await getAuthCodes();
+                setCodes(res);
+            } catch (err) {
+                if (err.message === CustomError.KEY_MISSING) {
+                    router.push({
+                        pathname: PAGES.CREDENTIALS,
+                        query: { redirectPage: PAGES.AUTH },
                     });
-            } catch (error) {
-                // do not log errors
+                } else {
+                    // do not log errors
+                }
             }
         };
         fetchCodes();
