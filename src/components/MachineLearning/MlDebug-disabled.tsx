@@ -24,7 +24,8 @@ export {};
 // import mlIDbStorage from 'utils/storage/mlIDbStorage';
 // import { getFaceCropBlobFromStorage } from 'utils/machineLearning/faceCrop';
 // import { PeopleList } from './PeopleList';
-// import styled from 'styled-components';
+// import { styled } from '@mui/material';
+
 // import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
 // import { DebugInfo, mstToBinaryTree } from 'hdbscan';
 // import { toD3Tree } from 'utils/machineLearning/clustering';
@@ -70,7 +71,7 @@ export {};
 //     );
 // }
 
-// const D3ImageContainer = styled.div`
+// const D3ImageContainer = styled('div')`
 //     & > img {
 //         width: 100%;
 //         height: 100%;
