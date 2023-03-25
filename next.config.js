@@ -28,12 +28,6 @@ module.exports = (phase) =>
                 '@mui/system',
                 '@mui/icons-material',
             ],
-            compiler: {
-                styledComponents: {
-                    ssr: true,
-                    displayName: true,
-                },
-            },
             env: {
                 SENTRY_RELEASE: GIT_SHA,
                 NEXT_PUBLIC_IS_TEST_APP: process.env.IS_TEST_RELEASE,
