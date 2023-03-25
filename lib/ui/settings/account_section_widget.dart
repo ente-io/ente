@@ -7,14 +7,12 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/account/change_email_dialog.dart';
 import 'package:photos/ui/account/delete_account_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
-import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
+import "package:photos/ui/payment/subscription.dart";
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 import "package:url_launcher/url_launcher_string.dart";
 
 class AccountSectionWidget extends StatelessWidget {
@@ -35,38 +33,13 @@ class AccountSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Recovery key",
+            title: "Manage subscription",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          showOnlyLoadingState: true,
           onTap: () async {
-            final hasAuthenticated = await LocalAuthenticationService.instance
-                .requestLocalAuthentication(
-              context,
-              "Please authenticate to view your recovery key",
-            );
-            if (hasAuthenticated) {
-              String recoveryKey;
-              try {
-                recoveryKey = await _getOrCreateRecoveryKey(context);
-              } catch (e) {
-                await showGenericErrorDialog(context: context);
-                return;
-              }
-              unawaited(
-                routeToPage(
-                  context,
-                  RecoveryKeyPage(
-                    recoveryKey,
-                    "OK",
-                    showAppBar: true,
-                    onDone: () {},
-                  ),
-                ),
-              );
-            }
+            _onManageSubscriptionTapped(context);
           },
         ),
         sectionOptionSpacing,
@@ -180,12 +153,6 @@ class AccountSectionWidget extends StatelessWidget {
     );
   }
 
-  Future<String> _getOrCreateRecoveryKey(BuildContext context) async {
-    return CryptoUtil.bin2hex(
-      await UserService.instance.getOrCreateRecoveryKey(context),
-    );
-  }
-
   void _onLogoutTapped(BuildContext context) {
     showChoiceActionSheet(
       context,
@@ -195,6 +162,16 @@ class AccountSectionWidget extends StatelessWidget {
       firstButtonOnTap: () async {
         await UserService.instance.logout(context);
       },
+    );
+  }
+
+  void _onManageSubscriptionTapped(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return getSubscriptionPage();
+        },
+      ),
     );
   }
 }
