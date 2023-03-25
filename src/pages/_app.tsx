@@ -26,7 +26,6 @@ import darkThemeOptions from 'themes/darkThemeOptions';
 import lightThemeOptions from 'themes/lightThemeOptions';
 import { CssBaseline, useMediaQuery } from '@mui/material';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import * as types from 'styled-components/cssprop'; // need to css prop on styled component
 import { SetDialogBoxAttributes, DialogBoxAttributes } from 'types/dialogBox';
 import {
     getFamilyPortalRedirectURL,
@@ -56,6 +55,9 @@ import { SetTheme } from 'types/theme';
 import { useLocalState } from 'hooks/useLocalState';
 import { THEME_COLOR } from 'constants/theme';
 import { setupI18n } from 'i18n';
+import createEmotionCache from 'themes/createEmotionCache';
+import { CacheProvider, EmotionCache } from '@emotion/react';
+import { AppProps } from 'next/app';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -115,7 +117,19 @@ const redirectMap = new Map([
 
 const APP_TITLE = 'ente Photos';
 
-export default function App({ Component, err }) {
+// Client-side cache, shared for the whole session of the user in the browser.
+const clientSideEmotionCache = createEmotionCache();
+
+export interface MyAppProps extends AppProps {
+    emotionCache?: EmotionCache;
+}
+
+export default function App(props) {
+    const {
+        Component,
+        emotionCache = clientSideEmotionCache,
+        pageProps,
+    } = props;
     const router = useRouter();
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
@@ -323,7 +337,7 @@ export default function App({ Component, err }) {
         });
 
     return (
-        <>
+        <CacheProvider value={emotionCache}>
             <Head>
                 <title>{isI18nReady ? t('TITLE') : APP_TITLE}</title>
                 <meta
@@ -411,10 +425,10 @@ export default function App({ Component, err }) {
                             </EnteSpinner>
                         </VerticallyCentered>
                     ) : (
-                        <Component err={err} setLoading={setLoading} />
+                        <Component setLoading={setLoading} {...pageProps} />
                     )}
                 </AppContext.Provider>
             </ThemeProvider>
-        </>
+        </CacheProvider>
     );
 }
