@@ -25,7 +25,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
           children: [
             TextFormField(
               decoration: const InputDecoration(
-                hintText: 'Email',
+                hintText: S.of(context).email,
                 hintStyle: TextStyle(
                   color: Colors.white30,
                 ),
@@ -47,7 +47,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
       actions: [
         TextButton(
           child: const Text(
-            "Cancel",
+            S.of(context).cancel,
             style: TextStyle(
               color: Colors.redAccent,
             ),
@@ -58,7 +58,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
         ),
         TextButton(
           child: const Text(
-            "Verify",
+            S.of(context).verify,
             style: TextStyle(
               color: Colors.green,
             ),
@@ -67,7 +67,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
             if (!isValidEmail(_email)) {
               showErrorDialog(
                 context,
-                "Invalid email address",
+                S.of(context).invalidEmailAddress,
                 "Please enter a valid email address.",
               );
               return;

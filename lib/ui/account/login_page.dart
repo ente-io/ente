@@ -77,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    'Welcome back!',
+                    S.of(context).accountWelcomeBack,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
@@ -88,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       fillColor: _emailInputFieldColor,
                       filled: true,
-                      hintText: 'Email',
+                      hintText: S.of(context).email,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 15,
                         vertical: 15,
