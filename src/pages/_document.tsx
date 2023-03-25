@@ -11,13 +11,13 @@ import Document, {
 import createEmotionServer from '@emotion/server/create-instance';
 import { AppType } from 'next/app';
 import createEmotionCache from 'themes/createEmotionCache';
-import { MyAppProps } from './_app';
+import { EnteAppProps } from './_app';
 
-interface MyDocumentProps extends DocumentProps {
+interface EnteDocumentProps extends DocumentProps {
     emotionStyleTags: JSX.Element[];
 }
 
-export default function MyDocument({ emotionStyleTags }: MyDocumentProps) {
+export default function EnteDocument({ emotionStyleTags }: EnteDocumentProps) {
     return (
         <Html lang="en">
             <Head>
@@ -47,7 +47,7 @@ export default function MyDocument({ emotionStyleTags }: MyDocumentProps) {
 
 // `getInitialProps` belongs to `_document` (instead of `_app`),
 // it's compatible with static-site generation (SSG).
-MyDocument.getInitialProps = async (ctx: DocumentContext) => {
+EnteDocument.getInitialProps = async (ctx: DocumentContext) => {
     // Resolution order
     //
     // On the server:
@@ -82,7 +82,7 @@ MyDocument.getInitialProps = async (ctx: DocumentContext) => {
         originalRenderPage({
             enhanceApp: (
                 App: React.ComponentType<
-                    React.ComponentProps<AppType> & MyAppProps
+                    React.ComponentProps<AppType> & EnteAppProps
                 >
             ) =>
                 function EnhanceApp(props) {

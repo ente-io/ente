@@ -119,7 +119,7 @@ const APP_TITLE = 'ente Photos';
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
 
-export interface MyAppProps extends AppProps {
+export interface EnteAppProps extends AppProps {
     emotionCache?: EmotionCache;
 }
 
