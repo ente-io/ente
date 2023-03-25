@@ -22,7 +22,7 @@ const OTPPage = () => {
                         if (err.message === CustomError.KEY_MISSING) {
                             router.push({
                                 pathname: PAGES.CREDENTIALS,
-                                query: { redirectPage: PAGES.AUTHENICATOR },
+                                query: { redirectPage: PAGES.AUTH },
                             });
                             return;
                         }

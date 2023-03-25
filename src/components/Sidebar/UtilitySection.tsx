@@ -63,7 +63,7 @@ export default function UtilitySection({ closeSidebar }) {
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
 
-    const redirectToAuthenticatorPage = () => router.push(PAGES.AUTHENICATOR);
+    const redirectToAuthenticatorPage = () => router.push(PAGES.AUTH);
 
     const somethingWentWrong = () =>
         setDialogMessage({
