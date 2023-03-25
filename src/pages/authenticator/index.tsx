@@ -26,11 +26,10 @@ const OTPPage = () => {
                             });
                             return;
                         }
-                        console.error('something wrong here', err);
+                        // do not log errors
                     });
             } catch (error) {
-                console.error('something wrong where asdas');
-                console.error(error);
+                // do not log errors
             }
         };
         fetchCodes();
