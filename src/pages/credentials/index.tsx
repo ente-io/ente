@@ -31,7 +31,7 @@ import VerifyMasterPasswordForm, {
 
 export default function Credentials() {
     const router = useRouter();
-    const routeReidrectPage =
+    const routerRedirectPage =
         router.query.redirectPage?.toString() ?? PAGES.GALLERY;
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const appContext = useContext(AppContext);
@@ -88,7 +88,7 @@ export default function Credentials() {
             await decryptAndStoreToken(key);
             const redirectURL = appContext.redirectURL;
             appContext.setRedirectURL(null);
-            router.push(redirectURL ?? routeReidrectPage ?? PAGES.GALLERY);
+            router.push(redirectURL ?? routerRedirectPage ?? PAGES.GALLERY);
         } catch (e) {
             logError(e, 'useMasterPassword failed');
         }
