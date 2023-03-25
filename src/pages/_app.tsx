@@ -25,7 +25,6 @@ import { styled, ThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'themes/darkThemeOptions';
 import lightThemeOptions from 'themes/lightThemeOptions';
 import { CssBaseline, useMediaQuery } from '@mui/material';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { SetDialogBoxAttributes, DialogBoxAttributes } from 'types/dialogBox';
 import {
     getFamilyPortalRedirectURL,
