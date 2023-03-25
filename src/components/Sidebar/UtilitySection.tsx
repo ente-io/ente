@@ -102,7 +102,7 @@ export default function UtilitySection({ closeSidebar }) {
             </SidebarButton>
             {isInternalUser() && (
                 <SidebarButton onClick={redirectToAuthenticatorPage}>
-                    {constants.AUTHENTICATOR_SECTION}
+                    {t('AUTHENTICATOR_SECTION')}
                 </SidebarButton>
             )}
             <SidebarButton onClick={openPreferencesOptions}>
