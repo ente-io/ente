@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import OTPDisplay from 'components/Authenicator/OTPDisplay';
 import { getAuthCodes } from 'services/authenticator/authenticatorService';
-import { Button } from '@mui/material';
 import { CustomError } from 'utils/error';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
+import { AuthFooter } from 'components/Authenicator/AuthFooder';
 
 const OTPPage = () => {
     const router = useRouter();
@@ -12,7 +12,6 @@ const OTPPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        // refactor this code
         const fetchCodes = async () => {
             try {
                 const res = await getAuthCodes();
@@ -40,30 +39,6 @@ const OTPPage = () => {
                 .toLowerCase()
                 .includes(searchTerm.toLowerCase())
     );
-
-    const DownloadApp = () => {
-        return (
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}>
-                <p>Download our mobile app to add &amp; manage your secrets.</p>
-                <a href="https://github.com/ente-io/auth#-download" download>
-                    <Button
-                        style={{
-                            backgroundColor: 'green',
-                            padding: '12px 18px',
-                            color: 'white',
-                        }}>
-                        Download
-                    </Button>
-                </a>
-            </div>
-        );
-    };
 
     return (
         <div
@@ -107,7 +82,7 @@ const OTPPage = () => {
                 ))
             )}
             <div style={{ marginBottom: '2rem' }} />
-            <DownloadApp />
+            <AuthFooter />
             <div style={{ marginBottom: '4rem' }} />
         </div>
     );
