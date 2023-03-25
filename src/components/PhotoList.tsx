@@ -19,7 +19,6 @@ import { DeduplicateContext } from 'pages/deduplicate';
 import { FlexWrapper } from './Container';
 import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
-import { SpecialPadding } from 'styles/SpecialPadding';
 import { formatDate } from 'utils/time/format';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
@@ -111,7 +110,10 @@ const ListContainer = styled(Box)<{
     grid-column-gap: ${GAP_BTW_TILES}px;
     width: 100%;
     color: #fff;
-    ${SpecialPadding}
+    padding: 0 24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        padding: 0 4px;
+    }
 `;
 
 const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
