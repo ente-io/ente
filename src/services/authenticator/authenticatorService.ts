@@ -23,12 +23,13 @@ export const getAuthCodes = async (): Promise<Code[]> => {
             authEntity
                 .filter((f) => !f.isDeleted)
                 .map(async (entity) => {
-                    const decryptedCode = await cryptoWorker.decryptMetadata(
-                        entity.encryptedData,
-                        entity.header,
-                        authenticatorKey
-                    );
                     try {
+                        const decryptedCode =
+                            await cryptoWorker.decryptMetadata(
+                                entity.encryptedData,
+                                entity.header,
+                                authenticatorKey
+                            );
                         return Code.fromRawData(entity.id, decryptedCode);
                     } catch (e) {
                         logError(
