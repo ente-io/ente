@@ -110,7 +110,7 @@ interface OTPDisplayProps {
 const OTPDisplay = (props: OTPDisplayProps) => {
     const { codeInfo } = props;
     const [code, setCode] = useState('');
-    const [nextcode, setNextCode] = useState('');
+    const [nextCode, setNextCode] = useState('');
     const [codeErr, setCodeErr] = useState('');
 
     const generateCodes = () => {
@@ -168,7 +168,7 @@ const OTPDisplay = (props: OTPDisplayProps) => {
                     issuer={codeInfo.issuer}
                     account={codeInfo.account}
                     code={code}
-                    nextCode={nextcode}
+                    nextCode={nextCode}
                 />
             ) : (
                 <BadCodeInfo codeInfo={codeInfo} codeErr={codeErr} />

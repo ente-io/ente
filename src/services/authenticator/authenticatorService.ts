@@ -12,7 +12,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
     try {
         const authKeyData = await getAuthKey();
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-        const authentitorKey = await cryptoWorker.decryptB64(
+        const authenticatorKey = await cryptoWorker.decryptB64(
             authKeyData.encryptedKey,
             authKeyData.header,
             masterKey
@@ -26,7 +26,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                     const decryptedCode = await cryptoWorker.decryptMetadata(
                         entity.encryptedData,
                         entity.header,
-                        authentitorKey
+                        authenticatorKey
                     );
                     try {
                         return Code.fromRawData(entity.id, decryptedCode);
