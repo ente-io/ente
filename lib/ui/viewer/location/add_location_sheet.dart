@@ -141,9 +141,23 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                               ),
                             );
                           } else {
-                            widget = Text(
-                              value == 1 ? "1 memory" : "$value memories",
-                              style: textTheme.body,
+                            widget = Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  value == 1 ? "1 memory" : "$value memories",
+                                  style: textTheme.body,
+                                ),
+                                if (value as int > 1000)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                      "Up to 1000 memories shown in gallery",
+                                      style: textTheme.miniMuted,
+                                    ),
+                                  ),
+                              ],
                             );
                           }
                           return Align(
