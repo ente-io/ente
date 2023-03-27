@@ -28,10 +28,7 @@ import { OverflowMenuOption } from './OverflowMenu/option';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
-import { getPersonalFiles } from 'utils/file';
-import { eventBus, Events } from 'services/events';
 import LinkButton from './pages/gallery/LinkButton';
-import { getUnExportedFiles } from 'utils/export';
 
 const ExportFolderPathContainer = styled(LinkButton)`
     width: 262px;
@@ -72,11 +69,19 @@ export default function ExportModal(props: Props) {
             setExportFolder(exportSettings?.folder);
             setContinuousExport(exportSettings?.continuousExport);
             syncFileCounts();
-            eventBus.on(Events.LOCAL_FILES_UPDATED, syncFileCounts);
         } catch (e) {
             logError(e, 'error in exportModal');
         }
     }, []);
+
+    useEffect(() => {
+        if (!props.show) {
+            return;
+        }
+        if (exportStage === ExportStage.FINISHED) {
+            void syncFileCounts();
+        }
+    }, [props.show]);
 
     useEffect(() => {
         try {
@@ -99,6 +104,7 @@ export default function ExportModal(props: Props) {
                 const exportInfo = await exportService.getExportRecord();
                 setExportStage(exportInfo?.stage ?? ExportStage.INIT);
                 setLastExportTime(exportInfo?.lastAttemptTimestamp);
+                await syncFileCounts();
                 if (exportInfo?.stage === ExportStage.INPROGRESS) {
                     await startExport();
                 }
@@ -167,18 +173,14 @@ export default function ExportModal(props: Props) {
     };
 
     const syncFileCounts = async () => {
-        const exportRecord = await exportService.getExportRecord();
-        const userPersonalFiles = await getPersonalFiles();
-        const unExportedFiles = getUnExportedFiles(
-            userPersonalFiles,
-            exportRecord
-        );
-        setTotalFileCount(userPersonalFiles.length);
-        setPendingFileCount(unExportedFiles.length);
-        return {
-            totalFileCount: userPersonalFiles.length,
-            pendingFileCount: unExportedFiles.length,
-        };
+        try {
+            const { totalFiles, pendingFiles } =
+                await exportService.getUpdateFileLists();
+            setTotalFileCount(totalFiles.length);
+            setPendingFileCount(pendingFiles.length);
+        } catch (e) {
+            logError(e, 'error updating file counts');
+        }
     };
 
     // =============
@@ -204,8 +206,6 @@ export default function ExportModal(props: Props) {
     const startExport = async () => {
         try {
             await preExportRun();
-            const { pendingFileCount } = await syncFileCounts();
-            setExportProgress({ current: 0, total: pendingFileCount });
             await exportService.exportFiles(setExportProgress);
             await postExportRun();
         } catch (e) {

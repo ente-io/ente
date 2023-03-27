@@ -31,6 +31,7 @@ import { decodeMotionPhoto } from './motionPhotoService';
 import {
     generateStreamFromArrayBuffer,
     getFileExtension,
+    getPersonalFiles,
     mergeMetadata,
 } from 'utils/file';
 
@@ -135,6 +136,24 @@ class ExportService {
             throw e;
         }
     }
+
+    getUpdateFileLists = async () => {
+        try {
+            const exportRecord = await this.getExportRecord();
+            const userPersonalFiles = await getPersonalFiles();
+            const unExportedFiles = getUnExportedFiles(
+                userPersonalFiles,
+                exportRecord
+            );
+            return {
+                totalFiles: userPersonalFiles,
+                pendingFiles: unExportedFiles,
+            };
+        } catch (e) {
+            logError(e, 'getUpdateFileLists failed');
+            throw e;
+        }
+    };
 
     stopRunningExport() {
         this.stopExport = true;
