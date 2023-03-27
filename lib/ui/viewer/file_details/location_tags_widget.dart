@@ -52,6 +52,8 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
           () => showAddLocationSheet(
             context,
             widget.coordinates,
+            //This callback is for reloading the locationTagsWidget after adding a new location tag
+            //so that it updates in file details.
             () {
               locationTagChips = _getLocationTags();
             },
@@ -72,7 +74,8 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         onTap: () => showAddLocationSheet(
           context,
           widget.coordinates,
-          //This callback is for reloading the locationTogsWidget after adding a new location tag.
+          //This callback is for reloading the locationTagsWidget after adding a new location tag
+          //so that it updates in file details.
           () {
             locationTagChips = _getLocationTags();
           },
