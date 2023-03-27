@@ -163,7 +163,7 @@ export default function ExportModal(props: Props) {
     const postExportRun = async () => {
         await updateExportStage(ExportStage.FINISHED);
         await updateExportTime(Date.now());
-        syncFileCounts();
+        await syncFileCounts();
     };
 
     const syncFileCounts = async () => {
@@ -175,6 +175,10 @@ export default function ExportModal(props: Props) {
         );
         setTotalFileCount(userPersonalFiles.length);
         setPendingFileCount(unExportedFiles.length);
+        return {
+            totalFileCount: userPersonalFiles.length,
+            pendingFileCount: unExportedFiles.length,
+        };
     };
 
     // =============
@@ -200,6 +204,7 @@ export default function ExportModal(props: Props) {
     const startExport = async () => {
         try {
             await preExportRun();
+            const { pendingFileCount } = await syncFileCounts();
             setExportProgress({ current: 0, total: pendingFileCount });
             await exportService.exportFiles(setExportProgress);
             await postExportRun();
