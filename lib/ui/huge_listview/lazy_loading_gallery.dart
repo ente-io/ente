@@ -424,21 +424,19 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       selectionColor = avatarColors[(randomID).remainder(avatarColors.length)];
     }
     return GestureDetector(
-      onTap: widget.selectedFiles != null
-          ? () async {
-              if (widget.selectedFiles!.files.isNotEmpty) {
-                _selectFile(file);
-              } else {
-                if (AppLifecycleService.instance.mediaExtensionAction.action ==
-                    IntentAction.pick) {
-                  final ioFile = await getFile(file);
-                  MediaExtension().setResult("file://${ioFile!.path}");
-                } else {
-                  _routeToDetailPage(file, context);
-                }
-              }
-            }
-          : null,
+      onTap: () async {
+        if (widget.selectedFiles?.files.isNotEmpty ?? false) {
+          _selectFile(file);
+        } else {
+          if (AppLifecycleService.instance.mediaExtensionAction.action ==
+              IntentAction.pick) {
+            final ioFile = await getFile(file);
+            MediaExtension().setResult("file://${ioFile!.path}");
+          } else {
+            _routeToDetailPage(file, context);
+          }
+        }
+      },
       onLongPress: widget.selectedFiles != null
           ? () {
               if (AppLifecycleService.instance.mediaExtensionAction.action ==
