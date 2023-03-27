@@ -1,5 +1,5 @@
 import { ChevronRight } from '@mui/icons-material';
-import { DialogProps, Divider, Stack } from '@mui/material';
+import { DialogProps, Stack } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { EnteMenuItem } from 'components/Menu/menuItem';
 import React, { useMemo, useState } from 'react';
@@ -9,6 +9,7 @@ import { t } from 'i18next';
 import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
 import { formatDateTime } from 'utils/time/format';
 import Titlebar from 'components/Titlebar';
+import EnteMenuItemDivider from 'components/Menu/menuItemDivider';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -63,7 +64,7 @@ export function ManageLinkExpiry({
                 subText={
                     publicShareProp?.validTill
                         ? formatDateTime(publicShareProp?.validTill / 1000)
-                        : 'never'
+                        : t('LINK_EXPIRY_NEVER')
                 }>
                 {t('LINK_EXPIRY')}
             </EnteMenuItem>
@@ -89,7 +90,7 @@ export function ManageLinkExpiry({
                                         {item.label}
                                     </EnteMenuItem>
                                     {index !== shareExpireOption.length - 1 && (
-                                        <Divider sx={{ '&&&': { m: 0 } }} />
+                                        <EnteMenuItemDivider />
                                     )}
                                 </>
                             ))}

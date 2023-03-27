@@ -6,8 +6,7 @@ import {
     SpaceBetweenFlex,
 } from 'components/Container';
 import { DotSeparator } from 'components/Sidebar/styledComponents';
-import { OverflowMenuContext } from 'contexts/overflowMenu';
-import React, { useContext } from 'react';
+import React from 'react';
 
 interface Iprops {
     onClick: () => void;
@@ -15,7 +14,6 @@ interface Iprops {
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
     subText?: string;
-    keepOpenAfterClick?: boolean;
     children?: any;
     hasSwitch?: boolean;
     checked?: boolean;
@@ -26,17 +24,12 @@ export function EnteMenuItem({
     startIcon,
     endIcon,
     subText,
-    keepOpenAfterClick,
     children,
     hasSwitch = false,
     checked,
 }: Iprops) {
-    const menuContext = useContext(OverflowMenuContext);
     const handleClick = () => {
         onClick();
-        if (!keepOpenAfterClick) {
-            menuContext.close();
-        }
     };
     return (
         <MenuItem
@@ -45,7 +38,7 @@ export function EnteMenuItem({
                 minWidth: '220px',
                 color: (theme) => theme.palette[color].main,
                 backgroundColor: (theme) => theme.palette.background.overPaper,
-                padding: 1.5,
+                padding: 2,
                 '& .MuiSvgIcon-root': {
                     fontSize: '20px',
                 },

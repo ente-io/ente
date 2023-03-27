@@ -20,6 +20,7 @@ interface Iprops {
 import LinkIcon from '@mui/icons-material/Link';
 import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
+import EnteMenuItemDivider from 'components/Menu/menuItemDivider';
 
 export default function EnablePublicShareOptions({
     collection,
@@ -82,6 +83,7 @@ export default function EnablePublicShareOptions({
                     onClick={handleCollectionPublicSharing}>
                     {t('CREATE_PUBLIC_SHARING')}
                 </EnteMenuItem>
+                <EnteMenuItemDivider />
                 <EnteMenuItem
                     startIcon={<LinkIcon />}
                     color="primary"

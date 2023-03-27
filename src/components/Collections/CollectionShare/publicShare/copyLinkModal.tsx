@@ -29,7 +29,7 @@ export default function CopyLinkModal({
             BackdropProps={{ sx: { position: 'absolute' } }}
             sx={{ position: 'absolute' }}
             PaperProps={{
-                sx: { p: 1, justifyContent: 'flex-end' },
+                sx: { p: 1 },
             }}>
             <DialogContent>
                 <VerticallyCentered>

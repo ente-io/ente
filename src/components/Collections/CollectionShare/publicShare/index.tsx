@@ -6,7 +6,7 @@ import CopyLinkModal from './copyLinkModal';
 import PublicShareManage from './manage';
 import ContentCopyIcon from '@mui/icons-material/ContentCopyOutlined';
 import PublicIcon from '@mui/icons-material/Public';
-
+import EnteMenuItemDivider from 'components/Menu/menuItemDivider';
 import { Stack, Typography } from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import { EnteMenuItem } from 'components/Menu/menuItem';
@@ -44,8 +44,8 @@ export default function PublicShare({
         }
     }, [publicShareProp]);
 
-    const copyToClipboardHelper = (text: string) => () => {
-        navigator.clipboard.writeText(text);
+    const copyToClipboardHelper = () => {
+        navigator.clipboard.writeText(publicShareUrl);
         handleCancel();
     };
     const handleCancel = () => {
@@ -71,9 +71,10 @@ export default function PublicShare({
                         <EnteMenuItemGroup>
                             <EnteMenuItem
                                 startIcon={<ContentCopyIcon />}
-                                onClick={copyToClipboardHelper(publicShareUrl)}>
+                                onClick={copyToClipboardHelper}>
                                 {t('COPY_LINK')}
                             </EnteMenuItem>
+                            <EnteMenuItemDivider />
                             <EnteMenuItem
                                 startIcon={<LinkIcon />}
                                 endIcon={<ChevronRightIcon />}
@@ -104,7 +105,7 @@ export default function PublicShare({
                 open={copyLinkModalView}
                 onClose={handleCancel}
                 handleCancel={handleCancel}
-                copyToClipboardHelper={copyToClipboardHelper(publicShareUrl)}
+                copyToClipboardHelper={copyToClipboardHelper}
             />
         </>
     );

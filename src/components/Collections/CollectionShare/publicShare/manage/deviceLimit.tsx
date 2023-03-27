@@ -1,5 +1,5 @@
 import { ChevronRight } from '@mui/icons-material';
-import { DialogProps, Divider, Stack } from '@mui/material';
+import { DialogProps, Stack } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { EnteMenuItem } from 'components/Menu/menuItem';
 import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
@@ -8,6 +8,7 @@ import { t } from 'i18next';
 import React, { useMemo, useState } from 'react';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { getDeviceLimitOptions } from 'utils/collection';
+import EnteMenuItemDivider from 'components/Menu/menuItemDivider';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -81,7 +82,7 @@ export function ManageDeviceLimit({
                                     </EnteMenuItem>
                                     {index !==
                                         deviceLimitOptions.length - 1 && (
-                                        <Divider sx={{ '&&&': { m: 0 } }} />
+                                        <EnteMenuItemDivider />
                                     )}
                                 </>
                             ))}

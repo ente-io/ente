@@ -21,6 +21,7 @@ import { t } from 'i18next';
 import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
 import { DialogProps } from '@mui/material';
 import Titlebar from 'components/Titlebar';
+import EnteMenuItemDivider from 'components/Menu/menuItemDivider';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -107,6 +108,7 @@ export default function PublicShareManage({
                                     }
                                     onRootClose={onRootClose}
                                 />
+                                <EnteMenuItemDivider />
                                 <ManageDownloadAccess
                                     collection={collection}
                                     publicShareProp={publicShareProp}
@@ -114,6 +116,7 @@ export default function PublicShareManage({
                                         updatePublicShareURLHelper
                                     }
                                 />
+                                <EnteMenuItemDivider />
                                 <ManageLinkPassword
                                     collection={collection}
                                     publicShareProp={publicShareProp}
