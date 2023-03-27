@@ -4,7 +4,6 @@ import { t } from 'i18next';
 
 interface Props {
     startExport: () => void;
-    totalFileCount: number;
 }
 export default function ExportInit({ startExport }: Props) {
     return (

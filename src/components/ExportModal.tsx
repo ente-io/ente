@@ -208,12 +208,7 @@ export default function ExportModal(props: Props) {
     const ExportDynamicContent = () => {
         switch (exportStage) {
             case ExportStage.INIT:
-                return (
-                    <ExportInit
-                        startExport={runExport}
-                        totalFileCount={totalFileCount}
-                    />
-                );
+                return <ExportInit startExport={runExport} />;
 
             case ExportStage.INPROGRESS:
                 return (
