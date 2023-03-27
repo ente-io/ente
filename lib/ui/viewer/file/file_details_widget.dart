@@ -244,7 +244,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         _exifData["longRef"] != null;
   }
 
-  _generateExifForLocation(Map<String, IfdTag> exif) {
+  void _generateExifForLocation(Map<String, IfdTag> exif) {
     if (exif["GPS GPSLatitude"] != null) {
       _exifData["lat"] = exif["GPS GPSLatitude"]!
           .values

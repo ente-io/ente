@@ -133,10 +133,10 @@ class LocationService {
 }
 
 class GPSData {
-  String latRef;
-  List<double> lat;
-  String longRef;
-  List<double> long;
+  final String latRef;
+  final List<double> lat;
+  final String longRef;
+  final List<double> long;
 
   GPSData(this.latRef, this.lat, this.longRef, this.long);
 
