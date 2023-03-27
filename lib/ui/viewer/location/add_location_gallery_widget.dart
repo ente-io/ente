@@ -60,7 +60,6 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
       );
       stopWatch.stop();
       widget.memoriesCountNotifier.value = copyOfFiles.length;
-
       final limitedResults = copyOfFiles.take(1000).toList();
 
       return Future.value(
@@ -76,7 +75,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return SizedBox(
-            height: _galleryHeight(widget.memoriesCountNotifier.value!),
+            height: _galleryHeight(widget.memoriesCountNotifier.value ?? 0),
             child: Gallery(
               key: ValueKey(selectedRadius),
               loadingWidget: const SizedBox.shrink(),
