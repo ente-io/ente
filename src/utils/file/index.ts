@@ -580,7 +580,7 @@ export function getLatestVersionFiles(files: EnteFile[]) {
     );
 }
 
-export async function getUserPersonalFiles() {
+export async function getPersonalFiles() {
     const files = await getLocalFiles();
     const user: User = getData(LS_KEYS.USER);
     if (!user?.id) {

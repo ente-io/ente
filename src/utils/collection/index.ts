@@ -1,6 +1,5 @@
 import {
     addToCollection,
-    getLocalCollections,
     moveToCollection,
     removeFromCollection,
     restoreToCollection,
@@ -273,30 +272,3 @@ export function getCollectionNameMap(
         collections.map((collection) => [collection.id, collection.name])
     );
 }
-
-export const getNonEmptyCollectionIds = (files: EnteFile[]) => {
-    const nonEmptyCollectionsIds = new Set<number>();
-    for (const file of files) {
-        if (!file.isTrashed) {
-            nonEmptyCollectionsIds.add(file.collectionID);
-        }
-    }
-    return nonEmptyCollectionsIds;
-};
-
-export const getNonEmptyUserPersonalCollections = async (
-    userPersonalFiles: EnteFile[]
-) => {
-    const user = getData(LS_KEYS.USER);
-    if (!user?.id) {
-        throw Error('user missing');
-    }
-    const collections = await getLocalCollections();
-    const nonEmptyCollectionIds = getNonEmptyCollectionIds(userPersonalFiles);
-    const userCollections = collections.filter(
-        (collection) =>
-            collection.owner.id === user?.id &&
-            nonEmptyCollectionIds.has(collection.id)
-    );
-    return userCollections;
-};

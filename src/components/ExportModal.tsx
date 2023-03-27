@@ -28,7 +28,10 @@ import { OverflowMenuOption } from './OverflowMenu/option';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
+import { getPersonalFiles } from 'utils/file';
+import { eventBus, Events } from 'services/events';
 import LinkButton from './pages/gallery/LinkButton';
+import { getUnExportedFiles } from 'utils/export';
 
 const ExportFolderPathContainer = styled(LinkButton)`
     width: 262px;
@@ -68,10 +71,8 @@ export default function ExportModal(props: Props) {
             const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
             setExportFolder(exportSettings?.folder);
             setContinuousExport(exportSettings?.continuousExport);
-            exportService.setupLocalFileUpdateListener(
-                setTotalFileCount,
-                setPendingFileCount
-            );
+            syncFileCounts();
+            eventBus.on(Events.LOCAL_FILES_UPDATED, syncFileCounts);
         } catch (e) {
             logError(e, 'error in exportModal');
         }
@@ -80,7 +81,7 @@ export default function ExportModal(props: Props) {
     useEffect(() => {
         try {
             if (continuousExport) {
-                exportService.enableContinuousExport(runExport);
+                exportService.enableContinuousExport(startExport);
             } else {
                 exportService.disableContinuousExport();
             }
@@ -99,7 +100,7 @@ export default function ExportModal(props: Props) {
                 setExportStage(exportInfo?.stage ?? ExportStage.INIT);
                 setLastExportTime(exportInfo?.lastAttemptTimestamp);
                 if (exportInfo?.stage === ExportStage.INPROGRESS) {
-                    await runExport();
+                    await startExport();
                 }
             } catch (e) {
                 logError(e, 'error handling exportFolder change');
@@ -145,7 +146,7 @@ export default function ExportModal(props: Props) {
 
     // ======================
     // HELPER FUNCTIONS
-    // =========================
+    // =======================
 
     const preExportRun = async () => {
         const exportFolder = getData(LS_KEYS.EXPORT)?.folder;
@@ -162,7 +163,18 @@ export default function ExportModal(props: Props) {
     const postExportRun = async () => {
         await updateExportStage(ExportStage.FINISHED);
         await updateExportTime(Date.now());
-        exportService.syncUpdatedFileCounts();
+        syncFileCounts();
+    };
+
+    const syncFileCounts = async () => {
+        const exportRecord = await exportService.getExportRecord();
+        const userPersonalFiles = await getPersonalFiles();
+        const unExportedFiles = getUnExportedFiles(
+            userPersonalFiles,
+            exportRecord
+        );
+        setTotalFileCount(userPersonalFiles.length);
+        setPendingFileCount(unExportedFiles.length);
     };
 
     // =============
@@ -185,11 +197,11 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const runExport = async () => {
+    const startExport = async () => {
         try {
             await preExportRun();
             setExportProgress({ current: 0, total: pendingFileCount });
-            await exportService.runExport(setExportProgress);
+            await exportService.exportFiles(setExportProgress);
             await postExportRun();
         } catch (e) {
             logError(e, 'startExport failed');
@@ -208,7 +220,7 @@ export default function ExportModal(props: Props) {
     const ExportDynamicContent = () => {
         switch (exportStage) {
             case ExportStage.INIT:
-                return <ExportInit startExport={runExport} />;
+                return <ExportInit startExport={startExport} />;
 
             case ExportStage.INPROGRESS:
                 return (
@@ -222,10 +234,10 @@ export default function ExportModal(props: Props) {
             case ExportStage.FINISHED:
                 return (
                     <ExportFinished
-                        pendingFileCount={pendingFileCount}
                         onHide={props.onHide}
                         lastExportTime={lastExportTime}
-                        startExport={runExport}
+                        pendingFileCount={pendingFileCount}
+                        startExport={startExport}
                     />
                 );
 
