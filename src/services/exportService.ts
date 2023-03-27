@@ -37,6 +37,7 @@ import { Collection } from 'types/collection';
 import {
     CollectionIDNameMap,
     CollectionIDPathMap,
+    ExportProgress,
     ExportRecord,
     ExportRecordV1,
 } from 'types/export';
@@ -124,7 +125,7 @@ class ExportService {
             this.continuousExportHandler =
                 this.getContinuousExportHandler(runExport);
 
-            this.continuousExportHandler();
+            this.localFileUpdateHandler();
         } catch (e) {
             logError(e, 'failed to enableContinuousExport ');
             throw e;
@@ -145,7 +146,7 @@ class ExportService {
         this.localFileUpdateHandler();
     }
 
-    async runExport(updateProgress) {
+    async runExport(updateProgress: (progress: ExportProgress) => void) {
         try {
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             if (this.exportInProgress) {
@@ -164,7 +165,7 @@ class ExportService {
     }
 
     private async exportFiles(
-        updateProgress: (progress: { current: number; total: number }) => void
+        updateProgress: (progress: ExportProgress) => void
     ) {
         try {
             const exportDir = getData(LS_KEYS.EXPORT)?.folder;
