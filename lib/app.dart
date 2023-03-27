@@ -18,10 +18,12 @@ import "package:photos/utils/intent_util.dart";
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
   final Future<void> Function(String) killBackgroundTask;
+  final AdaptiveThemeMode? savedThemeMode;
 
   const EnteApp(
     this.runBackgroundTask,
-    this.killBackgroundTask, {
+    this.killBackgroundTask,
+    this.savedThemeMode, {
     Key? key,
   }) : super(key: key);
 
@@ -56,7 +58,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       return AdaptiveTheme(
         light: lightThemeData,
         dark: darkThemeData,
-        initial: AdaptiveThemeMode.system,
+        initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
         builder: (lightTheme, dartTheme) => MaterialApp(
           title: "ente",
           themeMode: ThemeMode.system,

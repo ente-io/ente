@@ -14,7 +14,7 @@ import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/collections_list_widget.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
-import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/components/text_input_widget.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
@@ -153,7 +153,6 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                           child: TextInputWidget(
                             hintText: "Album name",
                             prefixIcon: Icons.search_rounded,
-                            autoFocus: true,
                             onChange: (value) {
                               setState(() {
                                 _searchQuery = value;
@@ -199,47 +198,46 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     return Flexible(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
-        child: Scrollbar(
-          thumbVisibility: true,
-          radius: const Radius.circular(2),
-          child: Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: FutureBuilder(
-              future: _getCollectionsWithThumbnail(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  //Need to show an error on the UI here
-                  return const SizedBox.shrink();
-                } else if (snapshot.hasData) {
-                  final collectionsWithThumbnail =
-                      snapshot.data as List<CollectionWithThumbnail>;
-                  _removeIncomingCollections(collectionsWithThumbnail);
-                  final shouldShowCreateAlbum =
-                      widget.showOptionToCreateNewAlbum && _searchQuery.isEmpty;
-                  final searchResults = _searchQuery.isNotEmpty
-                      ? collectionsWithThumbnail
-                          .where(
-                            (element) => element.collection.name!
-                                .toLowerCase()
-                                .contains(_searchQuery),
-                          )
-                          .toList()
-                      : collectionsWithThumbnail;
-                  return CollectionsListWidget(
+        child: FutureBuilder(
+          future: _getCollectionsWithThumbnail(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              //Need to show an error on the UI here
+              return const SizedBox.shrink();
+            } else if (snapshot.hasData) {
+              final collectionsWithThumbnail =
+                  snapshot.data as List<CollectionWithThumbnail>;
+              _removeIncomingCollections(collectionsWithThumbnail);
+              final shouldShowCreateAlbum =
+                  widget.showOptionToCreateNewAlbum && _searchQuery.isEmpty;
+              final searchResults = _searchQuery.isNotEmpty
+                  ? collectionsWithThumbnail
+                      .where(
+                        (element) => element.collection.name!
+                            .toLowerCase()
+                            .contains(_searchQuery),
+                      )
+                      .toList()
+                  : collectionsWithThumbnail;
+              return Scrollbar(
+                thumbVisibility: true,
+                radius: const Radius.circular(2),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: CollectionsListWidget(
                     searchResults,
                     widget.actionType,
-                    widget.showOptionToCreateNewAlbum,
                     widget.selectedFiles,
                     widget.sharedFiles,
                     _searchQuery,
                     shouldShowCreateAlbum,
-                  );
-                } else {
-                  return const EnteLoadingWidget();
-                }
-              },
-            ),
-          ),
+                  ),
+                ),
+              );
+            } else {
+              return const EnteLoadingWidget();
+            }
+          },
         ),
       ),
     );

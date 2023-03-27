@@ -384,12 +384,6 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       margin: const EdgeInsets.only(bottom: 6),
       child: Column(
         children: [
-          _isFreePlanUser()
-              ? Text(
-                  "2 months free on yearly plans",
-                  style: getEnteTextTheme(context).miniMuted,
-                )
-              : const SizedBox.shrink(),
           RepaintBoundary(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -405,10 +399,17 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
                     await _filterStorePlansForUi();
                   },
                 ),
-                planText("Yearly", !showYearlyPlan)
+                planText("Yearly", !showYearlyPlan),
               ],
             ),
           ),
+          _isFreePlanUser()
+              ? Text(
+                  "2 months free on yearly plans",
+                  style: getEnteTextTheme(context).miniMuted,
+                )
+              : const SizedBox.shrink(),
+          const Padding(padding: EdgeInsets.all(8)),
         ],
       ),
     );

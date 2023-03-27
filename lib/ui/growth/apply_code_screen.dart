@@ -5,8 +5,8 @@ import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/button_widget.dart";
-import "package:photos/ui/components/icon_button_widget.dart";
+import 'package:photos/ui/components/buttons/button_widget.dart';
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
@@ -135,9 +135,10 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                           Logger('$runtimeType')
                               .severe("failed to apply referral", e);
                           showErrorDialogForException(
-                              context: context,
-                              exception: e as Exception,
-                              apiErrorPrefix: "Failed to apply code");
+                            context: context,
+                            exception: e as Exception,
+                            apiErrorPrefix: "Failed to apply code",
+                          );
                         }
                       },
                     )

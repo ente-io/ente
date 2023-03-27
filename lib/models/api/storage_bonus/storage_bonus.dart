@@ -131,7 +131,8 @@ class BonusDetails {
 
   factory BonusDetails.fromJson(Map<String, dynamic> json) => BonusDetails(
         referralStats: List<ReferralStat>.from(
-            json["referralStats"].map((x) => ReferralStat.fromJson(x))),
+          json["referralStats"].map((x) => ReferralStat.fromJson(x)),
+        ),
         bonuses:
             List<Bonus>.from(json["bonuses"].map((x) => Bonus.fromJson(x))),
         refCount: json["refCount"],

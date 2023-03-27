@@ -66,7 +66,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 3. Pull in all submodules with `git submodule update --init --recursive`
 4. Enable repo git hooks `git config core.hooksPath hooks`
 5. Setup TensorFlowLite by executing `setup.sh`
-6. For Android, run `flutter build apk --release --flavor independent`
+6. For Android, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`
 7. For iOS, run `flutter build ios`
 
 <br/>

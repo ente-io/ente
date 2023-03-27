@@ -1,0 +1,6 @@
+{
+  "sign_up": "inscription",
+  "@sign_up": {
+    "description": "Text on the sign up button used during registration"
+  }
+}

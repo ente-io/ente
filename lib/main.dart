@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -58,26 +59,36 @@ const kBackgroundLockLatency = Duration(seconds: 3);
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
-  await _runInForeground();
+  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+  await _runInForeground(savedThemeMode);
   BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);
 }
 
-Future<void> _runInForeground() async {
+Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
     unawaited(_scheduleFGSync('appStart in FG'));
     runApp(
       AppLock(
-        builder: (args) => const EnteApp(_runBackgroundTask, _killBGTask),
+        builder: (args) =>
+            EnteApp(_runBackgroundTask, _killBGTask, savedThemeMode),
         lockScreen: const LockScreen(),
         enabled: Configuration.instance.shouldShowLockScreen(),
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
         backgroundLockLatency: kBackgroundLockLatency,
+        savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
   });
+}
+
+ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
+  if (savedThemeMode == null) return ThemeMode.system;
+  if (savedThemeMode.isLight) return ThemeMode.light;
+  if (savedThemeMode.isDark) return ThemeMode.dark;
+  return ThemeMode.system;
 }
 
 Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
@@ -119,7 +130,7 @@ Future<void> _runInBackground(String taskId) async {
 // https://stackoverflow.com/a/73796478/546896
 @pragma('vm:entry-point')
 void _headlessTaskHandler(HeadlessTask task) {
-  print("_headlessTaskHandler");
+  debugPrint("_headlessTaskHandler");
   if (task.timeout) {
     BackgroundFetch.finish(task.taskId);
   } else {

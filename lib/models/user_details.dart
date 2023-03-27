@@ -9,6 +9,7 @@ class UserDetails {
   final String email;
   final int usage;
   final int fileCount;
+  final int storageBonus;
   final int sharedCollectionsCount;
   final Subscription subscription;
   final FamilyData? familyData;
@@ -17,6 +18,7 @@ class UserDetails {
     this.email,
     this.usage,
     this.fileCount,
+    this.storageBonus,
     this.sharedCollectionsCount,
     this.subscription,
     this.familyData,
@@ -50,7 +52,8 @@ class UserDetails {
   }
 
   int getTotalStorage() {
-    return isPartOfFamily() ? familyData!.storage : subscription.storage;
+    return (isPartOfFamily() ? familyData!.storage : subscription.storage) +
+        storageBonus;
   }
 
   factory UserDetails.fromMap(Map<String, dynamic> map) {
@@ -58,6 +61,7 @@ class UserDetails {
       map['email'] as String,
       map['usage'] as int,
       (map['fileCount'] ?? 0) as int,
+      (map['storageBonus'] ?? 0) as int,
       (map['sharedCollectionsCount'] ?? 0) as int,
       Subscription.fromMap(map['subscription']),
       FamilyData.fromMap(map['familyData']),
@@ -69,6 +73,7 @@ class UserDetails {
       'email': email,
       'usage': usage,
       'fileCount': fileCount,
+      'storageBonus': storageBonus,
       'sharedCollectionsCount': sharedCollectionsCount,
       'subscription': subscription.toMap(),
       'familyData': familyData?.toMap(),

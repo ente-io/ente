@@ -6,9 +6,9 @@ import "package:photos/services/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/common/web_page.dart";
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
-import "package:photos/ui/components/icon_button_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
@@ -43,7 +43,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
         await UserService.instance.getUserDetailsV2(memoryCount: false);
     final referralView =
         await StorageBonusService.instance.getGateway().getReferralView();
-    return Tuple2(referralView, cachedUserDetails!);
+    return Tuple2(referralView, cachedUserDetails);
   }
 
   @override
