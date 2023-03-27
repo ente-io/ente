@@ -28,7 +28,6 @@ import { OverflowMenuOption } from './OverflowMenu/option';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
-import { getTotalFileCount } from 'utils/file';
 import LinkButton from './pages/gallery/LinkButton';
 
 const ExportFolderPathContainer = styled(LinkButton)`
@@ -204,20 +203,8 @@ export default function ExportModal(props: Props) {
     const startExport = async () => {
         try {
             await preExportRun();
-            const exportRecord = await exportService.getExportRecord();
-            const totalFileCount = await getTotalFileCount();
-            const exportedFileCount = exportRecord.exportedFiles?.length ?? 0;
-            setExportProgress({
-                current: exportedFileCount,
-                total: totalFileCount,
-            });
 
-            const updateExportStatsWithOffset = (current: number) =>
-                setExportProgress({
-                    current: exportedFileCount + current,
-                    total: totalFileCount,
-                });
-            await exportService.exportFiles(updateExportStatsWithOffset);
+            await exportService.exportFiles(setExportProgress);
 
             await postExportRun();
         } catch (e) {

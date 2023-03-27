@@ -31,6 +31,7 @@ import { decodeMotionPhoto } from './motionPhotoService';
 import {
     generateStreamFromArrayBuffer,
     getFileExtension,
+    getUserPersonalFiles,
     mergeMetadata,
 } from 'utils/file';
 
@@ -64,11 +65,38 @@ class ExportService {
     private stopExport: boolean = false;
     private allElectronAPIsExist: boolean = false;
     private fileReader: FileReader = null;
-    private continuousExportEventListener: () => void;
+    private continuousExportHandler: () => void;
+    private reRunExport: boolean = false;
 
     constructor() {
         this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.electronAPIs?.exists;
+    }
+
+    async setupLocalFileUpdateListener(
+        updateTotalFileCount: (totalFileCount: number) => void,
+        updatePendingFileCount: (pendingFileCount: number) => void
+    ) {
+        eventBus.addListener(Events.LOCAL_FILES_UPDATED, () =>
+            this.localFileUpdateHandler(
+                updateTotalFileCount,
+                updatePendingFileCount
+            )
+        );
+    }
+
+    async localFileUpdateHandler(updateTotalFileCount, updatePendingFileCount) {
+        const exportRecord = await this.getExportRecord();
+        const userPersonalFiles = await getUserPersonalFiles();
+        const unExportedFiles = getUnExportedFiles(
+            userPersonalFiles,
+            exportRecord
+        );
+        updateTotalFileCount(userPersonalFiles.length);
+        updatePendingFileCount(unExportedFiles.length);
+        if (unExportedFiles.length > 0 && this.continuousExportHandler) {
+            this.continuousExportHandler();
+        }
     }
 
     async changeExportDirectory(callback: (newExportDir: string) => void) {
@@ -93,25 +121,16 @@ class ExportService {
         }
     }
 
-    enableContinuousExport(startExport: () => void) {
+    enableContinuousExport(startExport: () => Promise<void>) {
         try {
-            if (this.continuousExportEventListener) {
+            if (this.continuousExportHandler) {
                 addLogLine('continuous export already enabled');
                 return;
             }
-            startExport();
-            this.continuousExportEventListener = () => {
-                addLogLine('continuous export triggered');
-                if (this.exportInProgress) {
-                    addLogLine('export in progress, skipping');
-                    return;
-                }
-                startExport();
-            };
-            eventBus.addListener(
-                Events.LOCAL_FILES_UPDATED,
-                this.continuousExportEventListener
-            );
+            this.continuousExportHandler =
+                this.getContinuousExportHandler(startExport);
+
+            this.continuousExportHandler();
         } catch (e) {
             logError(e, 'failed to enableContinuousExport ');
             throw e;
@@ -120,15 +139,11 @@ class ExportService {
 
     disableContinuousExport() {
         try {
-            if (!this.continuousExportEventListener) {
+            if (!this.continuousExportHandler) {
                 addLogLine('continuous export already disabled');
                 return;
             }
-            eventBus.removeListener(
-                Events.LOCAL_FILES_UPDATED,
-                this.continuousExportEventListener
-            );
-            this.continuousExportEventListener = null;
+            this.continuousExportHandler = null;
         } catch (e) {
             logError(e, 'failed to disableContinuousExport');
             throw e;
@@ -139,7 +154,9 @@ class ExportService {
         this.stopExport = true;
     }
 
-    async exportFiles(updateProgress: (current: number) => void) {
+    async exportFiles(
+        updateProgress: (progress: { current: number; total: number }) => void
+    ) {
         try {
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             if (this.exportInProgress) {
@@ -219,7 +236,7 @@ class ExportService {
         collectionIDNameMap: CollectionIDNameMap,
         renamedCollections: Collection[],
         collectionIDPathMap: CollectionIDPathMap,
-        updateProgress: (current: number) => void,
+        updateProgress: (progress: { current: number; total: number }) => void,
         exportDir: string
     ): Promise<void> {
         try {
@@ -264,6 +281,7 @@ class ExportService {
                         file,
                         RecordType.SUCCESS
                     );
+                    updateProgress({ current: index + 1, total: files.length });
                 } catch (e) {
                     logError(e, 'export failed for a file');
                     if (
@@ -278,7 +296,6 @@ class ExportService {
                         RecordType.FAILED
                     );
                 }
-                updateProgress(index + 1);
             }
             if (!this.stopExport) {
                 this.electronAPIs.sendNotification(
@@ -393,6 +410,22 @@ class ExportService {
             logError(e, 'export Record JSON parsing failed ');
             throw e;
         }
+    }
+
+    getContinuousExportHandler(startExport: () => Promise<void>) {
+        return async () => {
+            addLogLine('continuous export triggered');
+            if (this.exportInProgress) {
+                addLogLine('export in progress, setting reRunExport to true');
+                this.reRunExport = true;
+                return;
+            }
+            await startExport();
+            if (this.reRunExport) {
+                this.reRunExport = false;
+                setTimeout(this.continuousExportHandler, 0);
+            }
+        };
     }
 
     async createNewCollectionFolder(

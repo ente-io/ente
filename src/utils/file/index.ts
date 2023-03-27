@@ -580,19 +580,11 @@ export function getLatestVersionFiles(files: EnteFile[]) {
     );
 }
 
-export function getUserPersonalFiles(files: EnteFile[]) {
+export async function getUserPersonalFiles() {
+    const files = await getLocalFiles();
     const user: User = getData(LS_KEYS.USER);
     if (!user?.id) {
         throw Error('user missing');
     }
     return files.filter((file) => file.ownerID === user.id);
 }
-
-export const getTotalFileCount = async () => {
-    try {
-        const userPersonalFiles = getUserPersonalFiles(await getLocalFiles());
-        return userPersonalFiles.length;
-    } catch (e) {
-        logError(e, 'updateTotalFileCount failed');
-    }
-};
