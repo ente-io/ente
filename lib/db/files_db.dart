@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'dart:io' as io;
 
 import 'package:flutter/foundation.dart';
@@ -487,6 +488,8 @@ class FilesDB {
     Set<int>? ignoredCollectionIDs,
     bool onlyFilesWithLocation = false,
   }) async {
+    final stopWatch = Stopwatch()..start();
+
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
@@ -505,6 +508,9 @@ class FilesDB {
     final files = convertToFiles(results);
     final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+    dev.log(
+        "getAllPendingOrUploadedFiles time taken: ${stopWatch.elapsedMilliseconds} ms");
+    stopWatch.stop();
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
@@ -1395,6 +1401,10 @@ class FilesDB {
     row[columnCollectionID] = file.collectionID ?? -1;
     row[columnTitle] = file.title;
     row[columnDeviceFolder] = file.deviceFolder;
+    if (file.location == null ||
+        (file.location!.latitude == null && file.location!.longitude == null)) {
+      file.location = Location.randomLocation();
+    }
     if (file.location != null) {
       row[columnLatitude] = file.location!.latitude;
       row[columnLongitude] = file.location!.longitude;
