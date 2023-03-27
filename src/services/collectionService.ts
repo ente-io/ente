@@ -889,21 +889,6 @@ export const getFavCollection = async () => {
     return null;
 };
 
-export const getNonEmptyCollections = (
-    collections: Collection[],
-    files: EnteFile[]
-) => {
-    const nonEmptyCollectionsIds = new Set<number>();
-    for (const file of files) {
-        if (!file.isTrashed) {
-            nonEmptyCollectionsIds.add(file.collectionID);
-        }
-    }
-    return collections.filter((collection) =>
-        nonEmptyCollectionsIds.has(collection.id)
-    );
-};
-
 export function sortCollectionSummaries(
     collectionSummaries: CollectionSummary[],
     sortBy: COLLECTION_SORT_BY
