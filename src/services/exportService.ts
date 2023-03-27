@@ -137,7 +137,7 @@ class ExportService {
         }
     }
 
-    getUpdateFileLists = async () => {
+    getUpdateTotalAndPendingFileCounts = async () => {
         try {
             const exportRecord = await this.getExportRecord();
             const userPersonalFiles = await getPersonalFiles();

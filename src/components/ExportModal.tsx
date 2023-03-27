@@ -79,7 +79,7 @@ export default function ExportModal(props: Props) {
             return;
         }
         if (exportStage === ExportStage.FINISHED) {
-            void syncFileCounts();
+            syncFileCounts();
         }
     }, [props.show]);
 
@@ -175,7 +175,7 @@ export default function ExportModal(props: Props) {
     const syncFileCounts = async () => {
         try {
             const { totalFiles, pendingFiles } =
-                await exportService.getUpdateFileLists();
+                await exportService.getUpdateTotalAndPendingFileCounts();
             setTotalFileCount(totalFiles.length);
             setPendingFileCount(pendingFiles.length);
         } catch (e) {
