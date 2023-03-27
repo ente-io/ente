@@ -28,7 +28,6 @@ export default function ExportFinished(props: Props) {
                         </Typography>
                         <Typography>{props.pendingFileCount}</Typography>
                     </SpaceBetweenFlex>
-
                     <SpaceBetweenFlex minHeight={'48px'}>
                         <Typography color="text.secondary">
                             {t('LAST_EXPORT_TIME')}
