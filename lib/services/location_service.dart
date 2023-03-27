@@ -73,7 +73,7 @@ class LocationService {
     return result;
   }
 
-  isFileInsideLocationTag(
+  bool isFileInsideLocationTag(
     List<double> center,
     List<double> fileCoordinates,
     int radius,
