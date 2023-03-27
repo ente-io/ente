@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.7.33+433
+version: 0.7.37+437
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
@@ -30,13 +30,14 @@ dependencies:
   collection: # dart
   computer: ^2.0.0
   confetti: ^0.6.0
-  crypto: ^3.0.2
   connectivity_plus: ^3.0.3
+  crypto: ^3.0.2
   cupertino_icons: ^1.0.0
   device_info: ^2.0.2
   dio: ^4.0.6
   dots_indicator: ^2.0.0
   dotted_border: ^2.0.0+2
+  dropdown_button2: ^2.0.0
   email_validator: ^2.0.1
   equatable: ^2.0.5
   event_bus: ^2.0.0
@@ -165,7 +166,9 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
-    - assets/models/
+    - assets/models/cocossd/
+    - assets/models/mobilenet/
+    - assets/models/scenes/
   fonts:
   - family: Inter
     fonts:

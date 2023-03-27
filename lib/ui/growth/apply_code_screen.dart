@@ -135,9 +135,10 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                           Logger('$runtimeType')
                               .severe("failed to apply referral", e);
                           showErrorDialogForException(
-                              context: context,
-                              exception: e as Exception,
-                              apiErrorPrefix: "Failed to apply code");
+                            context: context,
+                            exception: e as Exception,
+                            apiErrorPrefix: "Failed to apply code",
+                          );
                         }
                       },
                     )
