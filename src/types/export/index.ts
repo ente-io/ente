@@ -9,10 +9,6 @@ export interface ExportProgress {
 export interface ExportedCollectionPaths {
     [collectionID: number]: string;
 }
-export interface ExportStats {
-    failed: number;
-    success: number;
-}
 
 export interface ExportRecordV1 {
     version?: number;

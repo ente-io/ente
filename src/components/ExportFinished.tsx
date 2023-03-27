@@ -7,7 +7,6 @@ import {
 } from '@mui/material';
 import React from 'react';
 import { t } from 'i18next';
-import { ExportStats } from 'types/export';
 import { formatDateTime } from 'utils/time/format';
 import { SpaceBetweenFlex } from './Container';
 
@@ -15,7 +14,6 @@ interface Props {
     pendingFileCount: number;
     onHide: () => void;
     lastExportTime: number;
-    exportStats: ExportStats;
     startExport: () => void;
 }
 

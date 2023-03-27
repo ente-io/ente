@@ -1,7 +1,7 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState, useContext } from 'react';
 import exportService from 'services/exportService';
-import { ExportProgress, ExportSettings, ExportStats } from 'types/export';
+import { ExportProgress, ExportSettings } from 'types/export';
 import {
     Box,
     Button,
@@ -55,10 +55,6 @@ export default function ExportModal(props: Props) {
         current: 0,
         total: 0,
     });
-    const [exportStats, setExportStats] = useState<ExportStats>({
-        failed: 0,
-        success: 0,
-    });
     const [lastExportTime, setLastExportTime] = useState(0);
 
     // ====================
@@ -84,7 +80,7 @@ export default function ExportModal(props: Props) {
     useEffect(() => {
         try {
             if (continuousExport) {
-                exportService.enableContinuousExport(startExport);
+                exportService.enableContinuousExport(runExport);
             } else {
                 exportService.disableContinuousExport();
             }
@@ -102,12 +98,8 @@ export default function ExportModal(props: Props) {
                 const exportInfo = await exportService.getExportRecord();
                 setExportStage(exportInfo?.stage ?? ExportStage.INIT);
                 setLastExportTime(exportInfo?.lastAttemptTimestamp);
-                setExportStats({
-                    success: exportInfo?.exportedFiles?.length ?? 0,
-                    failed: exportInfo?.failedFiles?.length ?? 0,
-                });
                 if (exportInfo?.stage === ExportStage.INPROGRESS) {
-                    await startExport();
+                    await runExport();
                 }
             } catch (e) {
                 logError(e, 'error handling exportFolder change');
@@ -170,14 +162,7 @@ export default function ExportModal(props: Props) {
     const postExportRun = async () => {
         await updateExportStage(ExportStage.FINISHED);
         await updateExportTime(Date.now());
-        await syncExportStatsWithRecord();
-    };
-
-    const syncExportStatsWithRecord = async () => {
-        const exportRecord = await exportService.getExportRecord();
-        const failed = exportRecord?.failedFiles?.length ?? 0;
-        const success = exportRecord?.exportedFiles?.length ?? 0;
-        setExportStats({ failed, success });
+        exportService.syncUpdatedFileCounts();
     };
 
     // =============
@@ -200,12 +185,10 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const startExport = async () => {
+    const runExport = async () => {
         try {
             await preExportRun();
-
-            await exportService.exportFiles(setExportProgress);
-
+            await exportService.runExport(setExportProgress);
             await postExportRun();
         } catch (e) {
             logError(e, 'startExport failed');
@@ -226,7 +209,7 @@ export default function ExportModal(props: Props) {
             case ExportStage.INIT:
                 return (
                     <ExportInit
-                        startExport={startExport}
+                        startExport={runExport}
                         totalFileCount={totalFileCount}
                     />
                 );
@@ -246,8 +229,7 @@ export default function ExportModal(props: Props) {
                         pendingFileCount={pendingFileCount}
                         onHide={props.onHide}
                         lastExportTime={lastExportTime}
-                        exportStats={exportStats}
-                        startExport={startExport}
+                        startExport={runExport}
                     />
                 );
 
