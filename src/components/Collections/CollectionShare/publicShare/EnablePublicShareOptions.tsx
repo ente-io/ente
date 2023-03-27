@@ -42,6 +42,7 @@ export default function EnablePublicShareOptions({
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
         } finally {
+            setSharableLinkError(null);
             appContext.finishLoading();
         }
     };
@@ -57,10 +58,6 @@ export default function EnablePublicShareOptions({
         } finally {
             galleryContext.setBlockingLoad(false);
         }
-    };
-    const handleCollectionPublicSharing = () => {
-        setSharableLinkError(null);
-        createSharableURLHelper();
     };
     const handleCollecPhotosPublicSharing = async () => {
         setSharableLinkError(null);
@@ -80,7 +77,7 @@ export default function EnablePublicShareOptions({
                 <EnteMenuItem
                     startIcon={<LinkIcon />}
                     color="primary"
-                    onClick={handleCollectionPublicSharing}>
+                    onClick={createSharableURLHelper}>
                     {t('CREATE_PUBLIC_SHARING')}
                 </EnteMenuItem>
                 <EnteMenuItemDivider />

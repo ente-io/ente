@@ -38,7 +38,6 @@ export function ManageDeviceLimit({
 
     const changeDeviceLimitValue = (value: number) => async () => {
         await updateDeviceLimit(value);
-        publicShareProp.deviceLimit = value;
         setChangeDeviceLimitView(false);
     };
 

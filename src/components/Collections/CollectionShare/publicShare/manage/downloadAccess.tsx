@@ -48,7 +48,7 @@ export function ManageDownloadAccess({
         <EnteMenuItem
             checked={publicShareProp?.enableDownload ?? true}
             onClick={handleFileDownloadSetting}
-            hasSwitch={true}>
+            hasSwitch>
             {t('FILE_DOWNLOAD')}
         </EnteMenuItem>
     );

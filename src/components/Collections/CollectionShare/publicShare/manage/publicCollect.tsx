@@ -27,7 +27,7 @@ export function ManagePublicCollect({
             <EnteMenuItem
                 onClick={handleFileDownloadSetting}
                 color="primary"
-                hasSwitch={true}
+                hasSwitch
                 checked={publicShareProp?.enableCollect}>
                 {t('PUBLIC_COLLECT')}
             </EnteMenuItem>
