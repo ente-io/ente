@@ -1401,10 +1401,10 @@ class FilesDB {
     row[columnCollectionID] = file.collectionID ?? -1;
     row[columnTitle] = file.title;
     row[columnDeviceFolder] = file.deviceFolder;
-    if (file.location == null ||
-        (file.location!.latitude == null && file.location!.longitude == null)) {
-      file.location = Location.randomLocation();
-    }
+    // if (file.location == null ||
+    //     (file.location!.latitude == null && file.location!.longitude == null)) {
+    //   file.location = Location.randomLocation();
+    // }
     if (file.location != null) {
       row[columnLatitude] = file.location!.latitude;
       row[columnLongitude] = file.location!.longitude;
