@@ -188,6 +188,7 @@ export default function ExportModal(props: Props) {
     const runExport = async () => {
         try {
             await preExportRun();
+            setExportProgress({ current: 0, total: pendingFileCount });
             await exportService.runExport(setExportProgress);
             await postExportRun();
         } catch (e) {
