@@ -126,7 +126,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
         firstList.add(
           BlurMenuItemWidget(
             leadingIcon: Icons.link_outlined,
-            labelText: "Create link$suffix",
+            labelText: "Share link$suffix",
             menuItemColor: colorScheme.fillFaint,
             onTap: anyUploadedFiles ? _onCreatedSharedLinkClicked : null,
           ),

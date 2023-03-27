@@ -258,7 +258,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     autofillHints: const [AutofillHints.newPassword],
                     onEditingComplete: () => TextInput.finishAutofillContext(),
                     decoration: InputDecoration(
-                      fillColor: _passwordsMatch ? _validFieldValueColor : null,
+                      fillColor: _passwordsMatch && _passwordIsValid
+                          ? _validFieldValueColor
+                          : null,
                       filled: true,
                       hintText: "Confirm password",
                       contentPadding: const EdgeInsets.symmetric(

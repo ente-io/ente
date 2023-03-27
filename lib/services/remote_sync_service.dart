@@ -433,23 +433,36 @@ class RemoteSyncService {
   }
 
   Future<int?> _getCollectionID(DeviceCollection deviceCollection) async {
-    if (deviceCollection.collectionID != null) {
+    if (deviceCollection.hasCollectionID()) {
       final collection =
           _collectionsService.getCollectionByID(deviceCollection.collectionID!);
-      if (collection == null || collection.isDeleted) {
-        _logger.warning(
-          "Collection $deviceCollection.collectionID either deleted or missing "
-          "for path ${deviceCollection.id}",
-        );
-        return null;
+      if (collection != null && !collection.isDeleted) {
+        return collection.id;
       }
-      return collection.id;
-    } else {
-      final collection =
-          await _collectionsService.getOrCreateForPath(deviceCollection.name);
-      await _db.updateDeviceCollection(deviceCollection.id, collection.id);
-      return collection.id;
+      if (collection == null) {
+        // ideally, this should never happen because the app keeps a track of
+        // all collections and their IDs. But, if somehow the collection is
+        // deleted, we should fetch it again
+        _logger.severe(
+          "Collection ${deviceCollection.collectionID} missing "
+          "for pathID ${deviceCollection.id}",
+        );
+        _collectionsService
+            .fetchCollectionByID(deviceCollection.collectionID!)
+            .ignore();
+        // return, by next run collection should be available.
+        // we are not waiting on fetch by choice because device might have wrong
+        // mapping which will result in breaking upload for other device path
+        return null;
+      } else if (collection.isDeleted) {
+        _logger.warning("Collection ${deviceCollection.collectionID} deleted "
+            "for pathID ${deviceCollection.id}, new collection will be created");
+      }
     }
+    final collection =
+        await _collectionsService.getOrCreateForPath(deviceCollection.name);
+    await _db.updateDeviceCollection(deviceCollection.id, collection.id);
+    return collection.id;
   }
 
   Future<List<File>> _getFilesToBeUploaded() async {

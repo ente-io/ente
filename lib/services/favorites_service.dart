@@ -137,7 +137,10 @@ class FavoritesService {
   }
 
   Future<void> updateFavorites(
-      BuildContext context, List<File> files, bool favFlag) async {
+    BuildContext context,
+    List<File> files,
+    bool favFlag,
+  ) async {
     final int currentUserID = Configuration.instance.getUserID()!;
     if (files.any((f) => f.uploadedFileID == null)) {
       throw AssertionError("Can only favorite uploaded items");

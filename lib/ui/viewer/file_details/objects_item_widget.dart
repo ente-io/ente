@@ -15,7 +15,6 @@ class ObjectsItemWidget extends StatelessWidget {
     return InfoItemWidget(
       key: const ValueKey("Objects"),
       leadingIcon: Icons.image_search_outlined,
-      title: "Objects",
       subtitleSection: _objectTags(file),
       hasChipButtons: true,
     );
