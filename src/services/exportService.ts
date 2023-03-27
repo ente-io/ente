@@ -115,14 +115,14 @@ class ExportService {
         }
     }
 
-    enableContinuousExport(startExport: () => Promise<void>) {
+    enableContinuousExport(runExport: () => Promise<void>) {
         try {
             if (this.continuousExportHandler) {
                 addLogLine('continuous export already enabled');
                 return;
             }
             this.continuousExportHandler =
-                this.getContinuousExportHandler(startExport);
+                this.getContinuousExportHandler(runExport);
 
             this.continuousExportHandler();
         } catch (e) {
@@ -190,10 +190,6 @@ class ExportService {
                 exportRecord
             );
 
-            addLogLine(
-                `starting export, filesToExportCount: ${filesToExport?.length}, userPersonalFileCount: ${personalFiles?.length}`
-            );
-
             const collectionIDPathMap: CollectionIDPathMap =
                 getCollectionIDPathMapFromExportRecord(exportRecord);
             const collectionIDNameMap =
@@ -218,6 +214,10 @@ class ExportService {
                 );
                 return;
             }
+            addLogLine(
+                `starting export, filesToExportCount: ${filesToExport?.length}, userPersonalFileCount: ${personalFiles?.length}`
+            );
+
             return this.fileExporter(
                 filesToExport,
                 collectionIDNameMap,
@@ -401,7 +401,10 @@ class ExportService {
     ) {
         return debounce(async () => {
             try {
-                addLogLine('local file update triggered');
+                addLogLine(
+                    'local file update triggered',
+                    !!this.continuousExportHandler
+                );
                 const exportRecord = await this.getExportRecord();
                 const userPersonalFiles = await getUserPersonalFiles();
                 const unExportedFiles = getUnExportedFiles(
@@ -422,7 +425,7 @@ class ExportService {
         }, 1000);
     }
 
-    getContinuousExportHandler(startExport: () => Promise<void>): () => void {
+    getContinuousExportHandler(runExport: () => Promise<void>): () => void {
         const handler = async () => {
             try {
                 addLogLine('continuous export triggered');
@@ -433,7 +436,7 @@ class ExportService {
                     this.reRunExport = true;
                     return;
                 }
-                await startExport();
+                await runExport();
                 if (this.reRunExport) {
                     this.reRunExport = false;
                     setTimeout(handler, 0);
