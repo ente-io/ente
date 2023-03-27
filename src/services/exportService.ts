@@ -15,16 +15,12 @@ import {
     getMetadataFolderPath,
     getCollectionsRenamedAfterLastExport,
     getCollectionIDPathMapFromExportRecord,
+    debounce,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import {
-    getLocalCollections,
-    getNonEmptyCollections,
-} from './collectionService';
 import downloadManager from './downloadManager';
-import { getLocalFiles } from './fileService';
 import { EnteFile } from 'types/file';
 
 import { decodeMotionPhoto } from './motionPhotoService';
@@ -44,7 +40,6 @@ import {
     ExportRecord,
     ExportRecordV1,
 } from 'types/export';
-import { User } from 'types/user';
 import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
 import { RecordType } from 'constants/export';
 import { ElectronAPIs } from 'types/electron';
@@ -52,7 +47,10 @@ import { CustomError } from 'utils/error';
 import { addLogLine } from 'utils/logging';
 import { t } from 'i18next';
 import { eventBus, Events } from './events';
-import { getCollectionNameMap } from 'utils/collection';
+import {
+    getCollectionNameMap,
+    getNonEmptyUserPersonalCollections,
+} from 'utils/collection';
 
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
@@ -65,6 +63,7 @@ class ExportService {
     private stopExport: boolean = false;
     private allElectronAPIsExist: boolean = false;
     private fileReader: FileReader = null;
+    private localFileUpdateHandler: () => void;
     private continuousExportHandler: () => void;
     private reRunExport: boolean = false;
 
@@ -73,30 +72,25 @@ class ExportService {
         this.allElectronAPIsExist = !!this.electronAPIs?.exists;
     }
 
-    async setupLocalFileUpdateListener(
+    setupLocalFileUpdateListener(
         updateTotalFileCount: (totalFileCount: number) => void,
         updatePendingFileCount: (pendingFileCount: number) => void
     ) {
-        eventBus.addListener(Events.LOCAL_FILES_UPDATED, () =>
-            this.localFileUpdateHandler(
-                updateTotalFileCount,
-                updatePendingFileCount
-            )
-        );
-    }
-
-    async localFileUpdateHandler(updateTotalFileCount, updatePendingFileCount) {
-        const exportRecord = await this.getExportRecord();
-        const userPersonalFiles = await getUserPersonalFiles();
-        const unExportedFiles = getUnExportedFiles(
-            userPersonalFiles,
-            exportRecord
-        );
-        updateTotalFileCount(userPersonalFiles.length);
-        updatePendingFileCount(unExportedFiles.length);
-        if (unExportedFiles.length > 0 && this.continuousExportHandler) {
-            this.continuousExportHandler();
+        if (this.localFileUpdateHandler) {
+            eventBus.removeListener(
+                Events.LOCAL_FILES_UPDATED,
+                this.localFileUpdateHandler
+            );
         }
+        this.localFileUpdateHandler = this.getLocalFileUpdateHandler(
+            updateTotalFileCount,
+            updatePendingFileCount
+        );
+        this.localFileUpdateHandler();
+        eventBus.addListener(
+            Events.LOCAL_FILES_UPDATED,
+            this.localFileUpdateHandler
+        );
     }
 
     async changeExportDirectory(callback: (newExportDir: string) => void) {
@@ -138,15 +132,8 @@ class ExportService {
     }
 
     disableContinuousExport() {
-        try {
-            if (!this.continuousExportHandler) {
-                addLogLine('continuous export already disabled');
-                return;
-            }
+        if (this.continuousExportHandler) {
             this.continuousExportHandler = null;
-        } catch (e) {
-            logError(e, 'failed to disableContinuousExport');
-            throw e;
         }
     }
 
@@ -154,9 +141,11 @@ class ExportService {
         this.stopExport = true;
     }
 
-    async exportFiles(
-        updateProgress: (progress: { current: number; total: number }) => void
-    ) {
+    syncUpdatedFileCounts() {
+        this.localFileUpdateHandler();
+    }
+
+    async runExport(updateProgress) {
         try {
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             if (this.exportInProgress) {
@@ -165,81 +154,54 @@ class ExportService {
                 );
                 return await this.exportInProgress;
             }
-            const exportDir = getData(LS_KEYS.EXPORT)?.folder;
-            if (!exportDir) {
-                // no-export folder set
-                return;
-            }
-            const user: User = getData(LS_KEYS.USER);
-
-            const localFiles = await getLocalFiles();
-            const userPersonalFiles = localFiles
-                .filter((file) => file.ownerID === user?.id)
-                .sort((fileA, fileB) => fileA.id - fileB.id);
-
-            const collections = await getLocalCollections();
-            const nonEmptyCollections = getNonEmptyCollections(
-                collections,
-                userPersonalFiles
-            );
-            const userCollections = nonEmptyCollections
-                .filter((collection) => collection.owner.id === user?.id)
-                .sort(
-                    (collectionA, collectionB) =>
-                        collectionA.id - collectionB.id
-                );
-            if (this.checkAllElectronAPIsExists()) {
-                await this.migrateExport(
-                    exportDir,
-                    collections,
-                    userPersonalFiles
-                );
-            }
-            const exportRecord = await this.getExportRecord(exportDir);
-
-            const filesToExport = getUnExportedFiles(
-                userPersonalFiles,
-                exportRecord
-            );
-
-            addLogLine(
-                `starting export, filesToExportCount: ${filesToExport?.length}, userPersonalFileCount: ${userPersonalFiles?.length}`
-            );
-
-            const collectionIDPathMap: CollectionIDPathMap =
-                getCollectionIDPathMapFromExportRecord(exportRecord);
-            const collectionIDNameMap = getCollectionNameMap(collections);
-            const renamedCollections = getCollectionsRenamedAfterLastExport(
-                userCollections,
-                exportRecord
-            );
-            this.exportInProgress = this.fileExporter(
-                filesToExport,
-                collectionIDNameMap,
-                renamedCollections,
-                collectionIDPathMap,
-                updateProgress,
-                exportDir
-            );
-            const resp = await this.exportInProgress;
-            return resp;
+            this.exportInProgress = this.exportFiles(updateProgress);
+            await this.exportInProgress;
         } catch (e) {
-            logError(e, 'exportFiles failed');
-            return { paused: false };
+            logError(e, 'runExport failed');
         } finally {
             this.exportInProgress = null;
         }
     }
 
-    async fileExporter(
-        files: EnteFile[],
-        collectionIDNameMap: CollectionIDNameMap,
-        renamedCollections: Collection[],
-        collectionIDPathMap: CollectionIDPathMap,
-        updateProgress: (progress: { current: number; total: number }) => void,
-        exportDir: string
-    ): Promise<void> {
+    private async exportFiles(
+        updateProgress: (progress: { current: number; total: number }) => void
+    ) {
         try {
+            const exportDir = getData(LS_KEYS.EXPORT)?.folder;
+            if (!exportDir) {
+                // no-export folder set
+                throw Error(CustomError.NO_EXPORT_FOLDER_SELECTED);
+            }
+            const personalFiles = await getUserPersonalFiles();
+            const personalCollections =
+                await getNonEmptyUserPersonalCollections(personalFiles);
+
+            if (this.checkAllElectronAPIsExists()) {
+                await this.migrateExport(
+                    exportDir,
+                    personalCollections,
+                    personalFiles
+                );
+            }
+            const exportRecord = await this.getExportRecord(exportDir);
+
+            const filesToExport = getUnExportedFiles(
+                personalFiles,
+                exportRecord
+            );
+
+            addLogLine(
+                `starting export, filesToExportCount: ${filesToExport?.length}, userPersonalFileCount: ${personalFiles?.length}`
+            );
+
+            const collectionIDPathMap: CollectionIDPathMap =
+                getCollectionIDPathMapFromExportRecord(exportRecord);
+            const collectionIDNameMap =
+                getCollectionNameMap(personalCollections);
+            const renamedCollections = getCollectionsRenamedAfterLastExport(
+                personalCollections,
+                exportRecord
+            );
             if (
                 renamedCollections?.length &&
                 this.checkAllElectronAPIsExists()
@@ -250,12 +212,33 @@ class ExportService {
                     collectionIDPathMap
                 );
             }
-            if (!files?.length) {
+            if (!filesToExport?.length) {
                 this.electronAPIs.sendNotification(
                     t('EXPORT_NOTIFICATION.UP_TO_DATE')
                 );
                 return;
             }
+            return this.fileExporter(
+                filesToExport,
+                collectionIDNameMap,
+                collectionIDPathMap,
+                updateProgress,
+                exportDir
+            );
+        } catch (e) {
+            logError(e, 'exportFiles failed');
+            throw e;
+        }
+    }
+
+    async fileExporter(
+        files: EnteFile[],
+        collectionIDNameMap: CollectionIDNameMap,
+        collectionIDPathMap: CollectionIDPathMap,
+        updateProgress: (progress: { current: number; total: number }) => void,
+        exportDir: string
+    ): Promise<void> {
+        try {
             this.stopExport = false;
             this.electronAPIs.sendNotification(t('EXPORT_NOTIFICATION.START'));
 
@@ -412,20 +395,54 @@ class ExportService {
         }
     }
 
-    getContinuousExportHandler(startExport: () => Promise<void>) {
-        return async () => {
-            addLogLine('continuous export triggered');
-            if (this.exportInProgress) {
-                addLogLine('export in progress, setting reRunExport to true');
-                this.reRunExport = true;
-                return;
+    getLocalFileUpdateHandler(
+        updateTotalFileCount: (count: number) => void,
+        updatePendingFileCount: (count: number) => void
+    ) {
+        return debounce(async () => {
+            try {
+                addLogLine('local file update triggered');
+                const exportRecord = await this.getExportRecord();
+                const userPersonalFiles = await getUserPersonalFiles();
+                const unExportedFiles = getUnExportedFiles(
+                    userPersonalFiles,
+                    exportRecord
+                );
+                updateTotalFileCount(userPersonalFiles.length);
+                updatePendingFileCount(unExportedFiles.length);
+                if (
+                    unExportedFiles.length > 0 &&
+                    this.continuousExportHandler
+                ) {
+                    this.continuousExportHandler();
+                }
+            } catch (e) {
+                logError(e, 'local file update handler failed');
             }
-            await startExport();
-            if (this.reRunExport) {
-                this.reRunExport = false;
-                setTimeout(this.continuousExportHandler, 0);
+        }, 1000);
+    }
+
+    getContinuousExportHandler(startExport: () => Promise<void>): () => void {
+        const handler = async () => {
+            try {
+                addLogLine('continuous export triggered');
+                if (this.exportInProgress) {
+                    addLogLine(
+                        'export in progress, setting reRunExport to true'
+                    );
+                    this.reRunExport = true;
+                    return;
+                }
+                await startExport();
+                if (this.reRunExport) {
+                    this.reRunExport = false;
+                    setTimeout(handler, 0);
+                }
+            } catch (e) {
+                logError(e, 'continuous export handler failed');
             }
         };
+        return () => void handler();
     }
 
     async createNewCollectionFolder(
