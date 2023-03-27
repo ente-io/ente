@@ -17,7 +17,8 @@ class _LocationTagDataStateProviderState
     extends State<LocationTagDataStateProvider> {
   int selectedRaduisIndex = defaultRadiusValueIndex;
   late List<double> coordinates;
-  final Debouncer _debouncer = Debouncer(const Duration(milliseconds: 300));
+  final Debouncer _selectedRadiusDebouncer =
+      Debouncer(const Duration(milliseconds: 300));
   @override
   void initState() {
     coordinates = widget.coordinates;
@@ -25,8 +26,8 @@ class _LocationTagDataStateProviderState
   }
 
   void _updateSelectedIndex(int index) {
-    _debouncer.cancelDebounce();
-    _debouncer.run(() async {
+    _selectedRadiusDebouncer.cancelDebounce();
+    _selectedRadiusDebouncer.run(() async {
       if (mounted) {
         setState(() {
           selectedRaduisIndex = index;
