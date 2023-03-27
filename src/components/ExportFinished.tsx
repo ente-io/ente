@@ -21,7 +21,7 @@ export default function ExportFinished(props: Props) {
     return (
         <>
             <DialogContent>
-                <Stack spacing={2.5} pr={2}>
+                <Stack spacing={3} pr={2}>
                     <SpaceBetweenFlex>
                         <Typography color={'text.secondary'}>
                             {t('PENDING_ITEMS')}
