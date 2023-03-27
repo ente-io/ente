@@ -50,14 +50,14 @@ class AddLocationSheet extends StatefulWidget {
 }
 
 class _AddLocationSheetState extends State<AddLocationSheet> {
+  //The value of these notifiers has no significance.
   //When memoriesCountNotifier is null, we show the loading widget in the
   //memories count section which also means the gallery is loading.
-  ValueNotifier<int?> memoriesCountNotifier = ValueNotifier(null);
-  //The value of this notifier has no significance.
-  ValueNotifier<bool> submitNotifer = ValueNotifier(false);
-  ValueNotifier<bool> cancelNotifier = ValueNotifier(false);
+  final ValueNotifier<int?> _memoriesCountNotifier = ValueNotifier(null);
+  final ValueNotifier<bool> _submitNotifer = ValueNotifier(false);
+  final ValueNotifier<bool> _cancelNotifier = ValueNotifier(false);
   final _focusNode = FocusNode();
-  Widget? keyboardTopButtons;
+  Widget? _keyboardTopButtons;
 
   @override
   void initState() {
@@ -68,8 +68,8 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   @override
   void dispose() {
     _focusNode.removeListener(_focusNodeListener);
-    submitNotifer.dispose();
-    cancelNotifier.dispose();
+    _submitNotifer.dispose();
+    _cancelNotifier.dispose();
     super.dispose();
   }
 
@@ -100,8 +100,8 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           hintText: "Location name",
                           borderRadius: 2,
                           focusNode: _focusNode,
-                          submitNotifier: submitNotifer,
-                          cancelNotifier: cancelNotifier,
+                          submitNotifier: _submitNotifer,
+                          cancelNotifier: _cancelNotifier,
                           popNavAfterSubmission: true,
                           onSubmit: (locationName) async {
                             await _addLocationTag(locationName);
@@ -110,7 +110,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           alwaysShowSuccessState: true,
                         ),
                         const SizedBox(height: 24),
-                        RadiusPickerWidget(memoriesCountNotifier),
+                        RadiusPickerWidget(_memoriesCountNotifier),
                         const SizedBox(height: 24),
                         Text(
                           "A location tag groups all photos that were taken within some radius of a photo",
@@ -128,7 +128,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: ValueListenableBuilder(
-                        valueListenable: memoriesCountNotifier,
+                        valueListenable: _memoriesCountNotifier,
                         builder: (context, value, _) {
                           Widget widget;
                           if (value == null) {
@@ -174,7 +174,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  AddLocationGalleryWidget(memoriesCountNotifier),
+                  AddLocationGalleryWidget(_memoriesCountNotifier),
                 ],
               ),
             ),
@@ -199,16 +199,16 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
 
   void _focusNodeListener() {
     final bool hasFocus = _focusNode.hasFocus;
-    keyboardTopButtons ??= KeyboardTopButton(
+    _keyboardTopButtons ??= KeyboardTopButton(
       onDoneTap: () {
-        submitNotifer.value = !submitNotifer.value;
+        _submitNotifer.value = !_submitNotifer.value;
       },
       onCancelTap: () {
-        cancelNotifier.value = !cancelNotifier.value;
+        _cancelNotifier.value = !_cancelNotifier.value;
       },
     );
     if (hasFocus) {
-      KeyboardOverlay.showOverlay(context, keyboardTopButtons!);
+      KeyboardOverlay.showOverlay(context, _keyboardTopButtons!);
     } else {
       KeyboardOverlay.removeOverlay();
     }
