@@ -29,7 +29,6 @@ import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
 import { getTotalFileCount } from 'utils/file';
-import { eventBus, Events } from 'services/events';
 import LinkButton from './pages/gallery/LinkButton';
 
 const ExportFolderPathContainer = styled(LinkButton)`
@@ -52,6 +51,7 @@ export default function ExportModal(props: Props) {
     const [exportFolder, setExportFolder] = useState('');
     const [continuousExport, setContinuousExport] = useState(false);
     const [totalFileCount, setTotalFileCount] = useState(0);
+    const [pendingFileCount, setPendingFileCount] = useState(0);
     const [exportProgress, setExportProgress] = useState<ExportProgress>({
         current: 0,
         total: 0,
@@ -73,11 +73,10 @@ export default function ExportModal(props: Props) {
             const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
             setExportFolder(exportSettings?.folder);
             setContinuousExport(exportSettings?.continuousExport);
-            const localFileUpdateHandler = async () => {
-                setTotalFileCount(await getTotalFileCount());
-            };
-            localFileUpdateHandler();
-            eventBus.on(Events.LOCAL_FILES_UPDATED, localFileUpdateHandler);
+            exportService.setupLocalFileUpdateListener(
+                setTotalFileCount,
+                setPendingFileCount
+            );
         } catch (e) {
             logError(e, 'error in exportModal');
         }
@@ -238,7 +237,12 @@ export default function ExportModal(props: Props) {
     const ExportDynamicContent = () => {
         switch (exportStage) {
             case ExportStage.INIT:
-                return <ExportInit startExport={startExport} />;
+                return (
+                    <ExportInit
+                        startExport={startExport}
+                        totalFileCount={totalFileCount}
+                    />
+                );
 
             case ExportStage.INPROGRESS:
                 return (
@@ -252,6 +256,7 @@ export default function ExportModal(props: Props) {
             case ExportStage.FINISHED:
                 return (
                     <ExportFinished
+                        pendingFileCount={pendingFileCount}
                         onHide={props.onHide}
                         lastExportTime={lastExportTime}
                         exportStats={exportStats}
@@ -276,11 +281,18 @@ export default function ExportModal(props: Props) {
                     exportStage={exportStage}
                     openExportDirectory={handleOpenExportDirectoryClick}
                 />
-                <TotalFileCount totalFileCount={totalFileCount} />
                 <ContinuousExport
                     continuousExport={continuousExport}
                     toggleContinuousExport={toggleContinuousExport}
                 />
+                <SpaceBetweenFlex minHeight={'48px'} pr={'16px'}>
+                    <Typography color="text.secondary">
+                        {t('TOTAL_ITEMS')}
+                    </Typography>
+                    <Typography color="text.secondary">
+                        {totalFileCount}
+                    </Typography>
+                </SpaceBetweenFlex>
             </DialogContent>
             <Divider />
             <ExportDynamicContent />
@@ -328,17 +340,6 @@ function ExportDirectory({
     );
 }
 
-function TotalFileCount({ totalFileCount }) {
-    return (
-        <SpaceBetweenFlex minHeight={'40px'} pr={2}>
-            <Typography color={'text.secondary'}>
-                {t('TOTAL_FILE_COUNT')}{' '}
-            </Typography>
-            <Typography>{totalFileCount}</Typography>
-        </SpaceBetweenFlex>
-    );
-}
-
 function ExportDirectoryOption({ changeExportDirectory }) {
     return (
         <OverflowMenu
@@ -360,7 +361,7 @@ function ExportDirectoryOption({ changeExportDirectory }) {
 
 function ContinuousExport({ continuousExport, toggleContinuousExport }) {
     return (
-        <SpaceBetweenFlex minHeight={'40px'}>
+        <SpaceBetweenFlex minHeight={'48px'}>
             <Typography color="text.secondary">
                 {t('CONTINUOUS_EXPORT')}
             </Typography>
