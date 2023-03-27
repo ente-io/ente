@@ -25,7 +25,11 @@ import { styled, ThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'themes/darkThemeOptions';
 import lightThemeOptions from 'themes/lightThemeOptions';
 import { CssBaseline, useMediaQuery } from '@mui/material';
-import { SetDialogBoxAttributes, DialogBoxAttributes } from 'types/dialogBox';
+import {
+    SetDialogBoxAttributes,
+    DialogBoxAttributes,
+    DialogBoxAttributesV2,
+} from 'types/dialogBox';
 import {
     getFamilyPortalRedirectURL,
     getRoadmapRedirectURL,
@@ -57,6 +61,7 @@ import { setupI18n } from 'i18n';
 import createEmotionCache from 'themes/createEmotionCache';
 import { CacheProvider, EmotionCache } from '@emotion/react';
 import { AppProps } from 'next/app';
+import DialogBoxV2 from 'components/DialogBoxV2';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -95,6 +100,7 @@ type AppContextType = {
     theme: THEME_COLOR;
     setTheme: SetTheme;
     somethingWentWrong: () => void;
+    setDialogBoxAttributesV2: (attributes: DialogBoxAttributesV2) => void;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -144,7 +150,11 @@ export default function App(props) {
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
+    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] =
+        useState<DialogBoxAttributesV2>();
+    useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
+    const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [isFolderSyncRunning, setIsFolderSyncRunning] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
@@ -295,6 +305,10 @@ export default function App(props) {
     }, [dialogMessage]);
 
     useEffect(() => {
+        setDialogBoxV2View(true);
+    }, [dialogBoxV2View]);
+
+    useEffect(() => {
         setNotificationView(true);
     }, [notificationAttributes]);
 
@@ -327,6 +341,7 @@ export default function App(props) {
     };
 
     const closeMessageDialog = () => setMessageDialogView(false);
+    const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
     const somethingWentWrong = () =>
         setDialogMessage({
@@ -385,6 +400,12 @@ export default function App(props) {
                     onClose={closeMessageDialog}
                     attributes={dialogMessage}
                 />
+                <DialogBoxV2
+                    sx={{ zIndex: 1600 }}
+                    open={dialogBoxV2View}
+                    onClose={closeDialogBoxV2}
+                    attributes={dialogBoxAttributeV2}
+                />
                 <Notification
                     open={notificationView}
                     onClose={closeNotification}
@@ -416,6 +437,7 @@ export default function App(props) {
                         theme,
                         setTheme,
                         somethingWentWrong,
+                        setDialogBoxAttributesV2,
                     }}>
                     {loading || !isI18nReady ? (
                         <VerticallyCentered>
