@@ -1,4 +1,5 @@
 import "dart:developer" as dev;
+import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
@@ -36,6 +37,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
 
   @override
   Widget build(BuildContext context) {
+    const galleryFilesLimit = 1000;
     final selectedRadius = _selectedRadius();
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
@@ -60,7 +62,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
       );
       stopWatch.stop();
       widget.memoriesCountNotifier.value = copyOfFiles.length;
-      final limitedResults = copyOfFiles.take(1000).toList();
+      final limitedResults = copyOfFiles.take(galleryFilesLimit).toList();
 
       return Future.value(
         FileLoadResult(
@@ -75,7 +77,12 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return SizedBox(
-            height: _galleryHeight(widget.memoriesCountNotifier.value ?? 0),
+            height: _galleryHeight(
+              min(
+                (widget.memoriesCountNotifier.value ?? 0),
+                galleryFilesLimit,
+              ),
+            ),
             child: Gallery(
               key: ValueKey(selectedRadius),
               loadingWidget: const SizedBox.shrink(),
