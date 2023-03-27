@@ -21,15 +21,15 @@ export default function ExportFinished(props: Props) {
     return (
         <>
             <DialogContent>
-                <Stack spacing={3} pr={2}>
-                    <SpaceBetweenFlex>
+                <Stack pr={2}>
+                    <SpaceBetweenFlex minHeight={'48px'}>
                         <Typography color={'text.secondary'}>
                             {t('PENDING_ITEMS')}
                         </Typography>
                         <Typography>{props.pendingFileCount}</Typography>
                     </SpaceBetweenFlex>
 
-                    <SpaceBetweenFlex>
+                    <SpaceBetweenFlex minHeight={'48px'}>
                         <Typography color="text.secondary">
                             {t('LAST_EXPORT_TIME')}
                         </Typography>
