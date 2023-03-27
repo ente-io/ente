@@ -26,7 +26,6 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
   late Future<void> removeIgnoredFiles;
   double heightOfGallery = 0;
-  late int memoryCount;
 
   @override
   void initState() {
@@ -60,7 +59,6 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
         "Time taken to get all files in a location tag: ${stopWatch.elapsedMilliseconds} ms",
       );
       stopWatch.stop();
-      memoryCount = copyOfFiles.length;
       widget.memoriesCountNotifier.value = copyOfFiles.length;
       return Future.value(
         FileLoadResult(
@@ -75,7 +73,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return SizedBox(
-            height: _galleryHeight(memoryCount),
+            height: _galleryHeight(widget.memoriesCountNotifier.value!),
             child: Gallery(
               key: ValueKey(selectedRadius),
               loadingWidget: const SizedBox.shrink(),
@@ -114,7 +112,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
         );
   }
 
-  double _galleryHeight(int memoryCount) {
+  double _galleryHeight(int fileCount) {
     final photoGridSize = LocalSettings.instance.getPhotoGridSize();
     final totalWhiteSpaceBetweenPhotos =
         galleryGridSpacing * (photoGridSize - 1);
@@ -123,7 +121,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
         ((MediaQuery.of(context).size.width - totalWhiteSpaceBetweenPhotos) /
             photoGridSize);
 
-    final numberOfRows = (memoryCount / photoGridSize).ceil();
+    final numberOfRows = (fileCount / photoGridSize).ceil();
 
     final galleryHeight = (thumbnailHeight * numberOfRows) +
         (galleryGridSpacing * (numberOfRows - 1));
