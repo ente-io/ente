@@ -60,9 +60,12 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
       );
       stopWatch.stop();
       widget.memoriesCountNotifier.value = copyOfFiles.length;
+
+      final limitedResults = copyOfFiles.take(1000).toList();
+
       return Future.value(
         FileLoadResult(
-          copyOfFiles,
+          limitedResults,
           result.hasMore,
         ),
       );
