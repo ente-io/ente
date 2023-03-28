@@ -216,6 +216,7 @@ const Color tabIconDark = Color.fromRGBO(255, 255, 255, 0.80);
 // Fixed Colors
 
 const Color fixedStrokeMutedWhite = Color.fromRGBO(255, 255, 255, 0.50);
+const Color strokeSolidMutedLight = Color.fromRGBO(147, 147, 147, 1);
 
 const Color _primary700 = Color.fromRGBO(0, 179, 60, 1);
 const Color _primary500 = Color.fromRGBO(29, 185, 84, 1);

@@ -5,6 +5,7 @@ import "package:photos/services/location_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/buttons/inline_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
+import 'package:photos/ui/viewer/location/add_location_sheet.dart';
 
 class LocationTagsWidget extends StatefulWidget {
   final List<double> coordinates;
@@ -18,7 +19,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   String title = "Add location";
   IconData leadingIcon = Icons.add_location_alt_outlined;
   bool hasChipButtons = false;
-  late final Future<List<Widget>> locationTagChips;
+  late Future<List<Widget>> locationTagChips;
   @override
   void initState() {
     locationTagChips = _getLocationTags();
@@ -46,7 +47,18 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         LocationService.instance.enclosingLocationTags(widget.coordinates);
     if (locationTags.isEmpty) {
       return [
-        InlineButtonWidget("Group nearby photos", () {}),
+        InlineButtonWidget(
+          "Group nearby photos",
+          () => showAddLocationSheet(
+            context,
+            widget.coordinates,
+            //This callback is for reloading the locationTagsWidget after adding a new location tag
+            //so that it updates in file details.
+            () {
+              locationTagChips = _getLocationTags();
+            },
+          ),
+        ),
       ];
     }
     setState(() {
@@ -54,6 +66,22 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       leadingIcon = Icons.pin_drop_outlined;
       hasChipButtons = true;
     });
-    return locationTags.map((e) => ChipButtonWidget(e)).toList();
+    final result = locationTags.map((e) => ChipButtonWidget(e)).toList();
+    result.add(
+      ChipButtonWidget(
+        null,
+        leadingIcon: Icons.add_outlined,
+        onTap: () => showAddLocationSheet(
+          context,
+          widget.coordinates,
+          //This callback is for reloading the locationTagsWidget after adding a new location tag
+          //so that it updates in file details.
+          () {
+            locationTagChips = _getLocationTags();
+          },
+        ),
+      ),
+    );
+    return result;
   }
 }

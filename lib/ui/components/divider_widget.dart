@@ -28,17 +28,23 @@ class DividerWidget extends StatelessWidget {
         : getEnteColorScheme(context).strokeFaint;
 
     if (dividerType == DividerType.solid) {
-      return Container(
-        color: getEnteColorScheme(context).strokeFaint,
-        width: double.infinity,
-        height: 1,
+      return Padding(
+        padding: padding ?? EdgeInsets.zero,
+        child: Container(
+          color: getEnteColorScheme(context).strokeFaint,
+          width: double.infinity,
+          height: 1,
+        ),
       );
     }
     if (dividerType == DividerType.bottomBar) {
-      return Container(
-        color: dividerColor,
-        width: double.infinity,
-        height: 1,
+      return Padding(
+        padding: padding ?? EdgeInsets.zero,
+        child: Container(
+          color: dividerColor,
+          width: double.infinity,
+          height: 1,
+        ),
       );
     }
 

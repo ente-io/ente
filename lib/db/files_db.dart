@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'dart:io' as io;
 
 import 'package:flutter/foundation.dart';
@@ -485,14 +486,20 @@ class FilesDB {
     bool? asc,
     int visibility = visibilityVisible,
     Set<int>? ignoredCollectionIDs,
+    bool onlyFilesWithLocation = false,
   }) async {
+    final stopWatch = Stopwatch()..start();
+
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       filesTable,
-      where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-          ' AND $columnMMdVisibility = ?',
+      where: onlyFilesWithLocation
+          ? '$columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0)'
+              'AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND  ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+              'AND $columnMMdVisibility = ?'
+          : '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+              ' AND $columnMMdVisibility = ?',
       whereArgs: [startTime, endTime, ownerID, visibility],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -501,6 +508,9 @@ class FilesDB {
     final files = convertToFiles(results);
     final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+    dev.log(
+        "getAllPendingOrUploadedFiles time taken: ${stopWatch.elapsedMilliseconds} ms");
+    stopWatch.stop();
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
@@ -511,14 +521,18 @@ class FilesDB {
     int? limit,
     bool? asc,
     Set<int>? ignoredCollectionIDs,
+    bool onlyFilesWithLocation = false,
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       filesTable,
-      where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
-          ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+      where: onlyFilesWithLocation
+          ? '$columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0)'
+              '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+              ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))'
+          : '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+              ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
       whereArgs: [startTime, endTime, ownerID, visibilityVisible],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -1387,6 +1401,10 @@ class FilesDB {
     row[columnCollectionID] = file.collectionID ?? -1;
     row[columnTitle] = file.title;
     row[columnDeviceFolder] = file.deviceFolder;
+    // if (file.location == null ||
+    //     (file.location!.latitude == null && file.location!.longitude == null)) {
+    //   file.location = Location.randomLocation();
+    // }
     if (file.location != null) {
       row[columnLatitude] = file.location!.latitude;
       row[columnLongitude] = file.location!.longitude;
