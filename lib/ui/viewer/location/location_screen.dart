@@ -1,9 +1,15 @@
 import "package:flutter/material.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/db/files_db.dart";
+import "package:photos/models/file_load_result.dart";
+import "package:photos/services/collections_service.dart";
+import "package:photos/services/ignored_files_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
+import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
 class LocationScreen extends StatelessWidget {
@@ -13,94 +19,80 @@ class LocationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final editNotifier = ValueNotifier(false);
     return Scaffold(
-      body: CustomScrollView(
-        primary: false,
-        slivers: <Widget>[
-          TitleBarWidget(
-            flexibleSpaceTitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ValueListenableBuilder(
-                  valueListenable: editNotifier,
-                  builder: (context, value, _) {
-                    Widget child;
-                    if (value as bool) {
-                      child = SizedBox(
-                        key: ValueKey(value),
-                        width: double.infinity,
-                        child: const TitleBarTitleWidget(
-                          title: "Edit location",
-                        ),
-                      );
-                    } else {
-                      child = SizedBox(
-                        key: ValueKey(value),
-                        width: double.infinity,
-                        child: const TitleBarTitleWidget(
-                          title: "Location name",
-                        ),
-                      );
-                    }
-                    return AnimatedSwitcher(
-                      switchInCurve: Curves.easeInExpo,
-                      switchOutCurve: Curves.easeOutExpo,
-                      duration: const Duration(milliseconds: 200),
-                      child: child,
-                    );
-                  },
-                ),
-                Text(
-                  "51 memories",
-                  style: getEnteTextTheme(context).smallMuted,
-                ),
-              ],
-            ),
-            actionIcons: [
-              IconButton(
-                onPressed: () {
-                  editNotifier.value = !editNotifier.value;
-                },
-                icon: const Icon(Icons.edit_rounded),
-              )
-            ],
-          ),
-          SliverList(
-            delegate: SliverChildListDelegate([
+      appBar: PreferredSize(
+        preferredSize: const Size(double.infinity, 102),
+        child: TitleBarWidget(
+          isSliver: false,
+          isFlexibleSpaceDisabled: false,
+          flexibleSpaceTitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
               ValueListenableBuilder(
                 valueListenable: editNotifier,
                 builder: (context, value, _) {
-                  return AnimatedCrossFade(
-                    firstCurve: Curves.easeInOutExpo,
-                    secondCurve: Curves.easeInOutExpo,
-                    sizeCurve: Curves.easeInOutExpo,
-                    firstChild: const LocationEditingWidget(),
-                    secondChild: const SizedBox.shrink(),
-                    crossFadeState: editNotifier.value
-                        ? CrossFadeState.showFirst
-                        : CrossFadeState.showSecond,
-                    duration: const Duration(milliseconds: 300),
+                  Widget child;
+                  if (value as bool) {
+                    child = SizedBox(
+                      key: ValueKey(value),
+                      width: double.infinity,
+                      child: const TitleBarTitleWidget(
+                        title: "Edit location",
+                      ),
+                    );
+                  } else {
+                    child = SizedBox(
+                      key: ValueKey(value),
+                      width: double.infinity,
+                      child: const TitleBarTitleWidget(
+                        title: "Location name",
+                      ),
+                    );
+                  }
+                  return AnimatedSwitcher(
+                    switchInCurve: Curves.easeInExpo,
+                    switchOutCurve: Curves.easeOutExpo,
+                    duration: const Duration(milliseconds: 200),
+                    child: child,
                   );
                 },
               ),
-              //Gallery here
-              Container(
-                width: double.infinity,
-                height: 300,
-                color: Colors.teal,
+              Text(
+                "51 memories",
+                style: getEnteTextTheme(context).smallMuted,
               ),
-              Container(
-                width: double.infinity,
-                height: 300,
-                color: Colors.red,
-              ),
-              Container(
-                width: double.infinity,
-                height: 300,
-                color: Colors.orange,
-              ),
-            ]),
+            ],
           ),
+          actionIcons: [
+            IconButton(
+              onPressed: () {
+                editNotifier.value = !editNotifier.value;
+              },
+              icon: const Icon(Icons.edit_rounded),
+            )
+          ],
+        ),
+      ),
+      body: Column(
+        children: <Widget>[
+          ValueListenableBuilder(
+            valueListenable: editNotifier,
+            builder: (context, value, _) {
+              return AnimatedCrossFade(
+                firstCurve: Curves.easeInOutExpo,
+                secondCurve: Curves.easeInOutExpo,
+                sizeCurve: Curves.easeInOutExpo,
+                firstChild: const LocationEditingWidget(),
+                secondChild: const SizedBox(width: double.infinity),
+                crossFadeState: editNotifier.value
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                duration: const Duration(milliseconds: 300),
+              );
+            },
+          ),
+          const SizedBox(
+              height: 1500, width: 320, child: LocationGalleryWidget()),
         ],
       ),
     );
@@ -160,6 +152,53 @@ class LocationEditingWidget extends StatelessWidget {
           RadiusPickerWidget(selectedIndexNotifier),
         ],
       ),
+    );
+  }
+}
+
+class LocationGalleryWidget extends StatelessWidget {
+  const LocationGalleryWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Gallery(
+      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
+        final ownerID = Configuration.instance.getUserID();
+        final hasSelectedAllForBackup =
+            Configuration.instance.hasSelectedAllFoldersForBackup();
+        final collectionsToHide =
+            CollectionsService.instance.collectionsHiddenFromTimeline();
+        FileLoadResult result;
+        if (hasSelectedAllForBackup) {
+          result = await FilesDB.instance.getAllLocalAndUploadedFiles(
+            creationStartTime,
+            creationEndTime,
+            ownerID!,
+            limit: limit,
+            asc: asc,
+            ignoredCollectionIDs: collectionsToHide,
+          );
+        } else {
+          result = await FilesDB.instance.getAllPendingOrUploadedFiles(
+            creationStartTime,
+            creationEndTime,
+            ownerID!,
+            limit: limit,
+            asc: asc,
+            ignoredCollectionIDs: collectionsToHide,
+          );
+        }
+
+        // hide ignored files from home page UI
+        final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+        result.files.removeWhere(
+          (f) =>
+              f.uploadedFileID == null &&
+              IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
+        );
+        return result;
+      },
+      tagPrefix: "location_gallery",
     );
   }
 }
