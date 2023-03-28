@@ -33,7 +33,7 @@ export default function ExportInProgress(props: Props) {
             <DialogContent>
                 <VerticallyCentered>
                     <Box mb={1.5}>
-                        {props.exportProgress.total === 0 ? (
+                        {isLoading ? (
                             t('EXPORT_STARTING')
                         ) : (
                             <Trans
