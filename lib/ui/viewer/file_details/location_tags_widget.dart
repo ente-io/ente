@@ -6,6 +6,8 @@ import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/buttons/inline_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import 'package:photos/ui/viewer/location/add_location_sheet.dart';
+import "package:photos/ui/viewer/location/location_screen.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class LocationTagsWidget extends StatefulWidget {
   final List<double> coordinates;
@@ -66,7 +68,16 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       leadingIcon = Icons.pin_drop_outlined;
       hasChipButtons = true;
     });
-    final result = locationTags.map((e) => ChipButtonWidget(e)).toList();
+    final result = locationTags
+        .map(
+          (e) => ChipButtonWidget(
+            e,
+            onTap: () {
+              routeToPage(context, const LocationScreen());
+            },
+          ),
+        )
+        .toList();
     result.add(
       ChipButtonWidget(
         null,
