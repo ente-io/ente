@@ -81,6 +81,9 @@ export default function ExportModal(props: Props) {
         if (!props.show) {
             return;
         }
+        if (exportService.isExportInProgress()) {
+            setExportStage(ExportStage.INPROGRESS);
+        }
         syncFileCounts();
     }, [props.show]);
 
