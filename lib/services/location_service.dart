@@ -1,6 +1,8 @@
 import "dart:collection";
 import "dart:convert";
+import "dart:math";
 
+import "package:photos/core/constants.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LocationService {
@@ -13,7 +15,7 @@ class LocationService {
     prefs ??= await SharedPreferences.getInstance();
   }
 
-  List<String> getLocations() {
+  List<String> getAllLocationTags() {
     var list = prefs!.getStringList('locations');
     list ??= [];
     return list;
@@ -22,20 +24,53 @@ class LocationService {
   Future<void> addLocation(
     String location,
     double lat,
-    double lon,
+    double long,
     int radius,
   ) async {
-    final list = getLocations();
+    final list = getAllLocationTags();
+    //The area enclosed by the location tag will be a circle on a 3D spherical
+    //globe and an ellipse on a 2D Mercator projection (2D map)
+    //a & b are the semi-major and semi-minor axes of the ellipse
+    //Converting the unit from kilometers to degrees for a and b as that is
+    //the unit on the caritesian plane
+    final a = (radius * _scaleFactor(lat)) / kilometersPerDegree;
+    final b = radius / kilometersPerDegree;
+    final center = [lat, long];
     final data = {
-      "id": list.length,
       "name": location,
-      "lat": lat,
-      "lon": lon,
       "radius": radius,
+      "aSquare": a * a,
+      "bSquare": b * b,
+      "center": center,
     };
     final encodedMap = json.encode(data);
     list.add(encodedMap);
     await prefs!.setStringList('locations', list);
+  }
+
+  ///The area bounded by the location tag becomes more elliptical with increase
+  ///in the magnitude of the latitude on the caritesian plane. When latitude is
+  ///0 degrees, the ellipse is a circle with a = b = r. When latitude incrases,
+  ///the major axis (a) has to be scaled by the secant of the latitude.
+  double _scaleFactor(double lat) {
+    return 1 / cos(lat * (pi / 180));
+  }
+
+  List<String> enclosingLocationTags(List<double> coordinates) {
+    final result = List<String>.of([]);
+    final allLocationTags = getAllLocationTags();
+    for (var locationTag in allLocationTags) {
+      final locationJson = json.decode(locationTag);
+      final aSquare = locationJson["aSquare"];
+      final bSquare = locationJson["bSquare"];
+      final center = locationJson["center"];
+      final x = coordinates[0] - center[0];
+      final y = coordinates[1] - center[1];
+      if ((x * x) / (aSquare) + (y * y) / (bSquare) <= 1) {
+        result.add(locationJson["name"]);
+      }
+    }
+    return result;
   }
 
   Future<void> addFileToLocation(int locationId, int fileId) async {
@@ -51,7 +86,7 @@ class LocationService {
   }
 
   List<String> getLocationsByFileID(int fileId) {
-    final locationList = getLocations();
+    final locationList = getAllLocationTags();
     final locations = List<dynamic>.of([]);
     for (String locationString in locationList) {
       final locationJson = json.decode(locationString);
@@ -79,5 +114,23 @@ class LocationService {
       );
     }
     return map;
+  }
+}
+
+class GPSData {
+  final String latRef;
+  final List<double> lat;
+  final String longRef;
+  final List<double> long;
+
+  GPSData(this.latRef, this.lat, this.longRef, this.long);
+
+  List<double> toSignedDecimalDegreeCoordinates() {
+    final latSign = latRef == "N" ? 1 : -1;
+    final longSign = longRef == "E" ? 1 : -1;
+    return [
+      latSign * lat[0] + lat[1] / 60 + lat[2] / 3600,
+      longSign * long[0] + long[1] / 60 + long[2] / 3600
+    ];
   }
 }
