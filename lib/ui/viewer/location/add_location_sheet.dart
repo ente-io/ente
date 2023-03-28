@@ -56,12 +56,15 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   final ValueNotifier<int?> _memoriesCountNotifier = ValueNotifier(null);
   final ValueNotifier<bool> _submitNotifer = ValueNotifier(false);
   final ValueNotifier<bool> _cancelNotifier = ValueNotifier(false);
+  final ValueNotifier<int> _selectedRadiusIndexNotifier =
+      ValueNotifier(defaultRadiusValueIndex);
   final _focusNode = FocusNode();
   Widget? _keyboardTopButtons;
 
   @override
   void initState() {
     _focusNode.addListener(_focusNodeListener);
+    _selectedRadiusIndexNotifier.addListener(_selectedRadiusIndexListener);
     super.initState();
   }
 
@@ -70,6 +73,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
     _focusNode.removeListener(_focusNodeListener);
     _submitNotifer.dispose();
     _cancelNotifier.dispose();
+    _selectedRadiusIndexNotifier.dispose();
     super.dispose();
   }
 
@@ -110,7 +114,10 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           alwaysShowSuccessState: true,
                         ),
                         const SizedBox(height: 24),
-                        RadiusPickerWidget(_memoriesCountNotifier),
+                        RadiusPickerWidget(
+                          _memoriesCountNotifier,
+                          _selectedRadiusIndexNotifier,
+                        ),
                         const SizedBox(height: 24),
                         Text(
                           "A location tag groups all photos that were taken within some radius of a photo",
@@ -212,5 +219,14 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
     } else {
       KeyboardOverlay.removeOverlay();
     }
+  }
+
+  void _selectedRadiusIndexListener() {
+    InheritedLocationTagData.of(
+      context,
+    ).updateSelectedIndex(
+      _selectedRadiusIndexNotifier.value,
+    );
+    _memoriesCountNotifier.value = null;
   }
 }
