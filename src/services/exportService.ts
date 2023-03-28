@@ -44,6 +44,7 @@ import {
     ExportProgress,
     ExportRecord,
     ExportRecordV1,
+    FileExportStats,
 } from 'types/export';
 import { User } from 'types/user';
 import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
@@ -148,7 +149,7 @@ class ExportService {
         }
     }
 
-    getUpdatedTotalAndPendingFileCount = async () => {
+    getFileExportStats = async (): Promise<FileExportStats> => {
         try {
             const exportRecord = await this.getExportRecord();
             const userPersonalFiles = await getPersonalFiles();
@@ -157,8 +158,8 @@ class ExportService {
                 exportRecord
             );
             return {
-                totalFiles: userPersonalFiles,
-                pendingFiles: unExportedFiles,
+                totalCount: userPersonalFiles.length,
+                pendingCount: unExportedFiles.length,
             };
         } catch (e) {
             logError(e, 'getUpdateFileLists failed');
