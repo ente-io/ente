@@ -108,6 +108,7 @@ class ExportService {
                     if (this.exportInProgress) {
                         addLogLine('export in progress, scheduling re-run');
                         reRunNeeded.current = true;
+                        return;
                     }
                     await startExport();
                     if (reRunNeeded.current) {
