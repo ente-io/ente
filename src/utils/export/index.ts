@@ -93,20 +93,6 @@ export const getExportedFiles = (
     return exportedFiles;
 };
 
-export const getExportFailedFiles = (
-    allFiles: EnteFile[],
-    exportRecord: ExportRecord
-) => {
-    const failedFiles = new Set(exportRecord?.failedFiles);
-    const filesToExport = allFiles.filter((file) => {
-        if (failedFiles.has(getExportRecordFileUID(file))) {
-            return true;
-        }
-        return false;
-    });
-    return filesToExport;
-};
-
 export const dedupe = (files: string[]) => {
     const fileSet = new Set(files);
     return Array.from(fileSet);

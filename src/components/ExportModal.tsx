@@ -29,6 +29,7 @@ import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
 import LinkButton from './pages/gallery/LinkButton';
+import { CustomError } from 'utils/error';
 
 const ExportFolderPathContainer = styled(LinkButton)`
     width: 262px;
@@ -165,7 +166,7 @@ export default function ExportModal(props: Props) {
             appContext.setDialogMessage(
                 getExportDirectoryDoesNotExistMessage()
             );
-            return;
+            throw Error(CustomError.EXPORT_FOLDER_DOES_NOT_EXIST);
         }
         await updateExportStage(ExportStage.INPROGRESS);
     };
@@ -208,10 +209,13 @@ export default function ExportModal(props: Props) {
     const startExport = async () => {
         try {
             await preExportRun();
+            setExportProgress({ current: 0, total: 0 });
             await exportService.exportFiles(setExportProgress);
             await postExportRun();
         } catch (e) {
-            logError(e, 'startExport failed');
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'startExport failed');
+            }
         }
     };
 
