@@ -406,20 +406,16 @@ class ExportService {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
             }
             if (!folder) {
-                throw Error(CustomError.NO_EXPORT_FOLDER_SELECTED);
+                return null;
             }
             const exportFolderExists = this.exists(folder);
             if (!exportFolderExists) {
-                throw Error(CustomError.EXPORT_FOLDER_DOES_NOT_EXIST);
+                return null;
             }
             const recordFile = await this.electronAPIs.getExportRecord(
                 `${folder}/${EXPORT_RECORD_FILE_NAME}`
             );
-            if (recordFile) {
-                return JSON.parse(recordFile);
-            } else {
-                return {} as ExportRecord;
-            }
+            return JSON.parse(recordFile);
         } catch (e) {
             logError(e, 'export Record JSON parsing failed ');
             throw e;
