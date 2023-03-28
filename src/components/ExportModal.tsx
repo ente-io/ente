@@ -209,6 +209,7 @@ export default function ExportModal(props: Props) {
     const startExport = async () => {
         try {
             await preExportRun();
+            setExportProgress({ current: 0, total: 0 });
             await exportService.exportFiles(setExportProgress);
             await postExportRun();
         } catch (e) {
