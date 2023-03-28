@@ -20,49 +20,10 @@ class LocationScreen extends StatelessWidget {
     final editNotifier = ValueNotifier(false);
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size(double.infinity, 102),
+        preferredSize: const Size(double.infinity, 48),
         child: TitleBarWidget(
           isSliver: false,
-          isFlexibleSpaceDisabled: false,
-          flexibleSpaceTitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ValueListenableBuilder(
-                valueListenable: editNotifier,
-                builder: (context, value, _) {
-                  Widget child;
-                  if (value as bool) {
-                    child = SizedBox(
-                      key: ValueKey(value),
-                      width: double.infinity,
-                      child: const TitleBarTitleWidget(
-                        title: "Edit location",
-                      ),
-                    );
-                  } else {
-                    child = SizedBox(
-                      key: ValueKey(value),
-                      width: double.infinity,
-                      child: const TitleBarTitleWidget(
-                        title: "Location name",
-                      ),
-                    );
-                  }
-                  return AnimatedSwitcher(
-                    switchInCurve: Curves.easeInExpo,
-                    switchOutCurve: Curves.easeOutExpo,
-                    duration: const Duration(milliseconds: 200),
-                    child: child,
-                  );
-                },
-              ),
-              Text(
-                "51 memories",
-                style: getEnteTextTheme(context).smallMuted,
-              ),
-            ],
-          ),
+          isFlexibleSpaceDisabled: true,
           actionIcons: [
             IconButton(
               onPressed: () {
@@ -75,25 +36,10 @@ class LocationScreen extends StatelessWidget {
       ),
       body: Column(
         children: <Widget>[
-          ValueListenableBuilder(
-            valueListenable: editNotifier,
-            builder: (context, value, _) {
-              return AnimatedCrossFade(
-                firstCurve: Curves.easeInExpo,
-                sizeCurve: Curves.easeInOutExpo,
-                firstChild: const LocationEditingWidget(),
-                secondChild: const SizedBox(width: double.infinity),
-                crossFadeState: editNotifier.value
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
-                duration: const Duration(milliseconds: 300),
-              );
-            },
-          ),
-          const SizedBox(
-            height: 1500,
+          SizedBox(
+            height: MediaQuery.of(context).size.height - 102,
             width: double.infinity,
-            child: LocationGalleryWidget(),
+            child: LocationGalleryWidget(editNotifier),
           ),
         ],
       ),
@@ -159,11 +105,16 @@ class LocationEditingWidget extends StatelessWidget {
 }
 
 class LocationGalleryWidget extends StatelessWidget {
-  const LocationGalleryWidget({super.key});
+  final ValueNotifier<bool> editNotifier;
+  const LocationGalleryWidget(this.editNotifier, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Gallery(
+      header: Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: GalleryHeaderWidget(editNotifier),
+      ),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final ownerID = Configuration.instance.getUserID();
         final hasSelectedAllForBackup =
@@ -201,6 +152,78 @@ class LocationGalleryWidget extends StatelessWidget {
         return result;
       },
       tagPrefix: "location_gallery",
+    );
+  }
+}
+
+class GalleryHeaderWidget extends StatelessWidget {
+  final ValueNotifier editNotifier;
+  const GalleryHeaderWidget(this.editNotifier, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ValueListenableBuilder(
+                valueListenable: editNotifier,
+                builder: (context, value, _) {
+                  Widget child;
+                  if (value as bool) {
+                    child = SizedBox(
+                      key: ValueKey(value),
+                      width: double.infinity,
+                      child: const TitleBarTitleWidget(
+                        title: "Edit location",
+                      ),
+                    );
+                  } else {
+                    child = SizedBox(
+                      key: ValueKey(value),
+                      width: double.infinity,
+                      child: const TitleBarTitleWidget(
+                        title: "Location name",
+                      ),
+                    );
+                  }
+                  return AnimatedSwitcher(
+                    switchInCurve: Curves.easeInExpo,
+                    switchOutCurve: Curves.easeOutExpo,
+                    duration: const Duration(milliseconds: 200),
+                    child: child,
+                  );
+                },
+              ),
+              Text(
+                "51 memories",
+                style: getEnteTextTheme(context).smallMuted,
+              ),
+            ],
+          ),
+        ),
+        ValueListenableBuilder(
+          valueListenable: editNotifier,
+          builder: (context, value, _) {
+            return AnimatedCrossFade(
+              firstCurve: Curves.easeInExpo,
+              sizeCurve: Curves.easeInOutExpo,
+              firstChild: const LocationEditingWidget(),
+              secondChild: const SizedBox(width: double.infinity),
+              crossFadeState: editNotifier.value
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+              duration: const Duration(milliseconds: 300),
+            );
+          },
+        )
+      ],
     );
   }
 }
