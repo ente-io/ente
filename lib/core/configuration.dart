@@ -38,8 +38,7 @@ class Configuration {
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
   static const userIDKey = "user_id";
-  static const hasMigratedSecureStorageToFirstUnlockKey =
-      "has_migrated_secure_storage_to_first_unlock";
+  static const hasMigratedSecureStorageKey = "has_migrated_secure_storage";
 
   final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
 
@@ -63,8 +62,9 @@ class Configuration {
   late String _sharedDocumentsMediaDirectory;
   String? _volatilePassword;
 
-  final _secureStorageOptionsIOS =
-      const IOSOptions(accessibility: KeychainAccessibility.first_unlock);
+  final _secureStorageOptionsIOS = const IOSOptions(
+    accessibility: KeychainAccessibility.first_unlock_this_device,
+  );
 
   // const IOSOptions(accessibility: IOSAccessibility.first_unlock);
 
@@ -462,7 +462,7 @@ class Configuration {
 
   Future<void> _migrateSecurityStorageToFirstUnlock() async {
     final hasMigratedSecureStorageToFirstUnlock =
-        _preferences.getBool(hasMigratedSecureStorageToFirstUnlockKey) ?? false;
+        _preferences.getBool(hasMigratedSecureStorageKey) ?? false;
     if (!hasMigratedSecureStorageToFirstUnlock &&
         _key != null &&
         _secretKey != null) {
@@ -477,7 +477,7 @@ class Configuration {
         iOptions: _secureStorageOptionsIOS,
       );
       await _preferences.setBool(
-        hasMigratedSecureStorageToFirstUnlockKey,
+        hasMigratedSecureStorageKey,
         true,
       );
     }
