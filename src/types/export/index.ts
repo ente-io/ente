@@ -9,6 +9,10 @@ export interface ExportProgress {
 export interface ExportedCollectionPaths {
     [collectionID: number]: string;
 }
+export interface FileExportStats {
+    totalCount: number;
+    pendingCount: number;
+}
 
 export interface ExportRecordV1 {
     version?: number;

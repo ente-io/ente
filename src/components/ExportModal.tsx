@@ -1,7 +1,7 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState, useContext } from 'react';
 import exportService from 'services/exportService';
-import { ExportProgress, ExportSettings } from 'types/export';
+import { ExportProgress, ExportSettings, FileExportStats } from 'types/export';
 import {
     Box,
     Button,
@@ -49,11 +49,13 @@ export default function ExportModal(props: Props) {
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState('');
     const [continuousExport, setContinuousExport] = useState(false);
-    const [totalFileCount, setTotalFileCount] = useState(0);
-    const [pendingFileCount, setPendingFileCount] = useState(0);
     const [exportProgress, setExportProgress] = useState<ExportProgress>({
         current: 0,
         total: 0,
+    });
+    const [fileExportStats, setFileExportStats] = useState<FileExportStats>({
+        totalCount: 0,
+        pendingCount: 0,
     });
     const [lastExportTime, setLastExportTime] = useState(0);
 
@@ -176,10 +178,8 @@ export default function ExportModal(props: Props) {
 
     const syncFileCounts = async () => {
         try {
-            const { totalFiles, pendingFiles } =
-                await exportService.getUpdatedTotalAndPendingFileCount();
-            setTotalFileCount(totalFiles.length);
-            setPendingFileCount(pendingFiles.length);
+            const fileExportStats = await exportService.getFileExportStats();
+            setFileExportStats(fileExportStats);
         } catch (e) {
             logError(e, 'error updating file counts');
         }
@@ -245,7 +245,7 @@ export default function ExportModal(props: Props) {
                         {t('TOTAL_ITEMS')}
                     </Typography>
                     <Typography color="text.secondary">
-                        {totalFileCount}
+                        {fileExportStats.totalCount}
                     </Typography>
                 </SpaceBetweenFlex>
             </DialogContent>
@@ -256,7 +256,7 @@ export default function ExportModal(props: Props) {
                 stopExport={stopExport}
                 onHide={props.onHide}
                 lastExportTime={lastExportTime}
-                pendingFileCount={pendingFileCount}
+                pendingFileCount={fileExportStats.pendingCount}
                 exportProgress={exportProgress}
             />
         </Dialog>
