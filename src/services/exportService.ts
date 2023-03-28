@@ -66,7 +66,7 @@ class ExportService {
     private stopExport: boolean = false;
     private allElectronAPIsExist: boolean = false;
     private fileReader: FileReader = null;
-    private continuousExportEventListener: () => void;
+    private continuousExportEventHandler: () => void;
 
     constructor() {
         this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -95,24 +95,34 @@ class ExportService {
         }
     }
 
-    enableContinuousExport(startExport: () => void) {
+    enableContinuousExport(startExport: () => Promise<void>) {
         try {
-            if (this.continuousExportEventListener) {
+            if (this.continuousExportEventHandler) {
                 addLogLine('continuous export already enabled');
                 return;
             }
-            startExport();
-            this.continuousExportEventListener = () => {
-                addLogLine('continuous export triggered');
-                if (this.exportInProgress) {
-                    addLogLine('export in progress, skipping');
-                    return;
+            const reRunNeeded = { current: false };
+            this.continuousExportEventHandler = async () => {
+                try {
+                    addLogLine('continuous export triggered');
+                    if (this.exportInProgress) {
+                        addLogLine('export in progress, scheduling re-run');
+                        reRunNeeded.current = true;
+                    }
+                    await startExport();
+                    if (reRunNeeded.current) {
+                        reRunNeeded.current = false;
+                        addLogLine('re-running export');
+                        setTimeout(this.continuousExportEventHandler, 0);
+                    }
+                } catch (e) {
+                    logError(e, 'continuous export failed');
                 }
-                startExport();
             };
+            this.continuousExportEventHandler();
             eventBus.addListener(
                 Events.LOCAL_FILES_UPDATED,
-                this.continuousExportEventListener
+                this.continuousExportEventHandler
             );
         } catch (e) {
             logError(e, 'failed to enableContinuousExport ');
@@ -122,15 +132,15 @@ class ExportService {
 
     disableContinuousExport() {
         try {
-            if (!this.continuousExportEventListener) {
+            if (!this.continuousExportEventHandler) {
                 addLogLine('continuous export already disabled');
                 return;
             }
             eventBus.removeListener(
                 Events.LOCAL_FILES_UPDATED,
-                this.continuousExportEventListener
+                this.continuousExportEventHandler
             );
-            this.continuousExportEventListener = null;
+            this.continuousExportEventHandler = null;
         } catch (e) {
             logError(e, 'failed to disableContinuousExport');
             throw e;
