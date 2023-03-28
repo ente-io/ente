@@ -335,20 +335,8 @@ class ExportService {
                     exportRecord.exportedFiles = [];
                 }
                 exportRecord.exportedFiles.push(fileUID);
-                exportRecord.failedFiles &&
-                    (exportRecord.failedFiles = exportRecord.failedFiles.filter(
-                        (FailedFileUID) => FailedFileUID !== fileUID
-                    ));
-            } else {
-                if (!exportRecord.failedFiles) {
-                    exportRecord.failedFiles = [];
-                }
-                if (!exportRecord.failedFiles.find((x) => x === fileUID)) {
-                    exportRecord.failedFiles.push(fileUID);
-                }
             }
             exportRecord.exportedFiles = dedupe(exportRecord.exportedFiles);
-            exportRecord.failedFiles = dedupe(exportRecord.failedFiles);
             await this.updateExportRecord(exportRecord, folder);
         } catch (e) {
             logError(e, 'addFileExportedRecord failed');
@@ -701,6 +689,9 @@ class ExportService {
         }
         if (exportRecord?.progress) {
             exportRecord.progress = undefined;
+        }
+        if (exportRecord?.failedFiles) {
+            exportRecord.failedFiles = undefined;
         }
         await this.updateExportRecord(exportRecord);
     }

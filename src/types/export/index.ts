@@ -26,7 +26,6 @@ export interface ExportRecord {
     stage: ExportStage;
     lastAttemptTimestamp: number;
     exportedFiles: string[];
-    failedFiles: string[];
     exportedCollectionPaths: ExportedCollectionPaths;
 }
 
