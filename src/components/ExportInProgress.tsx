@@ -27,13 +27,7 @@ interface Props {
 }
 
 export default function ExportInProgress(props: Props) {
-    const progress =
-        props.exportProgress.total > 0
-            ? Math.round(
-                  (props.exportProgress.current * 100) /
-                      props.exportProgress.total
-              )
-            : 100;
+    const isLoading = props.exportProgress.total === 0;
     return (
         <>
             <DialogContent>
@@ -56,7 +50,14 @@ export default function ExportInProgress(props: Props) {
                     <FlexWrapper px={1}>
                         <ProgressBar
                             style={{ width: '100%' }}
-                            now={progress}
+                            now={
+                                isLoading
+                                    ? 100
+                                    : Math.round(
+                                          (props.exportProgress.current * 100) /
+                                              props.exportProgress.total
+                                      )
+                            }
                             animated
                             variant="upload-progress-bar"
                         />
