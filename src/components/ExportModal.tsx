@@ -104,6 +104,7 @@ export default function ExportModal(props: Props) {
             try {
                 const exportRecord = await exportService.getExportRecord();
                 if (!exportRecord) {
+                    setExportStage(ExportStage.INIT);
                     return;
                 }
                 setExportStage(exportRecord.stage);
