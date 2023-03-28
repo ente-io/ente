@@ -273,8 +273,8 @@ class ExportService {
             }
             this.stopExport = false;
             this.electronAPIs.sendNotification(t('EXPORT_NOTIFICATION.START'));
-
-            for (const [index, file] of files.entries()) {
+            let success = 0;
+            for (const file of files) {
                 if (this.stopExport) {
                     break;
                 }
@@ -296,7 +296,8 @@ class ExportService {
                         file,
                         RecordType.SUCCESS
                     );
-                    updateProgress({ current: index + 1, total: files.length });
+                    success++;
+                    updateProgress({ current: success, total: files.length });
                 } catch (e) {
                     logError(e, 'export failed for a file');
                     if (
