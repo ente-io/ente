@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.7.38+438
+version: 0.7.39+439
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
@@ -64,7 +64,7 @@ dependencies:
     sdk: flutter
   flutter_native_splash: ^2.2.0+1
   flutter_password_strength: ^0.1.6
-  flutter_secure_storage: ^4.2.0
+  flutter_secure_storage: ^8.0.0
   flutter_sodium: ^0.2.0
   flutter_typeahead: ^4.0.0
   fluttertoast: ^8.0.6
