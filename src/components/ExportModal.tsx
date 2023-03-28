@@ -175,7 +175,7 @@ export default function ExportModal(props: Props) {
     const syncFileCounts = async () => {
         try {
             const { totalFiles, pendingFiles } =
-                await exportService.getUpdateTotalAndPendingFileCounts();
+                await exportService.getUpdatedTotalAndPendingFileCount();
             setTotalFileCount(totalFiles.length);
             setPendingFileCount(pendingFiles.length);
         } catch (e) {
