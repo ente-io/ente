@@ -300,7 +300,6 @@
     "EXPORT_DATA": "Export data",
     "SELECT_FOLDER": "Select folder",
     "DESTINATION": "Destination",
-    "TOTAL_FILE_COUNT": "Total file count",
     "START": "Start",
     "EXPORT_IN_PROGRESS": "Export in progress...",
     "PAUSE": "Pause",
@@ -577,5 +576,8 @@
         "FINISH": "Export finished",
         "UP_TO_DATE": "No new files to export"
     },
-    "CONTINUOUS_EXPORT": "Sync continuously"
+    "CONTINUOUS_EXPORT": "Sync continuously",
+    "TOTAL_ITEMS": "Total items",
+    "PENDING_ITEMS": "Pending items",
+    "EXPORT_STARTING": "Export starting..."
 }
