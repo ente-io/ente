@@ -78,9 +78,7 @@ export default function ExportModal(props: Props) {
         if (!props.show) {
             return;
         }
-        if (exportStage === ExportStage.FINISHED) {
-            syncFileCounts();
-        }
+        syncFileCounts();
     }, [props.show]);
 
     useEffect(() => {
