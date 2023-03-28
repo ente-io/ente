@@ -100,8 +100,12 @@ export default function ExportModal(props: Props) {
         const main = async () => {
             try {
                 const exportInfo = await exportService.getExportRecord();
-                setExportStage(exportInfo?.stage ?? ExportStage.INIT);
-                setLastExportTime(exportInfo?.lastAttemptTimestamp);
+                if (exportInfo?.stage) {
+                    setExportStage(exportInfo?.stage);
+                }
+                if (exportInfo?.lastAttemptTimestamp) {
+                    setLastExportTime(exportInfo?.lastAttemptTimestamp);
+                }
                 await syncFileCounts();
                 if (exportInfo?.stage === ExportStage.INPROGRESS) {
                     await startExport();
@@ -220,35 +224,6 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const ExportDynamicContent = () => {
-        switch (exportStage) {
-            case ExportStage.INIT:
-                return <ExportInit startExport={startExport} />;
-
-            case ExportStage.INPROGRESS:
-                return (
-                    <ExportInProgress
-                        exportStage={exportStage}
-                        exportProgress={exportProgress}
-                        stopExport={stopExport}
-                        closeExportDialog={props.onHide}
-                    />
-                );
-            case ExportStage.FINISHED:
-                return (
-                    <ExportFinished
-                        onHide={props.onHide}
-                        lastExportTime={lastExportTime}
-                        pendingFileCount={pendingFileCount}
-                        startExport={startExport}
-                    />
-                );
-
-            default:
-                return <></>;
-        }
-    };
-
     return (
         <Dialog open={props.show} onClose={props.onHide} maxWidth="xs">
             <DialogTitleWithCloseButton onClose={props.onHide}>
@@ -275,7 +250,15 @@ export default function ExportModal(props: Props) {
                 </SpaceBetweenFlex>
             </DialogContent>
             <Divider />
-            <ExportDynamicContent />
+            <ExportDynamicContent
+                exportStage={exportStage}
+                startExport={startExport}
+                stopExport={stopExport}
+                onHide={props.onHide}
+                lastExportTime={lastExportTime}
+                pendingFileCount={pendingFileCount}
+                exportProgress={exportProgress}
+            />
         </Dialog>
     );
 }
@@ -355,3 +338,48 @@ function ContinuousExport({ continuousExport, toggleContinuousExport }) {
         </SpaceBetweenFlex>
     );
 }
+
+const ExportDynamicContent = ({
+    exportStage,
+    startExport,
+    stopExport,
+    onHide,
+    lastExportTime,
+    pendingFileCount,
+    exportProgress,
+}: {
+    exportStage: ExportStage;
+    startExport: () => void;
+    stopExport: () => void;
+    onHide: () => void;
+    lastExportTime: number;
+    pendingFileCount: number;
+    exportProgress: ExportProgress;
+}) => {
+    switch (exportStage) {
+        case ExportStage.INIT:
+            return <ExportInit startExport={startExport} />;
+
+        case ExportStage.INPROGRESS:
+            return (
+                <ExportInProgress
+                    exportStage={exportStage}
+                    exportProgress={exportProgress}
+                    stopExport={stopExport}
+                    closeExportDialog={onHide}
+                />
+            );
+        case ExportStage.FINISHED:
+            return (
+                <ExportFinished
+                    onHide={onHide}
+                    lastExportTime={lastExportTime}
+                    pendingFileCount={pendingFileCount}
+                    startExport={startExport}
+                />
+            );
+
+        default:
+            return <></>;
+    }
+};
