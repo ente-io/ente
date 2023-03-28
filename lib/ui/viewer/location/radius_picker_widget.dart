@@ -19,10 +19,8 @@ class CustomTrackShape extends RoundedRectSliderTrackShape {
 }
 
 class RadiusPickerWidget extends StatefulWidget {
-  final ValueNotifier<int?> memoriesCountNotifier;
   final ValueNotifier<int> selectedRadiusIndexNotifier;
   const RadiusPickerWidget(
-    this.memoriesCountNotifier,
     this.selectedRadiusIndexNotifier, {
     super.key,
   });

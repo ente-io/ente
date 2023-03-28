@@ -115,7 +115,6 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                         ),
                         const SizedBox(height: 24),
                         RadiusPickerWidget(
-                          _memoriesCountNotifier,
                           _selectedRadiusIndexNotifier,
                         ),
                         const SizedBox(height: 24),
