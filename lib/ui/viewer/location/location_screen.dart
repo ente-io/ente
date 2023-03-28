@@ -79,8 +79,7 @@ class LocationScreen extends StatelessWidget {
             valueListenable: editNotifier,
             builder: (context, value, _) {
               return AnimatedCrossFade(
-                firstCurve: Curves.easeInOutExpo,
-                secondCurve: Curves.easeInOutExpo,
+                firstCurve: Curves.easeInExpo,
                 sizeCurve: Curves.easeInOutExpo,
                 firstChild: const LocationEditingWidget(),
                 secondChild: const SizedBox(width: double.infinity),
@@ -92,7 +91,10 @@ class LocationScreen extends StatelessWidget {
             },
           ),
           const SizedBox(
-              height: 1500, width: 320, child: LocationGalleryWidget()),
+            height: 1500,
+            width: double.infinity,
+            child: LocationGalleryWidget(),
+          ),
         ],
       ),
     );
