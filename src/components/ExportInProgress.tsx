@@ -27,28 +27,36 @@ interface Props {
 }
 
 export default function ExportInProgress(props: Props) {
+    const progress =
+        props.exportProgress.total > 0
+            ? Math.round(
+                  (props.exportProgress.current * 100) /
+                      props.exportProgress.total
+              )
+            : 100;
     return (
         <>
             <DialogContent>
                 <VerticallyCentered>
                     <Box mb={1.5}>
-                        <Trans
-                            i18nKey={'EXPORT_PROGRESS'}
-                            components={{
-                                a: <ComfySpan />,
-                            }}
-                            values={{
-                                progress: props.exportProgress,
-                            }}
-                        />
+                        {props.exportProgress.total === 0 ? (
+                            t('EXPORT_STARTING')
+                        ) : (
+                            <Trans
+                                i18nKey={'EXPORT_PROGRESS'}
+                                components={{
+                                    a: <ComfySpan />,
+                                }}
+                                values={{
+                                    progress: props.exportProgress,
+                                }}
+                            />
+                        )}
                     </Box>
                     <FlexWrapper px={1}>
                         <ProgressBar
                             style={{ width: '100%' }}
-                            now={Math.round(
-                                (props.exportProgress.current * 100) /
-                                    props.exportProgress.total
-                            )}
+                            now={progress}
                             animated
                             variant="upload-progress-bar"
                         />

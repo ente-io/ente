@@ -578,5 +578,6 @@
     },
     "CONTINUOUS_EXPORT": "Sync continuously",
     "TOTAL_ITEMS": "Total items",
-    "PENDING_ITEMS": "Pending items"
+    "PENDING_ITEMS": "Pending items",
+    "EXPORT_STARTING": "Export starting..."
 }
