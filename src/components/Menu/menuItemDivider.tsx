@@ -3,21 +3,12 @@ interface Iprops {
     hasIcon?: boolean;
 }
 export default function EnteMenuItemDivider({ hasIcon = false }: Iprops) {
-    return hasIcon ? (
+    return (
         <Divider
             sx={{
                 '&&&': {
                     my: 0,
-                    ml: 6,
-                },
-            }}
-        />
-    ) : (
-        <Divider
-            sx={{
-                '&&&': {
-                    my: 0,
-                    ml: 2,
+                    ml: hasIcon ? '48px' : '16px',
                 },
             }}
         />

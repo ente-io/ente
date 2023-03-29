@@ -79,7 +79,7 @@ export default function EnablePublicShareOptions({
                     onClick={createSharableURLHelper}>
                     {t('CREATE_PUBLIC_SHARING')}
                 </EnteMenuItem>
-                <EnteMenuItemDivider hasIcon={true} />
+                <EnteMenuItemDivider hasIcon />
                 <EnteMenuItem
                     startIcon={<LinkIcon />}
                     color="primary"
