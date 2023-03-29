@@ -24,7 +24,7 @@ interface Iprops<T> {
     placeholder?: string;
 }
 
-export default function DropdownInput<T>({
+export default function DropdownInput<T extends string>({
     label,
     labelProps,
     options,
@@ -85,7 +85,7 @@ export default function DropdownInput<T>({
                     <MenuItem
                         key={option.label}
                         divider={index !== options.length - 1}
-                        value={option.value as string}
+                        value={option.value}
                         sx={{
                             px: '16px',
                             py: '14px',
