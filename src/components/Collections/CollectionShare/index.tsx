@@ -1,16 +1,13 @@
 import EmailShare from './emailShare';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Collection } from 'types/collection';
-import DialogTitleWithCloseButton, {
-    dialogCloseHandler,
-} from 'components/DialogBox/TitleWithCloseButton';
-import DialogContent from '@mui/material/DialogContent';
-import { Divider } from '@mui/material';
-
-import { CollectionShareContainer } from './container';
+import { EnteDrawer } from 'components/EnteDrawer';
 import PublicShare from './publicShare';
-import { AppContext } from 'pages/_app';
+import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import { t } from 'i18next';
+import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
+import { DialogProps, Stack } from '@mui/material';
+import Titlebar from 'components/Titlebar';
 
 interface Props {
     open: boolean;
@@ -19,30 +16,48 @@ interface Props {
 }
 
 function CollectionShare(props: Props) {
-    const { isMobile } = useContext(AppContext);
-    const handleClose = dialogCloseHandler({
-        onClose: props.onClose,
-    });
-
+    const handleRootClose = () => {
+        props.onClose();
+    };
+    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
+        if (reason === 'backdropClick') {
+            handleRootClose();
+        } else {
+            props.onClose();
+        }
+    };
     if (!props.collection) {
         return <></>;
     }
 
     return (
         <>
-            <CollectionShareContainer
+            <EnteDrawer
+                anchor="right"
                 open={props.open}
-                onClose={handleClose}
-                fullScreen={isMobile}>
-                <DialogTitleWithCloseButton onClose={handleClose}>
-                    {t('SHARE_COLLECTION')}
-                </DialogTitleWithCloseButton>
-                <DialogContent>
-                    <EmailShare collection={props.collection} />
-                    <Divider />
-                    <PublicShare collection={props.collection} />
-                </DialogContent>
-            </CollectionShareContainer>
+                onClose={handleDrawerClose}
+                BackdropProps={{
+                    sx: { '&&&': { backgroundColor: 'transparent' } },
+                }}>
+                <Stack spacing={'4px'} py={'12px'}>
+                    <Titlebar
+                        onClose={props.onClose}
+                        title={t('SHARE_COLLECTION')}
+                        onRootClose={handleRootClose}
+                    />
+                    <Stack py={'20px'} px={'8px'}>
+                        <MenuSectionTitle
+                            title={t('ADD_EMAIL_TITLE')}
+                            icon={<WorkspacesIcon />}
+                        />
+                        <EmailShare collection={props.collection} />
+                        <PublicShare
+                            collection={props.collection}
+                            onRootClose={handleRootClose}
+                        />
+                    </Stack>
+                </Stack>
+            </EnteDrawer>
         </>
     );
 }

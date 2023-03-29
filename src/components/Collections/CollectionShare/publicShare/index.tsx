@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Collection, PublicURL } from 'types/collection';
 import { appendCollectionKeyToShareURL } from 'utils/collection';
-import PublicShareControl from './control';
-import PublicShareLink from './link';
-import PublicShareManage from './manage';
+import EnablePublicShareOptions from './EnablePublicShareOptions';
+import CopyLinkModal from './copyLinkModal';
+import ManagePublicShare from './managePublicShare';
 
 export default function PublicShare({
     collection,
+    onRootClose,
 }: {
     collection: Collection;
+    onRootClose: () => void;
 }) {
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
     const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
+    const [copyLinkModalView, setCopyLinkModalView] = useState(false);
 
     useEffect(() => {
         if (collection.publicURLs?.length) {
@@ -31,24 +34,38 @@ export default function PublicShare({
         }
     }, [publicShareProp]);
 
+    const copyToClipboardHelper = () => {
+        navigator.clipboard.writeText(publicShareUrl);
+        handleCancel();
+    };
+    const handleCancel = () => {
+        setCopyLinkModalView(false);
+    };
+
     return (
         <>
-            <PublicShareControl
-                setPublicShareProp={setPublicShareProp}
-                collection={collection}
-                publicShareActive={!!publicShareProp}
-            />
-            {publicShareProp && (
-                <>
-                    <PublicShareLink publicShareUrl={publicShareUrl} />
-
-                    <PublicShareManage
-                        publicShareProp={publicShareProp}
-                        collection={collection}
-                        setPublicShareProp={setPublicShareProp}
-                    />
-                </>
+            {publicShareProp ? (
+                <ManagePublicShare
+                    publicShareProp={publicShareProp}
+                    setPublicShareProp={setPublicShareProp}
+                    collection={collection}
+                    publicShareUrl={publicShareUrl}
+                    onRootClose={onRootClose}
+                    copyToClipboardHelper={copyToClipboardHelper}
+                />
+            ) : (
+                <EnablePublicShareOptions
+                    setPublicShareProp={setPublicShareProp}
+                    collection={collection}
+                    setCopyLinkModalView={setCopyLinkModalView}
+                />
             )}
+            <CopyLinkModal
+                open={copyLinkModalView}
+                onClose={handleCancel}
+                handleCancel={handleCancel}
+                copyToClipboardHelper={copyToClipboardHelper}
+            />
         </>
     );
 }

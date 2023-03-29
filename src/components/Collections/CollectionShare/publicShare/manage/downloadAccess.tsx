@@ -1,11 +1,9 @@
-import { Box, Typography } from '@mui/material';
+import { EnteMenuItem } from 'components/Menu/menuItem';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
-import PublicShareSwitch from '../switch';
-
 interface Iprops {
     publicShareProp: PublicURL;
     collection: Collection;
@@ -47,12 +45,11 @@ export function ManageDownloadAccess({
         });
     };
     return (
-        <Box>
-            <Typography mb={0.5}>{t('FILE_DOWNLOAD')}</Typography>
-            <PublicShareSwitch
-                checked={publicShareProp?.enableDownload ?? true}
-                onChange={handleFileDownloadSetting}
-            />
-        </Box>
+        <EnteMenuItem
+            checked={publicShareProp?.enableDownload ?? true}
+            onClick={handleFileDownloadSetting}
+            hasSwitch>
+            {t('FILE_DOWNLOAD')}
+        </EnteMenuItem>
     );
 }
