@@ -1,4 +1,4 @@
-import { ChevronRight } from '@mui/icons-material';
+import ChevronRight from '@mui/icons-material/ChevronRight';
 import { DialogProps, Stack } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { EnteMenuItem } from 'components/Menu/menuItem';

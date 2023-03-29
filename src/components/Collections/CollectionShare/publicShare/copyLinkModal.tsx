@@ -7,7 +7,7 @@ import {
     Box,
 } from '@mui/material';
 import VerticallyCentered from 'components/Container';
-import { Check } from '@mui/icons-material';
+import Check from '@mui/icons-material/Check';
 import { t } from 'i18next';
 interface Iprops {
     open: boolean;
