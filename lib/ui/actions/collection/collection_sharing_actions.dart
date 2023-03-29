@@ -295,8 +295,7 @@ class CollectionActions {
               // collection should be empty on server now
               await collectionsService.trashEmptyCollection(collection);
             } catch (e, s) {
-              logger.severe(
-                  "Failed to keep photos and delete collection", e, s);
+              logger.severe("Failed to keep photos & delete collection", e, s);
               rethrow;
             }
           },
