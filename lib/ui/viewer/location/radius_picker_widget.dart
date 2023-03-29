@@ -19,6 +19,8 @@ class CustomTrackShape extends RoundedRectSliderTrackShape {
 }
 
 class RadiusPickerWidget extends StatefulWidget {
+  ///This notifier can be listened to get the selected radius index from
+  ///a parent widget.
   final ValueNotifier<int> selectedRadiusIndexNotifier;
   const RadiusPickerWidget(
     this.selectedRadiusIndexNotifier, {
@@ -30,10 +32,6 @@ class RadiusPickerWidget extends StatefulWidget {
 }
 
 class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
-  //Will maintain the state of the slider using this varialbe. Can't use
-  //InheritedLocationData.selectedRadiusIndex as the state in the inheritedWidget
-  //only changes after debounce time and the slider will not reflect the change immediately.
-
   @override
   void initState() {
     widget.selectedRadiusIndexNotifier.value = defaultRadiusValueIndex;
