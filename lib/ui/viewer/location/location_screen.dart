@@ -7,6 +7,7 @@ import "package:photos/services/files_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
@@ -144,16 +145,22 @@ class LocationGalleryWidget extends StatefulWidget {
 class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
   late Future<void> removeIgnoredFiles;
+  late Widget galleryHeaderWidget;
   @override
   void initState() {
     fileLoadResult = FilesService.instance.fetchAllFilesWithLocationData();
     removeIgnoredFiles =
         FilesService.instance.removeIgnoredFiles(fileLoadResult);
+    galleryHeaderWidget = GalleryHeaderWidget(
+      widget.editNotifier,
+    );
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    print("----------------");
+    print(galleryHeaderWidget.hashCode);
     final selectedRadius = _selectedRadius();
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
@@ -193,11 +200,13 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Gallery(
-            loadingWidget: const SizedBox.shrink(),
-            header: Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: GalleryHeaderWidget(widget.editNotifier),
+            loadingWidget: Column(
+              children: [
+                galleryHeaderWidget,
+                const EnteLoadingWidget(),
+              ],
             ),
+            header: galleryHeaderWidget,
             asyncLoader: (
               creationStartTime,
               creationEndTime, {
@@ -209,7 +218,8 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
             tagPrefix: "location_gallery",
           );
         } else {
-          return const SizedBox.shrink();
+          // return const SizedBox.shrink();
+          return galleryHeaderWidget;
         }
       },
       future: filterFiles(),
@@ -222,74 +232,82 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
   }
 }
 
-class GalleryHeaderWidget extends StatelessWidget {
+class GalleryHeaderWidget extends StatefulWidget {
   final ValueNotifier editNotifier;
   const GalleryHeaderWidget(this.editNotifier, {super.key});
 
   @override
+  State<GalleryHeaderWidget> createState() => _GalleryHeaderWidgetState();
+}
+
+class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ValueListenableBuilder(
-                valueListenable: editNotifier,
-                builder: (context, value, _) {
-                  Widget child;
-                  if (value as bool) {
-                    child = SizedBox(
-                      key: ValueKey(value),
-                      width: double.infinity,
-                      child: const TitleBarTitleWidget(
-                        title: "Edit location",
-                      ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ValueListenableBuilder(
+                  valueListenable: widget.editNotifier,
+                  builder: (context, value, _) {
+                    Widget child;
+                    if (value as bool) {
+                      child = SizedBox(
+                        key: ValueKey(value),
+                        width: double.infinity,
+                        child: const TitleBarTitleWidget(
+                          title: "Edit location",
+                        ),
+                      );
+                    } else {
+                      child = SizedBox(
+                        key: ValueKey(value),
+                        width: double.infinity,
+                        child: const TitleBarTitleWidget(
+                          title: "Location name",
+                        ),
+                      );
+                    }
+                    return AnimatedSwitcher(
+                      switchInCurve: Curves.easeInExpo,
+                      switchOutCurve: Curves.easeOutExpo,
+                      duration: const Duration(milliseconds: 200),
+                      child: child,
                     );
-                  } else {
-                    child = SizedBox(
-                      key: ValueKey(value),
-                      width: double.infinity,
-                      child: const TitleBarTitleWidget(
-                        title: "Location name",
-                      ),
-                    );
-                  }
-                  return AnimatedSwitcher(
-                    switchInCurve: Curves.easeInExpo,
-                    switchOutCurve: Curves.easeOutExpo,
-                    duration: const Duration(milliseconds: 200),
-                    child: child,
-                  );
-                },
-              ),
-              Text(
-                "51 memories",
-                style: getEnteTextTheme(context).smallMuted,
-              ),
-            ],
+                  },
+                ),
+                Text(
+                  "51 memories",
+                  style: getEnteTextTheme(context).smallMuted,
+                ),
+              ],
+            ),
           ),
-        ),
-        ValueListenableBuilder(
-          valueListenable: editNotifier,
-          builder: (context, value, _) {
-            return AnimatedCrossFade(
-              firstCurve: Curves.easeInExpo,
-              sizeCurve: Curves.easeInOutExpo,
-              firstChild: const LocationEditingWidget(),
-              secondChild: const SizedBox(width: double.infinity),
-              crossFadeState: editNotifier.value
-                  ? CrossFadeState.showFirst
-                  : CrossFadeState.showSecond,
-              duration: const Duration(milliseconds: 300),
-            );
-          },
-        )
-      ],
+          ValueListenableBuilder(
+            valueListenable: widget.editNotifier,
+            builder: (context, value, _) {
+              return AnimatedCrossFade(
+                firstCurve: Curves.easeInExpo,
+                sizeCurve: Curves.easeInOutExpo,
+                firstChild: const LocationEditingWidget(),
+                secondChild: const SizedBox(width: double.infinity),
+                crossFadeState: widget.editNotifier.value
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                duration: const Duration(milliseconds: 300),
+              );
+            },
+          )
+        ],
+      ),
     );
   }
 }
