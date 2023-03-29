@@ -22,8 +22,6 @@ import {
 import LoadingBar from 'react-top-loading-bar';
 import DialogBox from 'components/DialogBox';
 import { styled, ThemeProvider } from '@mui/material/styles';
-import darkThemeOptions from 'themes/darkThemeOptions';
-import lightThemeOptions from 'themes/lightThemeOptions';
 import { CssBaseline, useMediaQuery } from '@mui/material';
 import {
     SetDialogBoxAttributes,
@@ -62,6 +60,7 @@ import createEmotionCache from 'themes/createEmotionCache';
 import { CacheProvider, EmotionCache } from '@emotion/react';
 import { AppProps } from 'next/app';
 import DialogBoxV2 from 'components/DialogBoxV2';
+import { getTheme } from 'themes';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -360,12 +359,7 @@ export default function App(props) {
                 />
             </Head>
 
-            <ThemeProvider
-                theme={
-                    theme === THEME_COLOR.DARK
-                        ? darkThemeOptions
-                        : lightThemeOptions
-                }>
+            <ThemeProvider theme={getTheme(theme)}>
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar />}
                 <MessageContainer>
