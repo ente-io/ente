@@ -52,7 +52,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
               f.location!.longitude != null,
         );
         return !LocationService.instance.isFileInsideLocationTag(
-          InheritedLocationTagData.of(context).coordinates,
+          InheritedAddLocationTagData.of(context).coordinates,
           [f.location!.latitude!, f.location!.longitude!],
           selectedRadius,
         );
@@ -109,7 +109,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
 
   int _selectedRadius() {
     return radiusValues[
-        InheritedLocationTagData.of(context).selectedRadiusIndex];
+        InheritedAddLocationTagData.of(context).selectedRadiusIndex];
   }
 
   Future<void> _removeIgnoredFiles(Future<FileLoadResult> result) async {

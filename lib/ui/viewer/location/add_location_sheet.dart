@@ -23,7 +23,7 @@ showAddLocationSheet(
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
-      return LocationTagDataStateProvider(
+      return AddLocationTagStateProvider(
         coordinates,
         AddLocationSheet(onLocationAdded),
       );
@@ -191,7 +191,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   }
 
   Future<void> _addLocationTag(String locationName) async {
-    final locationData = InheritedLocationTagData.of(context);
+    final locationData = InheritedAddLocationTagData.of(context);
     final coordinates = locationData.coordinates;
     final radius = radiusValues[locationData.selectedRadiusIndex];
     await LocationService.instance.addLocation(
@@ -221,7 +221,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   }
 
   void _selectedRadiusIndexListener() {
-    InheritedLocationTagData.of(
+    InheritedAddLocationTagData.of(
       context,
     ).updateSelectedIndex(
       _selectedRadiusIndexNotifier.value,
