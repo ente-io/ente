@@ -9,9 +9,9 @@ export interface ExportProgress {
 export interface ExportedCollectionPaths {
     [collectionID: number]: string;
 }
-export interface ExportStats {
-    failed: number;
-    success: number;
+export interface FileExportStats {
+    totalCount: number;
+    pendingCount: number;
 }
 
 export interface ExportRecordV1 {
@@ -30,7 +30,6 @@ export interface ExportRecord {
     stage: ExportStage;
     lastAttemptTimestamp: number;
     exportedFiles: string[];
-    failedFiles: string[];
     exportedCollectionPaths: ExportedCollectionPaths;
 }
 

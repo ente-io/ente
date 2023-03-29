@@ -7,14 +7,13 @@ import {
 } from '@mui/material';
 import React from 'react';
 import { t } from 'i18next';
-import { ExportStats } from 'types/export';
 import { formatDateTime } from 'utils/time/format';
 import { SpaceBetweenFlex } from './Container';
 
 interface Props {
+    pendingFileCount: number;
     onHide: () => void;
     lastExportTime: number;
-    exportStats: ExportStats;
     startExport: () => void;
 }
 
@@ -22,8 +21,14 @@ export default function ExportFinished(props: Props) {
     return (
         <>
             <DialogContent>
-                <Stack spacing={2.5} pr={2}>
-                    <SpaceBetweenFlex>
+                <Stack pr={2}>
+                    <SpaceBetweenFlex minHeight={'48px'}>
+                        <Typography color={'text.secondary'}>
+                            {t('PENDING_ITEMS')}
+                        </Typography>
+                        <Typography>{props.pendingFileCount}</Typography>
+                    </SpaceBetweenFlex>
+                    <SpaceBetweenFlex minHeight={'48px'}>
                         <Typography color="text.secondary">
                             {t('LAST_EXPORT_TIME')}
                         </Typography>
@@ -31,20 +36,6 @@ export default function ExportFinished(props: Props) {
                             {formatDateTime(props.lastExportTime)}
                         </Typography>
                     </SpaceBetweenFlex>
-                    <SpaceBetweenFlex>
-                        <Typography color="text.secondary">
-                            {t('SUCCESSFULLY_EXPORTED_FILES')}
-                        </Typography>
-                        <Typography>{props.exportStats.success}</Typography>
-                    </SpaceBetweenFlex>
-                    {props.exportStats.failed > 0 && (
-                        <SpaceBetweenFlex>
-                            <Typography color="text.secondary">
-                                {t('FAILED_EXPORTED_FILES')}
-                            </Typography>
-                            <Typography>{props.exportStats.failed}</Typography>
-                        </SpaceBetweenFlex>
-                    )}
                 </Stack>
             </DialogContent>
             <DialogActions>

@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import { styled } from '@mui/material';
 import { Overlay } from 'components/Container';
-import { SpecialPadding } from 'styles/SpecialPadding';
+import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from 'constants/gallery';
 export const CollectionListWrapper = styled(Box)`
     position: relative;
     overflow: hidden;
@@ -10,7 +10,10 @@ export const CollectionListWrapper = styled(Box)`
 `;
 
 export const CollectionListBarWrapper = styled(Box)`
-    ${SpecialPadding}
+    padding: 0 24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        padding: 0 4px;
+    }
     margin-bottom: 16px;
     border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
 `;

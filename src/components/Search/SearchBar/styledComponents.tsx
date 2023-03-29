@@ -4,10 +4,13 @@ import {
     FluidContainer,
 } from 'components/Container';
 import { css, styled } from '@mui/material';
-import { SpecialPadding } from 'styles/SpecialPadding';
+import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from 'constants/gallery';
 
 export const SearchBarWrapper = styled(FlexWrapper)`
-    ${SpecialPadding}
+    padding: 0 24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        padding: 0 4px;
+    }
 `;
 
 export const SearchMobileBox = styled(FluidContainer)`

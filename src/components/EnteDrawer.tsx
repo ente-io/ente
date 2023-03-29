@@ -1,5 +1,4 @@
-import { Drawer } from '@mui/material';
-import styled from 'styled-components';
+import { Drawer, styled } from '@mui/material';
 
 export const EnteDrawer = styled(Drawer)(({ theme }) => ({
     '& .MuiPaper-root': {

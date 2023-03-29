@@ -27,28 +27,37 @@ interface Props {
 }
 
 export default function ExportInProgress(props: Props) {
+    const isLoading = props.exportProgress.total === 0;
     return (
         <>
             <DialogContent>
                 <VerticallyCentered>
                     <Box mb={1.5}>
-                        <Trans
-                            i18nKey={'EXPORT_PROGRESS'}
-                            components={{
-                                a: <ComfySpan />,
-                            }}
-                            values={{
-                                progress: props.exportProgress,
-                            }}
-                        />
+                        {isLoading ? (
+                            t('EXPORT_STARTING')
+                        ) : (
+                            <Trans
+                                i18nKey={'EXPORT_PROGRESS'}
+                                components={{
+                                    a: <ComfySpan />,
+                                }}
+                                values={{
+                                    progress: props.exportProgress,
+                                }}
+                            />
+                        )}
                     </Box>
                     <FlexWrapper px={1}>
                         <ProgressBar
                             style={{ width: '100%' }}
-                            now={Math.round(
-                                (props.exportProgress.current * 100) /
-                                    props.exportProgress.total
-                            )}
+                            now={
+                                isLoading
+                                    ? 100
+                                    : Math.round(
+                                          (props.exportProgress.current * 100) /
+                                              props.exportProgress.total
+                                      )
+                            }
                             animated
                             variant="upload-progress-bar"
                         />

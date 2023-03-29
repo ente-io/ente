@@ -1,6 +1,6 @@
 import { FlexWrapper } from 'components/Container';
 import { styled } from '@mui/material';
-import { SpecialPadding } from 'styles/SpecialPadding';
+import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from 'constants/gallery';
 const NavbarBase = styled(FlexWrapper)`
     min-height: 64px;
     position: sticky;
@@ -10,7 +10,10 @@ const NavbarBase = styled(FlexWrapper)`
     border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
     background-color: ${({ theme }) => theme.palette.background.default};
     margin-bottom: 16px;
-    ${SpecialPadding}
+    padding: 0 24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        padding: 0 4px;
+    }
 `;
 
 export default NavbarBase;
