@@ -44,7 +44,7 @@ export default function ManagePublicShare({
                         onClick={copyToClipboardHelper}>
                         {t('COPY_LINK')}
                     </EnteMenuItem>
-                    <EnteMenuItemDivider />
+                    <EnteMenuItemDivider hasIcon={true} />
                     <EnteMenuItem
                         startIcon={<LinkIcon />}
                         endIcon={<ChevronRightIcon />}

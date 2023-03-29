@@ -1,8 +1,25 @@
 import { Divider } from '@mui/material';
-export default function EnteMenuItemDivider() {
-    return (
+interface Iprops {
+    hasIcon?: boolean;
+}
+export default function EnteMenuItemDivider({ hasIcon = false }: Iprops) {
+    return hasIcon ? (
         <Divider
-            sx={{ '&&&': { marginTop: 0, marginBottom: 0, marginLeft: 2 } }}
+            sx={{
+                '&&&': {
+                    my: 0,
+                    ml: 6,
+                },
+            }}
+        />
+    ) : (
+        <Divider
+            sx={{
+                '&&&': {
+                    my: 0,
+                    ml: 2,
+                },
+            }}
         />
     );
 }
