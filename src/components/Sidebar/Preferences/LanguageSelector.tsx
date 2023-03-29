@@ -1,9 +1,8 @@
-import { OptionWithDivider } from 'components/Collections/CollectionShare/publicShare/manage/selectComponents/OptionWithDivider';
+import DropdownInput, { DropdownOption } from 'components/DropdownInput';
 import { Language } from 'constants/locale';
 import { useLocalState } from 'hooks/useLocalState';
+import { t } from 'i18next';
 import { useRouter } from 'next/router';
-import Select from 'react-select';
-import { DropdownStyle } from 'styles/dropdown';
 import { getBestPossibleUserLocale } from 'utils/i18n';
 import { LS_KEYS } from 'utils/storage/localStorage';
 
@@ -16,7 +15,7 @@ const getLocaleDisplayName = (l: Language) => {
     }
 };
 
-const getLanguageOptions = () => {
+const getLanguageOptions = (): DropdownOption<Language>[] => {
     return Object.values(Language).map((lang) => ({
         label: getLocaleDisplayName(lang),
         value: lang,
@@ -37,19 +36,12 @@ export const LanguageSelector = () => {
     };
 
     return (
-        <Select
-            menuPosition="fixed"
+        <DropdownInput
             options={getLanguageOptions()}
-            components={{
-                Option: OptionWithDivider,
-            }}
-            isSearchable={false}
-            value={{
-                label: getLocaleDisplayName(userLocale),
-                value: userLocale,
-            }}
-            onChange={(e) => updateCurrentLocale(e.value)}
-            styles={DropdownStyle}
+            label={t('LANGUAGE')}
+            labelProps={{ color: 'text.secondary' }}
+            selectedValue={userLocale}
+            setSelectedValue={updateCurrentLocale}
         />
     );
 };
