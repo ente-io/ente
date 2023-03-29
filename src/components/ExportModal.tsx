@@ -81,6 +81,9 @@ export default function ExportModal(props: Props) {
         if (!props.show) {
             return;
         }
+        if (exportService.isExportInProgress()) {
+            setExportStage(ExportStage.INPROGRESS);
+        }
         syncFileCounts();
     }, [props.show]);
 
@@ -102,15 +105,15 @@ export default function ExportModal(props: Props) {
         }
         const main = async () => {
             try {
-                const exportInfo = await exportService.getExportRecord();
-                if (exportInfo?.stage) {
-                    setExportStage(exportInfo?.stage);
+                const exportRecord = await exportService.getExportRecord();
+                if (!exportRecord) {
+                    setExportStage(ExportStage.INIT);
+                    return;
                 }
-                if (exportInfo?.lastAttemptTimestamp) {
-                    setLastExportTime(exportInfo?.lastAttemptTimestamp);
-                }
+                setExportStage(exportRecord.stage);
+                setLastExportTime(exportRecord.lastAttemptTimestamp);
                 await syncFileCounts();
-                if (exportInfo?.stage === ExportStage.INPROGRESS) {
+                if (exportRecord.stage === ExportStage.INPROGRESS) {
                     await startExport();
                 }
             } catch (e) {
