@@ -1,10 +1,10 @@
+import 'dart:developer' as dev;
 import "package:flutter/material.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/db/files_db.dart";
+import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
-import "package:photos/services/collections_service.dart";
-import "package:photos/services/ignored_files_service.dart";
+import "package:photos/services/files_service.dart";
+import "package:photos/services/location_service.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/text_input_widget.dart";
@@ -133,55 +133,92 @@ class _LocationEditingWidgetState extends State<LocationEditingWidget> {
   }
 }
 
-class LocationGalleryWidget extends StatelessWidget {
+class LocationGalleryWidget extends StatefulWidget {
   final ValueNotifier<bool> editNotifier;
   const LocationGalleryWidget(this.editNotifier, {super.key});
 
   @override
+  State<LocationGalleryWidget> createState() => _LocationGalleryWidgetState();
+}
+
+class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
+  late final Future<FileLoadResult> fileLoadResult;
+  late Future<void> removeIgnoredFiles;
+  @override
+  void initState() {
+    fileLoadResult = FilesService.instance.fetchAllFilesWithLocationData();
+    removeIgnoredFiles =
+        FilesService.instance.removeIgnoredFiles(fileLoadResult);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Gallery(
-      header: Padding(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: GalleryHeaderWidget(editNotifier),
-      ),
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final ownerID = Configuration.instance.getUserID();
-        final hasSelectedAllForBackup =
-            Configuration.instance.hasSelectedAllFoldersForBackup();
-        final collectionsToHide =
-            CollectionsService.instance.collectionsHiddenFromTimeline();
-        FileLoadResult result;
-        if (hasSelectedAllForBackup) {
-          result = await FilesDB.instance.getAllLocalAndUploadedFiles(
-            creationStartTime,
-            creationEndTime,
-            ownerID!,
-            limit: limit,
-            asc: asc,
-            ignoredCollectionIDs: collectionsToHide,
+    final selectedRadius = _selectedRadius();
+    Future<FileLoadResult> filterFiles() async {
+      final FileLoadResult result = await fileLoadResult;
+      //wait for ignored files to be removed after init
+      await removeIgnoredFiles;
+      final stopWatch = Stopwatch()..start();
+      final copyOfFiles = List<File>.from(result.files);
+      copyOfFiles.removeWhere((f) {
+        assert(
+          f.location != null &&
+              f.location!.latitude != null &&
+              f.location!.longitude != null,
+        );
+        return !LocationService.instance.isFileInsideLocationTag(
+          [63.5, -18.5], //pass the coordinates from the location tag here
+          [f.location!.latitude!, f.location!.longitude!],
+          selectedRadius,
+        );
+      });
+      dev.log(
+        "Time taken to get all files in a location tag: ${stopWatch.elapsedMilliseconds} ms",
+      );
+      stopWatch.stop();
+      // widget.memoriesCountNotifier.value = copyOfFiles.length;
+      // final limitedResults = copyOfFiles.take(galleryFilesLimit).toList();
+
+      return Future.value(
+        FileLoadResult(
+          copyOfFiles,
+          result.hasMore,
+        ),
+      );
+    }
+
+    return FutureBuilder(
+      key: ValueKey(selectedRadius),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Gallery(
+            loadingWidget: const SizedBox.shrink(),
+            header: Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: GalleryHeaderWidget(widget.editNotifier),
+            ),
+            asyncLoader: (
+              creationStartTime,
+              creationEndTime, {
+              limit,
+              asc,
+            }) async {
+              return snapshot.data as FileLoadResult;
+            },
+            tagPrefix: "location_gallery",
           );
         } else {
-          result = await FilesDB.instance.getAllPendingOrUploadedFiles(
-            creationStartTime,
-            creationEndTime,
-            ownerID!,
-            limit: limit,
-            asc: asc,
-            ignoredCollectionIDs: collectionsToHide,
-          );
+          return const SizedBox.shrink();
         }
-
-        // hide ignored files from home page UI
-        final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-        result.files.removeWhere(
-          (f) =>
-              f.uploadedFileID == null &&
-              IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
-        );
-        return result;
       },
-      tagPrefix: "location_gallery",
+      future: filterFiles(),
     );
+  }
+
+  int _selectedRadius() {
+    return radiusValues[
+        InheritedLocationTagData.of(context).selectedRadiusIndex];
   }
 }
 

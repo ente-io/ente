@@ -2,13 +2,10 @@ import "dart:developer" as dev;
 import "dart:math";
 
 import "package:flutter/material.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
-import "package:photos/services/collections_service.dart";
-import "package:photos/services/ignored_files_service.dart";
+import "package:photos/services/files_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/add_location_state.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
@@ -30,8 +27,9 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
 
   @override
   void initState() {
-    fileLoadResult = _fetchAllFilesWithLocationData();
-    removeIgnoredFiles = _removeIgnoredFiles(fileLoadResult);
+    fileLoadResult = FilesService.instance.fetchAllFilesWithLocationData();
+    removeIgnoredFiles =
+        FilesService.instance.removeIgnoredFiles(fileLoadResult);
     super.initState();
   }
 
@@ -112,15 +110,6 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
         InheritedAddLocationTagData.of(context).selectedRadiusIndex];
   }
 
-  Future<void> _removeIgnoredFiles(Future<FileLoadResult> result) async {
-    final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-    (await result).files.removeWhere(
-          (f) =>
-              f.uploadedFileID == null &&
-              IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
-        );
-  }
-
   double _galleryHeight(int fileCount) {
     final photoGridSize = LocalSettings.instance.getPhotoGridSize();
     final totalWhiteSpaceBetweenPhotos =
@@ -135,34 +124,5 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
     final galleryHeight = (thumbnailHeight * numberOfRows) +
         (galleryGridSpacing * (numberOfRows - 1));
     return galleryHeight + 120;
-  }
-
-  Future<FileLoadResult> _fetchAllFilesWithLocationData() {
-    final ownerID = Configuration.instance.getUserID();
-    final hasSelectedAllForBackup =
-        Configuration.instance.hasSelectedAllFoldersForBackup();
-    final collectionsToHide =
-        CollectionsService.instance.collectionsHiddenFromTimeline();
-    if (hasSelectedAllForBackup) {
-      return FilesDB.instance.getAllLocalAndUploadedFiles(
-        galleryLoadStartTime,
-        galleryLoadEndTime,
-        ownerID!,
-        limit: null,
-        asc: true,
-        ignoredCollectionIDs: collectionsToHide,
-        onlyFilesWithLocation: true,
-      );
-    } else {
-      return FilesDB.instance.getAllPendingOrUploadedFiles(
-        galleryLoadStartTime,
-        galleryLoadEndTime,
-        ownerID!,
-        limit: null,
-        asc: true,
-        ignoredCollectionIDs: collectionsToHide,
-        onlyFilesWithLocation: true,
-      );
-    }
   }
 }
