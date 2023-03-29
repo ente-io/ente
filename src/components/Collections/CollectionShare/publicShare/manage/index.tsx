@@ -33,7 +33,7 @@ interface Iprops {
     publicShareUrl: string;
 }
 
-export default function PublicShareManage({
+export default function ManagePublicShareOptions({
     publicShareProp,
     collection,
     setPublicShareProp,

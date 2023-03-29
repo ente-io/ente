@@ -29,23 +29,25 @@ export function ManageDeviceLimit({
             deviceLimit: newLimit,
         });
     };
-    const [changeDeviceLimitView, setChangeDeviceLimitView] = useState(false);
+    const [isChangeDeviceLimitVisible, setIsChangeDeviceLimitVisible] =
+        useState(false);
     const deviceLimitOptions = useMemo(() => getDeviceLimitOptions(), []);
 
-    const closeDeviceLimitChangeModalView = () =>
-        setChangeDeviceLimitView(false);
-    const openDeviceLimitChangeModalView = () => setChangeDeviceLimitView(true);
+    const closeDeviceLimitChangeModal = () =>
+        setIsChangeDeviceLimitVisible(false);
+    const openDeviceLimitChangeModalView = () =>
+        setIsChangeDeviceLimitVisible(true);
 
     const changeDeviceLimitValue = (value: number) => async () => {
         await updateDeviceLimit(value);
-        setChangeDeviceLimitView(false);
+        setIsChangeDeviceLimitVisible(false);
     };
 
     const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
         if (reason === 'backdropClick') {
             onRootClose();
         } else {
-            closeDeviceLimitChangeModalView();
+            closeDeviceLimitChangeModal();
         }
     };
 
@@ -60,11 +62,11 @@ export function ManageDeviceLimit({
 
             <EnteDrawer
                 anchor="right"
-                open={changeDeviceLimitView}
+                open={isChangeDeviceLimitVisible}
                 onClose={handleDrawerClose}>
                 <Stack spacing={'4px'} py={'12px'}>
                     <Titlebar
-                        onClose={closeDeviceLimitChangeModalView}
+                        onClose={closeDeviceLimitChangeModal}
                         title={t('LINK_DEVICE_LIMIT')}
                         onRootClose={onRootClose}
                     />

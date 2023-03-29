@@ -1,8 +1,9 @@
-import { Stack, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
 import { EnteMenuItem } from 'components/Menu/menuItem';
 import React from 'react';
 import { t } from 'i18next';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
+import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -31,14 +32,7 @@ export function ManagePublicCollect({
                 checked={publicShareProp?.enableCollect}>
                 {t('PUBLIC_COLLECT')}
             </EnteMenuItem>
-            <Typography
-                color="text.secondary"
-                variant="body2"
-                paddingLeft={1.75}
-                paddingTop={0.75}
-                paddingBottom={0.75}>
-                {t('PUBLIC_COLLECT_SUBTEXT')}
-            </Typography>
+            <MenuSectionTitle title={t('PUBLIC_COLLECT_SUBTEXT')} />
         </Stack>
     );
 }

@@ -3,16 +3,7 @@ import { Collection, PublicURL } from 'types/collection';
 import { appendCollectionKeyToShareURL } from 'utils/collection';
 import EnablePublicShareOptions from './EnablePublicShareOptions';
 import CopyLinkModal from './copyLinkModal';
-import PublicShareManage from './manage';
-import ContentCopyIcon from '@mui/icons-material/ContentCopyOutlined';
-import PublicIcon from '@mui/icons-material/Public';
-import EnteMenuItemDivider from 'components/Menu/menuItemDivider';
-import { Stack, Typography } from '@mui/material';
-import LinkIcon from '@mui/icons-material/Link';
-import { EnteMenuItem } from 'components/Menu/menuItem';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { t } from 'i18next';
-import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
+import ManagePublicShare from './managePublicShare';
 
 export default function PublicShare({
     collection,
@@ -24,7 +15,6 @@ export default function PublicShare({
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
     const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
     const [copyLinkModalView, setCopyLinkModalView] = useState(false);
-    const [manageShareView, setManageShareView] = useState(false);
 
     useEffect(() => {
         if (collection.publicURLs?.length) {
@@ -52,50 +42,19 @@ export default function PublicShare({
         setCopyLinkModalView(false);
     };
 
-    const closeManageShare = () => setManageShareView(false);
-    const openManageShare = () => setManageShareView(true);
     return (
         <>
             {publicShareProp ? (
-                <>
-                    <Stack>
-                        <Typography
-                            color="text.secondary"
-                            variant="body2"
-                            padding={1}>
-                            <PublicIcon
-                                style={{ fontSize: 17, marginRight: 8 }}
-                            />
-                            {t('PUBLIC_LINK_ENABLED')}
-                        </Typography>
-                        <EnteMenuItemGroup>
-                            <EnteMenuItem
-                                startIcon={<ContentCopyIcon />}
-                                onClick={copyToClipboardHelper}>
-                                {t('COPY_LINK')}
-                            </EnteMenuItem>
-                            <EnteMenuItemDivider />
-                            <EnteMenuItem
-                                startIcon={<LinkIcon />}
-                                endIcon={<ChevronRightIcon />}
-                                onClick={openManageShare}>
-                                {t('MANAGE_LINK')}
-                            </EnteMenuItem>
-                        </EnteMenuItemGroup>
-                    </Stack>
-                    <PublicShareManage
-                        open={manageShareView}
-                        onClose={closeManageShare}
-                        onRootClose={onRootClose}
-                        publicShareProp={publicShareProp}
-                        collection={collection}
-                        setPublicShareProp={setPublicShareProp}
-                        publicShareUrl={publicShareUrl}
-                    />
-                </>
+                <ManagePublicShare
+                    publicShareProp={publicShareProp}
+                    setPublicShareProp={setPublicShareProp}
+                    collection={collection}
+                    publicShareUrl={publicShareUrl}
+                    onRootClose={onRootClose}
+                    copyToClipboardHelper={copyToClipboardHelper}
+                />
             ) : (
                 <EnablePublicShareOptions
-                    publicShareProp={publicShareProp}
                     setPublicShareProp={setPublicShareProp}
                     collection={collection}
                     setCopyLinkModalView={setCopyLinkModalView}

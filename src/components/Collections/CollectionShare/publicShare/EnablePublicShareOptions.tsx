@@ -12,7 +12,6 @@ import { handleSharingErrors } from 'utils/error/ui';
 import { EnteMenuItem } from 'components/Menu/menuItem';
 import PublicIcon from '@mui/icons-material/Public';
 interface Iprops {
-    publicShareProp;
     collection: Collection;
     setPublicShareProp: (value: PublicURL) => void;
     setCopyLinkModalView: (value: boolean) => void;
