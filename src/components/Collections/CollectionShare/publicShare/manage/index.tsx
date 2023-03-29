@@ -66,9 +66,17 @@ export default function ManagePublicShareOptions({
         }
     };
     const disablePublicSharing = async () => {
-        await deleteShareableURL(collection);
-        setPublicShareProp(null);
-        onClose();
+        try {
+            galleryContext.setBlockingLoad(true);
+            await deleteShareableURL(collection);
+            setPublicShareProp(null);
+            onClose();
+        } catch (e) {
+            const errorMessage = handleSharingErrors(e);
+            setSharableLinkError(errorMessage);
+        } finally {
+            galleryContext.setBlockingLoad(false);
+        }
     };
     const copyToClipboardHelper = (text: string) => () => {
         navigator.clipboard.writeText(text);

@@ -1,13 +1,12 @@
 import { Stack, Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
-import { AppContext } from 'pages/_app';
 import React, { useContext, useState } from 'react';
 import { t } from 'i18next';
 import {
     createShareableURL,
     updateShareableURL,
 } from 'services/collectionService';
-import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
+import { Collection, PublicURL } from 'types/collection';
 import { handleSharingErrors } from 'utils/error/ui';
 import { EnteMenuItem } from 'components/Menu/menuItem';
 import PublicIcon from '@mui/icons-material/Public';
@@ -26,31 +25,17 @@ export default function EnablePublicShareOptions({
     setPublicShareProp,
     setCopyLinkModalView,
 }: Iprops) {
-    const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const [sharableLinkError, setSharableLinkError] = useState(null);
 
     const createSharableURLHelper = async () => {
         try {
-            appContext.startLoading();
+            setSharableLinkError(null);
+            galleryContext.setBlockingLoad(true);
             const publicURL = await createShareableURL(collection);
             setPublicShareProp(publicURL);
             setCopyLinkModalView(true);
-            await galleryContext.syncWithRemote(false, true);
-        } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            setSharableLinkError(errorMessage);
-        } finally {
-            setSharableLinkError(null);
-            appContext.finishLoading();
-        }
-    };
-
-    const updatePublicShareURLHelper = async (req: UpdatePublicURL) => {
-        try {
-            galleryContext.setBlockingLoad(true);
-            const response = await updateShareableURL(req);
-            setPublicShareProp(response);
+            galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
@@ -58,14 +43,27 @@ export default function EnablePublicShareOptions({
             galleryContext.setBlockingLoad(false);
         }
     };
-    const handleCollecPhotosPublicSharing = async () => {
-        setSharableLinkError(null);
-        await createSharableURLHelper();
-        await updatePublicShareURLHelper({
-            collectionID: collection.id,
-            enableCollect: true,
-        });
+
+    const createCollectPhotoShareableURLHelper = async () => {
+        try {
+            setSharableLinkError(null);
+            galleryContext.setBlockingLoad(true);
+            const publicURL = await createShareableURL(collection);
+            await updateShareableURL({
+                collectionID: collection.id,
+                enableCollect: true,
+            });
+            setPublicShareProp(publicURL);
+            setCopyLinkModalView(true);
+            galleryContext.syncWithRemote(false, true);
+        } catch (e) {
+            const errorMessage = handleSharingErrors(e);
+            setSharableLinkError(errorMessage);
+        } finally {
+            galleryContext.setBlockingLoad(false);
+        }
     };
+
     return (
         <Stack>
             <MenuSectionTitle
@@ -83,7 +81,7 @@ export default function EnablePublicShareOptions({
                 <EnteMenuItem
                     startIcon={<LinkIcon />}
                     color="primary"
-                    onClick={handleCollecPhotosPublicSharing}>
+                    onClick={createCollectPhotoShareableURLHelper}>
                     {t('COLLECT_PHOTOS')}
                 </EnteMenuItem>
             </EnteMenuItemGroup>
