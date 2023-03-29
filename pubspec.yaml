@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 1.0.34+34
+version: 1.0.35+35
 publish_to: none
 
 environment:
@@ -35,7 +35,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_native_splash: ^2.2.13
-  flutter_secure_storage: ^6.0.0
+  flutter_secure_storage: ^8.0.0
   flutter_slidable: ^2.0.0
   flutter_sodium:
     git:
