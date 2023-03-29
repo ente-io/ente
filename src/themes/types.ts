@@ -1,8 +1,10 @@
 import React from 'react';
 
 declare module '@mui/material/styles' {
-    type TextWithoutPrimary = Omit<TypeText, 'primary'>;
     interface Palette {
+        accent: AccentColor;
+        caution: CautionColor;
+        danger: DangerColor;
         backdrop: Strength;
         fill: FillStrength;
         stroke: StrokeStrength;
@@ -14,6 +16,9 @@ declare module '@mui/material/styles' {
     }
 
     interface PaletteOptions {
+        accent?: Partial<AccentColor>;
+        caution?: Partial<CautionColor>;
+        danger?: Partial<DangerColor>;
         backdrop?: Partial<Strength>;
         fill?: Partial<FillStrength>;
         stroke?: Partial<StrokeStrength>;
@@ -114,18 +119,12 @@ declare module '@mui/material/CircularProgress' {
 
 declare module '@mui/material/styles' {
     interface BasePalette {
-        primary: PrimaryColor;
-        warning: WarningColor;
+        accent: AccentColor;
+        danger: DangerColor;
         caution: CautionColor;
         blur: BlurStrength;
         white: Omit<Strength, 'faint'>;
         black: string;
-    }
-
-    interface EnteTypeBackground {
-        base: string;
-        elevated: string;
-        elevated2: string;
     }
 
     interface Strength {
@@ -163,22 +162,20 @@ declare module '@mui/material/styles' {
         color: string;
     }
 
-    interface PrimaryColor {
+    interface AccentColor {
         700: string;
         500: string;
         400: string;
         300: string;
     }
-
-    interface WarningColor {
+    interface CautionColor {
+        500: string;
+    }
+    interface DangerColor {
         800: string;
         700: string;
         500: string;
         400: string;
-    }
-
-    interface CautionColor {
-        500: string;
     }
 
     interface BlurStrength {
