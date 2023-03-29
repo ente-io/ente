@@ -20,7 +20,7 @@ class SupportDevWidget extends StatelessWidget {
 
     // fetch
     return FutureBuilder<Subscription>(
-      future: BillingService.instance.fetchSubscription(),
+      future: BillingService.instance.getSubscription(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final subscription = snapshot.data;

@@ -32,10 +32,11 @@ class BillingService {
 
   bool _isOnSubscriptionPage = false;
 
+  Subscription _cachedSubscription;
+
   Future<BillingPlans> _future;
 
-  Future<void> init() async {
-  }
+  Future<void> init() async {}
 
   void clearCache() {
     _future = null;
@@ -99,22 +100,25 @@ class BillingService {
     }
   }
 
-  Future<Subscription> fetchSubscription() async {
-    try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/billing/subscription",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
-      final subscription = Subscription.fromMap(response.data["subscription"]);
-      return subscription;
-    } on DioError catch (e, s) {
-      _logger.severe(e, s);
-      rethrow;
+  Future<Subscription> getSubscription() async {
+    if (_cachedSubscription == null) {
+      try {
+        final response = await _dio.get(
+          _config.getHttpEndpoint() + "/billing/subscription",
+          options: Options(
+            headers: {
+              "X-Auth-Token": _config.getToken(),
+            },
+          ),
+        );
+        _cachedSubscription =
+            Subscription.fromMap(response.data["subscription"]);
+      } on DioError catch (e, s) {
+        _logger.severe(e, s);
+        rethrow;
+      }
     }
+    return _cachedSubscription;
   }
 
   Future<Subscription> cancelStripeSubscription() async {
