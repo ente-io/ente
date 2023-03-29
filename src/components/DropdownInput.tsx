@@ -1,5 +1,6 @@
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import {
+    Box,
     MenuItem,
     Select,
     SelectChangeEvent,
@@ -7,14 +8,14 @@ import {
     Typography,
 } from '@mui/material';
 
-interface Option {
+export interface DropdownOption {
     label: string;
     value: string;
 }
 
 interface Iprops {
     label: string;
-    options: Option[];
+    options: DropdownOption[];
     message?: string;
     selectedValue: string;
     setSelectedValue: (selectedValue: string) => void;
@@ -56,18 +57,24 @@ const DropdownInput = ({
                     '.MuiSelect-select': {
                         background: theme.palette.fill.dark,
                         borderRadius: '8px',
-                        p: '12px',
+                    },
+                    '&&& .MuiSelect-select': {
+                        p: '12px 36px 12px 16px',
                     },
                     '.MuiSelect-icon': {
                         mr: '12px',
+                        color: theme.palette.stroke.muted,
                     },
                 })}
                 renderValue={(selected) =>
-                    selected?.length === 0 ? placeholder : selected
+                    selected?.length === 0 ? (
+                        <Box color={'text.secondary'}>{placeholder}</Box>
+                    ) : (
+                        options.find((o) => o.value === selected).label
+                    )
                 }
                 value={selectedValue}
                 onChange={(event: SelectChangeEvent) => {
-                    console.log(event);
                     setSelectedValue(event.target.value);
                 }}>
                 {options.map((option, index) => (
