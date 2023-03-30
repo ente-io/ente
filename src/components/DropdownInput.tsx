@@ -19,8 +19,9 @@ interface Iprops<T> {
     labelProps?: TypographyTypeMap['props'];
     options: DropdownOption<T>[];
     message?: string;
-    selectedValue: string;
-    setSelectedValue: (selectedValue: T) => void;
+    messageProps?: TypographyTypeMap['props'];
+    selected: string;
+    setSelected: (selectedValue: T) => void;
     placeholder?: string;
 }
 
@@ -29,10 +30,12 @@ export default function DropdownInput<T extends string>({
     labelProps,
     options,
     message,
-    selectedValue,
+    selected,
     placeholder,
-    setSelectedValue,
+    setSelected,
+    messageProps,
 }: Iprops<T>) {
+    console.log({ ...messageProps });
     return (
         <Stack spacing={'4px'}>
             <Typography {...labelProps}>{label}</Typography>
@@ -77,9 +80,9 @@ export default function DropdownInput<T extends string>({
                         options.find((o) => o.value === selected).label
                     );
                 }}
-                value={selectedValue}
+                value={selected}
                 onChange={(event: SelectChangeEvent) => {
-                    setSelectedValue(event.target.value as T);
+                    setSelected(event.target.value as T);
                 }}>
                 {options.map((option, index) => (
                     <MenuItem
@@ -96,7 +99,10 @@ export default function DropdownInput<T extends string>({
                 ))}
             </Select>
             {message && (
-                <Typography px={'8px'} color={'text.secondary'}>
+                <Typography
+                    px={'8px'}
+                    color={'text.secondary'}
+                    {...messageProps}>
                     {message}
                 </Typography>
             )}
