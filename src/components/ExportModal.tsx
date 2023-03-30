@@ -218,13 +218,8 @@ export default function ExportModal(props: Props) {
         );
     };
 
-    const stopExport = async () => {
-        try {
-            exportService.stopRunningExport();
-            await postExportRun();
-        } catch (e) {
-            logError(e, 'stopExport failed');
-        }
+    const stopExport = () => {
+        void exportService.stopRunningExport(postExportRun);
     };
 
     return (

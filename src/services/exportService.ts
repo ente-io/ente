@@ -150,8 +150,13 @@ class ExportService {
         }
     };
 
-    stopRunningExport() {
-        this.stopExport = true;
+    async stopRunningExport(postExport: () => Promise<void>) {
+        try {
+            this.stopExport = true;
+            await postExport();
+        } catch (e) {
+            logError(e, 'stopRunningExport failed');
+        }
     }
 
     runExport = async (
@@ -168,23 +173,30 @@ class ExportService {
                 this.reRunNeeded = true;
                 return;
             }
-            addLogLine('starting export');
-            this.exportInProgress = true;
-            await preExport();
-            await this.exportFiles(updateProgress);
-            await postExport();
-            addLogLine('export completed');
-            this.exportInProgress = false;
-            if (this.reRunNeeded) {
-                this.reRunNeeded = false;
-                addLogLine('re-running export');
-                setTimeout(
-                    () => this.runExport(preExport, updateProgress, postExport),
-                    0
-                );
+            try {
+                addLogLine('starting export');
+                this.exportInProgress = true;
+                await preExport();
+                await this.exportFiles(updateProgress);
+                addLogLine('export completed');
+            } finally {
+                this.exportInProgress = false;
+                if (this.reRunNeeded) {
+                    this.reRunNeeded = false;
+                    addLogLine('re-running export');
+                    setTimeout(
+                        () =>
+                            this.runExport(
+                                preExport,
+                                updateProgress,
+                                postExport
+                            ),
+                        0
+                    );
+                }
+                await postExport();
             }
         } catch (e) {
-            this.exportInProgress = false;
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 logError(e, 'runExport failed');
             }
