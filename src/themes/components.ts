@@ -1,10 +1,10 @@
-import { PaletteOptions } from '@mui/material';
+import { ThemeColorsOptions } from '@mui/material';
 import { Components } from '@mui/material/styles/components';
 import { TypographyOptions } from '@mui/material/styles/createTypography';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getComponents = (
-    palette: PaletteOptions,
+    colors: ThemeColorsOptions,
     typography: TypographyOptions
 ): Components => ({
     MuiCssBaseline: {
@@ -27,7 +27,7 @@ export const getComponents = (
         styleOverrides: {
             root: {
                 '.MuiBackdrop-root': {
-                    backgroundColor: palette.backdrop.faint,
+                    backgroundColor: colors.backdrop.faint,
                 },
             },
         },
@@ -36,7 +36,7 @@ export const getComponents = (
         styleOverrides: {
             root: {
                 '.MuiBackdrop-root': {
-                    backgroundColor: palette.backdrop.faint,
+                    backgroundColor: colors.backdrop.faint,
                 },
                 '& .MuiDialog-paper': {
                     boxShadow: '0px 0px 10px 0px rgba(153,153,153,0.04)',
@@ -66,14 +66,14 @@ export const getComponents = (
     },
     MuiLink: {
         defaultProps: {
-            color: palette.primary[500],
+            color: colors.accent.A500,
             underline: 'none',
         },
         styleOverrides: {
             root: {
                 '&:hover': {
                     underline: 'always',
-                    color: palette.primary[500],
+                    color: colors.accent.A500,
                 },
             },
         },
@@ -87,6 +87,8 @@ export const getComponents = (
             root: {
                 padding: '12px 16px',
                 borderRadius: '4px',
+                textTransform: 'none',
+                fontWeight: 'bold',
             },
             startIcon: {
                 marginRight: '12px',
@@ -143,16 +145,17 @@ export const getComponents = (
                 switch (ownerState.color) {
                     case 'primary':
                         return {
-                            color: palette.stroke.base,
+                            color: colors.stroke.base,
                         };
                     case 'secondary':
                         return {
-                            color: palette.stroke.muted,
+                            color: colors.stroke.muted,
                         };
-                    case 'disabled':
-                        return {
-                            color: palette.stroke.faint,
-                        };
+                }
+                if (ownerState.disabled) {
+                    return {
+                        color: colors.stroke.faint,
+                    };
                 }
             },
         },
@@ -164,16 +167,16 @@ export const getComponents = (
                 switch (ownerState.color) {
                     case 'primary':
                         return {
-                            color: palette.stroke.base,
+                            color: colors.stroke.base,
                         };
                     case 'secondary':
                         return {
-                            color: palette.stroke.muted,
+                            color: colors.stroke.muted,
                         };
                 }
                 if (ownerState.disabled) {
                     return {
-                        color: palette.stroke.faint,
+                        color: colors.stroke.faint,
                     };
                 }
             },

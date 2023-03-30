@@ -1,65 +1,40 @@
-import { BasePalette, PaletteOptions } from '@mui/material';
+import { PaletteOptions } from '@mui/material';
+import darkThemeColors from 'themes/colors/dark';
+import lightThemeColors from 'themes/colors/light';
+import fixedColors from 'themes/colors/fixed';
 
-const lightThemePalette: Omit<PaletteOptions, keyof BasePalette> = {
-    mode: 'light',
-    background: {
-        base: '#fff',
-        elevated: '#fff',
-        elevated2: 'rgba(153, 153, 153, 0.04)',
+const lightThemePalette: PaletteOptions = {
+    mode: 'dark',
+    primary: {
+        main: lightThemeColors.fill.base,
+        dark: lightThemeColors.fill.basePressed,
+        contrastText: darkThemeColors.text.base,
     },
-    backdrop: {
-        base: 'rgba(255, 255, 255, 0.92)',
-        muted: 'rgba(255, 255, 255, 0.75)',
-        faint: 'rgba(255, 255, 255, 0.30)',
+    secondary: {
+        main: lightThemeColors.fill.faint,
+        dark: lightThemeColors.fill.faintPressed,
+        contrastText: lightThemeColors.text.base,
+    },
+    accent: {
+        main: fixedColors.accent.A500,
+        dark: fixedColors.accent.A700,
+        contrastText: darkThemeColors.text.base,
+    },
+    critical: {
+        main: fixedColors.warning.A700,
+        dark: fixedColors.warning.A800,
+        contrastText: darkThemeColors.text.base,
+    },
+    background: {
+        default: lightThemeColors.background.base,
+        paper: lightThemeColors.background.elevated,
     },
     text: {
-        base: '#000',
-        muted: 'rgba(0, 0, 0, 0.60)',
-        faint: 'rgba(0, 0, 0, 0.50)',
+        primary: lightThemeColors.text.base,
+        secondary: lightThemeColors.text.muted,
+        disabled: lightThemeColors.text.faint,
     },
-    fill: {
-        base: '#000',
-        muted: 'rgba(0, 0, 0, 0.12)',
-        faint: 'rgba(0, 0, 0, 0.04)',
-        basePressed: 'rgba(0, 0, 0, 0.87))',
-        faintPressed: 'rgba(0, 0, 0, 0.08)',
-        strong: 'rgba(0, 0, 0, 0.24)',
-    },
-    stroke: {
-        base: '#000',
-        muted: 'rgba(0, 0, 0, 0.24)',
-        faint: 'rgba(0, 0, 0, 0.12)',
-        fainter: 'rgba(0, 0, 0, 0.06)',
-    },
-
-    shadows: {
-        float: [
-            {
-                y: 0,
-                blur: 10,
-                color: 'rgba(0, 0, 0, 0.25)',
-            },
-        ],
-        menu: [
-            {
-                y: 0,
-                blur: 6,
-                color: 'rgba(0, 0, 0, 0.16)',
-            },
-            {
-                y: 0,
-                blur: 6,
-                color: 'rgba(0, 0, 0, 0.12)',
-            },
-        ],
-        button: [
-            {
-                y: 4,
-                blur: 4,
-                color: 'rgba(0, 0, 0, 0.25)',
-            },
-        ],
-    },
+    divider: lightThemeColors.stroke.faint,
 };
 
 export default lightThemePalette;

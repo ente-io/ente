@@ -1,43 +1,31 @@
+import { PaletteColorOptions } from '@mui/material';
 import React from 'react';
 
 declare module '@mui/material/styles' {
+    interface Theme {
+        colors: ThemeColors;
+    }
+
+    interface ThemeOptions {
+        colors?: ThemeColorsOptions;
+    }
+
     interface Palette {
-        accent: AccentColor;
-        caution: CautionColor;
-        danger: DangerColor;
-        backdrop: Strength;
-        fill: FillStrength;
-        stroke: StrokeStrength;
-        shadows: Shadows;
-        blur: BlurStrength;
-        white: Omit<Strength, 'faint'>;
-        black: string;
-        base: string;
+        accent: PaletteColor;
+        critical: PaletteColor;
     }
 
     interface PaletteOptions {
-        accent?: Partial<AccentColor>;
-        caution?: Partial<CautionColor>;
-        danger?: Partial<DangerColor>;
-        backdrop?: Partial<Strength>;
-        fill?: Partial<FillStrength>;
-        stroke?: Partial<StrokeStrength>;
-        shadows?: Partial<Shadows>;
-        blur?: Partial<BlurStrength>;
-        white?: Partial<Omit<Strength, 'faint'>>;
-        black?: string;
-        base?: string;
+        accent?: PaletteColorOptions;
+        critical?: PaletteColorOptions;
     }
 
-    interface TypeText {
-        base: string;
-        muted: string;
-        faint: string;
+    interface PaletteColor {
+        lighter: string;
+        darker: string;
     }
 
     interface TypeBackground {
-        base: string;
-        elevated: string;
         elevated2: string;
     }
 
@@ -80,12 +68,13 @@ declare module '@mui/material/Typography' {
 declare module '@mui/material/Button' {
     interface ButtonPropsColorOverrides {
         accent: true;
-        danger: true;
+        critical: true;
     }
 }
 declare module '@mui/material/Checkbox' {
     interface CheckboxPropsColorOverrides {
         accent: true;
+        critical: true;
     }
 }
 
@@ -118,13 +107,57 @@ declare module '@mui/material/CircularProgress' {
 // =================================================
 
 declare module '@mui/material/styles' {
-    interface BasePalette {
-        accent: AccentColor;
-        danger: DangerColor;
-        caution: CautionColor;
+    interface ThemeColors {
+        background: TypeBackground;
+        backdrop: Strength;
+        text: Strength;
+        fill: FillStrength;
+        stroke: StrokeStrength;
+        shadows: Shadows;
+        accent: ColorStrength;
+        warning: ColorStrength;
+        caution: ColorStrength;
         blur: BlurStrength;
         white: Omit<Strength, 'faint'>;
         black: string;
+    }
+
+    interface ThemeColorsOptions {
+        background?: Partial<BackgroundType>;
+        backdrop?: Partial<Strength>;
+        text?: Partial<Strength>;
+        fill?: Partial<FillStrength>;
+        stroke?: Partial<StrokeStrength>;
+        shadows?: Partial<Shadows>;
+        accent?: Partial<ColorStrength>;
+        warning?: Partial<ColorStrength>;
+        caution?: Partial<ColorStrength>;
+        blur?: Partial<BlurStrength>;
+        white?: Partial<Omit<Strength, 'faint'>>;
+        black?: Partial<string>;
+    }
+
+    interface ColorStrength {
+        A800: string;
+        A700: string;
+        A500: string;
+        A400: string;
+        A300: string;
+    }
+
+    interface FixedColors {
+        accent: string;
+        warning: string;
+        caution: string;
+        blur: number;
+        white: string;
+        black: string;
+    }
+
+    interface BackgroundType {
+        base: string;
+        elevated: string;
+        elevated2: string;
     }
 
     interface Strength {
@@ -160,22 +193,6 @@ declare module '@mui/material/styles' {
         y: number;
         blur: number;
         color: string;
-    }
-
-    interface AccentColor {
-        700: string;
-        500: string;
-        400: string;
-        300: string;
-    }
-    interface CautionColor {
-        500: string;
-    }
-    interface DangerColor {
-        800: string;
-        700: string;
-        500: string;
-        400: string;
     }
 
     interface BlurStrength {
