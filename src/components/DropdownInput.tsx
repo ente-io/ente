@@ -16,7 +16,7 @@ export interface DropdownOption<T> {
 
 interface Iprops<T> {
     label: string;
-    labelProps: TypographyTypeMap['props'];
+    labelProps?: TypographyTypeMap['props'];
     options: DropdownOption<T>[];
     message?: string;
     selectedValue: string;
