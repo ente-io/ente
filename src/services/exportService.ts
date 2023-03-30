@@ -184,6 +184,7 @@ class ExportService {
                 );
             }
         } catch (e) {
+            this.exportInProgress = false;
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 logError(e, 'runExport failed');
             }
