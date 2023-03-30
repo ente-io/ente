@@ -89,6 +89,8 @@ export const getComponents = (
                 borderRadius: '4px',
                 textTransform: 'none',
                 fontWeight: 'bold',
+                fontSize: typography.body.fontSize,
+                lineHeight: typography.body.lineHeight,
             },
             startIcon: {
                 marginRight: '12px',
