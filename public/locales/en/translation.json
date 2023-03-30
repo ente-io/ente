@@ -497,5 +497,18 @@
     "CONTINUOUS_EXPORT": "Sync continuously",
     "TOTAL_ITEMS": "Total items",
     "PENDING_ITEMS": "Pending items",
-    "EXPORT_STARTING": "Export starting..."
+    "EXPORT_STARTING": "Export starting...",
+    "DELETE_ACCOUNT_REASON_LABEL": "What is the main reason you are deleting your account?",
+    "DELETE_ACCOUNT_REASON_PLACEHOLDER": "Select a reason",
+    "DELETE_REASON": {
+        "MISSING_FEATURE": "It's missing a key feature that I need",
+        "BROKEN_BEHAVIOR": "The app or a certain feature does not behave as I think it should",
+        "FOUND_ANOTHER_SERVICE": "I found another service that I like better",
+        "USING_DIFFERENT_ACCOUNT": "I use a different account",
+        "NOT_LISTED": "My reason isn't listed"
+    },
+    "DELETE_ACCOUNT_FEEDBACK_LABEL": "We are sorry to see you go. Please explain why you are leaving to help us improve.",
+    "DELETE_ACCOUNT_FEEDBACK_PLACEHOLDER": "Feedback",
+    "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "Yes, I want to permanently delete this account and all its data",
+    "CONFIRM_DELETE_ACCOUNT": "Confirm Account Deletion"
 }
