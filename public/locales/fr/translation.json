@@ -567,16 +567,16 @@
         "MONTH": "dans un mois",
         "YEAR": "dans un an"
     },
-    "COPY_LINK": "",
-    "DONE": "",
-    "ADD_EMAIL_TITLE": "",
-    "LINK_SHARE_TITLE": "",
-    "REMOVE_LINK": "",
-    "CREATE_PUBLIC_SHARING": "",
-    "PUBLIC_LINK_CREATED": "",
-    "PUBLIC_LINK_ENABLED": "",
-    "COLLECT_PHOTOS": "",
-    "PUBLIC_COLLECT_SUBTEXT": "",
+    "COPY_LINK": "Copier le lien",
+    "DONE": "Terminé",
+    "ADD_EMAIL_TITLE": "Partager avec des personnes spécifiques",
+    "LINK_SHARE_TITLE": "Ou partager un lien",
+    "REMOVE_LINK": "Supprimer le lien",
+    "CREATE_PUBLIC_SHARING": "Créer un lien public",
+    "PUBLIC_LINK_CREATED": "Lien public créé",
+    "PUBLIC_LINK_ENABLED": "Lien public activé",
+    "COLLECT_PHOTOS": "Récupérer les photos",
+    "PUBLIC_COLLECT_SUBTEXT": "Autoriser les personnes ayant le lien d'ajouter des photos à l'album partagé.",
     "STOP_EXPORT": "Stop",
     "EXPORT_PROGRESS": "<a>{{progress.current}} / {{progress.total}}</a> fichiers exportés",
     "EXPORT_NOTIFICATION": {
@@ -586,7 +586,7 @@
         "UP_TO_DATE": "Aucun nouveau fichier à exporter"
     },
     "CONTINUOUS_EXPORT": "Synchronisation en continu",
-    "TOTAL_ITEMS": "",
-    "PENDING_ITEMS": "",
-    "EXPORT_STARTING": ""
+    "TOTAL_ITEMS": "Total d'objets",
+    "PENDING_ITEMS": "Objets en attente",
+    "EXPORT_STARTING": "Démarrage de l'export..."
 }
