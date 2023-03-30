@@ -11,7 +11,7 @@ import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 
 const UploadProgressTitleText = ({ expanded }) => {
     return (
-        <Typography variant={expanded ? 'title' : 'subtitle'}>
+        <Typography variant={expanded ? 'h2' : 'h3'}>
             {t('FILE_UPLOAD')}
         </Typography>
     );

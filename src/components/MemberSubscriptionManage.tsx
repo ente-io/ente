@@ -21,7 +21,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
         } catch (e) {
             setDialogMessage({
                 title: t('ERROR'),
-                close: { variant: 'danger' },
+                close: { variant: 'critical' },
                 content: t('UNKNOWN_ERROR'),
             });
         }
@@ -33,7 +33,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
             proceed: {
                 text: t('LEAVE'),
                 action: onLeaveFamilyClick,
-                variant: 'danger',
+                variant: 'critical',
             },
             close: {
                 text: t('CANCEL'),
@@ -80,7 +80,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                         <Button
                             size="large"
                             variant="outlined"
-                            color="danger"
+                            color="critical"
                             onClick={confirmLeaveFamily}>
                             {t('LEAVE_FAMILY_PLAN')}
                         </Button>

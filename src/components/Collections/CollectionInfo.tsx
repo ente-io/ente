@@ -14,7 +14,7 @@ export function CollectionInfo({ name, fileCount, endIcon }: Iprops) {
             <Typography variant="h3">{name}</Typography>
 
             <FlexWrapper>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="small" color="text.secondary">
                     {t('photos_count', { count: fileCount })}
                 </Typography>
                 {endIcon && (

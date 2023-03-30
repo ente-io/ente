@@ -181,7 +181,7 @@ export default function SignUp(props: SignUpProps) {
                                         />
                                     }
                                     label={
-                                        <Typography variant="body2">
+                                        <Typography variant="small">
                                             <Trans
                                                 i18nKey={'TERMS_AND_CONDITIONS'}
                                                 components={{
@@ -219,7 +219,7 @@ export default function SignUp(props: SignUpProps) {
                                     mt={1}
                                     textAlign={'center'}
                                     color="text.secondary"
-                                    variant="body2">
+                                    variant="small">
                                     {t('KEY_GENERATION_IN_PROGRESS_MESSAGE')}
                                 </Typography>
                             )}

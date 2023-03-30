@@ -86,7 +86,7 @@ const SelectedFileOptions = ({
             proceed: {
                 action: () => deleteFileHelper(true),
                 text: t('DELETE'),
-                variant: 'danger',
+                variant: 'critical',
             },
             close: { text: t('CANCEL') },
         });
@@ -121,7 +121,7 @@ const SelectedFileOptions = ({
                 proceed: {
                     action: removeFromCollectionHelper,
                     text: t('YES_REMOVE'),
-                    variant: 'danger',
+                    variant: 'critical',
                 },
                 close: { text: t('CANCEL') },
             });

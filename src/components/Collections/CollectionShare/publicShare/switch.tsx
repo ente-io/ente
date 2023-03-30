@@ -1,5 +1,5 @@
 import React from 'react';
-import { SwitchProps, Switch } from '@mui/material';
+import { SwitchProps, Switch, Theme } from '@mui/material';
 import { styled } from '@mui/material';
 const PublicShareSwitch = styled((props: SwitchProps) => (
     <Switch
@@ -7,7 +7,7 @@ const PublicShareSwitch = styled((props: SwitchProps) => (
         disableRipple
         {...props}
     />
-))(({ theme }) => ({
+))(({ theme }: { theme: Theme }) => ({
     width: 40,
     height: 24,
     padding: 0,

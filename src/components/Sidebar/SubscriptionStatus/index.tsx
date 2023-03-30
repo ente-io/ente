@@ -71,7 +71,7 @@ export default function SubscriptionStatus({
     return (
         <Box px={1} pt={0.5}>
             <Typography
-                variant="body2"
+                variant="small"
                 color={'text.secondary'}
                 onClick={handleClick && handleClick}
                 sx={{ cursor: handleClick && 'pointer' }}>

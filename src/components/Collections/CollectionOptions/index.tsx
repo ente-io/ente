@@ -128,7 +128,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 setDialogMessage({
                     title: t('ERROR'),
                     content: t('UNKNOWN_ERROR'),
-                    close: { variant: 'danger' },
+                    close: { variant: 'critical' },
                 });
             } finally {
                 syncWithRemote(false, true);
@@ -201,7 +201,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 action: handleCollectionAction(
                     CollectionActions.DELETE_WITH_FILES
                 ),
-                variant: 'danger',
+                variant: 'critical',
             },
             secondary: {
                 text: t('KEEP_PHOTOS'),
@@ -239,7 +239,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             proceed: {
                 action: handleCollectionAction(CollectionActions.EMPTY_TRASH),
                 text: t('EMPTY_TRASH'),
-                variant: 'danger',
+                variant: 'critical',
             },
             close: { text: t('CANCEL') },
         });
@@ -253,7 +253,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 action: handleCollectionAction(
                     CollectionActions.LEAVE_SHARED_ALBUM
                 ),
-                variant: 'danger',
+                variant: 'critical',
             },
             close: {
                 text: t('CANCEL'),

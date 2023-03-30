@@ -436,7 +436,7 @@ export default function Gallery() {
                 setDialogMessage({
                     title: t('ERROR'),
 
-                    close: { variant: 'danger' },
+                    close: { variant: 'critical' },
                     content: t('UNKNOWN_ERROR'),
                 });
             } finally {
@@ -463,7 +463,7 @@ export default function Gallery() {
                     setDialogMessage({
                         title: t('ERROR'),
 
-                        close: { variant: 'danger' },
+                        close: { variant: 'critical' },
                         content: t('NOT_FILE_OWNER'),
                     });
                     return;
@@ -471,7 +471,7 @@ export default function Gallery() {
             setDialogMessage({
                 title: t('ERROR'),
 
-                close: { variant: 'danger' },
+                close: { variant: 'critical' },
                 content: t('UNKNOWN_ERROR'),
             });
         } finally {
@@ -495,7 +495,7 @@ export default function Gallery() {
                 setDialogMessage({
                     title: t('ERROR'),
 
-                    close: { variant: 'danger' },
+                    close: { variant: 'critical' },
                     content: t('UNKNOWN_ERROR'),
                 });
             } finally {
@@ -531,14 +531,14 @@ export default function Gallery() {
                     setDialogMessage({
                         title: t('ERROR'),
 
-                        close: { variant: 'danger' },
+                        close: { variant: 'critical' },
                         content: t('NOT_FILE_OWNER'),
                     });
             }
             setDialogMessage({
                 title: t('ERROR'),
 
-                close: { variant: 'danger' },
+                close: { variant: 'critical' },
                 content: t('UNKNOWN_ERROR'),
             });
         } finally {
@@ -611,7 +611,7 @@ export default function Gallery() {
                 )}
                 {isFirstLoad && (
                     <CenteredFlex>
-                        <Typography color="text.secondary" variant="body2">
+                        <Typography color="text.secondary" variant="small">
                             {t('INITIAL_LOAD_DELAY_WARNING')}
                         </Typography>
                     </CenteredFlex>

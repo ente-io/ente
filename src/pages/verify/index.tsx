@@ -148,7 +148,7 @@ export default function Verify() {
                         values={{ email }}
                     />
                 </FormPaperTitle>
-                <Typography color={'text.secondary'} mb={2} variant="body2">
+                <Typography color={'text.secondary'} mb={2} variant="small">
                     {t('CHECK_INBOX')}
                 </Typography>
                 <SingleInputForm

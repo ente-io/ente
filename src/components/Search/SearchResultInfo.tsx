@@ -17,7 +17,7 @@ export default function SearchResultInfo({ searchResultSummary }: Iprops) {
 
     return (
         <CollectionInfoBarWrapper>
-            <Typography variant="subtitle" color="text.secondary">
+            <Typography color="text.secondary">
                 {t('SEARCH_RESULTS')}
             </Typography>
             <CollectionInfo name={optionName} fileCount={fileCount} />

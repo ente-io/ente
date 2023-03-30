@@ -67,7 +67,7 @@ export default function UtilitySection({ closeSidebar }) {
         setDialogMessage({
             title: t('ERROR'),
             content: t('RECOVER_KEY_GENERATION_FAILED'),
-            close: { variant: 'danger' },
+            close: { variant: 'critical' },
         });
 
     return (

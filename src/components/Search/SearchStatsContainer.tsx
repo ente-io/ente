@@ -1,6 +1,6 @@
-import { styled } from '@mui/material';
+import { styled, Theme } from '@mui/material';
 const SearchStatsContainer = styled('div')(
-    ({ theme }) => `
+    ({ theme }: { theme: Theme }) => `
     display: flex;
     justify-content: center;
     align-items: center;

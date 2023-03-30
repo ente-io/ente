@@ -1,4 +1,11 @@
-import { Box, Button, ButtonProps, styled, Typography } from '@mui/material';
+import {
+    Box,
+    Button,
+    ButtonProps,
+    styled,
+    Theme,
+    Typography,
+} from '@mui/material';
 import React from 'react';
 import {
     isUserSubscribedPlan,
@@ -32,10 +39,10 @@ const TopAlignedFluidContainer = styled(FluidContainer)`
 
 const DisabledPlanButton = styled((props: ButtonProps) => (
     <Button disabled endIcon={<Done />} {...props} />
-))(({ theme }) => ({
+))(({ theme }: { theme: Theme }) => ({
     '&.Mui-disabled': {
         backgroundColor: 'transparent',
-        color: theme.palette.text.primary,
+        color: theme.colors.text.base,
     },
 }));
 
@@ -88,10 +95,10 @@ export function PlanRow({
                     size="large"
                     onClick={handleClick}>
                     <Box textAlign={'right'}>
-                        <Typography fontWeight={'bold'} variant="h4">
+                        <Typography fontWeight={'bold'} variant="large">
                             {plan.price}{' '}
                         </Typography>{' '}
-                        <Typography color="text.secondary" variant="body2">
+                        <Typography color="text.secondary" variant="small">
                             {`/ ${
                                 plan.period === PLAN_PERIOD.MONTH
                                     ? t('MONTH_SHORT')

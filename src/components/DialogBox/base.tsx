@@ -1,6 +1,6 @@
-import { Dialog, styled } from '@mui/material';
+import { Dialog, styled, Theme } from '@mui/material';
 
-const DialogBoxBase = styled(Dialog)(({ theme }) => ({
+const DialogBoxBase = styled(Dialog)(({ theme }: { theme: Theme }) => ({
     '& .MuiDialog-paper': {
         padding: theme.spacing(1, 1.5),
         maxWidth: '346px',

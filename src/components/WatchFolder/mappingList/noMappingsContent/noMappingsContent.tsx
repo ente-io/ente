@@ -10,19 +10,19 @@ export function NoMappingsContent() {
     return (
         <NoMappingsContainer>
             <Stack spacing={1}>
-                <Typography variant="h4" fontWeight={'bold'}>
+                <Typography variant="large" fontWeight={'bold'}>
                     {t('NO_FOLDERS_ADDED')}
                 </Typography>
-                <Typography py={0.5} variant={'body2'} color="text.secondary">
+                <Typography py={0.5} variant={'small'} color="text.secondary">
                     {t('FOLDERS_AUTOMATICALLY_MONITORED')}
                 </Typography>
-                <Typography variant={'body2'} color="text.secondary">
+                <Typography variant={'small'} color="text.secondary">
                     <FlexWrapper gap={1}>
                         <CheckmarkIcon />
                         {t('UPLOAD_NEW_FILES_TO_ENTE')}
                     </FlexWrapper>
                 </Typography>
-                <Typography variant={'body2'} color="text.secondary">
+                <Typography variant={'small'} color="text.secondary">
                     <FlexWrapper gap={1}>
                         <CheckmarkIcon />
                         {t('REMOVE_DELETED_FILES_FROM_ENTE')}

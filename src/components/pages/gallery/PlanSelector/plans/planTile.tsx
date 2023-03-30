@@ -9,7 +9,7 @@ const PlanTile = styled('div')<{ current: boolean }>(({ theme, current }) => ({
         cursor: 'pointer',
     },
     ...(current && {
-        borderColor: theme.palette.accent.main,
+        borderColor: theme.colors.accent.A500,
         cursor: 'not-allowed',
         '&:hover': { backgroundColor: 'transparent' },
     }),

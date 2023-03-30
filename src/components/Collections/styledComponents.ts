@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Theme } from '@mui/material';
 import { styled } from '@mui/material';
 import { Overlay } from 'components/Container';
 import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from 'constants/gallery';
@@ -15,7 +15,8 @@ export const CollectionListBarWrapper = styled(Box)`
         padding: 0 4px;
     }
     margin-bottom: 16px;
-    border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
+    border-bottom: 1px solid
+        ${({ theme }: { theme: Theme }) => theme.palette.divider};
 `;
 
 export const CollectionInfoBarWrapper = styled(Box)`
@@ -49,7 +50,8 @@ export const CollectionTile = styled('div')`
 
 export const ActiveIndicator = styled('div')`
     height: 3px;
-    background-color: ${({ theme }) => theme.palette.primary.main};
+    background-color: ${({ theme }: { theme: Theme }) =>
+        theme.palette.primary.main};
     margin-top: 18px;
     border-radius: 2px;
 `;

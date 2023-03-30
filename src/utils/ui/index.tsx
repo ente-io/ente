@@ -33,7 +33,7 @@ export const getTrashFilesMessage = (
     proceed: {
         action: deleteFileHelper,
         text: t('MOVE_TO_TRASH'),
-        variant: 'danger',
+        variant: 'critical',
     },
     close: { text: t('CANCEL') },
 });
@@ -44,7 +44,7 @@ export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
     proceed: {
         action: deleteFileHelper,
         text: t('MOVE_TO_TRASH'),
-        variant: 'danger',
+        variant: 'critical',
     },
     close: { text: t('CANCEL') },
 });

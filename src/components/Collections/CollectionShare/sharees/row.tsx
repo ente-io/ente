@@ -21,13 +21,13 @@ const ShareeRow = ({ sharee, collectionUnshare }: IProps) => {
                 menuPaperProps={{
                     sx: {
                         backgroundColor: (theme) =>
-                            theme.palette.background.overPaper,
+                            theme.palette.background.elevated2,
                     },
                 }}
                 ariaControls={`email-share-${sharee.email}`}
                 triggerButtonIcon={<MoreHorizIcon />}>
                 <OverflowMenuOption
-                    color="danger"
+                    color="critical"
                     onClick={handleClick}
                     startIcon={<NotInterestedIcon />}>
                     {t('REMOVE')}

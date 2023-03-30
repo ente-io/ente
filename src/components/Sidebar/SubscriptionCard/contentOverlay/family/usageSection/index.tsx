@@ -33,7 +33,7 @@ export function FamilyUsageSection({
                     <Legend label={t('YOU')} color="text.primary" />
                     <Legend label={t('FAMILY')} color="text.secondary" />
                 </Stack>
-                <Typography variant="caption" fontWeight={'bold'}>
+                <Typography variant="mini" fontWeight={'bold'}>
                     {t('photos_count', { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>

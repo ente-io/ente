@@ -358,7 +358,7 @@ export default function PublicCollectionGallery() {
                         <Typography
                             color={'text.secondary'}
                             mb={2}
-                            variant="body2">
+                            variant="small">
                             {t('LINK_PASSWORD')}
                         </Typography>
                         <SingleInputForm

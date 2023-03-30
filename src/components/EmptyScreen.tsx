@@ -48,11 +48,11 @@ export default function EmptyScreen({ openUploader }) {
                             components={{ a: <EnteLogo /> }}
                         />
                     </Typography>
-                    <Typography variant="title">
+                    <Typography variant="h2">
                         {t('WELCOME_TO_ENTE_SUBHEADING')}
                     </Typography>
                 </VerticallyCentered>
-                <Typography variant="body1" mt={3.5} color="text.secondary">
+                <Typography mt={3.5} color="text.secondary">
                     {t('WHERE_YOUR_BEST_PHOTOS_LIVE')}
                 </Typography>
             </Stack>

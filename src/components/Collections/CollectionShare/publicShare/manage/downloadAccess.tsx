@@ -40,7 +40,7 @@ export function ManageDownloadAccess({
                         collectionID: collection.id,
                         enableDownload: false,
                     }),
-                variant: 'danger',
+                variant: 'critical',
             },
         });
     };

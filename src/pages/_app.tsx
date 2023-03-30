@@ -345,7 +345,7 @@ export default function App(props) {
     const somethingWentWrong = () =>
         setDialogMessage({
             title: t('ERROR'),
-            close: { variant: 'danger' },
+            close: { variant: 'critical' },
             content: t('UNKNOWN_ERROR'),
         });
 

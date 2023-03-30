@@ -1,25 +1,27 @@
-import { styled, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { styled, Theme, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { PLAN_PERIOD } from 'constants/gallery';
 import React from 'react';
 import { t } from 'i18next';
 
-const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
-    textTransform: 'none',
-    padding: '12px 16px',
-    borderRadius: '4px',
-    backgroundColor: theme.palette.fill.dark,
-    border: `1px solid transparent`,
-    color: theme.palette.text.disabled,
-    '&.Mui-selected': {
-        backgroundColor: theme.palette.accent.main,
-        color: theme.palette.accent.contrastText,
-    },
-    '&.Mui-selected:hover': {
-        backgroundColor: theme.palette.accent.main,
-        color: theme.palette.accent.contrastText,
-    },
-    width: '97.433px',
-}));
+const CustomToggleButton = styled(ToggleButton)(
+    ({ theme }: { theme: Theme }) => ({
+        textTransform: 'none',
+        padding: '12px 16px',
+        borderRadius: '4px',
+        backgroundColor: theme.colors.fill.faint,
+        border: `1px solid transparent`,
+        color: theme.colors.text.faint,
+        '&.Mui-selected': {
+            backgroundColor: theme.colors.accent.A500,
+            color: theme.colors.text.base,
+        },
+        '&.Mui-selected:hover': {
+            backgroundColor: theme.colors.accent.A500,
+            color: theme.colors.text.base,
+        },
+        width: '97.433px',
+    })
+);
 
 export function PeriodToggler({ planPeriod, togglePeriod }) {
     const handleChange = (_, newPlanPeriod: PLAN_PERIOD) => {

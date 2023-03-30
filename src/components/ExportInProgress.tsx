@@ -71,7 +71,10 @@ export default function ExportInProgress(props: Props) {
                     onClick={props.closeExportDialog}>
                     {t('CLOSE')}
                 </Button>
-                <Button size="large" color="danger" onClick={props.stopExport}>
+                <Button
+                    size="large"
+                    color="critical"
+                    onClick={props.stopExport}>
                     {t('STOP_EXPORT')}
                 </Button>
             </DialogActions>

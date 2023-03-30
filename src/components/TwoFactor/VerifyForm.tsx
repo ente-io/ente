@@ -69,7 +69,7 @@ export default function VerifyTwoFactor(props: Props) {
                     <form noValidate onSubmit={handleSubmit}>
                         <Typography
                             mb={2}
-                            variant="body2"
+                            variant="small"
                             color="text.secondary">
                             {t('ENTER_TWO_FACTOR_OTP')}
                         </Typography>

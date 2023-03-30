@@ -19,7 +19,7 @@ export default function MenuSectionTitle({ title, icon }: Iprops) {
                     {icon}
                 </Box>
             )}
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="small" color="text.secondary">
                 {title}
             </Typography>
         </Stack>

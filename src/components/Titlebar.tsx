@@ -46,7 +46,7 @@ export default function Titlebar({
                     {title}
                 </Typography>
                 <Typography
-                    variant="body2"
+                    variant="small"
                     color="text.secondary"
                     sx={{ wordBreak: 'break-all', minHeight: '17px' }}>
                     {caption}

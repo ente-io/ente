@@ -1,7 +1,7 @@
-import { styled } from '@mui/material';
+import { styled, Theme } from '@mui/material';
 
 export const EnteMenuItemGroup = styled('div')(
-    ({ theme }) => `
+    ({ theme }: { theme: Theme }) => `
     & > .MuiMenuItem-root:not(:last-of-type) {
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
@@ -10,7 +10,7 @@ export const EnteMenuItemGroup = styled('div')(
         border-top-left-radius: 0;
         border-top-right-radius: 0;
     }
-    background-color: ${theme.palette.background.overPaper};
+    background-color: ${theme.palette.background.elevated2};
     border-radius: 4px;
 `
 );

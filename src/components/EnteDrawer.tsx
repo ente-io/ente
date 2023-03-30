@@ -1,6 +1,6 @@
-import { Drawer, styled } from '@mui/material';
+import { Drawer, styled, Theme } from '@mui/material';
 
-export const EnteDrawer = styled(Drawer)(({ theme }) => ({
+export const EnteDrawer = styled(Drawer)(({ theme }: { theme: Theme }) => ({
     '& .MuiPaper-root': {
         maxWidth: '375px',
         width: '100%',

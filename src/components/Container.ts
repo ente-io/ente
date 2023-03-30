@@ -1,4 +1,4 @@
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, Theme } from '@mui/material';
 import { styled } from '@mui/material';
 
 const VerticallyCentered = styled(Box)`
@@ -23,7 +23,7 @@ export const Row = styled('div')`
     min-height: 32px;
     display: flex;
     align-items: center;
-    margin-bottom: ${({ theme }) => theme.spacing(2)};
+    margin-bottom: ${({ theme }: { theme: Theme }) => theme.spacing(2)};
     flex: 1;
 `;
 
@@ -66,9 +66,11 @@ export const Overlay = styled(Box)`
     left: 0;
 `;
 
-export const IconButtonWithBG = styled(IconButton)(({ theme }) => ({
-    backgroundColor: theme.palette.fill.dark,
-}));
+export const IconButtonWithBG = styled(IconButton)(
+    ({ theme }: { theme: Theme }) => ({
+        backgroundColor: theme.colors.fill.faint,
+    })
+);
 
 export const HorizontalFlex = styled(Box)({
     display: 'flex',

@@ -64,7 +64,7 @@ export default function DebugSection() {
                 {t('DOWNLOAD_UPLOAD_LOGS')}
             </SidebarButton>
             {appVersion && (
-                <Typography p={1.5} color="text.secondary" variant="caption">
+                <Typography p={1.5} color="text.secondary" variant="mini">
                     {appVersion}
                 </Typography>
             )}

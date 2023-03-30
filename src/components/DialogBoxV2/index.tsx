@@ -62,7 +62,7 @@ export default function DialogBoxV2({
                         </Box>
                     )}
                     {attributes.title && (
-                        <Typography variant="h4" fontWeight={'bold'}>
+                        <Typography variant="large" fontWeight={'bold'}>
                             {attributes.title}
                         </Typography>
                     )}

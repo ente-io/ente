@@ -29,7 +29,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                         <Typography variant="h3" fontWeight={'bold'}>
                             {t('SUBSCRIPTION')}
                         </Typography>
-                        <Typography variant="body2" color={'text.secondary'}>
+                        <Typography variant="small" color={'text.secondary'}>
                             {convertBytesToGBs(subscription.storage, 2)}{' '}
                             {t('GB')}
                         </Typography>
@@ -63,7 +63,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                             togglePeriod={togglePeriod}
                         />
                         <Typography
-                            variant="body2"
+                            variant="small"
                             mt={0.5}
                             color="text.secondary">
                             {t('TWO_MONTHS_FREE')}

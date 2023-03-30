@@ -48,7 +48,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const somethingWentWrong = () =>
         setDialogMessage({
             title: t('ERROR'),
-            close: { variant: 'danger' },
+            close: { variant: 'critical' },
             content: t('UNKNOWN_ERROR'),
         });
 
@@ -76,7 +76,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             proceed: {
                 text: t('DELETE'),
                 action: solveChallengeAndDeleteAccount,
-                variant: 'danger',
+                variant: 'critical',
             },
             close: { text: t('CANCEL') },
         });
@@ -99,7 +99,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 action: () => {
                     initiateEmail('account-deletion@ente.io');
                 },
-                variant: 'danger',
+                variant: 'critical',
             },
             close: { text: t('CANCEL') },
         });
@@ -162,7 +162,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                         <Button
                             size="large"
                             variant="outlined"
-                            color="danger"
+                            color="critical"
                             onClick={initiateDelete}
                             startIcon={<NoAccountsIcon />}>
                             {t('DELETE_ACCOUNT')}

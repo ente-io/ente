@@ -8,7 +8,7 @@ type Iprops = ButtonProps<'button', { typographyVariant?: TypographyVariant }>;
 const SidebarButton: FC<Iprops> = ({
     children,
     sx,
-    typographyVariant = 'body1',
+    typographyVariant = 'body',
     ...props
 }) => {
     return (

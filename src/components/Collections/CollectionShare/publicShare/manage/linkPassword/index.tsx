@@ -41,7 +41,7 @@ export function ManageLinkPassword({
                         collectionID: collection.id,
                         disablePassword: true,
                     }),
-                variant: 'danger',
+                variant: 'critical',
             },
         });
     };

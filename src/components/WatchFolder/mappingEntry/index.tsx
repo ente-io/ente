@@ -35,7 +35,7 @@ export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
             proceed: {
                 action: stopWatching,
                 text: t('YES_STOP'),
-                variant: 'danger',
+                variant: 'critical',
             },
         });
     };
@@ -55,7 +55,7 @@ export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
                 )}
                 <EntryContainer>
                     <EntryHeading mapping={mapping} />
-                    <Typography color="text.secondary" variant="body2">
+                    <Typography color="text.secondary" variant="small">
                         {mapping.folderPath}
                     </Typography>
                 </EntryContainer>
