@@ -114,7 +114,7 @@ export default function ExportModal(props: Props) {
                 setLastExportTime(exportRecord.lastAttemptTimestamp);
                 await syncFileCounts();
                 if (exportRecord.stage === ExportStage.INPROGRESS) {
-                    await startExport();
+                    startExport();
                 }
             } catch (e) {
                 logError(e, 'error handling exportFolder change');
@@ -172,6 +172,7 @@ export default function ExportModal(props: Props) {
             throw Error(CustomError.EXPORT_FOLDER_DOES_NOT_EXIST);
         }
         await updateExportStage(ExportStage.INPROGRESS);
+        setExportProgress({ current: 0, total: 0 });
     };
 
     const postExportRun = async () => {
@@ -209,17 +210,12 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const startExport = async () => {
-        try {
-            await preExportRun();
-            setExportProgress({ current: 0, total: 0 });
-            await exportService.exportFiles(setExportProgress);
-            await postExportRun();
-        } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                logError(e, 'startExport failed');
-            }
-        }
+    const startExport = () => {
+        void exportService.runExport(
+            preExportRun,
+            setExportProgress,
+            postExportRun
+        );
     };
 
     const stopExport = async () => {
