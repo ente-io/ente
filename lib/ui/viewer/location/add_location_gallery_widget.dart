@@ -7,7 +7,7 @@ import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/location_service.dart";
-import "package:photos/states/add_location_state.dart";
+import 'package:photos/states/location_state.dart';
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/utils/local_settings.dart";
 
