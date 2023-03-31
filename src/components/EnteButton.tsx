@@ -1,25 +1,42 @@
 import Done from '@mui/icons-material/Done';
-import { Button, ButtonProps, CircularProgress } from '@mui/material';
-import { useEffect, useState } from 'react';
+import {
+    Button,
+    ButtonProps,
+    CircularProgress,
+    PaletteColor,
+} from '@mui/material';
 
 interface Iprops extends ButtonProps {
-    loading: boolean;
+    loading?: boolean;
+    success?: boolean;
 }
 
-export default function EnteButton({ children, loading, ...props }: Iprops) {
-    const [success, setSuccess] = useState(false);
-
-    useEffect(() => {
-        if (loading === false) {
-            setSuccess(true);
-            setTimeout(() => setSuccess(false), 2000);
-        }
-    }, [loading]);
-
+export default function EnteButton({
+    children,
+    loading,
+    success,
+    disabled,
+    sx,
+    ...props
+}: Iprops) {
     return (
-        <Button {...props} disabled={loading || success}>
+        <Button
+            disabled={disabled}
+            sx={{
+                ...sx,
+                ...((loading || success) && {
+                    '&.Mui-disabled': (theme) => ({
+                        backgroundColor: (
+                            theme.palette[props.color] as PaletteColor
+                        ).main,
+                        color: (theme.palette[props.color] as PaletteColor)
+                            .contrastText,
+                    }),
+                }),
+            }}
+            {...props}>
             {loading ? (
-                <CircularProgress size={20} />
+                <CircularProgress size={20} sx={{ color: 'inherit' }} />
             ) : success ? (
                 <Done sx={{ fontSize: 20 }} />
             ) : (
