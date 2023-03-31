@@ -106,18 +106,25 @@ class ObjectDetectionService {
   Future<List<String>> _getPredictions(IsolateData isolateData) async {
     final predictions = await _inference(isolateData);
     final Set<String> results = {};
-    for (final Recognition result in predictions.recognitions) {
-      if (result.score > scoreThreshold) {
-        results.add(result.label);
+    if (predictions.error == null) {
+      for (final Recognition result in predictions.recognitions!) {
+        if (result.score > scoreThreshold) {
+          results.add(result.label);
+        }
       }
+      _logger.info(
+        "Time taken for " +
+            isolateData.type.toString() +
+            ": " +
+            predictions.stats!.totalElapsedTime.toString() +
+            "ms",
+      );
+    } else {
+      _logger.severe(
+        "Error while fetching predictions for " + isolateData.type.toString(),
+        predictions.error,
+      );
     }
-    _logger.info(
-      "Time taken for " +
-          isolateData.type.toString() +
-          ": " +
-          predictions.stats.totalElapsedTime.toString() +
-          "ms",
-    );
     return results.toList();
   }
 
