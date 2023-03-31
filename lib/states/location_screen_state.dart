@@ -9,6 +9,8 @@ class InheritedLocationScreenState extends InheritedWidget {
     required super.child,
   });
 
+  static final memoryCountNotifier = ValueNotifier<int?>(null);
+
   static InheritedLocationScreenState of(BuildContext context) {
     return context
         .dependOnInheritedWidgetOfExactType<InheritedLocationScreenState>()!;

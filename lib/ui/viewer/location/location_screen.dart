@@ -67,6 +67,12 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
   }
 
   @override
+  void dispose() {
+    InheritedLocationScreenState.memoryCountNotifier.value = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     //Todo: get radius of location tag here.
     final selectedRadius =
@@ -93,7 +99,8 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
         "Time taken to get all files in a location tag: ${stopWatch.elapsedMilliseconds} ms",
       );
       stopWatch.stop();
-      // widget.memoriesCountNotifier.value = copyOfFiles.length;
+      InheritedLocationScreenState.memoryCountNotifier.value =
+          copyOfFiles.length;
 
       return Future.value(
         FileLoadResult(
@@ -126,12 +133,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
             tagPrefix: "location_gallery",
           );
         } else {
-          return Column(
-            children: [
-              galleryHeaderWidget,
-              const EnteLoadingWidget(),
-            ],
-          );
+          return galleryHeaderWidget;
         }
       },
       future: filterFiles(),
@@ -171,10 +173,27 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
                     title: locationName,
                   ),
                 ),
-                Text(
-                  "51 memories",
-                  style: getEnteTextTheme(context).smallMuted,
-                ),
+                ValueListenableBuilder(
+                  valueListenable:
+                      InheritedLocationScreenState.memoryCountNotifier,
+                  builder: (context, value, _) {
+                    if (value == null) {
+                      return RepaintBoundary(
+                        child: EnteLoadingWidget(
+                          size: 10,
+                          color: getEnteColorScheme(context).strokeMuted,
+                          alignment: Alignment.centerLeft,
+                          padding: 5,
+                        ),
+                      );
+                    } else {
+                      return Text(
+                        value == 1 ? "1 memory" : "$value memories",
+                        style: getEnteTextTheme(context).smallMuted,
+                      );
+                    }
+                  },
+                )
               ],
             ),
           ),
