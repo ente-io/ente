@@ -24,6 +24,12 @@ declare module '@mui/material/styles' {
         elevated2: string;
     }
 
+    interface TypeText {
+        base: string;
+        muted: string;
+        faint: string;
+    }
+
     interface TypographyVariants {
         large: React.CSSProperties;
         body: React.CSSProperties;
