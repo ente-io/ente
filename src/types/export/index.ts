@@ -37,3 +37,10 @@ export interface ExportSettings {
     folder: string;
     continuousExport: boolean;
 }
+
+export interface ExportUIUpdaters {
+    updateExportStage: (stage: ExportStage) => Promise<void>;
+    updateExportProgress: (progress: ExportProgress) => void;
+    updateFileExportStats: (fileExportStats: FileExportStats) => void;
+    updateLastExportTime: (exportTime: number) => Promise<void>;
+}

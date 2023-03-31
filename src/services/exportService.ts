@@ -41,14 +41,14 @@ import { Collection } from 'types/collection';
 import {
     CollectionIDNameMap,
     CollectionIDPathMap,
-    ExportProgress,
     ExportRecord,
     ExportRecordV1,
+    ExportUIUpdaters,
     FileExportStats,
 } from 'types/export';
 import { User } from 'types/user';
 import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
-import { RecordType } from 'constants/export';
+import { ExportStage, RecordType } from 'constants/export';
 import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
 import { addLogLine } from 'utils/logging';
@@ -69,10 +69,15 @@ class ExportService {
     private allElectronAPIsExist: boolean = false;
     private fileReader: FileReader = null;
     private continuousExportEventHandler: () => void;
+    private uiUpdater: ExportUIUpdaters;
 
     constructor() {
         this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.electronAPIs?.exists;
+    }
+
+    async setUIUpdaters(uiUpdater: ExportUIUpdaters) {
+        this.uiUpdater = uiUpdater;
     }
 
     async changeExportDirectory(callback: (newExportDir: string) => void) {
@@ -97,13 +102,13 @@ class ExportService {
         }
     }
 
-    enableContinuousExport(startExport: () => void) {
+    enableContinuousExport() {
         try {
             if (this.continuousExportEventHandler) {
                 addLogLine('continuous export already enabled');
                 return;
             }
-            this.continuousExportEventHandler = startExport;
+            this.continuousExportEventHandler = this.runExport;
             this.continuousExportEventHandler();
             eventBus.addListener(
                 Events.LOCAL_FILES_UPDATED,
@@ -150,20 +155,16 @@ class ExportService {
         }
     };
 
-    async stopRunningExport(postExport: () => Promise<void>) {
+    async stopRunningExport() {
         try {
             this.stopExport = true;
-            await postExport();
+            await this.postExport();
         } catch (e) {
             logError(e, 'stopRunningExport failed');
         }
     }
 
-    runExport = async (
-        preExport: () => Promise<void>,
-        updateProgress: (progress: ExportProgress) => void,
-        postExport: () => Promise<void>
-    ) => {
+    runExport = async () => {
         try {
             if (this.exportInProgress) {
                 addLogLine('export in progress, scheduling re-run');
@@ -176,25 +177,18 @@ class ExportService {
             try {
                 addLogLine('starting export');
                 this.exportInProgress = true;
-                await preExport();
-                await this.exportFiles(updateProgress);
+                await this.uiUpdater.updateExportStage(ExportStage.INPROGRESS);
+                this.uiUpdater.updateExportProgress({ current: 0, total: 0 });
+                await this.exportFiles();
                 addLogLine('export completed');
             } finally {
                 this.exportInProgress = false;
                 if (this.reRunNeeded) {
                     this.reRunNeeded = false;
                     addLogLine('re-running export');
-                    setTimeout(
-                        () =>
-                            this.runExport(
-                                preExport,
-                                updateProgress,
-                                postExport
-                            ),
-                        0
-                    );
+                    setTimeout(this.runExport, 0);
                 }
-                await postExport();
+                await this.postExport();
             }
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
@@ -203,9 +197,7 @@ class ExportService {
         }
     };
 
-    private async exportFiles(
-        updateProgress: (progress: ExportProgress) => void
-    ) {
+    private async exportFiles() {
         try {
             const exportDir = getData(LS_KEYS.EXPORT)?.folder;
             if (!exportDir) {
@@ -260,7 +252,6 @@ class ExportService {
                 collectionIDNameMap,
                 renamedCollections,
                 collectionIDPathMap,
-                updateProgress,
                 exportDir
             );
         } catch (e) {
@@ -273,7 +264,6 @@ class ExportService {
         collectionIDNameMap: CollectionIDNameMap,
         renamedCollections: Collection[],
         collectionIDPathMap: CollectionIDPathMap,
-        updateProgress: (progress: ExportProgress) => void,
         exportDir: string
     ): Promise<void> {
         try {
@@ -319,7 +309,10 @@ class ExportService {
                         RecordType.SUCCESS
                     );
                     success++;
-                    updateProgress({ current: success, total: files.length });
+                    this.uiUpdater.updateExportProgress({
+                        current: success,
+                        total: files.length,
+                    });
                 } catch (e) {
                     logError(e, 'export failed for a file');
                     if (
@@ -344,6 +337,12 @@ class ExportService {
             logError(e, 'fileExporter failed');
             throw e;
         }
+    }
+
+    async postExport() {
+        await this.uiUpdater.updateExportStage(ExportStage.FINISHED);
+        await this.uiUpdater.updateLastExportTime(Date.now());
+        this.uiUpdater.updateFileExportStats(await this.getFileExportStats());
     }
 
     async addFileExportedRecord(

@@ -72,6 +72,12 @@ export default function ExportModal(props: Props) {
             setExportFolder(exportSettings?.folder);
             setContinuousExport(exportSettings?.continuousExport);
             syncFileCounts();
+            exportService.setUIUpdaters({
+                updateExportStage: updateExportStage,
+                updateExportProgress: setExportProgress,
+                updateFileExportStats: setFileExportStats,
+                updateLastExportTime: updateExportTime,
+            });
         } catch (e) {
             logError(e, 'error in exportModal');
         }
@@ -90,7 +96,7 @@ export default function ExportModal(props: Props) {
     useEffect(() => {
         try {
             if (continuousExport) {
-                exportService.enableContinuousExport(startExport);
+                exportService.enableContinuousExport();
             } else {
                 exportService.disableContinuousExport();
             }
@@ -162,7 +168,7 @@ export default function ExportModal(props: Props) {
     // HELPER FUNCTIONS
     // =======================
 
-    const preExportRun = async () => {
+    const verifyExportFolderExists = () => {
         const exportFolder = getData(LS_KEYS.EXPORT)?.folder;
         const exportFolderExists = exportService.exists(exportFolder);
         if (!exportFolderExists) {
@@ -171,14 +177,6 @@ export default function ExportModal(props: Props) {
             );
             throw Error(CustomError.EXPORT_FOLDER_DOES_NOT_EXIST);
         }
-        await updateExportStage(ExportStage.INPROGRESS);
-        setExportProgress({ current: 0, total: 0 });
-    };
-
-    const postExportRun = async () => {
-        await updateExportStage(ExportStage.FINISHED);
-        await updateExportTime(Date.now());
-        await syncFileCounts();
     };
 
     const syncFileCounts = async () => {
@@ -211,15 +209,18 @@ export default function ExportModal(props: Props) {
     };
 
     const startExport = () => {
-        void exportService.runExport(
-            preExportRun,
-            setExportProgress,
-            postExportRun
-        );
+        try {
+            verifyExportFolderExists();
+            exportService.runExport();
+        } catch (e) {
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'startExport failed');
+            }
+        }
     };
 
     const stopExport = () => {
-        void exportService.stopRunningExport(postExportRun);
+        void exportService.stopRunningExport();
     };
 
     return (
