@@ -5,7 +5,8 @@
 cd "$(dirname "$(readlink -f "$0")")"
 
 # Pull from the latest tag where binaries were built
-TAG="v0.5.0"
+ANDROID_TAG="tf_2.5"
+IOS_TAG="v0.5.0"
 
 IOS_URL="https://github.com/am15h/tflite_flutter_plugin/releases/download/"
 ANDROID_URL="https://github.com/am15h/tflite_flutter_plugin/releases/download/"
@@ -34,7 +35,7 @@ do
 	esac
 done
 
-wget "${IOS_URL}${TAG}/${IOS_ASSET}"
+wget "${IOS_URL}${IOS_TAG}/${IOS_ASSET}"
 unzip ${IOS_ASSET}
 rm -rf ${MACOSX_METADATA_DIR}
 rm ${IOS_ASSET}
@@ -42,7 +43,7 @@ rm -rf "${IOS_DIR}/${IOS_FRAMEWORK}"
 mv ${IOS_FRAMEWORK} ${IOS_DIR}
 
 download () {
-    wget "${ANDROID_URL}${TAG}/$1"
+    wget "${ANDROID_URL}${ANDROID_TAG}/$1"
     mkdir -p "${ANDROID_DIR}$2/"
     mv $1 "${ANDROID_DIR}$2/${ANDROID_LIB}"
 }
