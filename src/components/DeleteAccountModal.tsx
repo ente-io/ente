@@ -88,7 +88,8 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         { setFieldError }: FormikHelpers<FormValues>
     ) => {
         try {
-            if (feedback.trim().length === 0) {
+            feedback = feedback.trim();
+            if (feedback.length === 0) {
                 setFieldError('feedback', t('FEEDBACK_REQUIRED'));
                 return;
             }
