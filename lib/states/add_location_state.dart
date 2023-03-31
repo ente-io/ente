@@ -3,25 +3,24 @@ import "package:photos/core/constants.dart";
 import "package:photos/models/typedefs.dart";
 import "package:photos/utils/debouncer.dart";
 
-class AddLocationTagStateProvider extends StatefulWidget {
-  final List<double> coordinates;
+class LocationTagStateProvider extends StatefulWidget {
+  final List<double> centerPoint;
   final Widget child;
-  const AddLocationTagStateProvider(this.coordinates, this.child, {super.key});
+  const LocationTagStateProvider(this.centerPoint, this.child, {super.key});
 
   @override
-  State<AddLocationTagStateProvider> createState() =>
-      _AddLocationTagStateProviderState();
+  State<LocationTagStateProvider> createState() =>
+      _LocationTagStateProviderState();
 }
 
-class _AddLocationTagStateProviderState
-    extends State<AddLocationTagStateProvider> {
+class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
   int selectedRaduisIndex = defaultRadiusValueIndex;
-  late List<double> coordinates;
+  late List<double> centerPoint;
   final Debouncer _selectedRadiusDebouncer =
       Debouncer(const Duration(milliseconds: 300));
   @override
   void initState() {
-    coordinates = widget.coordinates;
+    centerPoint = widget.centerPoint;
     super.initState();
   }
 
@@ -38,20 +37,20 @@ class _AddLocationTagStateProviderState
 
   @override
   Widget build(BuildContext context) {
-    return InheritedAddLocationTagData(
+    return InheritedLocationTagData(
       selectedRaduisIndex,
-      coordinates,
+      centerPoint,
       _updateSelectedIndex,
       child: widget.child,
     );
   }
 }
 
-class InheritedAddLocationTagData extends InheritedWidget {
+class InheritedLocationTagData extends InheritedWidget {
   final int selectedRadiusIndex;
   final List<double> coordinates;
   final VoidCallbackParamInt updateSelectedIndex;
-  const InheritedAddLocationTagData(
+  const InheritedLocationTagData(
     this.selectedRadiusIndex,
     this.coordinates,
     this.updateSelectedIndex, {
@@ -59,13 +58,13 @@ class InheritedAddLocationTagData extends InheritedWidget {
     super.key,
   });
 
-  static InheritedAddLocationTagData of(BuildContext context) {
+  static InheritedLocationTagData of(BuildContext context) {
     return context
-        .dependOnInheritedWidgetOfExactType<InheritedAddLocationTagData>()!;
+        .dependOnInheritedWidgetOfExactType<InheritedLocationTagData>()!;
   }
 
   @override
-  bool updateShouldNotify(InheritedAddLocationTagData oldWidget) {
+  bool updateShouldNotify(InheritedLocationTagData oldWidget) {
     return oldWidget.selectedRadiusIndex != selectedRadiusIndex;
   }
 }

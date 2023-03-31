@@ -243,6 +243,7 @@ class GalleryHeaderWidget extends StatefulWidget {
 class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
   @override
   Widget build(BuildContext context) {
+    debugPrint("Building GalleryHeaderWidget --------------");
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(

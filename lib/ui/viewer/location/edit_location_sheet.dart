@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/services/location_service.dart";
 import "package:photos/states/add_location_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -17,15 +16,15 @@ import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
 showAddLocationSheet(
   BuildContext context,
-  List<double> coordinates,
-  VoidCallback onLocationAdded,
+  List<double> centerPoint,
+  VoidCallback onLocationEdited,
 ) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
       return LocationTagStateProvider(
-        coordinates,
-        AddLocationSheet(onLocationAdded),
+        centerPoint,
+        EditLocationSheet(onLocationEdited),
       );
     },
     shape: const RoundedRectangleBorder(
@@ -41,15 +40,15 @@ showAddLocationSheet(
   );
 }
 
-class AddLocationSheet extends StatefulWidget {
+class EditLocationSheet extends StatefulWidget {
   final VoidCallback onLocationAdded;
-  const AddLocationSheet(this.onLocationAdded, {super.key});
+  const EditLocationSheet(this.onLocationAdded, {super.key});
 
   @override
-  State<AddLocationSheet> createState() => _AddLocationSheetState();
+  State<EditLocationSheet> createState() => _EditLocationSheetState();
 }
 
-class _AddLocationSheetState extends State<AddLocationSheet> {
+class _EditLocationSheetState extends State<EditLocationSheet> {
   //The value of these notifiers has no significance.
   //When memoriesCountNotifier is null, we show the loading widget in the
   //memories count section which also means the gallery is loading.
@@ -88,7 +87,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
           const Padding(
             padding: EdgeInsets.only(bottom: 16),
             child: BottomOfTitleBarWidget(
-              title: TitleBarTitleWidget(title: "Add location"),
+              title: TitleBarTitleWidget(title: "Edit location"),
             ),
           ),
           Expanded(
@@ -101,6 +100,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                     child: Column(
                       children: [
                         TextInputWidget(
+                          //todo: get location name from location tag here
                           hintText: "Location name",
                           borderRadius: 2,
                           focusNode: _focusNode,
@@ -108,7 +108,8 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           cancelNotifier: _cancelNotifier,
                           popNavAfterSubmission: true,
                           onSubmit: (locationName) async {
-                            await _addLocationTag(locationName);
+                            // await _addLocationTag(locationName);
+                            //todo: Edit location tag here
                           },
                           shouldUnfocusOnClearOrSubmit: true,
                           alwaysShowSuccessState: true,
@@ -118,10 +119,10 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           _selectedRadiusIndexNotifier,
                         ),
                         const SizedBox(height: 24),
-                        Text(
-                          "A location tag groups all photos that were taken within some radius of a photo",
-                          style: textTheme.smallMuted,
-                        ),
+                        // Text(
+                        //   "A location tag groups all photos that were taken within some radius of a photo",
+                        //   style: textTheme.smallMuted,
+                        // ),
                       ],
                     ),
                   ),
@@ -182,7 +183,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                   const SizedBox(height: 24),
                   DynamicLocationGalleryWidget(
                     _memoriesCountNotifier,
-                    "Add_location",
+                    "Edit_location",
                   ),
                 ],
               ),
@@ -193,18 +194,18 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
     );
   }
 
-  Future<void> _addLocationTag(String locationName) async {
-    final locationData = InheritedLocationTagData.of(context);
-    final coordinates = locationData.coordinates;
-    final radius = radiusValues[locationData.selectedRadiusIndex];
-    await LocationService.instance.addLocation(
-      locationName,
-      coordinates.first,
-      coordinates.last,
-      radius,
-    );
-    widget.onLocationAdded.call();
-  }
+  // Future<void> _addLocationTag(String locationName) async {
+  //   final locationData = InheritedAddLocationTagData.of(context);
+  //   final coordinates = locationData.coordinates;
+  //   final radius = radiusValues[locationData.selectedRadiusIndex];
+  //   await LocationService.instance.addLocation(
+  //     locationName,
+  //     coordinates.first,
+  //     coordinates.last,
+  //     radius,
+  //   );
+  //   widget.onLocationAdded.call();
+  // }
 
   void _focusNodeListener() {
     final bool hasFocus = _focusNode.hasFocus;

@@ -11,16 +11,24 @@ import "package:photos/states/add_location_state.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/utils/local_settings.dart";
 
-class AddLocationGalleryWidget extends StatefulWidget {
+///This gallery will get rebuilt with the updated radius when
+///InheritedLocationTagData notifies a change in radius.
+class DynamicLocationGalleryWidget extends StatefulWidget {
   final ValueNotifier<int?> memoriesCountNotifier;
-  const AddLocationGalleryWidget(this.memoriesCountNotifier, {super.key});
+  final String tagPrefix;
+  const DynamicLocationGalleryWidget(
+    this.memoriesCountNotifier,
+    this.tagPrefix, {
+    super.key,
+  });
 
   @override
-  State<AddLocationGalleryWidget> createState() =>
-      _AddLocationGalleryWidgetState();
+  State<DynamicLocationGalleryWidget> createState() =>
+      _DynamicLocationGalleryWidgetState();
 }
 
-class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
+class _DynamicLocationGalleryWidgetState
+    extends State<DynamicLocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
   late Future<void> removeIgnoredFiles;
   double heightOfGallery = 0;
@@ -50,7 +58,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
               f.location!.longitude != null,
         );
         return !LocationService.instance.isFileInsideLocationTag(
-          InheritedAddLocationTagData.of(context).coordinates,
+          InheritedLocationTagData.of(context).coordinates,
           [f.location!.latitude!, f.location!.longitude!],
           selectedRadius,
         );
@@ -93,7 +101,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
               }) async {
                 return snapshot.data as FileLoadResult;
               },
-              tagPrefix: "Add location",
+              tagPrefix: widget.tagPrefix,
               shouldCollateFilesByDay: false,
             ),
           );
@@ -107,7 +115,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
 
   int _selectedRadius() {
     return radiusValues[
-        InheritedAddLocationTagData.of(context).selectedRadiusIndex];
+        InheritedLocationTagData.of(context).selectedRadiusIndex];
   }
 
   double _galleryHeight(int fileCount) {
