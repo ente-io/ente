@@ -1,7 +1,12 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState, useContext } from 'react';
 import exportService from 'services/exportService';
-import { ExportProgress, ExportSettings, FileExportStats } from 'types/export';
+import {
+    ExportProgress,
+    ExportRecord,
+    ExportSettings,
+    FileExportStats,
+} from 'types/export';
 import {
     Box,
     Button,
@@ -67,67 +72,37 @@ export default function ExportModal(props: Props) {
         if (!isElectron()) {
             return;
         }
-        try {
-            const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
-            setExportFolder(exportSettings?.folder);
-            setContinuousExport(exportSettings?.continuousExport);
-            syncFileCounts();
-            exportService.setUIUpdaters({
-                updateExportStage: updateExportStage,
-                updateExportProgress: setExportProgress,
-                updateFileExportStats: setFileExportStats,
-                updateLastExportTime: updateExportTime,
-            });
-        } catch (e) {
-            logError(e, 'error in exportModal');
-        }
+        const main = async () => {
+            try {
+                exportService.setUIUpdaters({
+                    updateExportStage: updateExportStage,
+                    updateExportProgress: setExportProgress,
+                    updateFileExportStats: setFileExportStats,
+                    updateLastExportTime: updateExportTime,
+                });
+                const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
+                setExportFolder(exportSettings?.folder);
+                setContinuousExport(exportSettings?.continuousExport);
+                const exportRecord = await syncExportRecord(exportFolder);
+                if (exportRecord?.stage === ExportStage.INPROGRESS) {
+                    startExport();
+                }
+                if (exportSettings?.continuousExport) {
+                    exportService.enableContinuousExport();
+                }
+            } catch (e) {
+                logError(e, 'export on mount useEffect failed');
+            }
+        };
+        void main();
     }, []);
 
     useEffect(() => {
         if (!props.show) {
             return;
         }
-        if (exportService.isExportInProgress()) {
-            setExportStage(ExportStage.INPROGRESS);
-        }
-        syncFileCounts();
+        void syncFileCounts();
     }, [props.show]);
-
-    useEffect(() => {
-        try {
-            if (continuousExport) {
-                exportService.enableContinuousExport();
-            } else {
-                exportService.disableContinuousExport();
-            }
-        } catch (e) {
-            logError(e, 'error handling continuousExport change');
-        }
-    }, [continuousExport]);
-
-    useEffect(() => {
-        if (!exportFolder) {
-            return;
-        }
-        const main = async () => {
-            try {
-                const exportRecord = await exportService.getExportRecord();
-                if (!exportRecord) {
-                    setExportStage(ExportStage.INIT);
-                    return;
-                }
-                setExportStage(exportRecord.stage);
-                setLastExportTime(exportRecord.lastAttemptTimestamp);
-                await syncFileCounts();
-                if (exportRecord.stage === ExportStage.INPROGRESS) {
-                    startExport();
-                }
-            } catch (e) {
-                logError(e, 'error handling exportFolder change');
-            }
-        };
-        void main();
-    }, [exportFolder]);
 
     // =============
     // STATE UPDATERS
@@ -168,6 +143,16 @@ export default function ExportModal(props: Props) {
     // HELPER FUNCTIONS
     // =======================
 
+    const onExportFolderChange = async (newFolder: string) => {
+        try {
+            updateExportFolder(newFolder);
+            syncExportRecord(newFolder);
+        } catch (e) {
+            logError(e, 'onExportChange failed');
+            throw e;
+        }
+    };
+
     const verifyExportFolderExists = () => {
         const exportFolder = getData(LS_KEYS.EXPORT)?.folder;
         const exportFolderExists = exportService.exists(exportFolder);
@@ -176,6 +161,27 @@ export default function ExportModal(props: Props) {
                 getExportDirectoryDoesNotExistMessage()
             );
             throw Error(CustomError.EXPORT_FOLDER_DOES_NOT_EXIST);
+        }
+    };
+
+    const syncExportRecord = async (
+        exportFolder: string
+    ): Promise<ExportRecord> => {
+        try {
+            const exportRecord = await exportService.getExportRecord(
+                exportFolder
+            );
+            if (!exportRecord) {
+                setExportStage(ExportStage.INIT);
+                return null;
+            }
+            setExportStage(exportRecord.stage);
+            setLastExportTime(exportRecord.lastAttemptTimestamp);
+            void syncFileCounts();
+            return exportRecord;
+        } catch (e) {
+            logError(e, 'syncExportRecord failed');
+            throw e;
         }
     };
 
@@ -193,7 +199,7 @@ export default function ExportModal(props: Props) {
     // =============
 
     const handleChangeExportDirectoryClick = () => {
-        void exportService.changeExportDirectory(updateExportFolder);
+        void exportService.changeExportDirectory(onExportFolderChange);
     };
 
     const handleOpenExportDirectoryClick = () => {
@@ -202,9 +208,15 @@ export default function ExportModal(props: Props) {
 
     const toggleContinuousExport = () => {
         try {
-            updateContinuousExport(!continuousExport);
+            const newContinuousExport = !continuousExport;
+            if (newContinuousExport) {
+                exportService.enableContinuousExport();
+            } else {
+                exportService.disableContinuousExport();
+            }
+            updateContinuousExport(newContinuousExport);
         } catch (e) {
-            logError(e, 'toggleContinuousExport failed');
+            logError(e, 'onContinuousExportChange failed');
         }
     };
 

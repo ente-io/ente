@@ -158,6 +158,7 @@ class ExportService {
     async stopRunningExport() {
         try {
             this.stopExport = true;
+            this.reRunNeeded = false;
             await this.postExport();
         } catch (e) {
             logError(e, 'stopRunningExport failed');
