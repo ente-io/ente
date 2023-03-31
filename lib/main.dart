@@ -52,7 +52,7 @@ const kHeartBeatFrequency = Duration(seconds: 1);
 const kFGSyncFrequency = Duration(minutes: 5);
 const kBGTaskTimeout = Duration(seconds: 25);
 const kBGPushTimeout = Duration(seconds: 28);
-const kFGTaskDeathTimeoutInMicroseconds = 3000000;
+const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 const kBackgroundLockLatency = Duration(seconds: 3);
 
 void main() async {
