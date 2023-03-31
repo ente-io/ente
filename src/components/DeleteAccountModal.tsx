@@ -1,6 +1,6 @@
 import { Button, Link, Stack } from '@mui/material';
 import { AppContext } from 'pages/_app';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { preloadImage, initiateEmail } from 'utils/common';
 import {
     deleteAccount,
@@ -75,12 +75,13 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const [loading, setLoading] = useState(false);
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);
-    const [deleteAccountChallenge, setDeleteAccountChallenge] = useState('');
+    const deleteAccountChallenge = useRef<string>();
 
     const openAuthenticateUserModal = () => setAuthenticateUserModalView(true);
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
     const [acceptDataDeletion, setAcceptDataDeletion] = useState(false);
+    const reasonAndFeedbackRef = useRef<{ reason: string; feedback: string }>();
 
     useEffect(() => {
         preloadImage('/images/delete-account');
@@ -105,11 +106,11 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 setFieldError('feedback', t('FEEDBACK_REQUIRED'));
                 return;
             }
+            reasonAndFeedbackRef.current = { reason, feedback };
             setLoading(true);
             const deleteChallengeResponse = await getAccountDeleteChallenge();
-            setDeleteAccountChallenge(
-                deleteChallengeResponse.encryptedChallenge
-            );
+            deleteAccountChallenge.current =
+                deleteChallengeResponse.encryptedChallenge;
             if (deleteChallengeResponse.allowDelete) {
                 openAuthenticateUserModal();
             } else {
@@ -165,9 +166,10 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         try {
             setLoading(true);
             const decryptedChallenge = await decryptDeleteAccountChallenge(
-                deleteAccountChallenge
+                deleteAccountChallenge.current
             );
-            await deleteAccount(decryptedChallenge);
+            const { reason, feedback } = reasonAndFeedbackRef.current;
+            await deleteAccount(decryptedChallenge, reason, feedback);
             logoutUser();
         } catch (e) {
             logError(e, 'solveChallengeAndDeleteAccount failed');
