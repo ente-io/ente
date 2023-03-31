@@ -21,7 +21,7 @@ const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
         muted: 'rgba(255, 255, 255, 0.16)',
         faint: 'rgba(255, 255, 255, 0.12)',
         basePressed: 'rgba(255, 255, 255, 0.90)',
-        faintPressed: 'rgba(255, 255, 255, 0.60)',
+        faintPressed: 'rgba(255, 255, 255, 0.06)',
         strong: 'rgba(255, 255, 255, 0.32)',
     },
     stroke: {
