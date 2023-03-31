@@ -55,14 +55,12 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                 <Typography variant="h3" fontWeight={'bold'}>
                     {t('SUBSCRIPTION')}
                 </Typography>
-                <Typography color={'text.secondary'}>
-                    {t('FAMILY_PLAN')}
-                </Typography>
+                <Typography color={'text.muted'}>{t('FAMILY_PLAN')}</Typography>
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <VerticallyCentered>
                     <Box mb={4}>
-                        <Typography color="text.secondary">
+                        <Typography color="text.muted">
                             {t('FAMILY_SUBSCRIPTION_INFO')}
                         </Typography>
                         <Typography>

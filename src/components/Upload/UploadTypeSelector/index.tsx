@@ -88,7 +88,7 @@ export default function UploadTypeSelector({
                         </UploadTypeOption>
                     )}
                 </Stack>
-                <Typography p={1.5} pt={4} color="text.secondary">
+                <Typography p={1.5} pt={4} color="text.muted">
                     {t('DRAG_AND_DROP_HINT')}
                 </Typography>
             </Box>

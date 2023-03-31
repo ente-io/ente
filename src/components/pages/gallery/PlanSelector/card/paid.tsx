@@ -29,7 +29,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                         <Typography variant="h3" fontWeight={'bold'}>
                             {t('SUBSCRIPTION')}
                         </Typography>
-                        <Typography variant="small" color={'text.secondary'}>
+                        <Typography variant="small" color={'text.muted'}>
                             {convertBytesToGBs(subscription.storage, 2)}{' '}
                             {t('GB')}
                         </Typography>
@@ -41,7 +41,7 @@ export default function PaidSubscriptionPlanSelectorCard({
             </Box>
 
             <Box px={1.5}>
-                <Typography color={'text.secondary'} fontWeight={'bold'}>
+                <Typography color={'text.muted'} fontWeight={'bold'}>
                     <Trans
                         i18nKey="CURRENT_USAGE"
                         values={{
@@ -62,10 +62,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                             planPeriod={planPeriod}
                             togglePeriod={togglePeriod}
                         />
-                        <Typography
-                            variant="small"
-                            mt={0.5}
-                            color="text.secondary">
+                        <Typography variant="small" mt={0.5} color="text.muted">
                             {t('TWO_MONTHS_FREE')}
                         </Typography>
                     </Box>
@@ -79,7 +76,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                 </Stack>
 
                 <Box py={1} px={1.5}>
-                    <Typography color={'text.secondary'}>
+                    <Typography color={'text.muted'}>
                         {!isSubscriptionCancelled(subscription)
                             ? t('RENEWAL_ACTIVE_SUBSCRIPTION_STATUS', {
                                   date: subscription.expiryTime,

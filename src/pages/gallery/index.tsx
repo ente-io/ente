@@ -611,7 +611,7 @@ export default function Gallery() {
                 )}
                 {isFirstLoad && (
                     <CenteredFlex>
-                        <Typography color="text.secondary" variant="small">
+                        <Typography color="text.muted" variant="small">
                             {t('INITIAL_LOAD_DELAY_WARNING')}
                         </Typography>
                     </CenteredFlex>

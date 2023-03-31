@@ -34,7 +34,7 @@ export default function ManagePublicShare({
     return (
         <>
             <Stack>
-                <Typography color="text.secondary" variant="small" padding={1}>
+                <Typography color="text.muted" variant="small" padding={1}>
                     <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
                     {t('PUBLIC_LINK_ENABLED')}
                 </Typography>

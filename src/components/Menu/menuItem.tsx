@@ -60,7 +60,7 @@ export function EnteMenuItem({
                     {subText && (
                         <FluidContainer
                             sx={{
-                                color: 'text.secondary',
+                                color: 'text.muted',
                                 fontSize: '14px',
                             }}>
                             <DotSeparator style={{ fontSize: 8 }} />

@@ -141,7 +141,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                         />
                     </VerticallyCentered>
 
-                    <Typography color="text.secondary" px={1.5}>
+                    <Typography color="text.muted" px={1.5}>
                         <Trans
                             i18nKey="ASK_FOR_FEEDBACK"
                             components={{

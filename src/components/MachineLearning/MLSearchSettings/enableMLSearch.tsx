@@ -20,7 +20,7 @@ export default function EnableMLSearch({
             <Stack py={'20px'} px={'8px'} spacing={'32px'}>
                 <Box px={'8px'}>
                     {' '}
-                    <Typography color="text.secondary">
+                    <Typography color="text.muted">
                         <Trans i18nKey={'ENABLE_ML_SEARCH_DESCRIPTION'} />
                     </Typography>
                 </Box>

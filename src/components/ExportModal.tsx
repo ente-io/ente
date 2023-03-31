@@ -248,10 +248,10 @@ export default function ExportModal(props: Props) {
                     toggleContinuousExport={toggleContinuousExport}
                 />
                 <SpaceBetweenFlex minHeight={'48px'} pr={'16px'}>
-                    <Typography color="text.secondary">
+                    <Typography color="text.muted">
                         {t('TOTAL_ITEMS')}
                     </Typography>
-                    <Typography color="text.secondary">
+                    <Typography color="text.muted">
                         {fileExportStats.totalCount}
                     </Typography>
                 </SpaceBetweenFlex>
@@ -278,7 +278,7 @@ function ExportDirectory({
 }) {
     return (
         <SpaceBetweenFlex minHeight={'48px'}>
-            <Typography color="text.secondary" mr={'16px'}>
+            <Typography color="text.muted" mr={'16px'}>
                 {t('DESTINATION')}
             </Typography>
             <>
@@ -332,9 +332,7 @@ function ExportDirectoryOption({ changeExportDirectory }) {
 function ContinuousExport({ continuousExport, toggleContinuousExport }) {
     return (
         <SpaceBetweenFlex minHeight={'48px'}>
-            <Typography color="text.secondary">
-                {t('CONTINUOUS_EXPORT')}
-            </Typography>
+            <Typography color="text.muted">{t('CONTINUOUS_EXPORT')}</Typography>
             <Box>
                 <Switch
                     color="accent"

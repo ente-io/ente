@@ -89,7 +89,7 @@ function ChangeEmailForm() {
                                 components={{
                                     a: (
                                         <Box
-                                            color="text.secondary"
+                                            color="text.muted"
                                             component={'span'}
                                         />
                                     ),

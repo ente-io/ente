@@ -21,7 +21,7 @@ const ShortcutButton: FC<ButtonProps<'button', Iprops>> = ({
             {...props}>
             {label}
 
-            <Box sx={{ color: 'text.secondary' }}>
+            <Box sx={{ color: 'text.muted' }}>
                 <DotSeparator />
                 {count}
             </Box>

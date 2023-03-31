@@ -237,7 +237,7 @@ export function FileInfo({
                                 onClick={openExif}
                                 sx={{
                                     textDecoration: 'none',
-                                    color: 'text.secondary',
+                                    color: 'text.muted',
                                     fontWeight: 'bold',
                                 }}>
                                 {t('VIEW_EXIF')}

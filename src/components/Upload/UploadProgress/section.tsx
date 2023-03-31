@@ -28,7 +28,7 @@ export const UploadProgressSectionContent = styled(MuiAccordionDetails)(
 
 export const SectionInfo = (props: TypographyProps) => (
     <Typography
-        color={'text.secondary'}
+        color={'text.muted'}
         variant="small"
         {...props}
         sx={{ mb: 1 }}

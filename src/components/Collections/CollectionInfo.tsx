@@ -14,7 +14,7 @@ export function CollectionInfo({ name, fileCount, endIcon }: Iprops) {
             <Typography variant="h3">{name}</Typography>
 
             <FlexWrapper>
-                <Typography variant="small" color="text.secondary">
+                <Typography variant="small" color="text.muted">
                     {t('photos_count', { count: fileCount })}
                 </Typography>
                 {endIcon && (
@@ -22,7 +22,7 @@ export function CollectionInfo({ name, fileCount, endIcon }: Iprops) {
                         sx={{
                             svg: {
                                 fontSize: '17px',
-                                color: 'text.secondary',
+                                color: 'text.muted',
                             },
                         }}
                         ml={1.5}>

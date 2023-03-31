@@ -72,7 +72,7 @@ export default function SubscriptionStatus({
         <Box px={1} pt={0.5}>
             <Typography
                 variant="small"
-                color={'text.secondary'}
+                color={'text.muted'}
                 onClick={handleClick && handleClick}
                 sx={{ cursor: handleClick && 'pointer' }}>
                 {isSubscriptionActive(userDetails.subscription) ? (

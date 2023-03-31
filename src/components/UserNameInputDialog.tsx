@@ -25,7 +25,7 @@ export default function UserNameInputDialog({
                 title: t('ENTER_NAME'),
                 icon: <AutoAwesomeOutlinedIcon />,
             }}>
-            <Typography color={'text.secondary'} pb={1}>
+            <Typography color={'text.muted'} pb={1}>
                 {t('PUBLIC_UPLOADER_NAME_MESSAGE')}
             </Typography>
             <SingleInputForm

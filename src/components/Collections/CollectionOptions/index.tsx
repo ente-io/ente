@@ -192,7 +192,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 <Trans
                     i18nKey={'DELETE_COLLECTION_MESSAGE'}
                     components={{
-                        a: <Box component={'span'} color="text.primary" />,
+                        a: <Box component={'span'} color="text.base" />,
                     }}
                 />
             ),

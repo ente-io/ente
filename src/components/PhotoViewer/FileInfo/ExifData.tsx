@@ -67,9 +67,7 @@ export function ExifData(props: {
                 {[...Object.entries(exif)].map(([key, value]) =>
                     value ? (
                         <ExifItem key={key}>
-                            <Typography
-                                variant="small"
-                                color={'text.secondary'}>
+                            <Typography variant="small" color={'text.muted'}>
                                 {key}
                             </Typography>
                             <Typography

@@ -355,10 +355,7 @@ export default function PublicCollectionGallery() {
                 <FormContainer>
                     <FormPaper>
                         <FormPaperTitle>{t('PASSWORD')}</FormPaperTitle>
-                        <Typography
-                            color={'text.secondary'}
-                            mb={2}
-                            variant="small">
+                        <Typography color={'text.muted'} mb={2} variant="small">
                             {t('LINK_PASSWORD')}
                         </Typography>
                         <SingleInputForm

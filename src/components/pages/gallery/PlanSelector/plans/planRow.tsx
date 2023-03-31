@@ -77,7 +77,7 @@ export function PlanRow({
                     {convertBytesToGBs(plan.storage)}
                 </Typography>
                 <FlexWrapper flexWrap={'wrap'} gap={1}>
-                    <Typography variant="h3" color="text.secondary">
+                    <Typography variant="h3" color="text.muted">
                         {t('GB')}
                     </Typography>
                     {popular && !hasPaidSubscription(subscription) && (
@@ -98,7 +98,7 @@ export function PlanRow({
                         <Typography fontWeight={'bold'} variant="large">
                             {plan.price}{' '}
                         </Typography>{' '}
-                        <Typography color="text.secondary" variant="small">
+                        <Typography color="text.muted" variant="small">
                             {`/ ${
                                 plan.period === PLAN_PERIOD.MONTH
                                     ? t('MONTH_SHORT')

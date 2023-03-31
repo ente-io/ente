@@ -55,7 +55,7 @@ export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
                 )}
                 <EntryContainer>
                     <EntryHeading mapping={mapping} />
-                    <Typography color="text.secondary" variant="small">
+                    <Typography color="text.muted" variant="small">
                         {mapping.folderPath}
                     </Typography>
                 </EntryContainer>

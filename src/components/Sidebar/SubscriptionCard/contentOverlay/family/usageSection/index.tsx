@@ -30,8 +30,8 @@ export function FamilyUsageSection({
                     marginTop: 1.5,
                 }}>
                 <Stack direction={'row'} spacing={1.5}>
-                    <Legend label={t('YOU')} color="text.primary" />
-                    <Legend label={t('FAMILY')} color="text.secondary" />
+                    <Legend label={t('YOU')} color="text.base" />
+                    <Legend label={t('FAMILY')} color="text.muted" />
                 </Stack>
                 <Typography variant="mini" fontWeight={'bold'}>
                     {t('photos_count', { count: fileCount ?? 0 })}

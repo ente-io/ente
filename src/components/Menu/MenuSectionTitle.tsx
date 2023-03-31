@@ -13,13 +13,13 @@ export default function MenuSectionTitle({ title, icon }: Iprops) {
                     sx={{
                         '& > svg': {
                             fontSize: '17px',
-                            color: 'text.secondary',
+                            color: 'text.muted',
                         },
                     }}>
                     {icon}
                 </Box>
             )}
-            <Typography variant="small" color="text.secondary">
+            <Typography variant="small" color="text.muted">
                 {title}
             </Typography>
         </Stack>

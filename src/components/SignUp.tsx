@@ -165,7 +165,7 @@ export default function SignUp(props: SignUpProps) {
                             <FormGroup sx={{ width: '100%' }}>
                                 <FormControlLabel
                                     sx={{
-                                        color: 'text.secondary',
+                                        color: 'text.muted',
                                         ml: 0,
                                         mt: 2,
                                     }}
@@ -218,7 +218,7 @@ export default function SignUp(props: SignUpProps) {
                                 <Typography
                                     mt={1}
                                     textAlign={'center'}
-                                    color="text.secondary"
+                                    color="text.muted"
                                     variant="small">
                                     {t('KEY_GENERATION_IN_PROGRESS_MESSAGE')}
                                 </Typography>
