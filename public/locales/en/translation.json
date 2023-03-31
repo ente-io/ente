@@ -510,5 +510,6 @@
     "DELETE_ACCOUNT_FEEDBACK_LABEL": "We are sorry to see you go. Please explain why you are leaving to help us improve.",
     "DELETE_ACCOUNT_FEEDBACK_PLACEHOLDER": "Feedback",
     "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "Yes, I want to permanently delete this account and all its data",
-    "CONFIRM_DELETE_ACCOUNT": "Confirm Account Deletion"
+    "CONFIRM_DELETE_ACCOUNT": "Confirm Account Deletion",
+    "FEEDBACK_REQUIRED": "Kindly help us with this information"
 }

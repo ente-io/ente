@@ -101,7 +101,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 REASON_WITH_REQUIRED_FEEDBACK.has(reason as DELETE_REASON) &&
                 !feedback?.length
             ) {
-                setFieldError('feedback', t('REQUIRED'));
+                setFieldError('feedback', t('FEEDBACK_REQUIRED'));
                 return;
             }
             const deleteChallengeResponse = await getAccountDeleteChallenge();
