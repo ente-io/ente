@@ -5,7 +5,7 @@ import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/location_service.dart";
-import "package:photos/states/location_state.dart";
+import 'package:photos/states/old_location_state.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/text_input_widget.dart";
@@ -20,7 +20,7 @@ class LocationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final editNotifier = ValueNotifier(false);
-    return LocationTagStateProvider(
+    return OldLocationTagStateProvider(
       Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size(double.infinity, 48),
@@ -126,7 +126,7 @@ class _LocationEditingWidgetState extends State<LocationEditingWidget> {
   }
 
   void _selectedRadiusIndexListener() {
-    InheritedLocationTagData.of(
+    InheritedOldLocationTagData.of(
       context,
     ).updateSelectedIndex(
       _selectedRadiusIndexNotifier.value,
@@ -228,7 +228,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
 
   int _selectedRadius() {
     return radiusValues[
-        InheritedLocationTagData.of(context).selectedRadiusIndex];
+        InheritedOldLocationTagData.of(context).selectedRadiusIndex];
   }
 }
 
