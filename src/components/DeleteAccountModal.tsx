@@ -35,8 +35,7 @@ enum DELETE_REASON {
     MISSING_FEATURE = '0',
     BROKEN_BEHAVIOR = '1',
     FOUND_ANOTHER_SERVICE = '2',
-    USING_DIFFERENT_ACCOUNT = '3',
-    NOT_LISTED = '4',
+    NOT_LISTED = '3',
 }
 
 const getReasonOptions = (): DropdownOption<DELETE_REASON>[] => {
@@ -54,21 +53,11 @@ const getReasonOptions = (): DropdownOption<DELETE_REASON>[] => {
             value: DELETE_REASON.FOUND_ANOTHER_SERVICE,
         },
         {
-            label: t('DELETE_REASON.USING_DIFFERENT_ACCOUNT'),
-            value: DELETE_REASON.USING_DIFFERENT_ACCOUNT,
-        },
-        {
             label: t('DELETE_REASON.NOT_LISTED'),
             value: DELETE_REASON.NOT_LISTED,
         },
     ];
 };
-
-const REASON_WITH_REQUIRED_FEEDBACK = new Set([
-    DELETE_REASON.MISSING_FEATURE,
-    DELETE_REASON.BROKEN_BEHAVIOR,
-    DELETE_REASON.NOT_LISTED,
-]);
 
 const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const { setDialogBoxAttributesV2, isMobile } = useContext(AppContext);
@@ -99,15 +88,12 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         { setFieldError }: FormikHelpers<FormValues>
     ) => {
         try {
-            if (
-                REASON_WITH_REQUIRED_FEEDBACK.has(reason as DELETE_REASON) &&
-                !feedback?.length
-            ) {
+            if (feedback.trim().length === 0) {
                 setFieldError('feedback', t('FEEDBACK_REQUIRED'));
                 return;
             }
-            reasonAndFeedbackRef.current = { reason, feedback };
             setLoading(true);
+            reasonAndFeedbackRef.current = { reason, feedback };
             const deleteChallengeResponse = await getAccountDeleteChallenge();
             deleteAccountChallenge.current =
                 deleteChallengeResponse.encryptedChallenge;
