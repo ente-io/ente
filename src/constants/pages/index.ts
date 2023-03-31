@@ -9,6 +9,7 @@ export enum PAGES {
     SIGNUP = '/signup',
     TWO_FACTOR_SETUP = '/two-factor/setup',
     TWO_FACTOR_VERIFY = '/two-factor/verify',
+    TWO_FACTOR_RECOVER = '/two-factor/recover',
     VERIFY = '/verify',
     ROOT = '/',
     SHARED_ALBUMS = '/shared-albums',
