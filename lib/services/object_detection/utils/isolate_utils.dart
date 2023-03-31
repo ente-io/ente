@@ -2,6 +2,7 @@ import 'dart:isolate';
 import "dart:typed_data";
 
 import 'package:image/image.dart' as imgLib;
+import "package:photos/services/object_detection/models/predictions.dart";
 import "package:photos/services/object_detection/tflite/classifier.dart";
 import 'package:photos/services/object_detection/tflite/cocossd_classifier.dart';
 import "package:photos/services/object_detection/tflite/mobilenet_classifier.dart";
@@ -34,8 +35,12 @@ class IsolateUtils {
     await for (final IsolateData isolateData in port) {
       final classifier = _getClassifier(isolateData);
       final image = imgLib.decodeImage(isolateData.input);
-      final results = classifier.predict(image!);
-      isolateData.responsePort.send(results);
+      try {
+        final results = classifier.predict(image!);
+        isolateData.responsePort.send(results);
+      } catch (e) {
+        isolateData.responsePort.send(Predictions(null, null, error: e));
+      }
     }
   }
 
