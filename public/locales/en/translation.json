@@ -422,7 +422,7 @@
     "ASK_FOR_FEEDBACK": "<p>We'll be sorry to see you go. Are you facing some issue?</p><p>Please write to us at <a>{{emailID}}</a>, maybe there is a way we can help.</p>",
     "SEND_FEEDBACK": "Yes, send feedback",
     "CONFIRM_ACCOUNT_DELETION_TITLE": "Are you sure you want to delete your account?",
-    "CONFIRM_ACCOUNT_DELETION_MESSAGE": "<p>Your uploaded data will be scheduled for deletion, and your account will be permanently deleted.</p><p>This action is not reversible.</p>",
+    "CONFIRM_ACCOUNT_DELETION_MESSAGE": "Your uploaded data will be scheduled for deletion, and your account will be permanently deleted.<br/><br/>This action is not reversible.",
     "AUTHENTICATE": "Authenticate",
     "UPLOADED_TO_SINGLE_COLLECTION": "Uploaded to single collection",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "Uploaded to separate collections",
