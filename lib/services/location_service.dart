@@ -3,6 +3,8 @@ import "dart:convert";
 import "dart:math";
 
 import "package:photos/core/constants.dart";
+import "package:photos/models/location.dart";
+import "package:photos/models/location_tag.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LocationService {
@@ -56,8 +58,8 @@ class LocationService {
     return 1 / cos(lat * (pi / 180));
   }
 
-  List<String> enclosingLocationTags(List<double> coordinates) {
-    final result = List<String>.of([]);
+  List<LocationTag> enclosingLocationTags(List<double> coordinates) {
+    final result = List<LocationTag>.of([]);
     final allLocationTags = getAllLocationTags();
     for (var locationTag in allLocationTags) {
       final locationJson = json.decode(locationTag);
@@ -67,7 +69,16 @@ class LocationService {
       final x = coordinates[0] - center[0];
       final y = coordinates[1] - center[1];
       if ((x * x) / (aSquare) + (y * y) / (bSquare) <= 1) {
-        result.add(locationJson["name"]);
+        result.add(
+          LocationTag(
+            name: locationJson["name"],
+            radius: locationJson["radius"],
+            centerPoint: Location(
+              locationJson["center"][0],
+              locationJson["center"][1],
+            ),
+          ),
+        );
       }
     }
     return result;

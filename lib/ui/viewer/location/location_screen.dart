@@ -4,6 +4,7 @@ import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
@@ -68,7 +69,8 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
   @override
   Widget build(BuildContext context) {
     //Todo: get radius of location tag here.
-    final selectedRadius = 80;
+    final selectedRadius =
+        InheritedLocationScreenState.of(context).locationTag.radius;
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
       //wait for ignored files to be removed after init
@@ -124,8 +126,12 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
             tagPrefix: "location_gallery",
           );
         } else {
-          // return const SizedBox.shrink();
-          return galleryHeaderWidget;
+          return Column(
+            children: [
+              galleryHeaderWidget,
+              const EnteLoadingWidget(),
+            ],
+          );
         }
       },
       future: filterFiles(),
@@ -144,6 +150,8 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
   @override
   Widget build(BuildContext context) {
     debugPrint("Building GalleryHeaderWidget --------------");
+    final locationName =
+        InheritedLocationScreenState.of(context).locationTag.name;
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
@@ -156,11 +164,11 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(
-                  key: ValueKey("Location_name"),
+                SizedBox(
+                  key: ValueKey(locationName),
                   width: double.infinity,
                   child: TitleBarTitleWidget(
-                    title: "Location name",
+                    title: locationName,
                   ),
                 ),
                 Text(

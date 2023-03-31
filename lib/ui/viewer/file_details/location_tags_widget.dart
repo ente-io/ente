@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/buttons/inline_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
@@ -71,9 +72,15 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
     final result = locationTags
         .map(
           (e) => ChipButtonWidget(
-            e,
+            e.name,
             onTap: () {
-              routeToPage(context, const LocationScreen());
+              routeToPage(
+                context,
+                InheritedLocationScreenState(
+                  e,
+                  child: const LocationScreen(),
+                ),
+              );
             },
           ),
         )
