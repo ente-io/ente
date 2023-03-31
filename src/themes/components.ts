@@ -1,4 +1,4 @@
-import { ThemeColorsOptions } from '@mui/material';
+import { Shadow, ThemeColorsOptions } from '@mui/material';
 import { Components } from '@mui/material/styles/components';
 import { TypographyOptions } from '@mui/material/styles/createTypography';
 
@@ -39,7 +39,7 @@ export const getComponents = (
                     backgroundColor: colors.backdrop.faint,
                 },
                 '& .MuiDialog-paper': {
-                    boxShadow: '0px 0px 10px 0px rgba(153,153,153,0.04)',
+                    filter: getDropShadowStyle(colors.shadows.float),
                 },
                 '& .MuiDialogTitle-root': {
                     padding: '16px',
@@ -192,3 +192,12 @@ export const getComponents = (
         },
     },
 });
+
+const getDropShadowStyle = (shadows: Shadow[]) => {
+    return shadows
+        .map(
+            (shadow) =>
+                `drop-shadow(${shadow.x}px ${shadow.y}px ${shadow.blur}px ${shadow.color})`
+        )
+        .join(' ');
+};

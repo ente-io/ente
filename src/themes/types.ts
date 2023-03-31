@@ -1,4 +1,4 @@
-import { PaletteColorOptions } from '@mui/material';
+import { PaletteColor, PaletteColorOptions } from '@mui/material';
 import React from 'react';
 
 declare module '@mui/material/styles' {
@@ -18,11 +18,6 @@ declare module '@mui/material/styles' {
     interface PaletteOptions {
         accent?: PaletteColorOptions;
         critical?: PaletteColorOptions;
-    }
-
-    interface PaletteColor {
-        lighter: string;
-        darker: string;
     }
 
     interface TypeBackground {
@@ -190,6 +185,7 @@ declare module '@mui/material/styles' {
     }
 
     interface Shadow {
+        x: number;
         y: number;
         blur: number;
         color: string;

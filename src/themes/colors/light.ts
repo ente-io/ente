@@ -32,20 +32,16 @@ const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
     },
 
     shadows: {
-        float: [
-            {
-                y: 0,
-                blur: 10,
-                color: 'rgba(0, 0, 0, 0.25)',
-            },
-        ],
+        float: [{ x: 0, y: 0, blur: 10, color: 'rgba(0, 0, 0, 0.25)' }],
         menu: [
             {
+                x: 0,
                 y: 0,
                 blur: 6,
                 color: 'rgba(0, 0, 0, 0.16)',
             },
             {
+                x: 0,
                 y: 0,
                 blur: 6,
                 color: 'rgba(0, 0, 0, 0.12)',
@@ -53,6 +49,7 @@ const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
         ],
         button: [
             {
+                x: 0,
                 y: 4,
                 blur: 4,
                 color: 'rgba(0, 0, 0, 0.25)',
