@@ -246,7 +246,11 @@ Future<bool> _isRunningInForeground() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.reload();
   final currentTime = DateTime.now().microsecondsSinceEpoch;
-  return (prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0) >
+  final lastFGHeartBeatTime = DateTime.fromMicrosecondsSinceEpoch(
+    prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0,
+  );
+  _logger.info("Last FG heart beat @ ", lastFGHeartBeatTime.toString());
+  return lastFGHeartBeatTime.microsecondsSinceEpoch >
       (currentTime - kFGTaskDeathTimeoutInMicroseconds);
 }
 
