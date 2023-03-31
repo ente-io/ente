@@ -14,7 +14,7 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/location/add_location_gallery_widget.dart";
 import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
-showAddLocationSheet(
+showEditLocationSheet(
   BuildContext context,
   List<double> centerPoint,
   VoidCallback onLocationEdited,

@@ -9,13 +9,13 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/location/edit_location_sheet.dart";
 
 class LocationScreen extends StatelessWidget {
   const LocationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final editNotifier = ValueNotifier(false);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size(double.infinity, 48),
@@ -25,7 +25,7 @@ class LocationScreen extends StatelessWidget {
           actionIcons: [
             IconButton(
               onPressed: () {
-                editNotifier.value = !editNotifier.value;
+                showEditLocationSheet(context, [63.5, -18.5], () {});
               },
               icon: const Icon(Icons.edit_rounded),
             )
@@ -37,7 +37,7 @@ class LocationScreen extends StatelessWidget {
           SizedBox(
             height: MediaQuery.of(context).size.height - 102,
             width: double.infinity,
-            child: LocationGalleryWidget(editNotifier),
+            child: const LocationGalleryWidget(),
           ),
         ],
       ),
@@ -46,8 +46,7 @@ class LocationScreen extends StatelessWidget {
 }
 
 class LocationGalleryWidget extends StatefulWidget {
-  final ValueNotifier<bool> editNotifier;
-  const LocationGalleryWidget(this.editNotifier, {super.key});
+  const LocationGalleryWidget({super.key});
 
   @override
   State<LocationGalleryWidget> createState() => _LocationGalleryWidgetState();
