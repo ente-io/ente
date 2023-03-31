@@ -118,7 +118,9 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
             loadingWidget: Column(
               children: [
                 galleryHeaderWidget,
-                const EnteLoadingWidget(),
+                EnteLoadingWidget(
+                  color: getEnteColorScheme(context).strokeMuted,
+                ),
               ],
             ),
             header: galleryHeaderWidget,
@@ -133,7 +135,14 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
             tagPrefix: "location_gallery",
           );
         } else {
-          return galleryHeaderWidget;
+          return Column(
+            children: [
+              galleryHeaderWidget,
+              const Expanded(
+                child: EnteLoadingWidget(),
+              ),
+            ],
+          );
         }
       },
       future: filterFiles(),
@@ -156,48 +165,41 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
         InheritedLocationScreenState.of(context).locationTag.name;
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  key: ValueKey(locationName),
-                  width: double.infinity,
-                  child: TitleBarTitleWidget(
-                    title: locationName,
-                  ),
-                ),
-                ValueListenableBuilder(
-                  valueListenable:
-                      InheritedLocationScreenState.memoryCountNotifier,
-                  builder: (context, value, _) {
-                    if (value == null) {
-                      return RepaintBoundary(
-                        child: EnteLoadingWidget(
-                          size: 10,
-                          color: getEnteColorScheme(context).strokeMuted,
-                          alignment: Alignment.centerLeft,
-                          padding: 5,
-                        ),
-                      );
-                    } else {
-                      return Text(
-                        value == 1 ? "1 memory" : "$value memories",
-                        style: getEnteTextTheme(context).smallMuted,
-                      );
-                    }
-                  },
-                )
-              ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              key: ValueKey(locationName),
+              width: double.infinity,
+              child: TitleBarTitleWidget(
+                title: locationName,
+              ),
             ),
-          ),
-        ],
+            ValueListenableBuilder(
+              valueListenable: InheritedLocationScreenState.memoryCountNotifier,
+              builder: (context, value, _) {
+                if (value == null) {
+                  return RepaintBoundary(
+                    child: EnteLoadingWidget(
+                      size: 10,
+                      color: getEnteColorScheme(context).strokeMuted,
+                      alignment: Alignment.centerLeft,
+                      padding: 5,
+                    ),
+                  );
+                } else {
+                  return Text(
+                    value == 1 ? "1 memory" : "$value memories",
+                    style: getEnteTextTheme(context).smallMuted,
+                  );
+                }
+              },
+            )
+          ],
+        ),
       ),
     );
   }
