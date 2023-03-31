@@ -25,9 +25,21 @@ class ObjectDetectionService {
   Future<void> init() async {
     _isolateUtils = IsolateUtils();
     await _isolateUtils.start();
-    _objectClassifier = CocoSSDClassifier();
-    _mobileNetClassifier = MobileNetClassifier();
-    _sceneClassifier = SceneClassifier();
+    try {
+      _objectClassifier = CocoSSDClassifier();
+    } catch (e, s) {
+      _logger.severe("Could not initialize cocossd", e, s);
+    }
+    try {
+      _mobileNetClassifier = MobileNetClassifier();
+    } catch (e, s) {
+      _logger.severe("Could not initialize mobilenet", e, s);
+    }
+    try {
+      _sceneClassifier = SceneClassifier();
+    } catch (e, s) {
+      _logger.severe("Could not initialize sceneclassifier", e, s);
+    }
   }
 
   static ObjectDetectionService instance =
@@ -47,33 +59,48 @@ class ObjectDetectionService {
   }
 
   Future<List<String>> _getObjects(Uint8List bytes) async {
-    final isolateData = IsolateData(
-      bytes,
-      _objectClassifier.interpreter.address,
-      _objectClassifier.labels,
-      ClassifierType.cocossd,
-    );
-    return _getPredictions(isolateData);
+    try {
+      final isolateData = IsolateData(
+        bytes,
+        _objectClassifier.interpreter.address,
+        _objectClassifier.labels,
+        ClassifierType.cocossd,
+      );
+      return _getPredictions(isolateData);
+    } catch (e, s) {
+      _logger.severe("Could not run cocossd", e, s);
+    }
+    return [];
   }
 
   Future<List<String>> _getMobileNetResults(Uint8List bytes) async {
-    final isolateData = IsolateData(
-      bytes,
-      _mobileNetClassifier.interpreter.address,
-      _mobileNetClassifier.labels,
-      ClassifierType.mobilenet,
-    );
-    return _getPredictions(isolateData);
+    try {
+      final isolateData = IsolateData(
+        bytes,
+        _mobileNetClassifier.interpreter.address,
+        _mobileNetClassifier.labels,
+        ClassifierType.mobilenet,
+      );
+      return _getPredictions(isolateData);
+    } catch (e, s) {
+      _logger.severe("Could not run mobilenet", e, s);
+    }
+    return [];
   }
 
   Future<List<String>> _getSceneResults(Uint8List bytes) async {
-    final isolateData = IsolateData(
-      bytes,
-      _sceneClassifier.interpreter.address,
-      _sceneClassifier.labels,
-      ClassifierType.scenes,
-    );
-    return _getPredictions(isolateData);
+    try {
+      final isolateData = IsolateData(
+        bytes,
+        _sceneClassifier.interpreter.address,
+        _sceneClassifier.labels,
+        ClassifierType.scenes,
+      );
+      return _getPredictions(isolateData);
+    } catch (e, s) {
+      _logger.severe("Could not run scene detection", e, s);
+    }
+    return [];
   }
 
   Future<List<String>> _getPredictions(IsolateData isolateData) async {
