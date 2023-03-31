@@ -10,7 +10,7 @@ const NavbarBase = styled(FlexWrapper)`
     border-bottom: 1px solid
         ${({ theme }: { theme: Theme }) => theme.palette.divider};
     background-color: ${({ theme }: { theme: Theme }) =>
-        theme.palette.background.default};
+        theme.palette.background.base};
     margin-bottom: 16px;
     padding: 0 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
