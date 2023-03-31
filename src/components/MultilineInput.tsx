@@ -43,7 +43,11 @@ export default function MultilineInput({
                     },
                 })}
             />
-            <Typography variant="small" {...messageProps}>
+            <Typography
+                px={'8px'}
+                variant="small"
+                color="text.secondary"
+                {...messageProps}>
                 {message}
             </Typography>
         </Stack>
