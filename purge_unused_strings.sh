@@ -3,6 +3,7 @@
 # Set the path to the JSON file and folder
 json_file_path="./public/locales/en/translation.json"
 folder_path="./src"
+tab_width=4
 
 # Check if jq and grep are installed
 if ! command -v jq &> /dev/null || ! command -v grep &> /dev/null
@@ -45,5 +46,11 @@ keys=$(jq -r 'keys[]' "$json_file_path")
 
 # Loop through the keys and recursively check for nested keys
 check_keys "$keys" ""
+
+# Format the updated JSON using the specified tab width
+jq --indent "$tab_width" '.' "$json_file_path" > "$json_file_path.tmp" && mv "$json_file_path.tmp" "$json_file_path"
+
+
+
 
 echo "Done checking for missing keys."
