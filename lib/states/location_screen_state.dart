@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:photos/models/location_tag.dart";
+import 'package:photos/models/location_tag/location_tag.dart';
 
 class InheritedLocationScreenState extends InheritedWidget {
   final LocationTag locationTag;

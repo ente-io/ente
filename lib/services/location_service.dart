@@ -3,8 +3,8 @@ import "dart:convert";
 import "dart:math";
 
 import "package:photos/core/constants.dart";
-import "package:photos/models/location.dart";
-import "package:photos/models/location_tag.dart";
+import 'package:photos/models/location/location.dart';
+import 'package:photos/models/location_tag/location_tag.dart';
 import "package:shared_preferences/shared_preferences.dart";
 
 class LocationService {
@@ -74,8 +74,8 @@ class LocationService {
             name: locationJson["name"],
             radius: locationJson["radius"],
             centerPoint: Location(
-              locationJson["center"][0],
-              locationJson["center"][1],
+              latitude: locationJson["center"][0],
+              longitude: locationJson["center"][1],
             ),
           ),
         );

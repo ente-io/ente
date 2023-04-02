@@ -9,7 +9,7 @@ import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/models/location.dart';
+import 'package:photos/models/location/location.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
@@ -1489,7 +1489,10 @@ class FilesDB {
     file.title = row[columnTitle];
     file.deviceFolder = row[columnDeviceFolder];
     if (row[columnLatitude] != null && row[columnLongitude] != null) {
-      file.location = Location(row[columnLatitude], row[columnLongitude]);
+      file.location = Location(
+        latitude: row[columnLatitude],
+        longitude: row[columnLongitude],
+      );
     }
     file.fileType = getFileType(row[columnFileType]);
     file.creationTime = row[columnCreationTime];

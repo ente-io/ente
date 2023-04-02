@@ -160,7 +160,6 @@ class GalleryHeaderWidget extends StatefulWidget {
 class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
   @override
   Widget build(BuildContext context) {
-    debugPrint("Building GalleryHeaderWidget --------------");
     final locationName =
         InheritedLocationScreenState.of(context).locationTag.name;
     return Padding(
