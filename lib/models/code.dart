@@ -77,7 +77,12 @@ class Code {
   static String _getIssuer(Uri uri) {
     try {
       if (uri.queryParameters.containsKey("issuer")) {
-        return uri.queryParameters['issuer']!;
+        String issuerName = uri.queryParameters['issuer']!;
+        // Handle issuer name with period
+        // See https://github.com/ente-io/auth/pull/77
+        if (issuerName.contains("period=")) {
+          return issuerName.substring(0, issuerName.indexOf("period="));
+        }
       }
       final String path = Uri.decodeComponent(uri.path);
       return path.split(':')[0].substring(1);
