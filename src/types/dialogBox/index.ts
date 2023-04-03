@@ -42,7 +42,7 @@ export interface DialogBoxAttributesV2 {
     };
     proceed?: {
         text: string;
-        action: () => void;
+        action: (setLoading?: (value: boolean) => void) => void | Promise<void>;
         variant?: ButtonProps['color'];
         disabled?: boolean;
     };

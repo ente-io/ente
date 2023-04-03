@@ -33,7 +33,7 @@ export default function MultilineInput({
                 placeholder={placeholder}
                 sx={(theme) => ({
                     border: '1px solid',
-                    borderColor: theme.colors.stroke.faint,
+                    borderColor: theme.palette.stroke.faint,
                     borderRadius: '8px',
                     padding: '12px',
                     '.MuiInputBase-formControl': {
@@ -45,7 +45,7 @@ export default function MultilineInput({
             />
             <Typography
                 px={'8px'}
-                variant="small"
+                variant="body2"
                 color="text.secondary"
                 {...messageProps}>
                 {message}

@@ -19,6 +19,7 @@ import { Formik, FormikHelpers } from 'formik';
 import DropdownInput, { DropdownOption } from './DropdownInput';
 import MultilineInput from './MultilineInput';
 import { CheckboxInput } from './CheckboxInput';
+import EnteButton from './EnteButton';
 
 interface Iprops {
     onClose: () => void;
@@ -70,7 +71,8 @@ const REASON_WITH_REQUIRED_FEEDBACK = new Set([
 ]);
 
 const DeleteAccountModal = ({ open, onClose }: Iprops) => {
-    const { setDialogMessage, isMobile } = useContext(AppContext);
+    const { setDialogBoxAttributesV2, isMobile } = useContext(AppContext);
+    const [loading, setLoading] = useState(false);
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);
     const [deleteAccountChallenge, setDeleteAccountChallenge] = useState('');
@@ -85,7 +87,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     }, []);
 
     const somethingWentWrong = () =>
-        setDialogMessage({
+        setDialogBoxAttributesV2({
             title: t('ERROR'),
             close: { variant: 'danger' },
             content: t('UNKNOWN_ERROR'),
@@ -96,7 +98,6 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         { setFieldError }: FormikHelpers<FormValues>
     ) => {
         try {
-            console.log({ reason, feedback });
             if (
                 REASON_WITH_REQUIRED_FEEDBACK.has(reason as DELETE_REASON) &&
                 !feedback?.length
@@ -104,6 +105,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 setFieldError('feedback', t('FEEDBACK_REQUIRED'));
                 return;
             }
+            setLoading(true);
             const deleteChallengeResponse = await getAccountDeleteChallenge();
             setDeleteAccountChallenge(
                 deleteChallengeResponse.encryptedChallenge
@@ -116,12 +118,14 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         } catch (e) {
             logError(e, 'Error while initiating account deletion');
             somethingWentWrong();
+        } finally {
+            setLoading(false);
         }
     };
 
     const confirmAccountDeletion = () => {
-        setDialogMessage({
-            title: t('CONFIRM_ACCOUNT_DELETION_TITLE'),
+        setDialogBoxAttributesV2({
+            title: t('DELETE_ACCOUNT'),
             content: <Trans i18nKey="CONFIRM_ACCOUNT_DELETION_MESSAGE" />,
             proceed: {
                 text: t('DELETE'),
@@ -133,7 +137,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     };
 
     const askToMailForDeletion = () => {
-        setDialogMessage({
+        setDialogBoxAttributesV2({
             title: t('DELETE_ACCOUNT'),
             content: (
                 <Trans
@@ -155,8 +159,11 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         });
     };
 
-    const solveChallengeAndDeleteAccount = async () => {
+    const solveChallengeAndDeleteAccount = async (
+        setLoading: (value: boolean) => void
+    ) => {
         try {
+            setLoading(true);
             const decryptedChallenge = await decryptDeleteAccountChallenge(
                 deleteAccountChallenge
             );
@@ -165,6 +172,8 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         } catch (e) {
             logError(e, 'solveChallengeAndDeleteAccount failed');
             somethingWentWrong();
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -231,13 +240,14 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     )}
                                 />
                                 <Stack spacing={'8px'}>
-                                    <Button
+                                    <EnteButton
                                         type="submit"
                                         size="large"
                                         color="danger"
-                                        disabled={!acceptDataDeletion}>
+                                        disabled={!acceptDataDeletion}
+                                        loading={loading}>
                                         {t('CONFIRM_DELETE_ACCOUNT')}
-                                    </Button>
+                                    </EnteButton>
                                     <Button
                                         size="large"
                                         color={'secondary'}

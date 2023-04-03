@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Breakpoint,
@@ -11,6 +11,7 @@ import {
 import { t } from 'i18next';
 import { dialogCloseHandler } from 'components/DialogBox/TitleWithCloseButton';
 import { DialogBoxAttributesV2 } from 'types/dialogBox';
+import EnteButton from 'components/EnteButton';
 
 type IProps = React.PropsWithChildren<
     Omit<DialogProps, 'onClose' | 'maxSize'> & {
@@ -28,6 +29,7 @@ export default function DialogBoxV2({
     onClose,
     ...props
 }: IProps) {
+    const [loading, setLoading] = useState(false);
     if (!attributes) {
         return <></>;
     }
@@ -85,16 +87,18 @@ export default function DialogBoxV2({
                         }
                         flex={1}>
                         {attributes.proceed && (
-                            <Button
+                            <EnteButton
+                                loading={loading}
                                 size="large"
                                 color={attributes.proceed?.variant}
-                                onClick={() => {
-                                    attributes.proceed.action();
+                                onClick={async () => {
+                                    await attributes.proceed.action(setLoading);
+
                                     onClose();
                                 }}
                                 disabled={attributes.proceed.disabled}>
                                 {attributes.proceed.text}
-                            </Button>
+                            </EnteButton>
                         )}
                         {attributes.close && (
                             <Button

@@ -100,7 +100,7 @@ export default function DropdownInput<T extends string>({
             </Select>
             {message && (
                 <Typography
-                    variant="small"
+                    variant="body2"
                     px={'8px'}
                     color={'text.secondary'}
                     {...messageProps}>
