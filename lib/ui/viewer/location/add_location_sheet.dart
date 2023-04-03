@@ -13,7 +13,7 @@ import "package:photos/ui/components/keyboard/keybiard_oveylay.dart";
 import "package:photos/ui/components/keyboard/keyboard_top_button.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
-import "package:photos/ui/viewer/location/add_location_gallery_widget.dart";
+import 'package:photos/ui/viewer/location/dynamic_location_gallery_widget.dart';
 import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
 showAddLocationSheet(
