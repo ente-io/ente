@@ -112,7 +112,6 @@ const OTPDisplay = (props: OTPDisplayProps) => {
     const [code, setCode] = useState('');
     const [nextCode, setNextCode] = useState('');
     const [codeErr, setCodeErr] = useState('');
-    const generateCodeInterval = 1000;
 
     const generateCodes = () => {
         try {
@@ -145,15 +144,26 @@ const OTPDisplay = (props: OTPDisplayProps) => {
     };
 
     useEffect(() => {
+        // this is to set the initial code and nextCode on component mount
         generateCodes();
         const codeType = codeInfo.type;
-        const intervalId =
+        const codePeriodInMs = codeInfo.period * 1000;
+        const timeToNextCode =
+            codePeriodInMs - (new Date().getTime() % codePeriodInMs);
+        const intervalId = null;
+        // wait until we are at the start of the next code period,
+        // and then start the interval loop
+        setTimeout(() => {
+            // we need to call generateCodes() once before the interval loop
+            // to set the initial code and nextCode
+            generateCodes();
             codeType.toLowerCase() === 'totp' ||
             codeType.toLowerCase() === 'hotp'
                 ? setInterval(() => {
                       generateCodes();
-                  }, generateCodeInterval)
+                  }, codePeriodInMs)
                 : null;
+        }, timeToNextCode);
 
         return () => {
             if (intervalId) clearInterval(intervalId);
