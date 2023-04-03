@@ -41,6 +41,7 @@ import { Collection } from 'types/collection';
 import {
     CollectionIDNameMap,
     CollectionIDPathMap,
+    ExportProgress,
     ExportRecord,
     ExportRecordV1,
     ExportUIUpdaters,
@@ -70,6 +71,11 @@ class ExportService {
     private fileReader: FileReader = null;
     private continuousExportEventHandler: () => void;
     private uiUpdater: ExportUIUpdaters;
+    private currentExportProgress: ExportProgress = {
+        total: 0,
+        success: 0,
+        failed: 0,
+    };
 
     constructor() {
         this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -78,6 +84,12 @@ class ExportService {
 
     async setUIUpdaters(uiUpdater: ExportUIUpdaters) {
         this.uiUpdater = uiUpdater;
+        this.uiUpdater.updateExportProgress(this.currentExportProgress);
+    }
+
+    private updateExportProgress(exportProgress: ExportProgress) {
+        this.currentExportProgress = exportProgress;
+        this.uiUpdater.updateExportProgress(exportProgress);
     }
 
     async changeExportDirectory(callback: (newExportDir: string) => void) {
@@ -179,7 +191,7 @@ class ExportService {
                 addLogLine('starting export');
                 this.exportInProgress = true;
                 await this.uiUpdater.updateExportStage(ExportStage.INPROGRESS);
-                this.uiUpdater.updateExportProgress({
+                this.updateExportProgress({
                     success: 0,
                     failed: 0,
                     total: 0,
@@ -292,6 +304,11 @@ class ExportService {
             this.electronAPIs.sendNotification(t('EXPORT_NOTIFICATION.START'));
             let success = 0;
             let failed = 0;
+            this.updateExportProgress({
+                success,
+                failed,
+                total: files.length,
+            });
             for (const file of files) {
                 if (this.stopExport) {
                     break;
@@ -330,7 +347,7 @@ class ExportService {
                         RecordType.FAILED
                     );
                 }
-                this.uiUpdater.updateExportProgress({
+                this.updateExportProgress({
                     success,
                     failed,
                     total: files.length,
