@@ -6,3 +6,8 @@ export interface AuthEntity {
     createdAt: number;
     updatedAt: number;
 }
+
+export interface AuthKey {
+    encryptedKey: string;
+    header: string;
+}
