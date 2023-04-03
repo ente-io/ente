@@ -179,7 +179,11 @@ class ExportService {
                 addLogLine('starting export');
                 this.exportInProgress = true;
                 await this.uiUpdater.updateExportStage(ExportStage.INPROGRESS);
-                this.uiUpdater.updateExportProgress({ current: 0, total: 0 });
+                this.uiUpdater.updateExportProgress({
+                    success: 0,
+                    failed: 0,
+                    total: 0,
+                });
                 await this.exportFiles();
                 addLogLine('export completed');
             } finally {
@@ -287,6 +291,7 @@ class ExportService {
             this.stopExport = false;
             this.electronAPIs.sendNotification(t('EXPORT_NOTIFICATION.START'));
             let success = 0;
+            let failed = 0;
             for (const file of files) {
                 if (this.stopExport) {
                     break;
@@ -310,11 +315,8 @@ class ExportService {
                         RecordType.SUCCESS
                     );
                     success++;
-                    this.uiUpdater.updateExportProgress({
-                        current: success,
-                        total: files.length,
-                    });
                 } catch (e) {
+                    failed++;
                     logError(e, 'export failed for a file');
                     if (
                         e.message ===
@@ -328,6 +330,11 @@ class ExportService {
                         RecordType.FAILED
                     );
                 }
+                this.uiUpdater.updateExportProgress({
+                    success,
+                    failed,
+                    total: files.length,
+                });
             }
             if (!this.stopExport) {
                 this.electronAPIs.sendNotification(
