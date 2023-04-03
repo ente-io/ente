@@ -1,0 +1,116 @@
+{
+  "@@locale": "en",
+  "counterAppBarTitle": "Teller",
+  "@counterAppBarTitle": {
+    "description": "Text shown in the AppBar of the Counter Page"
+  },
+  "onBoardingBody": "Beveilig je 2FA codes",
+  "onBoardingGetStarted": "Begin",
+  "setupFirstAccount": "Maak je account aan",
+  "importScanQrCode": "Scan een QR-code",
+  "importEnterSetupKey": "Voer een toegangssleutel in",
+  "importAccountPageTitle": "Accountgegevens invoeren",
+  "codeIssuerHint": "Uitgever",
+  "codeSecretKeyHint": "Geheime code",
+  "codeAccountHint": "Account (jij@domein.nl)",
+  "accountKeyType": "Type sleutel",
+  "timeBasedKeyType": "Tijd gebaseerd (TOTP)",
+  "counterBasedKeyType": "Teller gebaseerd (HOTP)",
+  "saveAction": "Opslaan",
+  "nextTotpTitle": "volgende",
+  "deleteCodeTitle": "Code verwijderen?",
+  "deleteCodeMessage": "Weet je zeker dat je deze code wilt verwijderen? Deze actie is onomkeerbaar.",
+  "viewLogsAction": "Bekijk logs",
+  "sendLogsDescription": "Dit zal logs verzenden om ons te helpen uw probleem op te lossen. Hoewel we voorzorgsmaatregelen nemen om ervoor te zorgen dat gevoelige informatie niet wordt gedeeld, raden we je aan deze logs te bekijken voordat je ze deelt.",
+  "preparingLogsTitle": "Klaarmaken...",
+  "emailLogsTitle": "E-mail logs",
+  "emailLogsMessage": "Verstuur de logs alsjeblieft naar {email}",
+  "@emailLogsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "copyEmailAction": "E-mail kopiëren",
+  "exportLogsAction": "Logs exporteren",
+  "reportABug": "Een fout melden",
+  "crashAndErrorReporting": "Crash- en foutrapportage",
+  "reportBug": "Een fout melden",
+  "emailUsMessage": "Stuur ons een e-mail op {email}",
+  "@emailUsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contactSupport": "Klantenservice",
+  "verifyPassword": "Bevestig wachtwoord",
+  "pleaseWaitTitle": "Een ogenblik geduld...",
+  "generatingEncryptionKeysTitle": "Encryptiesleutels genereren...",
+  "recreatePassword": "Wachtwoord opnieuw instellen",
+  "recreatePasswordMessage": "Het huidige apparaat is niet krachtig genoeg om je wachtwoord te verifiëren, dus moeten we de code een keer opnieuw genereren op een manier die met alle apparaten werkt.\n\nLog in met behulp van uw herstelcode en genereer opnieuw uw wachtwoord (je kunt dezelfde indien gewenst opnieuw gebruiken).",
+  "useRecoveryKeyAction": "Herstelcode gebruiken",
+  "incorrectPassword": "Onjuist wachtwoord",
+  "welcomeBackTitle": "Welkom terug!",
+  "madeWithLoveAtPrefix": "gemaakt met ❤️ door ",
+  "supportDiscount": "Gebruik couponcode \"AUTH\" om 10% korting te krijgen op het eerste jaar",
+  "changeEmail": "e-mailadres wijzigen",
+  "ok": "Oké",
+  "cancel": "Annuleer",
+  "yes": "Ja",
+  "no": "Nee",
+  "email": "E-mail",
+  "support": "Ondersteuning",
+  "settings": "Instellingen",
+  "copied": "Gekopieerd",
+  "tryAgainMessage": "Probeer het nog eens",
+  "existingUser": "Bestaande gebruiker",
+  "newUser": "Nieuw bij ente",
+  "delete": "Verwijderen",
+  "enterYourPasswordHint": "Voer je wachtwoord in",
+  "forgotPassword": "Wachtwoord vergeten",
+  "oops": "Oeps",
+  "somethingWentWrongMessage": "Er is iets fout gegaan, probeer het opnieuw",
+  "leaveFamily": "Familie verlaten",
+  "leaveFamilyMessage": "Weet je zeker dat je het familie-plan wil verlaten?",
+  "inFamilyPlanMessage": "Je hebt een familie-plan!",
+  "swipeHint": "Veeg naar links om codes te bewerken of te verwijderen",
+  "scan": "Scannen",
+  "scanACode": "Scan een code",
+  "verify": "Verifiëren",
+  "enterCodeHint": "Voer de 6-cijferige code van je verificatie-app in",
+  "lostDeviceTitle": "Apparaat verloren?",
+  "twoFactorAuthTitle": "Tweestapsverificatie",
+  "recoverAccount": "Account herstellen",
+  "enterRecoveryKeyHint": "Voer je herstelcode in",
+  "recover": "Herstellen",
+  "contactSupportViaEmailMessage": "Verstuur a.u.b. een e-mail naar {email} van uw geregistreerde e-mailadres",
+  "@contactSupportViaEmailMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "noRecoveryKeyTitle": "Geen herstelcode?",
+  "enterEmailHint": "Voer je e-mailadres in",
+  "invalidEmailTitle": "Ongeldig e-mailadres",
+  "invalidEmailMessage": "Voer een geldig e-mailadres in.",
+  "deleteAccount": "Account verwijderen",
+  "deleteAccountQuery": "We zullen het vervelend vinden om je te zien vertrekken. Zijn er problemen?",
+  "yesSendFeedbackAction": "Ja, geef feedback",
+  "noDeleteAccountAction": "Nee, verwijder account",
+  "initiateAccountDeleteTitle": "Gelieve te verifiëren om het account te verwijderen",
+  "confirmAccountDeleteTitle": "Weet je zeker dat je je ente account wil verwijderen?",
+  "confirmAccountDeleteMessage": "Uw geüploade gegevens, in alle apps (Photos en Authenticator), worden ingepland voor verwijdering en uw account zal permanent worden verwijderd.",
+  "sendEmail": "E-mail versturen",
+  "createNewAccount": "Nieuw account aanmaken",
+  "passwordStrengthWeak": "Zwak",
+  "passwordStrengthStrong": "Sterk",
+  "passwordStrengthModerate": "Matig",
+  "confirmPassword": "Wachtwoord bevestigen",
+  "close": "Sluiten",
+  "oopsSomethingWentWrong": "Oeps, er is iets fout gegaan."
+}

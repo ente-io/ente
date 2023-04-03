@@ -1,0 +1,116 @@
+{
+  "@@locale": "en",
+  "counterAppBarTitle": "Compteur",
+  "@counterAppBarTitle": {
+    "description": "Text shown in the AppBar of the Counter Page"
+  },
+  "onBoardingBody": "Sécurisez vos codes 2FA",
+  "onBoardingGetStarted": "Premiers Pas",
+  "setupFirstAccount": "Configurez votre premier compte",
+  "importScanQrCode": "Scannez un QR Code",
+  "importEnterSetupKey": "Saisir une clé de configuration",
+  "importAccountPageTitle": "Saisir les détails du compte",
+  "codeIssuerHint": "Émetteur",
+  "codeSecretKeyHint": "Clé secrète",
+  "codeAccountHint": "Compte (vous@domaine.fr)",
+  "accountKeyType": "Type de clé",
+  "timeBasedKeyType": "Basé sur l'heure (TOTP)",
+  "counterBasedKeyType": "Basé sur le compteur (HOTP)",
+  "saveAction": "Sauvegarder",
+  "nextTotpTitle": "suivant",
+  "deleteCodeTitle": "Supprimer le code ?",
+  "deleteCodeMessage": "Êtes-vous sûr de vouloir supprimer ce code ? Cette action est irréversible.",
+  "viewLogsAction": "Afficher les journaux",
+  "sendLogsDescription": "Cela enverra des logs pour nous aider à déboguer votre problème. Bien que nous prenions des précautions pour nous assurer que les informations sensibles ne sont pas enregistrées, nous vous encourageons à consulter ces journaux avant de les partager.",
+  "preparingLogsTitle": "Préparation des journaux...",
+  "emailLogsTitle": "Journaux d'email",
+  "emailLogsMessage": "Envoyez les logs à {email}",
+  "@emailLogsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "copyEmailAction": "Copier l’e-mail",
+  "exportLogsAction": "Exporter les journaux",
+  "reportABug": "Signaler un bug",
+  "crashAndErrorReporting": "Rapport de plantage et d'erreur",
+  "reportBug": "Signaler un bug",
+  "emailUsMessage": "Veuillez nous envoyer un e-mail à {email}",
+  "@emailUsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contactSupport": "Contacter le support",
+  "verifyPassword": "Vérifier le mot de passe",
+  "pleaseWaitTitle": "Veuillez patienter...",
+  "generatingEncryptionKeysTitle": "Génération des clés de chiffrement...",
+  "recreatePassword": "Recréer le mot de passe",
+  "recreatePasswordMessage": "L'appareil actuel n'est pas assez puissant pour vérifier votre mot de passe, donc nous avons besoin de le régénérer une fois d'une manière qu'il fonctionne avec tous les périphériques.\n\nVeuillez vous connecter en utilisant votre clé de récupération et régénérer votre mot de passe (vous pouvez utiliser le même si vous le souhaitez).",
+  "useRecoveryKeyAction": "Utiliser la clé de récupération",
+  "incorrectPassword": "Mot de passe incorrect",
+  "welcomeBackTitle": "Bon retour parmi nous !",
+  "madeWithLoveAtPrefix": "fait avec ❤️ à ",
+  "supportDiscount": "Utilisez le code coupon \"AUTH\" pour obtenir 10% de réduction sur la première année",
+  "changeEmail": "modifier l'e-mail",
+  "ok": "Ok",
+  "cancel": "Annuler",
+  "yes": "Oui",
+  "no": "Non",
+  "email": "E-mail",
+  "support": "Support",
+  "settings": "Paramètres",
+  "copied": "Copié",
+  "tryAgainMessage": "Veuillez réessayer",
+  "existingUser": "Utilisateur existant",
+  "newUser": "Nouveau sur ente",
+  "delete": "Supprimer",
+  "enterYourPasswordHint": "Saisir votre mot de passe",
+  "forgotPassword": "Mot de passe oublié",
+  "oops": "Oups",
+  "somethingWentWrongMessage": "Quelque chose s'est mal passé, veuillez recommencer",
+  "leaveFamily": "Quitter le plan familial",
+  "leaveFamilyMessage": "Êtes-vous certains de vouloir quitter le plan familial ?",
+  "inFamilyPlanMessage": "Vous êtes sur un plan familial !",
+  "swipeHint": "Glisser vers la gauche pour modifier ou supprimer des codes",
+  "scan": "Analyser",
+  "scanACode": "Scanner un code",
+  "verify": "Vérifier",
+  "enterCodeHint": "Saisir le code à 6 caractères de votre appli d'authentification",
+  "lostDeviceTitle": "Appareil perdu ?",
+  "twoFactorAuthTitle": "Authentification à deux facteurs",
+  "recoverAccount": "Récupérer un compte",
+  "enterRecoveryKeyHint": "Saisissez votre clé de récupération",
+  "recover": "Restaurer",
+  "contactSupportViaEmailMessage": "Veuillez envoyer un e-mail à {} depuis votre adresse enregistrée",
+  "@contactSupportViaEmailMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "noRecoveryKeyTitle": "Pas de clé de récupération ?",
+  "enterEmailHint": "Entrez votre adresse e-mail",
+  "invalidEmailTitle": "Adresse e-mail non valide",
+  "invalidEmailMessage": "Veuillez saisir une adresse e-mail valide.",
+  "deleteAccount": "Supprimer le compte",
+  "deleteAccountQuery": "Nous sommes désolés de vous voir partir. Êtes-vous confronté à un problème?",
+  "yesSendFeedbackAction": "Oui, envoyer un commentaire",
+  "noDeleteAccountAction": "Non, supprimer le compte",
+  "initiateAccountDeleteTitle": "Veuillez vous authentifier pour débuter la suppression du compte",
+  "confirmAccountDeleteTitle": "Êtes-vous sûr de vouloir supprimer votre compte ente ?",
+  "confirmAccountDeleteMessage": "Vos données téléchargées, à travers toutes les applications (Photos et Authenticator), seront planifiées pour la suppression, et votre compte sera définitivement supprimé.",
+  "sendEmail": "Envoyer un e-mail",
+  "createNewAccount": "Créer un nouveau compte",
+  "passwordStrengthWeak": "Faible",
+  "passwordStrengthStrong": "Fort",
+  "passwordStrengthModerate": "Modéré",
+  "confirmPassword": "Confirmer le mot de passe",
+  "close": "Fermer",
+  "oopsSomethingWentWrong": "Oops ! Une erreur s'est produite."
+}

@@ -52,14 +52,19 @@ releases](https://github.com/ente-io/auth/releases/latest/download/ente-auth.apk
 contains APKs, built straight from source. These builds keep themselves updated,
 without relying on third party stores.
 
-You can alternatively install the build from PlayStore.
+You can alternatively install the build from PlayStore or F-Droid.
 
 <a href="https://play.google.com/store/apps/details?id=io.ente.auth"> <img
   width="197" alt="Get it on Google Play"
 src="https://ente.io/static/ed265c3abdcd3efa5e29f64b927bcb44/e230a/play-store-badge.webp">
 </a>
 
+<a href="https://f-droid.org/packages/io.ente.auth/">
+  <img width="197" alt="Get it on F-Droid" src="https://ente.io/static/5378d3de690a04a5011268b9caf739f5/e230a/f-droid-badge.webp">
+</a>
+
 ### iPhone / Apple Silicon
+
 
 <a href="https://apps.apple.com/us/app/ente-authenticator/id6444121398"> <img
   width="197" alt="Download on AppStore"
@@ -102,6 +107,10 @@ If you have feature requests, please create a [GitHub issue](https://github.com/
 If you wish to support us, please ⭐
 [star](https://github.com/ente-io/auth/stargazers) this project.
 
+## 🙌 Translation
+[![Crowdin](https://badges.crowdin.net/ente-authenticator-app/localized.svg)](https://crowdin.com/project/ente-authenticator-app)
+
+If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-authenticator-app) to get started. Thank you for your support.
 
 ## 💜 Community
 

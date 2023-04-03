@@ -1,8 +1,8 @@
 {
-  "@@locale": "de",
+  "@@locale": "en",
   "counterAppBarTitle": "Zähler",
   "@counterAppBarTitle": {
-    "description": "Text, der in der AppBar der Zähler-Seite angezeigt wird"
+    "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "Sichern Sie Ihre 2FA-Codes",
   "onBoardingGetStarted": "Los geht's",
@@ -11,7 +11,7 @@
   "importEnterSetupKey": "Einen Setup-Schlüssel eingeben",
   "importAccountPageTitle": "Kontodaten eingeben",
   "codeIssuerHint": "Aussteller",
-  "codeSecretKeyHint" : "Geheimer Schlüssel",
+  "codeSecretKeyHint": "Geheimer Schlüssel",
   "codeAccountHint": "Konto (you@domain.com)",
   "accountKeyType": "Art des Schlüssels",
   "timeBasedKeyType": "Zeitbasiert (TOTP)",
@@ -56,21 +56,19 @@
   "welcomeBackTitle": "Willkommen zurück!",
   "madeWithLoveAtPrefix": "gemacht mit ❤️ bei ",
   "changeEmail": "E-Mail ändern",
-  "ok": "OK",
   "cancel": "Abbrechen",
   "yes": "Ja",
   "no": "Nein",
   "email": "E-Mail",
-  "support": "Support",
+  "support": "Unterstützung",
   "settings": "Einstellungen",
   "copied": "Kopiert",
   "tryAgainMessage": "Bitte versuchen Sie es erneut",
   "existingUser": "Bestehender Benutzer",
-  "newUser" : "Neu bei ente",
+  "newUser": "Neu bei ente",
   "delete": "Löschen",
   "enterYourPasswordHint": "Geben Sie Ihr Passwort ein",
   "forgotPassword": "Passwort vergessen",
-  "oops": "Oops",
   "somethingWentWrongMessage": "Ein Fehler ist aufgetreten, bitte versuchen Sie es erneut",
   "leaveFamily": "Familie verlassen",
   "leaveFamilyMessage": "Sind Sie sicher, dass Sie den Familien-Plan verlassen wollen?",
@@ -85,7 +83,7 @@
   "recoverAccount": "Konto wiederherstellen",
   "enterRecoveryKeyHint": "Geben Sie Ihren Wiederherstellungsschlüssel ein",
   "recover": "Wiederherstellen",
-  "contactSupportViaEmailMessage":"Bitte senden Sie eine E-Mail an {email} von Ihrer registrierten E-Mail-Adresse",
+  "contactSupportViaEmailMessage": "Bitte senden Sie eine E-Mail an {email} von Ihrer registrierten E-Mail-Adresse",
   "@contactSupportViaEmailMessage": {
     "placeholders": {
       "email": {
@@ -112,5 +110,4 @@
   "confirmPassword": "Bestätigen Sie das Passwort",
   "close": "Schließen",
   "oopsSomethingWentWrong": "Ups, da ist etwas schief gelaufen."
-
 }
