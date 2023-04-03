@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/models/location/location.dart";
 import "package:photos/services/location_service.dart";
 import 'package:photos/states/location_state.dart';
 import "package:photos/theme/colors.dart";
@@ -17,7 +18,7 @@ import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
 showAddLocationSheet(
   BuildContext context,
-  List<double> coordinates,
+  Location coordinates,
   VoidCallback onLocationAdded,
 ) {
   showBarModalBottomSheet(
@@ -195,12 +196,11 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
 
   Future<void> _addLocationTag(String locationName) async {
     final locationData = InheritedLocationTagData.of(context);
-    final coordinates = locationData.coordinates;
+    final coordinates = locationData.centerPoint;
     final radius = radiusValues[locationData.selectedRadiusIndex];
     await LocationService.instance.addLocation(
       locationName,
-      coordinates.first,
-      coordinates.last,
+      coordinates,
       radius,
     );
     widget.onLocationAdded.call();

@@ -58,8 +58,8 @@ class _DynamicLocationGalleryWidgetState
               f.location!.longitude != null,
         );
         return !LocationService.instance.isFileInsideLocationTag(
-          InheritedLocationTagData.of(context).coordinates,
-          [f.location!.latitude!, f.location!.longitude!],
+          InheritedLocationTagData.of(context).centerPoint,
+          f.location!,
           selectedRadius,
         );
       });

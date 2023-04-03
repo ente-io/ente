@@ -25,8 +25,7 @@ class LocationService {
 
   Future<void> addLocation(
     String location,
-    double lat,
-    double long,
+    Location centerPoint,
     int radius,
   ) async {
     final list = getAllLocationTags();
@@ -35,15 +34,17 @@ class LocationService {
     //a & b are the semi-major and semi-minor axes of the ellipse
     //Converting the unit from kilometers to degrees for a and b as that is
     //the unit on the caritesian plane
-    final a = (radius * _scaleFactor(lat)) / kilometersPerDegree;
+
+    //Todo : Check if lat long can be null here
+    final a =
+        (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
     final b = radius / kilometersPerDegree;
-    final center = Location(latitude: lat, longitude: long);
     final locationTag = LocationTag(
       name: location,
       radius: radius,
       aSquare: a * a,
       bSquare: b * b,
-      centerPoint: center,
+      centerPoint: centerPoint,
     );
     list.add(json.encode(locationTag.toJson()));
     await prefs!.setStringList('locations', list);
@@ -57,7 +58,7 @@ class LocationService {
     return 1 / cos(lat * (pi / 180));
   }
 
-  List<LocationTag> enclosingLocationTags(List<double> coordinates) {
+  List<LocationTag> enclosingLocationTags(Location fileCoordinates) {
     final result = List<LocationTag>.of([]);
     final locationTagsData = getAllLocationTags();
     for (String locationTagData in locationTagsData) {
@@ -65,8 +66,8 @@ class LocationService {
       // final locationJson = json.decode(locationTag);
       // final center = locationJson["center"];
       //Todo : Check if lat long can be null here
-      final x = coordinates[0] - locationTag.centerPoint.latitude!;
-      final y = coordinates[1] - locationTag.centerPoint.longitude!;
+      final x = fileCoordinates.latitude! - locationTag.centerPoint.latitude!;
+      final y = fileCoordinates.longitude! - locationTag.centerPoint.longitude!;
       if ((x * x) / (locationTag.aSquare) + (y * y) / (locationTag.bSquare) <=
           1) {
         result.add(
@@ -78,14 +79,15 @@ class LocationService {
   }
 
   bool isFileInsideLocationTag(
-    List<double> center,
-    List<double> fileCoordinates,
+    Location centerPoint,
+    Location fileCoordinates,
     int radius,
   ) {
-    final a = (radius * _scaleFactor(center[0])) / kilometersPerDegree;
+    final a =
+        (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
     final b = radius / kilometersPerDegree;
-    final x = center[0] - fileCoordinates[0];
-    final y = center[1] - fileCoordinates[1];
+    final x = centerPoint.latitude! - fileCoordinates.latitude!;
+    final y = centerPoint.longitude! - fileCoordinates.longitude!;
     if ((x * x) / (a * a) + (y * y) / (b * b) <= 1) {
       return true;
     }
@@ -144,12 +146,12 @@ class GPSData {
 
   GPSData(this.latRef, this.lat, this.longRef, this.long);
 
-  List<double> toSignedDecimalDegreeCoordinates() {
+  Location toLocationFormat() {
     final latSign = latRef == "N" ? 1 : -1;
     final longSign = longRef == "E" ? 1 : -1;
-    return [
-      latSign * lat[0] + lat[1] / 60 + lat[2] / 3600,
-      longSign * long[0] + long[1] / 60 + long[2] / 3600
-    ];
+    return Location(
+      latitude: latSign * lat[0] + lat[1] / 60 + lat[2] / 3600,
+      longitude: longSign * long[0] + long[1] / 60 + long[2] / 3600,
+    );
   }
 }

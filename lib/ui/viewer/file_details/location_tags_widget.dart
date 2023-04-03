@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:photos/models/location/location.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
@@ -11,8 +12,8 @@ import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class LocationTagsWidget extends StatefulWidget {
-  final List<double> coordinates;
-  const LocationTagsWidget(this.coordinates, {super.key});
+  final Location centerPoint;
+  const LocationTagsWidget(this.centerPoint, {super.key});
 
   @override
   State<LocationTagsWidget> createState() => _LocationTagsWidgetState();
@@ -47,14 +48,14 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
 
   Future<List<Widget>> _getLocationTags() async {
     final locationTags =
-        LocationService.instance.enclosingLocationTags(widget.coordinates);
+        LocationService.instance.enclosingLocationTags(widget.centerPoint);
     if (locationTags.isEmpty) {
       return [
         InlineButtonWidget(
           "Group nearby photos",
           () => showAddLocationSheet(
             context,
-            widget.coordinates,
+            widget.centerPoint,
             //This callback is for reloading the locationTagsWidget after adding a new location tag
             //so that it updates in file details.
             () {
@@ -91,7 +92,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         leadingIcon: Icons.add_outlined,
         onTap: () => showAddLocationSheet(
           context,
-          widget.coordinates,
+          widget.centerPoint,
           //This callback is for reloading the locationTagsWidget after adding a new location tag
           //so that it updates in file details.
           () {

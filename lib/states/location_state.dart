@@ -1,10 +1,11 @@
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/models/location/location.dart";
 import "package:photos/models/typedefs.dart";
 import "package:photos/utils/debouncer.dart";
 
 class LocationTagStateProvider extends StatefulWidget {
-  final List<double> centerPoint;
+  final Location centerPoint;
   final Widget child;
   const LocationTagStateProvider(this.centerPoint, this.child, {super.key});
 
@@ -15,7 +16,7 @@ class LocationTagStateProvider extends StatefulWidget {
 
 class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
   int selectedRaduisIndex = defaultRadiusValueIndex;
-  late List<double> centerPoint;
+  late Location centerPoint;
   final Debouncer _selectedRadiusDebouncer =
       Debouncer(const Duration(milliseconds: 300));
   @override
@@ -48,11 +49,11 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
 
 class InheritedLocationTagData extends InheritedWidget {
   final int selectedRadiusIndex;
-  final List<double> coordinates;
+  final Location centerPoint;
   final VoidCallbackParamInt updateSelectedIndex;
   const InheritedLocationTagData(
     this.selectedRadiusIndex,
-    this.coordinates,
+    this.centerPoint,
     this.updateSelectedIndex, {
     required super.child,
     super.key,

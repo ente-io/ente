@@ -2,6 +2,7 @@ import 'dart:developer' as dev;
 import "package:flutter/material.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
+import "package:photos/models/location/location.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_screen_state.dart";
@@ -26,7 +27,11 @@ class LocationScreen extends StatelessWidget {
           actionIcons: [
             IconButton(
               onPressed: () {
-                showEditLocationSheet(context, [63.5, -18.5], () {});
+                showEditLocationSheet(
+                  context,
+                  const Location(latitude: 63.5, longitude: -18.5),
+                  () {},
+                );
               },
               icon: const Icon(Icons.edit_rounded),
             )
@@ -90,8 +95,11 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
               f.location!.longitude != null,
         );
         return !LocationService.instance.isFileInsideLocationTag(
-          [63.5, -18.5], //pass the coordinates from the location tag here
-          [f.location!.latitude!, f.location!.longitude!],
+          const Location(
+            latitude: 63.5,
+            longitude: -18.5,
+          ), //pass the coordinates from the location tag here
+          f.location!,
           selectedRadius,
         );
       });

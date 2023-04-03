@@ -152,7 +152,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                           _exifData["lat"],
                           _exifData["longRef"],
                           _exifData["long"],
-                        ).toSignedDecimalDegreeCoordinates(),
+                        ).toLocationFormat(),
                       ),
                       const FileDetailsDivider(),
                     ],
