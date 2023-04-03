@@ -1,5 +1,3 @@
-import "dart:convert";
-
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/data/holidays.dart';
@@ -12,6 +10,7 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location/location.dart';
+import "package:photos/models/location_tag/location_tag.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import 'package:photos/models/search/location_api_response.dart';
@@ -270,15 +269,10 @@ class SearchService {
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
-    final locations = LocationService.instance.getAllLocationTags();
-    for (String location in locations) {
-      final locationJson = json.decode(location);
-      final locationName = locationJson["name"].toString();
-      _logger.info(locationName);
-      if (locationName.toLowerCase().contains(query.toLowerCase())) {
-        _logger.info("TRUEEE");
-        final fileIDs = LocationService.instance
-            .getFilesByLocation(locationJson["id"].toString());
+    final locations = LocationService.instance.getLocationTags();
+    for (LocationTag tag in locations) {
+      if (tag.name.toLowerCase().contains(query.toLowerCase())) {
+        final fileIDs = LocationService.instance.getFilesByLocation(tag);
         final files = List<File>.empty(growable: true);
         for (String fileID in fileIDs) {
           final id = int.parse(fileID);
@@ -288,7 +282,7 @@ class SearchService {
         searchResults.add(
           GenericSearchResult(
             ResultType.location,
-            locationName,
+            tag.name,
             files,
           ),
         );

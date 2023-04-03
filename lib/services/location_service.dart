@@ -17,10 +17,15 @@ class LocationService {
     prefs = preferences;
   }
 
-  List<String> getAllLocationTags() {
+  List<String> _getStoredLocationTags() {
     var list = prefs.getStringList('locations');
     list ??= [];
     return list;
+  }
+
+  List<LocationTag> getLocationTags() {
+    final list = _getStoredLocationTags();
+    return list.map((e) => LocationTag.fromJson(json.decode(e))).toList();
   }
 
   Future<void> addLocation(
@@ -28,7 +33,7 @@ class LocationService {
     Location centerPoint,
     int radius,
   ) async {
-    final list = getAllLocationTags();
+    final list = _getStoredLocationTags();
     //The area enclosed by the location tag will be a circle on a 3D spherical
     //globe and an ellipse on a 2D Mercator projection (2D map)
     //a & b are the semi-major and semi-minor axes of the ellipse
@@ -59,11 +64,8 @@ class LocationService {
 
   List<LocationTag> enclosingLocationTags(Location fileCoordinates) {
     final result = List<LocationTag>.of([]);
-    final locationTagsData = getAllLocationTags();
-    for (String locationTagData in locationTagsData) {
-      final locationTag = LocationTag.fromJson(json.decode(locationTagData));
-      // final locationJson = json.decode(locationTag);
-      // final center = locationJson["center"];
+    final locationTagsData = getLocationTags();
+    for (LocationTag locationTag in locationTagsData) {
       final x = fileCoordinates.latitude! - locationTag.centerPoint.latitude!;
       final y = fileCoordinates.longitude! - locationTag.centerPoint.longitude!;
       if ((x * x) / (locationTag.aSquare) + (y * y) / (locationTag.bSquare) <=
@@ -92,8 +94,8 @@ class LocationService {
     return false;
   }
 
-  List<String> getFilesByLocation(String locationId) {
-    var fileList = prefs.getStringList("location_$locationId");
+  List<String> getFilesByLocation(LocationTag locationTag) {
+    var fileList = prefs.getStringList("location_${locationTag.name}");
     fileList ??= [];
     return fileList;
   }
