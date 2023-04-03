@@ -63,7 +63,8 @@ src="https://ente.io/static/ed265c3abdcd3efa5e29f64b927bcb44/e230a/play-store-ba
   <img width="197" alt="Get it on F-Droid" src="https://ente.io/static/5378d3de690a04a5011268b9caf739f5/e230a/f-droid-badge.webp">
 </a>
 
-### iOS
+### iPhone / Apple Silicon
+
 
 <a href="https://apps.apple.com/us/app/ente-authenticator/id6444121398"> <img
   width="197" alt="Download on AppStore"
@@ -72,7 +73,7 @@ src="https://user-images.githubusercontent.com/1161789/154795157-c4468ff9-97fd-4
 
 ### Desktop
 
-Support for desktop platforms (Linux, Mac and Windows) is a [work in
+Support for desktop platforms (Linux, Windows and older Macs) is a [work in
 progress](https://github.com/ente-io/auth/tree/desktop).
 
 Please ⭐ this repo to be notified of updates.
