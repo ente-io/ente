@@ -529,7 +529,8 @@ class FilesDB {
       filesTable,
       where: onlyFilesWithLocation
           ? '$columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0)'
-              '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+              ' AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND '
+              '($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
               ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))'
           : '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
               ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
