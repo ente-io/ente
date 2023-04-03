@@ -5,7 +5,7 @@ import {
     getPeopleList,
     getUnidentifiedFaces,
 } from 'utils/machineLearning';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import { EnteFile } from 'types/file';
 import { ImageCacheView } from './ImageViews';
 import { CACHES } from 'constants/cache';
@@ -14,7 +14,7 @@ import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
 import { t } from 'i18next';
 
-const FaceChipContainer = styled.div`
+const FaceChipContainer = styled('div')`
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -24,7 +24,7 @@ const FaceChipContainer = styled.div`
     overflow: auto;
 `;
 
-const FaceChip = styled.div<{ clickable?: boolean }>`
+const FaceChip = styled('div')<{ clickable?: boolean }>`
     width: 112px;
     height: 112px;
     margin: 5px;

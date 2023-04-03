@@ -180,7 +180,7 @@ const darkThemeOptions = createTheme({
             },
             styleOverrides: {
                 root: {
-                    padding: '12px 16px',
+                    padding: '14px 16px',
                     borderRadius: '4px',
                 },
                 startIcon: {

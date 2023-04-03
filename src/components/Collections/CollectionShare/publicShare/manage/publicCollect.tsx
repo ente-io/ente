@@ -1,8 +1,9 @@
-import { Box, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
+import { EnteMenuItem } from 'components/Menu/menuItem';
 import React from 'react';
 import { t } from 'i18next';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
-import PublicShareSwitch from '../switch';
+import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -23,12 +24,15 @@ export function ManagePublicCollect({
     };
 
     return (
-        <Box>
-            <Typography mb={0.5}>{t('PUBLIC_COLLECT')}</Typography>
-            <PublicShareSwitch
-                checked={publicShareProp?.enableCollect}
-                onChange={handleFileDownloadSetting}
-            />
-        </Box>
+        <Stack>
+            <EnteMenuItem
+                onClick={handleFileDownloadSetting}
+                color="primary"
+                hasSwitch
+                checked={publicShareProp?.enableCollect}>
+                {t('PUBLIC_COLLECT')}
+            </EnteMenuItem>
+            <MenuSectionTitle title={t('PUBLIC_COLLECT_SUBTEXT')} />
+        </Stack>
     );
 }

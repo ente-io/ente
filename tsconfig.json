@@ -1,8 +1,5 @@
 {
     "compilerOptions": {
-        "paths": {
-            "@mui/styled-engine": ["./node_modules/@mui/styled-engine-sc"]
-        },
         "target": "es5",
         "lib": ["dom", "dom.iterable", "esnext", "webworker"],
         "allowJs": true,
@@ -23,8 +20,9 @@
         "jsx": "preserve",
         "baseUrl": "./src",
         "downlevelIteration": true,
+        "jsxImportSource": "@emotion/react",
         "incremental": true
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
     "exclude": ["node_modules", "out", ".next", "thirdparty"]
 }

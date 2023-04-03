@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
+
 import { imageBitmapToBlob } from 'utils/image';
 import { logError } from 'utils/sentry';
 import { getBlobFromCache } from 'utils/storage/cache';
 
-export const Image = styled.img``;
-
-export const FaceCropsRow = styled.div`
+export const FaceCropsRow = styled('div')`
     & > img {
         width: 256px;
         height: 256px;
     }
 `;
 
-export const FaceImagesRow = styled.div`
+export const FaceImagesRow = styled('div')`
     & > img {
         width: 112px;
         height: 112px;
@@ -92,9 +91,5 @@ export function ImageBlobView(props: { blob: Blob }) {
         }
     }, [props.blob]);
 
-    return (
-        <>
-            <Image src={imgUrl}></Image>
-        </>
-    );
+    return <img src={imgUrl} />;
 }

@@ -27,10 +27,6 @@ export const Row = styled('div')`
     flex: 1;
 `;
 
-export const Label = styled('div')<{ width?: string }>`
-    width: ${(props) => props.width ?? '70%'};
-    color: ${(props) => props.theme.palette.text.secondary};
-`;
 export const Value = styled('div')<{ width?: string }>`
     display: flex;
     justify-content: flex-start;
@@ -76,4 +72,12 @@ export const IconButtonWithBG = styled(IconButton)(({ theme }) => ({
 
 export const HorizontalFlex = styled(Box)({
     display: 'flex',
+});
+
+export const VerticalFlex = styled(HorizontalFlex)({
+    flexDirection: 'column',
+});
+
+export const VerticallyCenteredFlex = styled(HorizontalFlex)({
+    alignItems: 'center',
 });

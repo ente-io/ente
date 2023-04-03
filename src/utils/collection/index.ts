@@ -264,3 +264,11 @@ export function isValidMoveTarget(
         !isIncomingShare(targetCollection, user)
     );
 }
+
+export function getCollectionNameMap(
+    collections: Collection[]
+): Map<number, string> {
+    return new Map<number, string>(
+        collections.map((collection) => [collection.id, collection.name])
+    );
+}

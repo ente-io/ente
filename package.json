@@ -14,10 +14,12 @@
   },
   "dependencies": {
     "@date-io/date-fns": "^2.14.0",
+    "@emotion/cache": "^11.10.5",
+    "@emotion/react": "^11.10.6",
+    "@emotion/server": "^11.10.0",
+    "@emotion/styled": "^11.10.6",
     "@mui/icons-material": "^5.6.2",
     "@mui/material": "^5.6.2",
-    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
-    "@mui/styled-engine-sc": "^5.6.1",
     "@mui/x-date-pickers": "^5.0.0-alpha.6",
     "@sentry/nextjs": "^6.7.1",
     "@stripe/stripe-js": "^1.13.2",
@@ -99,7 +101,6 @@
     "@types/react-select": "^4.0.15",
     "@types/react-window": "^1.8.2",
     "@types/react-window-infinite-loader": "^1.0.3",
-    "@types/styled-components": "^5.1.25",
     "@types/wicg-file-system-access": "^2020.9.5",
     "@types/yup": "^0.29.7",
     "@types/zxcvbn": "^4.4.1",
@@ -114,8 +115,5 @@
   },
   "standard": {
     "parser": "babel-eslint"
-  },
-  "resolutions": {
-    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
   }
 }

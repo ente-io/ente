@@ -31,6 +31,7 @@ import { addLogLine } from 'utils/logging';
 import { CustomError } from 'utils/error';
 import { convertBytesToHumanReadable } from './size';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { getLocalFiles } from 'services/fileService';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -577,4 +578,13 @@ export function getLatestVersionFiles(files: EnteFile[]) {
     return Array.from(latestVersionFiles.values()).filter(
         (file) => !file.isDeleted
     );
+}
+
+export async function getPersonalFiles() {
+    const files = await getLocalFiles();
+    const user: User = getData(LS_KEYS.USER);
+    if (!user?.id) {
+        throw Error('user missing');
+    }
+    return files.filter((file) => file.ownerID === user.id);
 }

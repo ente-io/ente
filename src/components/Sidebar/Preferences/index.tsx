@@ -1,7 +1,6 @@
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import { Box, DialogProps, Stack } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import Titlebar from 'components/Titlebar';
 import isElectron from 'is-electron';
 import { useState } from 'react';
@@ -46,10 +45,7 @@ export default function Preferences({ open, onClose, onRootClose }) {
                 />
                 <Box px={'8px'}>
                     <Stack py="20px" spacing="24px">
-                        <Box>
-                            <MenuSectionTitle title={t('LANGUAGE')} />
-                            <LanguageSelector />
-                        </Box>
+                        <LanguageSelector />
                         {isElectron() && (
                             <SidebarButton
                                 variant="contained"

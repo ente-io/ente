@@ -1,5 +1,6 @@
 import { ExportStage } from 'constants/export';
 
+export type CollectionIDNameMap = Map<number, string>;
 export type CollectionIDPathMap = Map<number, string>;
 export interface ExportProgress {
     current: number;
@@ -8,12 +9,12 @@ export interface ExportProgress {
 export interface ExportedCollectionPaths {
     [collectionID: number]: string;
 }
-export interface ExportStats {
-    failed: number;
-    success: number;
+export interface FileExportStats {
+    totalCount: number;
+    pendingCount: number;
 }
 
-export interface ExportRecord {
+export interface ExportRecordV1 {
     version?: number;
     stage?: ExportStage;
     lastAttemptTimestamp?: number;
@@ -22,4 +23,17 @@ export interface ExportRecord {
     exportedFiles?: string[];
     failedFiles?: string[];
     exportedCollectionPaths?: ExportedCollectionPaths;
+}
+
+export interface ExportRecord {
+    version: number;
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    exportedFiles: string[];
+    exportedCollectionPaths: ExportedCollectionPaths;
+}
+
+export interface ExportSettings {
+    folder: string;
+    continuousExport: boolean;
 }

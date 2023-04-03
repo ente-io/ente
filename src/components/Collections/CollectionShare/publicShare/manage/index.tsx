@@ -4,30 +4,51 @@ import { ManageLinkExpiry } from './linkExpiry';
 import { Stack, Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import React, { useContext, useState } from 'react';
-import { updateShareableURL } from 'services/collectionService';
-import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
-import { sleep } from 'utils/common';
 import {
-    ManageSectionLabel,
-    ManageSectionOptions,
-} from '../../styledComponents';
+    deleteShareableURL,
+    updateShareableURL,
+} from 'services/collectionService';
+import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { ManageDownloadAccess } from './downloadAccess';
 import { handleSharingErrors } from 'utils/error/ui';
 import { SetPublicShareProp } from 'types/publicCollection';
 import { ManagePublicCollect } from './publicCollect';
+import { EnteDrawer } from 'components/EnteDrawer';
+import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { EnteMenuItem } from 'components/Menu/menuItem';
 import { t } from 'i18next';
+import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
+import { DialogProps } from '@mui/material';
+import Titlebar from 'components/Titlebar';
+import EnteMenuItemDivider from 'components/Menu/menuItemDivider';
 
 interface Iprops {
     publicShareProp: PublicURL;
     collection: Collection;
     setPublicShareProp: SetPublicShareProp;
+    open: boolean;
+    onClose: () => void;
+    onRootClose: () => void;
+    publicShareUrl: string;
 }
 
-export default function PublicShareManage({
+export default function ManagePublicShareOptions({
     publicShareProp,
     collection,
     setPublicShareProp,
+    open,
+    onClose,
+    onRootClose,
+    publicShareUrl,
 }: Iprops) {
+    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
+        if (reason === 'backdropClick') {
+            onRootClose();
+        } else {
+            onClose();
+        }
+    };
     const galleryContext = useContext(GalleryContext);
 
     const [sharableLinkError, setSharableLinkError] = useState(null);
@@ -44,74 +65,100 @@ export default function PublicShareManage({
             galleryContext.setBlockingLoad(false);
         }
     };
-
-    const scrollToEnd = (e) => {
-        const lastOptionRow: Element =
-            e.currentTarget.nextElementSibling.lastElementChild;
-        const main = async (lastOptionRow: Element) => {
-            await sleep(0);
-            lastOptionRow.scrollIntoView(true);
-        };
-        main(lastOptionRow);
+    const disablePublicSharing = async () => {
+        try {
+            galleryContext.setBlockingLoad(true);
+            await deleteShareableURL(collection);
+            setPublicShareProp(null);
+            onClose();
+        } catch (e) {
+            const errorMessage = handleSharingErrors(e);
+            setSharableLinkError(errorMessage);
+        } finally {
+            galleryContext.setBlockingLoad(false);
+        }
     };
-
+    const copyToClipboardHelper = (text: string) => () => {
+        navigator.clipboard.writeText(text);
+    };
     return (
         <>
-            <details>
-                <ManageSectionLabel onClick={scrollToEnd}>
-                    {t('MANAGE_LINK')}
-                </ManageSectionLabel>
-                <ManageSectionOptions>
-                    <Stack spacing={1.5}>
-                        <ManageLinkExpiry
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                        <ManageDeviceLimit
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                        <ManagePublicCollect
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                        <ManageDownloadAccess
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                        <ManageLinkPassword
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
+            <EnteDrawer anchor="right" open={open} onClose={handleDrawerClose}>
+                <Stack spacing={'4px'} py={'12px'}>
+                    <Titlebar
+                        onClose={onClose}
+                        title={t('SHARE_COLLECTION')}
+                        onRootClose={onRootClose}
+                    />
+                    <Stack py={'20px'} px={'8px'} spacing={'32px'}>
+                        <Stack spacing={3}>
+                            <ManagePublicCollect
+                                collection={collection}
+                                publicShareProp={publicShareProp}
+                                updatePublicShareURLHelper={
+                                    updatePublicShareURLHelper
+                                }
+                            />
+                            <ManageLinkExpiry
+                                collection={collection}
+                                publicShareProp={publicShareProp}
+                                updatePublicShareURLHelper={
+                                    updatePublicShareURLHelper
+                                }
+                                onRootClose={onRootClose}
+                            />
+                            <EnteMenuItemGroup>
+                                <ManageDeviceLimit
+                                    collection={collection}
+                                    publicShareProp={publicShareProp}
+                                    updatePublicShareURLHelper={
+                                        updatePublicShareURLHelper
+                                    }
+                                    onRootClose={onRootClose}
+                                />
+                                <EnteMenuItemDivider />
+                                <ManageDownloadAccess
+                                    collection={collection}
+                                    publicShareProp={publicShareProp}
+                                    updatePublicShareURLHelper={
+                                        updatePublicShareURLHelper
+                                    }
+                                />
+                                <EnteMenuItemDivider />
+                                <ManageLinkPassword
+                                    collection={collection}
+                                    publicShareProp={publicShareProp}
+                                    updatePublicShareURLHelper={
+                                        updatePublicShareURLHelper
+                                    }
+                                />
+                            </EnteMenuItemGroup>
+                            <EnteMenuItem
+                                startIcon={<ContentCopyIcon />}
+                                onClick={copyToClipboardHelper(publicShareUrl)}>
+                                {t('COPY_LINK')}
+                            </EnteMenuItem>
+                            <EnteMenuItem
+                                color="danger"
+                                startIcon={<RemoveCircleOutline />}
+                                onClick={disablePublicSharing}>
+                                {t('REMOVE_LINK')}
+                            </EnteMenuItem>
+                        </Stack>
+                        {sharableLinkError && (
+                            <Typography
+                                textAlign={'center'}
+                                variant="body2"
+                                sx={{
+                                    color: (theme) => theme.palette.danger.main,
+                                    mt: 0.5,
+                                }}>
+                                {sharableLinkError}
+                            </Typography>
+                        )}
                     </Stack>
-                    {sharableLinkError && (
-                        <Typography
-                            textAlign={'center'}
-                            variant="body2"
-                            sx={{
-                                color: (theme) => theme.palette.danger.main,
-                                mt: 0.5,
-                            }}>
-                            {sharableLinkError}
-                        </Typography>
-                    )}
-                </ManageSectionOptions>
-            </details>
+                </Stack>
+            </EnteDrawer>
         </>
     );
 }
