@@ -93,12 +93,6 @@ class LocationService {
     }
     return false;
   }
-
-  List<String> getFilesByLocation(LocationTag locationTag) {
-    var fileList = prefs.getStringList("location_${locationTag.name}");
-    fileList ??= [];
-    return fileList;
-  }
 }
 
 class GPSData {
