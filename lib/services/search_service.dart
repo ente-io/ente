@@ -1,5 +1,3 @@
-import "dart:convert";
-
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/data/holidays.dart';
@@ -12,6 +10,7 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location/location.dart';
+import "package:photos/models/location_tag/location_tag.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import 'package:photos/models/search/location_api_response.dart';
@@ -269,27 +268,40 @@ class SearchService {
   Future<List<GenericSearchResult>> getLocationResults(
     String query,
   ) async {
+    final locations = LocationService.instance.getLocationTags();
+    final Map<LocationTag, List<File>> result = {};
+
     final List<GenericSearchResult> searchResults = [];
-    final locations = LocationService.instance.getAllLocationTags();
-    for (String location in locations) {
-      final locationJson = json.decode(location);
-      final locationName = locationJson["name"].toString();
-      _logger.info(locationName);
-      if (locationName.toLowerCase().contains(query.toLowerCase())) {
-        _logger.info("TRUEEE");
-        final fileIDs = LocationService.instance
-            .getFilesByLocation(locationJson["id"].toString());
-        final files = List<File>.empty(growable: true);
-        for (String fileID in fileIDs) {
-          final id = int.parse(fileID);
-          final file = await FilesDB.instance.getFile(id);
-          files.add(file!);
+
+    for (LocationTag tag in locations) {
+      if (tag.name.toLowerCase().contains(query.toLowerCase())) {
+        result[tag] = [];
+      }
+    }
+    if (result.isEmpty) {
+      return searchResults;
+    }
+    final allFiles = await _getAllFiles();
+    for (File file in allFiles) {
+      if (file.hasLocation) {
+        for (LocationTag tag in result.keys) {
+          if (LocationService.instance.isFileInsideLocationTag(
+            tag.centerPoint,
+            file.location!,
+            tag.radius,
+          )) {
+            result[tag]!.add(file);
+          }
         }
+      }
+    }
+    for (MapEntry<LocationTag, List<File>> entry in result.entries) {
+      if (entry.value.isNotEmpty) {
         searchResults.add(
           GenericSearchResult(
             ResultType.location,
-            locationName,
-            files,
+            entry.key.name,
+            entry.value,
           ),
         );
       }

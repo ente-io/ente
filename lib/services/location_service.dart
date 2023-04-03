@@ -1,4 +1,3 @@
-import "dart:collection";
 import "dart:convert";
 import "dart:math";
 
@@ -18,10 +17,15 @@ class LocationService {
     prefs = preferences;
   }
 
-  List<String> getAllLocationTags() {
+  List<String> _getStoredLocationTags() {
     var list = prefs.getStringList('locations');
     list ??= [];
     return list;
+  }
+
+  List<LocationTag> getLocationTags() {
+    final list = _getStoredLocationTags();
+    return list.map((e) => LocationTag.fromJson(json.decode(e))).toList();
   }
 
   Future<void> addLocation(
@@ -29,7 +33,7 @@ class LocationService {
     Location centerPoint,
     int radius,
   ) async {
-    final list = getAllLocationTags();
+    final list = _getStoredLocationTags();
     //The area enclosed by the location tag will be a circle on a 3D spherical
     //globe and an ellipse on a 2D Mercator projection (2D map)
     //a & b are the semi-major and semi-minor axes of the ellipse
@@ -60,11 +64,8 @@ class LocationService {
 
   List<LocationTag> enclosingLocationTags(Location fileCoordinates) {
     final result = List<LocationTag>.of([]);
-    final locationTagsData = getAllLocationTags();
-    for (String locationTagData in locationTagsData) {
-      final locationTag = LocationTag.fromJson(json.decode(locationTagData));
-      // final locationJson = json.decode(locationTag);
-      // final center = locationJson["center"];
+    final locationTagsData = getLocationTags();
+    for (LocationTag locationTag in locationTagsData) {
       final x = fileCoordinates.latitude! - locationTag.centerPoint.latitude!;
       final y = fileCoordinates.longitude! - locationTag.centerPoint.longitude!;
       if ((x * x) / (locationTag.aSquare) + (y * y) / (locationTag.bSquare) <=
@@ -91,48 +92,6 @@ class LocationService {
       return true;
     }
     return false;
-  }
-
-  Future<void> addFileToLocation(int locationId, int fileId) async {
-    final list = getFilesByLocation(locationId.toString());
-    list.add(fileId.toString());
-    await prefs.setStringList("location_$locationId", list);
-  }
-
-  List<String> getFilesByLocation(String locationId) {
-    var fileList = prefs.getStringList("location_$locationId");
-    fileList ??= [];
-    return fileList;
-  }
-
-  List<String> getLocationsByFileID(int fileId) {
-    final locationList = getAllLocationTags();
-    final locations = List<dynamic>.of([]);
-    for (String locationString in locationList) {
-      final locationJson = json.decode(locationString);
-      locations.add(locationJson);
-    }
-    final res = List<String>.of([]);
-    for (dynamic location in locations) {
-      final list = getFilesByLocation(location["id"].toString());
-      if (list.contains(fileId.toString())) {
-        res.add(location["name"]);
-      }
-    }
-    return res;
-  }
-
-  Map<String, List<String>> clusterFilesByLocation() {
-    final map = HashMap<String, List<String>>();
-    final locations = getAllLocationTags();
-    for (String locationData in locations) {
-      final locationJson = json.decode(locationData);
-      map.putIfAbsent(
-        locationData,
-        () => getFilesByLocation(locationJson['id'].toString()),
-      );
-    }
-    return map;
   }
 }
 
