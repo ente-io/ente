@@ -2,7 +2,6 @@ import 'dart:developer' as dev;
 import "package:flutter/material.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
-import "package:photos/models/location/location.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_screen_state.dart";
@@ -29,7 +28,9 @@ class LocationScreen extends StatelessWidget {
               onPressed: () {
                 showEditLocationSheet(
                   context,
-                  const Location(latitude: 63.5, longitude: -18.5),
+                  InheritedLocationScreenState.of(context)
+                      .locationTag
+                      .centerPoint,
                   () {},
                 );
               },
@@ -79,7 +80,6 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    //Todo: get radius of location tag here.
     final selectedRadius =
         InheritedLocationScreenState.of(context).locationTag.radius;
     Future<FileLoadResult> filterFiles() async {
@@ -95,10 +95,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
               f.location!.longitude != null,
         );
         return !LocationService.instance.isFileInsideLocationTag(
-          const Location(
-            latitude: 63.5,
-            longitude: -18.5,
-          ), //pass the coordinates from the location tag here
+          InheritedLocationScreenState.of(context).locationTag.centerPoint,
           f.location!,
           selectedRadius,
         );
