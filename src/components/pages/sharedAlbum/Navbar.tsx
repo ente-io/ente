@@ -14,6 +14,7 @@ export default function SharedAlbumNavbar({ showUploadButton, openUploader }) {
             </FluidContainer>
             {showUploadButton ? (
                 <UploadButton
+                    disableShrink
                     openUploader={openUploader}
                     text={t('ADD_PHOTOS')}
                 />
