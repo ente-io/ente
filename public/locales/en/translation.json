@@ -423,7 +423,7 @@
     "ASK_FOR_FEEDBACK": "<p>We'll be sorry to see you go. Are you facing some issue?</p><p>Please write to us at <a>{{emailID}}</a>, maybe there is a way we can help.</p>",
     "SEND_FEEDBACK": "Yes, send feedback",
     "CONFIRM_ACCOUNT_DELETION_TITLE": "Are you sure you want to delete your account?",
-    "CONFIRM_ACCOUNT_DELETION_MESSAGE": "<p>Your uploaded data will be scheduled for deletion, and your account will be permanently deleted.</p><p>This action is not reversible.</p>",
+    "CONFIRM_ACCOUNT_DELETION_MESSAGE": "Your uploaded data will be scheduled for deletion, and your account will be permanently deleted.<br/><br/>This action is not reversible.",
     "AUTHENTICATE": "Authenticate",
     "UPLOADED_TO_SINGLE_COLLECTION": "Uploaded to single collection",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "Uploaded to separate collections",
@@ -498,5 +498,19 @@
     "CONTINUOUS_EXPORT": "Sync continuously",
     "TOTAL_ITEMS": "Total items",
     "PENDING_ITEMS": "Pending items",
-    "EXPORT_STARTING": "Export starting..."
+    "EXPORT_STARTING": "Export starting...",
+    "DELETE_ACCOUNT_REASON_LABEL": "What is the main reason you are deleting your account?",
+    "DELETE_ACCOUNT_REASON_PLACEHOLDER": "Select a reason",
+    "DELETE_REASON": {
+        "MISSING_FEATURE": "It's missing a key feature that I need",
+        "BROKEN_BEHAVIOR": "The app or a certain feature does not behave as I think it should",
+        "FOUND_ANOTHER_SERVICE": "I found another service that I like better",
+        "NOT_LISTED": "My reason isn't listed"
+    },
+    "DELETE_ACCOUNT_FEEDBACK_LABEL": "We are sorry to see you go. Please explain why you are leaving to help us improve.",
+    "DELETE_ACCOUNT_FEEDBACK_PLACEHOLDER": "Feedback",
+    "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "Yes, I want to permanently delete this account and all its data",
+    "CONFIRM_DELETE_ACCOUNT": "Confirm Account Deletion",
+    "FEEDBACK_REQUIRED": "Kindly help us with this information",
+    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "What does the other service do better?"
 }
