@@ -268,22 +268,40 @@ class SearchService {
   Future<List<GenericSearchResult>> getLocationResults(
     String query,
   ) async {
-    final List<GenericSearchResult> searchResults = [];
     final locations = LocationService.instance.getLocationTags();
+    final Map<LocationTag, List<File>> result = {};
+
+    final List<GenericSearchResult> searchResults = [];
+
     for (LocationTag tag in locations) {
       if (tag.name.toLowerCase().contains(query.toLowerCase())) {
-        final fileIDs = LocationService.instance.getFilesByLocation(tag);
-        final files = List<File>.empty(growable: true);
-        for (String fileID in fileIDs) {
-          final id = int.parse(fileID);
-          final file = await FilesDB.instance.getFile(id);
-          files.add(file!);
+        result[tag] = [];
+      }
+    }
+    if (result.isEmpty) {
+      return searchResults;
+    }
+    final allFiles = await _getAllFiles();
+    for (File file in allFiles) {
+      if (file.hasLocation) {
+        for (LocationTag tag in result.keys) {
+          if (LocationService.instance.isFileInsideLocationTag(
+            tag.centerPoint,
+            file.location!,
+            tag.radius,
+          )) {
+            result[tag]!.add(file);
+          }
         }
+      }
+    }
+    for (MapEntry<LocationTag, List<File>> entry in result.entries) {
+      if (entry.value.isNotEmpty) {
         searchResults.add(
           GenericSearchResult(
             ResultType.location,
-            tag.name,
-            files,
+            entry.key.name,
+            entry.value,
           ),
         );
       }
