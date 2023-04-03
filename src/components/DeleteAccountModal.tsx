@@ -76,7 +76,16 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         try {
             feedback = feedback.trim();
             if (feedback.length === 0) {
-                setFieldError('feedback', t('FEEDBACK_REQUIRED'));
+                switch (reason) {
+                    case DELETE_REASON.FOUND_ANOTHER_SERVICE:
+                        setFieldError(
+                            'feedback',
+                            t('FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE')
+                        );
+                        break;
+                    default:
+                        setFieldError('feedback', t('FEEDBACK_REQUIRED'));
+                }
                 return;
             }
             setLoading(true);
@@ -173,7 +182,6 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                     }}
                     validationSchema={Yup.object().shape({
                         reason: Yup.string().required(t('REQUIRED')),
-                        feedback: Yup.string().required(t('FEEDBACK_REQUIRED')),
                     })}
                     validateOnChange={false}
                     validateOnBlur={false}
