@@ -56,7 +56,8 @@ export default function ExportModal(props: Props) {
     const [exportFolder, setExportFolder] = useState('');
     const [continuousExport, setContinuousExport] = useState(false);
     const [exportProgress, setExportProgress] = useState<ExportProgress>({
-        current: 0,
+        success: 0,
+        failed: 0,
         total: 0,
     });
     const [fileExportStats, setFileExportStats] = useState<FileExportStats>({
