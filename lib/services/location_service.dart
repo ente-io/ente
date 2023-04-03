@@ -3,7 +3,7 @@ import "dart:convert";
 import "dart:math";
 
 import "package:photos/core/constants.dart";
-import 'package:photos/models/location/location.dart';
+import "package:photos/models/location/location.dart";
 import 'package:photos/models/location_tag/location_tag.dart';
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -37,16 +37,15 @@ class LocationService {
     //the unit on the caritesian plane
     final a = (radius * _scaleFactor(lat)) / kilometersPerDegree;
     final b = radius / kilometersPerDegree;
-    final center = [lat, long];
-    final data = {
-      "name": location,
-      "radius": radius,
-      "aSquare": a * a,
-      "bSquare": b * b,
-      "center": center,
-    };
-    final encodedMap = json.encode(data);
-    list.add(encodedMap);
+    final center = Location(latitude: lat, longitude: long);
+    final locationTag = LocationTag(
+      name: location,
+      radius: radius,
+      aSquare: a * a,
+      bSquare: b * b,
+      centerPoint: center,
+    );
+    list.add(json.encode(locationTag.toJson()));
     await prefs!.setStringList('locations', list);
   }
 
@@ -60,24 +59,18 @@ class LocationService {
 
   List<LocationTag> enclosingLocationTags(List<double> coordinates) {
     final result = List<LocationTag>.of([]);
-    final allLocationTags = getAllLocationTags();
-    for (var locationTag in allLocationTags) {
-      final locationJson = json.decode(locationTag);
-      final aSquare = locationJson["aSquare"];
-      final bSquare = locationJson["bSquare"];
-      final center = locationJson["center"];
-      final x = coordinates[0] - center[0];
-      final y = coordinates[1] - center[1];
-      if ((x * x) / (aSquare) + (y * y) / (bSquare) <= 1) {
+    final locationTagsData = getAllLocationTags();
+    for (String locationTagData in locationTagsData) {
+      final locationTag = LocationTag.fromJson(json.decode(locationTagData));
+      // final locationJson = json.decode(locationTag);
+      // final center = locationJson["center"];
+      //Todo : Check if lat long can be null here
+      final x = coordinates[0] - locationTag.centerPoint.latitude!;
+      final y = coordinates[1] - locationTag.centerPoint.longitude!;
+      if ((x * x) / (locationTag.aSquare) + (y * y) / (locationTag.bSquare) <=
+          1) {
         result.add(
-          LocationTag(
-            name: locationJson["name"],
-            radius: locationJson["radius"],
-            centerPoint: Location(
-              latitude: locationJson["center"][0],
-              longitude: locationJson["center"][1],
-            ),
-          ),
+          locationTag,
         );
       }
     }
