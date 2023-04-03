@@ -9,6 +9,8 @@ class LocationTag with _$LocationTag {
   const factory LocationTag({
     required String name,
     required int radius,
+    required double aSquare,
+    required double bSquare,
     required Location centerPoint,
   }) = _LocationTag;
 

@@ -22,6 +22,8 @@ LocationTag _$LocationTagFromJson(Map<String, dynamic> json) {
 mixin _$LocationTag {
   String get name => throw _privateConstructorUsedError;
   int get radius => throw _privateConstructorUsedError;
+  double get aSquare => throw _privateConstructorUsedError;
+  double get bSquare => throw _privateConstructorUsedError;
   Location get centerPoint => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -36,7 +38,12 @@ abstract class $LocationTagCopyWith<$Res> {
           LocationTag value, $Res Function(LocationTag) then) =
       _$LocationTagCopyWithImpl<$Res, LocationTag>;
   @useResult
-  $Res call({String name, int radius, Location centerPoint});
+  $Res call(
+      {String name,
+      int radius,
+      double aSquare,
+      double bSquare,
+      Location centerPoint});
 
   $LocationCopyWith<$Res> get centerPoint;
 }
@@ -56,6 +63,8 @@ class _$LocationTagCopyWithImpl<$Res, $Val extends LocationTag>
   $Res call({
     Object? name = null,
     Object? radius = null,
+    Object? aSquare = null,
+    Object? bSquare = null,
     Object? centerPoint = null,
   }) {
     return _then(_value.copyWith(
@@ -67,6 +76,14 @@ class _$LocationTagCopyWithImpl<$Res, $Val extends LocationTag>
           ? _value.radius
           : radius // ignore: cast_nullable_to_non_nullable
               as int,
+      aSquare: null == aSquare
+          ? _value.aSquare
+          : aSquare // ignore: cast_nullable_to_non_nullable
+              as double,
+      bSquare: null == bSquare
+          ? _value.bSquare
+          : bSquare // ignore: cast_nullable_to_non_nullable
+              as double,
       centerPoint: null == centerPoint
           ? _value.centerPoint
           : centerPoint // ignore: cast_nullable_to_non_nullable
@@ -91,7 +108,12 @@ abstract class _$$_LocationTagCopyWith<$Res>
       __$$_LocationTagCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String name, int radius, Location centerPoint});
+  $Res call(
+      {String name,
+      int radius,
+      double aSquare,
+      double bSquare,
+      Location centerPoint});
 
   @override
   $LocationCopyWith<$Res> get centerPoint;
@@ -110,6 +132,8 @@ class __$$_LocationTagCopyWithImpl<$Res>
   $Res call({
     Object? name = null,
     Object? radius = null,
+    Object? aSquare = null,
+    Object? bSquare = null,
     Object? centerPoint = null,
   }) {
     return _then(_$_LocationTag(
@@ -121,6 +145,14 @@ class __$$_LocationTagCopyWithImpl<$Res>
           ? _value.radius
           : radius // ignore: cast_nullable_to_non_nullable
               as int,
+      aSquare: null == aSquare
+          ? _value.aSquare
+          : aSquare // ignore: cast_nullable_to_non_nullable
+              as double,
+      bSquare: null == bSquare
+          ? _value.bSquare
+          : bSquare // ignore: cast_nullable_to_non_nullable
+              as double,
       centerPoint: null == centerPoint
           ? _value.centerPoint
           : centerPoint // ignore: cast_nullable_to_non_nullable
@@ -133,7 +165,11 @@ class __$$_LocationTagCopyWithImpl<$Res>
 @JsonSerializable()
 class _$_LocationTag implements _LocationTag {
   const _$_LocationTag(
-      {required this.name, required this.radius, required this.centerPoint});
+      {required this.name,
+      required this.radius,
+      required this.aSquare,
+      required this.bSquare,
+      required this.centerPoint});
 
   factory _$_LocationTag.fromJson(Map<String, dynamic> json) =>
       _$$_LocationTagFromJson(json);
@@ -143,11 +179,15 @@ class _$_LocationTag implements _LocationTag {
   @override
   final int radius;
   @override
+  final double aSquare;
+  @override
+  final double bSquare;
+  @override
   final Location centerPoint;
 
   @override
   String toString() {
-    return 'LocationTag(name: $name, radius: $radius, centerPoint: $centerPoint)';
+    return 'LocationTag(name: $name, radius: $radius, aSquare: $aSquare, bSquare: $bSquare, centerPoint: $centerPoint)';
   }
 
   @override
@@ -157,13 +197,16 @@ class _$_LocationTag implements _LocationTag {
             other is _$_LocationTag &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.radius, radius) || other.radius == radius) &&
+            (identical(other.aSquare, aSquare) || other.aSquare == aSquare) &&
+            (identical(other.bSquare, bSquare) || other.bSquare == bSquare) &&
             (identical(other.centerPoint, centerPoint) ||
                 other.centerPoint == centerPoint));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, name, radius, centerPoint);
+  int get hashCode =>
+      Object.hash(runtimeType, name, radius, aSquare, bSquare, centerPoint);
 
   @JsonKey(ignore: true)
   @override
@@ -183,6 +226,8 @@ abstract class _LocationTag implements LocationTag {
   const factory _LocationTag(
       {required final String name,
       required final int radius,
+      required final double aSquare,
+      required final double bSquare,
       required final Location centerPoint}) = _$_LocationTag;
 
   factory _LocationTag.fromJson(Map<String, dynamic> json) =
@@ -192,6 +237,10 @@ abstract class _LocationTag implements LocationTag {
   String get name;
   @override
   int get radius;
+  @override
+  double get aSquare;
+  @override
+  double get bSquare;
   @override
   Location get centerPoint;
   @override
