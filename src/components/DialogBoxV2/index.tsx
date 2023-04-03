@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Breakpoint,
@@ -11,6 +11,7 @@ import {
 import { t } from 'i18next';
 import { dialogCloseHandler } from 'components/DialogBox/TitleWithCloseButton';
 import { DialogBoxAttributesV2 } from 'types/dialogBox';
+import EnteButton from 'components/EnteButton';
 
 type IProps = React.PropsWithChildren<
     Omit<DialogProps, 'onClose' | 'maxSize'> & {
@@ -28,6 +29,7 @@ export default function DialogBoxV2({
     onClose,
     ...props
 }: IProps) {
+    const [loading, setLoading] = useState(false);
     if (!attributes) {
         return <></>;
     }
@@ -42,13 +44,13 @@ export default function DialogBoxV2({
         <Dialog
             open={open}
             onClose={handleClose}
-            {...props}
             PaperProps={{
                 sx: {
                     padding: '8px 12px',
                     maxWidth: '360px',
                 },
-            }}>
+            }}
+            {...props}>
             <Stack spacing={'36px'} p={'16px'}>
                 <Stack spacing={'19px'}>
                     {attributes.icon && (
@@ -73,53 +75,59 @@ export default function DialogBoxV2({
                             </Typography>
                         ))}
                 </Stack>
-                <Stack
-                    spacing={'8px'}
-                    direction={
-                        attributes.buttonDirection === 'row'
-                            ? 'row-reverse'
-                            : 'column'
-                    }
-                    flex={1}>
-                    {attributes.proceed && (
-                        <Button
-                            size="large"
-                            color={attributes.proceed?.variant}
-                            onClick={() => {
-                                attributes.proceed.action();
-                                onClose();
-                            }}
-                            disabled={attributes.proceed.disabled}>
-                            {attributes.proceed.text}
-                        </Button>
-                    )}
-                    {attributes.close && (
-                        <Button
-                            size="large"
-                            color={attributes.close?.variant ?? 'secondary'}
-                            onClick={() => {
-                                attributes.close.action &&
-                                    attributes.close?.action();
-                                onClose();
-                            }}>
-                            {attributes.close?.text ?? t('OK')}
-                        </Button>
-                    )}
-                    {attributes.buttons &&
-                        attributes.buttons.map((b) => (
-                            <Button
+                {(attributes.proceed ||
+                    attributes.close ||
+                    attributes.buttons?.length) && (
+                    <Stack
+                        spacing={'8px'}
+                        direction={
+                            attributes.buttonDirection === 'row'
+                                ? 'row-reverse'
+                                : 'column'
+                        }
+                        flex={1}>
+                        {attributes.proceed && (
+                            <EnteButton
+                                loading={loading}
                                 size="large"
-                                key={b.text}
-                                color={b.variant}
-                                onClick={() => {
-                                    b.action();
+                                color={attributes.proceed?.variant}
+                                onClick={async () => {
+                                    await attributes.proceed.action(setLoading);
+
                                     onClose();
                                 }}
-                                disabled={b.disabled}>
-                                {b.text}
+                                disabled={attributes.proceed.disabled}>
+                                {attributes.proceed.text}
+                            </EnteButton>
+                        )}
+                        {attributes.close && (
+                            <Button
+                                size="large"
+                                color={attributes.close?.variant ?? 'secondary'}
+                                onClick={() => {
+                                    attributes.close.action &&
+                                        attributes.close?.action();
+                                    onClose();
+                                }}>
+                                {attributes.close?.text ?? t('OK')}
                             </Button>
-                        ))}
-                </Stack>
+                        )}
+                        {attributes.buttons &&
+                            attributes.buttons.map((b) => (
+                                <Button
+                                    size="large"
+                                    key={b.text}
+                                    color={b.variant}
+                                    onClick={() => {
+                                        b.action();
+                                        onClose();
+                                    }}
+                                    disabled={b.disabled}>
+                                    {b.text}
+                                </Button>
+                            ))}
+                    </Stack>
+                )}
             </Stack>
         </Dialog>
     );

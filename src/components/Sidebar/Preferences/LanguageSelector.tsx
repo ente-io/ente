@@ -40,8 +40,8 @@ export const LanguageSelector = () => {
             options={getLanguageOptions()}
             label={t('LANGUAGE')}
             labelProps={{ color: 'text.secondary' }}
-            selectedValue={userLocale}
-            setSelectedValue={updateCurrentLocale}
+            selected={userLocale}
+            setSelected={updateCurrentLocale}
         />
     );
 };

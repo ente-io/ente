@@ -349,7 +349,11 @@ export const getAccountDeleteChallenge = async () => {
     }
 };
 
-export const deleteAccount = async (challenge: string) => {
+export const deleteAccount = async (
+    challenge: string,
+    reason: string,
+    feedback: string
+) => {
     try {
         const token = getToken();
         if (!token) {
@@ -358,7 +362,7 @@ export const deleteAccount = async (challenge: string) => {
 
         await HTTPService.delete(
             `${ENDPOINT}/users/delete`,
-            { challenge },
+            { challenge, reason, feedback },
             null,
             {
                 'X-Auth-Token': token,
