@@ -1,5 +1,5 @@
 import HTTPService from 'services/HTTPService';
-import { AuthEntity } from 'types/authenticator/api';
+import { AuthEntity, AuthKey } from 'types/authenticator/api';
 import { Code } from 'types/authenticator/code';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getEndpoint } from 'utils/common/apiUtil';
@@ -61,7 +61,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
     }
 };
 
-export const getAuthKey = async (): Promise<AuthEntity> => {
+export const getAuthKey = async (): Promise<AuthKey> => {
     try {
         const resp = await HTTPService.get(
             `${ENDPOINT}/authenticator/key`,
