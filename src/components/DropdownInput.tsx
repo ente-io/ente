@@ -43,11 +43,20 @@ export default function DropdownInput<T extends string>({
                 displayEmpty
                 variant="standard"
                 MenuProps={{
+                    PaperProps: {
+                        sx: {
+                            // Select component automatically sets the min width of the element to the width
+                            // of the select input's width, so setting the maxWidth to 0, forces to element
+                            // width to equal to minWidth
+                            maxWidth: 0,
+                        },
+                    },
                     MenuListProps: {
                         sx: (theme) => ({
                             backgroundColor: theme.palette.background.overPaper,
                             '.MuiMenuItem-root ': {
                                 color: theme.palette.text.secondary,
+                                whiteSpace: 'normal',
                             },
                             '&& > .Mui-selected': {
                                 background: theme.palette.background.overPaper,
