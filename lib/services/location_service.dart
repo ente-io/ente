@@ -8,17 +8,18 @@ import 'package:photos/models/location_tag/location_tag.dart';
 import "package:shared_preferences/shared_preferences.dart";
 
 class LocationService {
-  SharedPreferences? prefs;
+  late SharedPreferences prefs;
+
   LocationService._privateConstructor();
 
   static final LocationService instance = LocationService._privateConstructor();
 
-  Future<void> init() async {
-    prefs ??= await SharedPreferences.getInstance();
+  void init(SharedPreferences preferences) {
+    prefs = preferences;
   }
 
   List<String> getAllLocationTags() {
-    var list = prefs!.getStringList('locations');
+    var list = prefs.getStringList('locations');
     list ??= [];
     return list;
   }
@@ -46,7 +47,7 @@ class LocationService {
       centerPoint: centerPoint,
     );
     list.add(json.encode(locationTag.toJson()));
-    await prefs!.setStringList('locations', list);
+    await prefs.setStringList('locations', list);
   }
 
   ///The area bounded by the location tag becomes more elliptical with increase
@@ -95,11 +96,11 @@ class LocationService {
   Future<void> addFileToLocation(int locationId, int fileId) async {
     final list = getFilesByLocation(locationId.toString());
     list.add(fileId.toString());
-    await prefs!.setStringList("location_$locationId", list);
+    await prefs.setStringList("location_$locationId", list);
   }
 
   List<String> getFilesByLocation(String locationId) {
-    var fileList = prefs!.getStringList("location_$locationId");
+    var fileList = prefs.getStringList("location_$locationId");
     fileList ??= [];
     return fileList;
   }
@@ -123,7 +124,7 @@ class LocationService {
 
   Map<String, List<String>> clusterFilesByLocation() {
     final map = HashMap<String, List<String>>();
-    var locations = prefs!.getStringList('locations');
+    var locations = prefs.getStringList('locations');
     locations ??= [];
     for (String locationData in locations) {
       final locationJson = json.decode(locationData);
