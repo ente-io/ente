@@ -124,8 +124,7 @@ class LocationService {
 
   Map<String, List<String>> clusterFilesByLocation() {
     final map = HashMap<String, List<String>>();
-    var locations = prefs.getStringList('locations');
-    locations ??= [];
+    final locations = getAllLocationTags();
     for (String locationData in locations) {
       final locationJson = json.decode(locationData);
       map.putIfAbsent(
