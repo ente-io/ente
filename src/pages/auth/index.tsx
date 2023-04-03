@@ -6,7 +6,7 @@ import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AuthFooter } from 'components/Authenicator/AuthFooder';
 
-const OTPPage = () => {
+const AuthenticatorCodesPage = () => {
     const router = useRouter();
     const [codes, setCodes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -88,4 +88,4 @@ const OTPPage = () => {
     );
 };
 
-export default OTPPage;
+export default AuthenticatorCodesPage;
