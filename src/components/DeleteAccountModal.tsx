@@ -32,31 +32,17 @@ interface FormValues {
 }
 
 enum DELETE_REASON {
-    MISSING_FEATURE = '0',
-    BROKEN_BEHAVIOR = '1',
-    FOUND_ANOTHER_SERVICE = '2',
-    NOT_LISTED = '3',
+    MISSING_FEATURE = "It's missing a key feature that I need",
+    BROKEN_BEHAVIOR = 'The app or a certain feature does not behave as I think it should',
+    FOUND_ANOTHER_SERVICE = 'I found another service that I like better',
+    NOT_LISTED = "My reason isn't listed",
 }
 
 const getReasonOptions = (): DropdownOption<DELETE_REASON>[] => {
-    return [
-        {
-            label: t('DELETE_REASON.MISSING_FEATURE'),
-            value: DELETE_REASON.MISSING_FEATURE,
-        },
-        {
-            label: t('DELETE_REASON.BROKEN_BEHAVIOR'),
-            value: DELETE_REASON.BROKEN_BEHAVIOR,
-        },
-        {
-            label: t('DELETE_REASON.FOUND_ANOTHER_SERVICE'),
-            value: DELETE_REASON.FOUND_ANOTHER_SERVICE,
-        },
-        {
-            label: t('DELETE_REASON.NOT_LISTED'),
-            value: DELETE_REASON.NOT_LISTED,
-        },
-    ];
+    return Object.keys(DELETE_REASON).map((reason) => ({
+        label: t(`DELETE_REASON.${reason}`),
+        value: DELETE_REASON[reason],
+    }));
 };
 
 const DeleteAccountModal = ({ open, onClose }: Iprops) => {
