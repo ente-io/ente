@@ -154,7 +154,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   await NetworkClient.instance.init();
   await Configuration.instance.init();
   await UserService.instance.init();
-  await LocationService.instance.init();
+  LocationService.instance.init(preferences);
   await UserRemoteFlagService.instance.init();
   await UpdateService.instance.init();
   BillingService.instance.init();
