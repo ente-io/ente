@@ -368,7 +368,7 @@
     "UPLOAD_DIRS": "Dossier",
     "UPLOAD_GOOGLE_TAKEOUT": "Google Takeout",
     "DEDUPLICATE_FILES": "Déduplication de fichiers",
-    "AUTHENTICATOR_SECTION": "",
+    "AUTHENTICATOR_SECTION": "Authentificateur",
     "NO_DUPLICATES_FOUND": "Vous n'avez aucun fichier dédupliqué pouvant être nettoyé",
     "CLUB_BY_CAPTURE_TIME": "Durée de la capture par club",
     "FILES": "Fichiers",
@@ -455,9 +455,9 @@
     "FACE_SEARCH_CONFIRMATION": "Je comprends, et je souhaite permettre à ente de traiter la géométrie faciale",
     "LABS": "Labs",
     "YOURS": "Le vôtre",
-    "PASSPHRASE_STRENGTH_WEAK": "",
-    "PASSPHRASE_STRENGTH_MODERATE": "",
-    "PASSPHRASE_STRENGTH_STRONG": "",
+    "PASSPHRASE_STRENGTH_WEAK": "Force du mot de passe : faible",
+    "PASSPHRASE_STRENGTH_MODERATE": "Force du mot de passe : modéré",
+    "PASSPHRASE_STRENGTH_STRONG": "Force du mot de passe : fort",
     "PREFERENCES": "Préférences",
     "LANGUAGE": "Langue",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Dossier d'export invalide",
@@ -498,5 +498,19 @@
     "CONTINUOUS_EXPORT": "Synchronisation en continu",
     "TOTAL_ITEMS": "Total d'objets",
     "PENDING_ITEMS": "Objets en attente",
-    "EXPORT_STARTING": "Démarrage de l'export..."
+    "EXPORT_STARTING": "Démarrage de l'export...",
+    "DELETE_ACCOUNT_REASON_LABEL": "",
+    "DELETE_ACCOUNT_REASON_PLACEHOLDER": "",
+    "DELETE_REASON": {
+        "MISSING_FEATURE": "",
+        "BROKEN_BEHAVIOR": "",
+        "FOUND_ANOTHER_SERVICE": "",
+        "NOT_LISTED": ""
+    },
+    "DELETE_ACCOUNT_FEEDBACK_LABEL": "",
+    "DELETE_ACCOUNT_FEEDBACK_PLACEHOLDER": "",
+    "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "",
+    "CONFIRM_DELETE_ACCOUNT": "",
+    "FEEDBACK_REQUIRED": "",
+    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": ""
 }
