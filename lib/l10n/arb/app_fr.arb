@@ -1,5 +1,5 @@
 {
-  "@@locale": "en",
+  "@@locale": "fr",
   "counterAppBarTitle": "Compteur",
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
@@ -86,7 +86,7 @@
   "recoverAccount": "Récupérer un compte",
   "enterRecoveryKeyHint": "Saisissez votre clé de récupération",
   "recover": "Restaurer",
-  "contactSupportViaEmailMessage": "Veuillez envoyer un e-mail à {} depuis votre adresse enregistrée",
+  "contactSupportViaEmailMessage": "Veuillez envoyer un e-mail à {email} depuis votre adresse enregistrée",
   "@contactSupportViaEmailMessage": {
     "placeholders": {
       "email": {
