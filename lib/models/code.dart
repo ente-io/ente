@@ -67,7 +67,10 @@ class Code {
 
   static String _getAccount(Uri uri) {
     try {
-      final String path = Uri.decodeComponent(uri.path);
+      String path = Uri.decodeComponent(uri.path);
+      if (path.startsWith("/")) {
+        path = path.substring(1, path.length);
+      }
       // Parse account name from documented auth URI
       // otpauth://totp/ACCOUNT?secret=SUPERSECRET&issuer=SERVICE
       if (uri.queryParameters.containsKey("issuer") && !path.contains(":")) {
@@ -88,6 +91,7 @@ class Code {
         if (issuerName.contains("period=")) {
           return issuerName.substring(0, issuerName.indexOf("period="));
         }
+        return issuerName;
       }
       final String path = Uri.decodeComponent(uri.path);
       return path.split(':')[0].substring(1);
