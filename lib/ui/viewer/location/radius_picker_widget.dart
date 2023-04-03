@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/states/location_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 
@@ -34,8 +35,14 @@ class RadiusPickerWidget extends StatefulWidget {
 class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
   @override
   void initState() {
-    widget.selectedRadiusIndexNotifier.value = defaultRadiusValueIndex;
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    widget.selectedRadiusIndexNotifier.value =
+        InheritedLocationTagData.of(context).selectedRadiusIndex;
+    super.didChangeDependencies();
   }
 
   @override

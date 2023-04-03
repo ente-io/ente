@@ -25,7 +25,7 @@ showAddLocationSheet(
     context: context,
     builder: (context) {
       return LocationTagStateProvider(
-        coordinates,
+        centerPoint: coordinates,
         AddLocationSheet(onLocationAdded),
       );
     },

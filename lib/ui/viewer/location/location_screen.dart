@@ -28,9 +28,7 @@ class LocationScreen extends StatelessWidget {
               onPressed: () {
                 showEditLocationSheet(
                   context,
-                  InheritedLocationScreenState.of(context)
-                      .locationTag
-                      .centerPoint,
+                  InheritedLocationScreenState.of(context).locationTag,
                   () {},
                 );
               },

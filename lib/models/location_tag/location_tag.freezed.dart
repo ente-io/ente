@@ -163,13 +163,14 @@ class __$$_LocationTagCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$_LocationTag implements _LocationTag {
+class _$_LocationTag extends _LocationTag {
   const _$_LocationTag(
       {required this.name,
       required this.radius,
       required this.aSquare,
       required this.bSquare,
-      required this.centerPoint});
+      required this.centerPoint})
+      : super._();
 
   factory _$_LocationTag.fromJson(Map<String, dynamic> json) =>
       _$$_LocationTagFromJson(json);
@@ -222,13 +223,14 @@ class _$_LocationTag implements _LocationTag {
   }
 }
 
-abstract class _LocationTag implements LocationTag {
+abstract class _LocationTag extends LocationTag {
   const factory _LocationTag(
       {required final String name,
       required final int radius,
       required final double aSquare,
       required final double bSquare,
       required final Location centerPoint}) = _$_LocationTag;
+  const _LocationTag._() : super._();
 
   factory _LocationTag.fromJson(Map<String, dynamic> json) =
       _$_LocationTag.fromJson;

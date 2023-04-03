@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/models/location/location.dart";
+import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -17,14 +17,14 @@ import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
 showEditLocationSheet(
   BuildContext context,
-  Location centerPoint,
+  LocationTag locationTag,
   VoidCallback onLocationEdited,
 ) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
       return LocationTagStateProvider(
-        centerPoint,
+        locationTag: locationTag,
         EditLocationSheet(onLocationEdited),
       );
     },
