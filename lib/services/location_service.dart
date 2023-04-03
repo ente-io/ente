@@ -35,7 +35,6 @@ class LocationService {
     //Converting the unit from kilometers to degrees for a and b as that is
     //the unit on the caritesian plane
 
-    //Todo : Check if lat long can be null here
     final a =
         (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
     final b = radius / kilometersPerDegree;
@@ -65,7 +64,6 @@ class LocationService {
       final locationTag = LocationTag.fromJson(json.decode(locationTagData));
       // final locationJson = json.decode(locationTag);
       // final center = locationJson["center"];
-      //Todo : Check if lat long can be null here
       final x = fileCoordinates.latitude! - locationTag.centerPoint.latitude!;
       final y = fileCoordinates.longitude! - locationTag.centerPoint.longitude!;
       if ((x * x) / (locationTag.aSquare) + (y * y) / (locationTag.bSquare) <=
