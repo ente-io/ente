@@ -187,6 +187,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                     }}
                     validationSchema={Yup.object().shape({
                         reason: Yup.string().required(t('REQUIRED')),
+                        feedback: Yup.string().required(t('FEEDBACK_REQUIRED')),
                     })}
                     validateOnChange={false}
                     validateOnBlur={false}
@@ -207,7 +208,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     )}
                                     selected={values.reason}
                                     setSelected={handleChange('reason')}
-                                    messageProps={{ color: 'critical.main' }}
+                                    messageProps={{ color: 'danger.main' }}
                                     message={errors.reason}
                                 />
                                 <MultilineInput
@@ -218,7 +219,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     value={values.feedback}
                                     onChange={handleChange('feedback')}
                                     message={errors.feedback}
-                                    messageProps={{ color: 'critical.main' }}
+                                    messageProps={{ color: 'danger.main' }}
                                     rowCount={3}
                                 />
                                 <CheckboxInput

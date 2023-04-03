@@ -35,7 +35,6 @@ export default function DropdownInput<T extends string>({
     setSelected,
     messageProps,
 }: Iprops<T>) {
-    console.log({ ...messageProps });
     return (
         <Stack spacing={'4px'}>
             <Typography {...labelProps}>{label}</Typography>
