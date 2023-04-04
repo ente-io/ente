@@ -119,7 +119,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                           alwaysShowSuccessState: true,
                         ),
                         const SizedBox(height: 20),
-                        const EditCenterPointRowWidget(),
+                        const EditCenterPointTileWidget(),
                         const SizedBox(height: 20),
                         RadiusPickerWidget(
                           _selectedRadiusIndexNotifier,

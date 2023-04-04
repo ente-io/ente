@@ -2,9 +2,10 @@ import "package:flutter/material.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/viewer/location/pick_center_point_widget.dart";
 
-class EditCenterPointRowWidget extends StatelessWidget {
-  const EditCenterPointRowWidget({super.key});
+class EditCenterPointTileWidget extends StatelessWidget {
+  const EditCenterPointTileWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,13 @@ class EditCenterPointRowWidget extends StatelessWidget {
           ),
         ),
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            showPickCenterPointSheet(
+              context,
+              InheritedLocationTagData.of(context).locationTag!,
+              () {},
+            );
+          },
           icon: const Icon(Icons.edit),
           color: getEnteColorScheme(context).strokeMuted,
         ),
