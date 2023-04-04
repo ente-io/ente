@@ -103,24 +103,32 @@ class AuthenticatorGateway {
   }
 
   Future<List<AuthEntity>> getDiff(int sinceTime, {int limit = 500}) async {
-    final response = await _dio.get(
-      _basedEndpoint + "/entity/diff",
-      queryParameters: {
-        "sinceTime": sinceTime,
-        "limit": limit,
-      },
-      options: Options(
-        headers: {
-          "X-Auth-Token": _config.getToken(),
+    try {
+      final response = await _dio.get(
+        _basedEndpoint + "/entity/diff",
+        queryParameters: {
+          "sinceTime": sinceTime,
+          "limit": limit,
         },
-      ),
-    );
-    final List<AuthEntity> authEntities = <AuthEntity>[];
-    final diff = response.data["diff"] as List;
-    for (var entry in diff) {
-      final AuthEntity entity = AuthEntity.fromMap(entry);
-      authEntities.add(entity);
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      final List<AuthEntity> authEntities = <AuthEntity>[];
+      final diff = response.data["diff"] as List;
+      for (var entry in diff) {
+        final AuthEntity entity = AuthEntity.fromMap(entry);
+        authEntities.add(entity);
+      }
+      return authEntities;
+    } catch (e) {
+      if (e is DioError && e.response?.statusCode == 401) {
+        throw UnauthorizedError();
+      } else {
+        rethrow;
+      }
     }
-    return authEntities;
   }
 }
