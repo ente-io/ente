@@ -35,7 +35,7 @@ You can add tokens to ente by one of the following methods:
 3. Bulk importing from a file that contains a list of codes in the following
    format:
 ```
-otpauth://totp/ACCOUNT?secret=SUPERSECRET&issuer=SERVICE
+otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET
 ```
 The codes maybe separated by new lines or commas.
 
