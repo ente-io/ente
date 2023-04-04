@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/home_widget.dart';
@@ -71,7 +72,8 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
               : const HomeWidget(),
           debugShowCheckedModeBanner: false,
           builder: EasyLoading.init(),
-          supportedLocales: AppLocalizations.supportedLocales,
+          supportedLocales: appSupportedLocales,
+          localeResolutionCallback: localResolutionCallBack,
           localizationsDelegates: const [
             ...AppLocalizations.localizationsDelegates,
             S.delegate
@@ -87,7 +89,8 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           home: const HomeWidget(),
           debugShowCheckedModeBanner: false,
           builder: EasyLoading.init(),
-          supportedLocales: AppLocalizations.supportedLocales,
+          supportedLocales: appSupportedLocales,
+          localeResolutionCallback: localResolutionCallBack,
           localizationsDelegates: const [
             ...AppLocalizations.localizationsDelegates,
             S.delegate
