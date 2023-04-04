@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'lib/l10n/app_en.arb'
+      - 'lib/l10n/intl_en.arb'
     branches: [ main ]
 
 jobs:
