@@ -93,6 +93,23 @@ class LocationService {
     }
     return false;
   }
+
+  String convertLocationToDMS(Location centerPoint) {
+    final lat = centerPoint.latitude!;
+    final long = centerPoint.longitude!;
+    final latRef = lat >= 0 ? "N" : "S";
+    final longRef = long >= 0 ? "E" : "W";
+    final latDMS = convertCoordinateToDMS(lat.abs());
+    final longDMS = convertCoordinateToDMS(long.abs());
+    return "${latDMS[0]}°${latDMS[1]}'${latDMS[2]}\"$latRef, ${longDMS[0]}°${longDMS[1]}'${longDMS[2]}\"$longRef";
+  }
+
+  List<int> convertCoordinateToDMS(double coordinate) {
+    final degrees = coordinate.floor();
+    final minutes = ((coordinate - degrees) * 60).floor();
+    final seconds = ((coordinate - degrees - minutes / 60) * 3600).floor();
+    return [degrees, minutes, seconds];
+  }
 }
 
 class GPSData {
