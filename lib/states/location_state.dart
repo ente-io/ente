@@ -12,8 +12,12 @@ class LocationTagStateProvider extends StatefulWidget {
   //LocationTag becuase aSquare and bSquare will be null.
   final Location? centerPoint;
   final Widget child;
-  const LocationTagStateProvider(this.child,
-      {this.centerPoint, this.locationTag, super.key});
+  const LocationTagStateProvider(
+    this.child, {
+    this.centerPoint,
+    this.locationTag,
+    super.key,
+  });
 
   @override
   State<LocationTagStateProvider> createState() =>
@@ -51,6 +55,7 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
       selectedRaduisIndex,
       centerPoint,
       _updateSelectedIndex,
+      widget.locationTag,
       child: widget.child,
     );
   }
@@ -59,11 +64,14 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
 class InheritedLocationTagData extends InheritedWidget {
   final int selectedRadiusIndex;
   final Location centerPoint;
+  //locationTag is null when we are creating a new location tag in a add location sheet
+  final LocationTag? locationTag;
   final VoidCallbackParamInt updateSelectedIndex;
   const InheritedLocationTagData(
     this.selectedRadiusIndex,
     this.centerPoint,
-    this.updateSelectedIndex, {
+    this.updateSelectedIndex,
+    this.locationTag, {
     required super.child,
     super.key,
   });
@@ -75,6 +83,8 @@ class InheritedLocationTagData extends InheritedWidget {
 
   @override
   bool updateShouldNotify(InheritedLocationTagData oldWidget) {
-    return oldWidget.selectedRadiusIndex != selectedRadiusIndex;
+    return oldWidget.selectedRadiusIndex != selectedRadiusIndex ||
+        oldWidget.centerPoint != centerPoint ||
+        oldWidget.locationTag != locationTag;
   }
 }
