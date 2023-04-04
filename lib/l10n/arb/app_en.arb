@@ -14,6 +14,12 @@
   "codeSecretKeyHint" : "Secret Key",
   "codeAccountHint": "Account (you@domain.com)",
   "accountKeyType": "Type of key",
+  "sessionExpired": "Session expired",
+  "@sessionExpired": {
+    "description": "Title of the dialog when the users current session is invalid/expired"
+  },
+  "pleaseLoginAgain": "Please login again",
+  "loggingOut" : "Logging out...",
   "timeBasedKeyType": "Time based (TOTP)",
   "counterBasedKeyType": "Counter based (HOTP)",
   "saveAction": "Save",
