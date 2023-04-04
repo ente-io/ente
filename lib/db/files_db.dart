@@ -80,6 +80,7 @@ class FilesDB {
     ...createOnDeviceFilesAndPathCollection(),
     ...addFileSizeColumn(),
     ...updateIndexes(),
+    ...createEntityDataTable(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -335,12 +336,12 @@ class FilesDB {
   static List<String> createEntityDataTable() {
     return [
       '''
-       CREATE TABLE IF NOT EXISTS entity_data (
+       CREATE TABLE IF NOT EXISTS entities (
           id TEXT PRIMARY KEY NOT NULL,
           type TEXT NOT NULL,
-          owner_id INTEGER NOT NULL,
+          ownerID INTEGER NOT NULL,
           data TEXT NOT NULL DEFAULT '{}',
-          updated_at INTEGER NOT NULL
+          updatedAt INTEGER NOT NULL
       );
       '''
     ];

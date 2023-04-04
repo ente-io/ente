@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/models/api/entity/type.dart";
-import "package:photos/models/entity_data.dart";
+import "package:photos/models/local_entity_data.dart";
 import 'package:sqflite/sqlite_api.dart';
 
 extension EntitiesDB on FilesDB {

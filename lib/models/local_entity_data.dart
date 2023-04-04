@@ -30,8 +30,15 @@ class LocalEntityData {
       id: json["id"],
       type: typeFromString(json["type"]),
       data: json["data"],
-      ownerID: int.parse(json["ownerID"]),
-      updatedAt: int.parse(json["updatedAt"]),
+      ownerID: json["ownerID"] as int,
+      updatedAt: json["updatedAt"] as int,
     );
   }
+}
+
+class LocalEntity<T> {
+  final T item;
+  final String id;
+
+  LocalEntity(this.item, this.id);
 }

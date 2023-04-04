@@ -13,7 +13,7 @@ import "package:photos/gateways/entity_gw.dart";
 import "package:photos/models/api/entity/data.dart";
 import "package:photos/models/api/entity/key.dart";
 import "package:photos/models/api/entity/type.dart";
-import "package:photos/models/entity_data.dart";
+import "package:photos/models/local_entity_data.dart";
 import "package:photos/utils/crypto_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,7 +24,6 @@ class EntityService {
   late SharedPreferences _prefs;
   late EntityGateway _gateway;
   late FilesDB _db;
-  final String _lastEntitySyncTime = "lastEntitySyncTime";
 
   EntityService._privateConstructor();
 
@@ -32,6 +31,7 @@ class EntityService {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
+    _db = FilesDB.instance;
     _gateway = EntityGateway(NetworkClient.instance.enteDio);
   }
 
@@ -41,6 +41,10 @@ class EntityService {
 
   String _getEntityHeaderPrefix(EntityType type) {
     return "entity_key_header_" + type.typeToString();
+  }
+
+  String _getEntityLastSyncTimePrefix(EntityType type) {
+    return "entity_last_sync_time_" + type.typeToString();
   }
 
   Future<List<LocalEntityData>> getEntities(EntityType type) async {
@@ -60,6 +64,7 @@ class EntityService {
     final String encryptedData =
         Sodium.bin2base64(encryptedKeyData.encryptedData!);
     final String header = Sodium.bin2base64(encryptedKeyData.header!);
+    debugPrint("Adding entity of type: " + type.typeToString());
     final EntityData data = id == null
         ? await _gateway.createEntity(type, encryptedData, header)
         : await _gateway.updateEntity(type, id, encryptedData, header);
@@ -89,7 +94,8 @@ class EntityService {
   }
 
   Future<void> _remoteToLocalSync(EntityType type) async {
-    final int lastSyncTime = _prefs.getInt(_lastEntitySyncTime) ?? 0;
+    final int lastSyncTime =
+        _prefs.getInt(_getEntityLastSyncTimePrefix(type)) ?? 0;
     final List<EntityData> result = await _gateway.getDiff(
       type,
       lastSyncTime,
@@ -137,7 +143,7 @@ class EntityService {
         await _db.upsertEntities(entities);
       }
     }
-    _prefs.setInt(_lastEntitySyncTime, maxSyncTime);
+    _prefs.setInt(_getEntityLastSyncTimePrefix(type), maxSyncTime);
     if (hasMoreItems) {
       _logger.info("Diff limit reached, pulling again");
       await _remoteToLocalSync(type);
