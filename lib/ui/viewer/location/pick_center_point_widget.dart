@@ -2,13 +2,20 @@ import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
+import "package:photos/core/configuration.dart";
+import "package:photos/db/files_db.dart";
+import "package:photos/models/file_load_result.dart";
 import "package:photos/models/location_tag/location_tag.dart";
+import "package:photos/models/selected_files.dart";
+import "package:photos/services/collections_service.dart";
+import "package:photos/services/ignored_files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
+import "package:photos/ui/viewer/gallery/gallery.dart";
 
 showPickCenterPointSheet(
   BuildContext context,
@@ -29,6 +36,7 @@ showPickCenterPointSheet(
     topControl: const SizedBox.shrink(),
     backgroundColor: getEnteColorScheme(context).backgroundElevated,
     barrierColor: backdropFaintDark,
+    enableDrag: false,
   );
 }
 
@@ -44,6 +52,7 @@ class PickCenterPointWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectedFiles = SelectedFiles();
     return Padding(
       padding: const EdgeInsets.all(0),
       child: Row(
@@ -66,6 +75,61 @@ class PickCenterPointWidget extends StatelessWidget {
                             title: "Pick center point",
                           ),
                           caption: locationTag.name,
+                        ),
+                        Expanded(
+                          child: Gallery(
+                            asyncLoader: (
+                              creationStartTime,
+                              creationEndTime, {
+                              limit,
+                              asc,
+                            }) async {
+                              final ownerID =
+                                  Configuration.instance.getUserID();
+                              final hasSelectedAllForBackup = Configuration
+                                  .instance
+                                  .hasSelectedAllFoldersForBackup();
+                              final collectionsToHide = CollectionsService
+                                  .instance
+                                  .collectionsHiddenFromTimeline();
+                              FileLoadResult result;
+                              if (hasSelectedAllForBackup) {
+                                result = await FilesDB.instance
+                                    .getAllLocalAndUploadedFiles(
+                                  creationStartTime,
+                                  creationEndTime,
+                                  ownerID!,
+                                  limit: limit,
+                                  asc: asc,
+                                  ignoredCollectionIDs: collectionsToHide,
+                                );
+                              } else {
+                                result = await FilesDB.instance
+                                    .getAllPendingOrUploadedFiles(
+                                  creationStartTime,
+                                  creationEndTime,
+                                  ownerID!,
+                                  limit: limit,
+                                  asc: asc,
+                                  ignoredCollectionIDs: collectionsToHide,
+                                );
+                              }
+
+                              // hide ignored files from home page UI
+                              final ignoredIDs =
+                                  await IgnoredFilesService.instance.ignoredIDs;
+                              result.files.removeWhere(
+                                (f) =>
+                                    f.uploadedFileID == null &&
+                                    IgnoredFilesService.instance
+                                        .shouldSkipUpload(ignoredIDs, f),
+                              );
+                              return result;
+                            },
+                            tagPrefix: "pick_center_point_gallery",
+                            selectedFiles: selectedFiles,
+                            limitSelectionToOne: true,
+                          ),
                         ),
                       ],
                     ),
