@@ -7,12 +7,14 @@ import 'dart:ui';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
+import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_widget.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
@@ -43,6 +45,7 @@ class _HomePageState extends State<HomePage> {
   List<Code> _codes = [];
   List<Code> _filteredCodes = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
+  StreamSubscription<TriggerLogoutEvent>? _triggerLogoutEvent;
 
   @override
   void initState() {
@@ -50,6 +53,10 @@ class _HomePageState extends State<HomePage> {
     _loadCodes();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
+    });
+    _triggerLogoutEvent =
+        Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
+      await autoLogoutAlert(context);
     });
     super.initState();
   }
@@ -84,6 +91,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _streamSubscription?.cancel();
+    _triggerLogoutEvent?.cancel();
     _textController.removeListener(_applyFiltering);
     super.dispose();
   }
