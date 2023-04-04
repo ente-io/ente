@@ -2,6 +2,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
@@ -67,6 +68,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _getBody() {
+    final l10n = context.l10n;
     return Column(
       children: [
         Expanded(
@@ -77,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    S.of(context).accountWelcomeBack,
+                    l10n.accountWelcomeBack,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
@@ -88,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       fillColor: _emailInputFieldColor,
                       filled: true,
-                      hintText: S.of(context).email,
+                      hintText: l10n.email,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 15,
                         vertical: 15,
