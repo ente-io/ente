@@ -109,6 +109,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Please enter a valid email address.`
+  String get enterValidEmail {
+    return Intl.message(
+      'Please enter a valid email address.',
+      name: 'enterValidEmail',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

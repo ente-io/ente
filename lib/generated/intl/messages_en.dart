@@ -26,6 +26,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Welcome back!"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
+        "enterValidEmail": MessageLookupByLibrary.simpleMessage(
+            "Please enter a valid email address."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Enter your email address"),
         "invalidEmailAddress":

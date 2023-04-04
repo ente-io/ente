@@ -69,7 +69,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
               showErrorDialog(
                 context,
                 l10n.invalidEmailAddress,
-                "Please enter a valid email address.",
+                l10n.enterValidEmail,
               );
               return;
             }
