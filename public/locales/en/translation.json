@@ -207,7 +207,7 @@
         "THING": "Content",
         "FILE_CAPTION": "Description"
     },
-    "photos_count_zero": "No memory",
+    "photos_count_zero": "No memories",
     "photos_count_one": "1 memory",
     "photos_count_other": "{{count}} memories",
     "TERMS_AND_CONDITIONS": "I agree to the <a>terms</a> and <b>privacy policy</b>",
