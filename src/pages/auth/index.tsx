@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import OTPDisplay from 'components/Authenicator/OTPDisplay';
 import { getAuthCodes } from 'services/authenticator/authenticatorService';
 import { CustomError } from 'utils/error';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AuthFooter } from 'components/Authenicator/AuthFooder';
+import { AppContext } from 'pages/_app';
 
 const AuthenticatorCodesPage = () => {
+    const appContext = useContext(AppContext);
     const router = useRouter();
     const [codes, setCodes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -18,10 +20,8 @@ const AuthenticatorCodesPage = () => {
                 setCodes(res);
             } catch (err) {
                 if (err.message === CustomError.KEY_MISSING) {
-                    router.push({
-                        pathname: PAGES.CREDENTIALS,
-                        query: { redirectPage: PAGES.AUTH },
-                    });
+                    appContext.setRedirectURL(PAGES.AUTH);
+                    router.push(PAGES.ROOT);
                 } else {
                     // do not log errors
                 }
