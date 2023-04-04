@@ -52,7 +52,12 @@ class PickCenterPointWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ValueNotifier<bool> isFileSelected = ValueNotifier(false);
     final selectedFiles = SelectedFiles();
+    selectedFiles.addListener(() {
+      isFileSelected.value = selectedFiles.files.isNotEmpty;
+    });
+
     return Padding(
       padding: const EdgeInsets.all(0),
       child: Row(
@@ -145,11 +150,33 @@ class PickCenterPointWidget extends StatelessWidget {
                           ),
                         ),
                       ),
-                      child: const ButtonWidget(
-                        buttonType: ButtonType.secondary,
-                        buttonAction: ButtonAction.cancel,
-                        isInAlert: true,
-                        labelText: "Cancel",
+                      child: Column(
+                        children: [
+                          ValueListenableBuilder(
+                            valueListenable: isFileSelected,
+                            builder: (context, bool value, _) {
+                              return AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 300),
+                                switchInCurve: Curves.easeInOutExpo,
+                                switchOutCurve: Curves.easeInOutExpo,
+                                child: ButtonWidget(
+                                  key: ValueKey(value),
+                                  isDisabled: !value,
+                                  buttonType: ButtonType.neutral,
+                                  isInAlert: true,
+                                  labelText: "Use selected photo",
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          const ButtonWidget(
+                            buttonType: ButtonType.secondary,
+                            buttonAction: ButtonAction.cancel,
+                            isInAlert: true,
+                            labelText: "Cancel",
+                          ),
+                        ],
                       ),
                     ),
                   )
