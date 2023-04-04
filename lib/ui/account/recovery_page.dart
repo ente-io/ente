@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -43,15 +44,16 @@ class _RecoveryPageState extends State<RecoveryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _recoveryKey.text.isNotEmpty,
-        buttonText: 'Recover',
+        buttonText: S.of(context).recoverButton,
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
-          final dialog = createProgressDialog(context, "Decrypting...");
+          final dialog =
+              createProgressDialog(context, S.of(context).decrypting);
           await dialog.show();
           try {
             await Configuration.instance.recover(_recoveryKey.text.trim());
             await dialog.hide();
-            showShortToast(context, "Recovery successful!");
+            showShortToast(context, S.of(context).recoverySuccessful);
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (BuildContext context) {
@@ -66,11 +68,15 @@ class _RecoveryPageState extends State<RecoveryPage> {
             );
           } catch (e) {
             await dialog.hide();
-            String errMessage = "The recovery key you entered is incorrect";
+            String errMessage = S.of(context).incorrectRecoveryKeyBody;
             if (e is AssertionError) {
               errMessage = '$errMessage : ${e.message}';
             }
-            showErrorDialog(context, "Incorrect recovery key", errMessage);
+            showErrorDialog(
+              context,
+              S.of(context).incorrectRecoveryKeyTitle,
+              errMessage,
+            );
           }
         },
       ),
@@ -85,7 +91,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    'Forgot password',
+                    S.of(context).forgotPassword,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
@@ -94,7 +100,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                   child: TextFormField(
                     decoration: InputDecoration(
                       filled: true,
-                      hintText: "Enter your recovery key",
+                      hintText: S.of(context).enterYourRecoveryKey,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
@@ -128,15 +134,15 @@ class _RecoveryPageState extends State<RecoveryPage> {
                       onTap: () {
                         showErrorDialog(
                           context,
-                          "Sorry",
-                          "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key",
+                          S.of(context).sorry,
+                          S.of(context).noRecoveryKeyNoDecryption,
                         );
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Center(
                           child: Text(
-                            "No recovery key?",
+                            S.of(context).noRecoveryKey,
                             style:
                                 Theme.of(context).textTheme.subtitle1!.copyWith(
                                       fontSize: 14,

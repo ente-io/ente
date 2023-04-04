@@ -38,6 +38,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "createAccount": MessageLookupByLibrary.simpleMessage("Create account"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Create new account"),
+        "decrypting": MessageLookupByLibrary.simpleMessage("Decrypting..."),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Delete account"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
             "We are sorry to see you go. Please share your feedback to help us improve."),
@@ -60,23 +61,39 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please enter a valid email address."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Enter your email address"),
+        "enterYourRecoveryKey":
+            MessageLookupByLibrary.simpleMessage("Enter your recovery key"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
+        "forgotPassword":
+            MessageLookupByLibrary.simpleMessage("Forgot password"),
         "fromYourRegisteredEmailAddress": MessageLookupByLibrary.simpleMessage(
             "from your registered email address."),
+        "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
+            "The recovery key you entered is incorrect"),
+        "incorrectRecoveryKeyTitle":
+            MessageLookupByLibrary.simpleMessage("Incorrect recovery key"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Invalid email address"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Kindly help us with this information"),
+        "noRecoveryKey":
+            MessageLookupByLibrary.simpleMessage("No recovery key?"),
+        "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
+            "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
         "password": MessageLookupByLibrary.simpleMessage("Password"),
         "pleaseSendAnEmailTo":
             MessageLookupByLibrary.simpleMessage("Please send an email to"),
+        "recoverButton": MessageLookupByLibrary.simpleMessage("Recover"),
+        "recoverySuccessful":
+            MessageLookupByLibrary.simpleMessage("Recovery successful!"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Select reason"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Something went wrong, please try again"),
+        "sorry": MessageLookupByLibrary.simpleMessage("Sorry"),
         "terminate": MessageLookupByLibrary.simpleMessage("Terminate"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Terminate session?"),

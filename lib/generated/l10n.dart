@@ -441,6 +441,106 @@ class S {
       args: [],
     );
   }
+
+  /// `Recover`
+  String get recoverButton {
+    return Intl.message(
+      'Recover',
+      name: 'recoverButton',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recovery successful!`
+  String get recoverySuccessful {
+    return Intl.message(
+      'Recovery successful!',
+      name: 'recoverySuccessful',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Decrypting...`
+  String get decrypting {
+    return Intl.message(
+      'Decrypting...',
+      name: 'decrypting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Incorrect recovery key`
+  String get incorrectRecoveryKeyTitle {
+    return Intl.message(
+      'Incorrect recovery key',
+      name: 'incorrectRecoveryKeyTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The recovery key you entered is incorrect`
+  String get incorrectRecoveryKeyBody {
+    return Intl.message(
+      'The recovery key you entered is incorrect',
+      name: 'incorrectRecoveryKeyBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Forgot password`
+  String get forgotPassword {
+    return Intl.message(
+      'Forgot password',
+      name: 'forgotPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter your recovery key`
+  String get enterYourRecoveryKey {
+    return Intl.message(
+      'Enter your recovery key',
+      name: 'enterYourRecoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No recovery key?`
+  String get noRecoveryKey {
+    return Intl.message(
+      'No recovery key?',
+      name: 'noRecoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry`
+  String get sorry {
+    return Intl.message(
+      'Sorry',
+      name: 'sorry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key`
+  String get noRecoveryKeyNoDecryption {
+    return Intl.message(
+      'Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
+      name: 'noRecoveryKeyNoDecryption',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

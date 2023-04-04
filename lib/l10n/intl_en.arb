@@ -43,5 +43,15 @@
   "thisWillLogYouOutOfTheFollowingDevice": "This will log you out of the following device:",
   "terminateSession": "Terminate session?",
   "terminate": "Terminate",
-  "thisDevice": "This device"
+  "thisDevice": "This device",
+  "recoverButton": "Recover",
+  "recoverySuccessful": "Recovery successful!",
+  "decrypting": "Decrypting...",
+  "incorrectRecoveryKeyTitle": "Incorrect recovery key",
+  "incorrectRecoveryKeyBody": "The recovery key you entered is incorrect",
+  "forgotPassword": "Forgot password",
+  "enterYourRecoveryKey": "Enter your recovery key",
+  "noRecoveryKey": "No recovery key?",
+  "sorry": "Sorry",
+  "noRecoveryKeyNoDecryption": "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key"
 }
