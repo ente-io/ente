@@ -27,8 +27,13 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Welcome back!"),
+        "ackPasswordLostWarningPart1": MessageLookupByLibrary.simpleMessage(
+            "I understand that if I lose my password, I may lose my data since my data is "),
+        "ackPasswordLostWarningPart2":
+            MessageLookupByLibrary.simpleMessage(" with ente"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Active sessions"),
+        "and": MessageLookupByLibrary.simpleMessage("and"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "What is the main reason you are deleting your account?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
@@ -65,8 +70,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "Your request will be processed within 72 hours."),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
+        "encryption": MessageLookupByLibrary.simpleMessage("Encryption"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Encryption keys"),
+        "endToEndEncrypted":
+            MessageLookupByLibrary.simpleMessage("end-to-end encrypted"),
         "enterNewPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Enter a new password we can use to encrypt your data"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
@@ -113,6 +121,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseSendAnEmailTo":
             MessageLookupByLibrary.simpleMessage("Please send an email to"),
         "pleaseWait": MessageLookupByLibrary.simpleMessage("Please wait..."),
+        "privacyPolicy": MessageLookupByLibrary.simpleMessage("privacy policy"),
+        "privacyPolicyTitle":
+            MessageLookupByLibrary.simpleMessage("Privacy Policy"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Recover"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Recovery successful!"),
@@ -136,6 +147,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "terminate": MessageLookupByLibrary.simpleMessage("Terminate"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Terminate session?"),
+        "termsAgreePart1":
+            MessageLookupByLibrary.simpleMessage("I agree to the"),
+        "termsOfService":
+            MessageLookupByLibrary.simpleMessage("terms of service"),
+        "termsOfServicesTitle": MessageLookupByLibrary.simpleMessage("Terms"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("This device"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(

@@ -94,5 +94,25 @@
   "continueLabel": "Continue",
   "insecureDevice": "Insecure device",
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.",
-  "howItWorks": "How it works"
+  "howItWorks": "How it works",
+  "encryption": "Encryption",
+  "ackPasswordLostWarningPart1": "I understand that if I lose my password, I may lose my data since my data is ",
+  "endToEndEncrypted": "end-to-end encrypted",
+  "ackPasswordLostWarningPart2": " with ente",
+  "@ackPasswordLostWarningPart2": {
+    "description": "This text is part2 the sentence 'I understand that if I lose my password, I may lose my data since my data is end-to-end encrypted with ente.'"
+  },
+  "privacyPolicyTitle": "Privacy Policy",
+  "termsOfServicesTitle": "Terms",
+
+  "termsAgreePart1": "I agree to the",
+  "@termsAgreePart1": {
+    "description": "This text is part the sentence 'I agree to the terms of service and privacy policy.'"
+  },
+  "privacyPolicy": "privacy policy",
+  "and": "and",
+  "@and": {
+    "description": "Separator used in sentences like 'I agree to the terms of service and privacy policy.'"
+  },
+  "termsOfService": "terms of service"
 }

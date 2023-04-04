@@ -783,6 +783,109 @@ class S {
       args: [],
     );
   }
+
+  /// `Encryption`
+  String get encryption {
+    return Intl.message(
+      'Encryption',
+      name: 'encryption',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I understand that if I lose my password, I may lose my data since my data is `
+  String get ackPasswordLostWarningPart1 {
+    return Intl.message(
+      'I understand that if I lose my password, I may lose my data since my data is ',
+      name: 'ackPasswordLostWarningPart1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `end-to-end encrypted`
+  String get endToEndEncrypted {
+    return Intl.message(
+      'end-to-end encrypted',
+      name: 'endToEndEncrypted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// ` with ente`
+  String get ackPasswordLostWarningPart2 {
+    return Intl.message(
+      ' with ente',
+      name: 'ackPasswordLostWarningPart2',
+      desc:
+          'This text is part2 the sentence \'I understand that if I lose my password, I may lose my data since my data is end-to-end encrypted with ente.\'',
+      args: [],
+    );
+  }
+
+  /// `Privacy Policy`
+  String get privacyPolicyTitle {
+    return Intl.message(
+      'Privacy Policy',
+      name: 'privacyPolicyTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Terms`
+  String get termsOfServicesTitle {
+    return Intl.message(
+      'Terms',
+      name: 'termsOfServicesTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I agree to the`
+  String get termsAgreePart1 {
+    return Intl.message(
+      'I agree to the',
+      name: 'termsAgreePart1',
+      desc:
+          'This text is part the sentence \'I agree to the terms of service and privacy policy.\'',
+      args: [],
+    );
+  }
+
+  /// `privacy policy`
+  String get privacyPolicy {
+    return Intl.message(
+      'privacy policy',
+      name: 'privacyPolicy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `and`
+  String get and {
+    return Intl.message(
+      'and',
+      name: 'and',
+      desc:
+          'Separator used in sentences like \'I agree to the terms of service and privacy policy.\'',
+      args: [],
+    );
+  }
+
+  /// `terms of service`
+  String get termsOfService {
+    return Intl.message(
+      'terms of service',
+      name: 'termsOfService',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
