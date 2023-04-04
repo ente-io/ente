@@ -58,5 +58,41 @@
   "checkInboxAndSpamFolder": "Please check your inbox (and spam) to complete verification",
   "tapToEnterCode": "Tap to enter code",
   "resendEmail": "Resend email",
-  "weveSentAMailTo": "We've sent a mail to"
+  "weveSentAMailTo": "We've sent a mail to",
+  "setPasswordTitle": "Set password",
+  "changePasswordTitle": "Change password",
+  "resetPasswordTitle": "Reset password",
+  "encryptionKeys": "Encryption keys",
+  "noPasswordWarningPart1": "We don't store this password, so if you forget,",
+  "@noPasswordWarningPart1": {
+    "description": "This text is part1 the sentence 'We don't store this password, so if you forget, we cannot decrypt your data.'"
+  },
+  "noPasswordWarningPart2": "we cannot decrypt your data",
+  "@noPasswordWarningPart2": {
+    "description": "This text is part2 the sentence 'We don't store this password, so if you forget, we cannot decrypt your data.'"
+  },
+  "enterPasswordToEncrypt": "Enter a password we can use to encrypt your data",
+  "enterNewPasswordToEncrypt": "Enter a new password we can use to encrypt your data",
+  "weakStrength": "Weak",
+  "strongStrength": "Strong",
+  "moderateStrength": "Moderate",
+  "passwordStrength": "Password strength: {passwordStrengthValue}",
+  "@passwordStrength": {
+    "description": "Text to indicate the password strength",
+    "placeholders": {
+      "passwordStrengthValue": {
+        "description": "The strength of the password as a string",
+        "type": "String",
+        "example": "Weak or Moderate or Strong"
+      }
+    },
+    "message": "Password Strength: {passwordStrengthText}"
+  },
+  "passwordChangedSuccessfully": "Password changed successfully",
+  "generatingEncryptionKeys": "Generating encryption keys...",
+  "pleaseWait": "Please wait...",
+  "continueLabel": "Continue",
+  "insecureDevice": "Insecure device",
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.",
+  "howItWorks": "How it works"
 }

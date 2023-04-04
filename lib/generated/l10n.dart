@@ -591,6 +591,198 @@ class S {
       args: [],
     );
   }
+
+  /// `Set password`
+  String get setPasswordTitle {
+    return Intl.message(
+      'Set password',
+      name: 'setPasswordTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change password`
+  String get changePasswordTitle {
+    return Intl.message(
+      'Change password',
+      name: 'changePasswordTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset password`
+  String get resetPasswordTitle {
+    return Intl.message(
+      'Reset password',
+      name: 'resetPasswordTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Encryption keys`
+  String get encryptionKeys {
+    return Intl.message(
+      'Encryption keys',
+      name: 'encryptionKeys',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We don't store this password, so if you forget,`
+  String get noPasswordWarningPart1 {
+    return Intl.message(
+      'We don\'t store this password, so if you forget,',
+      name: 'noPasswordWarningPart1',
+      desc:
+          'This text is part1 the sentence \'We don\'t store this password, so if you forget, we cannot decrypt your data.\'',
+      args: [],
+    );
+  }
+
+  /// `we cannot decrypt your data`
+  String get noPasswordWarningPart2 {
+    return Intl.message(
+      'we cannot decrypt your data',
+      name: 'noPasswordWarningPart2',
+      desc:
+          'This text is part2 the sentence \'We don\'t store this password, so if you forget, we cannot decrypt your data.\'',
+      args: [],
+    );
+  }
+
+  /// `Enter a password we can use to encrypt your data`
+  String get enterPasswordToEncrypt {
+    return Intl.message(
+      'Enter a password we can use to encrypt your data',
+      name: 'enterPasswordToEncrypt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a new password we can use to encrypt your data`
+  String get enterNewPasswordToEncrypt {
+    return Intl.message(
+      'Enter a new password we can use to encrypt your data',
+      name: 'enterNewPasswordToEncrypt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Weak`
+  String get weakStrength {
+    return Intl.message(
+      'Weak',
+      name: 'weakStrength',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strong`
+  String get strongStrength {
+    return Intl.message(
+      'Strong',
+      name: 'strongStrength',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Moderate`
+  String get moderateStrength {
+    return Intl.message(
+      'Moderate',
+      name: 'moderateStrength',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password strength: {passwordStrengthValue}`
+  String passwordStrength(String passwordStrengthValue) {
+    return Intl.message(
+      'Password strength: $passwordStrengthValue',
+      name: 'passwordStrength',
+      desc: 'Text to indicate the password strength',
+      args: [passwordStrengthValue],
+    );
+  }
+
+  /// `Password changed successfully`
+  String get passwordChangedSuccessfully {
+    return Intl.message(
+      'Password changed successfully',
+      name: 'passwordChangedSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Generating encryption keys...`
+  String get generatingEncryptionKeys {
+    return Intl.message(
+      'Generating encryption keys...',
+      name: 'generatingEncryptionKeys',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please wait...`
+  String get pleaseWait {
+    return Intl.message(
+      'Please wait...',
+      name: 'pleaseWait',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue`
+  String get continueLabel {
+    return Intl.message(
+      'Continue',
+      name: 'continueLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Insecure device`
+  String get insecureDevice {
+    return Intl.message(
+      'Insecure device',
+      name: 'insecureDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.`
+  String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease {
+    return Intl.message(
+      'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.',
+      name: 'sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How it works`
+  String get howItWorks {
+    return Intl.message(
+      'How it works',
+      name: 'howItWorks',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

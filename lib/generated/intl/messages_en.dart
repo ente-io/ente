@@ -20,6 +20,9 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
+  static String m0(passwordStrengthValue) =>
+      "Password strength: ${passwordStrengthValue}";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
@@ -29,6 +32,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "What is the main reason you are deleting your account?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "changePasswordTitle":
+            MessageLookupByLibrary.simpleMessage("Change password"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Please check your inbox (and spam) to complete verification"),
         "confirmAccountDeletion":
@@ -37,6 +42,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Yes, I want to permanently delete this account and all its data."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Confirm password"),
+        "continueLabel": MessageLookupByLibrary.simpleMessage("Continue"),
         "createAccount": MessageLookupByLibrary.simpleMessage("Create account"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Create new account"),
@@ -59,6 +65,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "Your request will be processed within 72 hours."),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
+        "encryptionKeys":
+            MessageLookupByLibrary.simpleMessage("Encryption keys"),
+        "enterNewPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
+            "Enter a new password we can use to encrypt your data"),
+        "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
+            "Enter a password we can use to encrypt your data"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Please enter a valid email address."),
         "enterYourEmailAddress":
@@ -70,14 +82,24 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Forgot password"),
         "fromYourRegisteredEmailAddress": MessageLookupByLibrary.simpleMessage(
             "from your registered email address."),
+        "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
+            "Generating encryption keys..."),
+        "howItWorks": MessageLookupByLibrary.simpleMessage("How it works"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
             "The recovery key you entered is incorrect"),
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("Incorrect recovery key"),
+        "insecureDevice":
+            MessageLookupByLibrary.simpleMessage("Insecure device"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Invalid email address"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Kindly help us with this information"),
+        "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
+        "noPasswordWarningPart1": MessageLookupByLibrary.simpleMessage(
+            "We don\'t store this password, so if you forget,"),
+        "noPasswordWarningPart2":
+            MessageLookupByLibrary.simpleMessage("we cannot decrypt your data"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("No recovery key?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -85,18 +107,30 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
         "password": MessageLookupByLibrary.simpleMessage("Password"),
+        "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
+            "Password changed successfully"),
+        "passwordStrength": m0,
         "pleaseSendAnEmailTo":
             MessageLookupByLibrary.simpleMessage("Please send an email to"),
+        "pleaseWait": MessageLookupByLibrary.simpleMessage("Please wait..."),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Recover"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Recovery successful!"),
         "resendEmail": MessageLookupByLibrary.simpleMessage("Resend email"),
+        "resetPasswordTitle":
+            MessageLookupByLibrary.simpleMessage("Reset password"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Select reason"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
+        "setPasswordTitle":
+            MessageLookupByLibrary.simpleMessage("Set password"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Something went wrong, please try again"),
         "sorry": MessageLookupByLibrary.simpleMessage("Sorry"),
+        "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
+            MessageLookupByLibrary.simpleMessage(
+                "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device."),
+        "strongStrength": MessageLookupByLibrary.simpleMessage("Strong"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("Tap to enter code"),
         "terminate": MessageLookupByLibrary.simpleMessage("Terminate"),
@@ -110,6 +144,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "This will log you out of this device!"),
         "verify": MessageLookupByLibrary.simpleMessage("Verify"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Verify email"),
+        "weakStrength": MessageLookupByLibrary.simpleMessage("Weak"),
         "weveSentAMailTo":
             MessageLookupByLibrary.simpleMessage("We\'ve sent a mail to"),
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
