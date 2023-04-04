@@ -1,13 +1,18 @@
 import "dart:convert";
 import "dart:math";
 
+import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/models/api/entity/type.dart";
+import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import 'package:photos/models/location_tag/location_tag.dart';
+import "package:photos/services/entity_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LocationService {
   late SharedPreferences prefs;
+  final Logger _logger = Logger((LocationService).toString());
 
   LocationService._privateConstructor();
 
@@ -17,15 +22,14 @@ class LocationService {
     prefs = preferences;
   }
 
-  List<String> _getStoredLocationTags() {
-    var list = prefs.getStringList('locations');
-    list ??= [];
-    return list;
+  Future<Iterable<LocalEntity<LocationTag>>> _getStoredLocationTags() async {
+    final data = await EntityService.instance.getEntities(EntityType.location);
+    return data.map(
+        (e) => LocalEntity(LocationTag.fromJson(json.decode(e.data)), e.id));
   }
 
-  List<LocationTag> getLocationTags() {
-    final list = _getStoredLocationTags();
-    return list.map((e) => LocationTag.fromJson(json.decode(e))).toList();
+  Future<Iterable<LocalEntity<LocationTag>>> getLocationTags() {
+    return _getStoredLocationTags();
   }
 
   Future<void> addLocation(
@@ -33,7 +37,6 @@ class LocationService {
     Location centerPoint,
     int radius,
   ) async {
-    final list = _getStoredLocationTags();
     //The area enclosed by the location tag will be a circle on a 3D spherical
     //globe and an ellipse on a 2D Mercator projection (2D map)
     //a & b are the semi-major and semi-minor axes of the ellipse
@@ -50,8 +53,8 @@ class LocationService {
       bSquare: b * b,
       centerPoint: centerPoint,
     );
-    list.add(json.encode(locationTag.toJson()));
-    await prefs.setStringList('locations', list);
+    await EntityService.instance
+        .addOrUpdate(EntityType.location, json.encode(locationTag.toJson()));
   }
 
   ///The area bounded by the location tag becomes more elliptical with increase
@@ -62,20 +65,27 @@ class LocationService {
     return 1 / cos(lat * (pi / 180));
   }
 
-  List<LocationTag> enclosingLocationTags(Location fileCoordinates) {
-    final result = List<LocationTag>.of([]);
-    final locationTagsData = getLocationTags();
-    for (LocationTag locationTag in locationTagsData) {
-      final x = fileCoordinates.latitude! - locationTag.centerPoint.latitude!;
-      final y = fileCoordinates.longitude! - locationTag.centerPoint.longitude!;
-      if ((x * x) / (locationTag.aSquare) + (y * y) / (locationTag.bSquare) <=
-          1) {
-        result.add(
-          locationTag,
-        );
+  Future<List<LocationTag>> enclosingLocationTags(
+      Location fileCoordinates) async {
+    try {
+      final result = List<LocationTag>.of([]);
+      final locationTagsData = (await getLocationTags()).map((e) => e.item);
+      for (LocationTag locationTag in locationTagsData) {
+        final x = fileCoordinates.latitude! - locationTag.centerPoint.latitude!;
+        final y =
+            fileCoordinates.longitude! - locationTag.centerPoint.longitude!;
+        if ((x * x) / (locationTag.aSquare) + (y * y) / (locationTag.bSquare) <=
+            1) {
+          result.add(
+            locationTag,
+          );
+        }
       }
+      return result;
+    } catch (e, s) {
+      _logger.severe("Failed to get enclosing location tags", e, s);
+      rethrow;
     }
-    return result;
   }
 
   bool isFileInsideLocationTag(

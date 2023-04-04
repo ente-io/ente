@@ -268,7 +268,8 @@ class SearchService {
   Future<List<GenericSearchResult>> getLocationResults(
     String query,
   ) async {
-    final locations = LocationService.instance.getLocationTags();
+    final locations =
+        (await LocationService.instance.getLocationTags()).map((e) => e.item);
     final Map<LocationTag, List<File>> result = {};
 
     final List<GenericSearchResult> searchResults = [];

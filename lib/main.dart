@@ -20,6 +20,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/entity_service.dart";
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
@@ -154,7 +155,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   await NetworkClient.instance.init();
   await Configuration.instance.init();
   await UserService.instance.init();
+  await EntityService.instance.init();
   LocationService.instance.init(preferences);
+
   await UserRemoteFlagService.instance.init();
   await UpdateService.instance.init();
   BillingService.instance.init();
