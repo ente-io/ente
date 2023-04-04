@@ -1,10 +1,15 @@
 // ignore_for_file: import_of_legacy_library_into_null_safe
 
+import 'dart:async';
+
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/ui/account/email_entry_page.dart';
 import 'package:ente_auth/ui/account/login_page.dart';
+import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/account/password_reentry_page.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
@@ -19,6 +24,23 @@ class OnboardingPage extends StatefulWidget {
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
+  late StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
+
+  @override
+  void initState() {
+    _triggerLogoutEvent =
+        Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
+      await autoLogoutAlert(context);
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _triggerLogoutEvent.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint("Building OnboardingPage");

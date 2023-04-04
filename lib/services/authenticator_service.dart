@@ -8,6 +8,7 @@ import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/events/signed_in_event.dart';
+import 'package:ente_auth/events/trigger_logout_event.dart';
 import 'package:ente_auth/gateway/authenticator.dart';
 import 'package:ente_auth/models/authenticator/auth_entity.dart';
 import 'package:ente_auth/models/authenticator/auth_key.dart';
@@ -132,6 +133,9 @@ class AuthenticatorService {
       await _localToRemoteSync();
       _logger.info("local push completed");
       Bus.instance.fire(CodesUpdatedEvent());
+    } on UnauthorizedError {
+      debugPrint("Firing logout event");
+      Bus.instance.fire(TriggerLogoutEvent());
     } catch (e) {
       _logger.severe("Failed to sync with remote", e);
     }
@@ -140,7 +144,7 @@ class AuthenticatorService {
   Future<void> _remoteToLocalSync() async {
     _logger.info('Initiating remote to local sync');
     final int lastSyncTime = _prefs.getInt(_lastEntitySyncTime) ?? 0;
-    _logger.info("Current synctime is " + lastSyncTime.toString());
+    _logger.info("Current sync is " + lastSyncTime.toString());
     const int fetchLimit = 500;
     final List<AuthEntity> result =
         await _gateway.getDiff(lastSyncTime, limit: fetchLimit);
