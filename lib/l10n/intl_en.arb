@@ -105,9 +105,9 @@
   "privacyPolicyTitle": "Privacy Policy",
   "termsOfServicesTitle": "Terms",
 
-  "termsAgreePart1": "I agree to the",
+  "termsAgreePart1": "I agree to the ",
   "@termsAgreePart1": {
-    "description": "This text is part the sentence 'I agree to the terms of service and privacy policy.'"
+    "description": "Note: there's a trailing space. This text is part the sentence 'I agree to the terms of service and privacy policy.'"
   },
   "privacyPolicy": "privacy policy",
   "and": "and",

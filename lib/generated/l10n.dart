@@ -845,13 +845,13 @@ class S {
     );
   }
 
-  /// `I agree to the`
+  /// `I agree to the `
   String get termsAgreePart1 {
     return Intl.message(
-      'I agree to the',
+      'I agree to the ',
       name: 'termsAgreePart1',
       desc:
-          'This text is part the sentence \'I agree to the terms of service and privacy policy.\'',
+          'Note: there\'s a trailing space. This text is part the sentence \'I agree to the terms of service and privacy policy.\'',
       args: [],
     );
   }

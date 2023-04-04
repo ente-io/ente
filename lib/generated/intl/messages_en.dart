@@ -148,7 +148,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Terminate session?"),
         "termsAgreePart1":
-            MessageLookupByLibrary.simpleMessage("I agree to the"),
+            MessageLookupByLibrary.simpleMessage("I agree to the "),
         "termsOfService":
             MessageLookupByLibrary.simpleMessage("terms of service"),
         "termsOfServicesTitle": MessageLookupByLibrary.simpleMessage("Terms"),
