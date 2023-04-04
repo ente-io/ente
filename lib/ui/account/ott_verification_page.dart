@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
@@ -64,7 +65,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _verificationCodeController.text.isNotEmpty,
-        buttonText: 'Verify',
+        buttonText: S.of(context).verify,
         onPressedFunction: () {
           if (widget.isChangeEmail) {
             UserService.instance.changeEmail(
@@ -93,7 +94,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 30, 20, 15),
               child: Text(
-                'Verify email',
+                S.of(context).verifyEmail,
                 style: Theme.of(context).textTheme.headline4,
               ),
             ),
@@ -114,7 +115,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                                   .subtitle1!
                                   .copyWith(fontSize: 14),
                               children: [
-                                const TextSpan(text: "We've sent a mail to "),
+                                TextSpan(text: S.of(context).weveSentAMailTo),
                                 TextSpan(
                                   text: widget.email,
                                   style: TextStyle(
@@ -128,7 +129,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                           ),
                         ),
                         Text(
-                          'Please check your inbox (and spam) to complete verification',
+                          S.of(context).checkInboxAndSpamFolder,
                           style: Theme.of(context)
                               .textTheme
                               .subtitle1!
@@ -150,7 +151,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 style: Theme.of(context).textTheme.subtitle1,
                 decoration: InputDecoration(
                   filled: true,
-                  hintText: 'Tap to enter code',
+                  hintText: S.of(context).tapToEnterCode,
                   contentPadding: const EdgeInsets.all(15),
                   border: UnderlineInputBorder(
                     borderSide: BorderSide.none,
@@ -183,7 +184,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                       );
                     },
                     child: Text(
-                      "Resend email",
+                      S.of(context).resendEmail,
                       style: Theme.of(context).textTheme.subtitle1!.copyWith(
                             fontSize: 14,
                             decoration: TextDecoration.underline,

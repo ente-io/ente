@@ -29,6 +29,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "What is the main reason you are deleting your account?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
+            "Please check your inbox (and spam) to complete verification"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Confirm Account Deletion"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
@@ -88,12 +90,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "recoverButton": MessageLookupByLibrary.simpleMessage("Recover"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Recovery successful!"),
+        "resendEmail": MessageLookupByLibrary.simpleMessage("Resend email"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Select reason"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Something went wrong, please try again"),
         "sorry": MessageLookupByLibrary.simpleMessage("Sorry"),
+        "tapToEnterCode":
+            MessageLookupByLibrary.simpleMessage("Tap to enter code"),
         "terminate": MessageLookupByLibrary.simpleMessage("Terminate"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Terminate session?"),
@@ -104,6 +109,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "This will log you out of this device!"),
         "verify": MessageLookupByLibrary.simpleMessage("Verify"),
+        "verifyEmail": MessageLookupByLibrary.simpleMessage("Verify email"),
+        "weveSentAMailTo":
+            MessageLookupByLibrary.simpleMessage("We\'ve sent a mail to"),
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Your account has been deleted")
       };

@@ -53,5 +53,10 @@
   "enterYourRecoveryKey": "Enter your recovery key",
   "noRecoveryKey": "No recovery key?",
   "sorry": "Sorry",
-  "noRecoveryKeyNoDecryption": "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key"
+  "noRecoveryKeyNoDecryption": "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key",
+  "verifyEmail": "Verify email",
+  "checkInboxAndSpamFolder": "Please check your inbox (and spam) to complete verification",
+  "tapToEnterCode": "Tap to enter code",
+  "resendEmail": "Resend email",
+  "weveSentAMailTo": "We've sent a mail to"
 }

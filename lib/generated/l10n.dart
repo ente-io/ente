@@ -541,6 +541,56 @@ class S {
       args: [],
     );
   }
+
+  /// `Verify email`
+  String get verifyEmail {
+    return Intl.message(
+      'Verify email',
+      name: 'verifyEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please check your inbox (and spam) to complete verification`
+  String get checkInboxAndSpamFolder {
+    return Intl.message(
+      'Please check your inbox (and spam) to complete verification',
+      name: 'checkInboxAndSpamFolder',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap to enter code`
+  String get tapToEnterCode {
+    return Intl.message(
+      'Tap to enter code',
+      name: 'tapToEnterCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Resend email`
+  String get resendEmail {
+    return Intl.message(
+      'Resend email',
+      name: 'resendEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We've sent a mail to`
+  String get weveSentAMailTo {
+    return Intl.message(
+      'We\'ve sent a mail to',
+      name: 'weveSentAMailTo',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
