@@ -20,7 +20,7 @@ const AuthenticatorCodesPage = () => {
                 setCodes(res);
             } catch (err) {
                 if (err.message === CustomError.KEY_MISSING) {
-                    appContext.setRedirectURL(router.asPath);
+                    appContext.setRedirectURL(PAGES.AUTH);
                     router.push(PAGES.ROOT);
                 } else {
                     // do not log errors
