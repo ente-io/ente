@@ -4,5 +4,6 @@
   "email": "Email",
   "cancel": "Cancel",
   "verify": "Verify",
-  "invalidEmailAddress": "Invalid email address"
+  "invalidEmailAddress": "Invalid email address",
+  "enterValidEmail": "Please enter a valid email address."
 }

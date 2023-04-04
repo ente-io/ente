@@ -73,7 +73,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           debugShowCheckedModeBanner: false,
           builder: EasyLoading.init(),
           supportedLocales: appSupportedLocales,
-          localeResolutionCallback: localResolutionCallBack,
+          localeListResolutionCallback: localResolutionCallBack,
           localizationsDelegates: const [
             ...AppLocalizations.localizationsDelegates,
             S.delegate
@@ -90,7 +90,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           debugShowCheckedModeBanner: false,
           builder: EasyLoading.init(),
           supportedLocales: appSupportedLocales,
-          localeResolutionCallback: localResolutionCallBack,
+          localeListResolutionCallback: localResolutionCallBack,
           localizationsDelegates: const [
             ...AppLocalizations.localizationsDelegates,
             S.delegate
