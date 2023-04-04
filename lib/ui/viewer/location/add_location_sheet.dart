@@ -38,7 +38,6 @@ showAddLocationSheet(
     topControl: const SizedBox.shrink(),
     backgroundColor: getEnteColorScheme(context).backgroundElevated,
     barrierColor: backdropFaintDark,
-    enableDrag: false,
   );
 }
 
@@ -94,6 +93,9 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
           ),
           Expanded(
             child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(
+                decelerationRate: ScrollDecelerationRate.fast,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
