@@ -38,6 +38,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final Stream<int> currentIndexStream;
   final int photoGirdSize;
   final bool areFilesCollatedByDay;
+  final bool limitSelectionToOne;
   LazyLoadingGallery(
     this.files,
     this.index,
@@ -50,6 +51,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.areFilesCollatedByDay, {
     this.logTag = "",
     this.photoGirdSize = photoGridSizeDefault,
+    this.limitSelectionToOne = false,
     Key? key,
   }) : super(key: key ?? UniqueKey());
 
@@ -264,6 +266,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           _toggleSelectAllFromDay,
           _areAllFromDaySelected,
           widget.photoGirdSize,
+          limitSelectionToOne: widget.limitSelectionToOne,
         ),
       );
     }
@@ -292,6 +295,7 @@ class LazyLoadingGridView extends StatefulWidget {
   final ValueNotifier toggleSelectAllFromDay;
   final ValueNotifier areAllFilesSelected;
   final int? photoGridSize;
+  final bool limitSelectionToOne;
 
   LazyLoadingGridView(
     this.tag,
@@ -303,6 +307,7 @@ class LazyLoadingGridView extends StatefulWidget {
     this.toggleSelectAllFromDay,
     this.areAllFilesSelected,
     this.photoGridSize, {
+    this.limitSelectionToOne = false,
     Key? key,
   }) : super(key: key ?? UniqueKey());
 
@@ -426,7 +431,12 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     return GestureDetector(
       onTap: () async {
         if (widget.selectedFiles?.files.isNotEmpty ?? false) {
-          _selectFile(file);
+          if (widget.limitSelectionToOne &&
+              file != widget.selectedFiles!.files.first) {
+            widget.selectedFiles!.clearAll();
+          }
+
+          _toggleFileSelection(file);
         } else {
           if (AppLifecycleService.instance.mediaExtensionAction.action ==
               IntentAction.pick) {
@@ -442,7 +452,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
               if (AppLifecycleService.instance.mediaExtensionAction.action ==
                   IntentAction.main) {
                 HapticFeedback.lightImpact();
-                _selectFile(file);
+                _toggleFileSelection(file);
               }
             }
           : null,
@@ -490,7 +500,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     );
   }
 
-  void _selectFile(File file) {
+  void _toggleFileSelection(File file) {
     widget.selectedFiles!.toggleSelection(file);
   }
 

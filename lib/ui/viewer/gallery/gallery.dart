@@ -43,6 +43,7 @@ class Gallery extends StatefulWidget {
   final bool shouldCollateFilesByDay;
   final Widget loadingWidget;
   final bool disableScroll;
+  final bool limitSelectionToOne;
 
   const Gallery({
     required this.asyncLoader,
@@ -60,6 +61,7 @@ class Gallery extends StatefulWidget {
     this.shouldCollateFilesByDay = true,
     this.loadingWidget = const EnteLoadingWidget(),
     this.disableScroll = false,
+    this.limitSelectionToOne = false,
     Key? key,
   }) : super(key: key);
 
@@ -257,6 +259,7 @@ class _GalleryState extends State<Gallery> {
           widget.shouldCollateFilesByDay,
           logTag: _logTag,
           photoGirdSize: _photoGridSize,
+          limitSelectionToOne: widget.limitSelectionToOne,
         );
         if (widget.header != null && index == 0) {
           gallery = Column(children: [widget.header!, gallery]);
