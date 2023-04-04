@@ -13,6 +13,7 @@ import "package:photos/ui/components/keyboard/keyboard_top_button.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import 'package:photos/ui/viewer/location/dynamic_location_gallery_widget.dart';
+import "package:photos/ui/viewer/location/edit_center_point_tile_widget.dart";
 import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
 showEditLocationSheet(
@@ -115,15 +116,13 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                           shouldUnfocusOnClearOrSubmit: true,
                           alwaysShowSuccessState: true,
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
+                        const EditCenterPointRowWidget(),
+                        const SizedBox(height: 20),
                         RadiusPickerWidget(
                           _selectedRadiusIndexNotifier,
                         ),
                         const SizedBox(height: 24),
-                        // Text(
-                        //   "A location tag groups all photos that were taken within some radius of a photo",
-                        //   style: textTheme.smallMuted,
-                        // ),
                       ],
                     ),
                   ),
