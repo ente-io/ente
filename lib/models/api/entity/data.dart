@@ -12,9 +12,11 @@ class EntityData {
   final bool isDeleted;
   final int createdAt;
   final int updatedAt;
+  final int userID;
 
   const EntityData(
     this.id,
+    this.userID,
     this.encryptedData,
     this.header,
     this.isDeleted,
@@ -25,6 +27,7 @@ class EntityData {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'userID': userID,
       'encryptedData': encryptedData,
       'header': header,
       'isDeleted': isDeleted,
@@ -36,6 +39,7 @@ class EntityData {
   factory EntityData.fromMap(Map<String, dynamic> map) {
     return EntityData(
       map['id'],
+      map['userID'],
       map['encryptedData'],
       map['header'],
       map['isDeleted']!,

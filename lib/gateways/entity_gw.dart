@@ -8,10 +8,15 @@ class EntityGateway {
 
   EntityGateway(this._enteDio);
 
-  Future<void> createKey(String encKey, String header) async {
+  Future<void> createKey(
+    EntityType entityType,
+    String encKey,
+    String header,
+  ) async {
     await _enteDio.post(
       "/user-entity/key",
       data: {
+        "type": entityType.typeToString(),
         "encryptedKey": encKey,
         "header": header,
       },
@@ -54,13 +59,13 @@ class EntityGateway {
     return EntityData.fromMap(response.data);
   }
 
-  Future<void> updateEntity(
+  Future<EntityData> updateEntity(
     EntityType type,
     String id,
     String encryptedData,
     String header,
   ) async {
-    await _enteDio.put(
+    final response = await _enteDio.put(
       "/user-entity/entity",
       data: {
         "id": id,
@@ -69,6 +74,7 @@ class EntityGateway {
         "type": type.typeToString(),
       },
     );
+    return EntityData.fromMap(response.data);
   }
 
   Future<void> deleteEntity(
@@ -82,12 +88,17 @@ class EntityGateway {
     );
   }
 
-  Future<List<EntityData>> getDiff(int sinceTime, {int limit = 500}) async {
+  Future<List<EntityData>> getDiff(
+    EntityType type,
+    int sinceTime, {
+    int limit = 500,
+  }) async {
     final response = await _enteDio.get(
       "/user-entity/entity/diff",
       queryParameters: {
         "sinceTime": sinceTime,
         "limit": limit,
+        "type": type.typeToString(),
       },
     );
     final List<EntityData> authEntities = <EntityData>[];

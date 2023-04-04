@@ -332,6 +332,20 @@ class FilesDB {
     ];
   }
 
+  static List<String> createEntityDataTable() {
+    return [
+      '''
+       CREATE TABLE IF NOT EXISTS entity_data (
+          id TEXT PRIMARY KEY NOT NULL,
+          type TEXT NOT NULL,
+          owner_id INTEGER NOT NULL,
+          data TEXT NOT NULL DEFAULT '{}',
+          updated_at INTEGER NOT NULL
+      );
+      '''
+    ];
+  }
+
   static List<String> addFileSizeColumn() {
     return [
       '''
