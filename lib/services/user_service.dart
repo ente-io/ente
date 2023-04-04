@@ -168,6 +168,10 @@ class UserService {
       final userDetails = UserDetails.fromMap(response.data);
       if (shouldCache) {
         await _preferences.setString(keyUserDetails, userDetails.toJson());
+        // handle email change from different client
+        if (userDetails.email != _config.getEmail()) {
+          setEmail(userDetails.email);
+        }
       }
       return userDetails;
     } on DioError catch (e) {

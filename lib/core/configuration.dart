@@ -62,8 +62,7 @@ class Configuration {
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
   static const userIDKey = "user_id";
-  static const hasMigratedSecureStorageToFirstUnlockKey =
-      "has_migrated_secure_storage_to_first_unlock";
+  static const hasMigratedSecureStorageKey = "has_migrated_secure_storage";
   static const hasSelectedAllFoldersForBackupKey =
       "has_selected_all_folders_for_backup";
   static const anonymousUserIDKey = "anonymous_user_id";
@@ -89,8 +88,9 @@ class Configuration {
   late String _sharedDocumentsMediaDirectory;
   String? _volatilePassword;
 
-  final _secureStorageOptionsIOS =
-      const IOSOptions(accessibility: IOSAccessibility.first_unlock);
+  final _secureStorageOptionsIOS = const IOSOptions(
+    accessibility: KeychainAccessibility.first_unlock_this_device,
+  );
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
@@ -597,11 +597,9 @@ class Configuration {
   }
 
   Future<void> _migrateSecurityStorageToFirstUnlock() async {
-    final hasMigratedSecureStorageToFirstUnlock =
-        _preferences.getBool(hasMigratedSecureStorageToFirstUnlockKey) ?? false;
-    if (!hasMigratedSecureStorageToFirstUnlock &&
-        _key != null &&
-        _secretKey != null) {
+    final hasMigratedSecureStorage =
+        _preferences.getBool(hasMigratedSecureStorageKey) ?? false;
+    if (!hasMigratedSecureStorage && _key != null && _secretKey != null) {
       await _secureStorage.write(
         key: keyKey,
         value: _key,
@@ -613,7 +611,7 @@ class Configuration {
         iOptions: _secureStorageOptionsIOS,
       );
       await _preferences.setBool(
-        hasMigratedSecureStorageToFirstUnlockKey,
+        hasMigratedSecureStorageKey,
         true,
       );
     }

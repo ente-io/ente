@@ -33,10 +33,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     'It’s missing a key feature that I need',
     'The app or a certain feature does not \nbehave as I think it should',
     'I found another service that I like better',
-    'I use a different account',
     'My reason isn’t listed',
   ];
-  final List<int> _reasonIndexesWhereFeedbackIsNecessary = [1, 2, 5];
 
   @override
   Widget build(BuildContext context) {
@@ -216,9 +214,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   }
 
   bool _shouldAskForFeedback() {
-    return (_reasonIndexesWhereFeedbackIsNecessary
-            .contains(_deletionReason.indexOf(_dropdownValue)) &&
-        _feedbackTextCtrl.text.trim().isEmpty);
+    return _feedbackTextCtrl.text.trim().isEmpty;
   }
 
   Future<void> _initiateDelete(BuildContext context) async {
