@@ -2,6 +2,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
@@ -54,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _emailIsValid,
-        buttonText: 'Log in',
+        buttonText: S.of(context).logInLabel,
         onPressedFunction: () {
           UserService.instance.setEmail(_email!);
           UserService.instance
@@ -148,11 +149,12 @@ class _LoginPageState extends State<LoginPage> {
                                 .subtitle1!
                                 .copyWith(fontSize: 12),
                             children: [
-                              const TextSpan(
-                                text: "By clicking log in, I agree to the ",
+                              TextSpan(
+                                text: S.of(context).byClickingLogInIAgreeToThe +
+                                    " ",
                               ),
                               TextSpan(
-                                text: "terms of service",
+                                text: S.of(context).termsOfService,
                                 style: const TextStyle(
                                   decoration: TextDecoration.underline,
                                 ),
@@ -161,8 +163,8 @@ class _LoginPageState extends State<LoginPage> {
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (BuildContext context) {
-                                          return const WebPage(
-                                            "terms",
+                                          return WebPage(
+                                            S.of(context).termsOfServicesTitle,
                                             "https://ente.io/terms",
                                           );
                                         },
@@ -170,9 +172,9 @@ class _LoginPageState extends State<LoginPage> {
                                     );
                                   },
                               ),
-                              const TextSpan(text: " and "),
+                              TextSpan(text: " ${S.of(context).and} "),
                               TextSpan(
-                                text: "privacy policy",
+                                text: S.of(context).privacyPolicy,
                                 style: const TextStyle(
                                   decoration: TextDecoration.underline,
                                 ),
@@ -181,8 +183,8 @@ class _LoginPageState extends State<LoginPage> {
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (BuildContext context) {
-                                          return const WebPage(
-                                            "privacy",
+                                          return WebPage(
+                                            S.of(context).privacyPolicyTitle,
                                             "https://ente.io/privacy",
                                           );
                                         },

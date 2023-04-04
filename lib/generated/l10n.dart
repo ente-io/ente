@@ -886,6 +886,27 @@ class S {
       args: [],
     );
   }
+
+  /// `Log in`
+  String get logInLabel {
+    return Intl.message(
+      'Log in',
+      name: 'logInLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `By clicking log in, I agree to the`
+  String get byClickingLogInIAgreeToThe {
+    return Intl.message(
+      'By clicking log in, I agree to the',
+      name: 'byClickingLogInIAgreeToThe',
+      desc:
+          'This text is part the sentence \'By clicking log in, I agree to the terms of service and privacy policy\'',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

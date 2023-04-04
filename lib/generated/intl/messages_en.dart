@@ -36,6 +36,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "and": MessageLookupByLibrary.simpleMessage("and"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "What is the main reason you are deleting your account?"),
+        "byClickingLogInIAgreeToThe": MessageLookupByLibrary.simpleMessage(
+            "By clicking log in, I agree to the"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "changePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Change password"),
@@ -103,6 +105,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Invalid email address"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Kindly help us with this information"),
+        "logInLabel": MessageLookupByLibrary.simpleMessage("Log in"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
         "noPasswordWarningPart1": MessageLookupByLibrary.simpleMessage(
             "We don\'t store this password, so if you forget,"),
