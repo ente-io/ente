@@ -24,14 +24,49 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Welcome back!"),
+        "askDeleteReason": MessageLookupByLibrary.simpleMessage(
+            "What is the main reason you are deleting your account?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "confirmAccountDeletion":
+            MessageLookupByLibrary.simpleMessage("Confirm Account Deletion"),
+        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
+            "Yes, I want to permanently delete this account and all its data."),
+        "deleteAccount": MessageLookupByLibrary.simpleMessage("Delete account"),
+        "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
+            "We are sorry to see you go. Please share your feedback to help us improve."),
+        "deleteAccountPermanentlyButton":
+            MessageLookupByLibrary.simpleMessage("Delete Account Permanently"),
+        "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
+            "You are about to permanently delete your account and all its data.\nThis action is irreversible."),
+        "deleteReason1": MessageLookupByLibrary.simpleMessage(
+            "It’s missing a key feature that I need"),
+        "deleteReason2": MessageLookupByLibrary.simpleMessage(
+            "The app or a certain feature does not \nbehave as I think it should"),
+        "deleteReason3": MessageLookupByLibrary.simpleMessage(
+            "I found another service that I like better"),
+        "deleteReason4":
+            MessageLookupByLibrary.simpleMessage("My reason isn’t listed"),
+        "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
+            "Your request will be processed within 72 hours."),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Please enter a valid email address."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Enter your email address"),
+        "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
+        "fromYourRegisteredEmailAddress": MessageLookupByLibrary.simpleMessage(
+            "from your registered email address."),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Invalid email address"),
-        "verify": MessageLookupByLibrary.simpleMessage("Verify")
+        "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
+            "Kindly help us with this information"),
+        "ok": MessageLookupByLibrary.simpleMessage("Ok"),
+        "pleaseSendAnEmailTo":
+            MessageLookupByLibrary.simpleMessage("Please send an email to"),
+        "selectReason": MessageLookupByLibrary.simpleMessage("Select reason"),
+        "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
+        "verify": MessageLookupByLibrary.simpleMessage("Verify"),
+        "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
+            "Your account has been deleted")
       };
 }

@@ -5,5 +5,31 @@
   "cancel": "Cancel",
   "verify": "Verify",
   "invalidEmailAddress": "Invalid email address",
-  "enterValidEmail": "Please enter a valid email address."
+  "enterValidEmail": "Please enter a valid email address.",
+  "deleteAccount": "Delete account",
+  "askDeleteReason": "What is the main reason you are deleting your account?",
+  "deleteAccountFeedbackPrompt": "We are sorry to see you go. Please share your feedback to help us improve.",
+  "feedback": "Feedback",
+  "kindlyHelpUsWithThisInformation": "Kindly help us with this information",
+  "confirmDeletePrompt": "Yes, I want to permanently delete this account and all its data.",
+  "confirmAccountDeletion": "Confirm Account Deletion",
+  "deleteConfirmDialogBody": "You are about to permanently delete your account and all its data.\nThis action is irreversible.",
+  "deleteAccountPermanentlyButton": "Delete Account Permanently",
+  "yourAccountHasBeenDeleted": "Your account has been deleted",
+  "selectReason": "Select reason",
+  "deleteReason1": "It’s missing a key feature that I need",
+  "deleteReason2": "The app or a certain feature does not \nbehave as I think it should",
+  "deleteReason3": "I found another service that I like better",
+  "deleteReason4": "My reason isn’t listed",
+  "sendEmail": "Send email",
+  "deleteRequestSLAText": "Your request will be processed within 72 hours.",
+  "pleaseSendAnEmailTo": "Please send an email to",
+  "@pleaseSendAnEmailTo": {
+    "description": "This text is part of the sentence 'Please send an email to email@ente.io from your registered email address.'"
+  },
+  "fromYourRegisteredEmailAddress": "from your registered email address.",
+  "@fromYourRegisteredEmailAddress": {
+    "description": "This text is part of the sentence 'Please send an email to email@ente.io from your registered email address.'"
+  },
+  "ok": "Ok"
 }
