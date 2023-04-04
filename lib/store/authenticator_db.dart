@@ -135,6 +135,13 @@ class AuthenticatorDB {
     return _convertRows(rows);
   }
 
+  // removeSyncedData will remove all the data which is synced with the server
+  Future<int> removeSyncedData() async {
+    final db = await instance.database;
+    return await db
+        .delete(entityTable, where: 'shouldSync = ?', whereArgs: [0]);
+  }
+
 // deleteByID will prefer generated id if both ids are passed during deletion
   Future<void> deleteByIDs({List<int>? generatedIDs, List<String>? ids}) async {
     final db = await instance.database;

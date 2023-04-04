@@ -134,7 +134,11 @@ class AuthenticatorService {
       _logger.info("local push completed");
       Bus.instance.fire(CodesUpdatedEvent());
     } on UnauthorizedError {
+      if ((await _db.removeSyncedData()) > 0) {
+        Bus.instance.fire(CodesUpdatedEvent());
+      }
       debugPrint("Firing logout event");
+
       Bus.instance.fire(TriggerLogoutEvent());
     } catch (e) {
       _logger.severe("Failed to sync with remote", e);
