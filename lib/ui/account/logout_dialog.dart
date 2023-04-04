@@ -11,7 +11,7 @@ Future<void> autoLogoutAlert(BuildContext context) async {
     actions: [
       TextButton(
         child: Text(
-          "Ok",
+          l10n.ok,
           style: TextStyle(
             color: Theme.of(context).colorScheme.primary,
           ),
