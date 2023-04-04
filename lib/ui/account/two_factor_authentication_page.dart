@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
 import 'package:pinput/pin_put/pin_put.dart';
@@ -51,8 +52,8 @@ class _TwoFactorAuthenticationPageState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Two-factor authentication",
+        title: Text(
+          S.of(context).twofactorAuthenticationPageTitle,
         ),
       ),
       body: _getBody(),
@@ -65,9 +66,9 @@ class _TwoFactorAuthenticationPageState
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
       children: [
-        const Text(
-          "Enter the 6-digit code from\nyour authenticator app",
-          style: TextStyle(
+        Text(
+          S.of(context).enterThe6digitCodeFromnyourAuthenticatorApp,
+          style: const TextStyle(
             height: 1.4,
             fontSize: 16,
           ),
@@ -116,7 +117,7 @@ class _TwoFactorAuthenticationPageState
                     _verifyTwoFactorCode(_code);
                   }
                 : null,
-            child: const Text("Verify"),
+            child: Text(S.of(context).verify),
           ),
         ),
         const Padding(padding: EdgeInsets.all(30)),
@@ -127,10 +128,10 @@ class _TwoFactorAuthenticationPageState
           },
           child: Container(
             padding: const EdgeInsets.all(10),
-            child: const Center(
+            child: Center(
               child: Text(
-                "Lost device?",
-                style: TextStyle(
+                S.of(context).lostDevice,
+                style: const TextStyle(
                   decoration: TextDecoration.underline,
                   fontSize: 12,
                 ),

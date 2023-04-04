@@ -112,7 +112,7 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   Future<void> _terminateSession(Session session) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
       await UserService.instance.terminateSession(session.token);

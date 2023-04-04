@@ -181,7 +181,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                           .copyWith(fontSize: 14),
                       children: [
                         TextSpan(
-                          text: S.of(context).noPasswordWarningPart1,
+                          text: '${S.of(context).noPasswordWarningPart1} ',
                         ),
                         TextSpan(
                           text: S.of(context).noPasswordWarningPart2,

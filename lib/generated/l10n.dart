@@ -907,6 +907,436 @@ class S {
       args: [],
     );
   }
+
+  /// `Change email`
+  String get changeEmail {
+    return Intl.message(
+      'Change email',
+      name: 'changeEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter your password`
+  String get enterYourPassword {
+    return Intl.message(
+      'Enter your password',
+      name: 'enterYourPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Welcome back!`
+  String get welcomeBack {
+    return Intl.message(
+      'Welcome back!',
+      name: 'welcomeBack',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Contact support`
+  String get contactSupport {
+    return Intl.message(
+      'Contact support',
+      name: 'contactSupport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Incorrect password`
+  String get incorrectPasswordTitle {
+    return Intl.message(
+      'Incorrect password',
+      name: 'incorrectPasswordTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please try again`
+  String get pleaseTryAgain {
+    return Intl.message(
+      'Please try again',
+      name: 'pleaseTryAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recreate password`
+  String get recreatePasswordTitle {
+    return Intl.message(
+      'Recreate password',
+      name: 'recreatePasswordTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use recovery key`
+  String get useRecoveryKey {
+    return Intl.message(
+      'Use recovery key',
+      name: 'useRecoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The current device is not powerful enough to verify your `
+  String get recreatePasswordBody {
+    return Intl.message(
+      'The current device is not powerful enough to verify your ',
+      name: 'recreatePasswordBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verify password`
+  String get verifyPassword {
+    return Intl.message(
+      'Verify password',
+      name: 'verifyPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recovery key`
+  String get recoveryKey {
+    return Intl.message(
+      'Recovery key',
+      name: 'recoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If you forget your password, the only way you can recover your data is with this key.`
+  String get recoveryKeyOnForgotPassword {
+    return Intl.message(
+      'If you forget your password, the only way you can recover your data is with this key.',
+      name: 'recoveryKeyOnForgotPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We don't store this key, please save this 24 word key in a safe place.`
+  String get recoveryKeySaveDescription {
+    return Intl.message(
+      'We don\'t store this key, please save this 24 word key in a safe place.',
+      name: 'recoveryKeySaveDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do this later`
+  String get doThisLater {
+    return Intl.message(
+      'Do this later',
+      name: 'doThisLater',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save key`
+  String get saveKey {
+    return Intl.message(
+      'Save key',
+      name: 'saveKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recovery key copied to clipboard`
+  String get recoveryKeyCopiedToClipboard {
+    return Intl.message(
+      'Recovery key copied to clipboard',
+      name: 'recoveryKeyCopiedToClipboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recover account`
+  String get recoverAccount {
+    return Intl.message(
+      'Recover account',
+      name: 'recoverAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recover`
+  String get recover {
+    return Intl.message(
+      'Recover',
+      name: 'recover',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please drop an email to {supportEmail} from your registered email address`
+  String dropSupportEmail(String supportEmail) {
+    return Intl.message(
+      'Please drop an email to $supportEmail from your registered email address',
+      name: 'dropSupportEmail',
+      desc: '',
+      args: [supportEmail],
+    );
+  }
+
+  /// `Two-factor setup`
+  String get twofactorSetup {
+    return Intl.message(
+      'Two-factor setup',
+      name: 'twofactorSetup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter code`
+  String get enterCode {
+    return Intl.message(
+      'Enter code',
+      name: 'enterCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan code`
+  String get scanCode {
+    return Intl.message(
+      'Scan code',
+      name: 'scanCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Code copied to clipboard`
+  String get codeCopiedToClipboard {
+    return Intl.message(
+      'Code copied to clipboard',
+      name: 'codeCopiedToClipboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy-paste this code\nto your authenticator app`
+  String get copypasteThisCodentoYourAuthenticatorApp {
+    return Intl.message(
+      'Copy-paste this code\nto your authenticator app',
+      name: 'copypasteThisCodentoYourAuthenticatorApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `tap to copy`
+  String get tapToCopy {
+    return Intl.message(
+      'tap to copy',
+      name: 'tapToCopy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan this barcode with\nyour authenticator app`
+  String get scanThisBarcodeWithnyourAuthenticatorApp {
+    return Intl.message(
+      'Scan this barcode with\nyour authenticator app',
+      name: 'scanThisBarcodeWithnyourAuthenticatorApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the 6-digit code from\nyour authenticator app`
+  String get enterThe6digitCodeFromnyourAuthenticatorApp {
+    return Intl.message(
+      'Enter the 6-digit code from\nyour authenticator app',
+      name: 'enterThe6digitCodeFromnyourAuthenticatorApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm`
+  String get confirm {
+    return Intl.message(
+      'Confirm',
+      name: 'confirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Setup complete`
+  String get setupComplete {
+    return Intl.message(
+      'Setup complete',
+      name: 'setupComplete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save your recovery key if you haven't already`
+  String get saveYourRecoveryKeyIfYouHaventAlready {
+    return Intl.message(
+      'Save your recovery key if you haven\'t already',
+      name: 'saveYourRecoveryKeyIfYouHaventAlready',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This can be used to recover your account if you lose your second factor`
+  String get thisCanBeUsedToRecoverYourAccountIfYou {
+    return Intl.message(
+      'This can be used to recover your account if you lose your second factor',
+      name: 'thisCanBeUsedToRecoverYourAccountIfYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Two-factor authentication`
+  String get twofactorAuthenticationPageTitle {
+    return Intl.message(
+      'Two-factor authentication',
+      name: 'twofactorAuthenticationPageTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lost device?`
+  String get lostDevice {
+    return Intl.message(
+      'Lost device?',
+      name: 'lostDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verifying recovery key...`
+  String get verifyingRecoveryKey {
+    return Intl.message(
+      'Verifying recovery key...',
+      name: 'verifyingRecoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recovery key verified`
+  String get recoveryKeyVerified {
+    return Intl.message(
+      'Recovery key verified',
+      name: 'recoveryKeyVerified',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Great! Your recovery key is valid. Thank you for verifying.\n\nPlease remember to keep your recovery key safely backed up.`
+  String get recoveryKeySuccessBody {
+    return Intl.message(
+      'Great! Your recovery key is valid. Thank you for verifying.\n\nPlease remember to keep your recovery key safely backed up.',
+      name: 'recoveryKeySuccessBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The recovery key you entered is not valid. Please make sure it `
+  String get invalidRecoveryKey {
+    return Intl.message(
+      'The recovery key you entered is not valid. Please make sure it ',
+      name: 'invalidRecoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invalid key`
+  String get invalidKey {
+    return Intl.message(
+      'Invalid key',
+      name: 'invalidKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Try again`
+  String get tryAgain {
+    return Intl.message(
+      'Try again',
+      name: 'tryAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View recovery key`
+  String get viewRecoveryKey {
+    return Intl.message(
+      'View recovery key',
+      name: 'viewRecoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm recovery key`
+  String get confirmRecoveryKey {
+    return Intl.message(
+      'Confirm recovery key',
+      name: 'confirmRecoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Account.\n\nPlease enter your recovery key here to verify that you have saved it correctly.`
+  String get recoveryKeyVerifyReason {
+    return Intl.message(
+      'Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Account.\n\nPlease enter your recovery key here to verify that you have saved it correctly.',
+      name: 'recoveryKeyVerifyReason',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm your recovery key`
+  String get confirmYourRecoveryKey {
+    return Intl.message(
+      'Confirm your recovery key',
+      name: 'confirmYourRecoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

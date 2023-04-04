@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:share_plus/share_plus.dart';
@@ -80,7 +81,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
           : widget.showAppBar!
               ? AppBar(
                   elevation: 0,
-                  title: Text(widget.title ?? "Recovery key"),
+                  title: Text(widget.title ?? S.of(context).recoveryKey),
                 )
               : null,
       body: Padding(
@@ -101,7 +102,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                       widget.showAppBar!
                           ? const SizedBox.shrink()
                           : Text(
-                              widget.title ?? "Recovery key",
+                              widget.title ?? S.of(context).recoveryKey,
                               style: Theme.of(context).textTheme.headline4,
                             ),
                       Padding(
@@ -109,7 +110,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                       ),
                       Text(
                         widget.text ??
-                            "If you forget your password, the only way you can recover your data is with this key.",
+                            S.of(context).recoveryKeyOnForgotPassword,
                         style: Theme.of(context).textTheme.subtitle1,
                       ),
                       const Padding(padding: EdgeInsets.only(top: 24)),
@@ -136,7 +137,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                                   );
                                   showShortToast(
                                     context,
-                                    "Recovery key copied to clipboard",
+                                    S.of(context).recoveryKeyCopiedToClipboard,
                                   );
                                   setState(() {
                                     _hasTriedToSave = true;
@@ -176,7 +177,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Text(
                           widget.subText ??
-                              "We don't store this key, please save this 24 word key in a safe place.",
+                              S.of(context).recoveryKeySaveDescription,
                           style: Theme.of(context).textTheme.bodyText1,
                         ),
                       ),
@@ -212,7 +213,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
           onPressed: () async {
             await _saveKeys();
           },
-          child: const Text('Do this later'),
+          child: Text(S.of(context).doThisLater),
         ),
       );
       childrens.add(const SizedBox(height: 10));
@@ -223,7 +224,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         onTap: () async {
           await _shareRecoveryKey(recoveryKey);
         },
-        text: 'Save key',
+        text: S.of(context).saveKey,
       ),
     );
     if (_hasTriedToSave) {
