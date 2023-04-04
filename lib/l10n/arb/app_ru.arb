@@ -1,0 +1,115 @@
+{
+  "counterAppBarTitle": "Счетчик",
+  "@counterAppBarTitle": {
+    "description": "Text shown in the AppBar of the Counter Page"
+  },
+  "onBoardingBody": "Защитите ваши 2FA коды",
+  "onBoardingGetStarted": "Начать",
+  "setupFirstAccount": "Настройте свой первый аккаунт",
+  "importScanQrCode": "Сканировать QR-код",
+  "importEnterSetupKey": "Введите ключ установки",
+  "importAccountPageTitle": "Введите данные аккаунта",
+  "codeIssuerHint": "Эмитент",
+  "codeSecretKeyHint": "Секретный ключ",
+  "codeAccountHint": "Аккаунт (you@domain.com)",
+  "accountKeyType": "Тип ключа",
+  "timeBasedKeyType": "Основанный на времени (TOTP)",
+  "counterBasedKeyType": "На основе счётчиков (HOTP)",
+  "saveAction": "Сохранить",
+  "nextTotpTitle": "далее",
+  "deleteCodeTitle": "Удалить код?",
+  "deleteCodeMessage": "Вы уверены, что хотите удалить этот код? Это действие необратимо.",
+  "viewLogsAction": "Посмотреть журнал",
+  "sendLogsDescription": "Это отправит все журналы, чтобы помочь нам отладить вашу проблему. Хотя мы принимаем меры предосторожности, чтобы конфиденциальная информация не регистрировалась, мы рекомендуем вам просмотреть эти журналы, прежде чем делиться ими.",
+  "preparingLogsTitle": "Подготовка журналов...",
+  "emailLogsTitle": "Отправляйте журналы по электронной почте",
+  "emailLogsMessage": "Пожалуйста, отправьте журналы на {email}",
+  "@emailLogsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "copyEmailAction": "Скопировать адрес",
+  "exportLogsAction": "Экспорт журналов",
+  "reportABug": "Сообщить об ошибке",
+  "crashAndErrorReporting": "Отчёт об ошибках",
+  "reportBug": "Сообщить об ошибке",
+  "emailUsMessage": "Пожалуйста, напишите нам на {email}",
+  "@emailUsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contactSupport": "Связаться с поддержкой",
+  "verifyPassword": "Подтверждение пароля",
+  "pleaseWaitTitle": "Пожалуйста, подождите...",
+  "generatingEncryptionKeysTitle": "Генерируем ключи шифрования...",
+  "recreatePassword": "Воссоздать пароль заново",
+  "recreatePasswordMessage": "Текущее устройство недостаточно мощное для проверки пароля, поэтому нам нужно регенерировать его один раз таким образом, чтобы работать со всеми устройствами. \n\nПожалуйста, войдите, используя ваш ключ восстановления и сгенерируйте ваш пароль (вы можете использовать тот же самый, если пожелаете).",
+  "useRecoveryKeyAction": "Использовать ключ восстановления",
+  "incorrectPassword": "Неправильный пароль",
+  "welcomeBackTitle": "С возвращением!",
+  "madeWithLoveAtPrefix": "сделана с ❤️ в ",
+  "supportDevs": "Подпишитесь на <bold-green>ente</bold-green> для поддержки этого проекта.",
+  "supportDiscount": "Используйте код скидки \"AUTH\", чтобы получить скидку 10% в первый год",
+  "changeEmail": "изменить почту",
+  "cancel": "Отменить",
+  "yes": "Да",
+  "no": "Нет",
+  "email": "Электронная почта",
+  "support": "Поддержка",
+  "settings": "Настройки",
+  "copied": "Скопировано",
+  "tryAgainMessage": "Пожалуйста, попробуйте ещё раз",
+  "existingUser": "Существующий пользователь",
+  "newUser": "Новый аккаунт",
+  "delete": "Удалить",
+  "enterYourPasswordHint": "Введите пароль",
+  "forgotPassword": "Забыл пароль",
+  "oops": "Ой",
+  "somethingWentWrongMessage": "Что-то пошло не так. Попробуйте еще раз",
+  "leaveFamily": "Покинуть семью",
+  "leaveFamilyMessage": "Вы уверены, что хотите отказаться от семейного плана?",
+  "inFamilyPlanMessage": "Вы на семейном плане!",
+  "swipeHint": "Проведите пальцем влево, чтобы отредактировать или удалить коды",
+  "scan": "Сканировать",
+  "scanACode": "Сканировать QR-код",
+  "verify": "Подтвердить",
+  "enterCodeHint": "Введите 6-значный код из\nвашего приложения-аутентификатора",
+  "lostDeviceTitle": "Потеряно устройство?",
+  "twoFactorAuthTitle": "Двухфакторная аутентификация",
+  "recoverAccount": "Восстановить аккаунт",
+  "enterRecoveryKeyHint": "Введите свой ключ восстановления",
+  "recover": "Восстановить",
+  "contactSupportViaEmailMessage": "Пожалуйста, отправьте электронное письмо на адрес {email} с вашего зарегистрированного адреса электронной почты",
+  "@contactSupportViaEmailMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "noRecoveryKeyTitle": "Нет ключа восстановления?",
+  "enterEmailHint": "Введите свою почту",
+  "invalidEmailTitle": "Неверный адрес электронной почты",
+  "invalidEmailMessage": "Пожалуйста, введите действительный адрес электронной почты.",
+  "deleteAccount": "Удалить аккаунт",
+  "deleteAccountQuery": "Нам будет жаль, если вы уйдете. Вы столкнулись с какой-то проблемой?",
+  "yesSendFeedbackAction": "Да, отправить отзыв",
+  "noDeleteAccountAction": "Нет, удалить аккаунт",
+  "initiateAccountDeleteTitle": "Пожалуйста, авторизуйтесь, чтобы начать удаление аккаунта",
+  "confirmAccountDeleteTitle": "Вы уверены, что хотите удалить ваш аккаунт ente?",
+  "confirmAccountDeleteMessage": "Ваши загруженные данные во всех приложениях (как фотографии, так и средство аутентификации) будут запланированы к удалению, а ваш аккаунт будет удален безвозвратно.",
+  "sendEmail": "Отправить электронное письмо",
+  "createNewAccount": "Создать новый аккаунт",
+  "passwordStrengthWeak": "Слабый",
+  "passwordStrengthStrong": "Крепкий",
+  "passwordStrengthModerate": "Средний",
+  "confirmPassword": "Подтвердить пароль",
+  "close": "Закрыть",
+  "oopsSomethingWentWrong": "Ой, что-то пошло не так."
+}
