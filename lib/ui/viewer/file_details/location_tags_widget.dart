@@ -47,8 +47,8 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   }
 
   Future<List<Widget>> _getLocationTags() async {
-    final locationTags =
-        LocationService.instance.enclosingLocationTags(widget.centerPoint);
+    final locationTags = await LocationService.instance
+        .enclosingLocationTags(widget.centerPoint);
     if (locationTags.isEmpty) {
       return [
         InlineButtonWidget(
