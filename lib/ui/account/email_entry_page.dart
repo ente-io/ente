@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
@@ -99,7 +100,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _isFormValid(),
-        buttonText: 'Create account',
+        buttonText: S.of(context).createAccount,
         onPressedFunction: () {
           _config.setVolatilePassword(_passwordController1.text);
           UserService.instance.setEmail(_email!);
@@ -133,7 +134,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    'Create new account',
+                    S.of(context).createNewAccount,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
@@ -145,7 +146,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _emailIsValid ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: 'Email',
+                      hintText: S.of(context).email,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -193,7 +194,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       fillColor:
                           _passwordIsValid ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: "Password",
+                      hintText: S.of(context).password,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -262,7 +263,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           ? _validFieldValueColor
                           : null,
                       filled: true,
-                      hintText: "Confirm password",
+                      hintText: S.of(context).confirmPassword,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,

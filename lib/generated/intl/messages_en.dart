@@ -24,6 +24,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Welcome back!"),
+        "activeSessions":
+            MessageLookupByLibrary.simpleMessage("Active sessions"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "What is the main reason you are deleting your account?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
@@ -31,6 +33,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Confirm Account Deletion"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
             "Yes, I want to permanently delete this account and all its data."),
+        "confirmPassword":
+            MessageLookupByLibrary.simpleMessage("Confirm password"),
+        "createAccount": MessageLookupByLibrary.simpleMessage("Create account"),
+        "createNewAccount":
+            MessageLookupByLibrary.simpleMessage("Create new account"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Delete account"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
             "We are sorry to see you go. Please share your feedback to help us improve."),
@@ -61,10 +68,24 @@ class MessageLookup extends MessageLookupByLibrary {
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Kindly help us with this information"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
+        "oops": MessageLookupByLibrary.simpleMessage("Oops"),
+        "password": MessageLookupByLibrary.simpleMessage("Password"),
         "pleaseSendAnEmailTo":
             MessageLookupByLibrary.simpleMessage("Please send an email to"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Select reason"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
+        "somethingWentWrongPleaseTryAgain":
+            MessageLookupByLibrary.simpleMessage(
+                "Something went wrong, please try again"),
+        "terminate": MessageLookupByLibrary.simpleMessage("Terminate"),
+        "terminateSession":
+            MessageLookupByLibrary.simpleMessage("Terminate session?"),
+        "thisDevice": MessageLookupByLibrary.simpleMessage("This device"),
+        "thisWillLogYouOutOfTheFollowingDevice":
+            MessageLookupByLibrary.simpleMessage(
+                "This will log you out of the following device:"),
+        "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
+            "This will log you out of this device!"),
         "verify": MessageLookupByLibrary.simpleMessage("Verify"),
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Your account has been deleted")

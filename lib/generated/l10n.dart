@@ -321,6 +321,126 @@ class S {
       args: [],
     );
   }
+
+  /// `Create account`
+  String get createAccount {
+    return Intl.message(
+      'Create account',
+      name: 'createAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create new account`
+  String get createNewAccount {
+    return Intl.message(
+      'Create new account',
+      name: 'createNewAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password`
+  String get password {
+    return Intl.message(
+      'Password',
+      name: 'password',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm password`
+  String get confirmPassword {
+    return Intl.message(
+      'Confirm password',
+      name: 'confirmPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Active sessions`
+  String get activeSessions {
+    return Intl.message(
+      'Active sessions',
+      name: 'activeSessions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Oops`
+  String get oops {
+    return Intl.message(
+      'Oops',
+      name: 'oops',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Something went wrong, please try again`
+  String get somethingWentWrongPleaseTryAgain {
+    return Intl.message(
+      'Something went wrong, please try again',
+      name: 'somethingWentWrongPleaseTryAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will log you out of this device!`
+  String get thisWillLogYouOutOfThisDevice {
+    return Intl.message(
+      'This will log you out of this device!',
+      name: 'thisWillLogYouOutOfThisDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will log you out of the following device:`
+  String get thisWillLogYouOutOfTheFollowingDevice {
+    return Intl.message(
+      'This will log you out of the following device:',
+      name: 'thisWillLogYouOutOfTheFollowingDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Terminate session?`
+  String get terminateSession {
+    return Intl.message(
+      'Terminate session?',
+      name: 'terminateSession',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Terminate`
+  String get terminate {
+    return Intl.message(
+      'Terminate',
+      name: 'terminate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This device`
+  String get thisDevice {
+    return Intl.message(
+      'This device',
+      name: 'thisDevice',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

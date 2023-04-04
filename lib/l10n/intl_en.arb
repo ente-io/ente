@@ -31,5 +31,17 @@
   "@fromYourRegisteredEmailAddress": {
     "description": "This text is part of the sentence 'Please send an email to email@ente.io from your registered email address.'"
   },
-  "ok": "Ok"
+  "ok": "Ok",
+  "createAccount": "Create account",
+  "createNewAccount": "Create new account",
+  "password": "Password",
+  "confirmPassword": "Confirm password",
+  "activeSessions": "Active sessions",
+  "oops": "Oops",
+  "somethingWentWrongPleaseTryAgain": "Something went wrong, please try again",
+  "thisWillLogYouOutOfThisDevice": "This will log you out of this device!",
+  "thisWillLogYouOutOfTheFollowingDevice": "This will log you out of the following device:",
+  "terminateSession": "Terminate session?",
+  "terminate": "Terminate",
+  "thisDevice": "This device"
 }

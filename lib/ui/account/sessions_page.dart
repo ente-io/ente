@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/sessions.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -33,7 +34,7 @@ class _SessionsPageState extends State<SessionsPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text("Active sessions"),
+        title: Text(S.of(context).activeSessions),
       ),
       body: _getBody(),
     );
@@ -122,8 +123,8 @@ class _SessionsPageState extends State<SessionsPage> {
       _logger.severe('failed to terminate');
       showErrorDialog(
         context,
-        'Oops',
-        "Something went wrong, please try again",
+        S.of(context).oops,
+        S.of(context).somethingWentWrongPleaseTryAgain,
       );
     }
   }
@@ -148,15 +149,15 @@ class _SessionsPageState extends State<SessionsPage> {
         session.token == Configuration.instance.getToken();
     Widget text;
     if (isLoggingOutFromThisDevice) {
-      text = const Text(
-        "This will log you out of this device!",
+      text = Text(
+        S.of(context).thisWillLogYouOutOfThisDevice,
       );
     } else {
       text = SingleChildScrollView(
         child: Column(
           children: [
-            const Text(
-              "This will log you out of the following device:",
+            Text(
+              S.of(context).thisWillLogYouOutOfTheFollowingDevice,
             ),
             const Padding(padding: EdgeInsets.all(8)),
             Text(
@@ -168,13 +169,13 @@ class _SessionsPageState extends State<SessionsPage> {
       );
     }
     final AlertDialog alert = AlertDialog(
-      title: const Text("Terminate session?"),
+      title: Text(S.of(context).terminateSession),
       content: text,
       actions: [
         TextButton(
-          child: const Text(
-            "Terminate",
-            style: TextStyle(
+          child: Text(
+            S.of(context).terminate,
+            style: const TextStyle(
               color: Colors.red,
             ),
           ),
@@ -189,7 +190,7 @@ class _SessionsPageState extends State<SessionsPage> {
         ),
         TextButton(
           child: Text(
-            "Cancel",
+            S.of(context).cancel,
             style: TextStyle(
               color: isLoggingOutFromThisDevice
                   ? Theme.of(context).colorScheme.greenAlternative
@@ -214,7 +215,7 @@ class _SessionsPageState extends State<SessionsPage> {
   Widget _getUAWidget(Session session) {
     if (session.token == Configuration.instance.getToken()) {
       return Text(
-        "This device",
+        S.of(context).thisDevice,
         style: TextStyle(
           fontWeight: FontWeight.bold,
           color: Theme.of(context).colorScheme.greenAlternative,
