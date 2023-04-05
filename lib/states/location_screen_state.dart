@@ -1,10 +1,11 @@
 import "package:flutter/material.dart";
+import "package:photos/models/local_entity_data.dart";
 import 'package:photos/models/location_tag/location_tag.dart';
 
 class InheritedLocationScreenState extends InheritedWidget {
-  final LocationTag locationTag;
+  final LocalEntity<LocationTag> locationTagEntity;
   const InheritedLocationScreenState(
-    this.locationTag, {
+    this.locationTagEntity, {
     super.key,
     required super.child,
   });
@@ -18,6 +19,6 @@ class InheritedLocationScreenState extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant InheritedLocationScreenState oldWidget) {
-    return oldWidget.locationTag != locationTag;
+    return oldWidget.locationTagEntity != locationTagEntity;
   }
 }

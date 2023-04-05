@@ -72,13 +72,13 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
     });
     final result = locationTags
         .map(
-          (e) => ChipButtonWidget(
-            e.name,
+          (locationTagEntity) => ChipButtonWidget(
+            locationTagEntity.item.name,
             onTap: () {
               routeToPage(
                 context,
                 InheritedLocationScreenState(
-                  e,
+                  locationTagEntity,
                   child: const LocationScreen(),
                 ),
               );

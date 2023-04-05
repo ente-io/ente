@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/colors.dart";
@@ -18,15 +19,15 @@ import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
 showEditLocationSheet(
   BuildContext context,
-  LocationTag locationTag,
+  LocalEntity<LocationTag> locationTagEntity,
   VoidCallback onLocationEdited,
 ) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
       return LocationTagStateProvider(
-        locationTag: locationTag,
-        EditLocationSheet(onLocationEdited),
+        locationTagEntity: locationTagEntity,
+        EditLocationSheet(locationTagEntity, onLocationEdited),
       );
     },
     shape: const RoundedRectangleBorder(
@@ -42,8 +43,13 @@ showEditLocationSheet(
 }
 
 class EditLocationSheet extends StatefulWidget {
+  final LocalEntity<LocationTag> locationTagEntity;
   final VoidCallback onLocationAdded;
-  const EditLocationSheet(this.onLocationAdded, {super.key});
+  const EditLocationSheet(
+    this.locationTagEntity,
+    this.onLocationAdded, {
+    super.key,
+  });
 
   @override
   State<EditLocationSheet> createState() => _EditLocationSheetState();

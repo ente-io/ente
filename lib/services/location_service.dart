@@ -66,20 +66,21 @@ class LocationService {
     return 1 / cos(lat * (pi / 180));
   }
 
-  Future<List<LocationTag>> enclosingLocationTags(
+  Future<List<LocalEntity<LocationTag>>> enclosingLocationTags(
     Location fileCoordinates,
   ) async {
     try {
-      final result = List<LocationTag>.of([]);
-      final locationTagsData = (await getLocationTags()).map((e) => e.item);
-      for (LocationTag locationTag in locationTagsData) {
+      final result = List<LocalEntity<LocationTag>>.of([]);
+      final locationTagEntities = await getLocationTags();
+      for (LocalEntity<LocationTag> locationTagEntity in locationTagEntities) {
+        final locationTag = locationTagEntity.item;
         final x = fileCoordinates.latitude! - locationTag.centerPoint.latitude!;
         final y =
             fileCoordinates.longitude! - locationTag.centerPoint.longitude!;
         if ((x * x) / (locationTag.aSquare) + (y * y) / (locationTag.bSquare) <=
             1) {
           result.add(
-            locationTag,
+            locationTagEntity,
           );
         }
       }

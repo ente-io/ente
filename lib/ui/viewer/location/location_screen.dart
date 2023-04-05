@@ -28,7 +28,7 @@ class LocationScreen extends StatelessWidget {
               onPressed: () {
                 showEditLocationSheet(
                   context,
-                  InheritedLocationScreenState.of(context).locationTag,
+                  InheritedLocationScreenState.of(context).locationTagEntity,
                   () {},
                 );
               },
@@ -79,7 +79,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
   @override
   Widget build(BuildContext context) {
     final selectedRadius =
-        InheritedLocationScreenState.of(context).locationTag.radius;
+        InheritedLocationScreenState.of(context).locationTagEntity.item.radius;
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
       //wait for ignored files to be removed after init
@@ -93,7 +93,10 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
               f.location!.longitude != null,
         );
         return !LocationService.instance.isFileInsideLocationTag(
-          InheritedLocationScreenState.of(context).locationTag.centerPoint,
+          InheritedLocationScreenState.of(context)
+              .locationTagEntity
+              .item
+              .centerPoint,
           f.location!,
           selectedRadius,
         );
@@ -164,7 +167,7 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
   @override
   Widget build(BuildContext context) {
     final locationName =
-        InheritedLocationScreenState.of(context).locationTag.name;
+        InheritedLocationScreenState.of(context).locationTagEntity.item.name;
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Padding(

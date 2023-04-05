@@ -38,7 +38,8 @@ class EditCenterPointTileWidget extends StatelessWidget {
                 Text(
                   LocationService.instance.convertLocationToDMS(
                     InheritedLocationTagData.of(context)
-                        .locationTag!
+                        .locationTagEntity!
+                        .item
                         .centerPoint,
                   ),
                   style: textTheme.miniMuted,
@@ -51,7 +52,7 @@ class EditCenterPointTileWidget extends StatelessWidget {
           onPressed: () {
             showPickCenterPointSheet(
               context,
-              InheritedLocationTagData.of(context).locationTag!,
+              InheritedLocationTagData.of(context).locationTagEntity!,
               () {},
             );
           },

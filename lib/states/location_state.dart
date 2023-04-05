@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/typedefs.dart";
@@ -7,7 +8,7 @@ import "package:photos/utils/debouncer.dart";
 
 class LocationTagStateProvider extends StatefulWidget {
   //This is used when we want to edit a locaiton tag
-  final LocationTag? locationTag;
+  final LocalEntity<LocationTag>? locationTagEntity;
   //This is used when we want to create a new location tag. We can't use
   //LocationTag becuase aSquare and bSquare will be null.
   final Location? centerPoint;
@@ -15,7 +16,7 @@ class LocationTagStateProvider extends StatefulWidget {
   const LocationTagStateProvider(
     this.child, {
     this.centerPoint,
-    this.locationTag,
+    this.locationTagEntity,
     super.key,
   });
 
@@ -31,10 +32,11 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
       Debouncer(const Duration(milliseconds: 300));
   @override
   void initState() {
-    assert(widget.centerPoint != null || widget.locationTag != null);
-    centerPoint = widget.locationTag?.centerPoint ?? widget.centerPoint!;
+    assert(widget.centerPoint != null || widget.locationTagEntity != null);
+    centerPoint =
+        widget.locationTagEntity?.item.centerPoint ?? widget.centerPoint!;
     selectedRaduisIndex =
-        widget.locationTag?.radiusIndex ?? defaultRadiusValueIndex;
+        widget.locationTagEntity?.item.radiusIndex ?? defaultRadiusValueIndex;
     super.initState();
   }
 
@@ -55,7 +57,7 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
       selectedRaduisIndex,
       centerPoint,
       _updateSelectedIndex,
-      widget.locationTag,
+      widget.locationTagEntity,
       child: widget.child,
     );
   }
@@ -65,13 +67,13 @@ class InheritedLocationTagData extends InheritedWidget {
   final int selectedRadiusIndex;
   final Location centerPoint;
   //locationTag is null when we are creating a new location tag in a add location sheet
-  final LocationTag? locationTag;
+  final LocalEntity<LocationTag>? locationTagEntity;
   final VoidCallbackParamInt updateSelectedIndex;
   const InheritedLocationTagData(
     this.selectedRadiusIndex,
     this.centerPoint,
     this.updateSelectedIndex,
-    this.locationTag, {
+    this.locationTagEntity, {
     required super.child,
     super.key,
   });
@@ -85,6 +87,6 @@ class InheritedLocationTagData extends InheritedWidget {
   bool updateShouldNotify(InheritedLocationTagData oldWidget) {
     return oldWidget.selectedRadiusIndex != selectedRadiusIndex ||
         oldWidget.centerPoint != centerPoint ||
-        oldWidget.locationTag != locationTag;
+        oldWidget.locationTagEntity != locationTagEntity;
   }
 }

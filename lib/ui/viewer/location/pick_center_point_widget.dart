@@ -5,6 +5,7 @@ import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file_load_result.dart";
+import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/collections_service.dart";
@@ -19,13 +20,13 @@ import "package:photos/ui/viewer/gallery/gallery.dart";
 
 showPickCenterPointSheet(
   BuildContext context,
-  LocationTag locationTag,
+  LocalEntity<LocationTag> locationTagEntity,
   VoidCallback onLocationEdited,
 ) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
-      return PickCenterPointWidget(locationTag, onLocationEdited);
+      return PickCenterPointWidget(locationTagEntity, onLocationEdited);
     },
     shape: const RoundedRectangleBorder(
       side: BorderSide(width: 0),
@@ -41,11 +42,11 @@ showPickCenterPointSheet(
 }
 
 class PickCenterPointWidget extends StatelessWidget {
-  final LocationTag locationTag;
+  final LocalEntity<LocationTag> locationTagEntity;
   final VoidCallback onLocationEdited;
 
   const PickCenterPointWidget(
-    this.locationTag,
+    this.locationTagEntity,
     this.onLocationEdited, {
     super.key,
   });
@@ -79,7 +80,7 @@ class PickCenterPointWidget extends StatelessWidget {
                           title: const TitleBarTitleWidget(
                             title: "Pick center point",
                           ),
-                          caption: locationTag.name,
+                          caption: locationTagEntity.item.name,
                         ),
                         Expanded(
                           child: Gallery(
