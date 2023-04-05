@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
@@ -52,8 +53,8 @@ class _ManageIndividualParticipantState
                   const SizedBox(
                     height: 12,
                   ),
-                  const TitleBarTitleWidget(
-                    title: "Manage",
+                  TitleBarTitleWidget(
+                    title: S.of(context).manage,
                   ),
                   Text(
                     widget.user.email.toString().trim(),
@@ -65,10 +66,10 @@ class _ManageIndividualParticipantState
               ),
             ),
             const SizedBox(height: 12),
-            const MenuSectionTitle(title: "Added as"),
+            MenuSectionTitle(title: S.of(context).addedAs),
             MenuItemWidget(
-              captionedTextWidget: const CaptionedTextWidget(
-                title: "Collaborator",
+              captionedTextWidget: CaptionedTextWidget(
+                title: S.of(context).collaborator,
               ),
               leadingIcon: Icons.edit_outlined,
               menuItemColor: getEnteColorScheme(context).fillFaint,
@@ -97,8 +98,8 @@ class _ManageIndividualParticipantState
               bgColor: getEnteColorScheme(context).fillFaint,
             ),
             MenuItemWidget(
-              captionedTextWidget: const CaptionedTextWidget(
-                title: "Viewer",
+              captionedTextWidget: CaptionedTextWidget(
+                title: S.of(context).viewer,
               ),
               leadingIcon: Icons.photo_outlined,
               leadingIconColor: getEnteColorScheme(context).strokeBase,
@@ -110,10 +111,12 @@ class _ManageIndividualParticipantState
                   : () async {
                       final actionResult = await showChoiceActionSheet(
                         context,
-                        title: "Change permissions?",
-                        firstButtonLabel: "Yes, convert to viewer",
-                        body:
-                            '${widget.user.email} will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them',
+                        title: S.of(context).changePermissions,
+                        firstButtonLabel: S.of(context).yesConvertToViewer,
+                        body: S
+                            .of(context)
+                            .cannotAddMorePhotosAfterBecomingViewer(
+                                widget.user.email),
                         isCritical: true,
                       );
                       if (actionResult?.action != null) {
@@ -141,15 +144,16 @@ class _ManageIndividualParticipantState
                     },
               isTopBorderRadiusRemoved: true,
             ),
-            const MenuSectionDescriptionWidget(
-              content:
-                  "Collaborators can add photos and videos to the shared album.",
+            MenuSectionDescriptionWidget(
+              content: S
+                  .of(context)
+                  .collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,
             ),
             const SizedBox(height: 24),
-            const MenuSectionTitle(title: "Remove participant"),
+            MenuSectionTitle(title: S.of(context).removeParticipant),
             MenuItemWidget(
-              captionedTextWidget: const CaptionedTextWidget(
-                title: "Remove",
+              captionedTextWidget: CaptionedTextWidget(
+                title: S.of(context).remove,
                 textColor: warning500,
                 makeTextBold: true,
               ),

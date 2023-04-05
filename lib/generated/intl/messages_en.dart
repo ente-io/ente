@@ -20,10 +20,13 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m0(supportEmail) =>
+  static String m0(user) =>
+      "${user} will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them";
+
+  static String m1(supportEmail) =>
       "Please drop an email to ${supportEmail} from your registered email address";
 
-  static String m1(passwordStrengthValue) =>
+  static String m2(passwordStrengthValue) =>
       "Password strength: ${passwordStrengthValue}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -41,6 +44,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Add collaborator"),
         "addMore": MessageLookupByLibrary.simpleMessage("Add more"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Add viewer"),
+        "addedAs": MessageLookupByLibrary.simpleMessage("Added as"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Owner"),
         "and": MessageLookupByLibrary.simpleMessage("and"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -48,9 +52,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "byClickingLogInIAgreeToThe": MessageLookupByLibrary.simpleMessage(
             "By clicking log in, I agree to the"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "cannotAddMorePhotosAfterBecomingViewer": m0,
         "changeEmail": MessageLookupByLibrary.simpleMessage("Change email"),
         "changePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Change password"),
+        "changePermissions":
+            MessageLookupByLibrary.simpleMessage("Change permissions?"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Please check your inbox (and spam) to complete verification"),
         "codeCopiedToClipboard":
@@ -98,7 +105,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "Your request will be processed within 72 hours."),
         "doThisLater": MessageLookupByLibrary.simpleMessage("Do this later"),
-        "dropSupportEmail": m0,
+        "dropSupportEmail": m1,
         "email": MessageLookupByLibrary.simpleMessage("Email"),
         "encryption": MessageLookupByLibrary.simpleMessage("Encryption"),
         "encryptionKeys":
@@ -147,6 +154,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Kindly help us with this information"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Log in"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Lost device?"),
+        "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
         "noPasswordWarningPart1": MessageLookupByLibrary.simpleMessage(
             "We don\'t store this password, so if you forget,"),
@@ -163,7 +171,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "password": MessageLookupByLibrary.simpleMessage("Password"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Password changed successfully"),
-        "passwordStrength": m1,
+        "passwordStrength": m2,
         "pleaseSendAnEmailTo":
             MessageLookupByLibrary.simpleMessage("Please send an email to"),
         "pleaseTryAgain":
@@ -195,6 +203,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "The current device is not powerful enough to verify your "),
         "recreatePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Recreate password"),
+        "remove": MessageLookupByLibrary.simpleMessage("Remove"),
+        "removeParticipant":
+            MessageLookupByLibrary.simpleMessage("Remove participant"),
         "resendEmail": MessageLookupByLibrary.simpleMessage("Resend email"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Reset password"),
@@ -259,6 +270,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Welcome back!"),
         "weveSentAMailTo":
             MessageLookupByLibrary.simpleMessage("We\'ve sent a mail to"),
+        "yesConvertToViewer":
+            MessageLookupByLibrary.simpleMessage("Yes, convert to viewer"),
         "you": MessageLookupByLibrary.simpleMessage("You"),
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Your account has been deleted")

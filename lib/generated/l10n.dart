@@ -1403,7 +1403,7 @@ class S {
     return Intl.message(
       'Owner',
       name: 'albumOwner',
-      desc: 'This is the role of the album owner',
+      desc: 'Role of the album owner',
       args: [],
     );
   }
@@ -1433,7 +1433,7 @@ class S {
     return Intl.message(
       'Add more',
       name: 'addMore',
-      desc: 'This is the button text to add more collaborators/viewers',
+      desc: 'Button text to add more collaborators/viewers',
       args: [],
     );
   }
@@ -1445,6 +1445,76 @@ class S {
       name: 'viewer',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Remove`
+  String get remove {
+    return Intl.message(
+      'Remove',
+      name: 'remove',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove participant`
+  String get removeParticipant {
+    return Intl.message(
+      'Remove participant',
+      name: 'removeParticipant',
+      desc: 'menuSectionTitle for removing a participant',
+      args: [],
+    );
+  }
+
+  /// `Manage`
+  String get manage {
+    return Intl.message(
+      'Manage',
+      name: 'manage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Added as`
+  String get addedAs {
+    return Intl.message(
+      'Added as',
+      name: 'addedAs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change permissions?`
+  String get changePermissions {
+    return Intl.message(
+      'Change permissions?',
+      name: 'changePermissions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, convert to viewer`
+  String get yesConvertToViewer {
+    return Intl.message(
+      'Yes, convert to viewer',
+      name: 'yesConvertToViewer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{user} will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them`
+  String cannotAddMorePhotosAfterBecomingViewer(Object user) {
+    return Intl.message(
+      '$user will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them',
+      name: 'cannotAddMorePhotosAfterBecomingViewer',
+      desc: '',
+      args: [user],
     );
   }
 }

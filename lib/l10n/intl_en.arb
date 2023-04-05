@@ -179,13 +179,23 @@
   "enterEmail": "Enter email",
   "albumOwner": "Owner",
   "@albumOwner": {
-    "description": "This is the role of the album owner"
+    "description": "Role of the album owner"
   },
   "you": "You",
   "collaborator": "Collaborator",
   "addMore": "Add more",
   "@addMore": {
-    "description": "This is the button text to add more collaborators/viewers"
+    "description": "Button text to add more collaborators/viewers"
   },
-  "viewer": "Viewer"
+  "viewer": "Viewer",
+  "remove": "Remove",
+  "removeParticipant": "Remove participant",
+  "@removeParticipant": {
+    "description": "menuSectionTitle for removing a participant"
+  },
+  "manage": "Manage",
+  "addedAs": "Added as",
+  "changePermissions": "Change permissions?",
+  "yesConvertToViewer": "Yes, convert to viewer",
+  "cannotAddMorePhotosAfterBecomingViewer": "{user} will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them"
 }
