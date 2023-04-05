@@ -62,10 +62,13 @@ export default function Home() {
                 <FormTitle>{t('TWO_FACTOR')}</FormTitle>
                 <VerifyTwoFactor onSubmit={onSubmit} buttonText={t('VERIFY')} />
 
-                <FormPaperFooter>
+                <FormPaperFooter style={{ justifyContent: 'space-between' }}>
                     <LinkButton
                         onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}>
                         {t('LOST_DEVICE')}
+                    </LinkButton>
+                    <LinkButton onClick={logoutUser}>
+                        {t('CHANGE_EMAIL')}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>
