@@ -25,7 +25,8 @@ class LocationService {
   Future<Iterable<LocalEntity<LocationTag>>> _getStoredLocationTags() async {
     final data = await EntityService.instance.getEntities(EntityType.location);
     return data.map(
-        (e) => LocalEntity(LocationTag.fromJson(json.decode(e.data)), e.id));
+      (e) => LocalEntity(LocationTag.fromJson(json.decode(e.data)), e.id),
+    );
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> getLocationTags() {
@@ -66,7 +67,8 @@ class LocationService {
   }
 
   Future<List<LocationTag>> enclosingLocationTags(
-      Location fileCoordinates) async {
+    Location fileCoordinates,
+  ) async {
     try {
       final result = List<LocationTag>.of([]);
       final locationTagsData = (await getLocationTags()).map((e) => e.item);

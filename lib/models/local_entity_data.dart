@@ -1,3 +1,4 @@
+import "package:equatable/equatable.dart";
 import "package:photos/models/api/entity/type.dart";
 
 class LocalEntityData {
@@ -36,9 +37,12 @@ class LocalEntityData {
   }
 }
 
-class LocalEntity<T> {
+class LocalEntity<T> extends Equatable {
   final T item;
   final String id;
 
-  LocalEntity(this.item, this.id);
+  const LocalEntity(this.item, this.id);
+
+  @override
+  List<Object?> get props => [item, id];
 }
