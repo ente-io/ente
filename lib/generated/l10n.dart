@@ -1,7 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -2099,6 +2098,87 @@ class S {
       name: 'enterReferralCode',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Code applied`
+  String get codeAppliedPageTitle {
+    return Intl.message(
+      'Code applied',
+      name: 'codeAppliedPageTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{storageAmountInGB} GB`
+  String storageInGB(Object storageAmountInGB) {
+    return Intl.message(
+      '$storageAmountInGB GB',
+      name: 'storageInGB',
+      desc: '',
+      args: [storageAmountInGB],
+    );
+  }
+
+  /// `Claimed`
+  String get claimed {
+    return Intl.message(
+      'Claimed',
+      name: 'claimed',
+      desc: 'Used to indicate storage claimed, like 10GB Claimed',
+      args: [],
+    );
+  }
+
+  /// `Details`
+  String get details {
+    return Intl.message(
+      'Details',
+      name: 'details',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Claim more!`
+  String get claimMore {
+    return Intl.message(
+      'Claim more!',
+      name: 'claimMore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `They also get {storageAmountInGB} GB`
+  String theyAlsoGetXGb(Object storageAmountInGB) {
+    return Intl.message(
+      'They also get $storageAmountInGB GB',
+      name: 'theyAlsoGetXGb',
+      desc: '',
+      args: [storageAmountInGB],
+    );
+  }
+
+  /// `{storageAmountInGB} GB each time someone signs up for a paid plan and applies your code`
+  String freeStorageOnReferralSuccess(Object storageAmountInGB) {
+    return Intl.message(
+      '$storageAmountInGB GB each time someone signs up for a paid plan and applies your code',
+      name: 'freeStorageOnReferralSuccess',
+      desc: '',
+      args: [storageAmountInGB],
+    );
+  }
+
+  /// `ente referral code: {referralCode} \n\nApply it in Settings → General → Referrals to get {referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io`
+  String shareTextReferralCode(
+      Object referralCode, Object referralStorageInGB) {
+    return Intl.message(
+      'ente referral code: $referralCode \n\nApply it in Settings → General → Referrals to get $referralStorageInGB GB free after you signup for a paid plan\n\nhttps://ente.io',
+      name: 'shareTextReferralCode',
+      desc: '',
+      args: [referralCode, referralStorageInGB],
     );
   }
 }

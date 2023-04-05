@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -28,8 +29,8 @@ class CodeSuccessScreen extends StatelessWidget {
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
-            flexibleSpaceTitle: const TitleBarTitleWidget(
-              title: "Code applied",
+            flexibleSpaceTitle: TitleBarTitleWidget(
+              title: S.of(context).codeAppliedPageTitle,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -72,18 +73,20 @@ class CodeSuccessScreen extends StatelessWidget {
                               curve: Curves.easeInOutCubic,
                             ),
                         Text(
-                          "${referralView.planInfo.storageInGB} GB",
+                          S.of(context).storageInGB(
+                                referralView.planInfo.storageInGB,
+                              ),
                           style: textStyle.h2Bold,
                         ),
                         Text(
-                          "Claimed",
+                          S.of(context).claimed,
                           style: textStyle.body
                               .copyWith(color: colorScheme.textMuted),
                         ),
                         const SizedBox(height: 32),
                         MenuItemWidget(
-                          captionedTextWidget: const CaptionedTextWidget(
-                            title: "Details",
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: S.of(context).details,
                           ),
                           menuItemColor: colorScheme.fillFaint,
                           trailingWidget: Icon(
@@ -103,7 +106,10 @@ class CodeSuccessScreen extends StatelessWidget {
                         InkWell(
                           onTap: () {
                             shareText(
-                              "ente referral code: ${referralView.code} \n\nApply it in Settings → General → Referrals to get ${referralView.planInfo.storageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io",
+                              S.of(context).shareTextReferralCode(
+                                    referralView.code,
+                                    referralView.planInfo.storageInGB,
+                                  ),
                             );
                           },
                           child: Container(
@@ -124,12 +130,14 @@ class CodeSuccessScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "Claim more!",
+                                    S.of(context).claimMore,
                                     style: textStyle.body,
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    "${referralView.planInfo.storageInGB} GB each time someone signs up for a paid plan and applies your code",
+                                    S.of(context).freeStorageOnReferralSuccess(
+                                          referralView.planInfo.storageInGB,
+                                        ),
                                     style: textStyle.small
                                         .copyWith(color: colorScheme.textMuted),
                                     textAlign: TextAlign.center,
@@ -138,7 +146,9 @@ class CodeSuccessScreen extends StatelessWidget {
                                   ReferralCodeWidget(referralView.code),
                                   const SizedBox(height: 16),
                                   Text(
-                                    "They also get ${referralView.planInfo.storageInGB} GB",
+                                    S.of(context).theyAlsoGetXGb(
+                                          referralView.planInfo.storageInGB,
+                                        ),
                                     style: textStyle.small
                                         .copyWith(color: colorScheme.textMuted),
                                     textAlign: TextAlign.center,
