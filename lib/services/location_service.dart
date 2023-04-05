@@ -145,6 +145,14 @@ class LocationService {
         json.encode(updatedLoationTag.toJson()),
         id: locationTagEntity.id,
       );
+      Bus.instance.fire(
+        LocationTagUpdatedEvent(
+          LocTagEventType.update,
+          updatedLocTagEntities: [
+            LocalEntity(updatedLoationTag, locationTagEntity.id)
+          ],
+        ),
+      );
     } catch (e, s) {
       _logger.severe("Failed to update center point", e, s);
       rethrow;

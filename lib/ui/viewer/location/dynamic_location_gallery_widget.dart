@@ -79,7 +79,10 @@ class _DynamicLocationGalleryWidgetState
     }
 
     return FutureBuilder(
-      key: ValueKey(selectedRadius),
+      //Only rebuild Gallery if the center point or radius changes
+      key: ValueKey(
+        "${InheritedLocationTagData.of(context).locationTagEntity?.item.centerPoint}$selectedRadius",
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return SizedBox(
@@ -90,7 +93,6 @@ class _DynamicLocationGalleryWidgetState
               ),
             ),
             child: Gallery(
-              key: ValueKey(selectedRadius),
               loadingWidget: const SizedBox.shrink(),
               disableScroll: true,
               asyncLoader: (

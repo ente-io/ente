@@ -23,12 +23,11 @@ import "package:photos/utils/dialog_util.dart";
 showPickCenterPointSheet(
   BuildContext context,
   LocalEntity<LocationTag> locationTagEntity,
-  VoidCallback onLocationEdited,
 ) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
-      return PickCenterPointWidget(locationTagEntity, onLocationEdited);
+      return PickCenterPointWidget(locationTagEntity);
     },
     shape: const RoundedRectangleBorder(
       side: BorderSide(width: 0),
@@ -45,11 +44,9 @@ showPickCenterPointSheet(
 
 class PickCenterPointWidget extends StatelessWidget {
   final LocalEntity<LocationTag> locationTagEntity;
-  final VoidCallback onLocationEdited;
 
   const PickCenterPointWidget(
-    this.locationTagEntity,
-    this.onLocationEdited, {
+    this.locationTagEntity, {
     super.key,
   });
 
@@ -179,7 +176,6 @@ class PickCenterPointWidget extends StatelessWidget {
                                         .onError((e, s) {
                                       showGenericErrorDialog(context: context);
                                     });
-                                    onLocationEdited();
                                   },
                                 ),
                               );

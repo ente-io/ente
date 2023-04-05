@@ -1,5 +1,9 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
@@ -26,18 +30,44 @@ class LocationTagStateProvider extends StatefulWidget {
 }
 
 class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
-  late int selectedRaduisIndex = defaultRadiusValueIndex;
-  late Location centerPoint;
+  int _selectedRaduisIndex = defaultRadiusValueIndex;
+  late Location? _centerPoint;
+  late LocalEntity<LocationTag>? _locationTagEntity;
   final Debouncer _selectedRadiusDebouncer =
       Debouncer(const Duration(milliseconds: 300));
+  late final StreamSubscription _locTagEntityListener;
   @override
   void initState() {
-    assert(widget.centerPoint != null || widget.locationTagEntity != null);
-    centerPoint =
-        widget.locationTagEntity?.item.centerPoint ?? widget.centerPoint!;
-    selectedRaduisIndex =
-        widget.locationTagEntity?.item.radiusIndex ?? defaultRadiusValueIndex;
+    _locationTagEntity = widget.locationTagEntity;
+    _centerPoint = widget.centerPoint;
+    assert(_centerPoint != null || _locationTagEntity != null);
+    _centerPoint = _locationTagEntity?.item.centerPoint ?? _centerPoint!;
+    _selectedRaduisIndex =
+        _locationTagEntity?.item.radiusIndex ?? defaultRadiusValueIndex;
+    _locTagEntityListener =
+        Bus.instance.on<LocationTagUpdatedEvent>().listen((event) {
+      _locationTagUpdateListener(event);
+    });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _locTagEntityListener.cancel();
+    super.dispose();
+  }
+
+  void _locationTagUpdateListener(LocationTagUpdatedEvent event) {
+    if (event.type == LocTagEventType.update) {
+      if (event.updatedLocTagEntities!.first.id == _locationTagEntity!.id) {
+        setState(() {
+          final updatedLocTagEntity = event.updatedLocTagEntities!.first;
+          _selectedRaduisIndex = updatedLocTagEntity.item.radiusIndex;
+          _centerPoint = updatedLocTagEntity.item.centerPoint;
+          _locationTagEntity = updatedLocTagEntity;
+        });
+      }
+    }
   }
 
   void _updateSelectedIndex(int index) {
@@ -45,7 +75,7 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
     _selectedRadiusDebouncer.run(() async {
       if (mounted) {
         setState(() {
-          selectedRaduisIndex = index;
+          _selectedRaduisIndex = index;
         });
       }
     });
@@ -54,10 +84,10 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
   @override
   Widget build(BuildContext context) {
     return InheritedLocationTagData(
-      selectedRaduisIndex,
-      centerPoint,
+      _selectedRaduisIndex,
+      _centerPoint!,
       _updateSelectedIndex,
-      widget.locationTagEntity,
+      _locationTagEntity,
       child: widget.child,
     );
   }

@@ -53,7 +53,6 @@ class EditCenterPointTileWidget extends StatelessWidget {
             showPickCenterPointSheet(
               context,
               InheritedLocationTagData.of(context).locationTagEntity!,
-              () {},
             );
           },
           icon: const Icon(Icons.edit),
