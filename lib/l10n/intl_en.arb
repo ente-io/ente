@@ -197,5 +197,27 @@
   "addedAs": "Added as",
   "changePermissions": "Change permissions?",
   "yesConvertToViewer": "Yes, convert to viewer",
-  "cannotAddMorePhotosAfterBecomingViewer": "{user} will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them"
+  "cannotAddMorePhotosAfterBecomingViewer": "{user} will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them",
+  "allowAddingPhotos": "Allow adding photos",
+  "@allowAddingPhotos": {
+    "description": "Switch button to enable uploading photos to a public link"
+  },
+  "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
+  "passwordLock": "Password lock",
+  "disableDownloadWarningTitle": "Please note",
+  "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your photos using external tools",
+  "allowDownloads": "Allow downloads",
+  "linkDeviceLimit": "Device limit",
+  "linkExpiry": "Link expiry",
+  "linkExpired": "Expired",
+  "linkEnabled": "Enabled",
+  "linkNeverExpires": "Never",
+  "expiredLinkInfo": "This link has expired. Please select a new expiry time or disable link expiry.",
+  "setAPassword": "Set a password",
+  "lockButtonLabel": "Lock",
+  "enterPassword": "Enter password",
+  "removeLink": "Remove link",
+  "manageLink": "Manage link",
+  "linkExpiresOn": "Link will expire on {expiryTime}",
+  "albumUpdated": "Album updated"
 }

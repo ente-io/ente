@@ -1517,6 +1517,196 @@ class S {
       args: [user],
     );
   }
+
+  /// `Allow adding photos`
+  String get allowAddingPhotos {
+    return Intl.message(
+      'Allow adding photos',
+      name: 'allowAddingPhotos',
+      desc: 'Switch button to enable uploading photos to a public link',
+      args: [],
+    );
+  }
+
+  /// `Allow people with the link to also add photos to the shared album.`
+  String get allowAddPhotosDescription {
+    return Intl.message(
+      'Allow people with the link to also add photos to the shared album.',
+      name: 'allowAddPhotosDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password lock`
+  String get passwordLock {
+    return Intl.message(
+      'Password lock',
+      name: 'passwordLock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please note`
+  String get disableDownloadWarningTitle {
+    return Intl.message(
+      'Please note',
+      name: 'disableDownloadWarningTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Viewers can still take screenshots or save a copy of your photos using external tools`
+  String get disableDownloadWarningBody {
+    return Intl.message(
+      'Viewers can still take screenshots or save a copy of your photos using external tools',
+      name: 'disableDownloadWarningBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow downloads`
+  String get allowDownloads {
+    return Intl.message(
+      'Allow downloads',
+      name: 'allowDownloads',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Device limit`
+  String get linkDeviceLimit {
+    return Intl.message(
+      'Device limit',
+      name: 'linkDeviceLimit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link expiry`
+  String get linkExpiry {
+    return Intl.message(
+      'Link expiry',
+      name: 'linkExpiry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Expired`
+  String get linkExpired {
+    return Intl.message(
+      'Expired',
+      name: 'linkExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enabled`
+  String get linkEnabled {
+    return Intl.message(
+      'Enabled',
+      name: 'linkEnabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Never`
+  String get linkNeverExpires {
+    return Intl.message(
+      'Never',
+      name: 'linkNeverExpires',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This link has expired. Please select a new expiry time or disable link expiry.`
+  String get expiredLinkInfo {
+    return Intl.message(
+      'This link has expired. Please select a new expiry time or disable link expiry.',
+      name: 'expiredLinkInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set a password`
+  String get setAPassword {
+    return Intl.message(
+      'Set a password',
+      name: 'setAPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lock`
+  String get lockButtonLabel {
+    return Intl.message(
+      'Lock',
+      name: 'lockButtonLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter password`
+  String get enterPassword {
+    return Intl.message(
+      'Enter password',
+      name: 'enterPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove link`
+  String get removeLink {
+    return Intl.message(
+      'Remove link',
+      name: 'removeLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage link`
+  String get manageLink {
+    return Intl.message(
+      'Manage link',
+      name: 'manageLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link will expire on {expiryTime}`
+  String linkExpiresOn(Object expiryTime) {
+    return Intl.message(
+      'Link will expire on $expiryTime',
+      name: 'linkExpiresOn',
+      desc: '',
+      args: [expiryTime],
+    );
+  }
+
+  /// `Album updated`
+  String get albumUpdated {
+    return Intl.message(
+      'Album updated',
+      name: 'albumUpdated',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -26,7 +26,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m1(supportEmail) =>
       "Please drop an email to ${supportEmail} from your registered email address";
 
-  static String m2(passwordStrengthValue) =>
+  static String m2(expiryTime) => "Link will expire on ${expiryTime}";
+
+  static String m3(passwordStrengthValue) =>
       "Password strength: ${passwordStrengthValue}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -46,6 +48,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "addViewer": MessageLookupByLibrary.simpleMessage("Add viewer"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Added as"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Owner"),
+        "albumUpdated": MessageLookupByLibrary.simpleMessage("Album updated"),
+        "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
+            "Allow people with the link to also add photos to the shared album."),
+        "allowAddingPhotos":
+            MessageLookupByLibrary.simpleMessage("Allow adding photos"),
+        "allowDownloads":
+            MessageLookupByLibrary.simpleMessage("Allow downloads"),
         "and": MessageLookupByLibrary.simpleMessage("and"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "What is the main reason you are deleting your account?"),
@@ -104,6 +113,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("My reason isn’t listed"),
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "Your request will be processed within 72 hours."),
+        "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
+            "Viewers can still take screenshots or save a copy of your photos using external tools"),
+        "disableDownloadWarningTitle":
+            MessageLookupByLibrary.simpleMessage("Please note"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("Do this later"),
         "dropSupportEmail": m1,
         "email": MessageLookupByLibrary.simpleMessage("Email"),
@@ -116,6 +129,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterEmail": MessageLookupByLibrary.simpleMessage("Enter email"),
         "enterNewPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Enter a new password we can use to encrypt your data"),
+        "enterPassword": MessageLookupByLibrary.simpleMessage("Enter password"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Enter a password we can use to encrypt your data"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
@@ -129,6 +143,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Enter your password"),
         "enterYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Enter your recovery key"),
+        "expiredLinkInfo": MessageLookupByLibrary.simpleMessage(
+            "This link has expired. Please select a new expiry time or disable link expiry."),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Forgot password"),
@@ -152,9 +168,17 @@ class MessageLookup extends MessageLookupByLibrary {
             "The recovery key you entered is not valid. Please make sure it "),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Kindly help us with this information"),
+        "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Device limit"),
+        "linkEnabled": MessageLookupByLibrary.simpleMessage("Enabled"),
+        "linkExpired": MessageLookupByLibrary.simpleMessage("Expired"),
+        "linkExpiresOn": m2,
+        "linkExpiry": MessageLookupByLibrary.simpleMessage("Link expiry"),
+        "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Never"),
+        "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lock"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Log in"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Lost device?"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
+        "manageLink": MessageLookupByLibrary.simpleMessage("Manage link"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
         "noPasswordWarningPart1": MessageLookupByLibrary.simpleMessage(
             "We don\'t store this password, so if you forget,"),
@@ -171,7 +195,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "password": MessageLookupByLibrary.simpleMessage("Password"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Password changed successfully"),
-        "passwordStrength": m2,
+        "passwordLock": MessageLookupByLibrary.simpleMessage("Password lock"),
+        "passwordStrength": m3,
         "pleaseSendAnEmailTo":
             MessageLookupByLibrary.simpleMessage("Please send an email to"),
         "pleaseTryAgain":
@@ -204,6 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "recreatePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Recreate password"),
         "remove": MessageLookupByLibrary.simpleMessage("Remove"),
+        "removeLink": MessageLookupByLibrary.simpleMessage("Remove link"),
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Remove participant"),
         "resendEmail": MessageLookupByLibrary.simpleMessage("Resend email"),
@@ -219,6 +245,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Scan this barcode with\nyour authenticator app"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Select reason"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
+        "setAPassword": MessageLookupByLibrary.simpleMessage("Set a password"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Set password"),
         "setupComplete": MessageLookupByLibrary.simpleMessage("Setup complete"),
