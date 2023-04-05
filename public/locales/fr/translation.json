@@ -499,8 +499,8 @@
     "TOTAL_ITEMS": "Total d'objets",
     "PENDING_ITEMS": "Objets en attente",
     "EXPORT_STARTING": "Démarrage de l'export...",
-    "DELETE_ACCOUNT_REASON_LABEL": "",
-    "DELETE_ACCOUNT_REASON_PLACEHOLDER": "",
+    "DELETE_ACCOUNT_REASON_LABEL": "Quelle est la raison principale de la suppression de votre compte ?",
+    "DELETE_ACCOUNT_REASON_PLACEHOLDER": "Choisir une raison",
     "DELETE_REASON": {
         "MISSING_FEATURE": "",
         "BROKEN_BEHAVIOR": "",
