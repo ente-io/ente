@@ -202,19 +202,6 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
     );
   }
 
-  // Future<void> _addLocationTag(String locationName) async {
-  //   final locationData = InheritedAddLocationTagData.of(context);
-  //   final coordinates = locationData.coordinates;
-  //   final radius = radiusValues[locationData.selectedRadiusIndex];
-  //   await LocationService.instance.addLocation(
-  //     locationName,
-  //     coordinates.first,
-  //     coordinates.last,
-  //     radius,
-  //   );
-  //   widget.onLocationAdded.call();
-  // }
-
   void _focusNodeListener() {
     final bool hasFocus = _focusNode.hasFocus;
     _keyboardTopButtons ??= KeyboardTopButton(
