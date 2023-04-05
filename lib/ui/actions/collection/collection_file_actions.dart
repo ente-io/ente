@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
@@ -22,7 +23,7 @@ extension CollectionFileActions on CollectionActions {
       context: bContext,
       buttons: [
         ButtonWidget(
-          labelText: "Remove",
+          labelText: S.of(bContext).remove,
           buttonType:
               removingOthersFile ? ButtonType.critical : ButtonType.neutral,
           buttonSize: ButtonSize.large,
@@ -41,8 +42,8 @@ extension CollectionFileActions on CollectionActions {
             }
           },
         ),
-        const ButtonWidget(
-          labelText: "Cancel",
+        ButtonWidget(
+          labelText: S.of(bContext).cancel,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
@@ -50,11 +51,10 @@ extension CollectionFileActions on CollectionActions {
           isInAlert: true,
         ),
       ],
-      title: removingOthersFile ? "Remove from album?" : null,
+      title: removingOthersFile ? S.of(bContext).removeFromAlbum : null,
       body: removingOthersFile
-          ? "Some of the items you are removing were "
-              "added by other people, and you will lose access to them"
-          : "Selected items will be removed from this album",
+          ? S.of(bContext).removeShareItemsWarning
+          : S.of(bContext).itemsWillBeRemovedFromAlbum,
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult?.action != null &&
@@ -72,7 +72,9 @@ extension CollectionFileActions on CollectionActions {
   ) async {
     final ProgressDialog dialog = createProgressDialog(
       context,
-      markAsFavorite ? "Adding to favorites..." : "Removing from favorites...",
+      markAsFavorite
+          ? S.of(context).addingToFavorites
+          : S.of(context).removingFromFavorites,
     );
     await dialog.show();
 
@@ -84,8 +86,9 @@ extension CollectionFileActions on CollectionActions {
       logger.severe(e, s);
       showShortToast(
         context,
-        "Sorry, could not" +
-            (markAsFavorite ? "add  to favorites!" : "remove from favorites!"),
+        markAsFavorite
+            ? S.of(context).sorryCouldNotAddToFavorites
+            : S.of(context).sorryCouldNotRemoveFromFavorites,
       );
     } finally {
       await dialog.hide();

@@ -27,6 +27,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.select(isFamilyMember, {
             'true': 'Your family has claimed ${storageAmountInGb} Gb so far',
             'false': 'You have claimed ${storageAmountInGb} Gb so far',
+            'other': 'You have claimed ${storageAmountInGb} Gb so far!',
           })}";
 
   static String m2(supportEmail) =>
@@ -85,6 +86,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addMore": MessageLookupByLibrary.simpleMessage("Add more"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Add viewer"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Added as"),
+        "addingToFavorites":
+            MessageLookupByLibrary.simpleMessage("Adding to favorites..."),
         "after1Day": MessageLookupByLibrary.simpleMessage("After 1 day"),
         "after1Hour": MessageLookupByLibrary.simpleMessage("After 1 hour"),
         "after1Month": MessageLookupByLibrary.simpleMessage("After 1 month"),
@@ -105,6 +108,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "What is the main reason you are deleting your account?"),
         "byClickingLogInIAgreeToThe": MessageLookupByLibrary.simpleMessage(
             "By clicking log in, I agree to the"),
+        "canOnlyRemoveFilesOwnedByYou": MessageLookupByLibrary.simpleMessage(
+            "Can only remove files owned by you"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "cannotAddMorePhotosAfterBecomingViewer": m0,
         "changeEmail": MessageLookupByLibrary.simpleMessage("Change email"),
@@ -164,6 +169,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "We are sorry to see you go. Please share your feedback to help us improve."),
         "deleteAccountPermanentlyButton":
             MessageLookupByLibrary.simpleMessage("Delete Account Permanently"),
+        "deleteAlbum": MessageLookupByLibrary.simpleMessage("Delete album"),
         "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
             "You are about to permanently delete your account and all its data.\nThis action is irreversible."),
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
@@ -176,6 +182,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("My reason isn’t listed"),
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "Your request will be processed within 72 hours."),
+        "deleteSharedAlbum":
+            MessageLookupByLibrary.simpleMessage("Delete shared album?"),
+        "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
+            "The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others"),
         "details": MessageLookupByLibrary.simpleMessage("Details"),
         "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
             "Viewers can still take screenshots or save a copy of your photos using external tools"),
@@ -251,6 +261,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "The recovery key you entered is not valid. Please make sure it "),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("Invite your friends"),
+        "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
+            "Selected items will be removed from this album"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Kindly help us with this information"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Device limit"),
@@ -332,9 +344,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "referralsAreCurrentlyPaused": MessageLookupByLibrary.simpleMessage(
             "Referrals are currently paused"),
         "remove": MessageLookupByLibrary.simpleMessage("Remove"),
+        "removeFromAlbum":
+            MessageLookupByLibrary.simpleMessage("Remove from album?"),
         "removeLink": MessageLookupByLibrary.simpleMessage("Remove link"),
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Remove participant"),
+        "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
+            "Some of the items you are removing were added by other people, and you will lose access to them"),
+        "removingFromFavorites":
+            MessageLookupByLibrary.simpleMessage("Removing from favorites..."),
         "resendEmail": MessageLookupByLibrary.simpleMessage("Resend email"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Reset password"),
@@ -374,11 +392,19 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Something went wrong, please try again"),
         "sorry": MessageLookupByLibrary.simpleMessage("Sorry"),
+        "sorryCouldNotAddToFavorites": MessageLookupByLibrary.simpleMessage(
+            "Sorry, could not add to favorites!"),
+        "sorryCouldNotRemoveFromFavorites":
+            MessageLookupByLibrary.simpleMessage(
+                "Sorry, could not remove from favorites!"),
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device."),
         "storageInGB": m13,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Strong"),
+        "subscribe": MessageLookupByLibrary.simpleMessage("Subscribe"),
+        "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
+            "Looks like your subscription has expired. Please subscribe to enable sharing."),
         "tapToCopy": MessageLookupByLibrary.simpleMessage("tap to copy"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("Tap to enter code"),

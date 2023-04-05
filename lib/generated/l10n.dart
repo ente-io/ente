@@ -2262,13 +2262,14 @@ class S {
     );
   }
 
-  /// `{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} Gb so far} false {You have claimed {storageAmountInGb} Gb so far}}`
-  String claimedStorageSoFar(bool isFamilyMember, int storageAmountInGb) {
+  /// `{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} Gb so far} false {You have claimed {storageAmountInGb} Gb so far} other {You have claimed {storageAmountInGb} Gb so far!}}`
+  String claimedStorageSoFar(String isFamilyMember, int storageAmountInGb) {
     return Intl.select(
       isFamilyMember,
       {
         'true': 'Your family has claimed $storageAmountInGb Gb so far',
         'false': 'You have claimed $storageAmountInGb Gb so far',
+        'other': 'You have claimed $storageAmountInGb Gb so far!',
       },
       name: 'claimedStorageSoFar',
       desc: '',
@@ -2361,6 +2362,136 @@ class S {
     return Intl.message(
       'Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan.',
       name: 'usableReferralStorageInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove from album?`
+  String get removeFromAlbum {
+    return Intl.message(
+      'Remove from album?',
+      name: 'removeFromAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Selected items will be removed from this album`
+  String get itemsWillBeRemovedFromAlbum {
+    return Intl.message(
+      'Selected items will be removed from this album',
+      name: 'itemsWillBeRemovedFromAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Some of the items you are removing were added by other people, and you will lose access to them`
+  String get removeShareItemsWarning {
+    return Intl.message(
+      'Some of the items you are removing were added by other people, and you will lose access to them',
+      name: 'removeShareItemsWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adding to favorites...`
+  String get addingToFavorites {
+    return Intl.message(
+      'Adding to favorites...',
+      name: 'addingToFavorites',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Removing from favorites...`
+  String get removingFromFavorites {
+    return Intl.message(
+      'Removing from favorites...',
+      name: 'removingFromFavorites',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, could not add to favorites!`
+  String get sorryCouldNotAddToFavorites {
+    return Intl.message(
+      'Sorry, could not add to favorites!',
+      name: 'sorryCouldNotAddToFavorites',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, could not remove from favorites!`
+  String get sorryCouldNotRemoveFromFavorites {
+    return Intl.message(
+      'Sorry, could not remove from favorites!',
+      name: 'sorryCouldNotRemoveFromFavorites',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Looks like your subscription has expired. Please subscribe to enable sharing.`
+  String get subscribeToEnableSharing {
+    return Intl.message(
+      'Looks like your subscription has expired. Please subscribe to enable sharing.',
+      name: 'subscribeToEnableSharing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscribe`
+  String get subscribe {
+    return Intl.message(
+      'Subscribe',
+      name: 'subscribe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Can only remove files owned by you`
+  String get canOnlyRemoveFilesOwnedByYou {
+    return Intl.message(
+      'Can only remove files owned by you',
+      name: 'canOnlyRemoveFilesOwnedByYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete shared album?`
+  String get deleteSharedAlbum {
+    return Intl.message(
+      'Delete shared album?',
+      name: 'deleteSharedAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete album`
+  String get deleteAlbum {
+    return Intl.message(
+      'Delete album',
+      name: 'deleteAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others`
+  String get deleteSharedAlbumDialogBody {
+    return Intl.message(
+      'The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others',
+      name: 'deleteSharedAlbumDialogBody',
       desc: '',
       args: [],
     );

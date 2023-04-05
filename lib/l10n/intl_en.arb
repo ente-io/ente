@@ -306,17 +306,18 @@
   "referralStep3": "3. Both of you get {storageInGB} GB* free",
   "referralsAreCurrentlyPaused": "Referrals are currently paused",
   "youCanAtMaxDoubleYourStorage": "* You can at max double your storage",
-  "claimedStorageSoFar" : "{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} Gb so far} false {You have claimed {storageAmountInGb} Gb so far}}",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} Gb so far} false {You have claimed {storageAmountInGb} Gb so far} other {You have claimed {storageAmountInGb} Gb so far!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
+      "isFamilyMember": {
+        "type": "String",
+        "example": "true"
+      },
       "storageAmountInGb": {
         "type": "int",
         "example": "10"
-      },
-      "isFamilyMember": {
-        "type": "bool",
-        "example": "true"
       }
+
     }
   },
   "faq": "FAQ",
@@ -327,5 +328,18 @@
   "codeUsedByYou": "Code used by you",
   "freeStorageClaimed": "Free storage claimed",
   "freeStorageUsable": "Free storage usable",
-  "usableReferralStorageInfo": "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan."
+  "usableReferralStorageInfo": "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan.",
+  "removeFromAlbum": "Remove from album?",
+  "itemsWillBeRemovedFromAlbum": "Selected items will be removed from this album",
+  "removeShareItemsWarning": "Some of the items you are removing were added by other people, and you will lose access to them",
+  "addingToFavorites": "Adding to favorites...",
+  "removingFromFavorites": "Removing from favorites...",
+  "sorryCouldNotAddToFavorites": "Sorry, could not add to favorites!",
+  "sorryCouldNotRemoveFromFavorites": "Sorry, could not remove from favorites!",
+  "subscribeToEnableSharing": "Looks like your subscription has expired. Please subscribe to enable sharing.",
+  "subscribe": "Subscribe",
+  "canOnlyRemoveFilesOwnedByYou": "Can only remove files owned by you",
+  "deleteSharedAlbum": "Delete shared album?",
+  "deleteAlbum": "Delete album",
+  "deleteSharedAlbumDialogBody": "The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others"
 }

@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
@@ -367,10 +368,9 @@ class CollectionActions {
     final actionResult = await showChoiceActionSheet(
       context,
       isCritical: true,
-      title: "Delete shared album?",
-      firstButtonLabel: "Delete album",
-      body: "The album will be deleted for everyone\n\nYou will lose access to "
-          "shared photos in this album that are owned by others",
+      title: S.of(context).deleteSharedAlbum,
+      firstButtonLabel: S.of(context).deleteAlbum,
+      body: S.of(context).deleteSharedAlbumDialogBody,
     );
     return actionResult?.action != null &&
         actionResult!.action == ButtonAction.first;
@@ -420,7 +420,7 @@ class CollectionActions {
     }
 
     if (!isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
-      showShortToast(context, "Can only remove files owned by you");
+      showShortToast(context, S.of(context).canOnlyRemoveFilesOwnedByYou);
       return;
     }
 
@@ -523,15 +523,14 @@ class CollectionActions {
 
   void _showUnSupportedAlert(BuildContext context) {
     final AlertDialog alert = AlertDialog(
-      title: const Text("Sorry"),
-      content: const Text(
-        "Looks like your subscription has expired. Please subscribe to enable"
-        " sharing.",
+      title: Text(S.of(context).sorry),
+      content: Text(
+        S.of(context).subscribeToEnableSharing,
       ),
       actions: [
         TextButton(
           child: Text(
-            "Subscribe",
+            S.of(context).subscribe,
             style: TextStyle(
               color: Theme.of(context).colorScheme.greenAlternative,
             ),
@@ -549,7 +548,7 @@ class CollectionActions {
         ),
         TextButton(
           child: Text(
-            "Ok",
+            S.of(context).ok,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
             ),

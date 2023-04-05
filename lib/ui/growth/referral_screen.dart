@@ -267,7 +267,7 @@ class ReferralWidget extends StatelessWidget {
           ),
           child: Text(
             S.of(context).claimedStorageSoFar(
-                  referralView.isFamilyMember,
+                  referralView.isFamilyMember.toString().toLowerCase(),
                   convertBytesToAbsoluteGBs(referralView.claimedStorage),
                 ),
             style: textStyle.small.copyWith(
