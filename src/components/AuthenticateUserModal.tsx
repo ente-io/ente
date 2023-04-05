@@ -6,9 +6,9 @@ import { KeyAttributes, User } from 'types/user';
 import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
 } from 'components/VerifyMasterPasswordForm';
-import { Dialog, Stack, Typography } from '@mui/material';
 import { logError } from 'utils/sentry';
 import { t } from 'i18next';
+import DialogBoxV2 from './DialogBoxV2';
 interface Iprops {
     open: boolean;
     onClose: () => void;
@@ -66,22 +66,21 @@ export default function AuthenticateUserModal({
         };
 
     return (
-        <Dialog
+        <DialogBoxV2
             open={open}
             onClose={onClose}
             sx={{ position: 'absolute' }}
-            PaperProps={{ sx: { p: 1, maxWidth: '346px' } }}>
-            <Stack spacing={3} p={1.5}>
-                <Typography variant="h3" px={1} py={0.5} fontWeight={'bold'}>
-                    {t('PASSWORD')}
-                </Typography>
-                <VerifyMasterPasswordForm
-                    buttonText={t('AUTHENTICATE')}
-                    callback={useMasterPassword}
-                    user={user}
-                    keyAttributes={keyAttributes}
-                />
-            </Stack>
-        </Dialog>
+            attributes={{
+                title: t('PASSWORD'),
+            }}
+            PaperProps={{ sx: { padding: '8px 12px', maxWidth: '320px' } }}>
+            <VerifyMasterPasswordForm
+                buttonText={t('AUTHENTICATE')}
+                callback={useMasterPassword}
+                user={user}
+                keyAttributes={keyAttributes}
+                submitButtonProps={{ sx: { mb: 0 } }}
+            />
+        </DialogBoxV2>
     );
 }

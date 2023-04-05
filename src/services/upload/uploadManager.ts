@@ -294,8 +294,7 @@ class UploadManager {
                 worker,
                 this.userOwnedNonTrashedExistingFiles,
                 fileWithCollection,
-                this.uploaderName,
-                this.publicUploadProps?.accessedThroughSharedURL
+                this.uploaderName
             );
 
             const finalUploadResult = await this.postUploadTask(
@@ -345,7 +344,6 @@ class UploadManager {
                 case UPLOAD_RESULT.UNSUPPORTED:
                 case UPLOAD_RESULT.TOO_LARGE:
                 case UPLOAD_RESULT.CANCELLED:
-                case UPLOAD_RESULT.SKIPPED_VIDEOS:
                     // no-op
                     break;
                 default:

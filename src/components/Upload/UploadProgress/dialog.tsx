@@ -11,7 +11,6 @@ import { NotUploadSectionHeader } from './styledComponents';
 import UploadProgressContext from 'contexts/uploadProgress';
 import { dialogCloseHandler } from 'components/DialogBox/TitleWithCloseButton';
 import { APP_DOWNLOAD_URL } from 'constants/urls';
-import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import { Trans } from 'react-i18next';
 
 export function UploadProgressDialog() {
@@ -29,8 +28,7 @@ export function UploadProgressDialog() {
             finishedUploads.get(UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE)
                 ?.length > 0 ||
             finishedUploads.get(UPLOAD_RESULT.TOO_LARGE)?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.UNSUPPORTED)?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.SKIPPED_VIDEOS)?.length > 0
+            finishedUploads.get(UPLOAD_RESULT.UNSUPPORTED)?.length > 0
         ) {
             setHasUnUploadedFiles(true);
         } else {
@@ -97,23 +95,6 @@ export function UploadProgressDialog() {
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.FAILED}
                                 sectionTitle={t('FAILED_UPLOADS')}
-                            />
-                            <ResultSection
-                                uploadResult={UPLOAD_RESULT.SKIPPED_VIDEOS}
-                                sectionTitle={t('SKIPPED_VIDEOS')}
-                                sectionInfo={
-                                    <Trans
-                                        i18nKey={'SKIPPED_VIDEOS_INFO'}
-                                        components={{
-                                            a: (
-                                                <Link
-                                                    href={ENTE_WEBSITE_LINK}
-                                                    target="_blank"
-                                                />
-                                            ),
-                                        }}
-                                    />
-                                }
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.ALREADY_UPLOADED}

@@ -366,7 +366,7 @@ const PhotoFrame = ({
             );
             return;
         }
-        if (file.msrc) {
+        if (file.msrc && file.msrc !== url) {
             addLogLine(`PhotoSwipe: updateURL: msrc already set: ${file.msrc}`);
             logError(
                 new Error(

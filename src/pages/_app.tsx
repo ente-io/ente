@@ -210,6 +210,9 @@ export default function App(props) {
     }, []);
 
     useEffect(() => {
+        if (!isElectron()) {
+            return;
+        }
         const loadMlSearchState = async () => {
             try {
                 const mlSearchConfig = await getMLSearchConfig();
@@ -306,7 +309,7 @@ export default function App(props) {
 
     useEffect(() => {
         setDialogBoxV2View(true);
-    }, [dialogBoxV2View]);
+    }, [dialogBoxAttributeV2]);
 
     useEffect(() => {
         setNotificationView(true);
