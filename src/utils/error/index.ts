@@ -57,6 +57,7 @@ export const CustomError = {
     ADD_FILE_EXPORTED_RECORD_FAILED: 'add file exported record failed',
     NO_EXPORT_FOLDER_SELECTED: 'no export folder selected',
     EXPORT_FOLDER_DOES_NOT_EXIST: 'export folder does not exist',
+    NO_INTERNET_CONNECTION: 'no internet connection',
 };
 
 export function parseUploadErrorCodes(error) {
