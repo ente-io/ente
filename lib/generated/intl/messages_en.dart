@@ -39,7 +39,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "addANewEmail": MessageLookupByLibrary.simpleMessage("Add a new email"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Add collaborator"),
+        "addMore": MessageLookupByLibrary.simpleMessage("Add more"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Add viewer"),
+        "albumOwner": MessageLookupByLibrary.simpleMessage("Owner"),
         "and": MessageLookupByLibrary.simpleMessage("and"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "What is the main reason you are deleting your account?"),
@@ -53,6 +55,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please check your inbox (and spam) to complete verification"),
         "codeCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("Code copied to clipboard"),
+        "collaborator": MessageLookupByLibrary.simpleMessage("Collaborator"),
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Collaborators can add photos and videos to the shared album."),
@@ -251,10 +254,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Verifying recovery key..."),
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("View recovery key"),
+        "viewer": MessageLookupByLibrary.simpleMessage("Viewer"),
         "weakStrength": MessageLookupByLibrary.simpleMessage("Weak"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Welcome back!"),
         "weveSentAMailTo":
             MessageLookupByLibrary.simpleMessage("We\'ve sent a mail to"),
+        "you": MessageLookupByLibrary.simpleMessage("You"),
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Your account has been deleted")
       };

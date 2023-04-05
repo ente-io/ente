@@ -176,5 +176,16 @@
   "addANewEmail": "Add a new email",
   "orPickAnExistingOne": "Or pick an existing one",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Collaborators can add photos and videos to the shared album.",
-  "enterEmail": "Enter email"
+  "enterEmail": "Enter email",
+  "albumOwner": "Owner",
+  "@albumOwner": {
+    "description": "This is the role of the album owner"
+  },
+  "you": "You",
+  "collaborator": "Collaborator",
+  "addMore": "Add more",
+  "@addMore": {
+    "description": "This is the button text to add more collaborators/viewers"
+  },
+  "viewer": "Viewer"
 }

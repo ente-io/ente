@@ -1397,6 +1397,56 @@ class S {
       args: [],
     );
   }
+
+  /// `Owner`
+  String get albumOwner {
+    return Intl.message(
+      'Owner',
+      name: 'albumOwner',
+      desc: 'This is the role of the album owner',
+      args: [],
+    );
+  }
+
+  /// `You`
+  String get you {
+    return Intl.message(
+      'You',
+      name: 'you',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collaborator`
+  String get collaborator {
+    return Intl.message(
+      'Collaborator',
+      name: 'collaborator',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add more`
+  String get addMore {
+    return Intl.message(
+      'Add more',
+      name: 'addMore',
+      desc: 'This is the button text to add more collaborators/viewers',
+      args: [],
+    );
+  }
+
+  /// `Viewer`
+  String get viewer {
+    return Intl.message(
+      'Viewer',
+      name: 'viewer',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
