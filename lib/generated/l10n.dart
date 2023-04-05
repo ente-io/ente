@@ -1337,6 +1337,66 @@ class S {
       args: [],
     );
   }
+
+  /// `Add viewer`
+  String get addViewer {
+    return Intl.message(
+      'Add viewer',
+      name: 'addViewer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add collaborator`
+  String get addCollaborator {
+    return Intl.message(
+      'Add collaborator',
+      name: 'addCollaborator',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a new email`
+  String get addANewEmail {
+    return Intl.message(
+      'Add a new email',
+      name: 'addANewEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Or pick an existing one`
+  String get orPickAnExistingOne {
+    return Intl.message(
+      'Or pick an existing one',
+      name: 'orPickAnExistingOne',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collaborators can add photos and videos to the shared album.`
+  String get collaboratorsCanAddPhotosAndVideosToTheSharedAlbum {
+    return Intl.message(
+      'Collaborators can add photos and videos to the shared album.',
+      name: 'collaboratorsCanAddPhotosAndVideosToTheSharedAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter email`
+  String get enterEmail {
+    return Intl.message(
+      'Enter email',
+      name: 'enterEmail',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

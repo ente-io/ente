@@ -36,6 +36,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(" with ente"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Active sessions"),
+        "addANewEmail": MessageLookupByLibrary.simpleMessage("Add a new email"),
+        "addCollaborator":
+            MessageLookupByLibrary.simpleMessage("Add collaborator"),
+        "addViewer": MessageLookupByLibrary.simpleMessage("Add viewer"),
         "and": MessageLookupByLibrary.simpleMessage("and"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "What is the main reason you are deleting your account?"),
@@ -49,6 +53,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please check your inbox (and spam) to complete verification"),
         "codeCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("Code copied to clipboard"),
+        "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
+            MessageLookupByLibrary.simpleMessage(
+                "Collaborators can add photos and videos to the shared album."),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Confirm Account Deletion"),
@@ -96,6 +103,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "endToEndEncrypted":
             MessageLookupByLibrary.simpleMessage("end-to-end encrypted"),
         "enterCode": MessageLookupByLibrary.simpleMessage("Enter code"),
+        "enterEmail": MessageLookupByLibrary.simpleMessage("Enter email"),
         "enterNewPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Enter a new password we can use to encrypt your data"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
@@ -147,6 +155,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
+        "orPickAnExistingOne":
+            MessageLookupByLibrary.simpleMessage("Or pick an existing one"),
         "password": MessageLookupByLibrary.simpleMessage("Password"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Password changed successfully"),
