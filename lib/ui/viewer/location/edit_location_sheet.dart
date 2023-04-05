@@ -65,6 +65,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
   final ValueNotifier<int> _selectedRadiusIndexNotifier =
       ValueNotifier(defaultRadiusValueIndex);
   final _focusNode = FocusNode();
+  final _textEditingController = TextEditingController();
   Widget? _keyboardTopButtons;
 
   @override
@@ -87,6 +88,8 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final locationName =
+        InheritedLocationTagData.of(context).locationTagEntity!.item.name;
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
       child: Column(
@@ -123,6 +126,13 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                           },
                           shouldUnfocusOnClearOrSubmit: true,
                           alwaysShowSuccessState: true,
+                          initialValue: locationName,
+                          onCancel: () {
+                            _focusNode.unfocus();
+                            _textEditingController.value =
+                                TextEditingValue(text: locationName);
+                          },
+                          textEditingController: _textEditingController,
                         ),
                         const SizedBox(height: 20),
                         const EditCenterPointTileWidget(),
