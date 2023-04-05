@@ -4,6 +4,7 @@ import { Code } from 'types/authenticator/code';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getActualKey, getToken } from 'utils/common/key';
+import { CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 
 const ENDPOINT = getEndpoint();
@@ -56,7 +57,9 @@ export const getAuthCodes = async (): Promise<Code[]> => {
         });
         return authCodes;
     } catch (e) {
-        logError(e, 'get authenticator entities failed');
+        if (e.message !== CustomError.AUTH_KEY_NOT_FOUND) {
+            logError(e, 'get authenticator entities failed');
+        }
         throw e;
     }
 };
@@ -72,8 +75,12 @@ export const getAuthKey = async (): Promise<AuthKey> => {
         );
         return resp.data;
     } catch (e) {
-        logError(e, 'Get key failed');
-        throw e;
+        if (e.status === 404) {
+            throw Error(CustomError.AUTH_KEY_NOT_FOUND);
+        } else {
+            logError(e, 'Get key failed');
+            throw e;
+        }
     }
 };
 

@@ -2,6 +2,13 @@ import { CustomError } from 'utils/error';
 import isElectron from 'is-electron';
 import { APP_DOWNLOAD_URL } from 'constants/urls';
 
+export function checkConnectivity() {
+    if (navigator.onLine) {
+        return true;
+    }
+    throw new Error(CustomError.NO_INTERNET_CONNECTION);
+}
+
 export function runningInBrowser() {
     return typeof window !== 'undefined';
 }

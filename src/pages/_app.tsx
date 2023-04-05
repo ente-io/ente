@@ -210,6 +210,9 @@ export default function App(props) {
     }, []);
 
     useEffect(() => {
+        if (!isElectron()) {
+            return;
+        }
         const loadMlSearchState = async () => {
             try {
                 const mlSearchConfig = await getMLSearchConfig();
