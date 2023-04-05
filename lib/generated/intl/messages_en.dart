@@ -26,17 +26,29 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m1(supportEmail) =>
       "Please drop an email to ${supportEmail} from your registered email address";
 
-  static String m2(expiryTime) => "Link will expire on ${expiryTime}";
+  static String m2(email) =>
+      "${email} does not have an ente account.\n\nSend them an invite to share photos.";
 
-  static String m3(maxValue) =>
+  static String m3(expiryTime) => "Link will expire on ${expiryTime}";
+
+  static String m4(maxValue) =>
       "When set to the maximum (${maxValue}), the device limit will be relaxed to allow for temporary spikes of large number of viewers.";
 
-  static String m4(passwordStrengthValue) =>
+  static String m5(passwordStrengthValue) =>
       "Password strength: ${passwordStrengthValue}";
 
-  static String m5(email) => "This is ${email}\'s Verification ID";
+  static String m6(verificationID) =>
+      "Here\'s my verification ID: ${verificationID} for ente.io.";
 
-  static String m6(email) => "Verify ${email}";
+  static String m7(verificationID) =>
+      "Hey, can you confirm that this is your ente.io verification ID: ${verificationID}";
+
+  static String m8(numberOfPeople) =>
+      "${Intl.plural(numberOfPeople, zero: 'Share with specific people', one: 'Shared with 1 person', other: 'Shared with ${numberOfPeople} people')}";
+
+  static String m9(email) => "This is ${email}\'s Verification ID";
+
+  static String m10(email) => "Verify ${email}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -139,8 +151,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "disableDownloadWarningTitle":
             MessageLookupByLibrary.simpleMessage("Please note"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("Do this later"),
+        "done": MessageLookupByLibrary.simpleMessage("Done"),
         "dropSupportEmail": m1,
         "email": MessageLookupByLibrary.simpleMessage("Email"),
+        "emailNoEnteAccount": m2,
         "encryption": MessageLookupByLibrary.simpleMessage("Encryption"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Encryption keys"),
@@ -194,7 +208,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Device limit"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Enabled"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Expired"),
-        "linkExpiresOn": m2,
+        "linkExpiresOn": m3,
         "linkExpiry": MessageLookupByLibrary.simpleMessage("Link expiry"),
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("Link has expired"),
@@ -205,7 +219,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageLink": MessageLookupByLibrary.simpleMessage("Manage link"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Manage"),
-        "maxDeviceLimitSpikeHandling": m3,
+        "maxDeviceLimitSpikeHandling": m4,
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
         "never": MessageLookupByLibrary.simpleMessage("Never"),
         "noPasswordWarningPart1": MessageLookupByLibrary.simpleMessage(
@@ -224,7 +238,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Password changed successfully"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("Password lock"),
-        "passwordStrength": m4,
+        "passwordStrength": m5,
         "pleaseSendAnEmailTo":
             MessageLookupByLibrary.simpleMessage("Please send an email to"),
         "pleaseTryAgain":
@@ -275,21 +289,27 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Scan this barcode with\nyour authenticator app"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Select reason"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
+        "sendInvite": MessageLookupByLibrary.simpleMessage("Send invite"),
         "sendLink": MessageLookupByLibrary.simpleMessage("Send link"),
         "setAPassword": MessageLookupByLibrary.simpleMessage("Set a password"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Set password"),
         "setupComplete": MessageLookupByLibrary.simpleMessage("Setup complete"),
         "shareALink": MessageLookupByLibrary.simpleMessage("Share a link"),
+        "shareMyVerificationID": m6,
+        "shareTextConfirmOthersVerificationID": m7,
+        "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
+            "Download ente so we can easily share original "),
         "shareWithNonenteUsers":
             MessageLookupByLibrary.simpleMessage("Share with non-ente users"),
-        "shareWithSpecificPeople":
-            MessageLookupByLibrary.simpleMessage("Share with specific people"),
+        "shareWithPeopleSectionTitle": m8,
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Create shared and collaborative albums with other ente users, including users on free plans."),
         "someoneSharingAlbumsWithYouShouldSeeTheSameId":
             MessageLookupByLibrary.simpleMessage(
                 "Someone sharing albums with you should see the same ID on their device."),
+        "somethingWentWrong":
+            MessageLookupByLibrary.simpleMessage("Something went wrong"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Something went wrong, please try again"),
@@ -313,7 +333,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "This can be used to recover your account if you lose your second factor"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("This device"),
-        "thisIsPersonVerificationId": m5,
+        "thisIsPersonVerificationId": m9,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "This is your Verification ID"),
         "thisWillLogYouOutOfTheFollowingDevice":
@@ -332,7 +352,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Verification ID"),
         "verify": MessageLookupByLibrary.simpleMessage("Verify"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Verify email"),
-        "verifyEmailID": m6,
+        "verifyEmailID": m10,
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Verify password"),
         "verifyingRecoveryKey":

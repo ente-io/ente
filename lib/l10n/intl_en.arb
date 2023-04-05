@@ -251,7 +251,15 @@
   "publicLinkEnabled": "Public link enabled",
   "shareALink": "Share a link",
   "sharedAlbumSectionDescription": "Create shared and collaborative albums with other ente users, including users on free plans.",
-  "shareWithSpecificPeople": "Share with specific people",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Share with specific people} =1 {Shared with 1 person} other {Shared with {numberOfPeople} people}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "thisIsYourVerificationId": "This is your Verification ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Someone sharing albums with you should see the same ID on their device.",
   "howToViewShareeVerificationID": "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.",
@@ -265,5 +273,12 @@
     }
   },
   "verificationId": "Verification ID",
-  "verifyEmailID": "Verify {email}"
+  "verifyEmailID": "Verify {email}",
+  "emailNoEnteAccount": "{email} does not have an ente account.\n\nSend them an invite to share photos.",
+  "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
+  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
+  "somethingWentWrong": "Something went wrong",
+  "sendInvite": "Send invite",
+  "shareTextRecommendUsingEnte": "Download ente so we can easily share original ",
+  "done": "Done"
 }

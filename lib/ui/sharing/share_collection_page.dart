@@ -51,9 +51,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     final children = <Widget>[];
     children.add(
       MenuSectionTitle(
-        title: _sharees.isEmpty
-            ? S.of(context).shareWithSpecificPeople
-            : "Shared with ${_sharees.length} ${_sharees.length == 1 ? 'person' : 'people'}",
+        title: S.of(context).shareWithPeopleSectionTitle(_sharees.length),
         iconData: Icons.workspaces,
       ),
     );

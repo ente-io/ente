@@ -1908,13 +1908,16 @@ class S {
     );
   }
 
-  /// `Share with specific people`
-  String get shareWithSpecificPeople {
-    return Intl.message(
-      'Share with specific people',
-      name: 'shareWithSpecificPeople',
+  /// `{numberOfPeople, plural, =0 {Share with specific people} =1 {Shared with 1 person} other {Shared with {numberOfPeople} people}}`
+  String shareWithPeopleSectionTitle(int numberOfPeople) {
+    return Intl.plural(
+      numberOfPeople,
+      zero: 'Share with specific people',
+      one: 'Shared with 1 person',
+      other: 'Shared with $numberOfPeople people',
+      name: 'shareWithPeopleSectionTitle',
       desc: '',
-      args: [],
+      args: [numberOfPeople],
     );
   }
 
@@ -1975,6 +1978,76 @@ class S {
       name: 'verifyEmailID',
       desc: '',
       args: [email],
+    );
+  }
+
+  /// `{email} does not have an ente account.\n\nSend them an invite to share photos.`
+  String emailNoEnteAccount(Object email) {
+    return Intl.message(
+      '$email does not have an ente account.\n\nSend them an invite to share photos.',
+      name: 'emailNoEnteAccount',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `Here's my verification ID: {verificationID} for ente.io.`
+  String shareMyVerificationID(Object verificationID) {
+    return Intl.message(
+      'Here\'s my verification ID: $verificationID for ente.io.',
+      name: 'shareMyVerificationID',
+      desc: '',
+      args: [verificationID],
+    );
+  }
+
+  /// `Hey, can you confirm that this is your ente.io verification ID: {verificationID}`
+  String shareTextConfirmOthersVerificationID(Object verificationID) {
+    return Intl.message(
+      'Hey, can you confirm that this is your ente.io verification ID: $verificationID',
+      name: 'shareTextConfirmOthersVerificationID',
+      desc: '',
+      args: [verificationID],
+    );
+  }
+
+  /// `Something went wrong`
+  String get somethingWentWrong {
+    return Intl.message(
+      'Something went wrong',
+      name: 'somethingWentWrong',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send invite`
+  String get sendInvite {
+    return Intl.message(
+      'Send invite',
+      name: 'sendInvite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download ente so we can easily share original `
+  String get shareTextRecommendUsingEnte {
+    return Intl.message(
+      'Download ente so we can easily share original ',
+      name: 'shareTextRecommendUsingEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Done`
+  String get done {
+    return Intl.message(
+      'Done',
+      name: 'done',
+      desc: '',
+      args: [],
     );
   }
 }
