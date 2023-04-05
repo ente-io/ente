@@ -15,7 +15,7 @@ export const FILE_TYPE_LIB_MISSED_FORMATS = [
     { fileType: FILE_TYPE.VIDEO, exactType: 'mp4', mimeType: 'video/mp4' },
 ];
 
-export const KNOWN_NON_MEDIA_FORMATS = ['xmp'];
+export const KNOWN_NON_MEDIA_FORMATS = ['xmp', 'html', 'txt'];
 
 export const EXIFLESS_FORMATS = ['image/gif'];
 
