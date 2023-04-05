@@ -3,6 +3,8 @@ import "dart:math";
 
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
@@ -56,6 +58,7 @@ class LocationService {
     );
     await EntityService.instance
         .addOrUpdate(EntityType.location, json.encode(locationTag.toJson()));
+    Bus.instance.fire(LocationTagUpdatedEvent(LocTagEventType.add));
   }
 
   ///The area bounded by the location tag becomes more elliptical with increase
@@ -129,8 +132,8 @@ class LocationService {
     Location newCenterPoint,
   ) async {
     try {
-      await Future.delayed(const Duration(seconds: 2));
-      assert(false);
+      // await Future.delayed(const Duration(seconds: 2));
+      // assert(false);
       final locationTag = locationTagEntity.item;
       //Semi-major axis of the ellipse (b) doesn't change unless radius is changed.
       final a = (locationTag.radius * _scaleFactor(newCenterPoint.latitude!)) /

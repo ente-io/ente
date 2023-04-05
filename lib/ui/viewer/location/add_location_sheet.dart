@@ -19,14 +19,13 @@ import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 showAddLocationSheet(
   BuildContext context,
   Location coordinates,
-  VoidCallback onLocationAdded,
 ) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
       return LocationTagStateProvider(
         centerPoint: coordinates,
-        AddLocationSheet(onLocationAdded),
+        const AddLocationSheet(),
       );
     },
     shape: const RoundedRectangleBorder(
@@ -42,8 +41,7 @@ showAddLocationSheet(
 }
 
 class AddLocationSheet extends StatefulWidget {
-  final VoidCallback onLocationAdded;
-  const AddLocationSheet(this.onLocationAdded, {super.key});
+  const AddLocationSheet({super.key});
 
   @override
   State<AddLocationSheet> createState() => _AddLocationSheetState();
@@ -205,7 +203,6 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
       coordinates,
       radius,
     );
-    widget.onLocationAdded.call();
   }
 
   void _focusNodeListener() {
