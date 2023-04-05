@@ -1,6 +1,7 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -60,7 +61,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
-        title: Text(widget.isAddingViewer ? "Add viewer" : "Add collaborator"),
+        title: Text(widget.isAddingViewer
+            ? S.of(context).addViewer
+            : S.of(context).addCollaborator),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -70,7 +73,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              "Add a new email",
+              S.of(context).addANewEmail,
               style: enteTextTheme.small
                   .copyWith(color: enteColorScheme.textMuted),
             ),
@@ -88,21 +91,22 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                     child: Column(
                       children: [
                         !isEmailListEmpty
-                            ? const MenuSectionTitle(
-                                title: "Or pick an existing one",
+                            ? MenuSectionTitle(
+                                title: S.of(context).orPickAnExistingOne,
                               )
                             : const SizedBox.shrink(),
                         Expanded(
                           child: ListView.builder(
                             itemBuilder: (context, index) {
                               if (index >= suggestedUsers.length) {
-                                return const Padding(
-                                  padding: EdgeInsets.symmetric(
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
                                     vertical: 8.0,
                                   ),
                                   child: MenuSectionDescriptionWidget(
-                                    content:
-                                        "Collaborators can add photos and videos to the shared album.",
+                                    content: S
+                                        .of(context)
+                                        .collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,
                                   ),
                                 );
                               }
@@ -176,8 +180,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                     buttonType: ButtonType.primary,
                     buttonSize: ButtonSize.large,
                     labelText: widget.isAddingViewer
-                        ? "Add viewer"
-                        : "Add collaborator",
+                        ? S.of(context).addViewer
+                        : S.of(context).addCollaborator,
                     isDisabled: (selectedEmail == '' && !_emailIsValid),
                     onTap: (selectedEmail == '' && !_emailIsValid)
                         ? null
@@ -204,8 +208,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                       if ((selectedEmail == '' && !_emailIsValid)) {
                         await showErrorDialog(
                           context,
-                          "Invalid email address",
-                          "Please enter a valid email address.",
+                          S.of(context).invalidEmailAddress,
+                          S.of(context).enterValidEmail,
                         );
                         return;
                       }
@@ -261,7 +265,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         ),
         fillColor: getEnteColorScheme(context).fillFaint,
         filled: true,
-        hintText: 'Enter email',
+        hintText: S.of(context).enterEmail,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,

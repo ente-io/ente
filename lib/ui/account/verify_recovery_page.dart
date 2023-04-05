@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/notification_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/services/user_service.dart';
@@ -29,7 +30,8 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
   final Logger _logger = Logger((_VerifyRecoveryPageState).toString());
 
   void _verifyRecoveryKey() async {
-    final dialog = createProgressDialog(context, "Verifying recovery key...");
+    final dialog =
+        createProgressDialog(context, S.of(context).verifyingRecoveryKey);
     await dialog.show();
     try {
       final String inputKey = _recoveryKey.text.trim();
@@ -58,10 +60,8 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
         // todo: change this as per figma once the component is ready
         await showErrorDialog(
           context,
-          "Recovery key verified",
-          "Great! Your recovery key is valid. Thank you for verifying.\n"
-              "\nPlease"
-              " remember to keep your recovery key safely backed up.",
+          S.of(context).recoveryKeyVerified,
+          S.of(context).recoveryKeySuccessBody,
         );
         Navigator.of(context).pop();
       } else {
@@ -70,16 +70,13 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
     } catch (e, s) {
       _logger.severe("failed to verify recovery key", e, s);
       await dialog.hide();
-      const String errMessage =
-          "The recovery key you entered is not valid. Please make sure it "
-          "contains 24 words, and check the spelling of each.\n\nIf you "
-          "entered an older recovery code, make sure it is 64 characters long, and check each of them.";
+      final String errMessage = S.of(context).invalidRecoveryKey;
       final result = await showChoiceDialog(
         context,
-        title: "Invalid key",
+        title: S.of(context).invalidKey,
         body: errMessage,
-        firstButtonLabel: "Try again",
-        secondButtonLabel: "View recovery key",
+        firstButtonLabel: S.of(context).tryAgain,
+        secondButtonLabel: S.of(context).viewRecoveryKey,
         secondButtonAction: ButtonAction.second,
       );
       if (result!.action == ButtonAction.second) {
@@ -104,7 +101,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           context,
           RecoveryKeyPage(
             recoveryKey,
-            "OK",
+            S.of(context).ok,
             showAppBar: true,
             onDone: () {
               Navigator.of(context).pop();
@@ -149,14 +146,14 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                       SizedBox(
                         width: double.infinity,
                         child: Text(
-                          'Confirm recovery key',
+                          S.of(context).confirmRecoveryKey,
                           style: enteTheme.textTheme.h3Bold,
                           textAlign: TextAlign.left,
                         ),
                       ),
                       const SizedBox(height: 18),
                       Text(
-                        "Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Account.\n\nPlease enter your recovery key here to verify that you have saved it correctly.",
+                        S.of(context).recoveryKeyVerifyReason,
                         style: enteTheme.textTheme.small
                             .copyWith(color: enteTheme.colorScheme.textMuted),
                       ),
@@ -164,7 +161,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                       TextFormField(
                         decoration: InputDecoration(
                           filled: true,
-                          hintText: "Enter your recovery key",
+                          hintText: S.of(context).enterYourRecoveryKey,
                           contentPadding: const EdgeInsets.all(20),
                           border: UnderlineInputBorder(
                             borderSide: BorderSide.none,
@@ -197,7 +194,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                             children: [
                               GradientButton(
                                 onTap: _verifyRecoveryKey,
-                                text: "Confirm",
+                                text: S.of(context).confirm,
                               ),
                               const SizedBox(height: 8),
                             ],

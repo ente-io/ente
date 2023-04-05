@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
@@ -75,8 +76,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text(
-          "Two-factor setup",
+        title: Text(
+          S.of(context).twofactorSetup,
         ),
       ),
       body: _getBody(),
@@ -97,12 +98,12 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                   TabBar(
                     labelColor: Theme.of(context).colorScheme.greenAlternative,
                     unselectedLabelColor: Colors.grey,
-                    tabs: const [
+                    tabs: [
                       Tab(
-                        text: "Enter code",
+                        text: S.of(context).enterCode,
                       ),
                       Tab(
-                        text: "Scan code",
+                        text: S.of(context).scanCode,
                       )
                     ],
                     controller: _tabController,
@@ -137,15 +138,15 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     return GestureDetector(
       onTap: () async {
         await Clipboard.setData(ClipboardData(text: widget.secretCode));
-        showShortToast(context, "Code copied to clipboard");
+        showShortToast(context, S.of(context).codeCopiedToClipboard);
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Padding(padding: EdgeInsets.all(12)),
-          const Text(
-            "Copy-paste this code\nto your authenticator app",
-            style: TextStyle(
+          Text(
+            S.of(context).copypasteThisCodentoYourAuthenticatorApp,
+            style: const TextStyle(
               height: 1.4,
               fontSize: 16,
             ),
@@ -171,7 +172,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
           ),
           const Padding(padding: EdgeInsets.all(6)),
           Text(
-            "tap to copy",
+            S.of(context).tapToCopy,
             style: TextStyle(color: textColor.withOpacity(0.5)),
           )
         ],
@@ -184,9 +185,9 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
       child: Column(
         children: [
           const Padding(padding: EdgeInsets.all(12)),
-          const Text(
-            "Scan this barcode with\nyour authenticator app",
-            style: TextStyle(
+          Text(
+            S.of(context).scanThisBarcodeWithnyourAuthenticatorApp,
+            style: const TextStyle(
               height: 1.4,
               fontSize: 16,
             ),
@@ -207,9 +208,9 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     return Column(
       children: [
         const Padding(padding: EdgeInsets.all(12)),
-        const Text(
-          "Enter the 6-digit code from\nyour authenticator app",
-          style: TextStyle(
+        Text(
+          S.of(context).enterThe6digitCodeFromnyourAuthenticatorApp,
+          style: const TextStyle(
             height: 1.4,
             fontSize: 16,
           ),
@@ -253,7 +254,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                   _enableTwoFactor(_code);
                 }
               : null,
-          child: const Text("Confirm"),
+          child: Text(S.of(context).confirm),
         ),
         const Padding(padding: EdgeInsets.only(bottom: 24)),
       ],
@@ -275,13 +276,12 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
       context,
       RecoveryKeyPage(
         recoveryKey,
-        "OK",
+        S.of(context).ok,
         showAppBar: true,
         onDone: () {},
-        title: "Setup complete",
-        text: "Save your recovery key if you haven't already",
-        subText:
-            "This can be used to recover your account if you lose your second factor",
+        title: S.of(context).setupComplete,
+        text: S.of(context).saveYourRecoveryKeyIfYouHaventAlready,
+        subText: S.of(context).thisCanBeUsedToRecoverYourAccountIfYou,
       ),
     );
   }

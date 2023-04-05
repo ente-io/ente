@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
@@ -99,7 +100,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _isFormValid(),
-        buttonText: 'Create account',
+        buttonText: S.of(context).createAccount,
         onPressedFunction: () {
           _config.setVolatilePassword(_passwordController1.text);
           UserService.instance.setEmail(_email!);
@@ -114,13 +115,13 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   }
 
   Widget _getBody() {
-    var passwordStrengthText = 'Weak';
+    var passwordStrengthText = S.of(context).weakStrength;
     var passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {
-      passwordStrengthText = 'Strong';
+      passwordStrengthText = S.of(context).strongStrength;
       passwordStrengthColor = Colors.greenAccent;
     } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
-      passwordStrengthText = 'Moderate';
+      passwordStrengthText = S.of(context).moderateStrength;
       passwordStrengthColor = Colors.orangeAccent;
     }
     return Column(
@@ -133,7 +134,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    'Create new account',
+                    S.of(context).createNewAccount,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
@@ -145,7 +146,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _emailIsValid ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: 'Email',
+                      hintText: S.of(context).email,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -193,7 +194,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       fillColor:
                           _passwordIsValid ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: "Password",
+                      hintText: S.of(context).password,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -262,7 +263,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           ? _validFieldValueColor
                           : null,
                       filled: true,
-                      hintText: "Confirm password",
+                      hintText: S.of(context).confirmPassword,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -314,7 +315,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                     child: Text(
-                      'Password strength: $passwordStrengthText',
+                      S.of(context).passwordStrength(passwordStrengthText),
                       style: TextStyle(
                         color: passwordStrengthColor,
                         fontWeight: FontWeight.w500,
@@ -371,11 +372,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             child: RichText(
               text: TextSpan(
                 children: [
-                  const TextSpan(
-                    text: "I agree to the ",
+                  TextSpan(
+                    text: S.of(context).termsAgreePart1,
                   ),
                   TextSpan(
-                    text: "terms of service",
+                    text: S.of(context).termsOfService,
                     style: const TextStyle(
                       decoration: TextDecoration.underline,
                     ),
@@ -384,8 +385,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (BuildContext context) {
-                              return const WebPage(
-                                "Terms",
+                              return WebPage(
+                                S.of(context).termsOfServicesTitle,
                                 "https://ente.io/terms",
                               );
                             },
@@ -393,9 +394,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         );
                       },
                   ),
-                  const TextSpan(text: " and "),
+                  TextSpan(text: ' ${S.of(context).and} '),
                   TextSpan(
-                    text: "privacy policy",
+                    text: S.of(context).privacyPolicy,
                     style: const TextStyle(
                       decoration: TextDecoration.underline,
                     ),
@@ -404,8 +405,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (BuildContext context) {
-                              return const WebPage(
-                                "Privacy",
+                              return WebPage(
+                                S.of(context).privacyPolicyTitle,
                                 "https://ente.io/privacy",
                               );
                             },
@@ -450,12 +451,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             child: RichText(
               text: TextSpan(
                 children: [
-                  const TextSpan(
-                    text:
-                        "I understand that if I lose my password, I may lose my data since my data is ",
+                  TextSpan(
+                    text: S.of(context).ackPasswordLostWarningPart1,
                   ),
                   TextSpan(
-                    text: "end-to-end encrypted",
+                    text: S.of(context).endToEndEncrypted,
                     style: const TextStyle(
                       decoration: TextDecoration.underline,
                     ),
@@ -464,8 +464,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (BuildContext context) {
-                              return const WebPage(
-                                "Encryption",
+                              return WebPage(
+                                S.of(context).encryption,
                                 "https://ente.io/architecture",
                               );
                             },
@@ -473,7 +473,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         );
                       },
                   ),
-                  const TextSpan(text: " with ente"),
+                  TextSpan(
+                    text: " ${S.of(context).ackPasswordLostWarningPart2}",
+                  ),
                 ],
                 style: Theme.of(context)
                     .textTheme

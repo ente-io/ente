@@ -4,6 +4,7 @@ import "package:dropdown_button2/dropdown_button2.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -26,23 +27,26 @@ class DeleteAccountPage extends StatefulWidget {
 class _DeleteAccountPageState extends State<DeleteAccountPage> {
   bool _hasConfirmedDeletion = false;
   final _feedbackTextCtrl = TextEditingController();
-  final String _defaultSelection = 'Select reason';
-  late String _dropdownValue = _defaultSelection;
+  late String _defaultSelection = S.of(context).selectReason;
+  String? _dropdownValue;
   late final List<String> _deletionReason = [
     _defaultSelection,
-    'It’s missing a key feature that I need',
-    'The app or a certain feature does not \nbehave as I think it should',
-    'I found another service that I like better',
-    'My reason isn’t listed',
+    S.of(context).deleteReason1,
+    S.of(context).deleteReason2,
+    S.of(context).deleteReason3,
+    S.of(context).deleteReason4,
   ];
 
   @override
   Widget build(BuildContext context) {
+    _defaultSelection = S.of(context).selectReason;
+    _dropdownValue ??= _defaultSelection;
+
     final colorScheme = getEnteColorScheme(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text("Delete account"),
+        title: Text(S.of(context).deleteAccount),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: Theme.of(context).iconTheme.color,
@@ -59,7 +63,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
             mainAxisSize: MainAxisSize.max,
             children: [
               Text(
-                "What is the main reason you are deleting your account?",
+                S.of(context).askDeleteReason,
                 style: getEnteTextTheme(context).body,
               ),
               const SizedBox(height: 4),
@@ -97,8 +101,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               ),
               const SizedBox(height: 24),
               Text(
-                "We are sorry to see you go. Please share your feedback to "
-                "help us improve.",
+                S.of(context).deleteAccountFeedbackPrompt,
                 style: getEnteTextTheme(context).body,
               ),
               const SizedBox(height: 4),
@@ -116,7 +119,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   ),
                   filled: true,
                   fillColor: Colors.transparent,
-                  hintText: "Feedback",
+                  hintText: S.of(context).feedback,
                   contentPadding: const EdgeInsets.all(12),
                 ),
                 controller: _feedbackTextCtrl,
@@ -135,7 +138,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       child: Padding(
                         padding: const EdgeInsets.only(top: 4.0),
                         child: Text(
-                          "Kindly help us with this information",
+                          S.of(context).kindlyHelpUsWithThisInformation,
                           style: getEnteTextTheme(context)
                               .smallBold
                               .copyWith(color: colorScheme.warning700),
@@ -162,8 +165,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                     ),
                     Expanded(
                       child: Text(
-                        "Yes, I want to permanently delete this account and "
-                        "all its data.",
+                        S.of(context).confirmDeletePrompt,
                         style: getEnteTextTheme(context).bodyMuted,
                         textAlign: TextAlign.left,
                       ),
@@ -177,7 +179,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   children: [
                     ButtonWidget(
                       buttonType: ButtonType.critical,
-                      labelText: "Confirm Account Deletion",
+                      labelText: S.of(context).confirmAccountDeletion,
                       isDisabled: _shouldBlockDeletion(),
                       onTap: () async {
                         await _initiateDelete(context);
@@ -187,7 +189,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                     const SizedBox(height: 8),
                     ButtonWidget(
                       buttonType: ButtonType.secondary,
-                      labelText: "Cancel",
+                      labelText: S.of(context).cancel,
                       onTap: () async {
                         Navigator.of(context).pop();
                       },
@@ -220,10 +222,9 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   Future<void> _initiateDelete(BuildContext context) async {
     final choice = await showChoiceDialog(
       context,
-      title: "Confirm Account Deletion",
-      body: "You are about to permanently delete your account and all its data."
-          "\nThis action is irreversible.",
-      firstButtonLabel: "Delete Account Permanently",
+      title: S.of(context).confirmAccountDeletion,
+      body: S.of(context).deleteConfirmDialogBody,
+      firstButtonLabel: S.of(context).deleteAccountPermanentlyButton,
       firstButtonType: ButtonType.critical,
       firstButtonOnTap: () async {
         final deleteChallengeResponse =
@@ -260,11 +261,11 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       await UserService.instance.deleteAccount(
         context,
         challengeResponseStr,
-        reasonCategory: _dropdownValue,
+        reasonCategory: _dropdownValue!,
         feedback: _feedbackTextCtrl.text.trim(),
       );
       Navigator.of(context).popUntil((route) => route.isFirst);
-      showShortToast(context, "Your account has been deleted");
+      showShortToast(context, S.of(context).yourAccountHasBeenDeleted);
     } catch (e, s) {
       Logger("DeleteAccount").severe("failed to delete", e, s);
       showGenericErrorDialog(context: context);
@@ -273,17 +274,17 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
 
   Future<void> _requestEmailForDeletion(BuildContext context) async {
     final AlertDialog alert = AlertDialog(
-      title: const Text(
-        "Delete account",
-        style: TextStyle(
+      title: Text(
+        S.of(context).deleteAccount,
+        style: const TextStyle(
           color: Colors.red,
         ),
       ),
       content: RichText(
         text: TextSpan(
           children: [
-            const TextSpan(
-              text: "Please send an email to ",
+            TextSpan(
+              text: S.of(context).pleaseSendAnEmailTo,
             ),
             TextSpan(
               text: "account-deletion@ente.io",
@@ -291,9 +292,9 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 color: Colors.orange[300],
               ),
             ),
-            const TextSpan(
+            TextSpan(
               text:
-                  " from your registered email address.\n\nYour request will be processed within 72 hours.",
+                  " ${S.of(context).fromYourRegisteredEmailAddress}\n\n${S.of(context).deleteRequestSLAText}",
             ),
           ],
           style: TextStyle(
@@ -305,9 +306,9 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       ),
       actions: [
         TextButton(
-          child: const Text(
-            "Send email",
-            style: TextStyle(
+          child: Text(
+            S.of(context).sendEmail,
+            style: const TextStyle(
               color: Colors.red,
             ),
           ),
@@ -316,13 +317,13 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
             await sendEmail(
               context,
               to: 'account-deletion@ente.io',
-              subject: '[Delete account]',
+              subject: '[${S.of(context).deleteAccount}]',
             );
           },
         ),
         TextButton(
           child: Text(
-            "Ok",
+            S.of(context).ok,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
             ),

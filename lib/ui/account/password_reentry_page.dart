@@ -6,6 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/ui/account/recovery_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -67,10 +68,11 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
-        buttonText: 'Verify password',
+        buttonText: S.of(context).verifyPassword,
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
-          final dialog = createProgressDialog(context, "Please wait...");
+          final dialog =
+              createProgressDialog(context, S.of(context).pleaseWait);
           await dialog.show();
           try {
             await Configuration.instance.decryptAndSaveSecrets(
@@ -82,12 +84,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             await dialog.hide();
             final dialogChoice = await showChoiceDialog(
               context,
-              title: "Recreate password",
-              body: "The current device is not powerful enough to verify your "
-                  "password, so we need to regenerate it once in a way that "
-                  "works with all devices. \n\nPlease login using your "
-                  "recovery key and regenerate your password (you can use the same one again if you wish).",
-              firstButtonLabel: "Use recovery key",
+              title: S.of(context).recreatePasswordTitle,
+              body: S.of(context).recreatePasswordBody,
+              firstButtonLabel: S.of(context).useRecoveryKey,
             );
             if (dialogChoice!.action == ButtonAction.first) {
               Navigator.of(context).push(
@@ -104,15 +103,15 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             await dialog.hide();
             final dialogChoice = await showChoiceDialog(
               context,
-              title: "Incorrect password",
-              body: "Please try again",
-              firstButtonLabel: "Contact Support",
-              secondButtonLabel: "OK",
+              title: S.of(context).incorrectPasswordTitle,
+              body: S.of(context).pleaseTryAgain,
+              firstButtonLabel: S.of(context).contactSupport,
+              secondButtonLabel: S.of(context).ok,
             );
             if (dialogChoice!.action == ButtonAction.first) {
               await sendLogs(
                 context,
-                "Contact support",
+                S.of(context).contactSupport,
                 "support@ente.io",
                 postShare: () {},
               );
@@ -149,7 +148,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    'Welcome back!',
+                    S.of(context).welcomeBack,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
@@ -172,7 +171,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                   child: TextFormField(
                     autofillHints: const [AutofillHints.password],
                     decoration: InputDecoration(
-                      hintText: "Enter your password",
+                      hintText: S.of(context).enterYourPassword,
                       filled: true,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
@@ -234,7 +233,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         },
                         child: Center(
                           child: Text(
-                            "Forgot password",
+                            S.of(context).forgotPassword,
                             style:
                                 Theme.of(context).textTheme.subtitle1!.copyWith(
                                       fontSize: 14,
@@ -246,8 +245,8 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () async {
-                          final dialog =
-                              createProgressDialog(context, "Please wait...");
+                          final dialog = createProgressDialog(
+                              context, S.of(context).pleaseWait);
                           await dialog.show();
                           await Configuration.instance.logout();
                           await dialog.hide();
@@ -256,7 +255,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         },
                         child: Center(
                           child: Text(
-                            "Change email",
+                            S.of(context).changeEmail,
                             style:
                                 Theme.of(context).textTheme.subtitle1!.copyWith(
                                       fontSize: 14,

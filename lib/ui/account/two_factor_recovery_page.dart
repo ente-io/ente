@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -27,9 +28,9 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Recover account",
-          style: TextStyle(
+        title: Text(
+          S.of(context).recoverAccount,
+          style: const TextStyle(
             fontSize: 18,
           ),
         ),
@@ -42,9 +43,9 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
             child: TextFormField(
-              decoration: const InputDecoration(
-                hintText: "Enter your recovery key",
-                contentPadding: EdgeInsets.all(20),
+              decoration: InputDecoration(
+                hintText: S.of(context).enterYourRecoveryKey,
+                contentPadding: const EdgeInsets.all(20),
               ),
               style: const TextStyle(
                 fontSize: 14,
@@ -77,7 +78,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                       );
                     }
                   : null,
-              child: const Text("Recover"),
+              child: Text(S.of(context).recover),
             ),
           ),
           GestureDetector(
@@ -85,15 +86,15 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
             onTap: () {
               showErrorDialog(
                 context,
-                "Contact support",
-                "Please drop an email to support@ente.io from your registered email address",
+                S.of(context).contactSupport,
+                S.of(context).dropSupportEmail("support@ente.io"),
               );
             },
             child: Container(
               padding: const EdgeInsets.all(40),
               child: Center(
                 child: Text(
-                  "No recovery key?",
+                  S.of(context).noRecoveryKey,
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                     fontSize: 12,

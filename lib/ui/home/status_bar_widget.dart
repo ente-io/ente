@@ -6,6 +6,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/notification_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/theme/text_style.dart';
@@ -100,14 +101,14 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         _showErrorBanner
             ? HeaderErrorWidget(error: _syncError)
             : const SizedBox.shrink(),
-        UserRemoteFlagService.instance.shouldShowRecoveryVerification()
+        !UserRemoteFlagService.instance.shouldShowRecoveryVerification()
             ? Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
                 child: NotificationWidget(
                   startIcon: Icons.error_outline,
                   actionIcon: Icons.arrow_forward,
-                  text: "Confirm your recovery key",
+                  text: S.of(context).confirmYourRecoveryKey,
                   onTap: () async => {
                     await routeToPage(
                       context,

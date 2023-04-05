@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/extensions/list.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -95,14 +96,14 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                     children: [
                       Column(
                         children: [
-                          const MenuSectionTitle(
-                            title: "Owner",
+                          MenuSectionTitle(
+                            title: S.of(context).albumOwner,
                             iconData: Icons.admin_panel_settings_outlined,
                           ),
                           MenuItemWidget(
                             captionedTextWidget: CaptionedTextWidget(
                               title: isOwner
-                                  ? "You"
+                                  ? S.of(context).you
                                   : widget.collection.owner?.email ?? '',
                               makeTextBold: isOwner,
                             ),
@@ -130,8 +131,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   if (index == 0 && (isOwner || collaborators.isNotEmpty)) {
-                    return const MenuSectionTitle(
-                      title: "Collaborator",
+                    return MenuSectionTitle(
+                      title: S.of(context).collaborator,
                       iconData: Icons.edit_outlined,
                     );
                   } else if (index > 0 && index <= collaborators.length) {
@@ -146,7 +147,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
                             title: isSameAsLoggedInUser
-                                ? "You"
+                                ? S.of(context).you
                                 : currentUser.email,
                             makeTextBold: isSameAsLoggedInUser,
                           ),
@@ -182,8 +183,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
                         title: collaborators.isNotEmpty
-                            ? "Add more"
-                            : "Add collaborator",
+                            ? S.of(context).addMore
+                            : S.of(context).addCollaborator,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,
@@ -207,8 +208,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   if (index == 0 && (isOwner || viewers.isNotEmpty)) {
-                    return const MenuSectionTitle(
-                      title: "Viewer",
+                    return MenuSectionTitle(
+                      title: S.of(context).viewer,
                       iconData: Icons.photo_outlined,
                     );
                   } else if (index > 0 && index <= viewers.length) {
@@ -222,7 +223,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
                             title: isSameAsLoggedInUser
-                                ? "You"
+                                ? S.of(context).you
                                 : currentUser.email,
                             makeTextBold: isSameAsLoggedInUser,
                           ),
@@ -257,7 +258,9 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                   } else if (index == (1 + viewers.length) && isOwner) {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
-                        title: viewers.isNotEmpty ? "Add more" : "Add viewer",
+                        title: viewers.isNotEmpty
+                            ? S.of(context).addMore
+                            : S.of(context).addViewer,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,
