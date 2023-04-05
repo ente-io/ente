@@ -6,7 +6,11 @@ import SingleInputForm, {
 } from 'components/SingleInputForm';
 import VerticallyCentered from 'components/Container';
 import { logError } from 'utils/sentry';
-import { recoverTwoFactor, removeTwoFactor } from 'services/userService';
+import {
+    logoutUser,
+    recoverTwoFactor,
+    removeTwoFactor,
+} from 'services/userService';
 import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import FormPaper from 'components/Form/FormPaper';
@@ -19,6 +23,7 @@ import { t } from 'i18next';
 import { Trans } from 'react-i18next';
 import { Link } from '@mui/material';
 import { SUPPORT_EMAIL } from 'constants/urls';
+import { DialogBoxAttributes } from 'types/dialogBox';
 
 const bip39 = require('bip39');
 // mobile client library only supports english.
@@ -44,15 +49,32 @@ export default function Recover() {
             setSessionID(user.twoFactorSessionID);
         }
         const main = async () => {
-            const resp = await recoverTwoFactor(user.twoFactorSessionID);
-            if (!resp.encryptedSecret) {
+            try {
+                const resp = await recoverTwoFactor(user.twoFactorSessionID);
                 setDoesHaveEncryptedRecoveryKey(!!resp.encryptedSecret);
-            } else {
-                setEncryptedTwoFactorSecret({
-                    encryptedData: resp.encryptedSecret,
-                    nonce: resp.secretDecryptionNonce,
-                    key: null,
-                });
+                if (!resp.encryptedSecret) {
+                    showContactSupportDialog({
+                        text: t('GO_BACK'),
+                        action: router.back,
+                    });
+                } else {
+                    setEncryptedTwoFactorSecret({
+                        encryptedData: resp.encryptedSecret,
+                        nonce: resp.secretDecryptionNonce,
+                        key: null,
+                    });
+                }
+            } catch (e) {
+                if (e.status === 404) {
+                    logoutUser();
+                } else {
+                    logError(e, 'two factor recovery page setup failed');
+                    setDoesHaveEncryptedRecoveryKey(false);
+                    showContactSupportDialog({
+                        text: t('GO_BACK'),
+                        action: router.back,
+                    });
+                }
             }
         };
         main();
@@ -99,13 +121,16 @@ export default function Recover() {
         }
     };
 
-    const showNoRecoveryKeyMessage = () => {
+    const showContactSupportDialog = (
+        dialogClose?: DialogBoxAttributes['close']
+    ) => {
         appContext.setDialogMessage({
             title: t('CONTACT_SUPPORT'),
-            close: {},
+            close: dialogClose ?? {},
             content: (
                 <Trans
                     i18nKey={'NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE'}
+                    values={{ emailID: SUPPORT_EMAIL }}
                     components={{
                         a: <Link href={`mailto:${SUPPORT_EMAIL}`} />,
                     }}
@@ -114,31 +139,24 @@ export default function Recover() {
         });
     };
 
+    if (!doesHaveEncryptedRecoveryKey) {
+        return <></>;
+    }
+
     return (
         <VerticallyCentered>
             <FormPaper>
                 <FormPaperTitle>{t('RECOVER_TWO_FACTOR')}</FormPaperTitle>
-                {doesHaveEncryptedRecoveryKey ? (
-                    <Trans
-                        i18nKey={'NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE'}
-                        components={{
-                            a: <Link href={`mailto:${SUPPORT_EMAIL}`} />,
-                        }}
-                    />
-                ) : (
-                    <SingleInputForm
-                        callback={recover}
-                        fieldType="text"
-                        placeholder={t('RECOVERY_KEY_HINT')}
-                        buttonText={t('RECOVER')}
-                    />
-                )}
+                <SingleInputForm
+                    callback={recover}
+                    fieldType="text"
+                    placeholder={t('RECOVERY_KEY_HINT')}
+                    buttonText={t('RECOVER')}
+                />
                 <FormPaperFooter style={{ justifyContent: 'space-between' }}>
-                    {doesHaveEncryptedRecoveryKey && (
-                        <LinkButton onClick={showNoRecoveryKeyMessage}>
-                            {t('NO_RECOVERY_KEY')}
-                        </LinkButton>
-                    )}
+                    <LinkButton onClick={() => showContactSupportDialog()}>
+                        {t('NO_RECOVERY_KEY')}
+                    </LinkButton>
                     <LinkButton onClick={router.back}>
                         {t('GO_BACK')}
                     </LinkButton>
