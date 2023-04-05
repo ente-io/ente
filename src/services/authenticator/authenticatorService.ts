@@ -13,16 +13,11 @@ export const getAuthCodes = async (): Promise<Code[]> => {
     try {
         const authKeyData = await getAuthKey();
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-        let authenticatorKey: string;
-        try {
-            authenticatorKey = await cryptoWorker.decryptB64(
-                authKeyData.encryptedKey,
-                authKeyData.header,
-                masterKey
-            );
-        } catch (e) {
-            throw Error(CustomError.DECRYPTION_FAILED);
-        }
+        const authenticatorKey = await cryptoWorker.decryptB64(
+            authKeyData.encryptedKey,
+            authKeyData.header,
+            masterKey
+        );
         // always fetch all data from server for now
         const authEntity: AuthEntity[] = await getDiff(0);
         const authCodes = await Promise.all(
