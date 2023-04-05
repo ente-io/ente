@@ -123,6 +123,30 @@ class LocationService {
     final seconds = ((coordinate - degrees - minutes / 60) * 3600).floor();
     return [degrees, minutes, seconds];
   }
+
+  Future<void> updateCenterPoint(
+    LocalEntity<LocationTag> locationTagEntity,
+    Location newCenterPoint,
+  ) async {
+    try {
+      await Future.delayed(const Duration(seconds: 2));
+      assert(false);
+      final locationTag = locationTagEntity.item;
+      //Semi-major axis of the ellipse (b) doesn't change unless radius is changed.
+      final a = (locationTag.radius * _scaleFactor(newCenterPoint.latitude!)) /
+          kilometersPerDegree;
+      final updatedLoationTag = locationTagEntity.item
+          .copyWith(centerPoint: newCenterPoint, aSquare: a * a);
+      await EntityService.instance.addOrUpdate(
+        EntityType.location,
+        json.encode(updatedLoationTag.toJson()),
+        id: locationTagEntity.id,
+      );
+    } catch (e, s) {
+      _logger.severe("Failed to update center point", e, s);
+      rethrow;
+    }
+  }
 }
 
 class GPSData {
