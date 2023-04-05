@@ -280,5 +280,10 @@
   "somethingWentWrong": "Something went wrong",
   "sendInvite": "Send invite",
   "shareTextRecommendUsingEnte": "Download ente so we can easily share original ",
-  "done": "Done"
+  "done": "Done",
+  "applyCodeTitle": "Apply code",
+  "enterCodeDescription": "Enter the code provided by your friend to claim free storage for both of you",
+  "apply": "Apply",
+  "failedToApplyCode": "Failed to apply code",
+  "enterReferralCode": "Enter referral code"
 }

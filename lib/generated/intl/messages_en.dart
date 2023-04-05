@@ -80,6 +80,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Allow downloads"),
         "and": MessageLookupByLibrary.simpleMessage("and"),
+        "apply": MessageLookupByLibrary.simpleMessage("Apply"),
+        "applyCodeTitle": MessageLookupByLibrary.simpleMessage("Apply code"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "What is the main reason you are deleting your account?"),
         "byClickingLogInIAgreeToThe": MessageLookupByLibrary.simpleMessage(
@@ -161,12 +163,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "endToEndEncrypted":
             MessageLookupByLibrary.simpleMessage("end-to-end encrypted"),
         "enterCode": MessageLookupByLibrary.simpleMessage("Enter code"),
+        "enterCodeDescription": MessageLookupByLibrary.simpleMessage(
+            "Enter the code provided by your friend to claim free storage for both of you"),
         "enterEmail": MessageLookupByLibrary.simpleMessage("Enter email"),
         "enterNewPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Enter a new password we can use to encrypt your data"),
         "enterPassword": MessageLookupByLibrary.simpleMessage("Enter password"),
         "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Enter a password we can use to encrypt your data"),
+        "enterReferralCode":
+            MessageLookupByLibrary.simpleMessage("Enter referral code"),
         "enterThe6digitCodeFromnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Enter the 6-digit code from\nyour authenticator app"),
@@ -180,6 +186,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Enter your recovery key"),
         "expiredLinkInfo": MessageLookupByLibrary.simpleMessage(
             "This link has expired. Please select a new expiry time or disable link expiry."),
+        "failedToApplyCode":
+            MessageLookupByLibrary.simpleMessage("Failed to apply code"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Forgot password"),

@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -2050,6 +2051,56 @@ class S {
       args: [],
     );
   }
+
+  /// `Apply code`
+  String get applyCodeTitle {
+    return Intl.message(
+      'Apply code',
+      name: 'applyCodeTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the code provided by your friend to claim free storage for both of you`
+  String get enterCodeDescription {
+    return Intl.message(
+      'Enter the code provided by your friend to claim free storage for both of you',
+      name: 'enterCodeDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apply`
+  String get apply {
+    return Intl.message(
+      'Apply',
+      name: 'apply',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to apply code`
+  String get failedToApplyCode {
+    return Intl.message(
+      'Failed to apply code',
+      name: 'failedToApplyCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter referral code`
+  String get enterReferralCode {
+    return Intl.message(
+      'Enter referral code',
+      name: 'enterReferralCode',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -2058,6 +2109,13 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
+      Locale.fromSubtags(languageCode: 'cs'),
+      Locale.fromSubtags(languageCode: 'de'),
+      Locale.fromSubtags(languageCode: 'es'),
+      Locale.fromSubtags(languageCode: 'fr'),
+      Locale.fromSubtags(languageCode: 'it'),
+      Locale.fromSubtags(languageCode: 'nl'),
+      Locale.fromSubtags(languageCode: 'pl'),
     ];
   }
 
