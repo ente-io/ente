@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
@@ -52,8 +52,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text(
-          "Manage link",
+        title: Text(
+          S.of(context).manageLink,
         ),
       ),
       body: SingleChildScrollView(
@@ -66,8 +66,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 children: [
                   MenuItemWidget(
                     key: ValueKey("Allow collect $isCollectEnabled"),
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: "Allow adding photos",
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).allowAddingPhotos,
                     ),
                     alignCaptionedTextToLeft: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
@@ -83,19 +83,19 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       },
                     ),
                   ),
-                  const MenuSectionDescriptionWidget(
-                    content:
-                        "Allow people with the link to also add photos to the shared "
-                        "album.",
+                  MenuSectionDescriptionWidget(
+                    content: S.of(context).allowAddPhotosDescription,
                   ),
                   const SizedBox(height: 24),
                   MenuItemWidget(
                     alignCaptionedTextToLeft: true,
                     captionedTextWidget: CaptionedTextWidget(
-                      title: "Link expiry",
+                      title: S.of(context).linkExpiry,
                       subTitle: (url.hasExpiry
-                          ? (url.isExpired ? "Expired" : "Enabled")
-                          : "Never"),
+                          ? (url.isExpired
+                              ? S.of(context).linkExpired
+                              : S.of(context).linkEnabled)
+                          : S.of(context).linkNeverExpires),
                       subTitleColor: url.isExpired ? warning500 : null,
                     ),
                     trailingIcon: Icons.chevron_right,
@@ -113,15 +113,20 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   url.hasExpiry
                       ? MenuSectionDescriptionWidget(
                           content: url.isExpired
-                              ? "This link has expired. Please select a new expiry time or disable link expiry."
-                              : 'Link will expire on '
-                                  '${getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(url.validTill))}',
+                              ? S.of(context).expiredLinkInfo
+                              : S.of(context).linkExpiresOn(
+                                    getFormattedTime(
+                                      DateTime.fromMicrosecondsSinceEpoch(
+                                        url.validTill,
+                                      ),
+                                    ),
+                                  ),
                         )
                       : const SizedBox.shrink(),
                   const Padding(padding: EdgeInsets.only(top: 24)),
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
-                      title: "Device limit",
+                      title: S.of(context).linkDeviceLimit,
                       subTitle: widget
                           .collection!.publicURLs!.first!.deviceLimit
                           .toString(),
@@ -146,8 +151,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   ),
                   MenuItemWidget(
                     key: ValueKey("Allow downloads $isDownloadEnabled"),
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: "Allow downloads",
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).allowDownloads,
                     ),
                     alignCaptionedTextToLeft: true,
                     isBottomBorderRadiusRemoved: true,
@@ -163,8 +168,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         if (!value) {
                           showErrorDialog(
                             context,
-                            "Please note",
-                            "Viewers can still take screenshots or save a copy of your photos using external tools",
+                            S.of(context).disableDownloadWarningTitle,
+                            S.of(context).disableDownloadWarningBody,
                           );
                         }
                       },
@@ -176,8 +181,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   ),
                   MenuItemWidget(
                     key: ValueKey("Password lock $isPasswordEnabled"),
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: "Password lock",
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).passwordLock,
                     ),
                     alignCaptionedTextToLeft: true,
                     isTopBorderRadiusRemoved: true,
@@ -188,9 +193,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         if (enablePassword) {
                           showTextInputDialog(
                             context,
-                            title: "Set a password",
-                            submitButtonLabel: "Lock",
-                            hintText: "Enter password",
+                            title: S.of(context).setAPassword,
+                            submitButtonLabel: S.of(context).lockButtonLabel,
+                            hintText: S.of(context).enterPassword,
                             isPasswordInput: true,
                             alwaysShowSuccessState: true,
                             onSubmit: (String password) async {
@@ -220,8 +225,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     height: 24,
                   ),
                   MenuItemWidget(
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: "Remove link",
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).removeLink,
                       textColor: warning500,
                       makeTextBold: true,
                     ),
@@ -268,14 +273,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     bool showProgressDialog = true,
   }) async {
     final dialog = showProgressDialog
-        ? createProgressDialog(context, "Please wait...")
+        ? createProgressDialog(context, S.of(context).pleaseWait)
         : null;
     await dialog?.show();
     try {
       await CollectionsService.instance
           .updateShareUrl(widget.collection!, prop);
       await dialog?.hide();
-      showShortToast(context, "Album updated");
+      showShortToast(context, S.of(context).albumUpdated);
       if (mounted) {
         setState(() {});
       }

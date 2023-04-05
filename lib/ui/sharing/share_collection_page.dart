@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -50,9 +51,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     final children = <Widget>[];
     children.add(
       MenuSectionTitle(
-        title: _sharees.isEmpty
-            ? "Share with specific people"
-            : "Shared with ${_sharees.length} ${_sharees.length == 1 ? 'person' : 'people'}",
+        title: S.of(context).shareWithPeopleSectionTitle(_sharees.length),
         iconData: Icons.workspaces,
       ),
     );
@@ -94,8 +93,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     );
     children.add(
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Add collaborator",
+        captionedTextWidget: CaptionedTextWidget(
+          title: S.of(context).addCollaborator,
           makeTextBold: true,
         ),
         leadingIcon: Icons.add,
@@ -113,10 +112,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     );
     if (_sharees.isEmpty && !hasUrl) {
       children.add(
-        const MenuSectionDescriptionWidget(
-          content:
-              "Create shared and collaborative albums with other ente users, "
-              "including users on free plans.",
+        MenuSectionDescriptionWidget(
+          content: S.of(context).sharedAlbumSectionDescription,
         ),
       );
     }
@@ -128,7 +125,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         height: 24,
       ),
       MenuSectionTitle(
-        title: hasUrl ? "Public link enabled" : "Share a link",
+        title:
+            hasUrl ? S.of(context).publicLinkEnabled : S.of(context).shareALink,
         iconData: Icons.public,
       ),
     ]);
@@ -137,7 +135,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         children.add(
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
-              title: "Link has expired",
+              title: S.of(context).linkHasExpired,
               textColor: getEnteColorScheme(context).warning500,
             ),
             leadingIcon: Icons.error_outline,
@@ -156,8 +154,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         children.addAll(
           [
             MenuItemWidget(
-              captionedTextWidget: const CaptionedTextWidget(
-                title: "Copy link",
+              captionedTextWidget: CaptionedTextWidget(
+                title: S.of(context).copyLink,
                 makeTextBold: true,
               ),
               leadingIcon: Icons.copy,
@@ -174,8 +172,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               bgColor: getEnteColorScheme(context).fillFaint,
             ),
             MenuItemWidget(
-              captionedTextWidget: const CaptionedTextWidget(
-                title: "Send link",
+              captionedTextWidget: CaptionedTextWidget(
+                title: S.of(context).sendLink,
                 makeTextBold: true,
               ),
               leadingIcon: Icons.adaptive.share,
@@ -197,8 +195,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             bgColor: getEnteColorScheme(context).fillFaint,
           ),
           MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Manage link",
+            captionedTextWidget: CaptionedTextWidget(
+              title: S.of(context).manageLink,
               makeTextBold: true,
             ),
             leadingIcon: Icons.link,
@@ -222,8 +220,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     } else {
       children.addAll([
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Create public link",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).createPublicLink,
             makeTextBold: true,
           ),
           leadingIcon: Icons.link,
@@ -238,20 +236,20 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           },
         ),
         _sharees.isEmpty
-            ? const MenuSectionDescriptionWidget(
-                content: "Share with non-ente users",
+            ? MenuSectionDescriptionWidget(
+                content: S.of(context).shareWithNonenteUsers,
               )
             : const SizedBox.shrink(),
         const SizedBox(
           height: 24,
         ),
-        const MenuSectionTitle(
-          title: "Collaborative link",
+        MenuSectionTitle(
+          title: S.of(context).collaborativeLink,
           iconData: Icons.public,
         ),
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Collect photos",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).collectPhotos,
             makeTextBold: true,
           ),
           leadingIcon: Icons.link,
@@ -269,10 +267,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           },
         ),
         _sharees.isEmpty
-            ? const MenuSectionDescriptionWidget(
-                content:
-                    "Create a link to allow people to add and view photos in "
-                    "your shared album without needing an ente app or account. Great for collecting event photos.",
+            ? MenuSectionDescriptionWidget(
+                content: S.of(context).collabLinkSectionDescription,
               )
             : const SizedBox.shrink(),
       ]);
@@ -353,8 +349,8 @@ class EmailItemWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: 'Manage',
+            captionedTextWidget: CaptionedTextWidget(
+              title: S.of(context).manageParticipants,
             ),
             leadingIcon: Icons.people_outline,
             menuItemColor: getEnteColorScheme(context).fillFaint,

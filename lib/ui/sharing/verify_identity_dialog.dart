@@ -7,6 +7,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/services/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -43,16 +44,18 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
   Widget build(BuildContext context) {
     final textStyle = getEnteTextTheme(context);
     final String subTitle = widget.self
-        ? "This is your Verification ID"
-        : "This is ${widget.email}'s Verification ID";
+        ? S.of(context).thisIsYourVerificationId
+        : S.of(context).thisIsPersonVerificationId(widget.email);
     final String bottomText = widget.self
-        ? "Someone sharing albums with you should see the same ID on their "
-            "device."
-        : "Please ask them to long-press their email address on the settings "
-            "screen, and verify that the IDs on both devices match.";
+        ? S.of(context).someoneSharingAlbumsWithYouShouldSeeTheSameId
+        : S.of(context).howToViewShareeVerificationID;
 
     final AlertDialog alert = AlertDialog(
-      title: Text(widget.self ? "Verification ID" : "Verify ${widget.email}"),
+      title: Text(
+        widget.self
+            ? S.of(context).verificationId
+            : S.of(context).verifyEmailID(widget.email),
+      ),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -67,20 +70,17 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "${widget.email} does not have an ente "
-                        "account.\n"
-                        "\nSend them an invite to share photos.",
+                        S.of(context).emailNoEnteAccount(widget.email),
                       ),
                       const SizedBox(height: 24),
                       ButtonWidget(
                         buttonType: ButtonType.neutral,
                         icon: Icons.adaptive.share,
-                        labelText: "Send invite",
+                        labelText: S.of(context).sendInvite,
                         isInAlert: true,
                         onTap: () async {
                           shareText(
-                            "Download ente so we can easily share original quality photos"
-                            " and videos\n\nhttps://ente.io/",
+                            S.of(context).shareTextRecommendUsingEnte,
                           );
                         },
                       ),
@@ -105,7 +105,8 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
                       ButtonWidget(
                         buttonType: ButtonType.neutral,
                         isInAlert: true,
-                        labelText: widget.self ? "OK" : "Done",
+                        labelText:
+                            widget.self ? S.of(context).ok : S.of(context).done,
                       ),
                     ],
                   );
@@ -114,7 +115,7 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
                 Logger("VerificationID")
                     .severe("failed to end userID", snapshot.error);
                 return Text(
-                  "Something went wrong",
+                  S.of(context).somethingWentWrong,
                   style: textStyle.bodyMuted,
                 );
               } else {
@@ -168,12 +169,10 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
               );
               shareText(
                 widget.self
-                    ? "Here's my verification ID: "
-                        "$verificationID for ente.io."
-                    : "Hey, "
-                        "can you confirm that "
-                        "this is your ente.io verification "
-                        "ID: $verificationID",
+                    ? S.of(context).shareMyVerificationID(verificationID)
+                    : S
+                        .of(context)
+                        .shareTextConfirmOthersVerificationID(verificationID),
               );
             },
             child: Container(

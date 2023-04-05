@@ -197,5 +197,88 @@
   "addedAs": "Added as",
   "changePermissions": "Change permissions?",
   "yesConvertToViewer": "Yes, convert to viewer",
-  "cannotAddMorePhotosAfterBecomingViewer": "{user} will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them"
+  "cannotAddMorePhotosAfterBecomingViewer": "{user} will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them",
+  "allowAddingPhotos": "Allow adding photos",
+  "@allowAddingPhotos": {
+    "description": "Switch button to enable uploading photos to a public link"
+  },
+  "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
+  "passwordLock": "Password lock",
+  "disableDownloadWarningTitle": "Please note",
+  "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your photos using external tools",
+  "allowDownloads": "Allow downloads",
+  "linkDeviceLimit": "Device limit",
+  "linkExpiry": "Link expiry",
+  "linkExpired": "Expired",
+  "linkEnabled": "Enabled",
+  "linkNeverExpires": "Never",
+  "expiredLinkInfo": "This link has expired. Please select a new expiry time or disable link expiry.",
+  "setAPassword": "Set a password",
+  "lockButtonLabel": "Lock",
+  "enterPassword": "Enter password",
+  "removeLink": "Remove link",
+  "manageLink": "Manage link",
+  "linkExpiresOn": "Link will expire on {expiryTime}",
+  "albumUpdated": "Album updated",
+  "maxDeviceLimitSpikeHandling": "When set to the maximum ({maxValue}), the device limit will be relaxed to allow for temporary spikes of large number of viewers.",
+  "@maxDeviceLimitSpikeHandling": {
+    "placeholders": {
+      "maxValue": {
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
+  "never": "Never",
+  "custom": "Custom",
+  "@custom": {
+    "description": "Label for setting custom value for link expiry"
+  },
+  "after1Hour": "After 1 hour",
+  "after1Day": "After 1 day",
+  "after1Week": "After 1 week",
+  "after1Month": "After 1 month",
+  "after1Year": "After 1 year",
+  "manageParticipants": "Manage",
+  "collabLinkSectionDescription": "Create a link to allow people to add and view photos in your shared album without needing an ente app or account. Great for collecting event photos.",
+  "collectPhotos": "Collect photos",
+  "collaborativeLink": "Collaborative link",
+  "shareWithNonenteUsers": "Share with non-ente users",
+  "createPublicLink": "Create public link",
+  "sendLink": "Send link",
+  "copyLink": "Copy link",
+  "linkHasExpired": "Link has expired",
+  "publicLinkEnabled": "Public link enabled",
+  "shareALink": "Share a link",
+  "sharedAlbumSectionDescription": "Create shared and collaborative albums with other ente users, including users on free plans.",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Share with specific people} =1 {Shared with 1 person} other {Shared with {numberOfPeople} people}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "thisIsYourVerificationId": "This is your Verification ID",
+  "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Someone sharing albums with you should see the same ID on their device.",
+  "howToViewShareeVerificationID": "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.",
+  "thisIsPersonVerificationId": "This is {email}'s Verification ID",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
+  "verificationId": "Verification ID",
+  "verifyEmailID": "Verify {email}",
+  "emailNoEnteAccount": "{email} does not have an ente account.\n\nSend them an invite to share photos.",
+  "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
+  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
+  "somethingWentWrong": "Something went wrong",
+  "sendInvite": "Send invite",
+  "shareTextRecommendUsingEnte": "Download ente so we can easily share original ",
+  "done": "Done"
 }
