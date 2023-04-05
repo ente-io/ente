@@ -89,9 +89,9 @@ If you would like to motivate us to keep building, you can do so by
 <br/>
 
 ## 🌍 Translate
-[![Crowdin](https://badges.crowdin.net/ente-photos-web/localized.svg)](https://crowdin.com/project/ente-photos-web)
+[![Crowdin](https://badges.crowdin.net/ente-photos-app/localized.svg)](https://crowdin.com/project/ente-photos-app)
 
-If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-photos-web) to get started. Thank you for your support.
+If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-photos-app) to get started. Thank you for your support.
 <br/>
 
 ## ❤️ Join the Community
