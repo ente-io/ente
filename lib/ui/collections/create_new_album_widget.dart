@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/tab_changed_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/utils/toast_util.dart';
 
 class CreateNewAlbumWidget extends StatelessWidget {
@@ -32,7 +33,7 @@ class CreateNewAlbumWidget extends StatelessWidget {
       onTap: () async {
         await showToast(
           context,
-          "Long press to select photos and click + to create an album",
+          S.of(context).createAlbumActionHint,
           toastLength: Toast.LENGTH_LONG,
         );
         Bus.instance

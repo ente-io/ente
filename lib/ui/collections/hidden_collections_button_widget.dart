@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/ui/viewer/gallery/hidden_page.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -45,7 +46,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
                       style: textStyle,
                       children: [
                         TextSpan(
-                          text: "Hidden",
+                          text: S.of(context).hidden,
                           style: Theme.of(context).textTheme.subtitle1,
                         ),
                         const TextSpan(text: "  \u2022  "),
@@ -74,7 +75,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
         final hasAuthenticated = await LocalAuthenticationService.instance
             .requestLocalAuthentication(
           context,
-          "Please authenticate to view your hidden files",
+          S.of(context).authToViewYourHiddenFiles,
         );
         if (hasAuthenticated) {
           routeToPage(

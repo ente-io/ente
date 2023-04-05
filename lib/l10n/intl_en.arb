@@ -279,7 +279,7 @@
   "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
   "somethingWentWrong": "Something went wrong",
   "sendInvite": "Send invite",
-  "shareTextRecommendUsingEnte": "Download ente so we can easily share original ",
+  "shareTextRecommendUsingEnte": "Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io/#download",
   "done": "Done",
   "applyCodeTitle": "Apply code",
   "enterCodeDescription": "Enter the code provided by your friend to claim free storage for both of you",
@@ -291,7 +291,6 @@
   "claimed": "Claimed",
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
-
   },
   "details": "Details",
   "claimMore": "Claim more!",
@@ -317,7 +316,6 @@
         "type": "int",
         "example": "10"
       }
-
     }
   },
   "faq": "FAQ",
@@ -341,5 +339,36 @@
   "canOnlyRemoveFilesOwnedByYou": "Can only remove files owned by you",
   "deleteSharedAlbum": "Delete shared album?",
   "deleteAlbum": "Delete album",
-  "deleteSharedAlbumDialogBody": "The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others"
+  "deleteAlbumDialogPart1": "Also delete the photos (and videos) present in this album from ",
+  "@deleteAlbumDialogPart1": {
+    "description": "Part of this string 'Also delete the photos (and videos) present in this album from all other albums they are part of?'"
+  },
+  "deleteAlbumDialogPart2Bold": "all",
+  "@deleteAlbumDialogPart2Bold": {
+    "description": "Part of this string 'Also delete the photos (and videos) present in this album from all other albums they are part of?'"
+  },
+  "deleteAlbumDialogPart3": " other albums they are part of?",
+  "@deleteAlbumDialogPart3": {
+    "description": "Part of this string 'Also delete the photos (and videos) present in this album from all other albums they are part of?'"
+  },
+  "deleteSharedAlbumDialogBody": "The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others",
+  "yesRemove": "Yes, remove",
+  "creatingLink": "Creating link...",
+  "removeWithQuestionMark": "Remove?",
+  "removeParticipantBody": "{userEmail} will be removed from this shared album\n\nAny photos added by them will also be removed from the album",
+  "keepPhotos": "Keep Photos",
+  "deletePhotos": "Delete photos",
+  "inviteToEnte": "Invite to ente",
+  "removePublicLink": "Remove public link",
+  "disableLinkMessage": "This will remove the public link for accessing \"{albumName}\".",
+  "sharing": "Sharing...",
+  "youCannotShareWithYourself": "You cannot share with yourself",
+  "archive": "Archive",
+  "createAlbumActionHint": "Long press to select photos and click + to create an album",
+  "importing": "Importing....",
+  "failedToLoadAlbums": "Failed to load albums",
+  "hidden": "Hidden",
+  "authToViewYourHiddenFiles": "Please authenticate to view your hidden files",
+  "trash": "Trash",
+  "uncategorized": "Uncategorized"
 }

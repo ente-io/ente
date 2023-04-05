@@ -61,7 +61,7 @@ class CollectionItem extends StatelessWidget {
             children: [
               const SizedBox(height: 2),
               Text(
-                (c.collection.name ?? "Unnamed").trim(),
+                (c.collection.collectionName).trim(),
                 style: enteTextTheme.small,
                 overflow: TextOverflow.ellipsis,
               ),

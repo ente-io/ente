@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/trash_updated_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/ui/viewer/gallery/trash_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -77,7 +78,7 @@ class _TrashButtonWidgetState extends State<TrashButtonWidget> {
                             style: widget.textStyle,
                             children: [
                               TextSpan(
-                                text: "Trash",
+                                text: S.of(context).trash,
                                 style: Theme.of(context).textTheme.subtitle1,
                               ),
                               const TextSpan(text: "  \u2022  "),
@@ -94,7 +95,7 @@ class _TrashButtonWidgetState extends State<TrashButtonWidget> {
                             style: widget.textStyle,
                             children: [
                               TextSpan(
-                                text: "Trash",
+                                text: S.of(context).trash,
                                 style: Theme.of(context).textTheme.subtitle1,
                               ),
                               //need to query in db and bring this value

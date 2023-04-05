@@ -2031,10 +2031,10 @@ class S {
     );
   }
 
-  /// `Download ente so we can easily share original `
+  /// `Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io/#download`
   String get shareTextRecommendUsingEnte {
     return Intl.message(
-      'Download ente so we can easily share original ',
+      'Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io/#download',
       name: 'shareTextRecommendUsingEnte',
       desc: '',
       args: [],
@@ -2487,11 +2487,234 @@ class S {
     );
   }
 
+  /// `Also delete the photos (and videos) present in this album from `
+  String get deleteAlbumDialogPart1 {
+    return Intl.message(
+      'Also delete the photos (and videos) present in this album from ',
+      name: 'deleteAlbumDialogPart1',
+      desc:
+          'Part of this string \'Also delete the photos (and videos) present in this album from all other albums they are part of?\'',
+      args: [],
+    );
+  }
+
+  /// `all`
+  String get deleteAlbumDialogPart2Bold {
+    return Intl.message(
+      'all',
+      name: 'deleteAlbumDialogPart2Bold',
+      desc:
+          'Part of this string \'Also delete the photos (and videos) present in this album from all other albums they are part of?\'',
+      args: [],
+    );
+  }
+
+  /// ` other albums they are part of?`
+  String get deleteAlbumDialogPart3 {
+    return Intl.message(
+      ' other albums they are part of?',
+      name: 'deleteAlbumDialogPart3',
+      desc:
+          'Part of this string \'Also delete the photos (and videos) present in this album from all other albums they are part of?\'',
+      args: [],
+    );
+  }
+
   /// `The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others`
   String get deleteSharedAlbumDialogBody {
     return Intl.message(
       'The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others',
       name: 'deleteSharedAlbumDialogBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, remove`
+  String get yesRemove {
+    return Intl.message(
+      'Yes, remove',
+      name: 'yesRemove',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Creating link...`
+  String get creatingLink {
+    return Intl.message(
+      'Creating link...',
+      name: 'creatingLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove?`
+  String get removeWithQuestionMark {
+    return Intl.message(
+      'Remove?',
+      name: 'removeWithQuestionMark',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{userEmail} will be removed from this shared album\n\nAny photos added by them will also be removed from the album`
+  String removeParticipantBody(Object userEmail) {
+    return Intl.message(
+      '$userEmail will be removed from this shared album\n\nAny photos added by them will also be removed from the album',
+      name: 'removeParticipantBody',
+      desc: '',
+      args: [userEmail],
+    );
+  }
+
+  /// `Keep Photos`
+  String get keepPhotos {
+    return Intl.message(
+      'Keep Photos',
+      name: 'keepPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete photos`
+  String get deletePhotos {
+    return Intl.message(
+      'Delete photos',
+      name: 'deletePhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invite to ente`
+  String get inviteToEnte {
+    return Intl.message(
+      'Invite to ente',
+      name: 'inviteToEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove public link`
+  String get removePublicLink {
+    return Intl.message(
+      'Remove public link',
+      name: 'removePublicLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will remove the public link for accessing "{albumName}".`
+  String disableLinkMessage(Object albumName) {
+    return Intl.message(
+      'This will remove the public link for accessing "$albumName".',
+      name: 'disableLinkMessage',
+      desc: '',
+      args: [albumName],
+    );
+  }
+
+  /// `Sharing...`
+  String get sharing {
+    return Intl.message(
+      'Sharing...',
+      name: 'sharing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You cannot share with yourself`
+  String get youCannotShareWithYourself {
+    return Intl.message(
+      'You cannot share with yourself',
+      name: 'youCannotShareWithYourself',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Archive`
+  String get archive {
+    return Intl.message(
+      'Archive',
+      name: 'archive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Long press to select photos and click + to create an album`
+  String get createAlbumActionHint {
+    return Intl.message(
+      'Long press to select photos and click + to create an album',
+      name: 'createAlbumActionHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Importing....`
+  String get importing {
+    return Intl.message(
+      'Importing....',
+      name: 'importing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to load albums`
+  String get failedToLoadAlbums {
+    return Intl.message(
+      'Failed to load albums',
+      name: 'failedToLoadAlbums',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hidden`
+  String get hidden {
+    return Intl.message(
+      'Hidden',
+      name: 'hidden',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to view your hidden files`
+  String get authToViewYourHiddenFiles {
+    return Intl.message(
+      'Please authenticate to view your hidden files',
+      name: 'authToViewYourHiddenFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trash`
+  String get trash {
+    return Intl.message(
+      'Trash',
+      name: 'trash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Uncategorized`
+  String get uncategorized {
+    return Intl.message(
+      'Uncategorized',
+      name: 'uncategorized',
       desc: '',
       args: [],
     );
