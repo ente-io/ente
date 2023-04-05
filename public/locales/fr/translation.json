@@ -1,9 +1,9 @@
 {
-    "HERO_SLIDE_1_TITLE": "<div>Sauvegardes personnelles </div><div>de vos souvenirs</div>",
+    "HERO_SLIDE_1_TITLE": "<div>Sauvegardes privées</div><div>pour vos souvenirs</div>",
     "HERO_SLIDE_1": "Chiffrement de bout en bout par défaut",
     "HERO_SLIDE_2_TITLE": "<div>Sécurisé </div><div>dans un abri antiatomique</div>",
     "HERO_SLIDE_2": "Conçu pour survivre",
-    "HERO_SLIDE_3_TITLE": "<div>Disponible</div><div> partout</div>",
+    "HERO_SLIDE_3_TITLE": "<div>Disponible</div><div> en tout lieu</div>",
     "HERO_SLIDE_3": "Android, iOS, Web, Ordinateur",
     "LOGIN": "Connexion",
     "SIGN_UP": "Inscription",
@@ -82,7 +82,6 @@
     "ZOOM_IN_OUT": "Zoom +/-",
     "PREVIOUS": "Précédent (←)",
     "NEXT": "Suivant (→)",
-    "NO_INTERNET_CONNECTION": "Veuillez vérifier votre connexion internet puis réessayer",
     "TITLE": "ente Photos",
     "UPLOAD_FIRST_PHOTO": "Chargez votre 1ere photo",
     "IMPORT_YOUR_FOLDERS": "Importez vos dossiers",
@@ -420,9 +419,6 @@
     "CURRENT_USAGE": "L'utilisation actuelle est de <strong>{{usage}}</strong>",
     "WEAK_DEVICE": "Le navigateur que vous utilisez n'est pas assez puissant pour chiffrer vos photos. Veuillez essayer de vous connecter à ente sur votre ordinateur, ou télécharger l'appli ente mobile/ordinateur.",
     "DRAG_AND_DROP_HINT": "Sinon glissez déposez dans la fenêtre ente",
-    "ASK_FOR_FEEDBACK": "<p>Nous serrions navré de vous voir partir. Avez-vous rencontré des problèmes?</p><p>Veuillez nous écrire à <a>{{emailID}}</a>,nous pouvons peut-être vous aider.</p>",
-    "SEND_FEEDBACK": "Oui, envoyer un commentaire",
-    "CONFIRM_ACCOUNT_DELETION_TITLE": "Êtes-vous certains de vouloir supprimer votre compte?",
     "CONFIRM_ACCOUNT_DELETION_MESSAGE": "<p> Vos données chargées seront programmées pour suppression, et votre comptre sera supprimé définitivement .</p><p>Cette action n'est pas reversible.</p>",
     "AUTHENTICATE": "Authentification",
     "UPLOADED_TO_SINGLE_COLLECTION": "Chargé dans une seule collection",
@@ -502,15 +498,15 @@
     "DELETE_ACCOUNT_REASON_LABEL": "Quelle est la raison principale de la suppression de votre compte ?",
     "DELETE_ACCOUNT_REASON_PLACEHOLDER": "Choisir une raison",
     "DELETE_REASON": {
-        "MISSING_FEATURE": "",
-        "BROKEN_BEHAVIOR": "",
-        "FOUND_ANOTHER_SERVICE": "",
-        "NOT_LISTED": ""
+        "MISSING_FEATURE": "Il manque une fonctionnalité essentielle dont j'ai besoin",
+        "BROKEN_BEHAVIOR": "L'application ou une certaine fonctionnalité ne se comporte pas comme je pense qu'elle devrait",
+        "FOUND_ANOTHER_SERVICE": "J'ai trouvé un autre service que je préfère",
+        "NOT_LISTED": "Ma raison n'est pas listée"
     },
-    "DELETE_ACCOUNT_FEEDBACK_LABEL": "",
-    "DELETE_ACCOUNT_FEEDBACK_PLACEHOLDER": "",
-    "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "",
-    "CONFIRM_DELETE_ACCOUNT": "",
-    "FEEDBACK_REQUIRED": "",
-    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": ""
+    "DELETE_ACCOUNT_FEEDBACK_LABEL": "Nous sommes désolés de vous voir partir. Expliquez-nous les raisons de votre départ pour que nous puissions nous améliorer.",
+    "DELETE_ACCOUNT_FEEDBACK_PLACEHOLDER": "Vos commentaires",
+    "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "Oui, je veux supprimer définitivement ce compte et toutes ses données",
+    "CONFIRM_DELETE_ACCOUNT": "Confirmer la suppression du compte",
+    "FEEDBACK_REQUIRED": "Merci de nous aider avec cette information",
+    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "Qu'est-ce que l'autre service fait de mieux ?"
 }
