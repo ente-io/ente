@@ -78,11 +78,7 @@ class CodeSuccessScreen extends StatelessWidget {
                               ),
                           style: textStyle.h2Bold,
                         ),
-                        Text(
-                          S.of(context).claimed,
-                          style: textStyle.body
-                              .copyWith(color: colorScheme.textMuted),
-                        ),
+                        Text(S.of(context).claimed, style: textStyle.bodyMuted),
                         const SizedBox(height: 32),
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
@@ -138,8 +134,7 @@ class CodeSuccessScreen extends StatelessWidget {
                                     S.of(context).freeStorageOnReferralSuccess(
                                           referralView.planInfo.storageInGB,
                                         ),
-                                    style: textStyle.small
-                                        .copyWith(color: colorScheme.textMuted),
+                                    style: textStyle.smallMuted,
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 16),
@@ -149,8 +144,7 @@ class CodeSuccessScreen extends StatelessWidget {
                                     S.of(context).theyAlsoGetXGb(
                                           referralView.planInfo.storageInGB,
                                         ),
-                                    style: textStyle.small
-                                        .copyWith(color: colorScheme.textMuted),
+                                    style: textStyle.smallMuted,
                                     textAlign: TextAlign.center,
                                   ),
                                 ],
