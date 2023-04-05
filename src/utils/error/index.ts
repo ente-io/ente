@@ -58,6 +58,8 @@ export const CustomError = {
     NO_EXPORT_FOLDER_SELECTED: 'no export folder selected',
     EXPORT_FOLDER_DOES_NOT_EXIST: 'export folder does not exist',
     NO_INTERNET_CONNECTION: 'no internet connection',
+    AUTH_KEY_NOT_FOUND: 'auth key not found',
+    DECRYPTION_FAILED: 'decryption failed',
 };
 
 export function parseUploadErrorCodes(error) {

@@ -22,8 +22,6 @@ const AuthenticatorCodesPage = () => {
                 if (err.message === CustomError.KEY_MISSING) {
                     appContext.setRedirectURL(PAGES.AUTH);
                     router.push(PAGES.ROOT);
-                } else {
-                    // do not log errors
                 }
             }
         };
