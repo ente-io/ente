@@ -30,6 +30,8 @@ export default function Recover() {
         useState<B64EncryptionResult>(null);
     const [sessionID, setSessionID] = useState(null);
     const appContext = useContext(AppContext);
+    const [doesHaveEncryptedRecoveryKey, setDoesHaveEncryptedRecoveryKey] =
+        useState(false);
 
     useEffect(() => {
         router.prefetch(PAGES.GALLERY);
@@ -43,11 +45,15 @@ export default function Recover() {
         }
         const main = async () => {
             const resp = await recoverTwoFactor(user.twoFactorSessionID);
-            setEncryptedTwoFactorSecret({
-                encryptedData: resp.encryptedSecret,
-                nonce: resp.secretDecryptionNonce,
-                key: null,
-            });
+            if (!resp.encryptedSecret) {
+                setDoesHaveEncryptedRecoveryKey(!!resp.encryptedSecret);
+            } else {
+                setEncryptedTwoFactorSecret({
+                    encryptedData: resp.encryptedSecret,
+                    nonce: resp.secretDecryptionNonce,
+                    key: null,
+                });
+            }
         };
         main();
     }, []);
@@ -112,16 +118,27 @@ export default function Recover() {
         <VerticallyCentered>
             <FormPaper>
                 <FormPaperTitle>{t('RECOVER_TWO_FACTOR')}</FormPaperTitle>
-                <SingleInputForm
-                    callback={recover}
-                    fieldType="text"
-                    placeholder={t('RECOVERY_KEY_HINT')}
-                    buttonText={t('RECOVER')}
-                />
+                {doesHaveEncryptedRecoveryKey ? (
+                    <Trans
+                        i18nKey={'NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE'}
+                        components={{
+                            a: <Link href={`mailto:${SUPPORT_EMAIL}`} />,
+                        }}
+                    />
+                ) : (
+                    <SingleInputForm
+                        callback={recover}
+                        fieldType="text"
+                        placeholder={t('RECOVERY_KEY_HINT')}
+                        buttonText={t('RECOVER')}
+                    />
+                )}
                 <FormPaperFooter style={{ justifyContent: 'space-between' }}>
-                    <LinkButton onClick={showNoRecoveryKeyMessage}>
-                        {t('NO_RECOVERY_KEY')}
-                    </LinkButton>
+                    {doesHaveEncryptedRecoveryKey && (
+                        <LinkButton onClick={showNoRecoveryKeyMessage}>
+                            {t('NO_RECOVERY_KEY')}
+                        </LinkButton>
+                    )}
                     <LinkButton onClick={router.back}>
                         {t('GO_BACK')}
                     </LinkButton>

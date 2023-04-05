@@ -1,4 +1,3 @@
-import React from 'react';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import { DialogBoxAttributes } from 'types/dialogBox';
 import { downloadApp } from 'utils/common';
