@@ -88,7 +88,7 @@ If you would like to motivate us to keep building, you can do so by
 [starring](https://github.com/ente-io/photos-app/stargazers) this project.
 <br/>
 
-## 🌍 Translate
+## 🌍 Translations
 [![Crowdin](https://badges.crowdin.net/ente-photos-app/localized.svg)](https://crowdin.com/project/ente-photos-app)
 
 If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-photos-app) to get started. Thank you for your support.
