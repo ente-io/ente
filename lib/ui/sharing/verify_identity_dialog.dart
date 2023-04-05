@@ -7,6 +7,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/services/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -43,16 +44,18 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
   Widget build(BuildContext context) {
     final textStyle = getEnteTextTheme(context);
     final String subTitle = widget.self
-        ? "This is your Verification ID"
-        : "This is ${widget.email}'s Verification ID";
+        ? S.of(context).thisIsYourVerificationId
+        : S.of(context).thisIsPersonVerificationId(widget.email);
     final String bottomText = widget.self
-        ? "Someone sharing albums with you should see the same ID on their "
-            "device."
-        : "Please ask them to long-press their email address on the settings "
-            "screen, and verify that the IDs on both devices match.";
+        ? S.of(context).someoneSharingAlbumsWithYouShouldSeeTheSameId
+        : S.of(context).howToViewShareeVerificationID;
 
     final AlertDialog alert = AlertDialog(
-      title: Text(widget.self ? "Verification ID" : "Verify ${widget.email}"),
+      title: Text(
+        widget.self
+            ? S.of(context).verificationId
+            : S.of(context).verifyEmailID(widget.email),
+      ),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

@@ -1707,6 +1707,276 @@ class S {
       args: [],
     );
   }
+
+  /// `When set to the maximum ({maxValue}), the device limit will be relaxed to allow for temporary spikes of large number of viewers.`
+  String maxDeviceLimitSpikeHandling(int maxValue) {
+    return Intl.message(
+      'When set to the maximum ($maxValue), the device limit will be relaxed to allow for temporary spikes of large number of viewers.',
+      name: 'maxDeviceLimitSpikeHandling',
+      desc: '',
+      args: [maxValue],
+    );
+  }
+
+  /// `Never`
+  String get never {
+    return Intl.message(
+      'Never',
+      name: 'never',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom`
+  String get custom {
+    return Intl.message(
+      'Custom',
+      name: 'custom',
+      desc: 'Label for setting custom value for link expiry',
+      args: [],
+    );
+  }
+
+  /// `After 1 hour`
+  String get after1Hour {
+    return Intl.message(
+      'After 1 hour',
+      name: 'after1Hour',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `After 1 day`
+  String get after1Day {
+    return Intl.message(
+      'After 1 day',
+      name: 'after1Day',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `After 1 week`
+  String get after1Week {
+    return Intl.message(
+      'After 1 week',
+      name: 'after1Week',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `After 1 month`
+  String get after1Month {
+    return Intl.message(
+      'After 1 month',
+      name: 'after1Month',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `After 1 year`
+  String get after1Year {
+    return Intl.message(
+      'After 1 year',
+      name: 'after1Year',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage`
+  String get manageParticipants {
+    return Intl.message(
+      'Manage',
+      name: 'manageParticipants',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create a link to allow people to add and view photos in your shared album without needing an ente app or account. Great for collecting event photos.`
+  String get collabLinkSectionDescription {
+    return Intl.message(
+      'Create a link to allow people to add and view photos in your shared album without needing an ente app or account. Great for collecting event photos.',
+      name: 'collabLinkSectionDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collect photos`
+  String get collectPhotos {
+    return Intl.message(
+      'Collect photos',
+      name: 'collectPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collaborative link`
+  String get collaborativeLink {
+    return Intl.message(
+      'Collaborative link',
+      name: 'collaborativeLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share with non-ente users`
+  String get shareWithNonenteUsers {
+    return Intl.message(
+      'Share with non-ente users',
+      name: 'shareWithNonenteUsers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create public link`
+  String get createPublicLink {
+    return Intl.message(
+      'Create public link',
+      name: 'createPublicLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send link`
+  String get sendLink {
+    return Intl.message(
+      'Send link',
+      name: 'sendLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy link`
+  String get copyLink {
+    return Intl.message(
+      'Copy link',
+      name: 'copyLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link has expired`
+  String get linkHasExpired {
+    return Intl.message(
+      'Link has expired',
+      name: 'linkHasExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Public link enabled`
+  String get publicLinkEnabled {
+    return Intl.message(
+      'Public link enabled',
+      name: 'publicLinkEnabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share a link`
+  String get shareALink {
+    return Intl.message(
+      'Share a link',
+      name: 'shareALink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create shared and collaborative albums with other ente users, including users on free plans.`
+  String get sharedAlbumSectionDescription {
+    return Intl.message(
+      'Create shared and collaborative albums with other ente users, including users on free plans.',
+      name: 'sharedAlbumSectionDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share with specific people`
+  String get shareWithSpecificPeople {
+    return Intl.message(
+      'Share with specific people',
+      name: 'shareWithSpecificPeople',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This is your Verification ID`
+  String get thisIsYourVerificationId {
+    return Intl.message(
+      'This is your Verification ID',
+      name: 'thisIsYourVerificationId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Someone sharing albums with you should see the same ID on their device.`
+  String get someoneSharingAlbumsWithYouShouldSeeTheSameId {
+    return Intl.message(
+      'Someone sharing albums with you should see the same ID on their device.',
+      name: 'someoneSharingAlbumsWithYouShouldSeeTheSameId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.`
+  String get howToViewShareeVerificationID {
+    return Intl.message(
+      'Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.',
+      name: 'howToViewShareeVerificationID',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This is {email}'s Verification ID`
+  String thisIsPersonVerificationId(String email) {
+    return Intl.message(
+      'This is $email\'s Verification ID',
+      name: 'thisIsPersonVerificationId',
+      desc: '',
+      args: [email],
+    );
+  }
+
+  /// `Verification ID`
+  String get verificationId {
+    return Intl.message(
+      'Verification ID',
+      name: 'verificationId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verify {email}`
+  String verifyEmailID(Object email) {
+    return Intl.message(
+      'Verify $email',
+      name: 'verifyEmailID',
+      desc: '',
+      args: [email],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
