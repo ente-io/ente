@@ -297,5 +297,27 @@
   "claimMore": "Claim more!",
   "theyAlsoGetXGb": "They also get {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB each time someone signs up for a paid plan and applies your code",
-  "shareTextReferralCode": "ente referral code: {referralCode} \n\nApply it in Settings → General → Referrals to get {referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io"
+  "shareTextReferralCode": "ente referral code: {referralCode} \n\nApply it in Settings → General → Referrals to get {referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io",
+  "claimFreeStorage": "Claim free storage",
+  "inviteYourFriends": "Invite your friends",
+  "failedToFetchReferralDetails": "Unable to fetch referral details. Please try again later.",
+  "referralStep1": "1. Give this code to your friends",
+  "referralStep2": "2. They sign up for a paid plan",
+  "referralStep3": "3. Both of you get {storageInGB} GB* free",
+  "referralsAreCurrentlyPaused": "Referrals are currently paused",
+  "youCanAtMaxDoubleYourStorage": "* You can at max double your storage",
+  "claimedStorageSoFar" : "{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} Gb so far} false {You have claimed {storageAmountInGb} Gb so far}}",
+  "@claimedStorageSoFar": {
+    "placeholders": {
+      "storageAmountInGb": {
+        "type": "int",
+        "example": "10"
+      },
+      "isFamilyMember": {
+        "type": "bool",
+        "example": "true"
+      }
+    }
+  },
+  "faq": "FAQ"
 }

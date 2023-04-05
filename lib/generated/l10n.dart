@@ -2181,6 +2181,110 @@ class S {
       args: [referralCode, referralStorageInGB],
     );
   }
+
+  /// `Claim free storage`
+  String get claimFreeStorage {
+    return Intl.message(
+      'Claim free storage',
+      name: 'claimFreeStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invite your friends`
+  String get inviteYourFriends {
+    return Intl.message(
+      'Invite your friends',
+      name: 'inviteYourFriends',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to fetch referral details. Please try again later.`
+  String get failedToFetchReferralDetails {
+    return Intl.message(
+      'Unable to fetch referral details. Please try again later.',
+      name: 'failedToFetchReferralDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `1. Give this code to your friends`
+  String get referralStep1 {
+    return Intl.message(
+      '1. Give this code to your friends',
+      name: 'referralStep1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `2. They sign up for a paid plan`
+  String get referralStep2 {
+    return Intl.message(
+      '2. They sign up for a paid plan',
+      name: 'referralStep2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `3. Both of you get {storageInGB} GB* free`
+  String referralStep3(Object storageInGB) {
+    return Intl.message(
+      '3. Both of you get $storageInGB GB* free',
+      name: 'referralStep3',
+      desc: '',
+      args: [storageInGB],
+    );
+  }
+
+  /// `Referrals are currently paused`
+  String get referralsAreCurrentlyPaused {
+    return Intl.message(
+      'Referrals are currently paused',
+      name: 'referralsAreCurrentlyPaused',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `* You can at max double your storage`
+  String get youCanAtMaxDoubleYourStorage {
+    return Intl.message(
+      '* You can at max double your storage',
+      name: 'youCanAtMaxDoubleYourStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} Gb so far} false {You have claimed {storageAmountInGb} Gb so far}}`
+  String claimedStorageSoFar(bool isFamilyMember, int storageAmountInGb) {
+    return Intl.select(
+      isFamilyMember,
+      {
+        'true': 'Your family has claimed $storageAmountInGb Gb so far',
+        'false': 'You have claimed $storageAmountInGb Gb so far',
+      },
+      name: 'claimedStorageSoFar',
+      desc: '',
+      args: [isFamilyMember, storageAmountInGb],
+    );
+  }
+
+  /// `FAQ`
+  String get faq {
+    return Intl.message(
+      'FAQ',
+      name: 'faq',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
