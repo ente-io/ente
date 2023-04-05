@@ -68,19 +68,16 @@ You can alternatively install the build from PlayStore or F-Droid.
 5. Setup TensorFlowLite by executing `setup.sh`
 6. For Android, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`
 7. For iOS, run `flutter build ios`
-
 <br/>
 
 ## 🙋 Help
 
 We provide human support to our customers. Please write to [support@ente.io](mailto:support@ente.io) sharing as many details as possible about whatever it is that you need help with, and we will get back to you as soon as possible.
-
 <br/>
 
 ## 🧭 Roadmap
 
 We maintain a public roadmap, that's driven by our community @ [roadmap.ente.io](https://roadmap.ente.io).
-
 <br/>
 
 ## 🤗 Support
@@ -89,7 +86,12 @@ If you like this project, please consider upgrading to a paid subscription.
 
 If you would like to motivate us to keep building, you can do so by
 [starring](https://github.com/ente-io/photos-app/stargazers) this project.
+<br/>
 
+## 🌍 Translations
+[![Crowdin](https://badges.crowdin.net/ente-photos-app/localized.svg)](https://crowdin.com/project/ente-photos-app)
+
+If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-photos-app) to get started. Thank you for your support.
 <br/>
 
 ## ❤️ Join the Community
