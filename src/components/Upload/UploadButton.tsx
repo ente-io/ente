@@ -63,7 +63,7 @@ function UploadButton({
                 onClick={onClickHandler}
                 disabled={!uploadManager.shouldAllowNewUpload()}
                 className="mobile-button">
-                <FileUploadOutlinedIcon />
+                {icon ?? <FileUploadOutlinedIcon />}
             </IconButton>
         </Wrapper>
     );

@@ -4,7 +4,6 @@ import { logError } from 'utils/sentry';
 import { findMatchingExistingFiles } from 'utils/upload';
 import UIService from './uiService';
 import UploadService from './uploadService';
-import { FILE_TYPE } from 'constants/file';
 import { UPLOAD_RESULT, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
 import {
     FileWithCollection,
@@ -32,8 +31,7 @@ export default async function uploader(
     worker: Remote<DedicatedCryptoWorker>,
     existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection,
-    uploaderName: string,
-    skipVideos: boolean
+    uploaderName: string
 ): Promise<UploadResponse> {
     const { collection, localID, ...uploadAsset } = fileWithCollection;
     const fileNameSize = `${UploadService.getAssetName(
@@ -54,12 +52,6 @@ export default async function uploader(
         addLogLine(
             `got filetype for ${fileNameSize} - ${JSON.stringify(fileTypeInfo)}`
         );
-        if (skipVideos && fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
-            addLogLine(
-                `skipped  video upload for public upload ${fileNameSize}`
-            );
-            return { fileUploadResult: UPLOAD_RESULT.SKIPPED_VIDEOS };
-        }
 
         addLogLine(`extracting  metadata ${fileNameSize}`);
         const metadata = await UploadService.extractAssetMetadata(
