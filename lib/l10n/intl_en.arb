@@ -319,5 +319,13 @@
       }
     }
   },
-  "faq": "FAQ"
+  "faq": "FAQ",
+  "oopsSomethingWentWrong": "Oops, something went wrong",
+  "peopleUsingYourCode": "People using your code",
+  "eligible": "eligible",
+  "total": "total",
+  "codeUsedByYou": "Code used by you",
+  "freeStorageClaimed": "Free storage claimed",
+  "freeStorageUsable": "Free storage usable",
+  "usableReferralStorageInfo": "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan."
 }

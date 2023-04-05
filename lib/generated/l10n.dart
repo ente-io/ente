@@ -2285,6 +2285,86 @@ class S {
       args: [],
     );
   }
+
+  /// `Oops, something went wrong`
+  String get oopsSomethingWentWrong {
+    return Intl.message(
+      'Oops, something went wrong',
+      name: 'oopsSomethingWentWrong',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `People using your code`
+  String get peopleUsingYourCode {
+    return Intl.message(
+      'People using your code',
+      name: 'peopleUsingYourCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `eligible`
+  String get eligible {
+    return Intl.message(
+      'eligible',
+      name: 'eligible',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `total`
+  String get total {
+    return Intl.message(
+      'total',
+      name: 'total',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Code used by you`
+  String get codeUsedByYou {
+    return Intl.message(
+      'Code used by you',
+      name: 'codeUsedByYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Free storage claimed`
+  String get freeStorageClaimed {
+    return Intl.message(
+      'Free storage claimed',
+      name: 'freeStorageClaimed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Free storage usable`
+  String get freeStorageUsable {
+    return Intl.message(
+      'Free storage usable',
+      name: 'freeStorageUsable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan.`
+  String get usableReferralStorageInfo {
+    return Intl.message(
+      'Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan.',
+      name: 'usableReferralStorageInfo',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

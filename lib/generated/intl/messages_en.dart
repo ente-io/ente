@@ -123,6 +123,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Code applied"),
         "codeCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("Code copied to clipboard"),
+        "codeUsedByYou":
+            MessageLookupByLibrary.simpleMessage("Code used by you"),
         "collabLinkSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Create a link to allow people to add and view photos in your shared album without needing an ente app or account. Great for collecting event photos."),
         "collaborativeLink":
@@ -182,6 +184,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "doThisLater": MessageLookupByLibrary.simpleMessage("Do this later"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
         "dropSupportEmail": m2,
+        "eligible": MessageLookupByLibrary.simpleMessage("eligible"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
         "emailNoEnteAccount": m3,
         "encryption": MessageLookupByLibrary.simpleMessage("Encryption"),
@@ -221,7 +224,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Forgot password"),
+        "freeStorageClaimed":
+            MessageLookupByLibrary.simpleMessage("Free storage claimed"),
         "freeStorageOnReferralSuccess": m4,
+        "freeStorageUsable":
+            MessageLookupByLibrary.simpleMessage("Free storage usable"),
         "fromYourRegisteredEmailAddress": MessageLookupByLibrary.simpleMessage(
             "from your registered email address."),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
@@ -273,6 +280,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
+        "oopsSomethingWentWrong":
+            MessageLookupByLibrary.simpleMessage("Oops, something went wrong"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Or pick an existing one"),
         "password": MessageLookupByLibrary.simpleMessage("Password"),
@@ -280,6 +289,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Password changed successfully"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("Password lock"),
         "passwordStrength": m7,
+        "peopleUsingYourCode":
+            MessageLookupByLibrary.simpleMessage("People using your code"),
         "pleaseSendAnEmailTo":
             MessageLookupByLibrary.simpleMessage("Please send an email to"),
         "pleaseTryAgain":
@@ -392,11 +403,14 @@ class MessageLookup extends MessageLookupByLibrary {
                 "This will log you out of the following device:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "This will log you out of this device!"),
+        "total": MessageLookupByLibrary.simpleMessage("total"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Try again"),
         "twofactorAuthenticationPageTitle":
             MessageLookupByLibrary.simpleMessage("Two-factor authentication"),
         "twofactorSetup":
             MessageLookupByLibrary.simpleMessage("Two-factor setup"),
+        "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
+            "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan."),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Use recovery key"),
         "verificationId":
