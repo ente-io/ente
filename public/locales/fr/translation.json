@@ -508,5 +508,6 @@
     "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "Oui, je veux supprimer définitivement ce compte et toutes ses données",
     "CONFIRM_DELETE_ACCOUNT": "Confirmer la suppression du compte",
     "FEEDBACK_REQUIRED": "Merci de nous aider avec cette information",
-    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "Qu'est-ce que l'autre service fait de mieux ?"
+    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "Qu'est-ce que l'autre service fait de mieux ?",
+    "RECOVER_TWO_FACTOR": "Récupérer la double-authentification"
 }
