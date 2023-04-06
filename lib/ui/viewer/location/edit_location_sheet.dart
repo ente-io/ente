@@ -3,6 +3,7 @@ import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location_tag/location_tag.dart";
+import "package:photos/services/location_service.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -27,7 +28,7 @@ showEditLocationSheet(
     builder: (context) {
       return LocationTagStateProvider(
         locationTagEntity: locationTagEntity,
-        EditLocationSheet(locationTagEntity, onLocationEdited),
+        EditLocationSheet(onLocationEdited),
       );
     },
     shape: const RoundedRectangleBorder(
@@ -43,10 +44,8 @@ showEditLocationSheet(
 }
 
 class EditLocationSheet extends StatefulWidget {
-  final LocalEntity<LocationTag> locationTagEntity;
   final VoidCallback onLocationAdded;
   const EditLocationSheet(
-    this.locationTagEntity,
     this.onLocationAdded, {
     super.key,
   });
@@ -73,6 +72,17 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
     _focusNode.addListener(_focusNodeListener);
     _selectedRadiusIndexNotifier.addListener(_selectedRadiusIndexListener);
     super.initState();
+  }
+
+  @override
+  void deactivate() {
+    final locationTagState = InheritedLocationTagData.of(context);
+    LocationService.instance.updateLocationTag(
+      locationTagEntity: locationTagState.locationTagEntity!,
+      newRadius: radiusValues[locationTagState.selectedRadiusIndex],
+      newName: _textEditingController.text,
+    );
+    super.deactivate();
   }
 
   @override

@@ -88,9 +88,9 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
             onTap: () {
               routeToPage(
                 context,
-                InheritedLocationScreenState(
+                LocationScreenStateProvider(
                   locationTagEntity,
-                  child: const LocationScreen(),
+                  const LocationScreen(),
                 ),
               );
             },

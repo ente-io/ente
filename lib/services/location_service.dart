@@ -159,6 +159,7 @@ class LocationService {
     }
   }
 
+  ///Will only update if there is a change in the locationTag's properties
   Future<void> updateLocationTag({
     required LocalEntity<LocationTag> locationTagEntity,
     int? newRadius,
