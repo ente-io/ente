@@ -671,5 +671,7 @@
   "usePublicLinksForPeopleNotOnEnte": "Use public links for people not on ente",
   "allowPeopleToAddPhotos": "Allow people to add photos",
   "shareAnAlbumNow": "Share an album now",
-  "collectEventPhotos": "Collect event photos"
+  "collectEventPhotos": "Collect event photos",
+  "sessionExpired": "Session expired",
+  "loggingOut": "Logging out..."
 }

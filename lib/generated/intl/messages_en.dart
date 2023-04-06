@@ -501,6 +501,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "To enable lockscreen, please setup device passcode or screen lock in your system settings."),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Lockscreen"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Log in"),
+        "loggingOut": MessageLookupByLibrary.simpleMessage("Logging out..."),
         "logout": MessageLookupByLibrary.simpleMessage("Logout"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Lost device?"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
@@ -681,6 +682,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("Send invite"),
         "sendLink": MessageLookupByLibrary.simpleMessage("Send link"),
+        "sessionExpired":
+            MessageLookupByLibrary.simpleMessage("Session expired"),
         "setAPassword": MessageLookupByLibrary.simpleMessage("Set a password"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Set password"),

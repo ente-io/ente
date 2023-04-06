@@ -4702,6 +4702,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Session expired`
+  String get sessionExpired {
+    return Intl.message(
+      'Session expired',
+      name: 'sessionExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Logging out...`
+  String get loggingOut {
+    return Intl.message(
+      'Logging out...',
+      name: 'loggingOut',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
