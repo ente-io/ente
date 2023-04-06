@@ -124,6 +124,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addedAs": MessageLookupByLibrary.simpleMessage("Added as"),
         "addingToFavorites":
             MessageLookupByLibrary.simpleMessage("Adding to favorites..."),
+        "advanced": MessageLookupByLibrary.simpleMessage("Advanced"),
         "advancedSettings": MessageLookupByLibrary.simpleMessage("Advanced"),
         "after1Day": MessageLookupByLibrary.simpleMessage("After 1 day"),
         "after1Hour": MessageLookupByLibrary.simpleMessage("After 1 hour"),
@@ -323,6 +324,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Unable to fetch referral details. Please try again later."),
         "failedToLoadAlbums":
             MessageLookupByLibrary.simpleMessage("Failed to load albums"),
+        "familyPlans": MessageLookupByLibrary.simpleMessage("Family plans"),
         "faq": MessageLookupByLibrary.simpleMessage("FAQ"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
         "forgotPassword":
@@ -336,6 +338,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Free up device space"),
         "fromYourRegisteredEmailAddress": MessageLookupByLibrary.simpleMessage(
             "from your registered email address."),
+        "general": MessageLookupByLibrary.simpleMessage("General"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generating encryption keys..."),
         "hidden": MessageLookupByLibrary.simpleMessage("Hidden"),
@@ -459,6 +462,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "referralStep2": MessageLookupByLibrary.simpleMessage(
             "2. They sign up for a paid plan"),
         "referralStep3": m12,
+        "referrals": MessageLookupByLibrary.simpleMessage("Referrals"),
         "referralsAreCurrentlyPaused": MessageLookupByLibrary.simpleMessage(
             "Referrals are currently paused"),
         "remindToEmptyDeviceTrash": MessageLookupByLibrary.simpleMessage(

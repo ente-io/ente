@@ -482,7 +482,7 @@
     "placeholders": {
       "storageSaved": {
         "example": "1.2 GB",
-        "type": "string"
+        "type": "String"
       }
     }
   },
@@ -502,5 +502,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "familyPlans": "Family plans",
+  "referrals": "Referrals",
+  "advanced": "Advanced",
+  "general": "General"
 }

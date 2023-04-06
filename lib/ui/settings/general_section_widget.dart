@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -16,7 +17,7 @@ class GeneralSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "General",
+      title: S.of(context).general,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.graphic_eq,
     );
@@ -28,7 +29,7 @@ class GeneralSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: "Family plans",
+            title: S.of(context).familyPlans,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -40,8 +41,8 @@ class GeneralSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Referrals",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).referrals,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -56,8 +57,8 @@ class GeneralSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Advanced",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).advanced,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,

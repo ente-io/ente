@@ -3397,7 +3397,7 @@ class S {
   }
 
   /// `You have successfully freed up {storageSaved}!`
-  String youHaveSuccessfullyFreedUp(string storageSaved) {
+  String youHaveSuccessfullyFreedUp(String storageSaved) {
     return Intl.message(
       'You have successfully freed up $storageSaved!',
       name: 'youHaveSuccessfullyFreedUp',
@@ -3435,6 +3435,46 @@ class S {
       desc:
           'The text to display when the user has successfully cleaned up duplicate files',
       args: [count, storageSaved],
+    );
+  }
+
+  /// `Family plans`
+  String get familyPlans {
+    return Intl.message(
+      'Family plans',
+      name: 'familyPlans',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Referrals`
+  String get referrals {
+    return Intl.message(
+      'Referrals',
+      name: 'referrals',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Advanced`
+  String get advanced {
+    return Intl.message(
+      'Advanced',
+      name: 'advanced',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `General`
+  String get general {
+    return Intl.message(
+      'General',
+      name: 'general',
+      desc: '',
+      args: [],
     );
   }
 }
