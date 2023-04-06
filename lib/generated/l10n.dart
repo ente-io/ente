@@ -3285,6 +3285,158 @@ class S {
       args: [],
     );
   }
+
+  /// `Backed up folders`
+  String get backedUpFolders {
+    return Intl.message(
+      'Backed up folders',
+      name: 'backedUpFolders',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup`
+  String get backup {
+    return Intl.message(
+      'Backup',
+      name: 'backup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Free up device space`
+  String get freeUpDeviceSpace {
+    return Intl.message(
+      'Free up device space',
+      name: 'freeUpDeviceSpace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `✨ All clear`
+  String get allClear {
+    return Intl.message(
+      '✨ All clear',
+      name: 'allClear',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You've no files on this device that can be deleted`
+  String get noDeviceThatCanBeDeleted {
+    return Intl.message(
+      'You\'ve no files on this device that can be deleted',
+      name: 'noDeviceThatCanBeDeleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove duplicates`
+  String get removeDuplicates {
+    return Intl.message(
+      'Remove duplicates',
+      name: 'removeDuplicates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `✨ No duplicates`
+  String get noDuplicates {
+    return Intl.message(
+      '✨ No duplicates',
+      name: 'noDuplicates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You've no duplicate files that can be cleared`
+  String get youveNoDuplicateFilesThatCanBeCleared {
+    return Intl.message(
+      'You\'ve no duplicate files that can be cleared',
+      name: 'youveNoDuplicateFilesThatCanBeCleared',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Success`
+  String get success {
+    return Intl.message(
+      'Success',
+      name: 'success',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rate us`
+  String get rateUs {
+    return Intl.message(
+      'Rate us',
+      name: 'rateUs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Also empty "Recently Deleted" from "Settings" -> "Storage" to claim the freed space`
+  String get remindToEmptyDeviceTrash {
+    return Intl.message(
+      'Also empty "Recently Deleted" from "Settings" -> "Storage" to claim the freed space',
+      name: 'remindToEmptyDeviceTrash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You have successfully freed up {storageSaved}!`
+  String youHaveSuccessfullyFreedUp(string storageSaved) {
+    return Intl.message(
+      'You have successfully freed up $storageSaved!',
+      name: 'youHaveSuccessfullyFreedUp',
+      desc:
+          'The text to display when the user has successfully freed up storage',
+      args: [storageSaved],
+    );
+  }
+
+  /// `Also empty your "Trash" to claim the freed up space`
+  String get remindToEmptyEnteTrash {
+    return Intl.message(
+      'Also empty your "Trash" to claim the freed up space',
+      name: 'remindToEmptyEnteTrash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `✨ Success`
+  String get sparkleSuccess {
+    return Intl.message(
+      '✨ Success',
+      name: 'sparkleSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your have cleaned up {count, plural, one{{count} duplicate file} other{{count} duplicate files}}, saving ({storageSaved}!)`
+  String duplicateFileCountWithStorageSaved(int count, String storageSaved) {
+    return Intl.message(
+      'Your have cleaned up ${Intl.plural(count, one: '$count duplicate file', other: '$count duplicate files')}, saving ($storageSaved!)',
+      name: 'duplicateFileCountWithStorageSaved',
+      desc:
+          'The text to display when the user has successfully cleaned up duplicate files',
+      args: [count, storageSaved],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

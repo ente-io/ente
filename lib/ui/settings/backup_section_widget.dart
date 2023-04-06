@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/services/deduplication_service.dart';
@@ -33,7 +34,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "Backup",
+      title: S.of(context).backup,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.backup_outlined,
     );
@@ -43,8 +44,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
     final List<Widget> sectionOptions = [
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Backed up folders",
+        captionedTextWidget: CaptionedTextWidget(
+          title: S.of(context).backedUpFolders,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -52,16 +53,16 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         onTap: () async {
           routeToPage(
             context,
-            const BackupFolderSelectionPage(
-              buttonText: "Backup",
+            BackupFolderSelectionPage(
+              buttonText: S.of(context).backup,
             ),
           );
         },
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Backup settings",
+        captionedTextWidget: CaptionedTextWidget(
+          title: S.of(context).backupSettings,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -79,8 +80,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
     sectionOptions.addAll(
       [
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Free up device space",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).freeUpDeviceSpace,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -98,8 +99,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             if (status.localIDs.isEmpty) {
               showErrorDialog(
                 context,
-                "✨ All clear",
-                "You've no files on this device that can be deleted",
+                S.of(context).allClear,
+                S.of(context).noDeviceThatCanBeDeleted,
               );
             } else {
               final bool? result =
@@ -112,8 +113,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Remove duplicates",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).removeDuplicates,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -132,8 +133,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             if (duplicates.isEmpty) {
               showErrorDialog(
                 context,
-                "✨ No duplicates",
-                "You've no duplicate files that can be cleared",
+                S.of(context).noDuplicates,
+                S.of(context).youveNoDuplicateFilesThatCanBeCleared,
               );
             } else {
               final DeduplicationResult? result =
@@ -154,19 +155,19 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
 
   void _showSpaceFreedDialog(BackupStatus status) {
     final DialogWidget dialog = choiceDialog(
-      title: "Success",
-      body: "You have successfully freed up " + formatBytes(status.size) + "!",
-      firstButtonLabel: "Rate us",
+      title: S.of(context).success,
+      body: S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
+      firstButtonLabel: S.of(context).rateUs,
       firstButtonOnTap: () async {
         UpdateService.instance.launchReviewUrl();
       },
       firstButtonType: ButtonType.primary,
-      secondButtonLabel: "OK",
+      secondButtonLabel: S.of(context).ok,
       secondButtonOnTap: () async {
         if (Platform.isIOS) {
           showToast(
             context,
-            "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
+            S.of(context).remindToEmptyDeviceTrash,
           );
         }
       },
@@ -184,27 +185,22 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   void _showDuplicateFilesDeletedDialog(DeduplicationResult result) {
-    final String countText = result.count.toString() +
-        " duplicate file" +
-        (result.count == 1 ? "" : "s");
-
     final DialogWidget dialog = choiceDialog(
-      title: "✨ Success",
-      body: "You have cleaned up " +
-          countText +
-          ", saving " +
-          formatBytes(result.size) +
-          "!",
-      firstButtonLabel: "Rate us",
+      title: S.of(context).sparkleSuccess,
+      body: S.of(context).duplicateFileCountWithStorageSaved(
+            result.count,
+            formatBytes(result.size),
+          ),
+      firstButtonLabel: S.of(context).rateUs,
       firstButtonOnTap: () async {
         UpdateService.instance.launchReviewUrl();
       },
       firstButtonType: ButtonType.primary,
-      secondButtonLabel: "OK",
+      secondButtonLabel: S.of(context).ok,
       secondButtonOnTap: () async {
         showShortToast(
           context,
-          "Also empty your \"Trash\" to claim the freed up space",
+          S.of(context).remindToEmptyEnteTrash,
         );
       },
     );

@@ -463,5 +463,44 @@
   "updateAvailable": "Update available",
   "downloading": "Downloading...",
   "theDownloadCouldNotBeCompleted": "The download could not be completed",
-  "retry": "Retry"
+  "retry": "Retry",
+  "backedUpFolders": "Backed up folders",
+  "backup": "Backup",
+  "freeUpDeviceSpace": "Free up device space",
+  "allClear": "✨ All clear",
+  "noDeviceThatCanBeDeleted": "You've no files on this device that can be deleted",
+  "removeDuplicates": "Remove duplicates",
+  "noDuplicates": "✨ No duplicates",
+  "youveNoDuplicateFilesThatCanBeCleared": "You've no duplicate files that can be cleared",
+  "success": "Success",
+  "rateUs": "Rate us",
+  "remindToEmptyDeviceTrash": "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
+  "youHaveSuccessfullyFreedUp": "You have successfully freed up {storageSaved}!",
+  "@youHaveSuccessfullyFreedUp": {
+    "description": "The text to display when the user has successfully freed up storage",
+    "type": "text",
+    "placeholders": {
+      "storageSaved": {
+        "example": "1.2 GB",
+        "type": "string"
+      }
+    }
+  },
+  "remindToEmptyEnteTrash": "Also empty your \"Trash\" to claim the freed up space",
+  "sparkleSuccess": "✨ Success",
+  "duplicateFileCountWithStorageSaved": "Your have cleaned up {count, plural, one{{count} duplicate file} other{{count} duplicate files}}, saving ({storageSaved}!)",
+  "@duplicateFileCountWithStorageSaved": {
+    "description": "The text to display when the user has successfully cleaned up duplicate files",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "storageSaved": {
+        "example": "1.2 GB",
+        "type": "String"
+      }
+    }
+  }
 }

@@ -27,7 +27,7 @@ class GeneralSectionWidget extends StatelessWidget {
       children: [
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
+          captionedTextWidget: CaptionedTextWidget(
             title: "Family plans",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
