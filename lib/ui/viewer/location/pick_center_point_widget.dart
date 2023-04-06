@@ -169,9 +169,9 @@ class PickCenterPointWidget extends StatelessWidget {
                                     final selectedFile =
                                         selectedFiles.files.first;
                                     await LocationService.instance
-                                        .updateCenterPoint(
-                                      locationTagEntity,
-                                      selectedFile.location!,
+                                        .updateLocationTag(
+                                      locationTagEntity: locationTagEntity,
+                                      newCenterPoint: selectedFile.location!,
                                     )
                                         .onError((e, s) {
                                       showGenericErrorDialog(context: context);

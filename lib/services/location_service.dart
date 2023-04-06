@@ -127,38 +127,6 @@ class LocationService {
     return [degrees, minutes, seconds];
   }
 
-  Future<void> updateCenterPoint(
-    LocalEntity<LocationTag> locationTagEntity,
-    Location newCenterPoint,
-  ) async {
-    try {
-      // await Future.delayed(const Duration(seconds: 2));
-      // assert(false);
-      final locationTag = locationTagEntity.item;
-      //Semi-major axis of the ellipse (b) doesn't change unless radius is changed.
-      final a = (locationTag.radius * _scaleFactor(newCenterPoint.latitude!)) /
-          kilometersPerDegree;
-      final updatedLoationTag = locationTagEntity.item
-          .copyWith(centerPoint: newCenterPoint, aSquare: a * a);
-      await EntityService.instance.addOrUpdate(
-        EntityType.location,
-        json.encode(updatedLoationTag.toJson()),
-        id: locationTagEntity.id,
-      );
-      Bus.instance.fire(
-        LocationTagUpdatedEvent(
-          LocTagEventType.update,
-          updatedLocTagEntities: [
-            LocalEntity(updatedLoationTag, locationTagEntity.id)
-          ],
-        ),
-      );
-    } catch (e, s) {
-      _logger.severe("Failed to update center point", e, s);
-      rethrow;
-    }
-  }
-
   ///Will only update if there is a change in the locationTag's properties
   Future<void> updateLocationTag({
     required LocalEntity<LocationTag> locationTagEntity,
