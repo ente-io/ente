@@ -140,7 +140,7 @@ class LocationService {
       final name = newName ?? locationTagEntity.item.name;
 
       final locationTag = locationTagEntity.item;
-      //Break if there is no change in locationTag's properties
+      //Exit if there is no change in locationTag's properties
       if (radius == locationTag.radius &&
           centerPoint == locationTag.centerPoint &&
           name == locationTag.name) {
@@ -201,7 +201,7 @@ class GPSData {
 
   GPSData(this.latRef, this.lat, this.longRef, this.long);
 
-  Location toLocationFormat() {
+  Location toLocationObj() {
     final latSign = latRef == "N" ? 1 : -1;
     final longSign = longRef == "E" ? 1 : -1;
     return Location(
