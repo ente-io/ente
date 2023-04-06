@@ -54,19 +54,23 @@ export async function getFileType(
             throw e;
         }
         const fileFormat = getFileExtension(receivedFile.name);
+        const fileSize = convertBytesToHumanReadable(getFileSize(receivedFile));
         const formatMissedByTypeDetection = FILE_TYPE_LIB_MISSED_FORMATS.find(
             (a) => a.exactType === fileFormat
         );
         if (formatMissedByTypeDetection) {
+            logError(Error(), 'format missed by type detection', {
+                fileFormat,
+                fileSize,
+            });
             return formatMissedByTypeDetection;
         }
         if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
-        const fileSize = getFileSize(receivedFile);
         logError(e, 'type detection failed', {
             fileFormat,
-            fileSize: convertBytesToHumanReadable(fileSize),
+            fileSize,
         });
         throw Error(CustomError.TYPE_DETECTION_FAILED(fileFormat));
     }
