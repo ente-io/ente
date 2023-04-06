@@ -519,5 +519,14 @@
   "disableTwofactor": "Disable two-factor",
   "confirm2FADisable": "Are you sure you want to disable two-factor authentication?",
   "no": "No",
-  "yes": "Yes"
+  "yes": "Yes",
+  "social": "Social",
+  "rateUsOnStore": "Rate us on {storeName}",
+  "blog": "Blog",
+  "merchandise": "Merchandise",
+  "twitter": "Twitter",
+  "mastodon": "Mastodon",
+  "matrix": "Matrix",
+  "discord": "Discord",
+  "reddit": "Reddit"
 }

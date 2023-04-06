@@ -3607,6 +3607,96 @@ class S {
       args: [],
     );
   }
+
+  /// `Social`
+  String get social {
+    return Intl.message(
+      'Social',
+      name: 'social',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rate us on {storeName}`
+  String rateUsOnStore(Object storeName) {
+    return Intl.message(
+      'Rate us on $storeName',
+      name: 'rateUsOnStore',
+      desc: '',
+      args: [storeName],
+    );
+  }
+
+  /// `Blog`
+  String get blog {
+    return Intl.message(
+      'Blog',
+      name: 'blog',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Merchandise`
+  String get merchandise {
+    return Intl.message(
+      'Merchandise',
+      name: 'merchandise',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Twitter`
+  String get twitter {
+    return Intl.message(
+      'Twitter',
+      name: 'twitter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mastodon`
+  String get mastodon {
+    return Intl.message(
+      'Mastodon',
+      name: 'mastodon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Matrix`
+  String get matrix {
+    return Intl.message(
+      'Matrix',
+      name: 'matrix',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discord`
+  String get discord {
+    return Intl.message(
+      'Discord',
+      name: 'discord',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reddit`
+  String get reddit {
+    return Intl.message(
+      'Reddit',
+      name: 'reddit',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
