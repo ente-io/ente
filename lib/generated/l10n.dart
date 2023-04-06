@@ -3877,6 +3877,227 @@ class S {
       args: [endDate],
     );
   }
+
+  /// `Subscription`
+  String get subscription {
+    return Intl.message(
+      'Subscription',
+      name: 'subscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Payment details`
+  String get paymentDetails {
+    return Intl.message(
+      'Payment details',
+      name: 'paymentDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage Family`
+  String get manageFamily {
+    return Intl.message(
+      'Manage Family',
+      name: 'manageFamily',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please contact us at support@ente.io to manage your {provider} subscription.`
+  String contactToManageSubscription(Object provider) {
+    return Intl.message(
+      'Please contact us at support@ente.io to manage your $provider subscription.',
+      name: 'contactToManageSubscription',
+      desc: '',
+      args: [provider],
+    );
+  }
+
+  /// `Renew subscription`
+  String get renewSubscription {
+    return Intl.message(
+      'Renew subscription',
+      name: 'renewSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancel subscription`
+  String get cancelSubscription {
+    return Intl.message(
+      'Cancel subscription',
+      name: 'cancelSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to renew?`
+  String get areYouSureYouWantToRenew {
+    return Intl.message(
+      'Are you sure you want to renew?',
+      name: 'areYouSureYouWantToRenew',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, Renew`
+  String get yesRenew {
+    return Intl.message(
+      'Yes, Renew',
+      name: 'yesRenew',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to cancel?`
+  String get areYouSureYouWantToCancel {
+    return Intl.message(
+      'Are you sure you want to cancel?',
+      name: 'areYouSureYouWantToCancel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, cancel`
+  String get yesCancel {
+    return Intl.message(
+      'Yes, cancel',
+      name: 'yesCancel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to renew`
+  String get failedToRenew {
+    return Intl.message(
+      'Failed to renew',
+      name: 'failedToRenew',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to cancel`
+  String get failedToCancel {
+    return Intl.message(
+      'Failed to cancel',
+      name: 'failedToCancel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `2 months free on yearly plans`
+  String get twoMonthsFreeOnYearlyPlans {
+    return Intl.message(
+      '2 months free on yearly plans',
+      name: 'twoMonthsFreeOnYearlyPlans',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Monthly`
+  String get monthly {
+    return Intl.message(
+      'Monthly',
+      name: 'monthly',
+      desc: 'The text to display for monthly plans',
+      args: [],
+    );
+  }
+
+  /// `Yearly`
+  String get yearly {
+    return Intl.message(
+      'Yearly',
+      name: 'yearly',
+      desc: 'The text to display for yearly plans',
+      args: [],
+    );
+  }
+
+  /// `Confirm plan change`
+  String get confirmPlanChange {
+    return Intl.message(
+      'Confirm plan change',
+      name: 'confirmPlanChange',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to change your plan?`
+  String get areYouSureYouWantToChangeYourPlan {
+    return Intl.message(
+      'Are you sure you want to change your plan?',
+      name: 'areYouSureYouWantToChangeYourPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You cannot downgrade to this plan`
+  String get youCannotDowngradeToThisPlan {
+    return Intl.message(
+      'You cannot downgrade to this plan',
+      name: 'youCannotDowngradeToThisPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please cancel your existing subscription from {paymentProvider} first`
+  String cancelOtherSubscription(String paymentProvider) {
+    return Intl.message(
+      'Please cancel your existing subscription from $paymentProvider first',
+      name: 'cancelOtherSubscription',
+      desc:
+          'The text to display when the user has an existing subscription from a different payment provider',
+      args: [paymentProvider],
+    );
+  }
+
+  /// `Optional, as short as you like...`
+  String get optionalAsShortAsYouLike {
+    return Intl.message(
+      'Optional, as short as you like...',
+      name: 'optionalAsShortAsYouLike',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send`
+  String get send {
+    return Intl.message(
+      'Send',
+      name: 'send',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your subscription was cancelled. Would you like to share the reason?`
+  String get askCancelReason {
+    return Intl.message(
+      'Your subscription was cancelled. Would you like to share the reason?',
+      name: 'askCancelReason',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
