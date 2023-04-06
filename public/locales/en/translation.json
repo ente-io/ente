@@ -508,5 +508,6 @@
     "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL": "Yes, I want to permanently delete this account and all its data",
     "CONFIRM_DELETE_ACCOUNT": "Confirm Account Deletion",
     "FEEDBACK_REQUIRED": "Kindly help us with this information",
-    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "What does the other service do better?"
+    "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "What does the other service do better?",
+    "RECOVER_TWO_FACTOR": "Recover two-factor"
 }

@@ -2,13 +2,11 @@ import VerifyTwoFactor, {
     VerifyTwoFactorCallback,
 } from 'components/TwoFactor/VerifyForm';
 import router from 'next/router';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { logoutUser, verifyTwoFactor } from 'services/userService';
-import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import { User } from 'types/user';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
-import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
 import LinkButton from 'components/pages/gallery/LinkButton';
@@ -16,12 +14,9 @@ import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
-import { Link } from '@mui/material';
-import { SUPPORT_EMAIL } from 'constants/urls';
 
 export default function Home() {
     const [sessionID, setSessionID] = useState('');
-    const appContext = useContext(AppContext);
 
     useEffect(() => {
         const main = async () => {
@@ -40,22 +35,6 @@ export default function Home() {
         };
         main();
     }, []);
-
-    const showContactSupport = () => {
-        appContext.setDialogMessage({
-            title: t('CONTACT_SUPPORT'),
-            close: {},
-            content: (
-                <Trans
-                    i18nKey="NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE"
-                    components={{
-                        a: <Link href={`mailto:${SUPPORT_EMAIL}`} />,
-                    }}
-                    values={{ emailID: SUPPORT_EMAIL }}
-                />
-            ),
-        });
-    };
 
     const onSubmit: VerifyTwoFactorCallback = async (otp) => {
         try {
@@ -83,9 +62,13 @@ export default function Home() {
                 <FormTitle>{t('TWO_FACTOR')}</FormTitle>
                 <VerifyTwoFactor onSubmit={onSubmit} buttonText={t('VERIFY')} />
 
-                <FormPaperFooter>
-                    <LinkButton onClick={showContactSupport}>
+                <FormPaperFooter style={{ justifyContent: 'space-between' }}>
+                    <LinkButton
+                        onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}>
                         {t('LOST_DEVICE')}
+                    </LinkButton>
+                    <LinkButton onClick={logoutUser}>
+                        {t('CHANGE_EMAIL')}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>
