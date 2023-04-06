@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -78,12 +79,15 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
                       valueListenable: _selectedFilesNotifier,
                       builder: (context, value, child) {
                         return Text(
-                          "${_selectedFilesNotifier.value} selected" +
-                              (_selectedOwnedFilesNotifier.value !=
-                                      _selectedFilesNotifier.value
-                                  ? " (${_selectedOwnedFilesNotifier.value} "
-                                      "yours) "
-                                  : ""),
+                          _selectedOwnedFilesNotifier.value !=
+                                  _selectedFilesNotifier.value
+                              ? S.of(context).selectedPhotosWithYours(
+                                    _selectedFilesNotifier.value,
+                                    _selectedOwnedFilesNotifier.value,
+                                  )
+                              : S.of(context).selectedPhotos(
+                                    _selectedFilesNotifier.value,
+                                  ),
                           style: textTheme.body.copyWith(
                             color: colorScheme.blurTextBase,
                           ),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/common/gradient_button.dart';
@@ -29,7 +30,7 @@ class PreserveFooterWidget extends StatelessWidget {
             );
           }
         },
-        text: "Preserve more",
+        text: S.of(context).preserveMore,
         iconData: Icons.cloud_upload_outlined,
       ),
     );

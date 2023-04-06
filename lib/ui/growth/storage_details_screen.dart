@@ -1,6 +1,7 @@
 import "dart:math";
 
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/services/storage_bonus_service.dart";
@@ -14,6 +15,7 @@ import "package:photos/utils/data_util.dart";
 class StorageDetailsScreen extends StatefulWidget {
   final ReferralView referralView;
   final UserDetails userDetails;
+
   const StorageDetailsScreen(this.referralView, this.userDetails, {super.key});
 
   @override
@@ -37,10 +39,10 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
-            flexibleSpaceTitle: const TitleBarTitleWidget(
-              title: "Claim free storage",
+            flexibleSpaceTitle: TitleBarTitleWidget(
+              title: S.of(context).claimFreeStorage,
             ),
-            flexibleSpaceCaption: "Details",
+            flexibleSpaceCaption: S.of(context).details,
             actionIcons: [
               IconButtonWidget(
                 icon: Icons.close_outlined,
@@ -79,7 +81,7 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                         }
                         if (snapshot.hasError) {
                           debugPrint(snapshot.error.toString());
-                          return const Text("Oops, something went wrong");
+                          return Text(S.of(context).oopsSomethingWentWrong);
                         } else {
                           final BonusDetails data = snapshot.data!;
                           return Padding(
@@ -89,24 +91,26 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 BonusInfoSection(
-                                  sectionName: "People using your code",
+                                  sectionName:
+                                      S.of(context).peopleUsingYourCode,
                                   leftValue: data.refUpgradeCount,
-                                  leftUnitName: "eligible",
+                                  leftUnitName: S.of(context).eligible,
                                   rightValue: data.refUpgradeCount >= 0
                                       ? data.refCount
                                       : null,
-                                  rightUnitName: "total",
+                                  rightUnitName: S.of(context).total,
                                   showUnit: data.refCount > 0,
                                 ),
                                 data.hasAppliedCode
-                                    ? const BonusInfoSection(
-                                        sectionName: "Code used by you",
+                                    ? BonusInfoSection(
+                                        sectionName:
+                                            S.of(context).codeUsedByYou,
                                         leftValue: 1,
                                         showUnit: false,
                                       )
                                     : const SizedBox.shrink(),
                                 BonusInfoSection(
-                                  sectionName: "Free storage claimed",
+                                  sectionName: S.of(context).freeStorageClaimed,
                                   leftValue: convertBytesToAbsoluteGBs(
                                     widget.referralView.claimedStorage,
                                   ),
@@ -114,7 +118,7 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                                   rightValue: null,
                                 ),
                                 BonusInfoSection(
-                                  sectionName: "Free storage usable",
+                                  sectionName: S.of(context).freeStorageUsable,
                                   leftValue: convertBytesToAbsoluteGBs(
                                     min(
                                       widget.referralView.claimedStorage,
@@ -131,10 +135,7 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                                   height: 24,
                                 ),
                                 Text(
-                                  "Usable storage is limited by your current"
-                                  " plan. Excess"
-                                  " claimed storage will automatically become"
-                                  " usable when you upgrade your plan.",
+                                  S.of(context).usableReferralStorageInfo,
                                   style: textStyle.small
                                       .copyWith(color: colorScheme.textMuted),
                                 )

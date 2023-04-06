@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
@@ -83,16 +84,16 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               purchase.verificationData.serverVerificationData,
             );
             await InAppPurchase.instance.completePurchase(purchase);
-            String text = "Thank you for subscribing!";
+            String text = S.of(context).thankYouForSubscribing;
             if (!widget.isOnboarding) {
               final isUpgrade = _hasActiveSubscription &&
                   newSubscription.storage > _currentSubscription!.storage;
               final isDowngrade = _hasActiveSubscription &&
                   newSubscription.storage < _currentSubscription!.storage;
               if (isUpgrade) {
-                text = "Your plan was successfully upgraded";
+                text = S.of(context).yourPlanWasSuccessfullyUpgraded;
               } else if (isDowngrade) {
-                text = "Your plan was successfully downgraded";
+                text = S.of(context).yourPlanWasSuccessfullyDowngraded;
               }
             }
             showShortToast(context, text);
@@ -107,13 +108,13 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           } on SubscriptionAlreadyClaimedError catch (e) {
             _logger.warning("subscription is already claimed ", e);
             await _dialog.hide();
-            final String title = "${Platform.isAndroid ? "Play" : "App"}"
-                "Store subscription";
-            final String id =
-                Platform.isAndroid ? "Google Play ID" : "Apple ID";
-            final String message = '''Your $id is already linked to another
-             ente account.\nIf you would like to use your $id with this 
-             account, please contact our support''';
+            final String title = Platform.isAndroid
+                ? S.of(context).playstoreSubscription
+                : S.of(context).appstoreSubscription;
+            final String id = Platform.isAndroid
+                ? S.of(context).googlePlayId
+                : S.of(context).appleId;
+            final String message = S.of(context).subAlreadyLinkedErrMessage(id);
             showErrorDialog(context, title, message);
             return;
           } catch (e) {
@@ -121,10 +122,10 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             await _dialog.hide();
             showErrorDialog(
               context,
-              "Payment failed",
-              "Please talk to " +
-                  (Platform.isAndroid ? "PlayStore" : "AppStore") +
-                  " support if you were charged",
+              S.of(context).paymentFailed,
+              S.of(context).paymentFailedTalkToProvider(
+                    Platform.isAndroid ? "PlayStore" : "AppStore",
+                  ),
             );
             return;
           }
@@ -152,11 +153,11 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       _isLoading = true;
       _fetchSubData();
     }
-    _dialog = createProgressDialog(context, "Please wait...");
+    _dialog = createProgressDialog(context, S.of(context).pleaseWait);
     final appBar = AppBar(
       title: widget.isOnboarding
           ? null
-          : const Text("Subscription${kDebugMode ? ' Store' : ''}"),
+          : Text("${S.of(context).subscription}${kDebugMode ? ' Store' : ''}"),
     );
     return Scaffold(
       appBar: appBar,
@@ -255,7 +256,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
             child: Text(
-              "Visit web.ente.io to manage your subscription",
+              S.of(context).visitWebToManage,
               style: getEnteTextTheme(context).small.copyWith(
                     color: colorScheme.textMuted,
                   ),
@@ -267,8 +268,8 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 40, 16, 4),
             child: MenuItemWidget(
-              captionedTextWidget: const CaptionedTextWidget(
-                title: "Payment details",
+              captionedTextWidget: CaptionedTextWidget(
+                title: S.of(context).paymentDetails,
               ),
               menuItemColor: colorScheme.fillFaint,
               trailingWidget: Icon(
@@ -291,7 +292,9 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
           child: MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
-              title: _isFreePlanUser() ? "Family Plans" : "Manage Family",
+              title: _isFreePlanUser()
+                  ? S.of(context).familyPlans
+                  : S.of(context).manageFamily,
             ),
             menuItemColor: colorScheme.fillFaint,
             trailingWidget: Icon(
@@ -328,8 +331,8 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     } else if (paymentProvider == stripe) {
       showErrorDialog(
         context,
-        "Sorry",
-        "Visit web.ente.io to manage your subscription",
+        S.of(context).sorry,
+        S.of(context).visitWebToManage,
       );
     } else {
       final String capitalizedWord = paymentProvider.isNotEmpty
@@ -337,9 +340,8 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           : '';
       showErrorDialog(
         context,
-        "Sorry",
-        "Please contact us at support@ente.io to manage your "
-            "$capitalizedWord subscription.",
+        S.of(context).sorry,
+        S.of(context).contactToManageSubscription(capitalizedWord),
       );
     }
   }
@@ -388,7 +390,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                planText("Monthly", showYearlyPlan),
+                planText(S.of(context).monthly, showYearlyPlan),
                 Switch(
                   value: showYearlyPlan,
                   activeColor: Colors.white,
@@ -399,13 +401,13 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
                     await _filterStorePlansForUi();
                   },
                 ),
-                planText("Yearly", !showYearlyPlan),
+                planText(S.of(context).yearly, !showYearlyPlan),
               ],
             ),
           ),
           _isFreePlanUser()
               ? Text(
-                  "2 months free on yearly plans",
+                  S.of(context).twoMonthsFreeOnYearlyPlans,
                   style: getEnteTextTheme(context).miniMuted,
                 )
               : const SizedBox.shrink(),
@@ -438,8 +440,8 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               }
               showErrorDialog(
                 context,
-                "Sorry",
-                "Please visit web.ente.io to manage your subscription",
+                S.of(context).sorry,
+                S.of(context).visitWebToManage,
               );
             },
             child: SubscriptionPlanWidget(
@@ -467,7 +469,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       planWidgets.add(
         SubscriptionPlanWidget(
           storage: _freePlan.storage,
-          price: "Free trial",
+          price: S.of(context).freeTrial,
           period: "",
           isActive: true,
         ),
@@ -490,8 +492,8 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               if (_userDetails.getFamilyOrPersonalUsage() > plan.storage) {
                 showErrorDialog(
                   context,
-                  "Sorry",
-                  "You cannot downgrade to this plan",
+                  S.of(context).sorry,
+                  S.of(context).youCannotDowngradeToThisPlan,
                 );
                 return;
               }
@@ -514,8 +516,8 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
                 await _dialog.hide();
                 showErrorDialog(
                   context,
-                  "Could not update subscription",
-                  "Please contact support@ente.io and we will be happy to help!",
+                  S.of(context).couldNotUpdateSubscription,
+                  S.of(context).pleaseContactSupportAndWeWillBeHappyToHelp,
                 );
                 return;
               } else {

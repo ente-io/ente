@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collection_action_sheet.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -44,24 +45,24 @@ class EmptyStateWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Private sharing",
+                      S.of(context).privateSharing,
                       style: textTheme.h3Bold,
                       textAlign: TextAlign.start,
                     ),
                     const SizedBox(height: 24),
                     Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
+                      children: [
                         EmptyStateItemWidget(
-                          "Share only with the people you want",
+                          S.of(context).shareOnlyWithThePeopleYouWant,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         EmptyStateItemWidget(
-                          "Use public links for people not on ente",
+                          S.of(context).usePublicLinksForPeopleNotOnEnte,
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         EmptyStateItemWidget(
-                          "Allow people to add photos",
+                          S.of(context).allowPeopleToAddPhotos,
                         ),
                       ],
                     ),
@@ -76,7 +77,7 @@ class EmptyStateWidget extends StatelessWidget {
                   children: [
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconPrimary,
-                      labelText: "Share an album now",
+                      labelText: S.of(context).shareAnAlbumNow,
                       icon: Icons.arrow_forward_outlined,
                       onTap: () async {
                         showCollectionActionSheet(
@@ -88,7 +89,7 @@ class EmptyStateWidget extends StatelessWidget {
                     const SizedBox(height: 6),
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
-                      labelText: "Collect event photos",
+                      labelText: S.of(context).collectEventPhotos,
                       icon: Icons.add_photo_alternate_outlined,
                       onTap: () async {
                         showCollectionActionSheet(
@@ -100,10 +101,10 @@ class EmptyStateWidget extends StatelessWidget {
                     const SizedBox(height: 6),
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
-                      labelText: "Invite your friends",
+                      labelText: S.of(context).inviteYourFriends,
                       icon: Icons.ios_share_outlined,
                       onTap: () async {
-                        shareText("Check out https://ente.io");
+                        shareText(S.of(context).shareTextRecommendUsingEnte);
                       },
                     ),
                   ],

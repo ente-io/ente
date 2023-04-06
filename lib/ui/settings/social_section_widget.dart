@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -13,7 +14,7 @@ class SocialSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "Social",
+      title: S.of(context).social,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.interests_outlined,
     );
@@ -27,28 +28,40 @@ class SocialSectionWidget extends StatelessWidget {
     options.addAll(
       [
         sectionOptionSpacing,
-        SocialsMenuItemWidget("Rate us on $ratePlace", rateUrl),
+        SocialsMenuItemWidget(S.of(context).rateUsOnStore(ratePlace), rateUrl),
         sectionOptionSpacing,
       ],
     );
     options.addAll(
       [
-        const SocialsMenuItemWidget("Blog", "https://ente.io/blog"),
+        SocialsMenuItemWidget(S.of(context).blog, "https://ente.io/blog"),
         sectionOptionSpacing,
-        const SocialsMenuItemWidget("Merchandise", "https://shop.ente.io"),
+        SocialsMenuItemWidget(
+          S.of(context).merchandise,
+          "https://shop.ente.io",
+        ),
         sectionOptionSpacing,
-        const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),
+        SocialsMenuItemWidget(
+          S.of(context).twitter,
+          "https://twitter.com/enteio",
+        ),
         sectionOptionSpacing,
-        const SocialsMenuItemWidget("Mastodon", "https://mstdn.social/@ente"),
+        SocialsMenuItemWidget(
+          S.of(context).mastodon,
+          "https://mstdn.social/@ente",
+        ),
         sectionOptionSpacing,
-        const SocialsMenuItemWidget(
-          "Matrix",
+        SocialsMenuItemWidget(
+          S.of(context).matrix,
           "https://ente.io/matrix/",
         ),
         sectionOptionSpacing,
-        const SocialsMenuItemWidget("Discord", "https://ente.io/discord"),
+        SocialsMenuItemWidget(S.of(context).discord, "https://ente.io/discord"),
         sectionOptionSpacing,
-        const SocialsMenuItemWidget("Reddit", "https://reddit.com/r/enteio"),
+        SocialsMenuItemWidget(
+          S.of(context).reddit,
+          "https://reddit.com/r/enteio",
+        ),
         sectionOptionSpacing,
       ],
     );
@@ -60,6 +73,7 @@ class SocialSectionWidget extends StatelessWidget {
 class SocialsMenuItemWidget extends StatelessWidget {
   final String text;
   final String urlSring;
+
   const SocialsMenuItemWidget(this.text, this.urlSring, {Key? key})
       : super(key: key);
 

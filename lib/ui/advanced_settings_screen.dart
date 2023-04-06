@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -34,8 +35,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
-            flexibleSpaceTitle: const TitleBarTitleWidget(
-              title: "Advanced",
+            flexibleSpaceTitle: TitleBarTitleWidget(
+              title: S.of(context).advancedSettings,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -74,7 +75,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                               },
                               child: MenuItemWidget(
                                 captionedTextWidget: CaptionedTextWidget(
-                                  title: "Photo grid size",
+                                  title: S.of(context).photoGridSize,
                                   subTitle: _photoGridSize.toString(),
                                 ),
                                 menuItemColor: colorScheme.fillFaint,
@@ -91,8 +92,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                               height: 24,
                             ),
                             MenuItemWidget(
-                              captionedTextWidget: const CaptionedTextWidget(
-                                title: "Manage device storage",
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).manageDeviceStorage,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingWidget: Icon(

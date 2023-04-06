@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/subscription.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
@@ -36,19 +37,19 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
             Row(
               children: [
                 Text(
-                  "Select your plan",
+                  S.of(context).selectYourPlan,
                   style: Theme.of(context).textTheme.headline4,
                 ),
               ],
             ),
             const SizedBox(height: 10),
             Text(
-              "ente preserves your memories, so they're always available to you, even if you lose your device.",
+              S.of(context).enteSubscriptionPitch,
               style: Theme.of(context).textTheme.caption,
             ),
             const SizedBox(height: 4),
             Text(
-              "Your family can be added to your plan as well. ",
+              S.of(context).enteSubscriptionShareWithFamily,
               style: Theme.of(context).textTheme.caption,
             ),
           ],
@@ -64,7 +65,7 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: "Current usage is ",
+                  text: S.of(context).currentUsageIs,
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
                 TextSpan(
@@ -96,11 +97,11 @@ class ValidityWidget extends StatelessWidget {
     final endDate = getDateAndMonthAndYear(
       DateTime.fromMicrosecondsSinceEpoch(currentSubscription!.expiryTime),
     );
-    var message = "Renews on $endDate";
+    var message = S.of(context).renewsOn(endDate);
     if (currentSubscription!.productID == freeProductID) {
-      message = "Free trial valid till $endDate";
+      message = S.of(context).freeTrialValidTill(endDate);
     } else if (currentSubscription!.attributes?.isCancelled ?? false) {
-      message = "Your subscription will be cancelled on $endDate";
+      message = S.of(context).subWillBeCancelledOn(endDate);
     }
     return Padding(
       padding: const EdgeInsets.only(top: 8),
@@ -123,8 +124,8 @@ class SubFaqWidget extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 40, 16, isOnboarding ? 40 : 4),
       child: MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "FAQs",
+        captionedTextWidget: CaptionedTextWidget(
+          title: S.of(context).faqs,
         ),
         menuItemColor: colorScheme.fillFaint,
         trailingWidget: Icon(

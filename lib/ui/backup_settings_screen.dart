@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -23,8 +24,8 @@ class BackupSettingsScreen extends StatelessWidget {
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
-            flexibleSpaceTitle: const TitleBarTitleWidget(
-              title: "Backup settings",
+            flexibleSpaceTitle: TitleBarTitleWidget(
+              title: S.of(context).backupSettings,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -50,8 +51,8 @@ class BackupSettingsScreen extends StatelessWidget {
                         Column(
                           children: [
                             MenuItemWidget(
-                              captionedTextWidget: const CaptionedTextWidget(
-                                title: "Backup over mobile data",
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).backupOverMobileData,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingWidget: ToggleSwitchWidget(
@@ -75,8 +76,8 @@ class BackupSettingsScreen extends StatelessWidget {
                               bgColor: colorScheme.fillFaint,
                             ),
                             MenuItemWidget(
-                              captionedTextWidget: const CaptionedTextWidget(
-                                title: "Backup videos",
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).backupVideos,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingWidget: ToggleSwitchWidget(
@@ -99,9 +100,8 @@ class BackupSettingsScreen extends StatelessWidget {
                             ? Column(
                                 children: [
                                   MenuItemWidget(
-                                    captionedTextWidget:
-                                        const CaptionedTextWidget(
-                                      title: "Disable auto lock",
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: S.of(context).disableAutoLock,
                                     ),
                                     menuItemColor: colorScheme.fillFaint,
                                     trailingWidget: ToggleSwitchWidget(
@@ -119,9 +119,9 @@ class BackupSettingsScreen extends StatelessWidget {
                                     alignCaptionedTextToLeft: true,
                                     isGestureDetectorDisabled: true,
                                   ),
-                                  const MenuSectionDescriptionWidget(
+                                  MenuSectionDescriptionWidget(
                                     content:
-                                        "Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster.",
+                                        S.of(context).deviceLockExplanation,
                                   )
                                 ],
                               )

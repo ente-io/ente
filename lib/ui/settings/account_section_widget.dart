@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -21,7 +22,7 @@ class AccountSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "Account",
+      title: S.of(context).account,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.account_circle_outlined,
     );
@@ -32,8 +33,8 @@ class AccountSectionWidget extends StatelessWidget {
       children: [
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Manage subscription",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).manageSubscription,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -44,8 +45,8 @@ class AccountSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Change email",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).changeEmail,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -55,7 +56,7 @@ class AccountSectionWidget extends StatelessWidget {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
               context,
-              "Please authenticate to change your email",
+              S.of(context).authToChangeYourEmail,
             );
             if (hasAuthenticated) {
               showDialog(
@@ -71,8 +72,8 @@ class AccountSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Change password",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).changePassword,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -82,7 +83,7 @@ class AccountSectionWidget extends StatelessWidget {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
               context,
-              "Please authenticate to change your password",
+              S.of(context).authToChangeYourPassword,
             );
             if (hasAuthenticated) {
               Navigator.of(context).push(
@@ -99,8 +100,8 @@ class AccountSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Export your data ",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).exportYourData,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -111,8 +112,8 @@ class AccountSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Logout",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).logout,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -123,8 +124,8 @@ class AccountSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Delete account",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).deleteAccount,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -133,7 +134,7 @@ class AccountSectionWidget extends StatelessWidget {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
               context,
-              "Please authenticate to initiate account deletion",
+              S.of(context).authToInitiateAccountDeletion,
             );
             if (hasAuthenticated) {
               unawaited(
@@ -156,8 +157,8 @@ class AccountSectionWidget extends StatelessWidget {
   void _onLogoutTapped(BuildContext context) {
     showChoiceActionSheet(
       context,
-      title: "Are you sure you want to logout?",
-      firstButtonLabel: "Yes, logout",
+      title: S.of(context).areYouSureYouWantToLogout,
+      firstButtonLabel: S.of(context).yesLogout,
       isCritical: true,
       firstButtonOnTap: () async {
         await UserService.instance.logout(context);

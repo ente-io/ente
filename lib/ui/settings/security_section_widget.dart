@@ -5,6 +5,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -52,7 +53,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "Security",
+      title: S.of(context).security,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.local_police_outlined,
     );
@@ -66,8 +67,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         [
           sectionOptionSpacing,
           MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Recovery key",
+            captionedTextWidget: CaptionedTextWidget(
+              title: S.of(context).recoveryKey,
             ),
             pressedColor: getEnteColorScheme(context).fillFaint,
             trailingIcon: Icons.chevron_right_outlined,
@@ -77,7 +78,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               final hasAuthenticated = await LocalAuthenticationService.instance
                   .requestLocalAuthentication(
                 context,
-                "Please authenticate to view your recovery key",
+                S.of(context).authToViewYourRecoveryKey,
               );
               if (hasAuthenticated) {
                 String recoveryKey;
@@ -92,7 +93,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                     context,
                     RecoveryKeyPage(
                       recoveryKey,
-                      "OK",
+                      S.of(context).ok,
                       showAppBar: true,
                       onDone: () {},
                     ),
@@ -103,8 +104,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           ),
           sectionOptionSpacing,
           MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Two-factor",
+            captionedTextWidget: CaptionedTextWidget(
+              title: S.of(context).twofactor,
             ),
             trailingWidget: ToggleSwitchWidget(
               value: () => UserService.instance.hasEnabledTwoFactor(),
@@ -113,7 +114,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                     .instance
                     .requestLocalAuthentication(
                   context,
-                  "Please authenticate to configure two-factor authentication",
+                  S.of(context).authToConfigureTwofactorAuthentication,
                 );
                 final isTwoFactorEnabled =
                     UserService.instance.hasEnabledTwoFactor();
@@ -136,8 +137,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     }
     children.addAll([
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Lockscreen",
+        captionedTextWidget: CaptionedTextWidget(
+          title: S.of(context).lockscreen,
         ),
         trailingWidget: ToggleSwitchWidget(
           value: () => _config.shouldShowLockScreen(),
@@ -146,16 +147,16 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                 .requestLocalAuthForLockScreen(
               context,
               !_config.shouldShowLockScreen(),
-              "Please authenticate to change lockscreen setting",
-              "To enable lockscreen, please setup device passcode or screen lock in your system settings.",
+              S.of(context).authToChangeLockscreenSetting,
+              S.of(context).lockScreenEnablePreSteps,
             );
           },
         ),
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "View active sessions",
+        captionedTextWidget: CaptionedTextWidget(
+          title: S.of(context).viewActiveSessions,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -165,7 +166,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
             context,
-            "Please authenticate to view your active sessions",
+            S.of(context).authToViewYourActiveSessions,
           );
           if (hasAuthenticated) {
             unawaited(
@@ -189,14 +190,14 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   Future<void> _disableTwoFactor() async {
     final AlertDialog alert = AlertDialog(
-      title: const Text("Disable two-factor"),
-      content: const Text(
-        "Are you sure you want to disable two-factor authentication?",
+      title: Text(S.of(context).disableTwofactor),
+      content: Text(
+        S.of(context).confirm2FADisable,
       ),
       actions: [
         TextButton(
           child: Text(
-            "No",
+            S.of(context).no,
             style: TextStyle(
               color: Theme.of(context).colorScheme.greenAlternative,
             ),
@@ -206,9 +207,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           },
         ),
         TextButton(
-          child: const Text(
-            "Yes",
-            style: TextStyle(
+          child: Text(
+            S.of(context).yes,
+            style: const TextStyle(
               color: Colors.red,
             ),
           ),

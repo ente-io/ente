@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
@@ -63,22 +64,23 @@ class CollectionActions {
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
-          labelText: "Yes, remove",
+          labelText: S.of(context).yesRemove,
           onTap: () async {
             await CollectionsService.instance.disableShareUrl(collection);
           },
         ),
-        const ButtonWidget(
+        ButtonWidget(
           buttonType: ButtonType.secondary,
           buttonAction: ButtonAction.cancel,
           isInAlert: true,
           shouldStickToDarkTheme: true,
-          labelText: "Cancel",
+          labelText: S.of(context).cancel,
         )
       ],
-      title: "Remove public link",
+      title: S.of(context).removePublicLink,
       body:
-          'This will remove the public link for accessing "${collection.name}".',
+          //'This will remove the public link for accessing "${collection.name}".',
+          S.of(context).disableLinkMessage(collection.collectionName),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
@@ -94,8 +96,8 @@ class CollectionActions {
     BuildContext context,
     List<File> files,
   ) async {
-    final dialog =
-        createProgressDialog(context, "Creating link...", isDismissible: true);
+    final dialog = createProgressDialog(context, S.of(context).creatingLink,
+        isDismissible: true);
     dialog.show();
     try {
       // create album with emptyName, use collectionCreationTime on UI to
@@ -141,33 +143,31 @@ class CollectionActions {
     User user,
   ) async {
     final actionResult = await showActionSheet(
-      context: context,
-      buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.critical,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: "Yes, remove",
-          onTap: () async {
-            final newSharees = await CollectionsService.instance
-                .unshare(collection.id, user.email);
-            collection.updateSharees(newSharees);
-          },
-        ),
-        const ButtonWidget(
-          buttonType: ButtonType.secondary,
-          buttonAction: ButtonAction.cancel,
-          isInAlert: true,
-          shouldStickToDarkTheme: true,
-          labelText: "Cancel",
-        )
-      ],
-      title: "Remove?",
-      body: '${user.email} will be removed from this shared album\n\nAny '
-          'photos added by them will also be removed from the album',
-    );
+        context: context,
+        buttons: [
+          ButtonWidget(
+            buttonType: ButtonType.critical,
+            isInAlert: true,
+            shouldStickToDarkTheme: true,
+            buttonAction: ButtonAction.first,
+            shouldSurfaceExecutionStates: true,
+            labelText: S.of(context).yesRemove,
+            onTap: () async {
+              final newSharees = await CollectionsService.instance
+                  .unshare(collection.id, user.email);
+              collection.updateSharees(newSharees);
+            },
+          ),
+          ButtonWidget(
+            buttonType: ButtonType.secondary,
+            buttonAction: ButtonAction.cancel,
+            isInAlert: true,
+            shouldStickToDarkTheme: true,
+            labelText: S.of(context).cancel,
+          )
+        ],
+        title: S.of(context).removeWithQuestionMark,
+        body: S.of(context).removeParticipantBody(user.email));
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
         showGenericErrorDialog(context: context);
@@ -188,19 +188,21 @@ class CollectionActions {
     if (!isValidEmail(email)) {
       await showErrorDialog(
         context,
-        "Invalid email address",
-        "Please enter a valid email address.",
+        S.of(context).invalidEmailAddress,
+        S.of(context).enterValidEmail,
       );
       return false;
     } else if (email.trim() == Configuration.instance.getEmail()) {
-      await showErrorDialog(context, "Oops", "You cannot share with yourself");
+      await showErrorDialog(context, S.of(context).oops,
+          S.of(context).youCannotShareWithYourself);
       return false;
     }
 
     ProgressDialog? dialog;
     String? publicKey;
     if (showProgress) {
-      dialog = createProgressDialog(context, "Sharing...", isDismissible: true);
+      dialog = createProgressDialog(context, S.of(context).sharing,
+          isDismissible: true);
       await dialog.show();
     }
 
@@ -219,21 +221,19 @@ class CollectionActions {
       // is used for error. Do this change along with handling of network errors
       await showDialogWidget(
         context: context,
-        title: "Invite to ente",
+        title: S.of(context).inviteToEnte,
         icon: Icons.info_outline,
-        body: "$email does not have an ente account\n\nSend them an invite to"
-            " add them after they sign up",
+        body: S.of(context).emailNoEnteAccount(email),
         isDismissible: true,
         buttons: [
           ButtonWidget(
             buttonType: ButtonType.neutral,
             icon: Icons.adaptive.share,
-            labelText: "Send invite",
+            labelText: S.of(context).sendInvite,
             isInAlert: true,
             onTap: () async {
               shareText(
-                "Download ente so we can easily share original quality photos"
-                " and videos\n\nhttps://ente.io/#download",
+                S.of(context).shareTextRecommendUsingEnte,
               );
             },
           ),
@@ -281,7 +281,7 @@ class CollectionActions {
       context: bContext,
       buttons: [
         ButtonWidget(
-          labelText: "Keep Photos",
+          labelText: S.of(bContext).keepPhotos,
           buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.first,
@@ -301,7 +301,7 @@ class CollectionActions {
           },
         ),
         ButtonWidget(
-          labelText: "Delete photos",
+          labelText: S.of(bContext).deletePhotos,
           buttonType: ButtonType.critical,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
@@ -316,8 +316,8 @@ class CollectionActions {
             }
           },
         ),
-        const ButtonWidget(
-          labelText: "Cancel",
+        ButtonWidget(
+          labelText: S.of(bContext).cancel,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.third,
@@ -329,16 +329,15 @@ class CollectionActions {
         text: TextSpan(
           style: textTheme.body.copyWith(color: textMutedDark),
           children: <TextSpan>[
-            const TextSpan(
-              text: 'Also delete the photos (and videos) present in this '
-                  'album from ',
+            TextSpan(
+              text: S.of(bContext).deleteAlbumDialogPart1,
             ),
             TextSpan(
-              text: 'all',
+              text: S.of(bContext).deleteAlbumDialogPart2Bold,
               style: textTheme.body.copyWith(color: textBaseDark),
             ),
-            const TextSpan(
-              text: ' other albums they are part of?',
+            TextSpan(
+              text: S.of(bContext).deleteAlbumDialogPart3,
             ),
           ],
         ),
@@ -367,10 +366,9 @@ class CollectionActions {
     final actionResult = await showChoiceActionSheet(
       context,
       isCritical: true,
-      title: "Delete shared album?",
-      firstButtonLabel: "Delete album",
-      body: "The album will be deleted for everyone\n\nYou will lose access to "
-          "shared photos in this album that are owned by others",
+      title: S.of(context).deleteSharedAlbum,
+      firstButtonLabel: S.of(context).deleteAlbum,
+      body: S.of(context).deleteSharedAlbumDialogBody,
     );
     return actionResult?.action != null &&
         actionResult!.action == ButtonAction.first;
@@ -420,7 +418,7 @@ class CollectionActions {
     }
 
     if (!isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
-      showShortToast(context, "Can only remove files owned by you");
+      showShortToast(context, S.of(context).canOnlyRemoveFilesOwnedByYou);
       return;
     }
 
@@ -523,15 +521,14 @@ class CollectionActions {
 
   void _showUnSupportedAlert(BuildContext context) {
     final AlertDialog alert = AlertDialog(
-      title: const Text("Sorry"),
-      content: const Text(
-        "Looks like your subscription has expired. Please subscribe to enable"
-        " sharing.",
+      title: Text(S.of(context).sorry),
+      content: Text(
+        S.of(context).subscribeToEnableSharing,
       ),
       actions: [
         TextButton(
           child: Text(
-            "Subscribe",
+            S.of(context).subscribe,
             style: TextStyle(
               color: Theme.of(context).colorScheme.greenAlternative,
             ),
@@ -549,7 +546,7 @@ class CollectionActions {
         ),
         TextButton(
           child: Text(
-            "Ok",
+            S.of(context).ok,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
             ),

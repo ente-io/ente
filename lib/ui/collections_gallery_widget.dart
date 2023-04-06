@@ -10,6 +10,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/extensions/list.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
@@ -193,13 +194,13 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       String text = key.toString();
       switch (key) {
         case AlbumSortKey.albumName:
-          text = "Name";
+          text = S.of(context).name;
           break;
         case AlbumSortKey.newestPhoto:
-          text = "Newest";
+          text = S.of(context).newest;
           break;
         case AlbumSortKey.lastUpdated:
-          text = "Last updated";
+          text = S.of(context).lastUpdated;
       }
       return Text(
         text,

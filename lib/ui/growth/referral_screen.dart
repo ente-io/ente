@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/services/storage_bonus_service.dart";
@@ -53,10 +54,10 @@ class _ReferralScreenState extends State<ReferralScreen> {
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
-            flexibleSpaceTitle: const TitleBarTitleWidget(
-              title: "Claim free storage",
+            flexibleSpaceTitle: TitleBarTitleWidget(
+              title: S.of(context).claimFreeStorage,
             ),
-            flexibleSpaceCaption: "Invite your friends",
+            flexibleSpaceCaption: S.of(context).inviteYourFriends,
             actionIcons: [
               IconButtonWidget(
                 icon: Icons.close_outlined,
@@ -84,11 +85,11 @@ class _ReferralScreenState extends State<ReferralScreen> {
                           notifyParent: _safeUIUpdate,
                         );
                       } else if (snapshot.hasError) {
-                        return const Center(
+                        return Center(
                           child: Padding(
-                            padding: EdgeInsets.all(24.0),
+                            padding: const EdgeInsets.all(24.0),
                             child: Text(
-                              "Unable to fetch referral details. Please try again later.",
+                              S.of(context).failedToFetchReferralDetails,
                             ),
                           ),
                         );
@@ -134,7 +135,10 @@ class ReferralWidget extends StatelessWidget {
             ? InkWell(
                 onTap: () {
                   shareText(
-                    "ente referral code: ${referralView.code} \n\nApply it in Settings → General → Referrals to get 10 GB free after you signup for a paid plan\n\nhttps://ente.io",
+                    S.of(context).shareTextReferralCode(
+                          referralView.code,
+                          referralView.planInfo.storageInGB,
+                        ),
                   );
                 },
                 child: Container(
@@ -154,20 +158,20 @@ class ReferralWidget extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "1. Give this code to your "
-                          "friends",
+                        Text(
+                          S.of(context).referralStep1,
                         ),
                         const SizedBox(height: 12),
                         ReferralCodeWidget(referralView.code),
                         const SizedBox(height: 12),
-                        const Text(
-                          "2. They sign up for a paid plan",
+                        Text(
+                          S.of(context).referralStep2,
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          "3. Both of you get ${referralView.planInfo.storageInGB} "
-                          "GB* free",
+                          S
+                              .of(context)
+                              .referralStep3(referralView.planInfo.storageInGB),
                         ),
                       ],
                     ),
@@ -186,7 +190,7 @@ class ReferralWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        "Referrals are currently paused",
+                        S.of(context).referralsAreCurrentlyPaused,
                         style: textStyle.small
                             .copyWith(color: colorScheme.textFaint),
                       ),
@@ -197,7 +201,7 @@ class ReferralWidget extends StatelessWidget {
         const SizedBox(height: 4),
         isReferralEnabled
             ? Text(
-                "* You can at max double your storage",
+                S.of(context).youCanAtMaxDoubleYourStorage,
                 style: textStyle.mini.copyWith(
                   color: colorScheme.textMuted,
                 ),
@@ -207,8 +211,8 @@ class ReferralWidget extends StatelessWidget {
         const SizedBox(height: 24),
         referralView.enableApplyCode
             ? MenuItemWidget(
-                captionedTextWidget: const CaptionedTextWidget(
-                  title: "Apply code",
+                captionedTextWidget: CaptionedTextWidget(
+                  title: S.of(context).applyCodeTitle,
                 ),
                 menuItemColor: colorScheme.fillFaint,
                 trailingWidget: Icon(
@@ -234,8 +238,8 @@ class ReferralWidget extends StatelessWidget {
               )
             : const SizedBox.shrink(),
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "FAQ",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).faq,
           ),
           menuItemColor: colorScheme.fillFaint,
           trailingWidget: Icon(
@@ -248,8 +252,8 @@ class ReferralWidget extends StatelessWidget {
           onTap: () async {
             routeToPage(
               context,
-              const WebPage(
-                "FAQ",
+              WebPage(
+                S.of(context).faq,
                 "https://ente.io/faq/general/referral-program",
               ),
             );
@@ -262,16 +266,18 @@ class ReferralWidget extends StatelessWidget {
             vertical: 6.0,
           ),
           child: Text(
-            "${referralView.isFamilyMember ? 'Your family has' : 'You have'} claimed "
-            "${convertBytesToAbsoluteGBs(referralView.claimedStorage)} GB so far",
+            S.of(context).claimedStorageSoFar(
+                  referralView.isFamilyMember.toString().toLowerCase(),
+                  convertBytesToAbsoluteGBs(referralView.claimedStorage),
+                ),
             style: textStyle.small.copyWith(
               color: colorScheme.textMuted,
             ),
           ),
         ),
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Details",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).details,
           ),
           menuItemColor: colorScheme.fillFaint,
           trailingWidget: Icon(

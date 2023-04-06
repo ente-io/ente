@@ -19,6 +19,7 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
@@ -192,12 +193,12 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<void> _autoLogoutAlert() async {
     final AlertDialog alert = AlertDialog(
-      title: const Text("Session expired"),
-      content: const Text("Please login again"),
+      title: Text(S.of(context).sessionExpired),
+      content: Text(S.of(context).pleaseLoginAgain),
       actions: [
         TextButton(
           child: Text(
-            "Ok",
+            S.of(context).ok,
             style: TextStyle(
               color: Theme.of(context).colorScheme.greenAlternative,
             ),
@@ -205,7 +206,8 @@ class _HomeWidgetState extends State<HomeWidget> {
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             Navigator.of(context).popUntil((route) => route.isFirst);
-            final dialog = createProgressDialog(context, "Logging out...");
+            final dialog =
+                createProgressDialog(context, S.of(context).loggingOut);
             await dialog.show();
             await Configuration.instance.logout();
             await dialog.hide();

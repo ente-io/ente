@@ -2031,10 +2031,10 @@ class S {
     );
   }
 
-  /// `Download ente so we can easily share original `
+  /// `Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io/#download`
   String get shareTextRecommendUsingEnte {
     return Intl.message(
-      'Download ente so we can easily share original ',
+      'Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io/#download',
       name: 'shareTextRecommendUsingEnte',
       desc: '',
       args: [],
@@ -2050,6 +2050,2708 @@ class S {
       args: [],
     );
   }
+
+  /// `Apply code`
+  String get applyCodeTitle {
+    return Intl.message(
+      'Apply code',
+      name: 'applyCodeTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the code provided by your friend to claim free storage for both of you`
+  String get enterCodeDescription {
+    return Intl.message(
+      'Enter the code provided by your friend to claim free storage for both of you',
+      name: 'enterCodeDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apply`
+  String get apply {
+    return Intl.message(
+      'Apply',
+      name: 'apply',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to apply code`
+  String get failedToApplyCode {
+    return Intl.message(
+      'Failed to apply code',
+      name: 'failedToApplyCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter referral code`
+  String get enterReferralCode {
+    return Intl.message(
+      'Enter referral code',
+      name: 'enterReferralCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Code applied`
+  String get codeAppliedPageTitle {
+    return Intl.message(
+      'Code applied',
+      name: 'codeAppliedPageTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{storageAmountInGB} GB`
+  String storageInGB(Object storageAmountInGB) {
+    return Intl.message(
+      '$storageAmountInGB GB',
+      name: 'storageInGB',
+      desc: '',
+      args: [storageAmountInGB],
+    );
+  }
+
+  /// `Claimed`
+  String get claimed {
+    return Intl.message(
+      'Claimed',
+      name: 'claimed',
+      desc: 'Used to indicate storage claimed, like 10GB Claimed',
+      args: [],
+    );
+  }
+
+  /// `Details`
+  String get details {
+    return Intl.message(
+      'Details',
+      name: 'details',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Claim more!`
+  String get claimMore {
+    return Intl.message(
+      'Claim more!',
+      name: 'claimMore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `They also get {storageAmountInGB} GB`
+  String theyAlsoGetXGb(Object storageAmountInGB) {
+    return Intl.message(
+      'They also get $storageAmountInGB GB',
+      name: 'theyAlsoGetXGb',
+      desc: '',
+      args: [storageAmountInGB],
+    );
+  }
+
+  /// `{storageAmountInGB} GB each time someone signs up for a paid plan and applies your code`
+  String freeStorageOnReferralSuccess(Object storageAmountInGB) {
+    return Intl.message(
+      '$storageAmountInGB GB each time someone signs up for a paid plan and applies your code',
+      name: 'freeStorageOnReferralSuccess',
+      desc: '',
+      args: [storageAmountInGB],
+    );
+  }
+
+  /// `ente referral code: {referralCode} \n\nApply it in Settings → General → Referrals to get {referralStorageInGB} GB free after you signup for a paid plan\n\nhttps://ente.io`
+  String shareTextReferralCode(
+      Object referralCode, Object referralStorageInGB) {
+    return Intl.message(
+      'ente referral code: $referralCode \n\nApply it in Settings → General → Referrals to get $referralStorageInGB GB free after you signup for a paid plan\n\nhttps://ente.io',
+      name: 'shareTextReferralCode',
+      desc: '',
+      args: [referralCode, referralStorageInGB],
+    );
+  }
+
+  /// `Claim free storage`
+  String get claimFreeStorage {
+    return Intl.message(
+      'Claim free storage',
+      name: 'claimFreeStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invite your friends`
+  String get inviteYourFriends {
+    return Intl.message(
+      'Invite your friends',
+      name: 'inviteYourFriends',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to fetch referral details. Please try again later.`
+  String get failedToFetchReferralDetails {
+    return Intl.message(
+      'Unable to fetch referral details. Please try again later.',
+      name: 'failedToFetchReferralDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `1. Give this code to your friends`
+  String get referralStep1 {
+    return Intl.message(
+      '1. Give this code to your friends',
+      name: 'referralStep1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `2. They sign up for a paid plan`
+  String get referralStep2 {
+    return Intl.message(
+      '2. They sign up for a paid plan',
+      name: 'referralStep2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `3. Both of you get {storageInGB} GB* free`
+  String referralStep3(Object storageInGB) {
+    return Intl.message(
+      '3. Both of you get $storageInGB GB* free',
+      name: 'referralStep3',
+      desc: '',
+      args: [storageInGB],
+    );
+  }
+
+  /// `Referrals are currently paused`
+  String get referralsAreCurrentlyPaused {
+    return Intl.message(
+      'Referrals are currently paused',
+      name: 'referralsAreCurrentlyPaused',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `* You can at max double your storage`
+  String get youCanAtMaxDoubleYourStorage {
+    return Intl.message(
+      '* You can at max double your storage',
+      name: 'youCanAtMaxDoubleYourStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} Gb so far} false {You have claimed {storageAmountInGb} Gb so far} other {You have claimed {storageAmountInGb} Gb so far!}}`
+  String claimedStorageSoFar(String isFamilyMember, int storageAmountInGb) {
+    return Intl.select(
+      isFamilyMember,
+      {
+        'true': 'Your family has claimed $storageAmountInGb Gb so far',
+        'false': 'You have claimed $storageAmountInGb Gb so far',
+        'other': 'You have claimed $storageAmountInGb Gb so far!',
+      },
+      name: 'claimedStorageSoFar',
+      desc: '',
+      args: [isFamilyMember, storageAmountInGb],
+    );
+  }
+
+  /// `FAQ`
+  String get faq {
+    return Intl.message(
+      'FAQ',
+      name: 'faq',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Oops, something went wrong`
+  String get oopsSomethingWentWrong {
+    return Intl.message(
+      'Oops, something went wrong',
+      name: 'oopsSomethingWentWrong',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `People using your code`
+  String get peopleUsingYourCode {
+    return Intl.message(
+      'People using your code',
+      name: 'peopleUsingYourCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `eligible`
+  String get eligible {
+    return Intl.message(
+      'eligible',
+      name: 'eligible',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `total`
+  String get total {
+    return Intl.message(
+      'total',
+      name: 'total',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Code used by you`
+  String get codeUsedByYou {
+    return Intl.message(
+      'Code used by you',
+      name: 'codeUsedByYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Free storage claimed`
+  String get freeStorageClaimed {
+    return Intl.message(
+      'Free storage claimed',
+      name: 'freeStorageClaimed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Free storage usable`
+  String get freeStorageUsable {
+    return Intl.message(
+      'Free storage usable',
+      name: 'freeStorageUsable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan.`
+  String get usableReferralStorageInfo {
+    return Intl.message(
+      'Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan.',
+      name: 'usableReferralStorageInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove from album?`
+  String get removeFromAlbum {
+    return Intl.message(
+      'Remove from album?',
+      name: 'removeFromAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Selected items will be removed from this album`
+  String get itemsWillBeRemovedFromAlbum {
+    return Intl.message(
+      'Selected items will be removed from this album',
+      name: 'itemsWillBeRemovedFromAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Some of the items you are removing were added by other people, and you will lose access to them`
+  String get removeShareItemsWarning {
+    return Intl.message(
+      'Some of the items you are removing were added by other people, and you will lose access to them',
+      name: 'removeShareItemsWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adding to favorites...`
+  String get addingToFavorites {
+    return Intl.message(
+      'Adding to favorites...',
+      name: 'addingToFavorites',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Removing from favorites...`
+  String get removingFromFavorites {
+    return Intl.message(
+      'Removing from favorites...',
+      name: 'removingFromFavorites',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, could not add to favorites!`
+  String get sorryCouldNotAddToFavorites {
+    return Intl.message(
+      'Sorry, could not add to favorites!',
+      name: 'sorryCouldNotAddToFavorites',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, could not remove from favorites!`
+  String get sorryCouldNotRemoveFromFavorites {
+    return Intl.message(
+      'Sorry, could not remove from favorites!',
+      name: 'sorryCouldNotRemoveFromFavorites',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Looks like your subscription has expired. Please subscribe to enable sharing.`
+  String get subscribeToEnableSharing {
+    return Intl.message(
+      'Looks like your subscription has expired. Please subscribe to enable sharing.',
+      name: 'subscribeToEnableSharing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscribe`
+  String get subscribe {
+    return Intl.message(
+      'Subscribe',
+      name: 'subscribe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Can only remove files owned by you`
+  String get canOnlyRemoveFilesOwnedByYou {
+    return Intl.message(
+      'Can only remove files owned by you',
+      name: 'canOnlyRemoveFilesOwnedByYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete shared album?`
+  String get deleteSharedAlbum {
+    return Intl.message(
+      'Delete shared album?',
+      name: 'deleteSharedAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete album`
+  String get deleteAlbum {
+    return Intl.message(
+      'Delete album',
+      name: 'deleteAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Also delete the photos (and videos) present in this album from `
+  String get deleteAlbumDialogPart1 {
+    return Intl.message(
+      'Also delete the photos (and videos) present in this album from ',
+      name: 'deleteAlbumDialogPart1',
+      desc:
+          'Part of this string \'Also delete the photos (and videos) present in this album from all other albums they are part of?\'',
+      args: [],
+    );
+  }
+
+  /// `all`
+  String get deleteAlbumDialogPart2Bold {
+    return Intl.message(
+      'all',
+      name: 'deleteAlbumDialogPart2Bold',
+      desc:
+          'Part of this string \'Also delete the photos (and videos) present in this album from all other albums they are part of?\'',
+      args: [],
+    );
+  }
+
+  /// ` other albums they are part of?`
+  String get deleteAlbumDialogPart3 {
+    return Intl.message(
+      ' other albums they are part of?',
+      name: 'deleteAlbumDialogPart3',
+      desc:
+          'Part of this string \'Also delete the photos (and videos) present in this album from all other albums they are part of?\'',
+      args: [],
+    );
+  }
+
+  /// `The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others`
+  String get deleteSharedAlbumDialogBody {
+    return Intl.message(
+      'The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others',
+      name: 'deleteSharedAlbumDialogBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, remove`
+  String get yesRemove {
+    return Intl.message(
+      'Yes, remove',
+      name: 'yesRemove',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Creating link...`
+  String get creatingLink {
+    return Intl.message(
+      'Creating link...',
+      name: 'creatingLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove?`
+  String get removeWithQuestionMark {
+    return Intl.message(
+      'Remove?',
+      name: 'removeWithQuestionMark',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{userEmail} will be removed from this shared album\n\nAny photos added by them will also be removed from the album`
+  String removeParticipantBody(Object userEmail) {
+    return Intl.message(
+      '$userEmail will be removed from this shared album\n\nAny photos added by them will also be removed from the album',
+      name: 'removeParticipantBody',
+      desc: '',
+      args: [userEmail],
+    );
+  }
+
+  /// `Keep Photos`
+  String get keepPhotos {
+    return Intl.message(
+      'Keep Photos',
+      name: 'keepPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete photos`
+  String get deletePhotos {
+    return Intl.message(
+      'Delete photos',
+      name: 'deletePhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invite to ente`
+  String get inviteToEnte {
+    return Intl.message(
+      'Invite to ente',
+      name: 'inviteToEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove public link`
+  String get removePublicLink {
+    return Intl.message(
+      'Remove public link',
+      name: 'removePublicLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will remove the public link for accessing "{albumName}".`
+  String disableLinkMessage(Object albumName) {
+    return Intl.message(
+      'This will remove the public link for accessing "$albumName".',
+      name: 'disableLinkMessage',
+      desc: '',
+      args: [albumName],
+    );
+  }
+
+  /// `Sharing...`
+  String get sharing {
+    return Intl.message(
+      'Sharing...',
+      name: 'sharing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You cannot share with yourself`
+  String get youCannotShareWithYourself {
+    return Intl.message(
+      'You cannot share with yourself',
+      name: 'youCannotShareWithYourself',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Archive`
+  String get archive {
+    return Intl.message(
+      'Archive',
+      name: 'archive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Long press to select photos and click + to create an album`
+  String get createAlbumActionHint {
+    return Intl.message(
+      'Long press to select photos and click + to create an album',
+      name: 'createAlbumActionHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Importing....`
+  String get importing {
+    return Intl.message(
+      'Importing....',
+      name: 'importing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to load albums`
+  String get failedToLoadAlbums {
+    return Intl.message(
+      'Failed to load albums',
+      name: 'failedToLoadAlbums',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hidden`
+  String get hidden {
+    return Intl.message(
+      'Hidden',
+      name: 'hidden',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to view your hidden files`
+  String get authToViewYourHiddenFiles {
+    return Intl.message(
+      'Please authenticate to view your hidden files',
+      name: 'authToViewYourHiddenFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trash`
+  String get trash {
+    return Intl.message(
+      'Trash',
+      name: 'trash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Uncategorized`
+  String get uncategorized {
+    return Intl.message(
+      'Uncategorized',
+      name: 'uncategorized',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `video`
+  String get videoSmallCase {
+    return Intl.message(
+      'video',
+      name: 'videoSmallCase',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `photo`
+  String get photoSmallCase {
+    return Intl.message(
+      'photo',
+      name: 'photoSmallCase',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `It will be deleted from all albums.`
+  String get singleFileDeleteHighlight {
+    return Intl.message(
+      'It will be deleted from all albums.',
+      name: 'singleFileDeleteHighlight',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This {fileType} is in both ente and your device.`
+  String singleFileInBothLocalAndRemote(Object fileType) {
+    return Intl.message(
+      'This $fileType is in both ente and your device.',
+      name: 'singleFileInBothLocalAndRemote',
+      desc: '',
+      args: [fileType],
+    );
+  }
+
+  /// `This {fileType} will be deleted from ente.`
+  String singleFileInRemoteOnly(Object fileType) {
+    return Intl.message(
+      'This $fileType will be deleted from ente.',
+      name: 'singleFileInRemoteOnly',
+      desc: '',
+      args: [fileType],
+    );
+  }
+
+  /// `This {fileType} will be deleted from your device.`
+  String singleFileDeleteFromDevice(Object fileType) {
+    return Intl.message(
+      'This $fileType will be deleted from your device.',
+      name: 'singleFileDeleteFromDevice',
+      desc: '',
+      args: [fileType],
+    );
+  }
+
+  /// `Delete from ente`
+  String get deleteFromEnte {
+    return Intl.message(
+      'Delete from ente',
+      name: 'deleteFromEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, delete`
+  String get yesDelete {
+    return Intl.message(
+      'Yes, delete',
+      name: 'yesDelete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Moved to trash`
+  String get movedToTrash {
+    return Intl.message(
+      'Moved to trash',
+      name: 'movedToTrash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete from device`
+  String get deleteFromDevice {
+    return Intl.message(
+      'Delete from device',
+      name: 'deleteFromDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete from both`
+  String get deleteFromBoth {
+    return Intl.message(
+      'Delete from both',
+      name: 'deleteFromBoth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New album`
+  String get newAlbum {
+    return Intl.message(
+      'New album',
+      name: 'newAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Albums`
+  String get albums {
+    return Intl.message(
+      'Albums',
+      name: 'albums',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, zero{no memories} one{{count} memory} other{{count} memories}}`
+  String memoryCount(int count) {
+    return Intl.plural(
+      count,
+      zero: 'no memories',
+      one: '$count memory',
+      other: '$count memories',
+      name: 'memoryCount',
+      desc: 'The text to display the number of memories',
+      args: [count],
+    );
+  }
+
+  /// `{count} selected`
+  String selectedPhotos(int count) {
+    return Intl.message(
+      '$count selected',
+      name: 'selectedPhotos',
+      desc: 'Display the number of selected photos',
+      args: [count],
+    );
+  }
+
+  /// `{count} selected ({yourCount} yours)`
+  String selectedPhotosWithYours(int count, int yourCount) {
+    return Intl.message(
+      '$count selected ($yourCount yours)',
+      name: 'selectedPhotosWithYours',
+      desc:
+          'Display the number of selected photos, including the number of selected photos owned by the user',
+      args: [count, yourCount],
+    );
+  }
+
+  /// `Advanced`
+  String get advancedSettings {
+    return Intl.message(
+      'Advanced',
+      name: 'advancedSettings',
+      desc: 'The text to display in the advanced settings section',
+      args: [],
+    );
+  }
+
+  /// `Photo grid size`
+  String get photoGridSize {
+    return Intl.message(
+      'Photo grid size',
+      name: 'photoGridSize',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage device storage`
+  String get manageDeviceStorage {
+    return Intl.message(
+      'Manage device storage',
+      name: 'manageDeviceStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select folders for backup`
+  String get selectFoldersForBackup {
+    return Intl.message(
+      'Select folders for backup',
+      name: 'selectFoldersForBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Selected folders will be encrypted and backed up`
+  String get selectedFoldersWillBeEncryptedAndBackedUp {
+    return Intl.message(
+      'Selected folders will be encrypted and backed up',
+      name: 'selectedFoldersWillBeEncryptedAndBackedUp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unselect all`
+  String get unselectAll {
+    return Intl.message(
+      'Unselect all',
+      name: 'unselectAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select all`
+  String get selectAll {
+    return Intl.message(
+      'Select all',
+      name: 'selectAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip`
+  String get skip {
+    return Intl.message(
+      'Skip',
+      name: 'skip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Updating folder selection...`
+  String get updatingFolderSelection {
+    return Intl.message(
+      'Updating folder selection...',
+      name: 'updatingFolderSelection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, one{{count} item} other{{count} items}}`
+  String itemCount(num count) {
+    return Intl.plural(
+      count,
+      one: '$count item',
+      other: '$count items',
+      name: 'itemCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, one{{count} year ago} other{{count} years ago}}`
+  String yearsAgo(num count) {
+    return Intl.plural(
+      count,
+      one: '$count year ago',
+      other: '$count years ago',
+      name: 'yearsAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Backup settings`
+  String get backupSettings {
+    return Intl.message(
+      'Backup settings',
+      name: 'backupSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup over mobile data`
+  String get backupOverMobileData {
+    return Intl.message(
+      'Backup over mobile data',
+      name: 'backupOverMobileData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup videos`
+  String get backupVideos {
+    return Intl.message(
+      'Backup videos',
+      name: 'backupVideos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disable auto lock`
+  String get disableAutoLock {
+    return Intl.message(
+      'Disable auto lock',
+      name: 'disableAutoLock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster.`
+  String get deviceLockExplanation {
+    return Intl.message(
+      'Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster.',
+      name: 'deviceLockExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `About`
+  String get about {
+    return Intl.message(
+      'About',
+      name: 'about',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We are open source!`
+  String get weAreOpenSource {
+    return Intl.message(
+      'We are open source!',
+      name: 'weAreOpenSource',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Privacy`
+  String get privacy {
+    return Intl.message(
+      'Privacy',
+      name: 'privacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Terms`
+  String get terms {
+    return Intl.message(
+      'Terms',
+      name: 'terms',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check for updates`
+  String get checkForUpdates {
+    return Intl.message(
+      'Check for updates',
+      name: 'checkForUpdates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking...`
+  String get checking {
+    return Intl.message(
+      'Checking...',
+      name: 'checking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You are on the latest version`
+  String get youAreOnTheLatestVersion {
+    return Intl.message(
+      'You are on the latest version',
+      name: 'youAreOnTheLatestVersion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Account`
+  String get account {
+    return Intl.message(
+      'Account',
+      name: 'account',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage subscription`
+  String get manageSubscription {
+    return Intl.message(
+      'Manage subscription',
+      name: 'manageSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to change your email`
+  String get authToChangeYourEmail {
+    return Intl.message(
+      'Please authenticate to change your email',
+      name: 'authToChangeYourEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change password`
+  String get changePassword {
+    return Intl.message(
+      'Change password',
+      name: 'changePassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to change your password`
+  String get authToChangeYourPassword {
+    return Intl.message(
+      'Please authenticate to change your password',
+      name: 'authToChangeYourPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export your data`
+  String get exportYourData {
+    return Intl.message(
+      'Export your data',
+      name: 'exportYourData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Logout`
+  String get logout {
+    return Intl.message(
+      'Logout',
+      name: 'logout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to initiate account deletion`
+  String get authToInitiateAccountDeletion {
+    return Intl.message(
+      'Please authenticate to initiate account deletion',
+      name: 'authToInitiateAccountDeletion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to logout?`
+  String get areYouSureYouWantToLogout {
+    return Intl.message(
+      'Are you sure you want to logout?',
+      name: 'areYouSureYouWantToLogout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, logout`
+  String get yesLogout {
+    return Intl.message(
+      'Yes, logout',
+      name: 'yesLogout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A new version of ente is available.`
+  String get aNewVersionOfEnteIsAvailable {
+    return Intl.message(
+      'A new version of ente is available.',
+      name: 'aNewVersionOfEnteIsAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update`
+  String get update {
+    return Intl.message(
+      'Update',
+      name: 'update',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Install manually`
+  String get installManually {
+    return Intl.message(
+      'Install manually',
+      name: 'installManually',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Critical update available`
+  String get criticalUpdateAvailable {
+    return Intl.message(
+      'Critical update available',
+      name: 'criticalUpdateAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update available`
+  String get updateAvailable {
+    return Intl.message(
+      'Update available',
+      name: 'updateAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Downloading...`
+  String get downloading {
+    return Intl.message(
+      'Downloading...',
+      name: 'downloading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The download could not be completed`
+  String get theDownloadCouldNotBeCompleted {
+    return Intl.message(
+      'The download could not be completed',
+      name: 'theDownloadCouldNotBeCompleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Retry`
+  String get retry {
+    return Intl.message(
+      'Retry',
+      name: 'retry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backed up folders`
+  String get backedUpFolders {
+    return Intl.message(
+      'Backed up folders',
+      name: 'backedUpFolders',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup`
+  String get backup {
+    return Intl.message(
+      'Backup',
+      name: 'backup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Free up device space`
+  String get freeUpDeviceSpace {
+    return Intl.message(
+      'Free up device space',
+      name: 'freeUpDeviceSpace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `✨ All clear`
+  String get allClear {
+    return Intl.message(
+      '✨ All clear',
+      name: 'allClear',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You've no files on this device that can be deleted`
+  String get noDeviceThatCanBeDeleted {
+    return Intl.message(
+      'You\'ve no files on this device that can be deleted',
+      name: 'noDeviceThatCanBeDeleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove duplicates`
+  String get removeDuplicates {
+    return Intl.message(
+      'Remove duplicates',
+      name: 'removeDuplicates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `✨ No duplicates`
+  String get noDuplicates {
+    return Intl.message(
+      '✨ No duplicates',
+      name: 'noDuplicates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You've no duplicate files that can be cleared`
+  String get youveNoDuplicateFilesThatCanBeCleared {
+    return Intl.message(
+      'You\'ve no duplicate files that can be cleared',
+      name: 'youveNoDuplicateFilesThatCanBeCleared',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Success`
+  String get success {
+    return Intl.message(
+      'Success',
+      name: 'success',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rate us`
+  String get rateUs {
+    return Intl.message(
+      'Rate us',
+      name: 'rateUs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Also empty "Recently Deleted" from "Settings" -> "Storage" to claim the freed space`
+  String get remindToEmptyDeviceTrash {
+    return Intl.message(
+      'Also empty "Recently Deleted" from "Settings" -> "Storage" to claim the freed space',
+      name: 'remindToEmptyDeviceTrash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You have successfully freed up {storageSaved}!`
+  String youHaveSuccessfullyFreedUp(String storageSaved) {
+    return Intl.message(
+      'You have successfully freed up $storageSaved!',
+      name: 'youHaveSuccessfullyFreedUp',
+      desc:
+          'The text to display when the user has successfully freed up storage',
+      args: [storageSaved],
+    );
+  }
+
+  /// `Also empty your "Trash" to claim the freed up space`
+  String get remindToEmptyEnteTrash {
+    return Intl.message(
+      'Also empty your "Trash" to claim the freed up space',
+      name: 'remindToEmptyEnteTrash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `✨ Success`
+  String get sparkleSuccess {
+    return Intl.message(
+      '✨ Success',
+      name: 'sparkleSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your have cleaned up {count, plural, one{{count} duplicate file} other{{count} duplicate files}}, saving ({storageSaved}!)`
+  String duplicateFileCountWithStorageSaved(int count, String storageSaved) {
+    return Intl.message(
+      'Your have cleaned up ${Intl.plural(count, one: '$count duplicate file', other: '$count duplicate files')}, saving ($storageSaved!)',
+      name: 'duplicateFileCountWithStorageSaved',
+      desc:
+          'The text to display when the user has successfully cleaned up duplicate files',
+      args: [count, storageSaved],
+    );
+  }
+
+  /// `Family plans`
+  String get familyPlans {
+    return Intl.message(
+      'Family plans',
+      name: 'familyPlans',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Referrals`
+  String get referrals {
+    return Intl.message(
+      'Referrals',
+      name: 'referrals',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Advanced`
+  String get advanced {
+    return Intl.message(
+      'Advanced',
+      name: 'advanced',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `General`
+  String get general {
+    return Intl.message(
+      'General',
+      name: 'general',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Security`
+  String get security {
+    return Intl.message(
+      'Security',
+      name: 'security',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to view your recovery key`
+  String get authToViewYourRecoveryKey {
+    return Intl.message(
+      'Please authenticate to view your recovery key',
+      name: 'authToViewYourRecoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Two-factor`
+  String get twofactor {
+    return Intl.message(
+      'Two-factor',
+      name: 'twofactor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to configure two-factor authentication`
+  String get authToConfigureTwofactorAuthentication {
+    return Intl.message(
+      'Please authenticate to configure two-factor authentication',
+      name: 'authToConfigureTwofactorAuthentication',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lockscreen`
+  String get lockscreen {
+    return Intl.message(
+      'Lockscreen',
+      name: 'lockscreen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to change lockscreen setting`
+  String get authToChangeLockscreenSetting {
+    return Intl.message(
+      'Please authenticate to change lockscreen setting',
+      name: 'authToChangeLockscreenSetting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To enable lockscreen, please setup device passcode or screen lock in your system settings.`
+  String get lockScreenEnablePreSteps {
+    return Intl.message(
+      'To enable lockscreen, please setup device passcode or screen lock in your system settings.',
+      name: 'lockScreenEnablePreSteps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View active sessions`
+  String get viewActiveSessions {
+    return Intl.message(
+      'View active sessions',
+      name: 'viewActiveSessions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to view your active sessions`
+  String get authToViewYourActiveSessions {
+    return Intl.message(
+      'Please authenticate to view your active sessions',
+      name: 'authToViewYourActiveSessions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disable two-factor`
+  String get disableTwofactor {
+    return Intl.message(
+      'Disable two-factor',
+      name: 'disableTwofactor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to disable two-factor authentication?`
+  String get confirm2FADisable {
+    return Intl.message(
+      'Are you sure you want to disable two-factor authentication?',
+      name: 'confirm2FADisable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No`
+  String get no {
+    return Intl.message(
+      'No',
+      name: 'no',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes`
+  String get yes {
+    return Intl.message(
+      'Yes',
+      name: 'yes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Social`
+  String get social {
+    return Intl.message(
+      'Social',
+      name: 'social',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rate us on {storeName}`
+  String rateUsOnStore(Object storeName) {
+    return Intl.message(
+      'Rate us on $storeName',
+      name: 'rateUsOnStore',
+      desc: '',
+      args: [storeName],
+    );
+  }
+
+  /// `Blog`
+  String get blog {
+    return Intl.message(
+      'Blog',
+      name: 'blog',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Merchandise`
+  String get merchandise {
+    return Intl.message(
+      'Merchandise',
+      name: 'merchandise',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Twitter`
+  String get twitter {
+    return Intl.message(
+      'Twitter',
+      name: 'twitter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mastodon`
+  String get mastodon {
+    return Intl.message(
+      'Mastodon',
+      name: 'mastodon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Matrix`
+  String get matrix {
+    return Intl.message(
+      'Matrix',
+      name: 'matrix',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discord`
+  String get discord {
+    return Intl.message(
+      'Discord',
+      name: 'discord',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reddit`
+  String get reddit {
+    return Intl.message(
+      'Reddit',
+      name: 'reddit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your storage details could not be fetched`
+  String get yourStorageDetailsCouldNotBeFetched {
+    return Intl.message(
+      'Your storage details could not be fetched',
+      name: 'yourStorageDetailsCouldNotBeFetched',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Report a bug`
+  String get reportABug {
+    return Intl.message(
+      'Report a bug',
+      name: 'reportABug',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Report bug`
+  String get reportBug {
+    return Intl.message(
+      'Report bug',
+      name: 'reportBug',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Suggest features`
+  String get suggestFeatures {
+    return Intl.message(
+      'Suggest features',
+      name: 'suggestFeatures',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Support`
+  String get support {
+    return Intl.message(
+      'Support',
+      name: 'support',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Theme`
+  String get theme {
+    return Intl.message(
+      'Theme',
+      name: 'theme',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Light`
+  String get lightTheme {
+    return Intl.message(
+      'Light',
+      name: 'lightTheme',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dark`
+  String get darkTheme {
+    return Intl.message(
+      'Dark',
+      name: 'darkTheme',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `System`
+  String get systemTheme {
+    return Intl.message(
+      'System',
+      name: 'systemTheme',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Free trial`
+  String get freeTrial {
+    return Intl.message(
+      'Free trial',
+      name: 'freeTrial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select your plan`
+  String get selectYourPlan {
+    return Intl.message(
+      'Select your plan',
+      name: 'selectYourPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ente preserves your memories, so they're always available to you, even if you lose your device.`
+  String get enteSubscriptionPitch {
+    return Intl.message(
+      'ente preserves your memories, so they\'re always available to you, even if you lose your device.',
+      name: 'enteSubscriptionPitch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your family can be added to your plan as well.`
+  String get enteSubscriptionShareWithFamily {
+    return Intl.message(
+      'Your family can be added to your plan as well.',
+      name: 'enteSubscriptionShareWithFamily',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current usage is `
+  String get currentUsageIs {
+    return Intl.message(
+      'Current usage is ',
+      name: 'currentUsageIs',
+      desc: 'This text is followed by storage usaged',
+      args: [],
+    );
+  }
+
+  /// `FAQs`
+  String get faqs {
+    return Intl.message(
+      'FAQs',
+      name: 'faqs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Renews on {endDate}`
+  String renewsOn(Object endDate) {
+    return Intl.message(
+      'Renews on $endDate',
+      name: 'renewsOn',
+      desc: '',
+      args: [endDate],
+    );
+  }
+
+  /// `Free trial valid till {endDate}`
+  String freeTrialValidTill(Object endDate) {
+    return Intl.message(
+      'Free trial valid till $endDate',
+      name: 'freeTrialValidTill',
+      desc: '',
+      args: [endDate],
+    );
+  }
+
+  /// `Your subscription will be cancelled on {endDate}`
+  String subWillBeCancelledOn(Object endDate) {
+    return Intl.message(
+      'Your subscription will be cancelled on $endDate',
+      name: 'subWillBeCancelledOn',
+      desc: '',
+      args: [endDate],
+    );
+  }
+
+  /// `Subscription`
+  String get subscription {
+    return Intl.message(
+      'Subscription',
+      name: 'subscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Payment details`
+  String get paymentDetails {
+    return Intl.message(
+      'Payment details',
+      name: 'paymentDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage Family`
+  String get manageFamily {
+    return Intl.message(
+      'Manage Family',
+      name: 'manageFamily',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please contact us at support@ente.io to manage your {provider} subscription.`
+  String contactToManageSubscription(Object provider) {
+    return Intl.message(
+      'Please contact us at support@ente.io to manage your $provider subscription.',
+      name: 'contactToManageSubscription',
+      desc: '',
+      args: [provider],
+    );
+  }
+
+  /// `Renew subscription`
+  String get renewSubscription {
+    return Intl.message(
+      'Renew subscription',
+      name: 'renewSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancel subscription`
+  String get cancelSubscription {
+    return Intl.message(
+      'Cancel subscription',
+      name: 'cancelSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to renew?`
+  String get areYouSureYouWantToRenew {
+    return Intl.message(
+      'Are you sure you want to renew?',
+      name: 'areYouSureYouWantToRenew',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, Renew`
+  String get yesRenew {
+    return Intl.message(
+      'Yes, Renew',
+      name: 'yesRenew',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to cancel?`
+  String get areYouSureYouWantToCancel {
+    return Intl.message(
+      'Are you sure you want to cancel?',
+      name: 'areYouSureYouWantToCancel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, cancel`
+  String get yesCancel {
+    return Intl.message(
+      'Yes, cancel',
+      name: 'yesCancel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to renew`
+  String get failedToRenew {
+    return Intl.message(
+      'Failed to renew',
+      name: 'failedToRenew',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to cancel`
+  String get failedToCancel {
+    return Intl.message(
+      'Failed to cancel',
+      name: 'failedToCancel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `2 months free on yearly plans`
+  String get twoMonthsFreeOnYearlyPlans {
+    return Intl.message(
+      '2 months free on yearly plans',
+      name: 'twoMonthsFreeOnYearlyPlans',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Monthly`
+  String get monthly {
+    return Intl.message(
+      'Monthly',
+      name: 'monthly',
+      desc: 'The text to display for monthly plans',
+      args: [],
+    );
+  }
+
+  /// `Yearly`
+  String get yearly {
+    return Intl.message(
+      'Yearly',
+      name: 'yearly',
+      desc: 'The text to display for yearly plans',
+      args: [],
+    );
+  }
+
+  /// `Confirm plan change`
+  String get confirmPlanChange {
+    return Intl.message(
+      'Confirm plan change',
+      name: 'confirmPlanChange',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to change your plan?`
+  String get areYouSureYouWantToChangeYourPlan {
+    return Intl.message(
+      'Are you sure you want to change your plan?',
+      name: 'areYouSureYouWantToChangeYourPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You cannot downgrade to this plan`
+  String get youCannotDowngradeToThisPlan {
+    return Intl.message(
+      'You cannot downgrade to this plan',
+      name: 'youCannotDowngradeToThisPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please cancel your existing subscription from {paymentProvider} first`
+  String cancelOtherSubscription(String paymentProvider) {
+    return Intl.message(
+      'Please cancel your existing subscription from $paymentProvider first',
+      name: 'cancelOtherSubscription',
+      desc:
+          'The text to display when the user has an existing subscription from a different payment provider',
+      args: [paymentProvider],
+    );
+  }
+
+  /// `Optional, as short as you like...`
+  String get optionalAsShortAsYouLike {
+    return Intl.message(
+      'Optional, as short as you like...',
+      name: 'optionalAsShortAsYouLike',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send`
+  String get send {
+    return Intl.message(
+      'Send',
+      name: 'send',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your subscription was cancelled. Would you like to share the reason?`
+  String get askCancelReason {
+    return Intl.message(
+      'Your subscription was cancelled. Would you like to share the reason?',
+      name: 'askCancelReason',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Thank you for subscribing!`
+  String get thankYouForSubscribing {
+    return Intl.message(
+      'Thank you for subscribing!',
+      name: 'thankYouForSubscribing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your purchase was successful`
+  String get yourPurchaseWasSuccessful {
+    return Intl.message(
+      'Your purchase was successful',
+      name: 'yourPurchaseWasSuccessful',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your plan was successfully upgraded`
+  String get yourPlanWasSuccessfullyUpgraded {
+    return Intl.message(
+      'Your plan was successfully upgraded',
+      name: 'yourPlanWasSuccessfullyUpgraded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your plan was successfully downgraded`
+  String get yourPlanWasSuccessfullyDowngraded {
+    return Intl.message(
+      'Your plan was successfully downgraded',
+      name: 'yourPlanWasSuccessfullyDowngraded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your subscription was updated successfully`
+  String get yourSubscriptionWasUpdatedSuccessfully {
+    return Intl.message(
+      'Your subscription was updated successfully',
+      name: 'yourSubscriptionWasUpdatedSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Google Play ID`
+  String get googlePlayId {
+    return Intl.message(
+      'Google Play ID',
+      name: 'googlePlayId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apple ID`
+  String get appleId {
+    return Intl.message(
+      'Apple ID',
+      name: 'appleId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `PlayStore subscription`
+  String get playstoreSubscription {
+    return Intl.message(
+      'PlayStore subscription',
+      name: 'playstoreSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `AppStore subscription`
+  String get appstoreSubscription {
+    return Intl.message(
+      'AppStore subscription',
+      name: 'appstoreSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your {id} is already linked to another ente account.\nIf you would like to use your {id} with this account, please contact our support''`
+  String subAlreadyLinkedErrMessage(Object id) {
+    return Intl.message(
+      'Your $id is already linked to another ente account.\nIf you would like to use your $id with this account, please contact our support\'\'',
+      name: 'subAlreadyLinkedErrMessage',
+      desc: '',
+      args: [id],
+    );
+  }
+
+  /// `Please visit web.ente.io to manage your subscription`
+  String get visitWebToManage {
+    return Intl.message(
+      'Please visit web.ente.io to manage your subscription',
+      name: 'visitWebToManage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not update subscription`
+  String get couldNotUpdateSubscription {
+    return Intl.message(
+      'Could not update subscription',
+      name: 'couldNotUpdateSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please contact support@ente.io and we will be happy to help!`
+  String get pleaseContactSupportAndWeWillBeHappyToHelp {
+    return Intl.message(
+      'Please contact support@ente.io and we will be happy to help!',
+      name: 'pleaseContactSupportAndWeWillBeHappyToHelp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Payment failed`
+  String get paymentFailed {
+    return Intl.message(
+      'Payment failed',
+      name: 'paymentFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please talk to {providerName} support if you were charged`
+  String paymentFailedTalkToProvider(String providerName) {
+    return Intl.message(
+      'Please talk to $providerName support if you were charged',
+      name: 'paymentFailedTalkToProvider',
+      desc: 'The text to display when the payment failed',
+      args: [providerName],
+    );
+  }
+
+  /// `Continue on free trial`
+  String get continueOnFreeTrial {
+    return Intl.message(
+      'Continue on free trial',
+      name: 'continueOnFreeTrial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to exit?`
+  String get areYouSureYouWantToExit {
+    return Intl.message(
+      'Are you sure you want to exit?',
+      name: 'areYouSureYouWantToExit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Thank you`
+  String get thankYou {
+    return Intl.message(
+      'Thank you',
+      name: 'thankYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to verify payment status`
+  String get failedToVerifyPaymentStatus {
+    return Intl.message(
+      'Failed to verify payment status',
+      name: 'failedToVerifyPaymentStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please wait for sometime before retrying`
+  String get pleaseWaitForSometimeBeforeRetrying {
+    return Intl.message(
+      'Please wait for sometime before retrying',
+      name: 'pleaseWaitForSometimeBeforeRetrying',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unfortunately your payment failed due to {reason}`
+  String paymentFailedWithReason(Object reason) {
+    return Intl.message(
+      'Unfortunately your payment failed due to $reason',
+      name: 'paymentFailedWithReason',
+      desc: '',
+      args: [reason],
+    );
+  }
+
+  /// `You are on a family plan!`
+  String get youAreOnAFamilyPlan {
+    return Intl.message(
+      'You are on a family plan!',
+      name: 'youAreOnAFamilyPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please contact`
+  String get contactFamilyAdminPart1 {
+    return Intl.message(
+      'Please contact',
+      name: 'contactFamilyAdminPart1',
+      desc:
+          'Part1 of the sentence \'Please contact {familyAdminName} to manage your subscription\'',
+      args: [],
+    );
+  }
+
+  /// `to manage your subscription`
+  String get contactFamilyAdminPart2 {
+    return Intl.message(
+      'to manage your subscription',
+      name: 'contactFamilyAdminPart2',
+      desc:
+          'Part2 of the sentence \'Please contact {familyAdminName} to manage your subscription\'',
+      args: [],
+    );
+  }
+
+  /// `Leave family`
+  String get leaveFamily {
+    return Intl.message(
+      'Leave family',
+      name: 'leaveFamily',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure that you want to leave the family plan?`
+  String get areYouSureThatYouWantToLeaveTheFamily {
+    return Intl.message(
+      'Are you sure that you want to leave the family plan?',
+      name: 'areYouSureThatYouWantToLeaveTheFamily',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Leave`
+  String get leave {
+    return Intl.message(
+      'Leave',
+      name: 'leave',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rate the app`
+  String get rateTheApp {
+    return Intl.message(
+      'Rate the app',
+      name: 'rateTheApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start backup`
+  String get startBackup {
+    return Intl.message(
+      'Start backup',
+      name: 'startBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No photos are being backed up right now`
+  String get noPhotosAreBeingBackedUpRightNow {
+    return Intl.message(
+      'No photos are being backed up right now',
+      name: 'noPhotosAreBeingBackedUpRightNow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preserve more`
+  String get preserveMore {
+    return Intl.message(
+      'Preserve more',
+      name: 'preserveMore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Existing user`
+  String get existingUser {
+    return Intl.message(
+      'Existing user',
+      name: 'existingUser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Private backups`
+  String get privateBackups {
+    return Intl.message(
+      'Private backups',
+      name: 'privateBackups',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `for your memories`
+  String get forYourMemories {
+    return Intl.message(
+      'for your memories',
+      name: 'forYourMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `End-to-end encrypted by default`
+  String get endtoendEncryptedByDefault {
+    return Intl.message(
+      'End-to-end encrypted by default',
+      name: 'endtoendEncryptedByDefault',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Safely stored`
+  String get safelyStored {
+    return Intl.message(
+      'Safely stored',
+      name: 'safelyStored',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `at a fallout shelter`
+  String get atAFalloutShelter {
+    return Intl.message(
+      'at a fallout shelter',
+      name: 'atAFalloutShelter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Designed to outlive`
+  String get designedToOutlive {
+    return Intl.message(
+      'Designed to outlive',
+      name: 'designedToOutlive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Available`
+  String get available {
+    return Intl.message(
+      'Available',
+      name: 'available',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `everywhere`
+  String get everywhere {
+    return Intl.message(
+      'everywhere',
+      name: 'everywhere',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Android, iOS, Web, Desktop`
+  String get androidIosWebDesktop {
+    return Intl.message(
+      'Android, iOS, Web, Desktop',
+      name: 'androidIosWebDesktop',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mobile, Web, Desktop`
+  String get mobileWebDesktop {
+    return Intl.message(
+      'Mobile, Web, Desktop',
+      name: 'mobileWebDesktop',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New to ente`
+  String get newToEnte {
+    return Intl.message(
+      'New to ente',
+      name: 'newToEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please login again`
+  String get pleaseLoginAgain {
+    return Intl.message(
+      'Please login again',
+      name: 'pleaseLoginAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.`
+  String get devAccountChanged {
+    return Intl.message(
+      'The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.',
+      name: 'devAccountChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your subscription has expired`
+  String get yourSubscriptionHasExpired {
+    return Intl.message(
+      'Your subscription has expired',
+      name: 'yourSubscriptionHasExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Storage limit exceeded`
+  String get storageLimitExceeded {
+    return Intl.message(
+      'Storage limit exceeded',
+      name: 'storageLimitExceeded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upgrade`
+  String get upgrade {
+    return Intl.message(
+      'Upgrade',
+      name: 'upgrade',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Raise ticket`
+  String get raiseTicket {
+    return Intl.message(
+      'Raise ticket',
+      name: 'raiseTicket',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup failed`
+  String get backupFailed {
+    return Intl.message(
+      'Backup failed',
+      name: 'backupFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We could not backup your data.\nWe will retry later.`
+  String get couldNotBackUpTryLater {
+    return Intl.message(
+      'We could not backup your data.\nWe will retry later.',
+      name: 'couldNotBackUpTryLater',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ente can encrypt and preserve files only if you grant access to them`
+  String get enteCanEncryptAndPreserveFilesOnlyIfYouGrant {
+    return Intl.message(
+      'ente can encrypt and preserve files only if you grant access to them',
+      name: 'enteCanEncryptAndPreserveFilesOnlyIfYouGrant',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please grant permissions`
+  String get pleaseGrantPermissions {
+    return Intl.message(
+      'Please grant permissions',
+      name: 'pleaseGrantPermissions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Private sharing`
+  String get privateSharing {
+    return Intl.message(
+      'Private sharing',
+      name: 'privateSharing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share only with the people you want`
+  String get shareOnlyWithThePeopleYouWant {
+    return Intl.message(
+      'Share only with the people you want',
+      name: 'shareOnlyWithThePeopleYouWant',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use public links for people not on ente`
+  String get usePublicLinksForPeopleNotOnEnte {
+    return Intl.message(
+      'Use public links for people not on ente',
+      name: 'usePublicLinksForPeopleNotOnEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow people to add photos`
+  String get allowPeopleToAddPhotos {
+    return Intl.message(
+      'Allow people to add photos',
+      name: 'allowPeopleToAddPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share an album now`
+  String get shareAnAlbumNow {
+    return Intl.message(
+      'Share an album now',
+      name: 'shareAnAlbumNow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collect event photos`
+  String get collectEventPhotos {
+    return Intl.message(
+      'Collect event photos',
+      name: 'collectEventPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Session expired`
+  String get sessionExpired {
+    return Intl.message(
+      'Session expired',
+      name: 'sessionExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Logging out...`
+  String get loggingOut {
+    return Intl.message(
+      'Logging out...',
+      name: 'loggingOut',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name`
+  String get name {
+    return Intl.message(
+      'Name',
+      name: 'name',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Newest`
+  String get newest {
+    return Intl.message(
+      'Newest',
+      name: 'newest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last updated`
+  String get lastUpdated {
+    return Intl.message(
+      'Last updated',
+      name: 'lastUpdated',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -2058,6 +4760,13 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
+      Locale.fromSubtags(languageCode: 'cs'),
+      Locale.fromSubtags(languageCode: 'de'),
+      Locale.fromSubtags(languageCode: 'es'),
+      Locale.fromSubtags(languageCode: 'fr'),
+      Locale.fromSubtags(languageCode: 'it'),
+      Locale.fromSubtags(languageCode: 'nl'),
+      Locale.fromSubtags(languageCode: 'pl'),
     ];
   }
 

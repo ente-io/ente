@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/utils/data_util.dart';
 
 class SubscriptionPlanWidget extends StatelessWidget {
@@ -15,9 +16,10 @@ class SubscriptionPlanWidget extends StatelessWidget {
   final String period;
   final bool isActive;
 
-  String _displayPrice() {
+  String _displayPrice(BuildContext context) {
+    // todo: l10n pricing part
     final result = price + (period.isNotEmpty ? " / " + period : "");
-    return price.isNotEmpty ? result : "Free trial";
+    return price.isNotEmpty ? result : S.of(context).freeTrial;
   }
 
   @override
@@ -59,7 +61,7 @@ class SubscriptionPlanWidget extends StatelessWidget {
                       .copyWith(color: textColor),
                 ),
                 Text(
-                  _displayPrice(),
+                  _displayPrice(context),
                   style: Theme.of(context).textTheme.headline6!.copyWith(
                         color: textColor,
                         fontWeight: FontWeight.normal,

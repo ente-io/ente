@@ -4,6 +4,7 @@ import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
@@ -151,7 +152,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               )
             : AppBar(
                 elevation: 0,
-                title: const Text("Subscription${kDebugMode ? ' Stripe' : ''}"),
+                title: Text("${S.of(context).subscription}${kDebugMode ? ' '
+                    'Stripe' : ''}"),
               ),
       ),
     );
@@ -172,7 +174,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Widget _getBody() {
     if (!_isLoading) {
       _isLoading = true;
-      _dialog = createProgressDialog(context, "Please wait...");
+      _dialog = createProgressDialog(context, S.of(context).pleaseWait);
       _fetchSub();
     }
     if (_hasLoadedData) {
@@ -228,8 +230,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 40, 16, 4),
           child: MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Payment details",
+            captionedTextWidget: CaptionedTextWidget(
+              title: S.of(context).paymentDetails,
             ),
             menuItemColor: colorScheme.fillFaint,
             trailingWidget: Icon(
@@ -251,8 +253,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
           child: MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Manage Family",
+            captionedTextWidget: CaptionedTextWidget(
+              title: S.of(context).manageFamily,
             ),
             menuItemColor: colorScheme.fillFaint,
             trailingWidget: Icon(
@@ -301,9 +303,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             : '';
         showErrorDialog(
           context,
-          "Sorry",
-          "Please contact us at support@ente.io to manage your "
-              "$capitalizedWord subscription.",
+          S.of(context).sorry,
+          S.of(context).contactToManageSubscription(capitalizedWord),
         );
     }
   }
@@ -315,7 +316,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
-            return WebPage("Payment details", url);
+            return WebPage(S.of(context).paymentDetails, url);
           },
         ),
       ).then((value) => onWebPaymentGoBack);
@@ -329,8 +330,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Widget _stripeRenewOrCancelButton() {
     final bool isRenewCancelled =
         _currentSubscription!.attributes?.isCancelled ?? false;
-    final String title =
-        isRenewCancelled ? "Renew subscription" : "Cancel subscription";
+    final String title = isRenewCancelled
+        ? S.of(context).renewSubscription
+        : S.of(context).cancelSubscription;
     return TextButton(
       child: Text(
         title,
@@ -346,17 +348,17 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           final choice = await showChoiceDialog(
             context,
             title: title,
-            body: "Are you sure you want to renew?",
-            firstButtonLabel: "Yes, Renew",
+            body: S.of(context).areYouSureYouWantToRenew,
+            firstButtonLabel: S.of(context).yesRenew,
           );
           confirmAction = choice!.action == ButtonAction.first;
         } else {
           final choice = await showChoiceDialog(
             context,
             title: title,
-            body: "Are you sure you want to cancel?",
-            firstButtonLabel: "Yes, cancel",
-            secondButtonLabel: "No",
+            body: S.of(context).areYouSureYouWantToCancel,
+            firstButtonLabel: S.of(context).yesCancel,
+            secondButtonLabel: S.of(context).no,
             isCritical: true,
           );
           confirmAction = choice!.action == ButtonAction.first;
@@ -380,17 +382,18 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     } catch (e) {
       showShortToast(
         context,
-        isAutoRenewDisabled ? 'Failed to renew' : 'Failed to cancel',
+        isAutoRenewDisabled
+            ? S.of(context).failedToRenew
+            : S.of(context).failedToCancel,
       );
     }
     await _dialog.hide();
     if (!isAutoRenewDisabled && mounted) {
       await showTextInputDialog(
         context,
-        title: "Your subscription was cancelled. Would you like to share the "
-            "reason?",
-        submitButtonLabel: "Send",
-        hintText: "Optional, as short as you like...",
+        title: S.of(context).askCancelReason,
+        submitButtonLabel: S.of(context).send,
+        hintText: S.of(context).optionalAsShortAsYouLike,
         alwaysShowSuccessState: true,
         textCapitalization: TextCapitalization.words,
         onSubmit: (String text) async {
@@ -435,17 +438,18 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   _currentSubscription!.productID != freeProductID) {
                 showErrorDialog(
                   context,
-                  "Sorry",
-                  "Please cancel your existing subscription from "
-                      "${_currentSubscription!.paymentProvider} first",
+                  S.of(context).sorry,
+                  S.of(context).cancelOtherSubscription(
+                        _currentSubscription!.paymentProvider,
+                      ),
                 );
                 return;
               }
               if (_userDetails.getFamilyOrPersonalUsage() > plan.storage) {
                 showErrorDialog(
                   context,
-                  "Sorry",
-                  "You cannot downgrade to this plan",
+                  S.of(context).sorry,
+                  S.of(context).youCannotDowngradeToThisPlan,
                 );
                 return;
               }
@@ -454,9 +458,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 // confirm if user wants to change plan or not
                 final result = await showChoiceDialog(
                   context,
-                  title: "Confirm plan change",
-                  body: "Are you sure you want to change your plan?",
-                  firstButtonLabel: "Yes",
+                  title: S.of(context).confirmPlanChange,
+                  body: S.of(context).areYouSureYouWantToChangeYourPlan,
+                  firstButtonLabel: S.of(context).yes,
                 );
                 if (result!.action == ButtonAction.first) {
                   stripPurChaseAction = 'update';
@@ -522,7 +526,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                planText("Monthly", _showYearlyPlan),
+                planText(S.of(context).monthly, _showYearlyPlan),
                 Switch(
                   value: _showYearlyPlan,
                   activeColor: Colors.white,
@@ -533,13 +537,13 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                     await _filterStripeForUI();
                   },
                 ),
-                planText("Yearly", !_showYearlyPlan),
+                planText(S.of(context).yearly, !_showYearlyPlan),
               ],
             ),
           ),
           _isFreePlanUser()
               ? Text(
-                  "2 months free on yearly plans",
+                  S.of(context).twoMonthsFreeOnYearlyPlans,
                   style: getEnteTextTheme(context).miniMuted,
                 )
               : const SizedBox.shrink(),

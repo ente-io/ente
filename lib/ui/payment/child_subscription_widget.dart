@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -25,7 +26,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
         children: [
           Center(
             child: Text(
-              "You are on a family plan!",
+              S.of(context).youAreOnAFamilyPlan,
               style: Theme.of(context).textTheme.bodyText1,
             ),
           ),
@@ -38,16 +39,16 @@ class ChildSubscriptionWidget extends StatelessWidget {
               textAlign: TextAlign.center,
               text: TextSpan(
                 children: [
-                  const TextSpan(
-                    text: "Please contact ",
+                  TextSpan(
+                    text: S.of(context).contactFamilyAdminPart1 + " ",
                   ),
                   TextSpan(
                     text: familyAdmin,
                     style:
                         const TextStyle(color: Color.fromRGBO(29, 185, 84, 1)),
                   ),
-                  const TextSpan(
-                    text: " to manage your subscription",
+                  TextSpan(
+                    text: " " + S.of(context).contactFamilyAdminPart2,
                   ),
                 ],
                 style: Theme.of(context).textTheme.bodyText1,
@@ -74,9 +75,9 @@ class ChildSubscriptionWidget extends StatelessWidget {
                     const EdgeInsets.symmetric(vertical: 18, horizontal: 100),
                 backgroundColor: Colors.red[500],
               ),
-              child: const Text(
-                "Leave Family",
-                style: TextStyle(
+              child: Text(
+                S.of(context).leaveFamily,
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                   color: Colors.white, // same for both themes
@@ -94,17 +95,9 @@ class ChildSubscriptionWidget extends StatelessWidget {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: "Please contact ",
-                      style: Theme.of(context).textTheme.bodyText2,
-                    ),
-                    TextSpan(
-                      text: "support@ente.io",
-                      style: Theme.of(context).textTheme.bodyText2?.copyWith(
-                            color: const Color.fromRGBO(29, 185, 84, 1),
-                          ),
-                    ),
-                    TextSpan(
-                      text: " for help",
+                      text: S
+                          .of(context)
+                          .pleaseContactSupportAndWeWillBeHappyToHelp,
                       style: Theme.of(context).textTheme.bodyText2,
                     ),
                   ],
@@ -120,9 +113,9 @@ class ChildSubscriptionWidget extends StatelessWidget {
   Future<void> _leaveFamilyPlan(BuildContext context) async {
     final choice = await showChoiceDialog(
       context,
-      title: "Leave family",
-      body: "Are you sure that you want to leave the family plan?",
-      firstButtonLabel: "Leave",
+      title: S.of(context).leaveFamily,
+      body: S.of(context).areYouSureThatYouWantToLeaveTheFamily,
+      firstButtonLabel: S.of(context).leave,
       firstButtonOnTap: () async {
         try {
           await UserService.instance.leaveFamilyPlan();
