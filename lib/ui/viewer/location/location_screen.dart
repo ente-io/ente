@@ -13,6 +13,7 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/location/edit_location_sheet.dart";
+import "package:photos/utils/dialog_util.dart";
 
 class LocationScreen extends StatelessWidget {
   const LocationScreen({super.key});
@@ -56,7 +57,7 @@ class LocationScreenPopUpMenu extends StatelessWidget {
           splashColor: Colors.transparent,
         ),
         child: PopupMenuButton(
-          elevation: 5,
+          elevation: 2,
           offset: const Offset(10, 50),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
@@ -86,7 +87,7 @@ class LocationScreenPopUpMenu extends StatelessWidget {
               ),
             ];
           },
-          onSelected: (value) {
+          onSelected: (value) async {
             if (value == "edit") {
               showEditLocationSheet(
                 context,
@@ -94,11 +95,14 @@ class LocationScreenPopUpMenu extends StatelessWidget {
                 () {},
               );
             } else if (value == "delete") {
-              // LocationService.instance.deleteLocation(
-              //   InheritedLocationScreenState.of(context)
-              //       .locationTagEntity,
-              // );
-              // Navigator.of(context).pop();
+              try {
+                await LocationService.instance.deleteLocationTag(
+                  InheritedLocationScreenState.of(context).locationTagEntity.id,
+                );
+                Navigator.of(context).pop();
+              } catch (e) {
+                showGenericErrorDialog(context: context);
+              }
             }
           },
         ),

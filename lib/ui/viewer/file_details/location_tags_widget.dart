@@ -26,11 +26,11 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   IconData leadingIcon = Icons.add_location_alt_outlined;
   bool hasChipButtons = false;
   late Future<List<Widget>> locationTagChips;
-  late StreamSubscription<LocationTagUpdatedEvent> _locationUpdateListener;
+  late StreamSubscription<LocationTagUpdatedEvent> _locTagUpdateListener;
   @override
   void initState() {
     locationTagChips = _getLocationTags();
-    _locationUpdateListener =
+    _locTagUpdateListener =
         Bus.instance.on<LocationTagUpdatedEvent>().listen((event) {
       locationTagChips = _getLocationTags();
     });
@@ -39,7 +39,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
 
   @override
   void dispose() {
-    _locationUpdateListener.cancel();
+    _locTagUpdateListener.cancel();
     super.dispose();
   }
 

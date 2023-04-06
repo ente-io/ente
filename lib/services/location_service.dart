@@ -207,6 +207,22 @@ class LocationService {
       rethrow;
     }
   }
+
+  Future<void> deleteLocationTag(String locTagEntityId) async {
+    try {
+      await EntityService.instance.deleteEntry(
+        locTagEntityId,
+      );
+      Bus.instance.fire(
+        LocationTagUpdatedEvent(
+          LocTagEventType.delete,
+        ),
+      );
+    } catch (e, s) {
+      _logger.severe("Failed to delete location tag", e, s);
+      rethrow;
+    }
+  }
 }
 
 class GPSData {
