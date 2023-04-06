@@ -547,6 +547,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Privacy Policy"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Public link enabled"),
+        "rateTheApp": MessageLookupByLibrary.simpleMessage("Rate the app"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Rate us"),
         "rateUsOnStore": m17,
         "recover": MessageLookupByLibrary.simpleMessage("Recover"),

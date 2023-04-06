@@ -4370,6 +4370,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Rate the app`
+  String get rateTheApp {
+    return Intl.message(
+      'Rate the app',
+      name: 'rateTheApp',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
