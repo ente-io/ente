@@ -529,5 +529,9 @@
   "matrix": "Matrix",
   "discord": "Discord",
   "reddit": "Reddit",
-  "yourStorageDetailsCouldNotBeFetched": "Your storage details could not be fetched"
+  "yourStorageDetailsCouldNotBeFetched": "Your storage details could not be fetched",
+  "reportABug": "Report a bug",
+  "reportBug": "Report bug",
+  "suggestFeatures": "Suggest features",
+  "support": "Support"
 }

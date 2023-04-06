@@ -3707,6 +3707,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Report a bug`
+  String get reportABug {
+    return Intl.message(
+      'Report a bug',
+      name: 'reportABug',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Report bug`
+  String get reportBug {
+    return Intl.message(
+      'Report bug',
+      name: 'reportBug',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Suggest features`
+  String get suggestFeatures {
+    return Intl.message(
+      'Suggest features',
+      name: 'suggestFeatures',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Support`
+  String get support {
+    return Intl.message(
+      'Support',
+      name: 'support',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

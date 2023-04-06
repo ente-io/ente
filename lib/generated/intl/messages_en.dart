@@ -512,6 +512,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Remove?"),
         "removingFromFavorites":
             MessageLookupByLibrary.simpleMessage("Removing from favorites..."),
+        "reportABug": MessageLookupByLibrary.simpleMessage("Report a bug"),
+        "reportBug": MessageLookupByLibrary.simpleMessage("Report bug"),
         "resendEmail": MessageLookupByLibrary.simpleMessage("Resend email"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Reset password"),
@@ -584,6 +586,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
             "Looks like your subscription has expired. Please subscribe to enable sharing."),
         "success": MessageLookupByLibrary.simpleMessage("Success"),
+        "suggestFeatures":
+            MessageLookupByLibrary.simpleMessage("Suggest features"),
+        "support": MessageLookupByLibrary.simpleMessage("Support"),
         "tapToCopy": MessageLookupByLibrary.simpleMessage("tap to copy"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("Tap to enter code"),
