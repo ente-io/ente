@@ -137,6 +137,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "What is the main reason you are deleting your account?"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to view your hidden files"),
+        "backupOverMobileData":
+            MessageLookupByLibrary.simpleMessage("Backup over mobile data"),
+        "backupSettings":
+            MessageLookupByLibrary.simpleMessage("Backup settings"),
+        "backupVideos": MessageLookupByLibrary.simpleMessage("Backup videos"),
         "byClickingLogInIAgreeToThe": MessageLookupByLibrary.simpleMessage(
             "By clicking log in, I agree to the"),
         "canOnlyRemoveFilesOwnedByYou": MessageLookupByLibrary.simpleMessage(
@@ -235,6 +240,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others"),
         "details": MessageLookupByLibrary.simpleMessage("Details"),
+        "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
+            "Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster."),
+        "disableAutoLock":
+            MessageLookupByLibrary.simpleMessage("Disable auto lock"),
         "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
             "Viewers can still take screenshots or save a copy of your photos using external tools"),
         "disableDownloadWarningTitle":

@@ -2985,6 +2985,56 @@ class S {
       args: [count],
     );
   }
+
+  /// `Backup settings`
+  String get backupSettings {
+    return Intl.message(
+      'Backup settings',
+      name: 'backupSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup over mobile data`
+  String get backupOverMobileData {
+    return Intl.message(
+      'Backup over mobile data',
+      name: 'backupOverMobileData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup videos`
+  String get backupVideos {
+    return Intl.message(
+      'Backup videos',
+      name: 'backupVideos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disable auto lock`
+  String get disableAutoLock {
+    return Intl.message(
+      'Disable auto lock',
+      name: 'disableAutoLock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster.`
+  String get deviceLockExplanation {
+    return Intl.message(
+      'Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster.',
+      name: 'deviceLockExplanation',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

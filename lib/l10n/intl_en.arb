@@ -433,5 +433,10 @@
   "selectAll": "Select all",
   "skip": "Skip",
   "updatingFolderSelection": "Updating folder selection...",
-  "itemCount": "{count, plural, one{{count} item} other{{count} items}}"
+  "itemCount": "{count, plural, one{{count} item} other{{count} items}}",
+  "backupSettings": "Backup settings",
+  "backupOverMobileData": "Backup over mobile data",
+  "backupVideos": "Backup videos",
+  "disableAutoLock": "Disable auto lock",
+  "deviceLockExplanation": "Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster."
 }
