@@ -120,17 +120,12 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                     child: Column(
                       children: [
                         TextInputWidget(
-                          //todo: get location name from location tag here
                           hintText: "Location name",
                           borderRadius: 2,
                           focusNode: _focusNode,
                           submitNotifier: _submitNotifer,
                           cancelNotifier: _cancelNotifier,
-                          popNavAfterSubmission: true,
-                          onSubmit: (locationName) async {
-                            // await _addLocationTag(locationName);
-                            //todo: Edit location tag here
-                          },
+                          popNavAfterSubmission: false,
                           shouldUnfocusOnClearOrSubmit: true,
                           alwaysShowSuccessState: true,
                           initialValue: locationName,
