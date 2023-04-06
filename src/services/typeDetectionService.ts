@@ -50,15 +50,10 @@ export async function getFileType(
             mimeType: typeResult.mime,
         };
     } catch (e) {
-        const fileFormat = getFileExtension(receivedFile.name);
-        const fileSize = getFileSize(receivedFile);
-        logError(e, 'type detection failed', {
-            fileFormat,
-            fileSize: convertBytesToHumanReadable(fileSize),
-        });
         if (e.message === CustomError.UNSUPPORTED_FILE_FORMAT) {
             throw e;
         }
+        const fileFormat = getFileExtension(receivedFile.name);
         const formatMissedByTypeDetection = FILE_TYPE_LIB_MISSED_FORMATS.find(
             (a) => a.exactType === fileFormat
         );
@@ -68,6 +63,11 @@ export async function getFileType(
         if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
+        const fileSize = getFileSize(receivedFile);
+        logError(e, 'type detection failed', {
+            fileFormat,
+            fileSize: convertBytesToHumanReadable(fileSize),
+        });
         throw Error(CustomError.TYPE_DETECTION_FAILED(fileFormat));
     }
 }
