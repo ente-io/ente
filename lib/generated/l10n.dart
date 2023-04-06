@@ -4109,6 +4109,16 @@ class S {
     );
   }
 
+  /// `Your purchase was successful`
+  String get yourPurchaseWasSuccessful {
+    return Intl.message(
+      'Your purchase was successful',
+      name: 'yourPurchaseWasSuccessful',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Your plan was successfully upgraded`
   String get yourPlanWasSuccessfullyUpgraded {
     return Intl.message(
@@ -4124,6 +4134,16 @@ class S {
     return Intl.message(
       'Your plan was successfully downgraded',
       name: 'yourPlanWasSuccessfullyDowngraded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your subscription was updated successfully`
+  String get yourSubscriptionWasUpdatedSuccessfully {
+    return Intl.message(
+      'Your subscription was updated successfully',
+      name: 'yourSubscriptionWasUpdatedSuccessfully',
       desc: '',
       args: [],
     );
@@ -4234,6 +4254,118 @@ class S {
     return Intl.message(
       'Continue on free trial',
       name: 'continueOnFreeTrial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to exit?`
+  String get areYouSureYouWantToExit {
+    return Intl.message(
+      'Are you sure you want to exit?',
+      name: 'areYouSureYouWantToExit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Thank you`
+  String get thankYou {
+    return Intl.message(
+      'Thank you',
+      name: 'thankYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to verify payment status`
+  String get failedToVerifyPaymentStatus {
+    return Intl.message(
+      'Failed to verify payment status',
+      name: 'failedToVerifyPaymentStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please wait for sometime before retrying`
+  String get pleaseWaitForSometimeBeforeRetrying {
+    return Intl.message(
+      'Please wait for sometime before retrying',
+      name: 'pleaseWaitForSometimeBeforeRetrying',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unfortunately your payment failed due to {reason}`
+  String paymentFailedWithReason(Object reason) {
+    return Intl.message(
+      'Unfortunately your payment failed due to $reason',
+      name: 'paymentFailedWithReason',
+      desc: '',
+      args: [reason],
+    );
+  }
+
+  /// `You are on a family plan!`
+  String get youAreOnAFamilyPlan {
+    return Intl.message(
+      'You are on a family plan!',
+      name: 'youAreOnAFamilyPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please contact`
+  String get contactFamilyAdminPart1 {
+    return Intl.message(
+      'Please contact',
+      name: 'contactFamilyAdminPart1',
+      desc:
+          'Part1 of the sentence \'Please contact {familyAdminName} to manage your subscription\'',
+      args: [],
+    );
+  }
+
+  /// `to manage your subscription`
+  String get contactFamilyAdminPart2 {
+    return Intl.message(
+      'to manage your subscription',
+      name: 'contactFamilyAdminPart2',
+      desc:
+          'Part2 of the sentence \'Please contact {familyAdminName} to manage your subscription\'',
+      args: [],
+    );
+  }
+
+  /// `Leave family`
+  String get leaveFamily {
+    return Intl.message(
+      'Leave family',
+      name: 'leaveFamily',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure that you want to leave the family plan?`
+  String get areYouSureThatYouWantToLeaveTheFamily {
+    return Intl.message(
+      'Are you sure that you want to leave the family plan?',
+      name: 'areYouSureThatYouWantToLeaveTheFamily',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Leave`
+  String get leave {
+    return Intl.message(
+      'Leave',
+      name: 'leave',
       desc: '',
       args: [],
     );

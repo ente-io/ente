@@ -595,8 +595,10 @@
   "send": "Send",
   "askCancelReason": "Your subscription was cancelled. Would you like to share the reason?",
   "thankYouForSubscribing": "Thank you for subscribing!",
+  "yourPurchaseWasSuccessful": "Your purchase was successful",
   "yourPlanWasSuccessfullyUpgraded": "Your plan was successfully upgraded",
   "yourPlanWasSuccessfullyDowngraded": "Your plan was successfully downgraded",
+  "yourSubscriptionWasUpdatedSuccessfully": "Your subscription was updated successfully",
   "googlePlayId": "Google Play ID",
   "appleId": "Apple ID",
   "playstoreSubscription": "PlayStore subscription",
@@ -617,5 +619,24 @@
       }
     }
   },
-  "continueOnFreeTrial": "Continue on free trial"
+  "continueOnFreeTrial": "Continue on free trial",
+  "areYouSureYouWantToExit": "Are you sure you want to exit?",
+  "thankYou": "Thank you",
+  "failedToVerifyPaymentStatus": "Failed to verify payment status",
+  "pleaseWaitForSometimeBeforeRetrying": "Please wait for sometime before retrying",
+  "paymentFailedWithReason": "Unfortunately your payment failed due to {reason}",
+  "youAreOnAFamilyPlan": "You are on a family plan!",
+  "contactFamilyAdminPart1": "Please contact",
+  "@contactFamilyAdminPart1": {
+    "description": "Part1 of the sentence 'Please contact {familyAdminName} to manage your subscription'",
+    "type": "text"
+  },
+  "contactFamilyAdminPart2": "to manage your subscription",
+  "@contactFamilyAdminPart2": {
+    "description": "Part2 of the sentence 'Please contact {familyAdminName} to manage your subscription'",
+    "type": "text"
+  },
+  "leaveFamily": "Leave family",
+  "areYouSureThatYouWantToLeaveTheFamily": "Are you sure that you want to leave the family plan?",
+  "leave": "Leave"
 }
