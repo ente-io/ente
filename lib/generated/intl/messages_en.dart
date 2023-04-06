@@ -98,6 +98,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "about": MessageLookupByLibrary.simpleMessage("About"),
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Welcome back!"),
         "ackPasswordLostWarningPart1": MessageLookupByLibrary.simpleMessage(
@@ -153,8 +154,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Change password"),
         "changePermissions":
             MessageLookupByLibrary.simpleMessage("Change permissions?"),
+        "checkForUpdates":
+            MessageLookupByLibrary.simpleMessage("Check for updates"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Please check your inbox (and spam) to complete verification"),
+        "checking": MessageLookupByLibrary.simpleMessage("Checking..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Claim free storage"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim more!"),
@@ -381,6 +385,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Please try again"),
         "pleaseWait": MessageLookupByLibrary.simpleMessage("Please wait..."),
+        "privacy": MessageLookupByLibrary.simpleMessage("Privacy"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("privacy policy"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Privacy Policy"),
@@ -504,6 +509,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "terminate": MessageLookupByLibrary.simpleMessage("Terminate"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Terminate session?"),
+        "terms": MessageLookupByLibrary.simpleMessage("Terms"),
         "termsAgreePart1":
             MessageLookupByLibrary.simpleMessage("I agree to the "),
         "termsOfService":
@@ -550,6 +556,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("View recovery key"),
         "viewer": MessageLookupByLibrary.simpleMessage("Viewer"),
+        "weAreOpenSource":
+            MessageLookupByLibrary.simpleMessage("We are open source!"),
         "weakStrength": MessageLookupByLibrary.simpleMessage("Weak"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Welcome back!"),
         "weveSentAMailTo":
@@ -559,6 +567,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesDelete": MessageLookupByLibrary.simpleMessage("Yes, delete"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Yes, remove"),
         "you": MessageLookupByLibrary.simpleMessage("You"),
+        "youAreOnTheLatestVersion": MessageLookupByLibrary.simpleMessage(
+            "You are on the latest version"),
         "youCanAtMaxDoubleYourStorage": MessageLookupByLibrary.simpleMessage(
             "* You can at max double your storage"),
         "youCannotShareWithYourself": MessageLookupByLibrary.simpleMessage(

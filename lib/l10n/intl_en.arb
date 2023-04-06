@@ -438,5 +438,12 @@
   "backupOverMobileData": "Backup over mobile data",
   "backupVideos": "Backup videos",
   "disableAutoLock": "Disable auto lock",
-  "deviceLockExplanation": "Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster."
+  "deviceLockExplanation": "Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster.",
+  "about": "About",
+  "weAreOpenSource": "We are open source!",
+  "privacy": "Privacy",
+  "terms": "Terms",
+  "checkForUpdates": "Check for updates",
+  "checking": "Checking...",
+  "youAreOnTheLatestVersion": "You are on the latest version"
 }
