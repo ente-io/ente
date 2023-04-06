@@ -9,6 +9,8 @@ import { getFileExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from './readerService';
 import FileType, { FileTypeResult } from 'file-type';
+import { getFileSize } from './upload/fileService';
+import { convertBytesToHumanReadable } from 'utils/file/size';
 
 const TYPE_VIDEO = 'video';
 const TYPE_IMAGE = 'image';
@@ -52,10 +54,15 @@ export async function getFileType(
             throw e;
         }
         const fileFormat = getFileExtension(receivedFile.name);
+        const fileSize = convertBytesToHumanReadable(getFileSize(receivedFile));
         const formatMissedByTypeDetection = FILE_TYPE_LIB_MISSED_FORMATS.find(
             (a) => a.exactType === fileFormat
         );
         if (formatMissedByTypeDetection) {
+            logError(Error(), 'format missed by type detection', {
+                fileFormat,
+                fileSize,
+            });
             return formatMissedByTypeDetection;
         }
         if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
@@ -63,6 +70,7 @@ export async function getFileType(
         }
         logError(e, 'type detection failed', {
             fileFormat,
+            fileSize,
         });
         throw Error(CustomError.TYPE_DETECTION_FAILED(fileFormat));
     }
