@@ -4098,6 +4098,136 @@ class S {
       args: [],
     );
   }
+
+  /// `Thank you for subscribing!`
+  String get thankYouForSubscribing {
+    return Intl.message(
+      'Thank you for subscribing!',
+      name: 'thankYouForSubscribing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your plan was successfully upgraded`
+  String get yourPlanWasSuccessfullyUpgraded {
+    return Intl.message(
+      'Your plan was successfully upgraded',
+      name: 'yourPlanWasSuccessfullyUpgraded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your plan was successfully downgraded`
+  String get yourPlanWasSuccessfullyDowngraded {
+    return Intl.message(
+      'Your plan was successfully downgraded',
+      name: 'yourPlanWasSuccessfullyDowngraded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Google Play ID`
+  String get googlePlayId {
+    return Intl.message(
+      'Google Play ID',
+      name: 'googlePlayId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apple ID`
+  String get appleId {
+    return Intl.message(
+      'Apple ID',
+      name: 'appleId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `PlayStore subscription`
+  String get playstoreSubscription {
+    return Intl.message(
+      'PlayStore subscription',
+      name: 'playstoreSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `AppStore subscription`
+  String get appstoreSubscription {
+    return Intl.message(
+      'AppStore subscription',
+      name: 'appstoreSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your {id} is already linked to another ente account.\nIf you would like to use your {id} with this account, please contact our support''`
+  String subAlreadyLinkedErrMessage(Object id) {
+    return Intl.message(
+      'Your $id is already linked to another ente account.\nIf you would like to use your $id with this account, please contact our support\'\'',
+      name: 'subAlreadyLinkedErrMessage',
+      desc: '',
+      args: [id],
+    );
+  }
+
+  /// `Please visit web.ente.io to manage your subscription`
+  String get visitWebToManage {
+    return Intl.message(
+      'Please visit web.ente.io to manage your subscription',
+      name: 'visitWebToManage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not update subscription`
+  String get couldNotUpdateSubscription {
+    return Intl.message(
+      'Could not update subscription',
+      name: 'couldNotUpdateSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please contact support@ente.io and we will be happy to help!`
+  String get pleaseContactSupportAndWeWillBeHappyToHelp {
+    return Intl.message(
+      'Please contact support@ente.io and we will be happy to help!',
+      name: 'pleaseContactSupportAndWeWillBeHappyToHelp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Payment failed`
+  String get paymentFailed {
+    return Intl.message(
+      'Payment failed',
+      name: 'paymentFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please talk to {providerName} support if you were charged`
+  String paymentFailedTalkToProvider(String providerName) {
+    return Intl.message(
+      'Please talk to $providerName support if you were charged',
+      name: 'paymentFailedTalkToProvider',
+      desc: 'The text to display when the payment failed',
+      args: [providerName],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
