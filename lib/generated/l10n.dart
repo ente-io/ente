@@ -4722,6 +4722,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Name`
+  String get name {
+    return Intl.message(
+      'Name',
+      name: 'name',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Newest`
+  String get newest {
+    return Intl.message(
+      'Newest',
+      name: 'newest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last updated`
+  String get lastUpdated {
+    return Intl.message(
+      'Last updated',
+      name: 'lastUpdated',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

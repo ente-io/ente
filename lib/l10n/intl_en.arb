@@ -673,5 +673,8 @@
   "shareAnAlbumNow": "Share an album now",
   "collectEventPhotos": "Collect event photos",
   "sessionExpired": "Session expired",
-  "loggingOut": "Logging out..."
+  "loggingOut": "Logging out...",
+  "name": "Name",
+  "newest": "Newest",
+  "lastUpdated": "Last updated"
 }

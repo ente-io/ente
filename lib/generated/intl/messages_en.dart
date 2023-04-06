@@ -485,6 +485,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Keep Photos"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Kindly help us with this information"),
+        "lastUpdated": MessageLookupByLibrary.simpleMessage("Last updated"),
         "leave": MessageLookupByLibrary.simpleMessage("Leave"),
         "leaveFamily": MessageLookupByLibrary.simpleMessage("Leave family"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Light"),
@@ -522,9 +523,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
         "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
         "movedToTrash": MessageLookupByLibrary.simpleMessage("Moved to trash"),
+        "name": MessageLookupByLibrary.simpleMessage("Name"),
         "never": MessageLookupByLibrary.simpleMessage("Never"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("New album"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("New to ente"),
+        "newest": MessageLookupByLibrary.simpleMessage("Newest"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "You\'ve no files on this device that can be deleted"),
