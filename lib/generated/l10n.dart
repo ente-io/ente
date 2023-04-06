@@ -4422,6 +4422,146 @@ class S {
       args: [],
     );
   }
+
+  /// `Existing user`
+  String get existingUser {
+    return Intl.message(
+      'Existing user',
+      name: 'existingUser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Private backups`
+  String get privateBackups {
+    return Intl.message(
+      'Private backups',
+      name: 'privateBackups',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `for your memories`
+  String get forYourMemories {
+    return Intl.message(
+      'for your memories',
+      name: 'forYourMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `End-to-end encrypted by default`
+  String get endtoendEncryptedByDefault {
+    return Intl.message(
+      'End-to-end encrypted by default',
+      name: 'endtoendEncryptedByDefault',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Safely stored`
+  String get safelyStored {
+    return Intl.message(
+      'Safely stored',
+      name: 'safelyStored',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `at a fallout shelter`
+  String get atAFalloutShelter {
+    return Intl.message(
+      'at a fallout shelter',
+      name: 'atAFalloutShelter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Designed to outlive`
+  String get designedToOutlive {
+    return Intl.message(
+      'Designed to outlive',
+      name: 'designedToOutlive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Available`
+  String get available {
+    return Intl.message(
+      'Available',
+      name: 'available',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `everywhere`
+  String get everywhere {
+    return Intl.message(
+      'everywhere',
+      name: 'everywhere',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Android, iOS, Web, Desktop`
+  String get androidIosWebDesktop {
+    return Intl.message(
+      'Android, iOS, Web, Desktop',
+      name: 'androidIosWebDesktop',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mobile, Web, Desktop`
+  String get mobileWebDesktop {
+    return Intl.message(
+      'Mobile, Web, Desktop',
+      name: 'mobileWebDesktop',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New to ente`
+  String get newToEnte {
+    return Intl.message(
+      'New to ente',
+      name: 'newToEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please login again`
+  String get pleaseLoginAgain {
+    return Intl.message(
+      'Please login again',
+      name: 'pleaseLoginAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.`
+  String get devAccountChanged {
+    return Intl.message(
+      'The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.',
+      name: 'devAccountChanged',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

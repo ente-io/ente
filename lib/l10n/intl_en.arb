@@ -643,5 +643,19 @@
   "rateTheApp": "Rate the app",
   "startBackup": "Start backup",
   "noPhotosAreBeingBackedUpRightNow": "No photos are being backed up right now",
-  "preserveMore": "Preserve more"
+  "preserveMore": "Preserve more",
+  "existingUser": "Existing user",
+  "privateBackups": "Private backups",
+  "forYourMemories": "for your memories",
+  "endtoendEncryptedByDefault": "End-to-end encrypted by default",
+  "safelyStored": "Safely stored",
+  "atAFalloutShelter": "at a fallout shelter",
+  "designedToOutlive": "Designed to outlive",
+  "available": "Available",
+  "everywhere": "everywhere",
+  "androidIosWebDesktop": "Android, iOS, Web, Desktop",
+  "mobileWebDesktop": "Mobile, Web, Desktop",
+  "newToEnte": "New to ente",
+  "pleaseLoginAgain": "Please login again",
+  "devAccountChanged": "The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable."
 }

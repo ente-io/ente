@@ -169,6 +169,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Allow downloads"),
         "and": MessageLookupByLibrary.simpleMessage("and"),
+        "androidIosWebDesktop":
+            MessageLookupByLibrary.simpleMessage("Android, iOS, Web, Desktop"),
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Apply"),
         "applyCodeTitle": MessageLookupByLibrary.simpleMessage("Apply code"),
@@ -193,6 +195,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Your subscription was cancelled. Would you like to share the reason?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "What is the main reason you are deleting your account?"),
+        "atAFalloutShelter":
+            MessageLookupByLibrary.simpleMessage("at a fallout shelter"),
         "authToChangeLockscreenSetting": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to change lockscreen setting"),
         "authToChangeYourEmail": MessageLookupByLibrary.simpleMessage(
@@ -210,6 +214,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please authenticate to view your hidden files"),
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to view your recovery key"),
+        "available": MessageLookupByLibrary.simpleMessage("Available"),
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Backed up folders"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
@@ -342,7 +347,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete shared album?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others"),
+        "designedToOutlive":
+            MessageLookupByLibrary.simpleMessage("Designed to outlive"),
         "details": MessageLookupByLibrary.simpleMessage("Details"),
+        "devAccountChanged": MessageLookupByLibrary.simpleMessage(
+            "The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable."),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster."),
         "disableAutoLock":
@@ -368,6 +377,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Encryption keys"),
         "endToEndEncrypted":
             MessageLookupByLibrary.simpleMessage("end-to-end encrypted"),
+        "endtoendEncryptedByDefault": MessageLookupByLibrary.simpleMessage(
+            "End-to-end encrypted by default"),
         "enteSubscriptionPitch": MessageLookupByLibrary.simpleMessage(
             "ente preserves your memories, so they\'re always available to you, even if you lose your device."),
         "enteSubscriptionShareWithFamily": MessageLookupByLibrary.simpleMessage(
@@ -394,6 +405,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Enter your password"),
         "enterYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Enter your recovery key"),
+        "everywhere": MessageLookupByLibrary.simpleMessage("everywhere"),
+        "existingUser": MessageLookupByLibrary.simpleMessage("Existing user"),
         "expiredLinkInfo": MessageLookupByLibrary.simpleMessage(
             "This link has expired. Please select a new expiry time or disable link expiry."),
         "exportYourData":
@@ -414,6 +427,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "faq": MessageLookupByLibrary.simpleMessage("FAQ"),
         "faqs": MessageLookupByLibrary.simpleMessage("FAQs"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
+        "forYourMemories":
+            MessageLookupByLibrary.simpleMessage("for your memories"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Forgot password"),
         "freeStorageClaimed":
@@ -491,11 +506,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "maxDeviceLimitSpikeHandling": m12,
         "memoryCount": m13,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "mobileWebDesktop":
+            MessageLookupByLibrary.simpleMessage("Mobile, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
         "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
         "movedToTrash": MessageLookupByLibrary.simpleMessage("Moved to trash"),
         "never": MessageLookupByLibrary.simpleMessage("Never"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("New album"),
+        "newToEnte": MessageLookupByLibrary.simpleMessage("New to ente"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "You\'ve no files on this device that can be deleted"),
@@ -539,6 +557,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
                 "Please contact support@ente.io and we will be happy to help!"),
+        "pleaseLoginAgain":
+            MessageLookupByLibrary.simpleMessage("Please login again"),
         "pleaseSendAnEmailTo":
             MessageLookupByLibrary.simpleMessage("Please send an email to"),
         "pleaseTryAgain":
@@ -552,6 +572,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("privacy policy"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Privacy Policy"),
+        "privateBackups":
+            MessageLookupByLibrary.simpleMessage("Private backups"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Public link enabled"),
         "rateTheApp": MessageLookupByLibrary.simpleMessage("Rate the app"),
@@ -619,6 +641,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Reset password"),
         "retry": MessageLookupByLibrary.simpleMessage("Retry"),
+        "safelyStored": MessageLookupByLibrary.simpleMessage("Safely stored"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Save key"),
         "saveYourRecoveryKeyIfYouHaventAlready":
             MessageLookupByLibrary.simpleMessage(
