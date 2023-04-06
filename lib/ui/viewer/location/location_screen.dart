@@ -252,10 +252,10 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
                 if (value == null) {
                   return RepaintBoundary(
                     child: EnteLoadingWidget(
-                      size: 10,
+                      size: 12,
                       color: getEnteColorScheme(context).strokeMuted,
                       alignment: Alignment.centerLeft,
-                      padding: 5,
+                      padding: 2.5,
                     ),
                   );
                 } else {
