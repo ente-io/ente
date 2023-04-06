@@ -528,5 +528,6 @@
   "mastodon": "Mastodon",
   "matrix": "Matrix",
   "discord": "Discord",
-  "reddit": "Reddit"
+  "reddit": "Reddit",
+  "yourStorageDetailsCouldNotBeFetched": "Your storage details could not be fetched"
 }

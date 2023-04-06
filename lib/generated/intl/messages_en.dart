@@ -668,6 +668,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "youHaveSuccessfullyFreedUp": m28,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Your account has been deleted"),
+        "yourStorageDetailsCouldNotBeFetched":
+            MessageLookupByLibrary.simpleMessage(
+                "Your storage details could not be fetched"),
         "youveNoDuplicateFilesThatCanBeCleared":
             MessageLookupByLibrary.simpleMessage(
                 "You\'ve no duplicate files that can be cleared")

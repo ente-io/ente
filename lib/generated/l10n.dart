@@ -3697,6 +3697,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Your storage details could not be fetched`
+  String get yourStorageDetailsCouldNotBeFetched {
+    return Intl.message(
+      'Your storage details could not be fetched',
+      name: 'yourStorageDetailsCouldNotBeFetched',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
