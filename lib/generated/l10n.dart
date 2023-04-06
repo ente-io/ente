@@ -3477,6 +3477,136 @@ class S {
       args: [],
     );
   }
+
+  /// `Security`
+  String get security {
+    return Intl.message(
+      'Security',
+      name: 'security',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to view your recovery key`
+  String get authToViewYourRecoveryKey {
+    return Intl.message(
+      'Please authenticate to view your recovery key',
+      name: 'authToViewYourRecoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Two-factor`
+  String get twofactor {
+    return Intl.message(
+      'Two-factor',
+      name: 'twofactor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to configure two-factor authentication`
+  String get authToConfigureTwofactorAuthentication {
+    return Intl.message(
+      'Please authenticate to configure two-factor authentication',
+      name: 'authToConfigureTwofactorAuthentication',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lockscreen`
+  String get lockscreen {
+    return Intl.message(
+      'Lockscreen',
+      name: 'lockscreen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to change lockscreen setting`
+  String get authToChangeLockscreenSetting {
+    return Intl.message(
+      'Please authenticate to change lockscreen setting',
+      name: 'authToChangeLockscreenSetting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To enable lockscreen, please setup device passcode or screen lock in your system settings.`
+  String get lockScreenEnablePreSteps {
+    return Intl.message(
+      'To enable lockscreen, please setup device passcode or screen lock in your system settings.',
+      name: 'lockScreenEnablePreSteps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View active sessions`
+  String get viewActiveSessions {
+    return Intl.message(
+      'View active sessions',
+      name: 'viewActiveSessions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to view your active sessions`
+  String get authToViewYourActiveSessions {
+    return Intl.message(
+      'Please authenticate to view your active sessions',
+      name: 'authToViewYourActiveSessions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disable two-factor`
+  String get disableTwofactor {
+    return Intl.message(
+      'Disable two-factor',
+      name: 'disableTwofactor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to disable two-factor authentication?`
+  String get confirm2FADisable {
+    return Intl.message(
+      'Are you sure you want to disable two-factor authentication?',
+      name: 'confirm2FADisable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No`
+  String get no {
+    return Intl.message(
+      'No',
+      name: 'no',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes`
+  String get yes {
+    return Intl.message(
+      'Yes',
+      name: 'yes',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

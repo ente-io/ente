@@ -149,14 +149,23 @@ class MessageLookup extends MessageLookupByLibrary {
             "Are you sure you want to logout?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "What is the main reason you are deleting your account?"),
+        "authToChangeLockscreenSetting": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to change lockscreen setting"),
         "authToChangeYourEmail": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to change your email"),
         "authToChangeYourPassword": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to change your password"),
+        "authToConfigureTwofactorAuthentication":
+            MessageLookupByLibrary.simpleMessage(
+                "Please authenticate to configure two-factor authentication"),
         "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to initiate account deletion"),
+        "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to view your active sessions"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to view your hidden files"),
+        "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to view your recovery key"),
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Backed up folders"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
@@ -204,6 +213,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Collaborators can add photos and videos to the shared album."),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Collect photos"),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
+        "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
+            "Are you sure you want to disable two-factor authentication?"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Confirm Account Deletion"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
@@ -279,6 +290,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "disableDownloadWarningTitle":
             MessageLookupByLibrary.simpleMessage("Please note"),
         "disableLinkMessage": m2,
+        "disableTwofactor":
+            MessageLookupByLibrary.simpleMessage("Disable two-factor"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("Do this later"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
         "downloading": MessageLookupByLibrary.simpleMessage("Downloading..."),
@@ -379,6 +392,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Link has expired"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Never"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lock"),
+        "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
+            "To enable lockscreen, please setup device passcode or screen lock in your system settings."),
+        "lockscreen": MessageLookupByLibrary.simpleMessage("Lockscreen"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Log in"),
         "logout": MessageLookupByLibrary.simpleMessage("Logout"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Lost device?"),
@@ -395,6 +411,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "movedToTrash": MessageLookupByLibrary.simpleMessage("Moved to trash"),
         "never": MessageLookupByLibrary.simpleMessage("Never"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("New album"),
+        "no": MessageLookupByLibrary.simpleMessage("No"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "You\'ve no files on this device that can be deleted"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ No duplicates"),
@@ -498,6 +515,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Scan this barcode with\nyour authenticator app"),
+        "security": MessageLookupByLibrary.simpleMessage("Security"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
         "selectFoldersForBackup":
             MessageLookupByLibrary.simpleMessage("Select folders for backup"),
@@ -586,6 +604,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "total": MessageLookupByLibrary.simpleMessage("total"),
         "trash": MessageLookupByLibrary.simpleMessage("Trash"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Try again"),
+        "twofactor": MessageLookupByLibrary.simpleMessage("Two-factor"),
         "twofactorAuthenticationPageTitle":
             MessageLookupByLibrary.simpleMessage("Two-factor authentication"),
         "twofactorSetup":
@@ -611,6 +630,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifyingRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Verifying recovery key..."),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
+        "viewActiveSessions":
+            MessageLookupByLibrary.simpleMessage("View active sessions"),
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("View recovery key"),
         "viewer": MessageLookupByLibrary.simpleMessage("Viewer"),
@@ -620,6 +641,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Welcome back!"),
         "weveSentAMailTo":
             MessageLookupByLibrary.simpleMessage("We\'ve sent a mail to"),
+        "yes": MessageLookupByLibrary.simpleMessage("Yes"),
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("Yes, convert to viewer"),
         "yesDelete": MessageLookupByLibrary.simpleMessage("Yes, delete"),
