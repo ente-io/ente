@@ -434,6 +434,7 @@
   "skip": "Skip",
   "updatingFolderSelection": "Updating folder selection...",
   "itemCount": "{count, plural, one{{count} item} other{{count} items}}",
+  "yearsAgo": "{count, plural, one{{count} year ago} other{{count} years ago}}",
   "backupSettings": "Backup settings",
   "backupOverMobileData": "Backup over mobile data",
   "backupVideos": "Backup videos",

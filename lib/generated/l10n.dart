@@ -2986,6 +2986,18 @@ class S {
     );
   }
 
+  /// `{count, plural, one{{count} year ago} other{{count} years ago}}`
+  String yearsAgo(num count) {
+    return Intl.plural(
+      count,
+      one: '$count year ago',
+      other: '$count years ago',
+      name: 'yearsAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
   /// `Backup settings`
   String get backupSettings {
     return Intl.message(
