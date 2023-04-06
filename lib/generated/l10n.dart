@@ -4400,6 +4400,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Preserve more`
+  String get preserveMore {
+    return Intl.message(
+      'Preserve more',
+      name: 'preserveMore',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -641,5 +641,6 @@
   "leave": "Leave",
   "rateTheApp": "Rate the app",
   "startBackup": "Start backup",
-  "noPhotosAreBeingBackedUpRightNow": "No photos are being backed up right now"
+  "noPhotosAreBeingBackedUpRightNow": "No photos are being backed up right now",
+  "preserveMore": "Preserve more"
 }
