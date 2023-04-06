@@ -3105,6 +3105,186 @@ class S {
       args: [],
     );
   }
+
+  /// `Account`
+  String get account {
+    return Intl.message(
+      'Account',
+      name: 'account',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage subscription`
+  String get manageSubscription {
+    return Intl.message(
+      'Manage subscription',
+      name: 'manageSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to change your email`
+  String get authToChangeYourEmail {
+    return Intl.message(
+      'Please authenticate to change your email',
+      name: 'authToChangeYourEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change password`
+  String get changePassword {
+    return Intl.message(
+      'Change password',
+      name: 'changePassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to change your password`
+  String get authToChangeYourPassword {
+    return Intl.message(
+      'Please authenticate to change your password',
+      name: 'authToChangeYourPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export your data`
+  String get exportYourData {
+    return Intl.message(
+      'Export your data',
+      name: 'exportYourData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Logout`
+  String get logout {
+    return Intl.message(
+      'Logout',
+      name: 'logout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to initiate account deletion`
+  String get authToInitiateAccountDeletion {
+    return Intl.message(
+      'Please authenticate to initiate account deletion',
+      name: 'authToInitiateAccountDeletion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to logout?`
+  String get areYouSureYouWantToLogout {
+    return Intl.message(
+      'Are you sure you want to logout?',
+      name: 'areYouSureYouWantToLogout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, logout`
+  String get yesLogout {
+    return Intl.message(
+      'Yes, logout',
+      name: 'yesLogout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A new version of ente is available.`
+  String get aNewVersionOfEnteIsAvailable {
+    return Intl.message(
+      'A new version of ente is available.',
+      name: 'aNewVersionOfEnteIsAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update`
+  String get update {
+    return Intl.message(
+      'Update',
+      name: 'update',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Install manually`
+  String get installManually {
+    return Intl.message(
+      'Install manually',
+      name: 'installManually',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Critical update available`
+  String get criticalUpdateAvailable {
+    return Intl.message(
+      'Critical update available',
+      name: 'criticalUpdateAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update available`
+  String get updateAvailable {
+    return Intl.message(
+      'Update available',
+      name: 'updateAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Downloading...`
+  String get downloading {
+    return Intl.message(
+      'Downloading...',
+      name: 'downloading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The download could not be completed`
+  String get theDownloadCouldNotBeCompleted {
+    return Intl.message(
+      'The download could not be completed',
+      name: 'theDownloadCouldNotBeCompleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Retry`
+  String get retry {
+    return Intl.message(
+      'Retry',
+      name: 'retry',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

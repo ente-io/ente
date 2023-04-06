@@ -98,7 +98,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "aNewVersionOfEnteIsAvailable": MessageLookupByLibrary.simpleMessage(
+            "A new version of ente is available."),
         "about": MessageLookupByLibrary.simpleMessage("About"),
+        "account": MessageLookupByLibrary.simpleMessage("Account"),
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Welcome back!"),
         "ackPasswordLostWarningPart1": MessageLookupByLibrary.simpleMessage(
@@ -134,8 +137,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "apply": MessageLookupByLibrary.simpleMessage("Apply"),
         "applyCodeTitle": MessageLookupByLibrary.simpleMessage("Apply code"),
         "archive": MessageLookupByLibrary.simpleMessage("Archive"),
+        "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
+            "Are you sure you want to logout?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "What is the main reason you are deleting your account?"),
+        "authToChangeYourEmail": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to change your email"),
+        "authToChangeYourPassword": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to change your password"),
+        "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to initiate account deletion"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to view your hidden files"),
         "backupOverMobileData":
@@ -150,6 +161,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "cannotAddMorePhotosAfterBecomingViewer": m0,
         "changeEmail": MessageLookupByLibrary.simpleMessage("Change email"),
+        "changePassword":
+            MessageLookupByLibrary.simpleMessage("Change password"),
         "changePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Change password"),
         "changePermissions":
@@ -206,6 +219,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Create public link"),
         "creatingLink":
             MessageLookupByLibrary.simpleMessage("Creating link..."),
+        "criticalUpdateAvailable":
+            MessageLookupByLibrary.simpleMessage("Critical update available"),
         "custom": MessageLookupByLibrary.simpleMessage("Custom"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Decrypting..."),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Delete account"),
@@ -255,6 +270,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "disableLinkMessage": m2,
         "doThisLater": MessageLookupByLibrary.simpleMessage("Do this later"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
+        "downloading": MessageLookupByLibrary.simpleMessage("Downloading..."),
         "dropSupportEmail": m3,
         "eligible": MessageLookupByLibrary.simpleMessage("eligible"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
@@ -288,6 +304,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Enter your recovery key"),
         "expiredLinkInfo": MessageLookupByLibrary.simpleMessage(
             "This link has expired. Please select a new expiry time or disable link expiry."),
+        "exportYourData":
+            MessageLookupByLibrary.simpleMessage("Export your data"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Failed to apply code"),
         "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(
@@ -320,6 +338,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Incorrect recovery key"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Insecure device"),
+        "installManually":
+            MessageLookupByLibrary.simpleMessage("Install manually"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Invalid email address"),
         "invalidKey": MessageLookupByLibrary.simpleMessage("Invalid key"),
@@ -344,12 +364,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Never"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lock"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Log in"),
+        "logout": MessageLookupByLibrary.simpleMessage("Logout"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Lost device?"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Manage device storage"),
         "manageLink": MessageLookupByLibrary.simpleMessage("Manage link"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Manage"),
+        "manageSubscription":
+            MessageLookupByLibrary.simpleMessage("Manage subscription"),
         "maxDeviceLimitSpikeHandling": m8,
         "memoryCount": m9,
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
@@ -439,6 +462,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resendEmail": MessageLookupByLibrary.simpleMessage("Resend email"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Reset password"),
+        "retry": MessageLookupByLibrary.simpleMessage("Retry"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Save key"),
         "saveYourRecoveryKeyIfYouHaventAlready":
             MessageLookupByLibrary.simpleMessage(
@@ -515,6 +539,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "termsOfService":
             MessageLookupByLibrary.simpleMessage("terms of service"),
         "termsOfServicesTitle": MessageLookupByLibrary.simpleMessage("Terms"),
+        "theDownloadCouldNotBeCompleted": MessageLookupByLibrary.simpleMessage(
+            "The download could not be completed"),
         "theyAlsoGetXGb": m23,
         "thisCanBeUsedToRecoverYourAccountIfYou":
             MessageLookupByLibrary.simpleMessage(
@@ -537,6 +563,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Two-factor setup"),
         "uncategorized": MessageLookupByLibrary.simpleMessage("Uncategorized"),
         "unselectAll": MessageLookupByLibrary.simpleMessage("Unselect all"),
+        "update": MessageLookupByLibrary.simpleMessage("Update"),
+        "updateAvailable":
+            MessageLookupByLibrary.simpleMessage("Update available"),
         "updatingFolderSelection": MessageLookupByLibrary.simpleMessage(
             "Updating folder selection..."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
@@ -565,6 +594,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("Yes, convert to viewer"),
         "yesDelete": MessageLookupByLibrary.simpleMessage("Yes, delete"),
+        "yesLogout": MessageLookupByLibrary.simpleMessage("Yes, logout"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Yes, remove"),
         "you": MessageLookupByLibrary.simpleMessage("You"),
         "youAreOnTheLatestVersion": MessageLookupByLibrary.simpleMessage(
