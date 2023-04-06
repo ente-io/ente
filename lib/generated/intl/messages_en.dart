@@ -111,6 +111,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addedAs": MessageLookupByLibrary.simpleMessage("Added as"),
         "addingToFavorites":
             MessageLookupByLibrary.simpleMessage("Adding to favorites..."),
+        "advancedSettings": MessageLookupByLibrary.simpleMessage("Advanced"),
         "after1Day": MessageLookupByLibrary.simpleMessage("After 1 day"),
         "after1Hour": MessageLookupByLibrary.simpleMessage("After 1 hour"),
         "after1Month": MessageLookupByLibrary.simpleMessage("After 1 month"),
@@ -328,6 +329,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "logInLabel": MessageLookupByLibrary.simpleMessage("Log in"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Lost device?"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
+        "manageDeviceStorage":
+            MessageLookupByLibrary.simpleMessage("Manage device storage"),
         "manageLink": MessageLookupByLibrary.simpleMessage("Manage link"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Manage"),
         "maxDeviceLimitSpikeHandling": m7,
@@ -357,6 +360,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordStrength": m9,
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
+        "photoGridSize":
+            MessageLookupByLibrary.simpleMessage("Photo grid size"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("photo"),
         "pleaseSendAnEmailTo":
             MessageLookupByLibrary.simpleMessage("Please send an email to"),

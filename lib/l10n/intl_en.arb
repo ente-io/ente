@@ -420,6 +420,11 @@
         "type": "int"
       }
     }
-  }
-
+  },
+  "advancedSettings": "Advanced",
+  "@advancedSettings": {
+    "description": "The text to display in the advanced settings section"
+  },
+  "photoGridSize": "Photo grid size",
+  "manageDeviceStorage": "Manage device storage"
 }

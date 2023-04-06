@@ -2883,6 +2883,36 @@ class S {
       args: [count, yourCount],
     );
   }
+
+  /// `Advanced`
+  String get advancedSettings {
+    return Intl.message(
+      'Advanced',
+      name: 'advancedSettings',
+      desc: 'The text to display in the advanced settings section',
+      args: [],
+    );
+  }
+
+  /// `Photo grid size`
+  String get photoGridSize {
+    return Intl.message(
+      'Photo grid size',
+      name: 'photoGridSize',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage device storage`
+  String get manageDeviceStorage {
+    return Intl.message(
+      'Manage device storage',
+      name: 'manageDeviceStorage',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
