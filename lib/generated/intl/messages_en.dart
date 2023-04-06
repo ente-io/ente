@@ -218,6 +218,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Backed up folders"),
         "backup": MessageLookupByLibrary.simpleMessage("Backup"),
+        "backupFailed": MessageLookupByLibrary.simpleMessage("Backup failed"),
         "backupOverMobileData":
             MessageLookupByLibrary.simpleMessage("Backup over mobile data"),
         "backupSettings":
@@ -294,6 +295,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "copypasteThisCodentoYourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Copy-paste this code\nto your authenticator app"),
+        "couldNotBackUpTryLater": MessageLookupByLibrary.simpleMessage(
+            "We could not backup your data.\nWe will retry later."),
         "couldNotUpdateSubscription": MessageLookupByLibrary.simpleMessage(
             "Could not update subscription"),
         "createAccount": MessageLookupByLibrary.simpleMessage("Create account"),
@@ -576,6 +579,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Private backups"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Public link enabled"),
+        "raiseTicket": MessageLookupByLibrary.simpleMessage("Raise ticket"),
         "rateTheApp": MessageLookupByLibrary.simpleMessage("Rate the app"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Rate us"),
         "rateUsOnStore": m17,
@@ -709,6 +713,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Success"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Start backup"),
         "storageInGB": m30,
+        "storageLimitExceeded":
+            MessageLookupByLibrary.simpleMessage("Storage limit exceeded"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("Strong"),
         "subAlreadyLinkedErrMessage": m31,
         "subWillBeCancelledOn": m32,
@@ -770,6 +776,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Update available"),
         "updatingFolderSelection": MessageLookupByLibrary.simpleMessage(
             "Updating folder selection..."),
+        "upgrade": MessageLookupByLibrary.simpleMessage("Upgrade"),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan."),
         "useRecoveryKey":
@@ -831,6 +838,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yourStorageDetailsCouldNotBeFetched":
             MessageLookupByLibrary.simpleMessage(
                 "Your storage details could not be fetched"),
+        "yourSubscriptionHasExpired": MessageLookupByLibrary.simpleMessage(
+            "Your subscription has expired"),
         "yourSubscriptionWasUpdatedSuccessfully":
             MessageLookupByLibrary.simpleMessage(
                 "Your subscription was updated successfully"),

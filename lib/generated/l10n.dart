@@ -4562,6 +4562,66 @@ class S {
       args: [],
     );
   }
+
+  /// `Your subscription has expired`
+  String get yourSubscriptionHasExpired {
+    return Intl.message(
+      'Your subscription has expired',
+      name: 'yourSubscriptionHasExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Storage limit exceeded`
+  String get storageLimitExceeded {
+    return Intl.message(
+      'Storage limit exceeded',
+      name: 'storageLimitExceeded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upgrade`
+  String get upgrade {
+    return Intl.message(
+      'Upgrade',
+      name: 'upgrade',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Raise ticket`
+  String get raiseTicket {
+    return Intl.message(
+      'Raise ticket',
+      name: 'raiseTicket',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup failed`
+  String get backupFailed {
+    return Intl.message(
+      'Backup failed',
+      name: 'backupFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We could not backup your data.\nWe will retry later.`
+  String get couldNotBackUpTryLater {
+    return Intl.message(
+      'We could not backup your data.\nWe will retry later.',
+      name: 'couldNotBackUpTryLater',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

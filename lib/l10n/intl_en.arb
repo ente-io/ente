@@ -657,5 +657,11 @@
   "mobileWebDesktop": "Mobile, Web, Desktop",
   "newToEnte": "New to ente",
   "pleaseLoginAgain": "Please login again",
-  "devAccountChanged": "The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable."
+  "devAccountChanged": "The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable.",
+  "yourSubscriptionHasExpired": "Your subscription has expired",
+  "storageLimitExceeded": "Storage limit exceeded",
+  "upgrade": "Upgrade",
+  "raiseTicket": "Raise ticket",
+  "backupFailed": "Backup failed",
+  "couldNotBackUpTryLater": "We could not backup your data.\nWe will retry later."
 }

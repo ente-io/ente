@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/email_util.dart';
 
@@ -21,13 +22,13 @@ class HeaderErrorWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: const [
-                Icon(
+              children: [
+                const Icon(
                   Icons.error_outline,
                   color: Colors.orange,
                 ),
-                Padding(padding: EdgeInsets.all(4)),
-                Text("Your subscription has expired"),
+                const Padding(padding: EdgeInsets.all(4)),
+                Text(S.of(context).yourSubscriptionHasExpired),
               ],
             ),
             const Padding(padding: EdgeInsets.all(8)),
@@ -36,7 +37,7 @@ class HeaderErrorWidget extends StatelessWidget {
               height: 52,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: OutlinedButton(
-                child: const Text("Subscribe"),
+                child: Text(S.of(context).subscribe),
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -60,13 +61,13 @@ class HeaderErrorWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: const [
-                Icon(
+              children: [
+                const Icon(
                   Icons.error_outline,
                   color: Colors.orange,
                 ),
-                Padding(padding: EdgeInsets.all(4)),
-                Text("Storage limit exceeded"),
+                const Padding(padding: EdgeInsets.all(4)),
+                Text(S.of(context).storageLimitExceeded),
               ],
             ),
             const Padding(padding: EdgeInsets.all(8)),
@@ -75,9 +76,9 @@ class HeaderErrorWidget extends StatelessWidget {
               height: 52,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: OutlinedButton(
-                child: const Text(
-                  "Upgrade",
-                  style: TextStyle(height: 1.1),
+                child: Text(
+                  S.of(context).upgrade,
+                  style: const TextStyle(height: 1.1),
                 ),
                 onPressed: () {
                   Navigator.of(context).push(
@@ -104,8 +105,8 @@ class HeaderErrorWidget extends StatelessWidget {
               color: Colors.red[400],
             ),
             const Padding(padding: EdgeInsets.all(4)),
-            const Text(
-              "We could not backup your data.\nWe will retry later.",
+            Text(
+              S.of(context).couldNotBackUpTryLater,
               style: TextStyle(height: 1.4),
               textAlign: TextAlign.center,
             ),
@@ -125,7 +126,7 @@ class HeaderErrorWidget extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  "Raise ticket",
+                  S.of(context).raiseTicket,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -136,9 +137,9 @@ class HeaderErrorWidget extends StatelessWidget {
                 onPressed: () {
                   sendLogs(
                     context,
-                    "Raise ticket",
+                    S.of(context).raiseTicket,
                     "support@ente.io",
-                    subject: "Backup failed",
+                    subject: S.of(context).backupFailed,
                   );
                 },
               ),
