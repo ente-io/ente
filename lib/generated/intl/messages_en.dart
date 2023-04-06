@@ -501,6 +501,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "We don\'t store this password, so if you forget,"),
         "noPasswordWarningPart2":
             MessageLookupByLibrary.simpleMessage("we cannot decrypt your data"),
+        "noPhotosAreBeingBackedUpRightNow":
+            MessageLookupByLibrary.simpleMessage(
+                "No photos are being backed up right now"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("No recovery key?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -677,6 +680,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device."),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Success"),
+        "startBackup": MessageLookupByLibrary.simpleMessage("Start backup"),
         "storageInGB": m30,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Strong"),
         "subAlreadyLinkedErrMessage": m31,

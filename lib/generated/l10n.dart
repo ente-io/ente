@@ -4380,6 +4380,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Start backup`
+  String get startBackup {
+    return Intl.message(
+      'Start backup',
+      name: 'startBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No photos are being backed up right now`
+  String get noPhotosAreBeingBackedUpRightNow {
+    return Intl.message(
+      'No photos are being backed up right now',
+      name: 'noPhotosAreBeingBackedUpRightNow',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
