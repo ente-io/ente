@@ -1,18 +1,20 @@
 import { ENCRYPTION_CHUNK_SIZE } from 'constants/crypto';
 import { FILE_TYPE } from 'constants/file';
 import {
+    FileTypeInfo,
     ImportSuggestion,
     Location,
     ParsedExtractedMetadata,
 } from 'types/upload';
 
 // list of format that were missed by type-detection for some files.
-export const FILE_TYPE_LIB_MISSED_FORMATS = [
+export const FILE_TYPE_LIB_MISSED_FORMATS: FileTypeInfo[] = [
     { fileType: FILE_TYPE.IMAGE, exactType: 'jpeg', mimeType: 'image/jpeg' },
     { fileType: FILE_TYPE.IMAGE, exactType: 'jpg', mimeType: 'image/jpeg' },
     { fileType: FILE_TYPE.VIDEO, exactType: 'webm', mimeType: 'video/webm' },
     { fileType: FILE_TYPE.VIDEO, exactType: 'mod', mimeType: 'video/mpeg' },
     { fileType: FILE_TYPE.VIDEO, exactType: 'mp4', mimeType: 'video/mp4' },
+    { fileType: FILE_TYPE.IMAGE, exactType: 'gif', mimeType: 'image/gif' },
 ];
 
 export const KNOWN_NON_MEDIA_FORMATS = ['xmp', 'html', 'txt'];
