@@ -1,5 +1,6 @@
 import "package:flutter/cupertino.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import "package:photos/theme/colors.dart";
@@ -18,19 +19,21 @@ Future<void> showSingleFileDeleteSheet(
   Function(File)? onFileRemoved,
 }) async {
   final List<ButtonWidget> buttons = [];
-  final String fileType = file.fileType == FileType.video ? "video" : "photo";
+  final String fileType = file.fileType == FileType.video
+      ? S.of(context).videoSmallCase
+      : S.of(context).photoSmallCase;
   final bool isBothLocalAndRemote =
       file.uploadedFileID != null && file.localID != null;
   final bool isLocalOnly = file.uploadedFileID == null && file.localID != null;
   final bool isRemoteOnly = file.uploadedFileID != null && file.localID == null;
-  const String bodyHighlight = "It will be deleted from all albums.";
+  String bodyHighlight = S.of(context).singleFileDeleteHighlight;
   String body = "";
   if (isBothLocalAndRemote) {
-    body = "This $fileType is in both ente and your device.";
+    body = S.of(context).singleFileInBothLocalAndRemote(fileType);
   } else if (isRemoteOnly) {
-    body = "This $fileType will be deleted from ente.";
+    body = S.of(context).singleFileInRemoteOnly(fileType);
   } else if (isLocalOnly) {
-    body = "This $fileType will be deleted from your device.";
+    body = S.of(context).singleFileDeleteFromDevice(fileType);
   } else {
     throw AssertionError("Unexpected state");
   }
@@ -38,7 +41,9 @@ Future<void> showSingleFileDeleteSheet(
   if (isBothLocalAndRemote || isRemoteOnly) {
     buttons.add(
       ButtonWidget(
-        labelText: isBothLocalAndRemote ? "Delete from ente" : "Yes, delete",
+        labelText: isBothLocalAndRemote
+            ? S.of(context).deleteFromEnte
+            : S.of(context).yesDelete,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -47,7 +52,7 @@ Future<void> showSingleFileDeleteSheet(
         isInAlert: true,
         onTap: () async {
           await deleteFilesFromRemoteOnly(context, [file]);
-          showShortToast(context, "Moved to trash");
+          showShortToast(context, S.of(context).movedToTrash);
           if (isRemoteOnly) {
             Navigator.of(context, rootNavigator: true).pop();
             if (onFileRemoved != null) {
@@ -62,7 +67,9 @@ Future<void> showSingleFileDeleteSheet(
   if (isBothLocalAndRemote || isLocalOnly) {
     buttons.add(
       ButtonWidget(
-        labelText: isBothLocalAndRemote ? "Delete from device" : "Yes, delete",
+        labelText: isBothLocalAndRemote
+            ? S.of(context).deleteFromDevice
+            : S.of(context).yesDelete,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -84,7 +91,7 @@ Future<void> showSingleFileDeleteSheet(
   if (isBothLocalAndRemote) {
     buttons.add(
       ButtonWidget(
-        labelText: "Delete from both",
+        labelText: S.of(context).deleteFromBoth,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -102,8 +109,8 @@ Future<void> showSingleFileDeleteSheet(
     );
   }
   buttons.add(
-    const ButtonWidget(
-      labelText: "Cancel",
+    ButtonWidget(
+      labelText: S.of(context).cancel,
       buttonType: ButtonType.secondary,
       buttonSize: ButtonSize.large,
       shouldStickToDarkTheme: true,

@@ -2719,6 +2719,170 @@ class S {
       args: [],
     );
   }
+
+  /// `video`
+  String get videoSmallCase {
+    return Intl.message(
+      'video',
+      name: 'videoSmallCase',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `photo`
+  String get photoSmallCase {
+    return Intl.message(
+      'photo',
+      name: 'photoSmallCase',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `It will be deleted from all albums.`
+  String get singleFileDeleteHighlight {
+    return Intl.message(
+      'It will be deleted from all albums.',
+      name: 'singleFileDeleteHighlight',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This {fileType} is in both ente and your device.`
+  String singleFileInBothLocalAndRemote(Object fileType) {
+    return Intl.message(
+      'This $fileType is in both ente and your device.',
+      name: 'singleFileInBothLocalAndRemote',
+      desc: '',
+      args: [fileType],
+    );
+  }
+
+  /// `This {fileType} will be deleted from ente.`
+  String singleFileInRemoteOnly(Object fileType) {
+    return Intl.message(
+      'This $fileType will be deleted from ente.',
+      name: 'singleFileInRemoteOnly',
+      desc: '',
+      args: [fileType],
+    );
+  }
+
+  /// `This {fileType} will be deleted from your device.`
+  String singleFileDeleteFromDevice(Object fileType) {
+    return Intl.message(
+      'This $fileType will be deleted from your device.',
+      name: 'singleFileDeleteFromDevice',
+      desc: '',
+      args: [fileType],
+    );
+  }
+
+  /// `Delete from ente`
+  String get deleteFromEnte {
+    return Intl.message(
+      'Delete from ente',
+      name: 'deleteFromEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, delete`
+  String get yesDelete {
+    return Intl.message(
+      'Yes, delete',
+      name: 'yesDelete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Moved to trash`
+  String get movedToTrash {
+    return Intl.message(
+      'Moved to trash',
+      name: 'movedToTrash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete from device`
+  String get deleteFromDevice {
+    return Intl.message(
+      'Delete from device',
+      name: 'deleteFromDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete from both`
+  String get deleteFromBoth {
+    return Intl.message(
+      'Delete from both',
+      name: 'deleteFromBoth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New album`
+  String get newAlbum {
+    return Intl.message(
+      'New album',
+      name: 'newAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Albums`
+  String get albums {
+    return Intl.message(
+      'Albums',
+      name: 'albums',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, zero{no memories} one{{count} memory} other{{count} memories}}`
+  String memoryCount(int count) {
+    return Intl.plural(
+      count,
+      zero: 'no memories',
+      one: '$count memory',
+      other: '$count memories',
+      name: 'memoryCount',
+      desc: 'The text to display the number of memories',
+      args: [count],
+    );
+  }
+
+  /// `{count} selected`
+  String selectedPhotos(int count) {
+    return Intl.message(
+      '$count selected',
+      name: 'selectedPhotos',
+      desc: 'Display the number of selected photos',
+      args: [count],
+    );
+  }
+
+  /// `{count} selected ({yourCount} yours)`
+  String selectedPhotosWithYours(int count, int yourCount) {
+    return Intl.message(
+      '$count selected ($yourCount yours)',
+      name: 'selectedPhotosWithYours',
+      desc:
+          'Display the number of selected photos, including the number of selected photos owned by the user',
+      args: [count, yourCount],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

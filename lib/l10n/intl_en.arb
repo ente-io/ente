@@ -370,5 +370,56 @@
   "hidden": "Hidden",
   "authToViewYourHiddenFiles": "Please authenticate to view your hidden files",
   "trash": "Trash",
-  "uncategorized": "Uncategorized"
+  "uncategorized": "Uncategorized",
+  "videoSmallCase": "video",
+  "photoSmallCase": "photo",
+  "singleFileDeleteHighlight": "It will be deleted from all albums.",
+  "singleFileInBothLocalAndRemote": "This {fileType} is in both ente and your device.",
+  "singleFileInRemoteOnly": "This {fileType} will be deleted from ente.",
+  "singleFileDeleteFromDevice": "This {fileType} will be deleted from your device.",
+  "deleteFromEnte": "Delete from ente",
+  "yesDelete": "Yes, delete",
+  "movedToTrash": "Moved to trash",
+  "deleteFromDevice": "Delete from device",
+  "deleteFromBoth": "Delete from both",
+  "newAlbum": "New album",
+  "albums": "Albums",
+  "memoryCount": "{count, plural, zero{no memories} one{{count} memory} other{{count} memories}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      }
+    }
+  },
+  "selectedPhotos": "{count} selected",
+  "@selectedPhotos": {
+    "description": "Display the number of selected photos",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "5",
+        "type": "int"
+      }
+    }
+  },
+  "selectedPhotosWithYours": "{count} selected ({yourCount} yours)",
+  "@selectedPhotosWithYours": {
+    "description": "Display the number of selected photos, including the number of selected photos owned by the user",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "yourCount": {
+        "example": "2",
+        "type": "int"
+      }
+    }
+  }
+
 }

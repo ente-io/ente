@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/button_result.dart";
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
@@ -256,11 +257,11 @@ class _TextInputDialogState extends State<TextInputDialog> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Expanded(
+                Expanded(
                   child: ButtonWidget(
                     buttonType: ButtonType.secondary,
                     buttonSize: ButtonSize.small,
-                    labelText: "Cancel",
+                    labelText: S.of(context).cancel,
                     isInAlert: true,
                   ),
                 ),

@@ -1,16 +1,17 @@
 import 'package:flutter/cupertino.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
 
 class KeyboardTopButton extends StatelessWidget {
   final VoidCallback? onDoneTap;
   final VoidCallback? onCancelTap;
-  final String doneText;
-  final String cancelText;
+  final String? doneText;
+  final String? cancelText;
 
   const KeyboardTopButton({
     super.key,
-    this.doneText = "Done",
-    this.cancelText = "Cancel",
+    this.doneText,
+    this.cancelText,
     this.onDoneTap,
     this.onCancelTap,
   });
@@ -36,12 +37,18 @@ class KeyboardTopButton extends StatelessWidget {
             CupertinoButton(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
               onPressed: onCancelTap,
-              child: Text(cancelText, style: enteTheme.bodyBold),
+              child: Text(
+                cancelText ?? S.of(context).cancel,
+                style: enteTheme.bodyBold,
+              ),
             ),
             CupertinoButton(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
               onPressed: onDoneTap,
-              child: Text(doneText, style: enteTheme.bodyBold),
+              child: Text(
+                doneText ?? S.of(context).done,
+                style: enteTheme.bodyBold,
+              ),
             ),
           ],
         ),
