@@ -5,8 +5,10 @@ import "package:photos/models/file_load_result.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_screen_state.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
@@ -18,23 +20,12 @@ class LocationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size(double.infinity, 48),
+      appBar: const PreferredSize(
+        preferredSize: Size(double.infinity, 48),
         child: TitleBarWidget(
           isSliver: false,
           isFlexibleSpaceDisabled: true,
-          actionIcons: [
-            IconButton(
-              onPressed: () {
-                showEditLocationSheet(
-                  context,
-                  InheritedLocationScreenState.of(context).locationTagEntity,
-                  () {},
-                );
-              },
-              icon: const Icon(Icons.edit_rounded),
-            )
-          ],
+          actionIcons: [LocationScreenPopUpMenu()],
         ),
       ),
       body: Column(
@@ -45,6 +36,72 @@ class LocationScreen extends StatelessWidget {
             child: const LocationGalleryWidget(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class LocationScreenPopUpMenu extends StatelessWidget {
+  const LocationScreenPopUpMenu({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+    return Padding(
+      padding: const EdgeInsets.only(right: 4),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+        ),
+        child: PopupMenuButton(
+          elevation: 5,
+          offset: const Offset(10, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          color: colorScheme.backgroundElevated2,
+          child: const IconButtonWidget(
+            icon: Icons.more_horiz,
+            iconButtonType: IconButtonType.primary,
+            disableGestureDetector: true,
+          ),
+          itemBuilder: (context) {
+            return [
+              PopupMenuItem(
+                value: "edit",
+                child: Text(
+                  "Edit",
+                  style: textTheme.bodyBold,
+                ),
+              ),
+              PopupMenuItem(
+                onTap: () {},
+                value: "delete",
+                child: Text(
+                  "Delete Location",
+                  style: textTheme.bodyBold.copyWith(color: warning500),
+                ),
+              ),
+            ];
+          },
+          onSelected: (value) {
+            if (value == "edit") {
+              showEditLocationSheet(
+                context,
+                InheritedLocationScreenState.of(context).locationTagEntity,
+                () {},
+              );
+            } else if (value == "delete") {
+              // LocationService.instance.deleteLocation(
+              //   InheritedLocationScreenState.of(context)
+              //       .locationTagEntity,
+              // );
+              // Navigator.of(context).pop();
+            }
+          },
+        ),
       ),
     );
   }
