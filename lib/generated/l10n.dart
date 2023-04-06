@@ -4622,6 +4622,26 @@ class S {
       args: [],
     );
   }
+
+  /// `ente can encrypt and preserve files only if you grant access to them`
+  String get enteCanEncryptAndPreserveFilesOnlyIfYouGrant {
+    return Intl.message(
+      'ente can encrypt and preserve files only if you grant access to them',
+      name: 'enteCanEncryptAndPreserveFilesOnlyIfYouGrant',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please grant permissions`
+  String get pleaseGrantPermissions {
+    return Intl.message(
+      'Please grant permissions',
+      name: 'pleaseGrantPermissions',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

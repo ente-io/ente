@@ -382,6 +382,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("end-to-end encrypted"),
         "endtoendEncryptedByDefault": MessageLookupByLibrary.simpleMessage(
             "End-to-end encrypted by default"),
+        "enteCanEncryptAndPreserveFilesOnlyIfYouGrant":
+            MessageLookupByLibrary.simpleMessage(
+                "ente can encrypt and preserve files only if you grant access to them"),
         "enteSubscriptionPitch": MessageLookupByLibrary.simpleMessage(
             "ente preserves your memories, so they\'re always available to you, even if you lose your device."),
         "enteSubscriptionShareWithFamily": MessageLookupByLibrary.simpleMessage(
@@ -560,6 +563,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
                 "Please contact support@ente.io and we will be happy to help!"),
+        "pleaseGrantPermissions":
+            MessageLookupByLibrary.simpleMessage("Please grant permissions"),
         "pleaseLoginAgain":
             MessageLookupByLibrary.simpleMessage("Please login again"),
         "pleaseSendAnEmailTo":
