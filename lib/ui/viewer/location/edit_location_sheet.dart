@@ -21,14 +21,13 @@ import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 showEditLocationSheet(
   BuildContext context,
   LocalEntity<LocationTag> locationTagEntity,
-  VoidCallback onLocationEdited,
 ) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
       return LocationTagStateProvider(
         locationTagEntity: locationTagEntity,
-        EditLocationSheet(onLocationEdited),
+        const EditLocationSheet(),
       );
     },
     shape: const RoundedRectangleBorder(
@@ -44,9 +43,7 @@ showEditLocationSheet(
 }
 
 class EditLocationSheet extends StatefulWidget {
-  final VoidCallback onLocationAdded;
-  const EditLocationSheet(
-    this.onLocationAdded, {
+  const EditLocationSheet({
     super.key,
   });
 

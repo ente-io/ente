@@ -92,7 +92,6 @@ class LocationScreenPopUpMenu extends StatelessWidget {
               showEditLocationSheet(
                 context,
                 InheritedLocationScreenState.of(context).locationTagEntity,
-                () {},
               );
             } else if (value == "delete") {
               try {

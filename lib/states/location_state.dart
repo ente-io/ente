@@ -11,9 +11,8 @@ import "package:photos/models/typedefs.dart";
 import "package:photos/utils/debouncer.dart";
 
 class LocationTagStateProvider extends StatefulWidget {
-  //This is used when we want to edit a locaiton tag
   final LocalEntity<LocationTag>? locationTagEntity;
-  //This is used when we want to create a new location tag. We can't use
+  //centerPoint is used when we want to create a new location tag. We can't use
   //LocationTag becuase aSquare and bSquare will be null.
   final Location? centerPoint;
   final Widget child;
@@ -60,6 +59,7 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
   void _locationTagUpdateListener(LocationTagUpdatedEvent event) {
     if (event.type == LocTagEventType.update) {
       if (event.updatedLocTagEntities!.first.id == _locationTagEntity!.id) {
+        //Update state when locationTag is updated.
         setState(() {
           final updatedLocTagEntity = event.updatedLocTagEntities!.first;
           _selectedRaduisIndex = updatedLocTagEntity.item.radiusIndex;
@@ -93,10 +93,11 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
   }
 }
 
+///This InheritedWidget's state is used in add & edit location sheets
 class InheritedLocationTagData extends InheritedWidget {
   final int selectedRadiusIndex;
   final Location centerPoint;
-  //locationTag is null when we are creating a new location tag in a add location sheet
+  //locationTag is null when we are creating a new location tag in add location sheet
   final LocalEntity<LocationTag>? locationTagEntity;
   final VoidCallbackParamInt updateSelectedIndex;
   const InheritedLocationTagData(
