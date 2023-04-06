@@ -247,6 +247,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable":
             MessageLookupByLibrary.simpleMessage("Critical update available"),
         "custom": MessageLookupByLibrary.simpleMessage("Custom"),
+        "darkTheme": MessageLookupByLibrary.simpleMessage("Dark"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Decrypting..."),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Delete account"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
@@ -387,6 +388,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Keep Photos"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Kindly help us with this information"),
+        "lightTheme": MessageLookupByLibrary.simpleMessage("Light"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Device limit"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Enabled"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Expired"),
@@ -589,6 +591,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Suggest features"),
         "support": MessageLookupByLibrary.simpleMessage("Support"),
+        "systemTheme": MessageLookupByLibrary.simpleMessage("System"),
         "tapToCopy": MessageLookupByLibrary.simpleMessage("tap to copy"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("Tap to enter code"),
@@ -603,6 +606,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "termsOfServicesTitle": MessageLookupByLibrary.simpleMessage("Terms"),
         "theDownloadCouldNotBeCompleted": MessageLookupByLibrary.simpleMessage(
             "The download could not be completed"),
+        "theme": MessageLookupByLibrary.simpleMessage("Theme"),
         "theyAlsoGetXGb": m25,
         "thisCanBeUsedToRecoverYourAccountIfYou":
             MessageLookupByLibrary.simpleMessage(

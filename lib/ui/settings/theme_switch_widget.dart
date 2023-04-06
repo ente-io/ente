@@ -1,7 +1,7 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -40,7 +40,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "Theme",
+      title: S.of(context).theme,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Theme.of(context).brightness == Brightness.light
           ? Icons.light_mode_outlined
@@ -63,9 +63,21 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   }
 
   Widget _menuItem(BuildContext context, AdaptiveThemeMode themeMode) {
+    late String themeName;
+    switch (themeMode) {
+      case AdaptiveThemeMode.light:
+        themeName = S.of(context).lightTheme;
+        break;
+      case AdaptiveThemeMode.dark:
+        themeName = S.of(context).darkTheme;
+        break;
+      case AdaptiveThemeMode.system:
+        themeName = S.of(context).systemTheme;
+        break;
+    }
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
-        title: toBeginningOfSentenceCase(themeMode.name)!,
+        title: themeName,
         textStyle: Theme.of(context).colorScheme.enteTheme.textTheme.body,
       ),
       pressedColor: getEnteColorScheme(context).fillFaint,

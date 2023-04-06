@@ -533,5 +533,9 @@
   "reportABug": "Report a bug",
   "reportBug": "Report bug",
   "suggestFeatures": "Suggest features",
-  "support": "Support"
+  "support": "Support",
+  "theme": "Theme",
+  "lightTheme": "Light",
+  "darkTheme" : "Dark",
+  "systemTheme": "System"
 }
