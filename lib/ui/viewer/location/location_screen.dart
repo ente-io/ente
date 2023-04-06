@@ -80,6 +80,10 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
   Widget build(BuildContext context) {
     final selectedRadius =
         InheritedLocationScreenState.of(context).locationTagEntity.item.radius;
+    final centerPoint = InheritedLocationScreenState.of(context)
+        .locationTagEntity
+        .item
+        .centerPoint;
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
       //wait for ignored files to be removed after init
@@ -93,10 +97,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
               f.location!.longitude != null,
         );
         return !LocationService.instance.isFileInsideLocationTag(
-          InheritedLocationScreenState.of(context)
-              .locationTagEntity
-              .item
-              .centerPoint,
+          centerPoint,
           f.location!,
           selectedRadius,
         );
@@ -117,7 +118,8 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
     }
 
     return FutureBuilder(
-      key: ValueKey(selectedRadius),
+      //rebuild gallery only when there is change in radius or center point
+      key: ValueKey("$centerPoint$selectedRadius"),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Gallery(
