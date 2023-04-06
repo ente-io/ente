@@ -158,6 +158,54 @@ class LocationService {
       rethrow;
     }
   }
+
+  Future<void> updateLocationTag({
+    required LocalEntity<LocationTag> locationTagEntity,
+    int? newRadius,
+    Location? newCenterPoint,
+    String? newName,
+  }) async {
+    try {
+      final radius = newRadius ?? locationTagEntity.item.radius;
+      final centerPoint = newCenterPoint ?? locationTagEntity.item.centerPoint;
+      final name = newName ?? locationTagEntity.item.name;
+
+      final locationTag = locationTagEntity.item;
+      //Break if there is no change in locationTag's properties
+      if (radius == locationTag.radius &&
+          centerPoint == locationTag.centerPoint &&
+          name == locationTag.name) {
+        return;
+      }
+      final a =
+          (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
+      final b = radius / kilometersPerDegree;
+      final updatedLoationTag = locationTagEntity.item.copyWith(
+        centerPoint: centerPoint,
+        aSquare: a * a,
+        bSquare: b * b,
+        radius: radius,
+        name: name,
+      );
+
+      await EntityService.instance.addOrUpdate(
+        EntityType.location,
+        json.encode(updatedLoationTag.toJson()),
+        id: locationTagEntity.id,
+      );
+      Bus.instance.fire(
+        LocationTagUpdatedEvent(
+          LocTagEventType.update,
+          updatedLocTagEntities: [
+            LocalEntity(updatedLoationTag, locationTagEntity.id)
+          ],
+        ),
+      );
+    } catch (e, s) {
+      _logger.severe("Failed to update location tag", e, s);
+      rethrow;
+    }
+  }
 }
 
 class GPSData {
