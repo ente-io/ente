@@ -2913,6 +2913,78 @@ class S {
       args: [],
     );
   }
+
+  /// `Select folders for backup`
+  String get selectFoldersForBackup {
+    return Intl.message(
+      'Select folders for backup',
+      name: 'selectFoldersForBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Selected folders will be encrypted and backed up`
+  String get selectedFoldersWillBeEncryptedAndBackedUp {
+    return Intl.message(
+      'Selected folders will be encrypted and backed up',
+      name: 'selectedFoldersWillBeEncryptedAndBackedUp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unselect all`
+  String get unselectAll {
+    return Intl.message(
+      'Unselect all',
+      name: 'unselectAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select all`
+  String get selectAll {
+    return Intl.message(
+      'Select all',
+      name: 'selectAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip`
+  String get skip {
+    return Intl.message(
+      'Skip',
+      name: 'skip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Updating folder selection...`
+  String get updatingFolderSelection {
+    return Intl.message(
+      'Updating folder selection...',
+      name: 'updatingFolderSelection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, one{{count} item} other{{count} items}}`
+  String itemCount(num count) {
+    return Intl.plural(
+      count,
+      one: '$count item',
+      other: '$count items',
+      name: 'itemCount',
+      desc: '',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

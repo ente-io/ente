@@ -426,5 +426,12 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Photo grid size",
-  "manageDeviceStorage": "Manage device storage"
+  "manageDeviceStorage": "Manage device storage",
+  "selectFoldersForBackup": "Select folders for backup",
+  "selectedFoldersWillBeEncryptedAndBackedUp": "Selected folders will be encrypted and backed up",
+  "unselectAll": "Unselect all",
+  "selectAll": "Select all",
+  "skip": "Skip",
+  "updatingFolderSelection": "Updating folder selection...",
+  "itemCount": "{count, plural, one{{count} item} other{{count} items}}"
 }
