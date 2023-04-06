@@ -168,6 +168,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Allow adding photos"),
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Allow downloads"),
+        "allowPeopleToAddPhotos":
+            MessageLookupByLibrary.simpleMessage("Allow people to add photos"),
         "and": MessageLookupByLibrary.simpleMessage("and"),
         "androidIosWebDesktop":
             MessageLookupByLibrary.simpleMessage("Android, iOS, Web, Desktop"),
@@ -265,6 +267,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Collaborators can add photos and videos to the shared album."),
+        "collectEventPhotos":
+            MessageLookupByLibrary.simpleMessage("Collect event photos"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Collect photos"),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
@@ -582,6 +586,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Privacy Policy"),
         "privateBackups":
             MessageLookupByLibrary.simpleMessage("Private backups"),
+        "privateSharing":
+            MessageLookupByLibrary.simpleMessage("Private sharing"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Public link enabled"),
         "raiseTicket": MessageLookupByLibrary.simpleMessage("Raise ticket"),
@@ -680,7 +686,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Set password"),
         "setupComplete": MessageLookupByLibrary.simpleMessage("Setup complete"),
         "shareALink": MessageLookupByLibrary.simpleMessage("Share a link"),
+        "shareAnAlbumNow":
+            MessageLookupByLibrary.simpleMessage("Share an album now"),
         "shareMyVerificationID": m23,
+        "shareOnlyWithThePeopleYouWant": MessageLookupByLibrary.simpleMessage(
+            "Share only with the people you want"),
         "shareTextConfirmOthersVerificationID": m24,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io/#download"),
@@ -784,6 +794,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("Upgrade"),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan."),
+        "usePublicLinksForPeopleNotOnEnte":
+            MessageLookupByLibrary.simpleMessage(
+                "Use public links for people not on ente"),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Use recovery key"),
         "verificationId":

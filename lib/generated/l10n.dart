@@ -4642,6 +4642,66 @@ class S {
       args: [],
     );
   }
+
+  /// `Private sharing`
+  String get privateSharing {
+    return Intl.message(
+      'Private sharing',
+      name: 'privateSharing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share only with the people you want`
+  String get shareOnlyWithThePeopleYouWant {
+    return Intl.message(
+      'Share only with the people you want',
+      name: 'shareOnlyWithThePeopleYouWant',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use public links for people not on ente`
+  String get usePublicLinksForPeopleNotOnEnte {
+    return Intl.message(
+      'Use public links for people not on ente',
+      name: 'usePublicLinksForPeopleNotOnEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow people to add photos`
+  String get allowPeopleToAddPhotos {
+    return Intl.message(
+      'Allow people to add photos',
+      name: 'allowPeopleToAddPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share an album now`
+  String get shareAnAlbumNow {
+    return Intl.message(
+      'Share an album now',
+      name: 'shareAnAlbumNow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collect event photos`
+  String get collectEventPhotos {
+    return Intl.message(
+      'Collect event photos',
+      name: 'collectEventPhotos',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

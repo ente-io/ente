@@ -665,5 +665,11 @@
   "backupFailed": "Backup failed",
   "couldNotBackUpTryLater": "We could not backup your data.\nWe will retry later.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "ente can encrypt and preserve files only if you grant access to them",
-  "pleaseGrantPermissions": "Please grant permissions"
+  "pleaseGrantPermissions": "Please grant permissions",
+  "privateSharing": "Private sharing",
+  "shareOnlyWithThePeopleYouWant": "Share only with the people you want",
+  "usePublicLinksForPeopleNotOnEnte": "Use public links for people not on ente",
+  "allowPeopleToAddPhotos": "Allow people to add photos",
+  "shareAnAlbumNow": "Share an album now",
+  "collectEventPhotos": "Collect event photos"
 }
