@@ -268,6 +268,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Contact support"),
         "contactToManageSubscription": m3,
         "continueLabel": MessageLookupByLibrary.simpleMessage("Continue"),
+        "continueOnFreeTrial":
+            MessageLookupByLibrary.simpleMessage("Continue on free trial"),
         "copyLink": MessageLookupByLibrary.simpleMessage("Copy link"),
         "copypasteThisCodentoYourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(

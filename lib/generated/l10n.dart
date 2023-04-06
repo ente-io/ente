@@ -4228,6 +4228,16 @@ class S {
       args: [providerName],
     );
   }
+
+  /// `Continue on free trial`
+  String get continueOnFreeTrial {
+    return Intl.message(
+      'Continue on free trial',
+      name: 'continueOnFreeTrial',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

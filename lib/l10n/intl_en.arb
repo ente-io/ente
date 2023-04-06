@@ -616,5 +616,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "continueOnFreeTrial": "Continue on free trial"
 }
