@@ -13,6 +13,12 @@
   "codeSecretKeyHint": "Gizli Anahtar",
   "codeAccountHint": "Hesap (örnek@domain.com)",
   "accountKeyType": "Anahtar türü",
+  "sessionExpired": "Oturum süresi doldu",
+  "@sessionExpired": {
+    "description": "Title of the dialog when the users current session is invalid/expired"
+  },
+  "pleaseLoginAgain": "Lütfen tekrar giriş yapın",
+  "loggingOut": "Çıkış yapılıyor...",
   "timeBasedKeyType": "Zaman tabanlı (TOTP)",
   "counterBasedKeyType": "Sayaç tabanlı (HOTP)",
   "saveAction": "Kaydet",
@@ -57,6 +63,7 @@
   "supportDevs": "Bu projeyi desteklemek için <bold-green>ente</bold-green> kanalına abone olun.",
   "supportDiscount": "İlk yılda %10 indirim için \"AUTH\" kupon kodunu kullanın",
   "changeEmail": "E-postayı değiştir",
+  "ok": "Tamam",
   "cancel": "İptal Et",
   "yes": "Evet",
   "no": "Hayır",
