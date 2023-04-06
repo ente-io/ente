@@ -37,13 +37,19 @@ class SocialSectionWidget extends StatelessWidget {
         SocialsMenuItemWidget(S.of(context).blog, "https://ente.io/blog"),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
-            S.of(context).merchandise, "https://shop.ente.io"),
+          S.of(context).merchandise,
+          "https://shop.ente.io",
+        ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
-            S.of(context).twitter, "https://twitter.com/enteio"),
+          S.of(context).twitter,
+          "https://twitter.com/enteio",
+        ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
-            S.of(context).mastodon, "https://mstdn.social/@ente"),
+          S.of(context).mastodon,
+          "https://mstdn.social/@ente",
+        ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
           S.of(context).matrix,
@@ -53,7 +59,9 @@ class SocialSectionWidget extends StatelessWidget {
         SocialsMenuItemWidget(S.of(context).discord, "https://ente.io/discord"),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
-            S.of(context).reddit, "https://reddit.com/r/enteio"),
+          S.of(context).reddit,
+          "https://reddit.com/r/enteio",
+        ),
         sectionOptionSpacing,
       ],
     );
