@@ -537,5 +537,21 @@
   "theme": "Theme",
   "lightTheme": "Light",
   "darkTheme" : "Dark",
-  "systemTheme": "System"
+  "systemTheme": "System",
+  "freeTrial": "Free trial",
+  "selectYourPlan": "Select your plan",
+  "enteSubscriptionPitch": "ente preserves your memories, so they're always available to you, even if you lose your device.",
+  "enteSubscriptionShareWithFamily": "Your family can be added to your plan as well.",
+  "currentUsageIs": "Current usage is ",
+  "@currentUsageIs": {
+    "description": "This text is followed by storage usaged",
+    "examples": [
+      "Current usage is 1.2 GB"
+    ],
+    "type": "text"
+  },
+  "faqs": "FAQs",
+  "renewsOn": "Renews on {endDate}",
+  "freeTrialValidTill": "Free trial valid till {endDate}",
+  "subWillBeCancelledOn": "Your subscription will be cancelled on {endDate}"
 }

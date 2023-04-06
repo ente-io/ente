@@ -3787,6 +3787,96 @@ class S {
       args: [],
     );
   }
+
+  /// `Free trial`
+  String get freeTrial {
+    return Intl.message(
+      'Free trial',
+      name: 'freeTrial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select your plan`
+  String get selectYourPlan {
+    return Intl.message(
+      'Select your plan',
+      name: 'selectYourPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ente preserves your memories, so they're always available to you, even if you lose your device.`
+  String get enteSubscriptionPitch {
+    return Intl.message(
+      'ente preserves your memories, so they\'re always available to you, even if you lose your device.',
+      name: 'enteSubscriptionPitch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your family can be added to your plan as well.`
+  String get enteSubscriptionShareWithFamily {
+    return Intl.message(
+      'Your family can be added to your plan as well.',
+      name: 'enteSubscriptionShareWithFamily',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current usage is `
+  String get currentUsageIs {
+    return Intl.message(
+      'Current usage is ',
+      name: 'currentUsageIs',
+      desc: 'This text is followed by storage usaged',
+      args: [],
+    );
+  }
+
+  /// `FAQs`
+  String get faqs {
+    return Intl.message(
+      'FAQs',
+      name: 'faqs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Renews on {endDate}`
+  String renewsOn(Object endDate) {
+    return Intl.message(
+      'Renews on $endDate',
+      name: 'renewsOn',
+      desc: '',
+      args: [endDate],
+    );
+  }
+
+  /// `Free trial valid till {endDate}`
+  String freeTrialValidTill(Object endDate) {
+    return Intl.message(
+      'Free trial valid till $endDate',
+      name: 'freeTrialValidTill',
+      desc: '',
+      args: [endDate],
+    );
+  }
+
+  /// `Your subscription will be cancelled on {endDate}`
+  String subWillBeCancelledOn(Object endDate) {
+    return Intl.message(
+      'Your subscription will be cancelled on $endDate',
+      name: 'subWillBeCancelledOn',
+      desc: '',
+      args: [endDate],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
