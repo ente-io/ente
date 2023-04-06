@@ -42,8 +42,9 @@ export default async function uploader(
     UIService.setFileProgress(localID, 0);
     await sleep(0);
     let fileTypeInfo: FileTypeInfo;
+    let fileSize: number;
     try {
-        const fileSize = UploadService.getAssetSize(uploadAsset);
+        fileSize = UploadService.getAssetSize(uploadAsset);
         if (fileSize >= MAX_FILE_SIZE_SUPPORTED) {
             return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
         }
@@ -173,6 +174,7 @@ export default async function uploader(
         ) {
             logError(e, 'file upload failed', {
                 fileFormat: fileTypeInfo?.exactType,
+                fileSize: convertBytesToHumanReadable(fileSize),
             });
         }
         const error = handleUploadError(e);
