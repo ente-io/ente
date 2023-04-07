@@ -173,11 +173,13 @@ class PickCenterPointWidget extends StatelessWidget {
                             },
                           ),
                           const SizedBox(height: 8),
-                          const ButtonWidget(
+                          ButtonWidget(
                             buttonType: ButtonType.secondary,
                             buttonAction: ButtonAction.cancel,
-                            isInAlert: true,
                             labelText: "Cancel",
+                            onTap: () async {
+                              Navigator.of(context).pop();
+                            },
                           ),
                         ],
                       ),
