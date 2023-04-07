@@ -8,9 +8,11 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/keyboard/keybiard_oveylay.dart";
 import "package:photos/ui/components/keyboard/keyboard_top_button.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import 'package:photos/ui/viewer/location/dynamic_location_gallery_widget.dart';
@@ -57,6 +59,8 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   final ValueNotifier<int> _selectedRadiusIndexNotifier =
       ValueNotifier(defaultRadiusValueIndex);
   final _focusNode = FocusNode();
+  final _textEditingController = TextEditingController();
+  final _isEmptyNotifier = ValueNotifier(true);
   Widget? _keyboardTopButtons;
 
   @override
@@ -101,18 +105,41 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       children: [
-                        TextInputWidget(
-                          hintText: "Location name",
-                          borderRadius: 2,
-                          focusNode: _focusNode,
-                          submitNotifier: _submitNotifer,
-                          cancelNotifier: _cancelNotifier,
-                          popNavAfterSubmission: true,
-                          onSubmit: (locationName) async {
-                            await _addLocationTag(locationName);
-                          },
-                          shouldUnfocusOnClearOrSubmit: true,
-                          alwaysShowSuccessState: true,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextInputWidget(
+                                hintText: "Location name",
+                                borderRadius: 2,
+                                focusNode: _focusNode,
+                                submitNotifier: _submitNotifer,
+                                cancelNotifier: _cancelNotifier,
+                                popNavAfterSubmission: false,
+                                shouldUnfocusOnClearOrSubmit: true,
+                                alwaysShowSuccessState: true,
+                                textEditingController: _textEditingController,
+                                isEmptyNotifier: _isEmptyNotifier,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ValueListenableBuilder(
+                              valueListenable: _isEmptyNotifier,
+                              builder: (context, bool value, _) {
+                                return ButtonWidget(
+                                  buttonType: ButtonType.secondary,
+                                  buttonSize: ButtonSize.small,
+                                  labelText: "Add",
+                                  isDisabled: value,
+                                  onTap: () async {
+                                    _focusNode.unfocus();
+                                    await _addLocationTag(
+                                      _textEditingController.text.trim(),
+                                    );
+                                  },
+                                );
+                              },
+                            )
+                          ],
                         ),
                         const SizedBox(height: 24),
                         RadiusPickerWidget(
@@ -203,6 +230,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
       coordinates,
       radius,
     );
+    Navigator.pop(context);
   }
 
   void _focusNodeListener() {
