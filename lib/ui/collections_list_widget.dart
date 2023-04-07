@@ -258,7 +258,8 @@ class CollectionsListWidget extends StatelessWidget {
             ),
           );
         }
-        showToast(context, S.of(context).thisAlbumAlreadyHasACollaborativeLink);
+        showShortToast(
+            context, S.of(context).thisAlbumAlreadyHasACollaborativeLink);
         return Future.value(false);
       } else {
         try {
@@ -270,7 +271,7 @@ class CollectionsListWidget extends StatelessWidget {
           );
           CollectionsService.instance
               .updateShareUrl(collection, {'enableCollect': true}).then(
-            (value) => showToast(
+            (value) => showShortToast(
               context,
               S.of(context).collaborativeLinkCreatedFor(collection.name!),
             ),
@@ -288,7 +289,7 @@ class CollectionsListWidget extends StatelessWidget {
       enableCollect: true,
     );
     if (result) {
-      showToast(
+      showShortToast(
         context,
         S.of(context).collaborativeLinkCreatedFor(collection.name!),
       );
