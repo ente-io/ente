@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:device_info/device_info.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -15,6 +14,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import "package:photos/events/force_reload_trash_page_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_item_request.dart';
@@ -127,9 +127,9 @@ Future<void> deleteFilesFromEverywhere(
       ),
     );
     if (hasLocalOnlyFiles && Platform.isAndroid) {
-      showShortToast(context, "Files deleted");
+      showShortToast(context, S.of(context).filesDeleted);
     } else {
-      showShortToast(context, "Moved to trash");
+      showShortToast(context, S.of(context).movedToTrash);
     }
   }
   if (uploadedFilesToBeTrashed.isNotEmpty) {
@@ -143,7 +143,7 @@ Future<void> deleteFilesFromRemoteOnly(
 ) async {
   files.removeWhere((element) => element.uploadedFileID == null);
   if (files.isEmpty) {
-    showToast(context, "Selected files are not on ente");
+    showToast(context, S.of(context).selectedFilesAreNotOnEnte);
     return;
   }
   _logger.info(
@@ -250,9 +250,9 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
   bool didDeletionStart = false;
   final actionResult = await showChoiceActionSheet(
     context,
-    title: "Permanently delete?",
-    body: "This action cannot be undone",
-    firstButtonLabel: "Delete",
+    title: S.of(context).permanentlyDelete,
+    body: S.of(context).thisActionCannotBeUndone,
+    firstButtonLabel: S.of(context).delete,
     isCritical: true,
     firstButtonOnTap: () async {
       try {
@@ -289,10 +289,9 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
 Future<bool> emptyTrash(BuildContext context) async {
   final actionResult = await showChoiceActionSheet(
     context,
-    title: "Empty trash?",
-    body:
-        "All items in trash will be permanently deleted\n\nThis action cannot be undone",
-    firstButtonLabel: "Empty",
+    title: S.of(context).emptyTrash,
+    body: S.of(context).permDeleteWarning,
+    firstButtonLabel: S.of(context).empty,
     isCritical: true,
     firstButtonOnTap: () async {
       try {
@@ -352,7 +351,7 @@ Future<bool> deleteLocalFiles(
     );
     return true;
   } else {
-    showToast(context, "Could not free up space");
+    showToast(context, S.of(context).couldNotFreeUpSpace);
     return false;
   }
 }
@@ -474,10 +473,9 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
 Future<bool> shouldProceedWithDeletion(BuildContext context) async {
   final actionResult = await showChoiceActionSheet(
     context,
-    title: "Permanently delete from device?",
-    body:
-        "Some of the files you are trying to delete are only available on your device and cannot be recovered if deleted",
-    firstButtonLabel: "Delete",
+    title: S.of(context).permanentlyDeleteFromDevice,
+    body: S.of(context).someOfTheFilesYouAreTryingToDeleteAre,
+    firstButtonLabel: S.of(context).delete,
     isCritical: true,
   );
   if (actionResult?.action == null) {
@@ -506,15 +504,16 @@ Future<void> showDeleteSheet(
   final bool isBothLocalAndRemote = containsUploadedFile && containsLocalFile;
   final bool isLocalOnly = !containsUploadedFile;
   final bool isRemoteOnly = !containsLocalFile;
-  final String? bodyHighlight =
-      isBothLocalAndRemote ? "They will be deleted from all albums." : null;
+  final String? bodyHighlight = isBothLocalAndRemote
+      ? S.of(context).theyWillBeDeletedFromAllAlbums
+      : null;
   String body = "";
   if (isBothLocalAndRemote) {
-    body = "Some items are in both ente and your device.";
+    body = S.of(context).someItemsAreInBothEnteAndYourDevice;
   } else if (isRemoteOnly) {
-    body = "Selected items will be deleted from all albums and moved to trash.";
+    body = S.of(context).selectedItemsWillBeDeletedFromAllAlbumsAndMoved;
   } else if (isLocalOnly) {
-    body = "These items will be deleted from your device.";
+    body = S.of(context).theseItemsWillBeDeletedFromYourDevice;
   } else {
     throw AssertionError("Unexpected state");
   }
@@ -522,7 +521,9 @@ Future<void> showDeleteSheet(
   if (isBothLocalAndRemote || isRemoteOnly) {
     buttons.add(
       ButtonWidget(
-        labelText: isBothLocalAndRemote ? "Delete from ente" : "Yes, delete",
+        labelText: isBothLocalAndRemote
+            ? S.of(context).deleteFromEnte
+            : S.of(context).yesDelete,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -535,7 +536,7 @@ Future<void> showDeleteSheet(
             selectedFiles.files.toList(),
           ).then(
             (value) {
-              showShortToast(context, "Moved to trash");
+              showShortToast(context, S.of(context).movedToTrash);
             },
             onError: (e, s) {
               showGenericErrorDialog(context: context);
@@ -549,7 +550,9 @@ Future<void> showDeleteSheet(
   if (isBothLocalAndRemote || isLocalOnly) {
     buttons.add(
       ButtonWidget(
-        labelText: isBothLocalAndRemote ? "Delete from device" : "Yes, delete",
+        labelText: isBothLocalAndRemote
+            ? S.of(context).deleteFromDevice
+            : S.of(context).yesDelete,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -566,7 +569,7 @@ Future<void> showDeleteSheet(
   if (isBothLocalAndRemote) {
     buttons.add(
       ButtonWidget(
-        labelText: "Delete from both",
+        labelText: S.of(context).deleteFromBoth,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -583,8 +586,8 @@ Future<void> showDeleteSheet(
     );
   }
   buttons.add(
-    const ButtonWidget(
-      labelText: "Cancel",
+    ButtonWidget(
+      labelText: S.of(context).cancel,
       buttonType: ButtonType.secondary,
       buttonSize: ButtonSize.large,
       shouldStickToDarkTheme: true,

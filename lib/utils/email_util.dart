@@ -12,6 +12,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -40,15 +41,14 @@ Future<void> sendLogs(
 }) async {
   showDialogWidget(
     context: context,
-    title: "Report a bug",
+    title: S.of(context).reportABug,
     icon: Icons.bug_report_outlined,
-    body:
-        "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.",
+    body: S.of(context).logsDialogBody,
     buttons: [
       ButtonWidget(
         isInAlert: true,
         buttonType: ButtonType.neutral,
-        labelText: "Report a bug",
+        labelText: S.of(context).reportABug,
         buttonAction: ButtonAction.first,
         shouldSurfaceExecutionStates: false,
         onTap: () async {
@@ -62,7 +62,7 @@ Future<void> sendLogs(
       //on pressing this button
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: "View logs",
+        labelText: S.of(context).viewLogs,
         buttonAction: ButtonAction.second,
         onTap: () async {
           showDialog(
@@ -75,10 +75,10 @@ Future<void> sendLogs(
           );
         },
       ),
-      const ButtonWidget(
+      ButtonWidget(
         isInAlert: true,
         buttonType: ButtonType.secondary,
-        labelText: "Cancel",
+        labelText: S.of(context).cancel,
         buttonAction: ButtonAction.cancel,
       ),
     ],
@@ -109,7 +109,7 @@ Future<void> _sendLogs(
 }
 
 Future<String> getZippedLogsFile(BuildContext context) async {
-  final dialog = createProgressDialog(context, "Preparing logs...");
+  final dialog = createProgressDialog(context, S.of(context).preparingLogs);
   await dialog.show();
   final logsPath = (await getApplicationSupportDirectory()).path;
   final logsDirectory = Directory(logsPath + "/logs");
@@ -131,12 +131,12 @@ Future<void> shareLogs(
 ) async {
   final result = await showDialogWidget(
     context: context,
-    title: "Email your logs",
-    body: "Please send the logs to \n$toEmail",
+    title: S.of(context).emailYourLogs,
+    body: S.of(context).pleaseSendTheLogsTo(toEmail),
     buttons: [
       ButtonWidget(
         buttonType: ButtonType.neutral,
-        labelText: "Copy email address",
+        labelText: S.of(context).copyEmailAddress,
         isInAlert: true,
         buttonAction: ButtonAction.first,
         onTap: () async {
@@ -144,15 +144,15 @@ Future<void> shareLogs(
         },
         shouldShowSuccessConfirmation: true,
       ),
-      const ButtonWidget(
+      ButtonWidget(
         buttonType: ButtonType.neutral,
-        labelText: "Export logs",
+        labelText: S.of(context).exportLogs,
         isInAlert: true,
         buttonAction: ButtonAction.second,
       ),
-      const ButtonWidget(
+      ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: "Cancel",
+        labelText: S.of(context).cancel,
         isInAlert: true,
         buttonAction: ButtonAction.cancel,
       ),
@@ -226,7 +226,7 @@ Future<void> sendEmail(
                 ),
             ],
             cancelButton: CupertinoActionSheetAction(
-              child: const Text("Cancel"),
+              child: Text(S.of(context).cancel),
               onPressed: () {
                 Navigator.of(context, rootNavigator: true).pop();
               },
@@ -256,9 +256,9 @@ void _showNoMailAppsDialog(BuildContext context, String toEmail) {
   showChoiceDialog(
     context,
     icon: Icons.email_outlined,
-    title: 'Please email us at $toEmail',
-    firstButtonLabel: "Copy email address",
-    secondButtonLabel: "Dismiss",
+    title: S.of(context).pleaseEmailUsAt(toEmail),
+    firstButtonLabel: S.of(context).copyEmailAddress,
+    secondButtonLabel: S.of(context).dismiss,
     firstButtonOnTap: () async {
       await Clipboard.setData(ClipboardData(text: toEmail));
       showShortToast(context, 'Copied');
