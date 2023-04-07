@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
@@ -43,7 +44,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                 SizedBox(
                   width: 142,
                   child: GradientButton(
-                    text: "Unlock",
+                    text: S.of(context).unlock,
                     iconData: Icons.lock_open_outlined,
                     onTap: () async {
                       _showLockScreen();
@@ -94,7 +95,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     try {
       _isShowingLockScreen = true;
       final result = await requestAuthentication(
-        "Please authenticate to view your memories",
+        S.of(context).authToViewYourMemories,
       );
       _isShowingLockScreen = false;
       if (result) {

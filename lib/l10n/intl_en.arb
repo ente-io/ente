@@ -796,5 +796,7 @@
   "totalSize": "Total size",
   "time": "Time",
   "longpressOnAnItemToViewInFullscreen": "Long-press on an item to view in full-screen",
-  "decryptingVideo": "Decrypting video..."
+  "decryptingVideo": "Decrypting video...",
+  "authToViewYourMemories": "Please authenticate to view your memories",
+  "unlock": "Unlock"
 }

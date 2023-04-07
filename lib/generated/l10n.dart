@@ -5767,6 +5767,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Please authenticate to view your memories`
+  String get authToViewYourMemories {
+    return Intl.message(
+      'Please authenticate to view your memories',
+      name: 'authToViewYourMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unlock`
+  String get unlock {
+    return Intl.message(
+      'Unlock',
+      name: 'unlock',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

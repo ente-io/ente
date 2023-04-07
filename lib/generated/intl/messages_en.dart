@@ -244,6 +244,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please authenticate to view your active sessions"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to view your hidden files"),
+        "authToViewYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Please authenticate to view your memories"),
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to view your recovery key"),
         "available": MessageLookupByLibrary.simpleMessage("Available"),
@@ -963,6 +965,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Unhide to album"),
         "unhidingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Unhiding files to album"),
+        "unlock": MessageLookupByLibrary.simpleMessage("Unlock"),
         "unselectAll": MessageLookupByLibrary.simpleMessage("Unselect all"),
         "update": MessageLookupByLibrary.simpleMessage("Update"),
         "updateAvailable":
