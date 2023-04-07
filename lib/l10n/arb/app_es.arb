@@ -2,5 +2,6 @@
   "counterAppBarTitle": "Contador",
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
-  }
+  },
+  "selectLanguage": "Valitse kieli"
 }

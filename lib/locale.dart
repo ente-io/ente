@@ -8,7 +8,7 @@ const List<Locale> appSupportedLocales = <Locale>[
   Locale('en'),
   Locale('de'),
   Locale('fr'),
-  Locale('fi'),
+  Locale('it'),
 ];
 
 Locale localResolutionCallBack(locales, supportedLocales) {
@@ -25,13 +25,17 @@ Locale localResolutionCallBack(locales, supportedLocales) {
 Future<Locale> getLocale() async {
   final String? savedLocale =
       (await SharedPreferences.getInstance()).getString('locale');
-  if (savedLocale != null) {
+  if (savedLocale != null &&
+      appSupportedLocales.contains(Locale(savedLocale))) {
     return Locale(savedLocale);
   }
   return const Locale('en');
 }
 
 Future<void> setLocale(Locale locale) async {
+  if (!appSupportedLocales.contains(locale)) {
+    throw Exception('Locale $locale is not supported by the app');
+  }
   await (await SharedPreferences.getInstance())
       .setString('locale', locale.languageCode);
 }

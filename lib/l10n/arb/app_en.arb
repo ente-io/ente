@@ -118,6 +118,8 @@
   "passwordStrengthModerate": "Moderate",
   "confirmPassword": "Confirm password",
   "close": "Close",
-  "oopsSomethingWentWrong": "Oops, Something went wrong."
+  "oopsSomethingWentWrong": "Oops, Something went wrong.",
+  "selectLanguage": "Select language",
+  "language": "Language"
 
 }

@@ -111,5 +111,6 @@
   "passwordStrengthModerate": "Modéré",
   "confirmPassword": "Confirmer le mot de passe",
   "close": "Fermer",
-  "oopsSomethingWentWrong": "Oops ! Une erreur s'est produite."
+  "oopsSomethingWentWrong": "Oops ! Une erreur s'est produite.",
+  "selectLanguage": "Sélectionnez la langue"
 }

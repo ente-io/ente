@@ -1,6 +1,9 @@
 // @dart=2.9
 
+import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/change_email_dialog.dart';
@@ -10,6 +13,7 @@ import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
+import 'package:ente_auth/ui/settings/language_picker.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +24,7 @@ class AccountSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return ExpandableMenuItemWidget(
       title: "Account",
       selectionOptionsWidget: _getSectionOptions(context),
@@ -28,6 +33,7 @@ class AccountSectionWidget extends StatelessWidget {
   }
 
   Column _getSectionOptions(BuildContext context) {
+    final l10n = context.l10n;
     List<Widget> children = [];
     children.addAll([
       sectionOptionSpacing,
@@ -116,6 +122,29 @@ class AccountSectionWidget extends StatelessWidget {
               ),
             );
           }
+        },
+      ),
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.language,
+        ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () async {
+          final locale = await getLocale();
+          routeToPage(
+            context,
+            DeviceLimitPickerPage(
+              appSupportedLocales,
+              (locale) async {
+                await setLocale(locale);
+                App.setLocale(context, locale);
+              },
+              locale,
+            ),
+          );
         },
       ),
       sectionOptionSpacing,

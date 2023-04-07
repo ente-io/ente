@@ -112,5 +112,6 @@
   "passwordStrengthModerate": "Mediocre",
   "confirmPassword": "Conferma la password",
   "close": "Chiudi",
-  "oopsSomethingWentWrong": "Oops, qualcosa è andato storto."
+  "oopsSomethingWentWrong": "Oops, qualcosa è andato storto.",
+  "selectLanguage": "Seleziona lingua"
 }
