@@ -843,5 +843,22 @@
       }
     }
   },
-  "freeUpAmount": "Free up {sizeInMBorGB}"
+  "freeUpAmount": "Free up {sizeInMBorGB}",
+  "thisEmailIsAlreadyInUse": "This email is already in use",
+  "incorrectCode": "Incorrect code",
+  "authenticationFailedPleaseTryAgain": "Authentication failed, please try again",
+  "verificationFailedPleaseTryAgain": "Verification failed, please try again",
+  "authenticating": "Authenticating...",
+  "authenticationSuccessful": "Authentication successful!",
+  "incorrectRecoveryKey": "Incorrect recovery key",
+  "theRecoveryKeyYouEnteredIsIncorrect": "The recovery key you entered is incorrect",
+  "twofactorAuthenticationSuccessfullyReset": "Two-factor authentication successfully reset",
+  "pleaseVerifyTheCodeYouHaveEntered": "Please verify the code you have entered",
+  "pleaseContactSupportIfTheProblemPersists": "Please contact support if the problem persists",
+  "twofactorAuthenticationHasBeenDisabled": "Two-factor authentication has been disabled",
+  "sorryTheCodeYouveEnteredIsIncorrect": "Sorry, the code you've entered is incorrect",
+  "yourVerificationCodeHasExpired": "Your verification code has expired",
+  "emailChangedTo": "Email changed to {newEmail}",
+  "verifying": "Verifying...",
+  "disablingTwofactorAuthentication": "Disabling two-factor authentication..."
 }

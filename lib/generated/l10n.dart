@@ -5851,6 +5851,176 @@ class S {
       args: [sizeInMBorGB],
     );
   }
+
+  /// `This email is already in use`
+  String get thisEmailIsAlreadyInUse {
+    return Intl.message(
+      'This email is already in use',
+      name: 'thisEmailIsAlreadyInUse',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Incorrect code`
+  String get incorrectCode {
+    return Intl.message(
+      'Incorrect code',
+      name: 'incorrectCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authentication failed, please try again`
+  String get authenticationFailedPleaseTryAgain {
+    return Intl.message(
+      'Authentication failed, please try again',
+      name: 'authenticationFailedPleaseTryAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verification failed, please try again`
+  String get verificationFailedPleaseTryAgain {
+    return Intl.message(
+      'Verification failed, please try again',
+      name: 'verificationFailedPleaseTryAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authenticating...`
+  String get authenticating {
+    return Intl.message(
+      'Authenticating...',
+      name: 'authenticating',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authentication successful!`
+  String get authenticationSuccessful {
+    return Intl.message(
+      'Authentication successful!',
+      name: 'authenticationSuccessful',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Incorrect recovery key`
+  String get incorrectRecoveryKey {
+    return Intl.message(
+      'Incorrect recovery key',
+      name: 'incorrectRecoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The recovery key you entered is incorrect`
+  String get theRecoveryKeyYouEnteredIsIncorrect {
+    return Intl.message(
+      'The recovery key you entered is incorrect',
+      name: 'theRecoveryKeyYouEnteredIsIncorrect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Two-factor authentication successfully reset`
+  String get twofactorAuthenticationSuccessfullyReset {
+    return Intl.message(
+      'Two-factor authentication successfully reset',
+      name: 'twofactorAuthenticationSuccessfullyReset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please verify the code you have entered`
+  String get pleaseVerifyTheCodeYouHaveEntered {
+    return Intl.message(
+      'Please verify the code you have entered',
+      name: 'pleaseVerifyTheCodeYouHaveEntered',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please contact support if the problem persists`
+  String get pleaseContactSupportIfTheProblemPersists {
+    return Intl.message(
+      'Please contact support if the problem persists',
+      name: 'pleaseContactSupportIfTheProblemPersists',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Two-factor authentication has been disabled`
+  String get twofactorAuthenticationHasBeenDisabled {
+    return Intl.message(
+      'Two-factor authentication has been disabled',
+      name: 'twofactorAuthenticationHasBeenDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, the code you've entered is incorrect`
+  String get sorryTheCodeYouveEnteredIsIncorrect {
+    return Intl.message(
+      'Sorry, the code you\'ve entered is incorrect',
+      name: 'sorryTheCodeYouveEnteredIsIncorrect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your verification code has expired`
+  String get yourVerificationCodeHasExpired {
+    return Intl.message(
+      'Your verification code has expired',
+      name: 'yourVerificationCodeHasExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email changed to {newEmail}`
+  String emailChangedTo(Object newEmail) {
+    return Intl.message(
+      'Email changed to $newEmail',
+      name: 'emailChangedTo',
+      desc: '',
+      args: [newEmail],
+    );
+  }
+
+  /// `Verifying...`
+  String get verifying {
+    return Intl.message(
+      'Verifying...',
+      name: 'verifying',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disabling two-factor authentication...`
+  String get disablingTwofactorAuthentication {
+    return Intl.message(
+      'Disabling two-factor authentication...',
+      name: 'disablingTwofactorAuthentication',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
