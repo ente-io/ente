@@ -2,6 +2,7 @@ import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
@@ -117,7 +118,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
         firstList.add(
           BlurMenuItemWidget(
             leadingIcon: Icons.copy_outlined,
-            labelText: "Copy link",
+            labelText: S.of(context).copyLink,
             menuItemColor: colorScheme.fillFaint,
             onTap: anyUploadedFiles ? _copyLink : null,
           ),
@@ -126,7 +127,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
         firstList.add(
           BlurMenuItemWidget(
             leadingIcon: Icons.link_outlined,
-            labelText: "Share link$suffix",
+            labelText: S.of(context).shareLink + suffix,
             menuItemColor: colorScheme.fillFaint,
             onTap: anyUploadedFiles ? _onCreatedSharedLinkClicked : null,
           ),
@@ -141,8 +142,9 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
         BlurMenuItemWidget(
           leadingIcon:
               showUploadIcon ? Icons.cloud_upload_outlined : Icons.add_outlined,
-          labelText:
-              "Add to ${showUploadIcon ? 'ente' : 'album'}$suffixInPending",
+          labelText: showUploadIcon
+              ? S.of(context).addToEnte
+              : S.of(context).addToAlbum + suffixInPending,
           menuItemColor: colorScheme.fillFaint,
           onTap: anyOwnedFiles ? _addToAlbum : null,
         ),
@@ -152,7 +154,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.arrow_forward_outlined,
-          labelText: "Move to album$suffix",
+          labelText: S.of(context).moveToAlbum + suffix,
           menuItemColor: colorScheme.fillFaint,
           onTap: anyUploadedFiles ? _moveFiles : null,
         ),
@@ -163,7 +165,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.remove_outlined,
-          labelText: "Remove from album$removeSuffix",
+          labelText: "${S.of(context).removeFromAlbum}$removeSuffix",
           menuItemColor: colorScheme.fillFaint,
           onTap: removeCount > 0 ? _removeFilesFromAlbum : null,
         ),
@@ -174,7 +176,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.delete_outline,
-          labelText: "Delete$suffixInPending",
+          labelText: S.of(context).delete + suffixInPending,
           menuItemColor: colorScheme.fillFaint,
           onTap: anyOwnedFiles ? _onDeleteClick : null,
         ),
@@ -185,7 +187,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.visibility_off_outlined,
-          labelText: "Hide$suffix",
+          labelText: S.of(context).hide + suffix,
           menuItemColor: colorScheme.fillFaint,
           onTap: anyUploadedFiles ? _onHideClick : null,
         ),
@@ -194,7 +196,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.visibility_off_outlined,
-          labelText: "Unhide$suffix",
+          labelText: S.of(context).unhide + suffix,
           menuItemColor: colorScheme.fillFaint,
           onTap: _onUnhideClick,
         ),
@@ -204,7 +206,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.archive_outlined,
-          labelText: "Archive$suffix",
+          labelText: S.of(context).archive + suffix,
           menuItemColor: colorScheme.fillFaint,
           onTap: anyUploadedFiles ? _onArchiveClick : null,
         ),
@@ -213,7 +215,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.unarchive,
-          labelText: "Unarchive$suffix",
+          labelText: S.of(context).unarchive + suffix,
           menuItemColor: colorScheme.fillFaint,
           onTap: _onUnArchiveClick,
         ),
@@ -224,7 +226,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.favorite_border_rounded,
-          labelText: "Favorite$suffix",
+          labelText: S.of(context).favorite + suffix,
           menuItemColor: colorScheme.fillFaint,
           onTap: anyUploadedFiles ? _onFavoriteClick : null,
         ),
@@ -233,7 +235,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.favorite,
-          labelText: "Remove from favorite$suffix",
+          labelText: S.of(context).removeFromFavorite + suffix,
           menuItemColor: colorScheme.fillFaint,
           onTap: _onUnFavoriteClick,
         ),
@@ -244,7 +246,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.restore_outlined,
-          labelText: "Restore",
+          labelText: S.of(context).restore,
           menuItemColor: colorScheme.fillFaint,
           onTap: _restore,
         ),
@@ -255,7 +257,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.delete_forever_outlined,
-          labelText: "Permanently delete",
+          labelText: S.of(context).permanentlyDelete,
           menuItemColor: colorScheme.fillFaint,
           onTap: _permanentlyDelete,
         ),
@@ -385,7 +387,8 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
 
   Future<void> _onCreatedSharedLinkClicked() async {
     if (split.ownedByCurrentUser.isEmpty) {
-      showShortToast(context, "Can only create link for files owned by you");
+      showShortToast(
+          context, S.of(context).canOnlyCreateLinkForFilesOwnedByYou);
       return;
     }
     _cachedCollectionForSharedLink ??= await collectionActions
@@ -393,24 +396,24 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     final actionResult = await showActionSheet(
       context: context,
       buttons: [
-        const ButtonWidget(
-          labelText: "Copy link",
+        ButtonWidget(
+          labelText: S.of(context).copyLink,
           buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           isInAlert: true,
         ),
-        const ButtonWidget(
-          labelText: "Manage link",
+        ButtonWidget(
+          labelText: S.of(context).manageLink,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
           shouldStickToDarkTheme: true,
           isInAlert: true,
         ),
-        const ButtonWidget(
-          labelText: "Done",
+        ButtonWidget(
+          labelText: S.of(context).done,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.third,
@@ -418,8 +421,8 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           isInAlert: true,
         )
       ],
-      title: "Public link created",
-      body: "You can manage your links in the share tab.",
+      title: S.of(context).publicLinkCreated,
+      body: S.of(context).youCanManageYourLinksInTheShareTab,
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult?.action != null) {
@@ -448,7 +451,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       final String url =
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
       await Clipboard.setData(ClipboardData(text: url));
-      showShortToast(context, "Link copied to clipboard");
+      showShortToast(context, S.of(context).linkCopiedToClipboard);
     }
   }
 

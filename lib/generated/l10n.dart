@@ -2368,9 +2368,19 @@ class S {
   }
 
   /// `Remove from album?`
-  String get removeFromAlbum {
+  String get removeFromAlbumTitle {
     return Intl.message(
       'Remove from album?',
+      name: 'removeFromAlbumTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove from album`
+  String get removeFromAlbum {
+    return Intl.message(
+      'Remove from album',
       name: 'removeFromAlbum',
       desc: '',
       args: [],
@@ -4790,6 +4800,166 @@ class S {
       name: 'deleteProgress',
       desc: '',
       args: [currentlyDeleting, totalCount],
+    );
+  }
+
+  /// `Permanently delete`
+  String get permanentlyDelete {
+    return Intl.message(
+      'Permanently delete',
+      name: 'permanentlyDelete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Can only create link for files owned by you`
+  String get canOnlyCreateLinkForFilesOwnedByYou {
+    return Intl.message(
+      'Can only create link for files owned by you',
+      name: 'canOnlyCreateLinkForFilesOwnedByYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Public link created`
+  String get publicLinkCreated {
+    return Intl.message(
+      'Public link created',
+      name: 'publicLinkCreated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can manage your links in the share tab.`
+  String get youCanManageYourLinksInTheShareTab {
+    return Intl.message(
+      'You can manage your links in the share tab.',
+      name: 'youCanManageYourLinksInTheShareTab',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link copied to clipboard`
+  String get linkCopiedToClipboard {
+    return Intl.message(
+      'Link copied to clipboard',
+      name: 'linkCopiedToClipboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore`
+  String get restore {
+    return Intl.message(
+      'Restore',
+      name: 'restore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Move to album`
+  String get moveToAlbum {
+    return Intl.message(
+      'Move to album',
+      name: 'moveToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unhide`
+  String get unhide {
+    return Intl.message(
+      'Unhide',
+      name: 'unhide',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unarchive`
+  String get unarchive {
+    return Intl.message(
+      'Unarchive',
+      name: 'unarchive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Favorite`
+  String get favorite {
+    return Intl.message(
+      'Favorite',
+      name: 'favorite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove from favorite`
+  String get removeFromFavorite {
+    return Intl.message(
+      'Remove from favorite',
+      name: 'removeFromFavorite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share link`
+  String get shareLink {
+    return Intl.message(
+      'Share link',
+      name: 'shareLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add to ente`
+  String get addToEnte {
+    return Intl.message(
+      'Add to ente',
+      name: 'addToEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add to album`
+  String get addToAlbum {
+    return Intl.message(
+      'Add to album',
+      name: 'addToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete`
+  String get delete {
+    return Intl.message(
+      'Delete',
+      name: 'delete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide`
+  String get hide {
+    return Intl.message(
+      'Hide',
+      name: 'hide',
+      desc: '',
+      args: [],
     );
   }
 }

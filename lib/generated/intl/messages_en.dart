@@ -150,6 +150,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Add collaborator"),
         "addMore": MessageLookupByLibrary.simpleMessage("Add more"),
+        "addToAlbum": MessageLookupByLibrary.simpleMessage("Add to album"),
+        "addToEnte": MessageLookupByLibrary.simpleMessage("Add to ente"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Add viewer"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Added as"),
         "addingToFavorites":
@@ -232,6 +234,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "byClickingLogInIAgreeToThe": MessageLookupByLibrary.simpleMessage(
             "By clicking log in, I agree to the"),
+        "canOnlyCreateLinkForFilesOwnedByYou":
+            MessageLookupByLibrary.simpleMessage(
+                "Can only create link for files owned by you"),
         "canOnlyRemoveFilesOwnedByYou": MessageLookupByLibrary.simpleMessage(
             "Can only remove files owned by you"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
@@ -322,6 +327,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "custom": MessageLookupByLibrary.simpleMessage("Custom"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("Dark"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Decrypting..."),
+        "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Delete account"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
             "We are sorry to see you go. Please share your feedback to help us improve."),
@@ -446,6 +452,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "familyPlans": MessageLookupByLibrary.simpleMessage("Family plans"),
         "faq": MessageLookupByLibrary.simpleMessage("FAQ"),
         "faqs": MessageLookupByLibrary.simpleMessage("FAQs"),
+        "favorite": MessageLookupByLibrary.simpleMessage("Favorite"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("for your memories"),
@@ -467,6 +474,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Generating encryption keys..."),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "hidden": MessageLookupByLibrary.simpleMessage("Hidden"),
+        "hide": MessageLookupByLibrary.simpleMessage("Hide"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("How it works"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
             "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match."),
@@ -499,6 +507,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "leave": MessageLookupByLibrary.simpleMessage("Leave"),
         "leaveFamily": MessageLookupByLibrary.simpleMessage("Leave family"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Light"),
+        "linkCopiedToClipboard":
+            MessageLookupByLibrary.simpleMessage("Link copied to clipboard"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Device limit"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Enabled"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Expired"),
@@ -532,6 +542,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mobile, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
         "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
+        "moveToAlbum": MessageLookupByLibrary.simpleMessage("Move to album"),
         "movedToTrash": MessageLookupByLibrary.simpleMessage("Moved to trash"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
         "never": MessageLookupByLibrary.simpleMessage("Never"),
@@ -573,6 +584,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "paymentFailedWithReason": m17,
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
+        "permanentlyDelete":
+            MessageLookupByLibrary.simpleMessage("Permanently delete"),
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("Photo grid size"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("photo"),
@@ -602,6 +615,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Private backups"),
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("Private sharing"),
+        "publicLinkCreated":
+            MessageLookupByLibrary.simpleMessage("Public link created"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Public link enabled"),
         "raiseTicket": MessageLookupByLibrary.simpleMessage("Raise ticket"),
@@ -648,7 +663,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeDuplicates":
             MessageLookupByLibrary.simpleMessage("Remove duplicates"),
         "removeFromAlbum":
+            MessageLookupByLibrary.simpleMessage("Remove from album"),
+        "removeFromAlbumTitle":
             MessageLookupByLibrary.simpleMessage("Remove from album?"),
+        "removeFromFavorite":
+            MessageLookupByLibrary.simpleMessage("Remove from favorite"),
         "removeLink": MessageLookupByLibrary.simpleMessage("Remove link"),
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Remove participant"),
@@ -669,6 +688,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resendEmail": MessageLookupByLibrary.simpleMessage("Resend email"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Reset password"),
+        "restore": MessageLookupByLibrary.simpleMessage("Restore"),
         "retry": MessageLookupByLibrary.simpleMessage("Retry"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Safely stored"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Save key"),
@@ -704,6 +724,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareALink": MessageLookupByLibrary.simpleMessage("Share a link"),
         "shareAnAlbumNow":
             MessageLookupByLibrary.simpleMessage("Share an album now"),
+        "shareLink": MessageLookupByLibrary.simpleMessage("Share link"),
         "shareMyVerificationID": m24,
         "shareOnlyWithThePeopleYouWant": MessageLookupByLibrary.simpleMessage(
             "Share only with the people you want"),
@@ -800,7 +821,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Two-factor authentication"),
         "twofactorSetup":
             MessageLookupByLibrary.simpleMessage("Two-factor setup"),
+        "unarchive": MessageLookupByLibrary.simpleMessage("Unarchive"),
         "uncategorized": MessageLookupByLibrary.simpleMessage("Uncategorized"),
+        "unhide": MessageLookupByLibrary.simpleMessage("Unhide"),
         "unselectAll": MessageLookupByLibrary.simpleMessage("Unselect all"),
         "update": MessageLookupByLibrary.simpleMessage("Update"),
         "updateAvailable":
@@ -855,6 +878,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "You are on the latest version"),
         "youCanAtMaxDoubleYourStorage": MessageLookupByLibrary.simpleMessage(
             "* You can at max double your storage"),
+        "youCanManageYourLinksInTheShareTab":
+            MessageLookupByLibrary.simpleMessage(
+                "You can manage your links in the share tab."),
         "youCannotDowngradeToThisPlan": MessageLookupByLibrary.simpleMessage(
             "You cannot downgrade to this plan"),
         "youCannotShareWithYourself": MessageLookupByLibrary.simpleMessage(
