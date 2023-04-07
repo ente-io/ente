@@ -19,7 +19,8 @@ import "package:flutter/material.dart";
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 class App extends StatefulWidget {
-  const App({Key key});
+  final Locale locale;
+  const App({Key key, this.locale = const Locale("en")}) : super(key: key);
 
   @override
   State<App> createState() => _AppState();
@@ -79,6 +80,7 @@ class _AppState extends State<App> {
           theme: lightTheme,
           darkTheme: dartTheme,
           debugShowCheckedModeBanner: false,
+          locale: widget.locale,
           supportedLocales: appSupportedLocales,
           localeListResolutionCallback: localResolutionCallBack,
           localizationsDelegates: const [
@@ -97,6 +99,7 @@ class _AppState extends State<App> {
         theme: lightThemeData,
         darkTheme: darkThemeData,
         debugShowCheckedModeBanner: false,
+        locale: widget.locale,
         supportedLocales: appSupportedLocales,
         localeListResolutionCallback: localResolutionCallBack,
         localizationsDelegates: const [

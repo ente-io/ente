@@ -5,6 +5,7 @@ import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/billing_service.dart';
 import 'package:ente_auth/services/notification_service.dart';
@@ -31,12 +32,14 @@ Future<void> _runInForeground() async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
+    final Locale locale = await getLocale();
     UpdateService.instance.showUpdateNotification();
     runApp(
       AppLock(
-        builder: (args) => const App(),
+        builder: (args) => App(locale: locale),
         lockScreen: const LockScreen(),
         enabled: Configuration.instance.shouldShowLockScreen(),
+        locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
       ),
