@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -87,7 +88,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                       keyboardType: TextInputType.visiblePassword,
                       // Above parameters are to disable auto-suggestion
                       decoration: InputDecoration(
-                        hintText: "Albums, months, days, years, ...",
+                        hintText: S.of(context).searchHintText,
                         filled: true,
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 10,

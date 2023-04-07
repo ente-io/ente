@@ -5386,6 +5386,146 @@ class S {
       args: [],
     );
   }
+
+  /// `No hidden photos or videos`
+  String get noHiddenPhotosOrVideos {
+    return Intl.message(
+      'No hidden photos or videos',
+      name: 'noHiddenPhotosOrVideos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To hide a photo or video`
+  String get toHideAPhotoOrVideo {
+    return Intl.message(
+      'To hide a photo or video',
+      name: 'toHideAPhotoOrVideo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `• Open the item`
+  String get openTheItem {
+    return Intl.message(
+      '• Open the item',
+      name: 'openTheItem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `• Click on the overflow menu`
+  String get clickOnTheOverflowMenu {
+    return Intl.message(
+      '• Click on the overflow menu',
+      name: 'clickOnTheOverflowMenu',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `• Click`
+  String get click {
+    return Intl.message(
+      '• Click',
+      name: 'click',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing to see here! 👀`
+  String get nothingToSeeHere {
+    return Intl.message(
+      'Nothing to see here! 👀',
+      name: 'nothingToSeeHere',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unarchive album`
+  String get unarchiveAlbum {
+    return Intl.message(
+      'Unarchive album',
+      name: 'unarchiveAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Archive album`
+  String get archiveAlbum {
+    return Intl.message(
+      'Archive album',
+      name: 'archiveAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Calculating...`
+  String get calculating {
+    return Intl.message(
+      'Calculating...',
+      name: 'calculating',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please wait, deleting album`
+  String get pleaseWaitDeletingAlbum {
+    return Intl.message(
+      'Please wait, deleting album',
+      name: 'pleaseWaitDeletingAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Albums, months, days, years, ...`
+  String get searchHintText {
+    return Intl.message(
+      'Albums, months, days, years, ...',
+      name: 'searchHintText',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `• Album names (e.g. "Camera")\n• Types of files (e.g. "Videos", ".gif")\n• Years and months (e.g. "2022", "January")\n• Holidays (e.g. "Christmas")\n• Photo descriptions (e.g. “#fun”)`
+  String get searchByExamples {
+    return Intl.message(
+      '• Album names (e.g. "Camera")\n• Types of files (e.g. "Videos", ".gif")\n• Years and months (e.g. "2022", "January")\n• Holidays (e.g. "Christmas")\n• Photo descriptions (e.g. “#fun”)',
+      name: 'searchByExamples',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can try searching for a different query.`
+  String get youCanTrySearchingForADifferentQuery {
+    return Intl.message(
+      'You can try searching for a different query.',
+      name: 'youCanTrySearchingForADifferentQuery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No results found`
+  String get noResultsFound {
+    return Intl.message(
+      'No results found',
+      name: 'noResultsFound',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

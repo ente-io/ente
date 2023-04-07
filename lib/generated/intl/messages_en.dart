@@ -203,6 +203,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "appstoreSubscription":
             MessageLookupByLibrary.simpleMessage("AppStore subscription"),
         "archive": MessageLookupByLibrary.simpleMessage("Archive"),
+        "archiveAlbum": MessageLookupByLibrary.simpleMessage("Archive album"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure that you want to leave the family plan?"),
@@ -255,6 +256,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "byClickingLogInIAgreeToThe": MessageLookupByLibrary.simpleMessage(
             "By clicking log in, I agree to the"),
+        "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
         "canNotUploadToAlbumsOwnedByOthers":
             MessageLookupByLibrary.simpleMessage(
                 "Can not upload to albums owned by others"),
@@ -285,6 +287,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim more!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Claimed"),
         "claimedStorageSoFar": m4,
+        "click": MessageLookupByLibrary.simpleMessage("• Click"),
+        "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
+            "• Click on the overflow menu"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Code applied"),
         "codeCopiedToClipboard":
@@ -601,6 +606,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "You\'ve no files on this device that can be deleted"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ No duplicates"),
+        "noHiddenPhotosOrVideos":
+            MessageLookupByLibrary.simpleMessage("No hidden photos or videos"),
         "noPasswordWarningPart1": MessageLookupByLibrary.simpleMessage(
             "We don\'t store this password, so if you forget,"),
         "noPasswordWarningPart2":
@@ -612,10 +619,15 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("No recovery key?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key"),
+        "noResultsFound":
+            MessageLookupByLibrary.simpleMessage("No results found"),
+        "nothingToSeeHere":
+            MessageLookupByLibrary.simpleMessage("Nothing to see here! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oops, something went wrong"),
+        "openTheItem": MessageLookupByLibrary.simpleMessage("• Open the item"),
         "optionalAsShortAsYouLike": MessageLookupByLibrary.simpleMessage(
             "Optional, as short as you like..."),
         "orPickAnExistingOne":
@@ -654,6 +666,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Please try again"),
         "pleaseWait": MessageLookupByLibrary.simpleMessage("Please wait..."),
+        "pleaseWaitDeletingAlbum":
+            MessageLookupByLibrary.simpleMessage("Please wait, deleting album"),
         "pleaseWaitForSometimeBeforeRetrying":
             MessageLookupByLibrary.simpleMessage(
                 "Please wait for sometime before retrying"),
@@ -762,6 +776,10 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Scan this barcode with\nyour authenticator app"),
         "searchByAlbumNameHint":
             MessageLookupByLibrary.simpleMessage("Album name"),
+        "searchByExamples": MessageLookupByLibrary.simpleMessage(
+            "• Album names (e.g. \"Camera\")\n• Types of files (e.g. \"Videos\", \".gif\")\n• Years and months (e.g. \"2022\", \"January\")\n• Holidays (e.g. \"Christmas\")\n• Photo descriptions (e.g. “#fun”)"),
+        "searchHintText": MessageLookupByLibrary.simpleMessage(
+            "Albums, months, days, years, ..."),
         "security": MessageLookupByLibrary.simpleMessage("Security"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("Select album"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
@@ -885,6 +903,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "This will log you out of the following device:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "This will log you out of this device!"),
+        "toHideAPhotoOrVideo":
+            MessageLookupByLibrary.simpleMessage("To hide a photo or video"),
         "total": MessageLookupByLibrary.simpleMessage("total"),
         "trash": MessageLookupByLibrary.simpleMessage("Trash"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Try again"),
@@ -899,6 +919,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "twofactorSetup":
             MessageLookupByLibrary.simpleMessage("Two-factor setup"),
         "unarchive": MessageLookupByLibrary.simpleMessage("Unarchive"),
+        "unarchiveAlbum":
+            MessageLookupByLibrary.simpleMessage("Unarchive album"),
         "uncategorized": MessageLookupByLibrary.simpleMessage("Uncategorized"),
         "unhide": MessageLookupByLibrary.simpleMessage("Unhide"),
         "unhideToAlbum":
@@ -964,6 +986,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "youCanManageYourLinksInTheShareTab":
             MessageLookupByLibrary.simpleMessage(
                 "You can manage your links in the share tab."),
+        "youCanTrySearchingForADifferentQuery":
+            MessageLookupByLibrary.simpleMessage(
+                "You can try searching for a different query."),
         "youCannotDowngradeToThisPlan": MessageLookupByLibrary.simpleMessage(
             "You cannot downgrade to this plan"),
         "youCannotShareWithYourself": MessageLookupByLibrary.simpleMessage(

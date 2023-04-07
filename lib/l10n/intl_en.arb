@@ -754,5 +754,19 @@
   "ignoredFolderUploadReason": "Some files in this album are ignored from upload because they had previously been deleted from ente.",
   "resetIgnoredFiles": "Reset ignored files",
   "deviceFilesAutoUploading": "Files added to this device album will automatically get uploaded to ente.",
-  "turnOnBackupForAutoUpload": "Turn on backup to automatically upload files added to this device folder to ente."
+  "turnOnBackupForAutoUpload": "Turn on backup to automatically upload files added to this device folder to ente.",
+  "noHiddenPhotosOrVideos": "No hidden photos or videos",
+  "toHideAPhotoOrVideo": "To hide a photo or video",
+  "openTheItem": "• Open the item",
+  "clickOnTheOverflowMenu": "• Click on the overflow menu",
+  "click": "• Click",
+  "nothingToSeeHere": "Nothing to see here! 👀",
+  "unarchiveAlbum": "Unarchive album",
+  "archiveAlbum": "Archive album",
+  "calculating": "Calculating...",
+  "pleaseWaitDeletingAlbum": "Please wait, deleting album",
+  "searchHintText": "Albums, months, days, years, ...",
+  "searchByExamples" : "\u2022 Album names (e.g. \"Camera\")\n\u2022 Types of files (e.g. \"Videos\", \".gif\")\n\u2022 Years and months (e.g. \"2022\", \"January\")\n\u2022 Holidays (e.g. \"Christmas\")\n\u2022 Photo descriptions (e.g. “#fun”)",
+  "youCanTrySearchingForADifferentQuery": "You can try searching for a different query.",
+  "noResultsFound": "No results found"
 }
