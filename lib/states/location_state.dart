@@ -81,6 +81,14 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
     });
   }
 
+  void _updateCenterPoint(Location centerPoint) {
+    if (mounted) {
+      setState(() {
+        _centerPoint = centerPoint;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return InheritedLocationTagData(
@@ -88,6 +96,7 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
       _centerPoint!,
       _updateSelectedIndex,
       _locationTagEntity,
+      _updateCenterPoint,
       child: widget.child,
     );
   }
@@ -100,11 +109,13 @@ class InheritedLocationTagData extends InheritedWidget {
   //locationTag is null when we are creating a new location tag in add location sheet
   final LocalEntity<LocationTag>? locationTagEntity;
   final VoidCallbackParamInt updateSelectedIndex;
+  final VoidCallbackParamLocation updateCenterPoint;
   const InheritedLocationTagData(
     this.selectedRadiusIndex,
     this.centerPoint,
     this.updateSelectedIndex,
-    this.locationTagEntity, {
+    this.locationTagEntity,
+    this.updateCenterPoint, {
     required super.child,
     super.key,
   });

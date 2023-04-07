@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/models/file.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -49,11 +50,15 @@ class EditCenterPointTileWidget extends StatelessWidget {
           ),
         ),
         IconButton(
-          onPressed: () {
-            showPickCenterPointSheet(
+          onPressed: () async {
+            final File? centerPointFile = await showPickCenterPointSheet(
               context,
               InheritedLocationTagData.of(context).locationTagEntity!,
             );
+            if (centerPointFile != null) {
+              InheritedLocationTagData.of(context)
+                  .updateCenterPoint(centerPointFile.location!);
+            }
           },
           icon: const Icon(Icons.edit),
           color: getEnteColorScheme(context).strokeMuted,

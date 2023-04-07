@@ -76,7 +76,7 @@ class _DynamicLocationGalleryWidgetState
     return FutureBuilder(
       //Only rebuild Gallery if the center point or radius changes
       key: ValueKey(
-        "${InheritedLocationTagData.of(context).locationTagEntity?.item.centerPoint}$selectedRadius",
+        "${InheritedLocationTagData.of(context).centerPoint}$selectedRadius",
       ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {

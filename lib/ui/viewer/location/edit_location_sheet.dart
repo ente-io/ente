@@ -241,6 +241,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
       locationTagEntity: locationTagState.locationTagEntity!,
       newRadius: radiusValues[locationTagState.selectedRadiusIndex],
       newName: _textEditingController.text.trim(),
+      newCenterPoint: InheritedLocationTagData.of(context).centerPoint,
     );
     Navigator.of(context).pop();
   }

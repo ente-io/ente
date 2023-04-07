@@ -4,13 +4,13 @@ import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/ignored_files_service.dart";
-import "package:photos/services/location_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
@@ -18,13 +18,12 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
-import "package:photos/utils/dialog_util.dart";
 
-showPickCenterPointSheet(
+Future<File?> showPickCenterPointSheet(
   BuildContext context,
   LocalEntity<LocationTag> locationTagEntity,
-) {
-  showBarModalBottomSheet(
+) async {
+  return await showBarModalBottomSheet(
     context: context,
     builder: (context) {
       return PickCenterPointWidget(locationTagEntity);
@@ -163,19 +162,11 @@ class PickCenterPointWidget extends StatelessWidget {
                                   key: ValueKey(value),
                                   isDisabled: !value,
                                   buttonType: ButtonType.neutral,
-                                  isInAlert: true,
                                   labelText: "Use selected photo",
                                   onTap: () async {
                                     final selectedFile =
                                         selectedFiles.files.first;
-                                    await LocationService.instance
-                                        .updateLocationTag(
-                                      locationTagEntity: locationTagEntity,
-                                      newCenterPoint: selectedFile.location!,
-                                    )
-                                        .onError((e, s) {
-                                      showGenericErrorDialog(context: context);
-                                    });
+                                    Navigator.pop(context, selectedFile);
                                   },
                                 ),
                               );
