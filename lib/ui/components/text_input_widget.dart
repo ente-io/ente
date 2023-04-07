@@ -40,6 +40,7 @@ class TextInputWidget extends StatefulWidget {
   final FocusNode? focusNode;
   final VoidCallback? onCancel;
   final TextEditingController? textEditingController;
+  final ValueNotifier? isEmptyNotifier;
   const TextInputWidget({
     this.onSubmit,
     this.onChange,
@@ -65,6 +66,7 @@ class TextInputWidget extends StatefulWidget {
     this.focusNode,
     this.onCancel,
     this.textEditingController,
+    this.isEmptyNotifier,
     super.key,
   });
 
@@ -101,6 +103,12 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     }
     _obscureTextNotifier = ValueNotifier(widget.isPasswordInput);
     _obscureTextNotifier.addListener(_safeRefresh);
+
+    if (widget.isEmptyNotifier != null) {
+      _textController.addListener(() {
+        widget.isEmptyNotifier!.value = _textController.text.isEmpty;
+      });
+    }
     super.initState();
   }
 
@@ -110,6 +118,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     widget.cancelNotifier?.removeListener(_onCancel);
     _obscureTextNotifier.dispose();
     _textController.dispose();
+    widget.isEmptyNotifier?.dispose();
     super.dispose();
   }
 
