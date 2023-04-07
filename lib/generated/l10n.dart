@@ -5787,6 +5787,70 @@ class S {
       args: [],
     );
   }
+
+  /// `Free up space`
+  String get freeUpSpace {
+    return Intl.message(
+      'Free up space',
+      name: 'freeUpSpace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, one {It can be deleted from the device to free up {formattedSize}} other {They can be deleted from the device to free up {formattedSize}}}`
+  String freeUpSpaceSaving(num count, Object formattedSize) {
+    return Intl.plural(
+      count,
+      one: 'It can be deleted from the device to free up $formattedSize',
+      other: 'They can be deleted from the device to free up $formattedSize',
+      name: 'freeUpSpaceSaving',
+      desc:
+          'Text to tell user how much space they can free up by deleting items from the device',
+      args: [count, formattedSize],
+    );
+  }
+
+  /// `{count, plural, one {1 file} other {{formattedNumber} files}} in this album has been backed up safely`
+  String filesBackedUpInAlbum(int count, String formattedNumber) {
+    return Intl.message(
+      '${Intl.plural(count, one: '1 file', other: '$formattedNumber files')} in this album has been backed up safely',
+      name: 'filesBackedUpInAlbum',
+      desc: 'Text to tell user how many files have been backed up in the album',
+      args: [count, formattedNumber],
+    );
+  }
+
+  /// `{count, plural, one {1 file} other {{formattedNumber} files}} on this device have been backed up safely`
+  String filesBackedUpFromDevice(int count, String formattedNumber) {
+    return Intl.message(
+      '${Intl.plural(count, one: '1 file', other: '$formattedNumber files')} on this device have been backed up safely',
+      name: 'filesBackedUpFromDevice',
+      desc:
+          'Text to tell user how many files have been backed up from this device',
+      args: [count, formattedNumber],
+    );
+  }
+
+  /// `You can still access {count, plural, one {it} other {them}} on ente as long as you have an active subscription`
+  String freeUpAccessPostDelete(int count) {
+    return Intl.message(
+      'You can still access ${Intl.plural(count, one: 'it', other: 'them')} on ente as long as you have an active subscription',
+      name: 'freeUpAccessPostDelete',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Free up {sizeInMBorGB}`
+  String freeUpAmount(Object sizeInMBorGB) {
+    return Intl.message(
+      'Free up $sizeInMBorGB',
+      name: 'freeUpAmount',
+      desc: '',
+      args: [sizeInMBorGB],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

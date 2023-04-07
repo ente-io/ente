@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/utils/data_util.dart';
@@ -26,7 +27,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text("Free up space"),
+        title: Text(S.of(context).freeUpSpace),
       ),
       body: _getBody(),
     );
@@ -47,11 +48,8 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     final count = status.localIDs.length;
     final formattedCount = NumberFormat().format(count);
     final String textMessage = widget.clearSpaceForFolder
-        ? formattedCount.toString() +
-            " file${count == 1 ? "" : "s"} in this album has been backed up "
-                "safely"
-        : formattedCount.toString() +
-            " file${count == 1 ? "" : "s"} on this device have been backed up safely";
+        ? S.of(context).filesBackedUpInAlbum(count, formattedCount)
+        : S.of(context).filesBackedUpFromDevice(count, formattedCount);
     final informationTextStyle = TextStyle(
       fontSize: 14,
       height: 1.3,
@@ -118,9 +116,9 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               const Padding(padding: EdgeInsets.all(10)),
               Expanded(
                 child: Text(
-                  (count == 1 ? "It" : "They") +
-                      " can be deleted from the device to free up " +
-                      formatBytes(status.size),
+                  S
+                      .of(context)
+                      .freeUpSpaceSaving(count, formatBytes(status.size)),
                   style: informationTextStyle,
                 ),
               ),
@@ -139,9 +137,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               const Padding(padding: EdgeInsets.all(10)),
               Expanded(
                 child: Text(
-                  "You can still access " +
-                      (count == 1 ? "it" : "them") +
-                      " on ente as long as you have an active subscription",
+                  S.of(context).freeUpAccessPostDelete(count),
                   style: informationTextStyle,
                 ),
               ),
@@ -159,7 +155,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             onTap: () async {
               await _freeStorage(status);
             },
-            text: "Free up " + formatBytes(status.size),
+            text: S.of(context).freeUpAmount(formatBytes(status.size)),
           ),
         ),
         const Padding(padding: EdgeInsets.all(24)),

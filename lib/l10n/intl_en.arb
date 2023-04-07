@@ -770,7 +770,7 @@
   "calculating": "Calculating...",
   "pleaseWaitDeletingAlbum": "Please wait, deleting album",
   "searchHintText": "Albums, months, days, years, ...",
-  "searchByExamples" : "\u2022 Album names (e.g. \"Camera\")\n\u2022 Types of files (e.g. \"Videos\", \".gif\")\n\u2022 Years and months (e.g. \"2022\", \"January\")\n\u2022 Holidays (e.g. \"Christmas\")\n\u2022 Photo descriptions (e.g. “#fun”)",
+  "searchByExamples": "\u2022 Album names (e.g. \"Camera\")\n\u2022 Types of files (e.g. \"Videos\", \".gif\")\n\u2022 Years and months (e.g. \"2022\", \"January\")\n\u2022 Holidays (e.g. \"Christmas\")\n\u2022 Photo descriptions (e.g. “#fun”)",
   "youCanTrySearchingForADifferentQuery": "You can try searching for a different query.",
   "noResultsFound": "No results found",
   "addedBy": "Added by {emailOrName}",
@@ -798,5 +798,50 @@
   "longpressOnAnItemToViewInFullscreen": "Long-press on an item to view in full-screen",
   "decryptingVideo": "Decrypting video...",
   "authToViewYourMemories": "Please authenticate to view your memories",
-  "unlock": "Unlock"
+  "unlock": "Unlock",
+  "freeUpSpace": "Free up space",
+  "freeUpSpaceSaving": "{count, plural, one {It can be deleted from the device to free up {formattedSize}} other {They can be deleted from the device to free up {formattedSize}}}",
+  "filesBackedUpInAlbum": "{count, plural, one {1 file} other {{formattedNumber} files}} in this album has been backed up safely",
+  "@filesBackedUpInAlbum": {
+    "description": "Text to tell user how many files have been backed up in the album",
+    "placeholders": {
+      "count" :{
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "filesBackedUpFromDevice": "{count, plural, one {1 file} other {{formattedNumber} files}} on this device have been backed up safely",
+  "@filesBackedUpFromDevice": {
+    "description": "Text to tell user how many files have been backed up from this device",
+    "placeholders": {
+      "count" :{
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "You can still access {count, plural, one {it} other {them}} on ente as long as you have an active subscription",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count" :{
+        "example": "1",
+        "type": "int"
+      }
+    }
+  },
+  "freeUpAmount": "Free up {sizeInMBorGB}"
 }
