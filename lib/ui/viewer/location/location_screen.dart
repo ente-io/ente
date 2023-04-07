@@ -151,11 +151,6 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       final stopWatch = Stopwatch()..start();
       final copyOfFiles = List<File>.from(result.files);
       copyOfFiles.removeWhere((f) {
-        assert(
-          f.location != null &&
-              f.location!.latitude != null &&
-              f.location!.longitude != null,
-        );
         return !LocationService.instance.isFileInsideLocationTag(
           centerPoint,
           f.location!,
