@@ -237,7 +237,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
 
   Future<void> _editLocation() async {
     final locationTagState = InheritedLocationTagData.of(context);
-    LocationService.instance.updateLocationTag(
+    await LocationService.instance.updateLocationTag(
       locationTagEntity: locationTagState.locationTagEntity!,
       newRadius: radiusValues[locationTagState.selectedRadiusIndex],
       newName: _textEditingController.text.trim(),

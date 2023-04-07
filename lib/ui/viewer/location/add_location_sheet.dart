@@ -234,6 +234,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
       coordinates,
       radius,
     );
+    Navigator.pop(context);
   }
 
   void _focusNodeListener() {
