@@ -1,1 +1,6 @@
-{}
+{
+  "confirmPassword": "Confirmer le mot de passe",
+  "recoverButton": "Récupérer",
+  "forgotPassword": "Mot de passe oublié",
+  "verifyEmail": "Vérifier l'email"
+}
