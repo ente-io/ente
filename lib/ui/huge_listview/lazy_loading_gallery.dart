@@ -200,42 +200,44 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                 _files[0].creationTime!,
                 widget.photoGirdSize,
               ),
-            ValueListenableBuilder(
-              valueListenable: _showSelectAllButton,
-              builder: (context, dynamic value, _) {
-                return !value
-                    ? const SizedBox.shrink()
-                    : GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        child: SizedBox(
-                          width: 48,
-                          height: 44,
-                          child: ValueListenableBuilder(
-                            valueListenable: _areAllFromDaySelected,
-                            builder: (context, dynamic value, _) {
-                              return value
-                                  ? const Icon(
-                                      Icons.check_circle,
-                                      size: 18,
-                                    )
-                                  : Icon(
-                                      Icons.check_circle_outlined,
-                                      color: getEnteColorScheme(context)
-                                          .strokeMuted,
-                                      size: 18,
-                                    );
-                            },
-                          ),
-                        ),
-                        onTap: () {
-                          //this value has no significance
-                          //changing only to notify the listeners
-                          _toggleSelectAllFromDay.value =
-                              !_toggleSelectAllFromDay.value;
-                        },
-                      );
-              },
-            )
+            widget.limitSelectionToOne
+                ? const SizedBox.shrink()
+                : ValueListenableBuilder(
+                    valueListenable: _showSelectAllButton,
+                    builder: (context, dynamic value, _) {
+                      return !value
+                          ? const SizedBox.shrink()
+                          : GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              child: SizedBox(
+                                width: 48,
+                                height: 44,
+                                child: ValueListenableBuilder(
+                                  valueListenable: _areAllFromDaySelected,
+                                  builder: (context, dynamic value, _) {
+                                    return value
+                                        ? const Icon(
+                                            Icons.check_circle,
+                                            size: 18,
+                                          )
+                                        : Icon(
+                                            Icons.check_circle_outlined,
+                                            color: getEnteColorScheme(context)
+                                                .strokeMuted,
+                                            size: 18,
+                                          );
+                                  },
+                                ),
+                              ),
+                              onTap: () {
+                                //this value has no significance
+                                //changing only to notify the listeners
+                                _toggleSelectAllFromDay.value =
+                                    !_toggleSelectAllFromDay.value;
+                              },
+                            );
+                    },
+                  )
           ],
         ),
         _shouldRender!
