@@ -906,5 +906,15 @@
   "remoteVideos": "Remote videos",
   "remoteThumbnails": "Remote thumbnails",
   "pendingSync": "Pending sync",
-  "localGallery": "Local gallery"
+  "localGallery": "Local gallery",
+  "todaysLogs": "Today's logs",
+  "viewLogs": "View logs",
+  "logsDialogBody": "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.",
+  "preparingLogs": "Preparing logs...",
+  "emailYourLogs": "Email your logs",
+  "pleaseSendTheLogsTo": "Please send the logs to \n{toEmail}",
+  "copyEmailAddress": "Copy email address",
+  "exportLogs": "Export logs",
+  "pleaseEmailUsAt": "Please email us at {toEmail}",
+  "dismiss": "Dismiss"
 }

@@ -6371,6 +6371,106 @@ class S {
       args: [],
     );
   }
+
+  /// `Today's logs`
+  String get todaysLogs {
+    return Intl.message(
+      'Today\'s logs',
+      name: 'todaysLogs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View logs`
+  String get viewLogs {
+    return Intl.message(
+      'View logs',
+      name: 'viewLogs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.`
+  String get logsDialogBody {
+    return Intl.message(
+      'This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.',
+      name: 'logsDialogBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preparing logs...`
+  String get preparingLogs {
+    return Intl.message(
+      'Preparing logs...',
+      name: 'preparingLogs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email your logs`
+  String get emailYourLogs {
+    return Intl.message(
+      'Email your logs',
+      name: 'emailYourLogs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please send the logs to \n{toEmail}`
+  String pleaseSendTheLogsTo(Object toEmail) {
+    return Intl.message(
+      'Please send the logs to \n$toEmail',
+      name: 'pleaseSendTheLogsTo',
+      desc: '',
+      args: [toEmail],
+    );
+  }
+
+  /// `Copy email address`
+  String get copyEmailAddress {
+    return Intl.message(
+      'Copy email address',
+      name: 'copyEmailAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export logs`
+  String get exportLogs {
+    return Intl.message(
+      'Export logs',
+      name: 'exportLogs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please email us at {toEmail}`
+  String pleaseEmailUsAt(Object toEmail) {
+    return Intl.message(
+      'Please email us at $toEmail',
+      name: 'pleaseEmailUsAt',
+      desc: '',
+      args: [toEmail],
+    );
+  }
+
+  /// `Dismiss`
+  String get dismiss {
+    return Intl.message(
+      'Dismiss',
+      name: 'dismiss',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
