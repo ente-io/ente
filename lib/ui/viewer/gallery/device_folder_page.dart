@@ -7,6 +7,7 @@ import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -112,7 +113,8 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               MenuItemWidget(
-                captionedTextWidget: const CaptionedTextWidget(title: "Backup"),
+                captionedTextWidget:
+                    CaptionedTextWidget(title: S.of(context).backup),
                 singleBorderRadius: 8.0,
                 menuItemColor: colorScheme.fillFaint,
                 alignCaptionedTextToLeft: true,
@@ -142,8 +144,8 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                 builder: (BuildContext context, bool value, _) {
                   return MenuSectionDescriptionWidget(
                     content: value
-                        ? "Files added to this device album will automatically get uploaded to ente."
-                        : "Turn on backup to automatically upload files added to this device folder to ente.",
+                        ? S.of(context).deviceFilesAutoUploading
+                        : S.of(context).turnOnBackupForAutoUpload,
                   );
                 },
               ),
@@ -232,8 +234,8 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
       children: [
         const SizedBox(height: 24),
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset ignored files",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).resetIgnoredFiles,
           ),
           singleBorderRadius: 8.0,
           menuItemColor: getEnteColorScheme(context).fillFaint,
@@ -248,9 +250,8 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
             });
           },
         ),
-        const MenuSectionDescriptionWidget(
-          content:
-              "Some files in this album are ignored from upload because they had previously been deleted from ente.",
+        MenuSectionDescriptionWidget(
+          content: S.of(context).ignoredFolderUploadReason,
         ),
       ],
     );

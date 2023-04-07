@@ -7,6 +7,7 @@ import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/events/tab_changed_event.dart";
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
@@ -101,9 +102,9 @@ class CollectionsListWidget extends StatelessWidget {
     if (filesCount > 0) {
       final result = await showTextInputDialog(
         context,
-        title: "Album title",
-        submitButtonLabel: "OK",
-        hintText: "Enter album name",
+        title: S.of(context).albumTitle,
+        submitButtonLabel: S.of(context).ok,
+        hintText: S.of(context).enterAlbumName,
         onSubmit: (name) {
           return _nameAlbum(context, name);
         },
@@ -123,7 +124,7 @@ class CollectionsListWidget extends StatelessWidget {
       Navigator.pop(context);
       await showToast(
         context,
-        "Long press to select photos and click + to create an album",
+        S.of(context).createAlbumActionHint,
         toastLength: Toast.LENGTH_LONG,
       );
       Bus.instance.fire(
@@ -180,12 +181,12 @@ class CollectionsListWidget extends StatelessWidget {
       late final String toastMessage;
       bool shouldNavigateToCollection = false;
       if (actionType == CollectionActionType.addFiles) {
-        toastMessage = "Added successfully to " + item.collection.name!;
+        toastMessage = S.of(context).addedSuccessfullyTo(item.collection.name!);
         shouldNavigateToCollection = true;
       } else if (actionType == CollectionActionType.moveFiles ||
           actionType == CollectionActionType.restoreFiles ||
           actionType == CollectionActionType.unHide) {
-        toastMessage = "Moved successfully to " + item.collection.name!;
+        toastMessage = S.of(context).movedSuccessfullyTo(item.collection.name!);
         shouldNavigateToCollection = true;
       } else {
         toastMessage = "";
@@ -257,7 +258,8 @@ class CollectionsListWidget extends StatelessWidget {
             ),
           );
         }
-        showToast(context, "This album already has a collaborative link");
+        showShortToast(
+            context, S.of(context).thisAlbumAlreadyHDACollaborativeLink);
         return Future.value(false);
       } else {
         try {
@@ -269,9 +271,9 @@ class CollectionsListWidget extends StatelessWidget {
           );
           CollectionsService.instance
               .updateShareUrl(collection, {'enableCollect': true}).then(
-            (value) => showToast(
+            (value) => showShortToast(
               context,
-              "Collaborative link created for " + collection.name!,
+              S.of(context).collaborativeLinkCreatedFor(collection.name!),
             ),
           );
           return true;
@@ -287,9 +289,9 @@ class CollectionsListWidget extends StatelessWidget {
       enableCollect: true,
     );
     if (result) {
-      showToast(
+      showShortToast(
         context,
-        "Collaborative link created for " + collection.name!,
+        S.of(context).collaborativeLinkCreatedFor(collection.name!),
       );
       if (Configuration.instance.getUserID() == collection.owner!.id) {
         unawaited(
@@ -332,8 +334,7 @@ class CollectionsListWidget extends StatelessWidget {
     final dialog = showProgressDialog
         ? createProgressDialog(
             context,
-            "Uploading files to album"
-            "...",
+            S.of(context).uploadingFilesToAlbum,
             isDismissible: true,
           )
         : null;
@@ -379,7 +380,7 @@ class CollectionsListWidget extends StatelessWidget {
         final Collection? c =
             CollectionsService.instance.getCollectionByID(collectionID);
         if (c != null && c.owner!.id != currentUserID) {
-          showToast(context, "Can not upload to albums owned by others");
+          showToast(context, S.of(context).canNotUploadToAlbumsOwnedByOthers);
           await dialog?.hide();
           return false;
         } else {
@@ -410,8 +411,8 @@ class CollectionsListWidget extends StatelessWidget {
     int toCollectionID,
   ) async {
     final String message = actionType == CollectionActionType.moveFiles
-        ? "Moving files to album..."
-        : "Unhiding files to album";
+        ? S.of(context).movingFilesToAlbum
+        : S.of(context).unhidingFilesToAlbum;
     final dialog = createProgressDialog(context, message, isDismissible: true);
     await dialog.show();
     try {
@@ -428,7 +429,7 @@ class CollectionsListWidget extends StatelessWidget {
       return true;
     } on AssertionError catch (e) {
       await dialog.hide();
-      showErrorDialog(context, "Oops", e.message as String?);
+      showErrorDialog(context, S.of(context).oops, e.message as String?);
       return false;
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);
@@ -444,7 +445,7 @@ class CollectionsListWidget extends StatelessWidget {
   ) async {
     final dialog = createProgressDialog(
       context,
-      "Restoring files...",
+      S.of(context).restoringFiles,
       isDismissible: true,
     );
     await dialog.show();
@@ -457,7 +458,7 @@ class CollectionsListWidget extends StatelessWidget {
       return true;
     } on AssertionError catch (e) {
       await dialog.hide();
-      showErrorDialog(context, "Oops", e.message as String?);
+      showErrorDialog(context, S.of(context).oops, e.message as String?);
       return false;
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);

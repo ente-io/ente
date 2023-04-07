@@ -12,6 +12,7 @@ import 'package:photos/core/network/network.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
@@ -70,7 +71,7 @@ class UserService {
     bool isChangeEmail = false,
     bool isCreateAccountScreen = false,
   }) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.post(
@@ -102,8 +103,8 @@ class UserService {
         unawaited(
           showErrorDialog(
             context,
-            "Oops",
-            "This email is already in use",
+            S.of(context).oops,
+            S.of(context).thisEmailIsAlreadyInUse,
           ),
         );
       } else {
@@ -282,7 +283,7 @@ class UserService {
   }
 
   Future<void> verifyEmail(BuildContext context, String ott) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.post(
@@ -325,21 +326,22 @@ class UserService {
       if (e.response != null && e.response!.statusCode == 410) {
         await showErrorDialog(
           context,
-          "Oops",
-          "Your verification code has expired",
+          S.of(context).oops,
+          S.of(context).yourVerificationCodeHasExpired,
         );
         Navigator.of(context).pop();
       } else {
         showErrorDialog(
           context,
-          "Incorrect code",
-          "Sorry, the code you've entered is incorrect",
+          S.of(context).incorrectCode,
+          S.of(context).sorryTheCodeYouveEnteredIsIncorrect,
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showErrorDialog(context, "Oops", "Verification failed, please try again");
+      showErrorDialog(context, S.of(context).oops,
+          S.of(context).verificationFailedPleaseTryAgain);
     }
   }
 
@@ -353,7 +355,7 @@ class UserService {
     String email,
     String ott,
   ) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
       final response = await _enteDio.post(
@@ -365,28 +367,31 @@ class UserService {
       );
       await dialog.hide();
       if (response.statusCode == 200) {
-        showShortToast(context, "Email changed to " + email);
+        showShortToast(context, S.of(context).emailChangedTo(email));
         await setEmail(email);
         Navigator.of(context).popUntil((route) => route.isFirst);
         Bus.instance.fire(UserDetailsChangedEvent());
         return;
       }
-      showErrorDialog(context, "Oops", "Verification failed, please try again");
+      showErrorDialog(context, S.of(context).oops,
+          S.of(context).verificationFailedPleaseTryAgain);
     } on DioError catch (e) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 403) {
-        showErrorDialog(context, "Oops", "This email is already in use");
+        showErrorDialog(
+            context, S.of(context).oops, S.of(context).thisEmailIsAlreadyInUse);
       } else {
         showErrorDialog(
           context,
-          "Incorrect code",
-          "Authentication failed, please try again",
+          S.of(context).incorrectCode,
+          S.of(context).authenticationFailedPleaseTryAgain,
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showErrorDialog(context, "Oops", "Verification failed, please try again");
+      showErrorDialog(context, S.of(context).oops,
+          S.of(context).verificationFailedPleaseTryAgain);
     }
   }
 
@@ -453,7 +458,7 @@ class UserService {
     String sessionID,
     String code,
   ) async {
-    final dialog = createProgressDialog(context, "Authenticating...");
+    final dialog = createProgressDialog(context, S.of(context).authenticating);
     await dialog.show();
     try {
       final response = await _dio.post(
@@ -465,7 +470,7 @@ class UserService {
       );
       await dialog.hide();
       if (response.statusCode == 200) {
-        showShortToast(context, "Authentication successful!");
+        showShortToast(context, S.of(context).authenticationSuccessful);
         await _saveConfiguration(response);
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
@@ -492,8 +497,8 @@ class UserService {
       } else {
         showErrorDialog(
           context,
-          "Incorrect code",
-          "Authentication failed, please try again",
+          S.of(context).incorrectCode,
+          S.of(context).authenticationFailedPleaseTryAgain,
         );
       }
     } catch (e) {
@@ -501,14 +506,14 @@ class UserService {
       _logger.severe(e);
       showErrorDialog(
         context,
-        "Oops",
-        "Authentication failed, please try again",
+        S.of(context).oops,
+        S.of(context).authenticationFailedPleaseTryAgain,
       );
     }
   }
 
   Future<void> recoverTwoFactor(BuildContext context, String sessionID) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.get(
@@ -534,7 +539,7 @@ class UserService {
     } on DioError catch (e) {
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
-        showToast(context, "Session expired");
+        showToast(context, S.of(context).sessionExpired);
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -546,16 +551,16 @@ class UserService {
       } else {
         showErrorDialog(
           context,
-          "Oops",
-          "Something went wrong, please try again",
+          S.of(context).oops,
+          S.of(context).somethingWentWrongPleaseTryAgain,
         );
       }
     } catch (e) {
       _logger.severe(e);
       showErrorDialog(
         context,
-        "Oops",
-        "Something went wrong, please try again",
+        S.of(context).oops,
+        S.of(context).somethingWentWrongPleaseTryAgain,
       );
     } finally {
       await dialog.hide();
@@ -569,7 +574,7 @@ class UserService {
     String encryptedSecret,
     String secretDecryptionNonce,
   ) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     String secret;
     try {
@@ -592,8 +597,8 @@ class UserService {
       await dialog.hide();
       await showErrorDialog(
         context,
-        "Incorrect recovery key",
-        "The recovery key you entered is incorrect",
+        S.of(context).incorrectRecoveryKey,
+        S.of(context).theRecoveryKeyYouEnteredIsIncorrect,
       );
       return;
     }
@@ -606,7 +611,8 @@ class UserService {
         },
       );
       if (response.statusCode == 200) {
-        showShortToast(context, "Two-factor authentication successfully reset");
+        showShortToast(
+            context, S.of(context).twofactorAuthenticationSuccessfullyReset);
         await _saveConfiguration(response);
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
@@ -632,16 +638,16 @@ class UserService {
       } else {
         showErrorDialog(
           context,
-          "Oops",
-          "Something went wrong, please try again",
+          S.of(context).oops,
+          S.of(context).somethingWentWrongPleaseTryAgain,
         );
       }
     } catch (e) {
       _logger.severe(e);
       showErrorDialog(
         context,
-        "Oops",
-        "Something went wrong, please try again",
+        S.of(context).oops,
+        S.of(context).somethingWentWrongPleaseTryAgain,
       );
     } finally {
       await dialog.hide();
@@ -649,7 +655,7 @@ class UserService {
   }
 
   Future<void> setupTwoFactor(BuildContext context, Completer completer) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
       final response = await _enteDio.post("/users/two-factor/setup");
@@ -684,7 +690,7 @@ class UserService {
       showGenericErrorDialog(context: context);
       return false;
     }
-    final dialog = createProgressDialog(context, "Verifying...");
+    final dialog = createProgressDialog(context, S.of(context).verifying);
     await dialog.show();
     final encryptionResult =
         CryptoUtil.encryptSync(CryptoUtil.base642bin(secret), recoveryKey);
@@ -710,24 +716,24 @@ class UserService {
         if (e.response != null && e.response!.statusCode == 401) {
           showErrorDialog(
             context,
-            "Incorrect code",
-            "Please verify the code you have entered",
+            S.of(context).incorrectCode,
+            S.of(context).pleaseVerifyTheCodeYouHaveEntered,
           );
           return false;
         }
       }
       showErrorDialog(
         context,
-        "Something went wrong",
-        "Please contact support if the problem persists",
+        S.of(context).somethingWentWrong,
+        S.of(context).pleaseContactSupportIfTheProblemPersists,
       );
     }
     return false;
   }
 
   Future<void> disableTwoFactor(BuildContext context) async {
-    final dialog =
-        createProgressDialog(context, "Disabling two-factor authentication...");
+    final dialog = createProgressDialog(
+        context, S.of(context).disablingTwofactorAuthentication);
     await dialog.show();
     try {
       await _enteDio.post(
@@ -738,7 +744,7 @@ class UserService {
       unawaited(
         showShortToast(
           context,
-          "Two-factor authentication has been disabled",
+          S.of(context).twofactorAuthenticationHasBeenDisabled,
         ),
       );
     } catch (e) {
@@ -746,8 +752,8 @@ class UserService {
       _logger.severe("Failed to disabled 2FA", e);
       await showErrorDialog(
         context,
-        "Something went wrong",
-        "Please contact support if the problem persists",
+        S.of(context).somethingWentWrong,
+        S.of(context).pleaseContactSupportIfTheProblemPersists,
       );
     }
   }
@@ -767,7 +773,7 @@ class UserService {
     final String? encryptedRecoveryKey =
         _config.getKeyAttributes()!.recoveryKeyEncryptedWithMasterKey;
     if (encryptedRecoveryKey == null || encryptedRecoveryKey.isEmpty) {
-      final dialog = createProgressDialog(context, "Please wait...");
+      final dialog = createProgressDialog(context, S.of(context).pleaseWait);
       await dialog.show();
       try {
         final keyAttributes = await _config.createNewRecoveryKey();

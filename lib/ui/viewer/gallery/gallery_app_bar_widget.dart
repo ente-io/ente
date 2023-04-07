@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
@@ -112,9 +113,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
     final result = await showTextInputDialog(
       context,
-      title: "Rename album",
-      submitButtonLabel: "Rename",
-      hintText: "Enter album name",
+      title: S.of(context).renameAlbum,
+      submitButtonLabel: S.of(context).rename,
+      hintText: S.of(context).enterAlbumName,
       alwaysShowSuccessState: true,
       textCapitalization: TextCapitalization.words,
       onSubmit: (String text) async {
@@ -150,21 +151,21 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
-          labelText: "Leave album",
+          labelText: S.of(context).leaveAlbum,
           onTap: () async {
             await CollectionsService.instance.leaveAlbum(widget.collection!);
           },
         ),
-        const ButtonWidget(
+        ButtonWidget(
           buttonType: ButtonType.secondary,
           buttonAction: ButtonAction.cancel,
           isInAlert: true,
           shouldStickToDarkTheme: true,
-          labelText: "Cancel",
+          labelText: S.of(context).cancel,
         )
       ],
-      title: "Leave shared album?",
-      body: "Photos added by you will be removed from the album",
+      title: S.of(context).leaveSharedAlbum,
+      body: S.of(context).photosAddedByYouWillBeRemovedFromTheAlbum,
     );
     if (actionResult?.action != null && mounted) {
       if (actionResult!.action == ButtonAction.error) {
@@ -180,7 +181,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   // the space which can be claimed up. This code duplication should be removed
   // whenever we move to the new design for free up space.
   Future<dynamic> _deleteBackedUpFiles(BuildContext context) async {
-    final dialog = createProgressDialog(context, "Calculating...");
+    final dialog = createProgressDialog(context, S.of(context).calculating);
     await dialog.show();
     BackupStatus status;
     try {
@@ -196,8 +197,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (status.localIDs.isEmpty) {
       showErrorDialog(
         context,
-        "✨ All clear",
-        "You've no files in this album that can be deleted",
+        S.of(context).allClear,
+        S.of(context).youveNoFilesInThisAlbumThatCanBeDeleted,
       );
     } else {
       final bool? result = await routeToPage(
@@ -212,19 +213,19 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   void _showSpaceFreedDialog(BackupStatus status) {
     final DialogWidget dialog = choiceDialog(
-      title: "Success",
-      body: "You have successfully freed up " + formatBytes(status.size) + "!",
-      firstButtonLabel: "Rate us",
+      title: S.of(context).success,
+      body: S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
+      firstButtonLabel: S.of(context).rateUs,
       firstButtonOnTap: () async {
         UpdateService.instance.launchReviewUrl();
       },
       firstButtonType: ButtonType.primary,
-      secondButtonLabel: "OK",
+      secondButtonLabel: S.of(context).ok,
       secondButtonOnTap: () async {
         if (Platform.isIOS) {
           showToast(
             context,
-            "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
+            S.of(context).remindToEmptyDeviceTrash,
           );
         }
       },
@@ -267,12 +268,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           PopupMenuItem(
             value: 1,
             child: Row(
-              children: const [
-                Icon(Icons.edit),
-                Padding(
+              children: [
+                const Icon(Icons.edit),
+                const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text("Rename album"),
+                Text(S.of(context).renameAlbum),
               ],
             ),
           ),
@@ -291,7 +292,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(isArchived ? "Unarchive album" : "Archive album"),
+                Text(isArchived
+                    ? S.of(context).unarchiveAlbum
+                    : S.of(context).archiveAlbum),
               ],
             ),
           ),
@@ -302,12 +305,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           PopupMenuItem(
             value: 3,
             child: Row(
-              children: const [
-                Icon(Icons.delete_outline),
-                Padding(
+              children: [
+                const Icon(Icons.delete_outline),
+                const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text("Delete album"),
+                Text(S.of(context).deleteAlbum),
               ],
             ),
           ),
@@ -320,12 +323,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         PopupMenuItem(
           value: 4,
           child: Row(
-            children: const [
-              Icon(Icons.logout),
-              Padding(
+            children: [
+              const Icon(Icons.logout),
+              const Padding(
                 padding: EdgeInsets.all(8),
               ),
-              Text("Leave album"),
+              Text(S.of(context).leaveAlbum),
             ],
           ),
         ),
@@ -336,12 +339,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         PopupMenuItem(
           value: 5,
           child: Row(
-            children: const [
-              Icon(Icons.delete_sweep_outlined),
-              Padding(
+            children: [
+              const Icon(Icons.delete_sweep_outlined),
+              const Padding(
                 padding: EdgeInsets.all(8),
               ),
-              Text("Free up device space"),
+              Text(S.of(context).freeUpDeviceSpace),
             ],
           ),
         ),
@@ -371,7 +374,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             } else if (value == 5) {
               await _deleteBackedUpFiles(context);
             } else {
-              showToast(context, "Something went wrong");
+              showToast(context, S.of(context).somethingWentWrong);
             }
           },
         ),
@@ -393,7 +396,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (isEmptyCollection) {
       final dialog = createProgressDialog(
         context,
-        "Please wait, deleting album",
+        S.of(context).pleaseWaitDeletingAlbum,
       );
       await dialog.show();
       try {

@@ -11,6 +11,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -157,7 +158,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         child: Column(
           children: [
             const SizedBox(height: 12),
-            const SectionTitle(title: "Shared with me"),
+            SectionTitle(title: S.of(context).sharedWithMe),
             const SizedBox(height: 12),
             collections.incoming.isNotEmpty
                 ? Padding(
@@ -182,7 +183,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   )
                 : _getIncomingCollectionEmptyState(),
             const SizedBox(height: 16),
-            const SectionTitle(title: "Shared by me"),
+            SectionTitle(title: S.of(context).sharedByMe),
             const SizedBox(height: 12),
             collections.outgoing.isNotEmpty
                 ? ListView.builder(
@@ -211,7 +212,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "Ask your loved ones to share",
+            S.of(context).askYourLovedOnesToShare,
             style: Theme.of(context).textTheme.caption,
           ),
           const Padding(padding: EdgeInsets.only(top: 14)),
@@ -220,10 +221,10 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             height: 50,
             child: GradientButton(
               onTap: () async {
-                shareText("Check out https://ente.io");
+                shareText(S.of(context).shareTextRecommendUsingEnte);
               },
               iconData: Icons.outgoing_mail,
-              text: "Invite",
+              text: S.of(context).invite,
             ),
           ),
           const SizedBox(height: 60),
@@ -239,7 +240,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "Share your first album",
+            S.of(context).shareYourFirstAlbum,
             style: Theme.of(context).textTheme.caption,
           ),
           const Padding(padding: EdgeInsets.only(top: 14)),
@@ -250,7 +251,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
               onTap: () async {
                 await showToast(
                   context,
-                  "Open an album and tap the share button on the top right to share.",
+                  S.of(context).shareAlbumHint,
                   toastLength: Toast.LENGTH_LONG,
                 );
                 Bus.instance.fire(
@@ -258,7 +259,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 );
               },
               iconData: Icons.person_add,
-              text: "Share",
+              text: S.of(context).share,
             ),
           ),
           const SizedBox(height: 60),
@@ -363,7 +364,7 @@ class OutgoingCollectionItem extends StatelessWidget {
                       : Padding(
                           padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                           child: Text(
-                            "Shared with " + shareesName.join(", "),
+                            S.of(context).sharedWith(shareesName.join(", ")),
                             style: TextStyle(
                               fontSize: 14,
                               color: Theme.of(context).primaryColorLight,

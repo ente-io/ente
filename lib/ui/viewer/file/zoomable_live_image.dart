@@ -4,6 +4,7 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/viewer/file/zoomable_image.dart';
 import 'package:photos/utils/file_util.dart';
@@ -119,7 +120,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     }
     _isLoadingVideoPlayer = true;
     if (_file.isRemoteFile && !(await isFileCached(_file, liveVideo: true))) {
-      showShortToast(context, "Downloading...");
+      showShortToast(context, S.of(context).downloading);
     }
 
     io.File? videoFile = await getFile(widget.file, liveVideo: true)
@@ -145,7 +146,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     if (videoFile != null && videoFile.existsSync()) {
       _setVideoPlayerController(file: videoFile);
     } else {
-      showShortToast(context, "Download failed");
+      showShortToast(context, S.of(context).downloadFailed);
     }
     _isLoadingVideoPlayer = false;
   }
@@ -166,7 +167,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     final preferences = await SharedPreferences.getInstance();
     final int promptTillNow = preferences.getInt(livePhotoToastCounterKey) ?? 0;
     if (promptTillNow < maxLivePhotoToastCount && mounted) {
-      showToast(context, "Press and hold to play video");
+      showToast(context, S.of(context).pressAndHoldToPlayVideo);
       preferences.setInt(livePhotoToastCounterKey, promptTillNow + 1);
     }
   }

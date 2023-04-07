@@ -51,7 +51,7 @@ extension CollectionFileActions on CollectionActions {
           isInAlert: true,
         ),
       ],
-      title: removingOthersFile ? S.of(bContext).removeFromAlbum : null,
+      title: removingOthersFile ? S.of(bContext).removeFromAlbumTitle : null,
       body: removingOthersFile
           ? S.of(bContext).removeShareItemsWarning
           : S.of(bContext).itemsWillBeRemovedFromAlbum,

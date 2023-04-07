@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
@@ -24,7 +25,7 @@ class EmptyHiddenWidget extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              "No hidden photos or videos",
+              S.of(context).noHiddenPhotosOrVideos,
               textAlign: TextAlign.center,
               style: enteTextTheme.body.copyWith(
                 color: enteColorScheme.textMuted,
@@ -34,24 +35,24 @@ class EmptyHiddenWidget extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const EmptyHiddenTextWidget("To hide a photo or video"),
+                EmptyHiddenTextWidget(S.of(context).toHideAPhotoOrVideo),
                 const SizedBox(height: 4),
                 Padding(
                   padding: const EdgeInsets.only(left: 6),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const EmptyHiddenTextWidget("• Open the item"),
+                      EmptyHiddenTextWidget(S.of(context).openTheItem),
                       const SizedBox(height: 2),
-                      const EmptyHiddenTextWidget(
-                        "• Click on the overflow menu",
+                      EmptyHiddenTextWidget(
+                        S.of(context).clickOnTheOverflowMenu,
                       ),
                       const SizedBox(height: 2),
                       SizedBox(
                         width: 120,
                         child: Row(
                           children: [
-                            const EmptyHiddenTextWidget("• Click "),
+                            EmptyHiddenTextWidget(S.of(context).click),
                             const SizedBox(width: 4),
                             Icon(
                               Icons.visibility_off,
@@ -62,7 +63,7 @@ class EmptyHiddenWidget extends StatelessWidget {
                               padding: EdgeInsets.all(4),
                             ),
                             Text(
-                              "Hide",
+                              S.of(context).hide,
                               style: TextStyle(
                                 color: enteColorScheme.textBase,
                               ),

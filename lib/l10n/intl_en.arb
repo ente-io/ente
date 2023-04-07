@@ -327,7 +327,8 @@
   "freeStorageClaimed": "Free storage claimed",
   "freeStorageUsable": "Free storage usable",
   "usableReferralStorageInfo": "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan.",
-  "removeFromAlbum": "Remove from album?",
+  "removeFromAlbumTitle": "Remove from album?",
+  "removeFromAlbum": "Remove from album",
   "itemsWillBeRemovedFromAlbum": "Selected items will be removed from this album",
   "removeShareItemsWarning": "Some of the items you are removing were added by other people, and you will lose access to them",
   "addingToFavorites": "Adding to favorites...",
@@ -537,7 +538,7 @@
   "support": "Support",
   "theme": "Theme",
   "lightTheme": "Light",
-  "darkTheme" : "Dark",
+  "darkTheme": "Dark",
   "systemTheme": "System",
   "freeTrial": "Free trial",
   "selectYourPlan": "Select your plan",
@@ -574,10 +575,10 @@
     "type": "text"
   },
   "yearly": "Yearly",
-    "@yearly": {
-        "description": "The text to display for yearly plans",
-        "type": "text"
-    },
+  "@yearly": {
+    "description": "The text to display for yearly plans",
+    "type": "text"
+  },
   "confirmPlanChange": "Confirm plan change",
   "areYouSureYouWantToChangeYourPlan": "Are you sure you want to change your plan?",
   "youCannotDowngradeToThisPlan": "You cannot downgrade to this plan",
@@ -609,7 +610,7 @@
   "couldNotUpdateSubscription": "Could not update subscription",
   "pleaseContactSupportAndWeWillBeHappyToHelp": "Please contact support@ente.io and we will be happy to help!",
   "paymentFailed": "Payment failed",
-  "paymentFailedTalkToProvider" : "Please talk to {providerName} support if you were charged",
+  "paymentFailedTalkToProvider": "Please talk to {providerName} support if you were charged",
   "@paymentFailedTalkToProvider": {
     "description": "The text to display when the payment failed",
     "type": "text",
@@ -676,5 +677,188 @@
   "loggingOut": "Logging out...",
   "name": "Name",
   "newest": "Newest",
-  "lastUpdated": "Last updated"
+  "lastUpdated": "Last updated",
+  "deleteEmptyAlbums": "Delete empty albums",
+  "deleteEmptyAlbumsWithQuestionMark": "Delete empty albums?",
+  "deleteAlbumsDialogBody": "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.",
+  "deleteProgress": "Deleting {currentlyDeleting} / {totalCount}",
+  "permanentlyDelete": "Permanently delete",
+  "canOnlyCreateLinkForFilesOwnedByYou": "Can only create link for files owned by you",
+  "publicLinkCreated": "Public link created",
+  "youCanManageYourLinksInTheShareTab": "You can manage your links in the share tab.",
+  "linkCopiedToClipboard": "Link copied to clipboard",
+  "restore": "Restore",
+  "@restore": {
+    "description": "Display text for an action which triggers a restore of item from trash",
+    "type": "text"
+  },
+  "moveToAlbum": "Move to album",
+  "unhide": "Unhide",
+  "unarchive": "Unarchive",
+  "favorite": "Favorite",
+  "removeFromFavorite": "Remove from favorite",
+  "shareLink": "Share link",
+  "addToEnte": "Add to ente",
+  "addToAlbum": "Add to album",
+  "delete": "Delete",
+  "hide": "Hide",
+  "itemSelectedCount": "{count} selected",
+  "@itemSelectedCount": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
+  "share": "Share",
+  "unhideToAlbum": "Unhide to album",
+  "restoreToAlbum": "Restore to album",
+  "moveItem": "{count, plural, one {Move item} other {Move items}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, one {Add item} other {Add items}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
+  "createOrSelectAlbum": "Create or select album",
+  "selectAlbum": "Select album",
+  "searchByAlbumNameHint": "Album name",
+  "albumTitle": "Album title",
+  "enterAlbumName": "Enter album name",
+  "restoringFiles": "Restoring files...",
+  "movingFilesToAlbum": "Moving files to album...",
+  "unhidingFilesToAlbum": "Unhiding files to album",
+  "canNotUploadToAlbumsOwnedByOthers": "Can not upload to albums owned by others",
+  "uploadingFilesToAlbum": "Uploading files to album...",
+  "addedSuccessfullyTo": "Added successfully to  {albumName}",
+  "movedSuccessfullyTo": "Moved successfully to {albumName}",
+  "thisAlbumAlreadyHDACollaborativeLink": "This album already has a collaborative link",
+  "collaborativeLinkCreatedFor": "Collaborative link created for {albumName}",
+  "askYourLovedOnesToShare": "Ask your loved ones to share",
+  "invite": "Invite",
+  "shareYourFirstAlbum": "Share your first album",
+  "sharedWith": "Shared with {emailIDs}",
+  "sharedWithMe": "Shared with me",
+  "sharedByMe": "Shared by me",
+  "doubleYourStorage": "Double your storage",
+  "referFriendsAnd2xYourPlan": "Refer friends and 2x your plan",
+  "shareAlbumHint": "Open an album and tap the share button on the top right to share.",
+  "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Items show the number of days remaining before permanent deletion",
+  "deleteAll": "Delete All",
+  "renameAlbum": "Rename album",
+  "rename": "Rename",
+  "leaveSharedAlbum": "Leave shared album?",
+  "leaveAlbum": "Leave album",
+  "photosAddedByYouWillBeRemovedFromTheAlbum": "Photos added by you will be removed from the album",
+  "youveNoFilesInThisAlbumThatCanBeDeleted": "You've no files in this album that can be deleted",
+  "youDontHaveAnyArchivedItems": "You don't have any archived items.",
+  "ignoredFolderUploadReason": "Some files in this album are ignored from upload because they had previously been deleted from ente.",
+  "resetIgnoredFiles": "Reset ignored files",
+  "deviceFilesAutoUploading": "Files added to this device album will automatically get uploaded to ente.",
+  "turnOnBackupForAutoUpload": "Turn on backup to automatically upload files added to this device folder to ente.",
+  "noHiddenPhotosOrVideos": "No hidden photos or videos",
+  "toHideAPhotoOrVideo": "To hide a photo or video",
+  "openTheItem": "• Open the item",
+  "clickOnTheOverflowMenu": "• Click on the overflow menu",
+  "click": "• Click",
+  "nothingToSeeHere": "Nothing to see here! 👀",
+  "unarchiveAlbum": "Unarchive album",
+  "archiveAlbum": "Archive album",
+  "calculating": "Calculating...",
+  "pleaseWaitDeletingAlbum": "Please wait, deleting album",
+  "searchHintText": "Albums, months, days, years, ...",
+  "searchByExamples": "\u2022 Album names (e.g. \"Camera\")\n\u2022 Types of files (e.g. \"Videos\", \".gif\")\n\u2022 Years and months (e.g. \"2022\", \"January\")\n\u2022 Holidays (e.g. \"Christmas\")\n\u2022 Photo descriptions (e.g. “#fun”)",
+  "youCanTrySearchingForADifferentQuery": "You can try searching for a different query.",
+  "noResultsFound": "No results found",
+  "addedBy": "Added by {emailOrName}",
+  "loadingExifData": "Loading EXIF data...",
+  "viewAllExifData": "View all EXIF data",
+  "noExifData": "No EXIF data",
+  "thisImageHasNoExifData": "This image has no exif data",
+  "exif": "EXIF",
+  "noResults": "No results",
+  "weDontSupportEditingPhotosAndAlbumsThatYouDont": "We don't support editing photos and albums that you don't own yet",
+  "failedToFetchOriginalForEdit": "Failed to fetch original for edit",
+  "close": "Close",
+  "setAs": "Set as",
+  "fileSavedToGallery": "File saved to gallery",
+  "download": "Download",
+  "pressAndHoldToPlayVideo": "Press and hold to play video",
+  "downloadFailed": "Download failed",
+  "deduplicateFiles": "Deduplicate Files",
+  "deselectAll": "Deselect all",
+  "reviewDeduplicateItems": "Please review and delete the items you believe are duplicates.",
+  "clubByCaptureTime": "Club by capture time",
+  "count": "Count",
+  "totalSize": "Total size",
+  "time": "Time",
+  "longpressOnAnItemToViewInFullscreen": "Long-press on an item to view in full-screen",
+  "decryptingVideo": "Decrypting video...",
+  "authToViewYourMemories": "Please authenticate to view your memories",
+  "unlock": "Unlock",
+  "freeUpSpace": "Free up space",
+  "freeUpSpaceSaving": "{count, plural, one {It can be deleted from the device to free up {formattedSize}} other {They can be deleted from the device to free up {formattedSize}}}",
+  "filesBackedUpInAlbum": "{count, plural, one {1 file} other {{formattedNumber} files}} in this album has been backed up safely",
+  "@filesBackedUpInAlbum": {
+    "description": "Text to tell user how many files have been backed up in the album",
+    "placeholders": {
+      "count" :{
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "filesBackedUpFromDevice": "{count, plural, one {1 file} other {{formattedNumber} files}} on this device have been backed up safely",
+  "@filesBackedUpFromDevice": {
+    "description": "Text to tell user how many files have been backed up from this device",
+    "placeholders": {
+      "count" :{
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "You can still access {count, plural, one {it} other {them}} on ente as long as you have an active subscription",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count" :{
+        "example": "1",
+        "type": "int"
+      }
+    }
+  },
+  "freeUpAmount": "Free up {sizeInMBorGB}",
+  "thisEmailIsAlreadyInUse": "This email is already in use",
+  "incorrectCode": "Incorrect code",
+  "authenticationFailedPleaseTryAgain": "Authentication failed, please try again",
+  "verificationFailedPleaseTryAgain": "Verification failed, please try again",
+  "authenticating": "Authenticating...",
+  "authenticationSuccessful": "Authentication successful!",
+  "incorrectRecoveryKey": "Incorrect recovery key",
+  "theRecoveryKeyYouEnteredIsIncorrect": "The recovery key you entered is incorrect",
+  "twofactorAuthenticationSuccessfullyReset": "Two-factor authentication successfully reset",
+  "pleaseVerifyTheCodeYouHaveEntered": "Please verify the code you have entered",
+  "pleaseContactSupportIfTheProblemPersists": "Please contact support if the problem persists",
+  "twofactorAuthenticationHasBeenDisabled": "Two-factor authentication has been disabled",
+  "sorryTheCodeYouveEnteredIsIncorrect": "Sorry, the code you've entered is incorrect",
+  "yourVerificationCodeHasExpired": "Your verification code has expired",
+  "emailChangedTo": "Email changed to {newEmail}",
+  "verifying": "Verifying...",
+  "disablingTwofactorAuthentication": "Disabling two-factor authentication..."
 }

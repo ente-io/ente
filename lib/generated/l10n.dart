@@ -2368,9 +2368,19 @@ class S {
   }
 
   /// `Remove from album?`
-  String get removeFromAlbum {
+  String get removeFromAlbumTitle {
     return Intl.message(
       'Remove from album?',
+      name: 'removeFromAlbumTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove from album`
+  String get removeFromAlbum {
+    return Intl.message(
+      'Remove from album',
       name: 'removeFromAlbum',
       desc: '',
       args: [],
@@ -4748,6 +4758,1265 @@ class S {
     return Intl.message(
       'Last updated',
       name: 'lastUpdated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete empty albums`
+  String get deleteEmptyAlbums {
+    return Intl.message(
+      'Delete empty albums',
+      name: 'deleteEmptyAlbums',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete empty albums?`
+  String get deleteEmptyAlbumsWithQuestionMark {
+    return Intl.message(
+      'Delete empty albums?',
+      name: 'deleteEmptyAlbumsWithQuestionMark',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.`
+  String get deleteAlbumsDialogBody {
+    return Intl.message(
+      'This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.',
+      name: 'deleteAlbumsDialogBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Deleting {currentlyDeleting} / {totalCount}`
+  String deleteProgress(Object currentlyDeleting, Object totalCount) {
+    return Intl.message(
+      'Deleting $currentlyDeleting / $totalCount',
+      name: 'deleteProgress',
+      desc: '',
+      args: [currentlyDeleting, totalCount],
+    );
+  }
+
+  /// `Permanently delete`
+  String get permanentlyDelete {
+    return Intl.message(
+      'Permanently delete',
+      name: 'permanentlyDelete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Can only create link for files owned by you`
+  String get canOnlyCreateLinkForFilesOwnedByYou {
+    return Intl.message(
+      'Can only create link for files owned by you',
+      name: 'canOnlyCreateLinkForFilesOwnedByYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Public link created`
+  String get publicLinkCreated {
+    return Intl.message(
+      'Public link created',
+      name: 'publicLinkCreated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can manage your links in the share tab.`
+  String get youCanManageYourLinksInTheShareTab {
+    return Intl.message(
+      'You can manage your links in the share tab.',
+      name: 'youCanManageYourLinksInTheShareTab',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link copied to clipboard`
+  String get linkCopiedToClipboard {
+    return Intl.message(
+      'Link copied to clipboard',
+      name: 'linkCopiedToClipboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore`
+  String get restore {
+    return Intl.message(
+      'Restore',
+      name: 'restore',
+      desc:
+          'Display text for an action which triggers a restore of item from trash',
+      args: [],
+    );
+  }
+
+  /// `Move to album`
+  String get moveToAlbum {
+    return Intl.message(
+      'Move to album',
+      name: 'moveToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unhide`
+  String get unhide {
+    return Intl.message(
+      'Unhide',
+      name: 'unhide',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unarchive`
+  String get unarchive {
+    return Intl.message(
+      'Unarchive',
+      name: 'unarchive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Favorite`
+  String get favorite {
+    return Intl.message(
+      'Favorite',
+      name: 'favorite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove from favorite`
+  String get removeFromFavorite {
+    return Intl.message(
+      'Remove from favorite',
+      name: 'removeFromFavorite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share link`
+  String get shareLink {
+    return Intl.message(
+      'Share link',
+      name: 'shareLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add to ente`
+  String get addToEnte {
+    return Intl.message(
+      'Add to ente',
+      name: 'addToEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add to album`
+  String get addToAlbum {
+    return Intl.message(
+      'Add to album',
+      name: 'addToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete`
+  String get delete {
+    return Intl.message(
+      'Delete',
+      name: 'delete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide`
+  String get hide {
+    return Intl.message(
+      'Hide',
+      name: 'hide',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} selected`
+  String itemSelectedCount(int count) {
+    return Intl.message(
+      '$count selected',
+      name: 'itemSelectedCount',
+      desc: 'Text to indicate number of items selected',
+      args: [count],
+    );
+  }
+
+  /// `Share`
+  String get share {
+    return Intl.message(
+      'Share',
+      name: 'share',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unhide to album`
+  String get unhideToAlbum {
+    return Intl.message(
+      'Unhide to album',
+      name: 'unhideToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore to album`
+  String get restoreToAlbum {
+    return Intl.message(
+      'Restore to album',
+      name: 'restoreToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, one {Move item} other {Move items}}`
+  String moveItem(num count) {
+    return Intl.plural(
+      count,
+      one: 'Move item',
+      other: 'Move items',
+      name: 'moveItem',
+      desc: 'Page title while moving one or more items to an album',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, one {Add item} other {Add items}}`
+  String addItem(num count) {
+    return Intl.plural(
+      count,
+      one: 'Add item',
+      other: 'Add items',
+      name: 'addItem',
+      desc: 'Page title while adding one or more items to album',
+      args: [count],
+    );
+  }
+
+  /// `Create or select album`
+  String get createOrSelectAlbum {
+    return Intl.message(
+      'Create or select album',
+      name: 'createOrSelectAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select album`
+  String get selectAlbum {
+    return Intl.message(
+      'Select album',
+      name: 'selectAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Album name`
+  String get searchByAlbumNameHint {
+    return Intl.message(
+      'Album name',
+      name: 'searchByAlbumNameHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Album title`
+  String get albumTitle {
+    return Intl.message(
+      'Album title',
+      name: 'albumTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter album name`
+  String get enterAlbumName {
+    return Intl.message(
+      'Enter album name',
+      name: 'enterAlbumName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restoring files...`
+  String get restoringFiles {
+    return Intl.message(
+      'Restoring files...',
+      name: 'restoringFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Moving files to album...`
+  String get movingFilesToAlbum {
+    return Intl.message(
+      'Moving files to album...',
+      name: 'movingFilesToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unhiding files to album`
+  String get unhidingFilesToAlbum {
+    return Intl.message(
+      'Unhiding files to album',
+      name: 'unhidingFilesToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Can not upload to albums owned by others`
+  String get canNotUploadToAlbumsOwnedByOthers {
+    return Intl.message(
+      'Can not upload to albums owned by others',
+      name: 'canNotUploadToAlbumsOwnedByOthers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Uploading files to album...`
+  String get uploadingFilesToAlbum {
+    return Intl.message(
+      'Uploading files to album...',
+      name: 'uploadingFilesToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Added successfully to  {albumName}`
+  String addedSuccessfullyTo(Object albumName) {
+    return Intl.message(
+      'Added successfully to  $albumName',
+      name: 'addedSuccessfullyTo',
+      desc: '',
+      args: [albumName],
+    );
+  }
+
+  /// `Moved successfully to {albumName}`
+  String movedSuccessfullyTo(Object albumName) {
+    return Intl.message(
+      'Moved successfully to $albumName',
+      name: 'movedSuccessfullyTo',
+      desc: '',
+      args: [albumName],
+    );
+  }
+
+  /// `This album already has a collaborative link`
+  String get thisAlbumAlreadyHDACollaborativeLink {
+    return Intl.message(
+      'This album already has a collaborative link',
+      name: 'thisAlbumAlreadyHDACollaborativeLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collaborative link created for {albumName}`
+  String collaborativeLinkCreatedFor(Object albumName) {
+    return Intl.message(
+      'Collaborative link created for $albumName',
+      name: 'collaborativeLinkCreatedFor',
+      desc: '',
+      args: [albumName],
+    );
+  }
+
+  /// `Ask your loved ones to share`
+  String get askYourLovedOnesToShare {
+    return Intl.message(
+      'Ask your loved ones to share',
+      name: 'askYourLovedOnesToShare',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invite`
+  String get invite {
+    return Intl.message(
+      'Invite',
+      name: 'invite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share your first album`
+  String get shareYourFirstAlbum {
+    return Intl.message(
+      'Share your first album',
+      name: 'shareYourFirstAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared with {emailIDs}`
+  String sharedWith(Object emailIDs) {
+    return Intl.message(
+      'Shared with $emailIDs',
+      name: 'sharedWith',
+      desc: '',
+      args: [emailIDs],
+    );
+  }
+
+  /// `Shared with me`
+  String get sharedWithMe {
+    return Intl.message(
+      'Shared with me',
+      name: 'sharedWithMe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared by me`
+  String get sharedByMe {
+    return Intl.message(
+      'Shared by me',
+      name: 'sharedByMe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Double your storage`
+  String get doubleYourStorage {
+    return Intl.message(
+      'Double your storage',
+      name: 'doubleYourStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refer friends and 2x your plan`
+  String get referFriendsAnd2xYourPlan {
+    return Intl.message(
+      'Refer friends and 2x your plan',
+      name: 'referFriendsAnd2xYourPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open an album and tap the share button on the top right to share.`
+  String get shareAlbumHint {
+    return Intl.message(
+      'Open an album and tap the share button on the top right to share.',
+      name: 'shareAlbumHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Items show the number of days remaining before permanent deletion`
+  String get itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion {
+    return Intl.message(
+      'Items show the number of days remaining before permanent deletion',
+      name: 'itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete All`
+  String get deleteAll {
+    return Intl.message(
+      'Delete All',
+      name: 'deleteAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rename album`
+  String get renameAlbum {
+    return Intl.message(
+      'Rename album',
+      name: 'renameAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rename`
+  String get rename {
+    return Intl.message(
+      'Rename',
+      name: 'rename',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Leave shared album?`
+  String get leaveSharedAlbum {
+    return Intl.message(
+      'Leave shared album?',
+      name: 'leaveSharedAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Leave album`
+  String get leaveAlbum {
+    return Intl.message(
+      'Leave album',
+      name: 'leaveAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Photos added by you will be removed from the album`
+  String get photosAddedByYouWillBeRemovedFromTheAlbum {
+    return Intl.message(
+      'Photos added by you will be removed from the album',
+      name: 'photosAddedByYouWillBeRemovedFromTheAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You've no files in this album that can be deleted`
+  String get youveNoFilesInThisAlbumThatCanBeDeleted {
+    return Intl.message(
+      'You\'ve no files in this album that can be deleted',
+      name: 'youveNoFilesInThisAlbumThatCanBeDeleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You don't have any archived items.`
+  String get youDontHaveAnyArchivedItems {
+    return Intl.message(
+      'You don\'t have any archived items.',
+      name: 'youDontHaveAnyArchivedItems',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Some files in this album are ignored from upload because they had previously been deleted from ente.`
+  String get ignoredFolderUploadReason {
+    return Intl.message(
+      'Some files in this album are ignored from upload because they had previously been deleted from ente.',
+      name: 'ignoredFolderUploadReason',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset ignored files`
+  String get resetIgnoredFiles {
+    return Intl.message(
+      'Reset ignored files',
+      name: 'resetIgnoredFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Files added to this device album will automatically get uploaded to ente.`
+  String get deviceFilesAutoUploading {
+    return Intl.message(
+      'Files added to this device album will automatically get uploaded to ente.',
+      name: 'deviceFilesAutoUploading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turn on backup to automatically upload files added to this device folder to ente.`
+  String get turnOnBackupForAutoUpload {
+    return Intl.message(
+      'Turn on backup to automatically upload files added to this device folder to ente.',
+      name: 'turnOnBackupForAutoUpload',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No hidden photos or videos`
+  String get noHiddenPhotosOrVideos {
+    return Intl.message(
+      'No hidden photos or videos',
+      name: 'noHiddenPhotosOrVideos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To hide a photo or video`
+  String get toHideAPhotoOrVideo {
+    return Intl.message(
+      'To hide a photo or video',
+      name: 'toHideAPhotoOrVideo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `• Open the item`
+  String get openTheItem {
+    return Intl.message(
+      '• Open the item',
+      name: 'openTheItem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `• Click on the overflow menu`
+  String get clickOnTheOverflowMenu {
+    return Intl.message(
+      '• Click on the overflow menu',
+      name: 'clickOnTheOverflowMenu',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `• Click`
+  String get click {
+    return Intl.message(
+      '• Click',
+      name: 'click',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing to see here! 👀`
+  String get nothingToSeeHere {
+    return Intl.message(
+      'Nothing to see here! 👀',
+      name: 'nothingToSeeHere',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unarchive album`
+  String get unarchiveAlbum {
+    return Intl.message(
+      'Unarchive album',
+      name: 'unarchiveAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Archive album`
+  String get archiveAlbum {
+    return Intl.message(
+      'Archive album',
+      name: 'archiveAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Calculating...`
+  String get calculating {
+    return Intl.message(
+      'Calculating...',
+      name: 'calculating',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please wait, deleting album`
+  String get pleaseWaitDeletingAlbum {
+    return Intl.message(
+      'Please wait, deleting album',
+      name: 'pleaseWaitDeletingAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Albums, months, days, years, ...`
+  String get searchHintText {
+    return Intl.message(
+      'Albums, months, days, years, ...',
+      name: 'searchHintText',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `• Album names (e.g. "Camera")\n• Types of files (e.g. "Videos", ".gif")\n• Years and months (e.g. "2022", "January")\n• Holidays (e.g. "Christmas")\n• Photo descriptions (e.g. “#fun”)`
+  String get searchByExamples {
+    return Intl.message(
+      '• Album names (e.g. "Camera")\n• Types of files (e.g. "Videos", ".gif")\n• Years and months (e.g. "2022", "January")\n• Holidays (e.g. "Christmas")\n• Photo descriptions (e.g. “#fun”)',
+      name: 'searchByExamples',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can try searching for a different query.`
+  String get youCanTrySearchingForADifferentQuery {
+    return Intl.message(
+      'You can try searching for a different query.',
+      name: 'youCanTrySearchingForADifferentQuery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No results found`
+  String get noResultsFound {
+    return Intl.message(
+      'No results found',
+      name: 'noResultsFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Added by {emailOrName}`
+  String addedBy(Object emailOrName) {
+    return Intl.message(
+      'Added by $emailOrName',
+      name: 'addedBy',
+      desc: '',
+      args: [emailOrName],
+    );
+  }
+
+  /// `Loading EXIF data...`
+  String get loadingExifData {
+    return Intl.message(
+      'Loading EXIF data...',
+      name: 'loadingExifData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View all EXIF data`
+  String get viewAllExifData {
+    return Intl.message(
+      'View all EXIF data',
+      name: 'viewAllExifData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No EXIF data`
+  String get noExifData {
+    return Intl.message(
+      'No EXIF data',
+      name: 'noExifData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This image has no exif data`
+  String get thisImageHasNoExifData {
+    return Intl.message(
+      'This image has no exif data',
+      name: 'thisImageHasNoExifData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `EXIF`
+  String get exif {
+    return Intl.message(
+      'EXIF',
+      name: 'exif',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No results`
+  String get noResults {
+    return Intl.message(
+      'No results',
+      name: 'noResults',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We don't support editing photos and albums that you don't own yet`
+  String get weDontSupportEditingPhotosAndAlbumsThatYouDont {
+    return Intl.message(
+      'We don\'t support editing photos and albums that you don\'t own yet',
+      name: 'weDontSupportEditingPhotosAndAlbumsThatYouDont',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to fetch original for edit`
+  String get failedToFetchOriginalForEdit {
+    return Intl.message(
+      'Failed to fetch original for edit',
+      name: 'failedToFetchOriginalForEdit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close`
+  String get close {
+    return Intl.message(
+      'Close',
+      name: 'close',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set as`
+  String get setAs {
+    return Intl.message(
+      'Set as',
+      name: 'setAs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `File saved to gallery`
+  String get fileSavedToGallery {
+    return Intl.message(
+      'File saved to gallery',
+      name: 'fileSavedToGallery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download`
+  String get download {
+    return Intl.message(
+      'Download',
+      name: 'download',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Press and hold to play video`
+  String get pressAndHoldToPlayVideo {
+    return Intl.message(
+      'Press and hold to play video',
+      name: 'pressAndHoldToPlayVideo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download failed`
+  String get downloadFailed {
+    return Intl.message(
+      'Download failed',
+      name: 'downloadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Deduplicate Files`
+  String get deduplicateFiles {
+    return Intl.message(
+      'Deduplicate Files',
+      name: 'deduplicateFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Deselect all`
+  String get deselectAll {
+    return Intl.message(
+      'Deselect all',
+      name: 'deselectAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please review and delete the items you believe are duplicates.`
+  String get reviewDeduplicateItems {
+    return Intl.message(
+      'Please review and delete the items you believe are duplicates.',
+      name: 'reviewDeduplicateItems',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Club by capture time`
+  String get clubByCaptureTime {
+    return Intl.message(
+      'Club by capture time',
+      name: 'clubByCaptureTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Count`
+  String get count {
+    return Intl.message(
+      'Count',
+      name: 'count',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total size`
+  String get totalSize {
+    return Intl.message(
+      'Total size',
+      name: 'totalSize',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Time`
+  String get time {
+    return Intl.message(
+      'Time',
+      name: 'time',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Long-press on an item to view in full-screen`
+  String get longpressOnAnItemToViewInFullscreen {
+    return Intl.message(
+      'Long-press on an item to view in full-screen',
+      name: 'longpressOnAnItemToViewInFullscreen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Decrypting video...`
+  String get decryptingVideo {
+    return Intl.message(
+      'Decrypting video...',
+      name: 'decryptingVideo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to view your memories`
+  String get authToViewYourMemories {
+    return Intl.message(
+      'Please authenticate to view your memories',
+      name: 'authToViewYourMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unlock`
+  String get unlock {
+    return Intl.message(
+      'Unlock',
+      name: 'unlock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Free up space`
+  String get freeUpSpace {
+    return Intl.message(
+      'Free up space',
+      name: 'freeUpSpace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, one {It can be deleted from the device to free up {formattedSize}} other {They can be deleted from the device to free up {formattedSize}}}`
+  String freeUpSpaceSaving(num count, Object formattedSize) {
+    return Intl.plural(
+      count,
+      one: 'It can be deleted from the device to free up $formattedSize',
+      other: 'They can be deleted from the device to free up $formattedSize',
+      name: 'freeUpSpaceSaving',
+      desc:
+          'Text to tell user how much space they can free up by deleting items from the device',
+      args: [count, formattedSize],
+    );
+  }
+
+  /// `{count, plural, one {1 file} other {{formattedNumber} files}} in this album has been backed up safely`
+  String filesBackedUpInAlbum(int count, String formattedNumber) {
+    return Intl.message(
+      '${Intl.plural(count, one: '1 file', other: '$formattedNumber files')} in this album has been backed up safely',
+      name: 'filesBackedUpInAlbum',
+      desc: 'Text to tell user how many files have been backed up in the album',
+      args: [count, formattedNumber],
+    );
+  }
+
+  /// `{count, plural, one {1 file} other {{formattedNumber} files}} on this device have been backed up safely`
+  String filesBackedUpFromDevice(int count, String formattedNumber) {
+    return Intl.message(
+      '${Intl.plural(count, one: '1 file', other: '$formattedNumber files')} on this device have been backed up safely',
+      name: 'filesBackedUpFromDevice',
+      desc:
+          'Text to tell user how many files have been backed up from this device',
+      args: [count, formattedNumber],
+    );
+  }
+
+  /// `You can still access {count, plural, one {it} other {them}} on ente as long as you have an active subscription`
+  String freeUpAccessPostDelete(int count) {
+    return Intl.message(
+      'You can still access ${Intl.plural(count, one: 'it', other: 'them')} on ente as long as you have an active subscription',
+      name: 'freeUpAccessPostDelete',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Free up {sizeInMBorGB}`
+  String freeUpAmount(Object sizeInMBorGB) {
+    return Intl.message(
+      'Free up $sizeInMBorGB',
+      name: 'freeUpAmount',
+      desc: '',
+      args: [sizeInMBorGB],
+    );
+  }
+
+  /// `This email is already in use`
+  String get thisEmailIsAlreadyInUse {
+    return Intl.message(
+      'This email is already in use',
+      name: 'thisEmailIsAlreadyInUse',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Incorrect code`
+  String get incorrectCode {
+    return Intl.message(
+      'Incorrect code',
+      name: 'incorrectCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authentication failed, please try again`
+  String get authenticationFailedPleaseTryAgain {
+    return Intl.message(
+      'Authentication failed, please try again',
+      name: 'authenticationFailedPleaseTryAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verification failed, please try again`
+  String get verificationFailedPleaseTryAgain {
+    return Intl.message(
+      'Verification failed, please try again',
+      name: 'verificationFailedPleaseTryAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authenticating...`
+  String get authenticating {
+    return Intl.message(
+      'Authenticating...',
+      name: 'authenticating',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Authentication successful!`
+  String get authenticationSuccessful {
+    return Intl.message(
+      'Authentication successful!',
+      name: 'authenticationSuccessful',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Incorrect recovery key`
+  String get incorrectRecoveryKey {
+    return Intl.message(
+      'Incorrect recovery key',
+      name: 'incorrectRecoveryKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The recovery key you entered is incorrect`
+  String get theRecoveryKeyYouEnteredIsIncorrect {
+    return Intl.message(
+      'The recovery key you entered is incorrect',
+      name: 'theRecoveryKeyYouEnteredIsIncorrect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Two-factor authentication successfully reset`
+  String get twofactorAuthenticationSuccessfullyReset {
+    return Intl.message(
+      'Two-factor authentication successfully reset',
+      name: 'twofactorAuthenticationSuccessfullyReset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please verify the code you have entered`
+  String get pleaseVerifyTheCodeYouHaveEntered {
+    return Intl.message(
+      'Please verify the code you have entered',
+      name: 'pleaseVerifyTheCodeYouHaveEntered',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please contact support if the problem persists`
+  String get pleaseContactSupportIfTheProblemPersists {
+    return Intl.message(
+      'Please contact support if the problem persists',
+      name: 'pleaseContactSupportIfTheProblemPersists',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Two-factor authentication has been disabled`
+  String get twofactorAuthenticationHasBeenDisabled {
+    return Intl.message(
+      'Two-factor authentication has been disabled',
+      name: 'twofactorAuthenticationHasBeenDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, the code you've entered is incorrect`
+  String get sorryTheCodeYouveEnteredIsIncorrect {
+    return Intl.message(
+      'Sorry, the code you\'ve entered is incorrect',
+      name: 'sorryTheCodeYouveEnteredIsIncorrect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your verification code has expired`
+  String get yourVerificationCodeHasExpired {
+    return Intl.message(
+      'Your verification code has expired',
+      name: 'yourVerificationCodeHasExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email changed to {newEmail}`
+  String emailChangedTo(Object newEmail) {
+    return Intl.message(
+      'Email changed to $newEmail',
+      name: 'emailChangedTo',
+      desc: '',
+      args: [newEmail],
+    );
+  }
+
+  /// `Verifying...`
+  String get verifying {
+    return Intl.message(
+      'Verifying...',
+      name: 'verifying',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disabling two-factor authentication...`
+  String get disablingTwofactorAuthentication {
+    return Intl.message(
+      'Disabling two-factor authentication...',
+      name: 'disablingTwofactorAuthentication',
       desc: '',
       args: [],
     );

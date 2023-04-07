@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -18,7 +19,7 @@ class ExifInfoDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "EXIF",
+            S.of(context).exif,
             style: textTheme.h3Bold,
           ),
           Text(
@@ -36,7 +37,7 @@ class ExifInfoDialog extends StatelessWidget {
       actions: [
         TextButton(
           child: Text(
-            "Close",
+            S.of(context).close,
             style: textTheme.body,
           ),
           onPressed: () {
