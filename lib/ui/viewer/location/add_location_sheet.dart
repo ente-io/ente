@@ -125,17 +125,21 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                             ValueListenableBuilder(
                               valueListenable: _isEmptyNotifier,
                               builder: (context, bool value, _) {
-                                return ButtonWidget(
-                                  buttonType: ButtonType.secondary,
-                                  buttonSize: ButtonSize.small,
-                                  labelText: "Add",
-                                  isDisabled: value,
-                                  onTap: () async {
-                                    _focusNode.unfocus();
-                                    await _addLocationTag(
-                                      _textEditingController.text.trim(),
-                                    );
-                                  },
+                                return AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 250),
+                                  switchInCurve: Curves.easeInOut,
+                                  switchOutCurve: Curves.easeInOut,
+                                  child: ButtonWidget(
+                                    key: ValueKey(value),
+                                    buttonType: ButtonType.secondary,
+                                    buttonSize: ButtonSize.small,
+                                    labelText: "Add",
+                                    isDisabled: value,
+                                    onTap: () async {
+                                      _focusNode.unfocus();
+                                      await _addLocationTag();
+                                    },
+                                  ),
                                 );
                               },
                             )
@@ -221,16 +225,15 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
     );
   }
 
-  Future<void> _addLocationTag(String locationName) async {
+  Future<void> _addLocationTag() async {
     final locationData = InheritedLocationTagData.of(context);
     final coordinates = locationData.centerPoint;
     final radius = radiusValues[locationData.selectedRadiusIndex];
     await LocationService.instance.addLocation(
-      locationName,
+      _textEditingController.text.trim(),
       coordinates,
       radius,
     );
-    Navigator.pop(context);
   }
 
   void _focusNodeListener() {
