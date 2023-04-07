@@ -9,9 +9,11 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/keyboard/keybiard_oveylay.dart";
 import "package:photos/ui/components/keyboard/keyboard_top_button.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import 'package:photos/ui/viewer/location/dynamic_location_gallery_widget.dart';
@@ -62,6 +64,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
       ValueNotifier(defaultRadiusValueIndex);
   final _focusNode = FocusNode();
   final _textEditingController = TextEditingController();
+  final _isEmptyNotifier = ValueNotifier(false);
   Widget? _keyboardTopButtons;
 
   @override
@@ -69,17 +72,6 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
     _focusNode.addListener(_focusNodeListener);
     _selectedRadiusIndexNotifier.addListener(_selectedRadiusIndexListener);
     super.initState();
-  }
-
-  @override
-  void deactivate() {
-    final locationTagState = InheritedLocationTagData.of(context);
-    LocationService.instance.updateLocationTag(
-      locationTagEntity: locationTagState.locationTagEntity!,
-      newRadius: radiusValues[locationTagState.selectedRadiusIndex],
-      newName: _textEditingController.text,
-    );
-    super.deactivate();
   }
 
   @override
@@ -119,22 +111,51 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       children: [
-                        TextInputWidget(
-                          hintText: "Location name",
-                          borderRadius: 2,
-                          focusNode: _focusNode,
-                          submitNotifier: _submitNotifer,
-                          cancelNotifier: _cancelNotifier,
-                          popNavAfterSubmission: false,
-                          shouldUnfocusOnClearOrSubmit: true,
-                          alwaysShowSuccessState: true,
-                          initialValue: locationName,
-                          onCancel: () {
-                            _focusNode.unfocus();
-                            _textEditingController.value =
-                                TextEditingValue(text: locationName);
-                          },
-                          textEditingController: _textEditingController,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextInputWidget(
+                                hintText: "Location name",
+                                borderRadius: 2,
+                                focusNode: _focusNode,
+                                submitNotifier: _submitNotifer,
+                                cancelNotifier: _cancelNotifier,
+                                popNavAfterSubmission: false,
+                                shouldUnfocusOnClearOrSubmit: true,
+                                alwaysShowSuccessState: true,
+                                initialValue: locationName,
+                                onCancel: () {
+                                  _focusNode.unfocus();
+                                  _textEditingController.value =
+                                      TextEditingValue(text: locationName);
+                                },
+                                textEditingController: _textEditingController,
+                                isEmptyNotifier: _isEmptyNotifier,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            ValueListenableBuilder(
+                              valueListenable: _isEmptyNotifier,
+                              builder: (context, bool value, _) {
+                                return AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 250),
+                                  switchInCurve: Curves.easeInOut,
+                                  switchOutCurve: Curves.easeInOut,
+                                  child: ButtonWidget(
+                                    key: ValueKey(value),
+                                    buttonType: ButtonType.secondary,
+                                    buttonSize: ButtonSize.small,
+                                    labelText: "Save",
+                                    isDisabled: value,
+                                    onTap: () async {
+                                      _focusNode.unfocus();
+                                      await _editLocation();
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 20),
                         const EditCenterPointTileWidget(),
@@ -212,6 +233,16 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
         ],
       ),
     );
+  }
+
+  Future<void> _editLocation() async {
+    final locationTagState = InheritedLocationTagData.of(context);
+    LocationService.instance.updateLocationTag(
+      locationTagEntity: locationTagState.locationTagEntity!,
+      newRadius: radiusValues[locationTagState.selectedRadiusIndex],
+      newName: _textEditingController.text,
+    );
+    Navigator.of(context).pop();
   }
 
   void _focusNodeListener() {
