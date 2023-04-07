@@ -6141,6 +6141,156 @@ class S {
       args: [],
     );
   }
+
+  /// `Files deleted`
+  String get filesDeleted {
+    return Intl.message(
+      'Files deleted',
+      name: 'filesDeleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Selected files are not on ente`
+  String get selectedFilesAreNotOnEnte {
+    return Intl.message(
+      'Selected files are not on ente',
+      name: 'selectedFilesAreNotOnEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This action cannot be undone`
+  String get thisActionCannotBeUndone {
+    return Intl.message(
+      'This action cannot be undone',
+      name: 'thisActionCannotBeUndone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Empty trash?`
+  String get emptyTrash {
+    return Intl.message(
+      'Empty trash?',
+      name: 'emptyTrash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All items in trash will be permanently deleted\n\nThis action cannot be undone`
+  String get permDeleteWarning {
+    return Intl.message(
+      'All items in trash will be permanently deleted\n\nThis action cannot be undone',
+      name: 'permDeleteWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Empty`
+  String get empty {
+    return Intl.message(
+      'Empty',
+      name: 'empty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not free up space`
+  String get couldNotFreeUpSpace {
+    return Intl.message(
+      'Could not free up space',
+      name: 'couldNotFreeUpSpace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Permanently delete from device?`
+  String get permanentlyDeleteFromDevice {
+    return Intl.message(
+      'Permanently delete from device?',
+      name: 'permanentlyDeleteFromDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Some of the files you are trying to delete are only available on your device and cannot be recovered if deleted`
+  String get someOfTheFilesYouAreTryingToDeleteAre {
+    return Intl.message(
+      'Some of the files you are trying to delete are only available on your device and cannot be recovered if deleted',
+      name: 'someOfTheFilesYouAreTryingToDeleteAre',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `They will be deleted from all albums.`
+  String get theyWillBeDeletedFromAllAlbums {
+    return Intl.message(
+      'They will be deleted from all albums.',
+      name: 'theyWillBeDeletedFromAllAlbums',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Some items are in both ente and your device.`
+  String get someItemsAreInBothEnteAndYourDevice {
+    return Intl.message(
+      'Some items are in both ente and your device.',
+      name: 'someItemsAreInBothEnteAndYourDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Selected items will be deleted from all albums and moved to trash.`
+  String get selectedItemsWillBeDeletedFromAllAlbumsAndMoved {
+    return Intl.message(
+      'Selected items will be deleted from all albums and moved to trash.',
+      name: 'selectedItemsWillBeDeletedFromAllAlbumsAndMoved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `These items will be deleted from your device.`
+  String get theseItemsWillBeDeletedFromYourDevice {
+    return Intl.message(
+      'These items will be deleted from your device.',
+      name: 'theseItemsWillBeDeletedFromYourDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.`
+  String get itLooksLikeSomethingWentWrongPleaseRetryAfterSome {
+    return Intl.message(
+      'It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.',
+      name: 'itLooksLikeSomethingWentWrongPleaseRetryAfterSome',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Error`
+  String get error {
+    return Intl.message(
+      'Error',
+      name: 'error',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

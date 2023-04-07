@@ -376,6 +376,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Copy-paste this code\nto your authenticator app"),
         "couldNotBackUpTryLater": MessageLookupByLibrary.simpleMessage(
             "We could not backup your data.\nWe will retry later."),
+        "couldNotFreeUpSpace":
+            MessageLookupByLibrary.simpleMessage("Could not free up space"),
         "couldNotUpdateSubscription": MessageLookupByLibrary.simpleMessage(
             "Could not update subscription"),
         "count": MessageLookupByLibrary.simpleMessage("Count"),
@@ -482,6 +484,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "email": MessageLookupByLibrary.simpleMessage("Email"),
         "emailChangedTo": m12,
         "emailNoEnteAccount": m13,
+        "empty": MessageLookupByLibrary.simpleMessage("Empty"),
+        "emptyTrash": MessageLookupByLibrary.simpleMessage("Empty trash?"),
         "encryptingBackup":
             MessageLookupByLibrary.simpleMessage("Encrypting backup..."),
         "encryption": MessageLookupByLibrary.simpleMessage("Encryption"),
@@ -524,6 +528,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Enter your password"),
         "enterYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Enter your recovery key"),
+        "error": MessageLookupByLibrary.simpleMessage("Error"),
         "everywhere": MessageLookupByLibrary.simpleMessage("everywhere"),
         "exif": MessageLookupByLibrary.simpleMessage("EXIF"),
         "existingUser": MessageLookupByLibrary.simpleMessage("Existing user"),
@@ -554,6 +559,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("File saved to gallery"),
         "filesBackedUpFromDevice": m14,
         "filesBackedUpInAlbum": m15,
+        "filesDeleted": MessageLookupByLibrary.simpleMessage("Files deleted"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("for your memories"),
         "forgotPassword":
@@ -607,6 +613,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "inviteToEnte": MessageLookupByLibrary.simpleMessage("Invite to ente"),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("Invite your friends"),
+        "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
+            MessageLookupByLibrary.simpleMessage(
+                "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team."),
         "itemCount": m21,
         "itemSelectedCount": m22,
         "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion":
@@ -721,8 +730,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "paymentFailedWithReason": m30,
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
+        "permDeleteWarning": MessageLookupByLibrary.simpleMessage(
+            "All items in trash will be permanently deleted\n\nThis action cannot be undone"),
         "permanentlyDelete":
             MessageLookupByLibrary.simpleMessage("Permanently delete"),
+        "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
+            "Permanently delete from device?"),
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("Photo grid size"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("photo"),
@@ -876,9 +889,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectReason": MessageLookupByLibrary.simpleMessage("Select reason"),
         "selectYourPlan":
             MessageLookupByLibrary.simpleMessage("Select your plan"),
+        "selectedFilesAreNotOnEnte": MessageLookupByLibrary.simpleMessage(
+            "Selected files are not on ente"),
         "selectedFoldersWillBeEncryptedAndBackedUp":
             MessageLookupByLibrary.simpleMessage(
                 "Selected folders will be encrypted and backed up"),
+        "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be deleted from all albums and moved to trash."),
         "selectedPhotos": m35,
         "selectedPhotosWithYours": m36,
         "send": MessageLookupByLibrary.simpleMessage("Send"),
@@ -924,6 +942,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "singleFileInRemoteOnly": m44,
         "skip": MessageLookupByLibrary.simpleMessage("Skip"),
         "social": MessageLookupByLibrary.simpleMessage("Social"),
+        "someItemsAreInBothEnteAndYourDevice":
+            MessageLookupByLibrary.simpleMessage(
+                "Some items are in both ente and your device."),
+        "someOfTheFilesYouAreTryingToDeleteAre":
+            MessageLookupByLibrary.simpleMessage(
+                "Some of the files you are trying to delete are only available on your device and cannot be recovered if deleted"),
         "someoneSharingAlbumsWithYouShouldSeeTheSameId":
             MessageLookupByLibrary.simpleMessage(
                 "Someone sharing albums with you should see the same ID on their device."),
@@ -989,7 +1013,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "The recovery key you entered is incorrect"),
         "theme": MessageLookupByLibrary.simpleMessage("Theme"),
+        "theseItemsWillBeDeletedFromYourDevice":
+            MessageLookupByLibrary.simpleMessage(
+                "These items will be deleted from your device."),
         "theyAlsoGetXGb": m49,
+        "theyWillBeDeletedFromAllAlbums": MessageLookupByLibrary.simpleMessage(
+            "They will be deleted from all albums."),
+        "thisActionCannotBeUndone": MessageLookupByLibrary.simpleMessage(
+            "This action cannot be undone"),
         "thisAlbumAlreadyHDACollaborativeLink":
             MessageLookupByLibrary.simpleMessage(
                 "This album already has a collaborative link"),

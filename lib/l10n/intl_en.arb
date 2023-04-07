@@ -883,5 +883,20 @@
   "successfullyArchived": "Successfully archived",
   "successfullyUnarchived": "Successfully unarchived",
   "renameFile": "Rename file",
-  "enterFileName": "Enter file name"
+  "enterFileName": "Enter file name",
+  "filesDeleted": "Files deleted",
+  "selectedFilesAreNotOnEnte": "Selected files are not on ente",
+  "thisActionCannotBeUndone": "This action cannot be undone",
+  "emptyTrash": "Empty trash?",
+  "permDeleteWarning": "All items in trash will be permanently deleted\n\nThis action cannot be undone",
+  "empty": "Empty",
+  "couldNotFreeUpSpace": "Could not free up space",
+  "permanentlyDeleteFromDevice": "Permanently delete from device?",
+  "someOfTheFilesYouAreTryingToDeleteAre": "Some of the files you are trying to delete are only available on your device and cannot be recovered if deleted",
+  "theyWillBeDeletedFromAllAlbums": "They will be deleted from all albums.",
+  "someItemsAreInBothEnteAndYourDevice": "Some items are in both ente and your device.",
+  "selectedItemsWillBeDeletedFromAllAlbumsAndMoved": "Selected items will be deleted from all albums and moved to trash.",
+  "theseItemsWillBeDeletedFromYourDevice": "These items will be deleted from your device.",
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
+  "error": "Error"
 }

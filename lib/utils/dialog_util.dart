@@ -4,6 +4,7 @@ import 'package:confetti/confetti.dart';
 import "package:dio/dio.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/button_result.dart";
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
@@ -55,7 +56,7 @@ Future<ButtonResult?> showErrorDialogForException({
   }
   return showDialogWidget(
     context: context,
-    title: "Error",
+    title: S.of(context).error,
     icon: Icons.error_outline_outlined,
     body: errorMessage,
     isDismissible: isDismissible,
@@ -76,10 +77,9 @@ Future<ButtonResult?> showGenericErrorDialog({
 }) async {
   return showDialogWidget(
     context: context,
-    title: "Error",
+    title: S.of(context).error,
     icon: Icons.error_outline_outlined,
-    body:
-        "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
+    body: S.of(context).itLooksLikeSomethingWentWrongPleaseRetryAfterSome,
     isDismissible: isDismissible,
     buttons: const [
       ButtonWidget(
