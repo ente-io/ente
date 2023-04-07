@@ -12,8 +12,6 @@ import "package:photos/utils/debouncer.dart";
 
 class LocationTagStateProvider extends StatefulWidget {
   final LocalEntity<LocationTag>? locationTagEntity;
-  //centerPoint is used when we want to create a new location tag. We can't use
-  //LocationTag becuase aSquare and bSquare will be null.
   final Location? centerPoint;
   final Widget child;
   const LocationTagStateProvider(
