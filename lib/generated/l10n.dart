@@ -6021,6 +6021,126 @@ class S {
       args: [],
     );
   }
+
+  /// `All memories preserved`
+  String get allMemoriesPreserved {
+    return Intl.message(
+      'All memories preserved',
+      name: 'allMemoriesPreserved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loading gallery...`
+  String get loadingGallery {
+    return Intl.message(
+      'Loading gallery...',
+      name: 'loadingGallery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Syncing...`
+  String get syncing {
+    return Intl.message(
+      'Syncing...',
+      name: 'syncing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Encrypting backup...`
+  String get encryptingBackup {
+    return Intl.message(
+      'Encrypting backup...',
+      name: 'encryptingBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sync stopped`
+  String get syncStopped {
+    return Intl.message(
+      'Sync stopped',
+      name: 'syncStopped',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{completed}/{total} memories preserved`
+  String syncProgress(int completed, int total) {
+    return Intl.message(
+      '$completed/$total memories preserved',
+      name: 'syncProgress',
+      desc: 'Text to tell user how many memories have been preserved',
+      args: [completed, total],
+    );
+  }
+
+  /// `Archiving...`
+  String get archiving {
+    return Intl.message(
+      'Archiving...',
+      name: 'archiving',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unarchiving...`
+  String get unarchiving {
+    return Intl.message(
+      'Unarchiving...',
+      name: 'unarchiving',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Successfully archived`
+  String get successfullyArchived {
+    return Intl.message(
+      'Successfully archived',
+      name: 'successfullyArchived',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Successfully unarchived`
+  String get successfullyUnarchived {
+    return Intl.message(
+      'Successfully unarchived',
+      name: 'successfullyUnarchived',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rename file`
+  String get renameFile {
+    return Intl.message(
+      'Rename file',
+      name: 'renameFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter file name`
+  String get enterFileName {
+    return Intl.message(
+      'Enter file name',
+      name: 'enterFileName',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

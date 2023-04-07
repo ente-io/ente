@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
@@ -22,9 +23,8 @@ Future<void> changeVisibility(
   final dialog = createProgressDialog(
     context,
     newVisibility == visibilityArchive
-        ? "Archiving..."
-        : "Unarchiving..."
-            "...",
+        ? S.of(context).archiving
+        : S.of(context).unarchiving,
   );
   await dialog.show();
   try {
@@ -32,8 +32,8 @@ Future<void> changeVisibility(
     showShortToast(
       context,
       newVisibility == visibilityArchive
-          ? "Successfully archived"
-          : "Successfully unarchived",
+          ? S.of(context).successfullyArchived
+          : S.of(context).successfullyUnarchived,
     );
 
     await dialog.hide();
@@ -51,7 +51,9 @@ Future<void> changeCollectionVisibility(
 ) async {
   final dialog = createProgressDialog(
     context,
-    newVisibility == visibilityArchive ? "Archiving..." : "Unarchiving...",
+    newVisibility == visibilityArchive
+        ? S.of(context).archiving
+        : S.of(context).unarchiving,
   );
   await dialog.show();
   try {
@@ -62,8 +64,8 @@ Future<void> changeCollectionVisibility(
     showShortToast(
       context,
       newVisibility == visibilityArchive
-          ? "Successfully archived"
-          : "Successfully unarchived",
+          ? S.of(context).successfullyArchived
+          : S.of(context).successfullyUnarchived,
     );
 
     await dialog.hide();
@@ -88,7 +90,7 @@ Future<bool> editTime(
     );
     return true;
   } catch (e) {
-    showShortToast(context, 'something went wrong');
+    showShortToast(context, S.of(context).somethingWentWrong);
     return false;
   }
 }
@@ -102,12 +104,12 @@ Future<void> editFilename(
   final extName = extension(fileName);
   final result = await showTextInputDialog(
     context,
-    title: "Rename file",
-    submitButtonLabel: "Rename",
+    title: S.of(context).renameFile,
+    submitButtonLabel: S.of(context).rename,
     initialValue: nameWithoutExt,
     message: extName.toUpperCase(),
     alignMessage: Alignment.centerRight,
-    hintText: "Enter file name",
+    hintText: S.of(context).enterFileName,
     maxLength: 50,
     alwaysShowSuccessState: true,
     onSubmit: (String text) async {
@@ -147,7 +149,7 @@ Future<bool> editFileCaption(
     return true;
   } catch (e) {
     if (context != null) {
-      showShortToast(context, "Something went wrong");
+      showShortToast(context, S.of(context).somethingWentWrong);
     }
     return false;
   }
@@ -166,7 +168,7 @@ Future<void> _updatePublicMetadata(
   }
   ProgressDialog? dialog;
   if (context != null && showProgressDialogs) {
-    dialog = createProgressDialog(context, 'Please wait...');
+    dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
   }
   try {
@@ -174,7 +176,7 @@ Future<void> _updatePublicMetadata(
     await FileMagicService.instance.updatePublicMagicMetadata(files, update);
     if (context != null) {
       if (showDoneToast) {
-        showShortToast(context, 'Done');
+        showShortToast(context, S.of(context).done);
       }
       await dialog?.hide();
     }

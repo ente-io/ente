@@ -207,7 +207,7 @@ class RefreshIndicatorWidget extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 4, 0, 0),
-                  child: Text(_getRefreshingText()),
+                  child: Text(_getRefreshingText(context)),
                 ),
               ],
             ),
@@ -217,22 +217,19 @@ class RefreshIndicatorWidget extends StatelessWidget {
     );
   }
 
-  String _getRefreshingText() {
+  String _getRefreshingText(BuildContext context) {
     if (event!.status == SyncStatus.startedFirstGalleryImport ||
         event!.status == SyncStatus.completedFirstGalleryImport) {
-      return "Loading gallery...";
+      return S.of(context).loadingGallery;
     }
     if (event!.status == SyncStatus.applyingRemoteDiff) {
-      return "Syncing...";
+      return S.of(context).syncing;
     }
     if (event!.status == SyncStatus.preparingForUpload) {
-      return "Encrypting backup...";
+      return S.of(context).encryptingBackup;
     }
     if (event!.status == SyncStatus.inProgress) {
-      return event!.completed.toString() +
-          "/" +
-          event!.total.toString() +
-          " memories preserved";
+      return S.of(context).syncProgress(event!.completed!, event!.total!);
     }
     if (event!.status == SyncStatus.paused) {
       return event!.reason;
@@ -242,10 +239,10 @@ class RefreshIndicatorWidget extends StatelessWidget {
     }
     if (event!.status == SyncStatus.completedBackup) {
       if (event!.wasStopped) {
-        return "Sync stopped";
+        return S.of(context).syncStopped;
       }
     }
-    return "All memories preserved";
+    return S.of(context).allMemoriesPreserved;
   }
 }
 
@@ -272,9 +269,9 @@ class SyncStatusCompletedWidget extends StatelessWidget {
                   color: Theme.of(context).colorScheme.greenAlternative,
                   size: 22,
                 ),
-                const Padding(
-                  padding: EdgeInsets.only(left: 12),
-                  child: Text("All memories preserved"),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Text(S.of(context).allMemoriesPreserved),
                 ),
               ],
             ),

@@ -860,5 +860,28 @@
   "yourVerificationCodeHasExpired": "Your verification code has expired",
   "emailChangedTo": "Email changed to {newEmail}",
   "verifying": "Verifying...",
-  "disablingTwofactorAuthentication": "Disabling two-factor authentication..."
+  "disablingTwofactorAuthentication": "Disabling two-factor authentication...",
+  "allMemoriesPreserved": "All memories preserved",
+  "loadingGallery": "Loading gallery...",
+  "syncing": "Syncing...",
+  "encryptingBackup": "Encrypting backup...",
+  "syncStopped": "Sync stopped",
+  "syncProgress": "{completed}/{total} memories preserved",
+  "@syncProgress": {
+    "description": "Text to tell user how many memories have been preserved",
+    "placeholders": {
+      "completed" :{
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "archiving": "Archiving...",
+  "unarchiving": "Unarchiving...",
+  "successfullyArchived": "Successfully archived",
+  "successfullyUnarchived": "Successfully unarchived",
+  "renameFile": "Rename file",
+  "enterFileName": "Enter file name"
 }
