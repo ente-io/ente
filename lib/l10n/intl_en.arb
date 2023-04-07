@@ -731,6 +731,15 @@
   "uploadingFilesToAlbum": "Uploading files to album...",
   "addedSuccessfullyTo": "Added successfully to  {albumName}",
   "movedSuccessfullyTo": "Moved successfully to {albumName}",
-  "thisAlbumAlreadyHasACollaborativeLink": "This album already has a collaborative link",
-  "collaborativeLinkCreatedFor": "Collaborative link created for {albumName}"
+  "thisAlbumAlreadyHDACollaborativeLink": "This album already has a collaborative link",
+  "collaborativeLinkCreatedFor": "Collaborative link created for {albumName}",
+  "askYourLovedOnesToShare": "Ask your loved ones to share",
+  "invite": "Invite",
+  "shareYourFirstAlbum": "Share your first album",
+  "sharedWith": "Shared with {emailIDs}",
+  "sharedWithMe": "Shared with me",
+  "sharedByMe": "Shared by me",
+  "doubleYourStorage": "Double your storage",
+  "referFriendsAnd2xYourPlan": "Refer friends and 2x your plan",
+  "shareAlbumHint": "Open an album and tap the share button on the top right to share."
 }

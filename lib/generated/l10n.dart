@@ -5148,10 +5148,10 @@ class S {
   }
 
   /// `This album already has a collaborative link`
-  String get thisAlbumAlreadyHasACollaborativeLink {
+  String get thisAlbumAlreadyHDACollaborativeLink {
     return Intl.message(
       'This album already has a collaborative link',
-      name: 'thisAlbumAlreadyHasACollaborativeLink',
+      name: 'thisAlbumAlreadyHDACollaborativeLink',
       desc: '',
       args: [],
     );
@@ -5164,6 +5164,96 @@ class S {
       name: 'collaborativeLinkCreatedFor',
       desc: '',
       args: [albumName],
+    );
+  }
+
+  /// `Ask your loved ones to share`
+  String get askYourLovedOnesToShare {
+    return Intl.message(
+      'Ask your loved ones to share',
+      name: 'askYourLovedOnesToShare',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invite`
+  String get invite {
+    return Intl.message(
+      'Invite',
+      name: 'invite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share your first album`
+  String get shareYourFirstAlbum {
+    return Intl.message(
+      'Share your first album',
+      name: 'shareYourFirstAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared with {emailIDs}`
+  String sharedWith(Object emailIDs) {
+    return Intl.message(
+      'Shared with $emailIDs',
+      name: 'sharedWith',
+      desc: '',
+      args: [emailIDs],
+    );
+  }
+
+  /// `Shared with me`
+  String get sharedWithMe {
+    return Intl.message(
+      'Shared with me',
+      name: 'sharedWithMe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared by me`
+  String get sharedByMe {
+    return Intl.message(
+      'Shared by me',
+      name: 'sharedByMe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Double your storage`
+  String get doubleYourStorage {
+    return Intl.message(
+      'Double your storage',
+      name: 'doubleYourStorage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refer friends and 2x your plan`
+  String get referFriendsAnd2xYourPlan {
+    return Intl.message(
+      'Refer friends and 2x your plan',
+      name: 'referFriendsAnd2xYourPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open an album and tap the share button on the top right to share.`
+  String get shareAlbumHint {
+    return Intl.message(
+      'Open an album and tap the share button on the top right to share.',
+      name: 'shareAlbumHint',
+      desc: '',
+      args: [],
     );
   }
 }

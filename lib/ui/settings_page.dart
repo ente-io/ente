@@ -6,6 +6,7 @@ import "package:flutter_animate/flutter_animate.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/opened_settings_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/feature_flag_service.dart';
 import "package:photos/services/storage_bonus_service.dart";
 import 'package:photos/theme/colors.dart';
@@ -93,8 +94,8 @@ class SettingsPage extends StatelessWidget {
                   child: NotificationWidget(
                     startIcon: Icons.auto_awesome,
                     actionIcon: Icons.arrow_forward_outlined,
-                    text: "Double your storage",
-                    subText: "Refer friends and 2x your plan",
+                    text: S.of(context).doubleYourStorage,
+                    subText: S.of(context).referFriendsAnd2xYourPlan,
                     type: NotificationType.goldenBanner,
                     onTap: () async {
                       StorageBonusService.instance.markStorageBonusAsDone();
