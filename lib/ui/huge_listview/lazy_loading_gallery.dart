@@ -431,33 +431,16 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       selectionColor = avatarColors[(randomID).remainder(avatarColors.length)];
     }
     return GestureDetector(
-      onTap: () async {
-        if (widget.selectedFiles?.files.isNotEmpty ?? false) {
-          if (widget.limitSelectionToOne &&
-              file != widget.selectedFiles!.files.first) {
-            widget.selectedFiles!.clearAll();
-          }
-
-          _toggleFileSelection(file);
-        } else {
-          if (AppLifecycleService.instance.mediaExtensionAction.action ==
-              IntentAction.pick) {
-            final ioFile = await getFile(file);
-            MediaExtension().setResult("file://${ioFile!.path}");
-          } else {
-            _routeToDetailPage(file, context);
-          }
-        }
+      onTap: () {
+        widget.limitSelectionToOne
+            ? _onTapWithSelectionLimit(file)
+            : _onTapNoSelectionLimit(file);
       },
-      onLongPress: widget.selectedFiles != null
-          ? () {
-              if (AppLifecycleService.instance.mediaExtensionAction.action ==
-                  IntentAction.main) {
-                HapticFeedback.lightImpact();
-                _toggleFileSelection(file);
-              }
-            }
-          : null,
+      onLongPress: () {
+        widget.limitSelectionToOne
+            ? _onLongPressWithSelectionLimit(file)
+            : _onLongPressNoSelectionLimit(file);
+      },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(1),
         child: Stack(
@@ -504,6 +487,48 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
 
   void _toggleFileSelection(File file) {
     widget.selectedFiles!.toggleSelection(file);
+  }
+
+  void _onTapNoSelectionLimit(File file) async {
+    if (widget.selectedFiles?.files.isNotEmpty ?? false) {
+      _toggleFileSelection(file);
+    } else {
+      if (AppLifecycleService.instance.mediaExtensionAction.action ==
+          IntentAction.pick) {
+        final ioFile = await getFile(file);
+        MediaExtension().setResult("file://${ioFile!.path}");
+      } else {
+        _routeToDetailPage(file, context);
+      }
+    }
+  }
+
+  void _onTapWithSelectionLimit(File file) {
+    if (widget.selectedFiles!.files.isNotEmpty &&
+        widget.selectedFiles!.files.first != file) {
+      widget.selectedFiles!.clearAll();
+    }
+    _toggleFileSelection(file);
+  }
+
+  void _onLongPressNoSelectionLimit(File file) {
+    if (widget.selectedFiles!.files.isNotEmpty) {
+      _routeToDetailPage(file, context);
+    } else if (AppLifecycleService.instance.mediaExtensionAction.action ==
+        IntentAction.main) {
+      HapticFeedback.lightImpact();
+      _toggleFileSelection(file);
+    }
+  }
+
+  Future<void> _onLongPressWithSelectionLimit(File file) async {
+    if (AppLifecycleService.instance.mediaExtensionAction.action ==
+        IntentAction.pick) {
+      final ioFile = await getFile(file);
+      MediaExtension().setResult("file://${ioFile!.path}");
+    } else {
+      _routeToDetailPage(file, context);
+    }
   }
 
   void _routeToDetailPage(File file, BuildContext context) {
