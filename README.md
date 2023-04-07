@@ -35,7 +35,7 @@ You can add tokens to ente by one of the following methods:
 3. Bulk importing from a file that contains a list of codes in the following
    format:
 ```
-otpauth://totp/ACCOUNT?secret=SUPERSECRET&issuer=SERVICE
+otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET
 ```
 The codes maybe separated by new lines or commas.
 
@@ -70,6 +70,10 @@ src="https://ente.io/static/ed265c3abdcd3efa5e29f64b927bcb44/e230a/play-store-ba
   width="197" alt="Download on AppStore"
 src="https://user-images.githubusercontent.com/1161789/154795157-c4468ff9-97fd-46f3-87fe-dca789d8733a.png">
 </a>
+
+### Web
+
+You can view your 2FA codes at https://web.ente.io/auth. For adding or managing your secrets, you will need to use our mobile app.
 
 ### Desktop
 
