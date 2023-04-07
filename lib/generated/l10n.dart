@@ -4752,6 +4752,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Delete empty albums`
+  String get deleteEmptyAlbums {
+    return Intl.message(
+      'Delete empty albums',
+      name: 'deleteEmptyAlbums',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete empty albums?`
+  String get deleteEmptyAlbumsWithQuestionMark {
+    return Intl.message(
+      'Delete empty albums?',
+      name: 'deleteEmptyAlbumsWithQuestionMark',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.`
+  String get deleteAlbumsDialogBody {
+    return Intl.message(
+      'This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.',
+      name: 'deleteAlbumsDialogBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Deleting {currentlyDeleting} / {totalCount}`
+  String deleteProgress(Object currentlyDeleting, Object totalCount) {
+    return Intl.message(
+      'Deleting $currentlyDeleting / $totalCount',
+      name: 'deleteProgress',
+      desc: '',
+      args: [currentlyDeleting, totalCount],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

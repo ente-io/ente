@@ -676,5 +676,9 @@
   "loggingOut": "Logging out...",
   "name": "Name",
   "newest": "Newest",
-  "lastUpdated": "Last updated"
+  "lastUpdated": "Last updated",
+  "deleteEmptyAlbums": "Delete empty albums",
+  "deleteEmptyAlbumsWithQuestionMark": "Delete empty albums?",
+  "deleteAlbumsDialogBody": "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.",
+  "deleteProgress": "Deleting {currentlyDeleting} / {totalCount}"
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
@@ -34,7 +35,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
         child: ButtonWidget(
           buttonSize: ButtonSize.small,
           buttonType: ButtonType.secondary,
-          labelText: "Delete empty albums",
+          labelText: S.of(context).deleteEmptyAlbums,
           icon: Icons.delete_sweep_outlined,
           shouldSurfaceExecutionStates: false,
           onTap: () async {
@@ -43,7 +44,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
               isDismissible: true,
               buttons: [
                 ButtonWidget(
-                  labelText: "Yes",
+                  labelText: S.of(context).yes,
                   buttonType: ButtonType.neutral,
                   buttonSize: ButtonSize.large,
                   shouldStickToDarkTheme: true,
@@ -66,7 +67,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
                   },
                 ),
                 ButtonWidget(
-                  labelText: "Cancel",
+                  labelText: S.of(context).cancel,
                   buttonType: ButtonType.secondary,
                   buttonSize: ButtonSize.large,
                   shouldStickToDarkTheme: true,
@@ -76,9 +77,8 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
                   },
                 )
               ],
-              title: "Delete empty albums?",
-              body:
-                  "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.",
+              title: S.of(context).deleteEmptyAlbumsWithQuestionMark,
+              body: S.of(context).deleteAlbumsDialogBody,
               actionSheetType: ActionSheetType.defaultActionSheet,
             );
           },
@@ -98,9 +98,11 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
     int failedCount = 0;
     for (int i = 0; i < collections.length; i++) {
       if (mounted && !_isCancelled) {
+        final String currentlyDeleting = (i + 1)
+            .toString()
+            .padLeft(collections.length.toString().length, '0');
         _deleteProgress.value =
-            "Deleting ${(i + 1).toString().padLeft(collections.length.toString().length, '0')} / "
-            "${collections.length}";
+            S.of(context).deleteProgress(currentlyDeleting, collections.length);
         try {
           await CollectionsService.instance.trashEmptyCollection(
             collections[i].collection,
