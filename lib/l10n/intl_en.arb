@@ -898,5 +898,13 @@
   "selectedItemsWillBeDeletedFromAllAlbumsAndMoved": "Selected items will be deleted from all albums and moved to trash.",
   "theseItemsWillBeDeletedFromYourDevice": "These items will be deleted from your device.",
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
-  "error": "Error"
+  "error": "Error",
+  "tempErrorContactSupportIfPersists": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
+  "cachedData": "Cached data",
+  "clearCaches": "Clear caches",
+  "remoteImages": "Remote images",
+  "remoteVideos": "Remote videos",
+  "remoteThumbnails": "Remote thumbnails",
+  "pendingSync": "Pending sync",
+  "localGallery": "Local gallery"
 }

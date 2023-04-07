@@ -290,6 +290,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "byClickingLogInIAgreeToThe": MessageLookupByLibrary.simpleMessage(
             "By clicking log in, I agree to the"),
+        "cachedData": MessageLookupByLibrary.simpleMessage("Cached data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
         "canNotUploadToAlbumsOwnedByOthers":
             MessageLookupByLibrary.simpleMessage(
@@ -321,6 +322,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim more!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Claimed"),
         "claimedStorageSoFar": m5,
+        "clearCaches": MessageLookupByLibrary.simpleMessage("Clear caches"),
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Click on the overflow menu"),
@@ -647,6 +649,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Loading EXIF data..."),
         "loadingGallery":
             MessageLookupByLibrary.simpleMessage("Loading gallery..."),
+        "localGallery": MessageLookupByLibrary.simpleMessage("Local gallery"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lock"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "To enable lockscreen, please setup device passcode or screen lock in your system settings."),
@@ -728,6 +731,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "paymentFailed": MessageLookupByLibrary.simpleMessage("Payment failed"),
         "paymentFailedTalkToProvider": m29,
         "paymentFailedWithReason": m30,
+        "pendingSync": MessageLookupByLibrary.simpleMessage("Pending sync"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
         "permDeleteWarning": MessageLookupByLibrary.simpleMessage(
@@ -824,6 +828,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space"),
         "remindToEmptyEnteTrash": MessageLookupByLibrary.simpleMessage(
             "Also empty your \"Trash\" to claim the freed up space"),
+        "remoteImages": MessageLookupByLibrary.simpleMessage("Remote images"),
+        "remoteThumbnails":
+            MessageLookupByLibrary.simpleMessage("Remote thumbnails"),
+        "remoteVideos": MessageLookupByLibrary.simpleMessage("Remote videos"),
         "remove": MessageLookupByLibrary.simpleMessage("Remove"),
         "removeDuplicates":
             MessageLookupByLibrary.simpleMessage("Remove duplicates"),
@@ -995,6 +1003,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "tapToCopy": MessageLookupByLibrary.simpleMessage("tap to copy"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("Tap to enter code"),
+        "tempErrorContactSupportIfPersists": MessageLookupByLibrary.simpleMessage(
+            "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team."),
         "terminate": MessageLookupByLibrary.simpleMessage("Terminate"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Terminate session?"),

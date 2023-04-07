@@ -6291,6 +6291,86 @@ class S {
       args: [],
     );
   }
+
+  /// `It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.`
+  String get tempErrorContactSupportIfPersists {
+    return Intl.message(
+      'It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.',
+      name: 'tempErrorContactSupportIfPersists',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cached data`
+  String get cachedData {
+    return Intl.message(
+      'Cached data',
+      name: 'cachedData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear caches`
+  String get clearCaches {
+    return Intl.message(
+      'Clear caches',
+      name: 'clearCaches',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remote images`
+  String get remoteImages {
+    return Intl.message(
+      'Remote images',
+      name: 'remoteImages',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remote videos`
+  String get remoteVideos {
+    return Intl.message(
+      'Remote videos',
+      name: 'remoteVideos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remote thumbnails`
+  String get remoteThumbnails {
+    return Intl.message(
+      'Remote thumbnails',
+      name: 'remoteThumbnails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pending sync`
+  String get pendingSync {
+    return Intl.message(
+      'Pending sync',
+      name: 'pendingSync',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local gallery`
+  String get localGallery {
+    return Intl.message(
+      'Local gallery',
+      name: 'localGallery',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

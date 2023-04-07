@@ -46,8 +46,7 @@ Future<ButtonResult?> showErrorDialogForException({
   bool isDismissible = true,
   String apiErrorPrefix = "It looks like something went wrong.",
 }) async {
-  String errorMessage =
-      "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.";
+  String errorMessage = S.of(context).tempErrorContactSupportIfPersists;
   if (exception is DioError &&
       exception.response != null &&
       exception.response!.data["code"] != null) {

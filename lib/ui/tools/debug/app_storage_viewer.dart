@@ -5,6 +5,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -56,25 +57,25 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
     paths.addAll([
       PathStorageItem.name(
         imageCachePath,
-        "Remote images",
+        S.of(context).remoteImages,
         allowCacheClear: true,
       ),
       PathStorageItem.name(
         videoCachePath,
-        "Remote videos",
+        S.of(context).remoteVideos,
         allowCacheClear: true,
       ),
       PathStorageItem.name(
         cacheDirectory,
-        "Remote thumbnails",
+        S.of(context).remoteThumbnails,
         allowCacheClear: true,
       ),
-      PathStorageItem.name(tempDownload, "Pending sync"),
+      PathStorageItem.name(tempDownload, S.of(context).pendingSync),
       PathStorageItem.name(
         Platform.isAndroid
             ? androidGlideCacheDirectory
             : iOSPhotoManagerInAppCacheDirectory,
-        "Local gallery",
+        S.of(context).localGallery,
         allowCacheClear: true,
       ),
     ]);
@@ -102,8 +103,8 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
-            flexibleSpaceTitle: const TitleBarTitleWidget(
-              title: "Manage device storage",
+            flexibleSpaceTitle: TitleBarTitleWidget(
+              title: S.of(context).manageDeviceStorage,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -131,8 +132,8 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                     children: [
                       Column(
                         children: [
-                          const MenuSectionTitle(
-                            title: 'Cached data',
+                          MenuSectionTitle(
+                            title: S.of(context).cachedData,
                           ),
                           ListView.builder(
                             shrinkWrap: true,
@@ -156,8 +157,8 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                           ),
                           MenuItemWidget(
                             leadingIcon: Icons.delete_sweep_outlined,
-                            captionedTextWidget: const CaptionedTextWidget(
-                              title: "Clear caches",
+                            captionedTextWidget: CaptionedTextWidget(
+                              title: S.of(context).clearCaches,
                             ),
                             menuItemColor:
                                 getEnteColorScheme(context).fillFaint,
