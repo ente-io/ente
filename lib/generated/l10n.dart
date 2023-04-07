@@ -4972,6 +4972,200 @@ class S {
       args: [count],
     );
   }
+
+  /// `Share`
+  String get share {
+    return Intl.message(
+      'Share',
+      name: 'share',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unhide to album`
+  String get unhideToAlbum {
+    return Intl.message(
+      'Unhide to album',
+      name: 'unhideToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore to album`
+  String get restoreToAlbum {
+    return Intl.message(
+      'Restore to album',
+      name: 'restoreToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, one {Move item} other {Move items}}`
+  String moveItem(num count) {
+    return Intl.plural(
+      count,
+      one: 'Move item',
+      other: 'Move items',
+      name: 'moveItem',
+      desc: 'Page title while moving one or more items to an album',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, one {Add item} other {Add items}}`
+  String addItem(num count) {
+    return Intl.plural(
+      count,
+      one: 'Add item',
+      other: 'Add items',
+      name: 'addItem',
+      desc: 'Page title while adding one or more items to album',
+      args: [count],
+    );
+  }
+
+  /// `Create or select album`
+  String get createOrSelectAlbum {
+    return Intl.message(
+      'Create or select album',
+      name: 'createOrSelectAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select album`
+  String get selectAlbum {
+    return Intl.message(
+      'Select album',
+      name: 'selectAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Album name`
+  String get searchByAlbumNameHint {
+    return Intl.message(
+      'Album name',
+      name: 'searchByAlbumNameHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Album title`
+  String get albumTitle {
+    return Intl.message(
+      'Album title',
+      name: 'albumTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter album name`
+  String get enterAlbumName {
+    return Intl.message(
+      'Enter album name',
+      name: 'enterAlbumName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restoring files...`
+  String get restoringFiles {
+    return Intl.message(
+      'Restoring files...',
+      name: 'restoringFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Moving files to album...`
+  String get movingFilesToAlbum {
+    return Intl.message(
+      'Moving files to album...',
+      name: 'movingFilesToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unhiding files to album`
+  String get unhidingFilesToAlbum {
+    return Intl.message(
+      'Unhiding files to album',
+      name: 'unhidingFilesToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Can not upload to albums owned by others`
+  String get canNotUploadToAlbumsOwnedByOthers {
+    return Intl.message(
+      'Can not upload to albums owned by others',
+      name: 'canNotUploadToAlbumsOwnedByOthers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Uploading files to album...`
+  String get uploadingFilesToAlbum {
+    return Intl.message(
+      'Uploading files to album...',
+      name: 'uploadingFilesToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Added successfully to  {albumName}`
+  String addedSuccessfullyTo(Object albumName) {
+    return Intl.message(
+      'Added successfully to  $albumName',
+      name: 'addedSuccessfullyTo',
+      desc: '',
+      args: [albumName],
+    );
+  }
+
+  /// `Moved successfully to {albumName}`
+  String movedSuccessfullyTo(Object albumName) {
+    return Intl.message(
+      'Moved successfully to $albumName',
+      name: 'movedSuccessfullyTo',
+      desc: '',
+      args: [albumName],
+    );
+  }
+
+  /// `This album already has a collaborative link`
+  String get thisAlbumAlreadyHasACollaborativeLink {
+    return Intl.message(
+      'This album already has a collaborative link',
+      name: 'thisAlbumAlreadyHasACollaborativeLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collaborative link created for {albumName}`
+  String collaborativeLinkCreatedFor(Object albumName) {
+    return Intl.message(
+      'Collaborative link created for $albumName',
+      name: 'collaborativeLinkCreatedFor',
+      desc: '',
+      args: [albumName],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

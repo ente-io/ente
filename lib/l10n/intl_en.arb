@@ -707,5 +707,30 @@
         "type": "int"
       }
     }
-  }
+  },
+  "share": "Share",
+  "unhideToAlbum": "Unhide to album",
+  "restoreToAlbum": "Restore to album",
+  "moveItem": "{count, plural, one {Move item} other {Move items}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, one {Add item} other {Add items}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
+  "createOrSelectAlbum": "Create or select album",
+  "selectAlbum": "Select album",
+  "searchByAlbumNameHint": "Album name",
+  "albumTitle": "Album title",
+  "enterAlbumName": "Enter album name",
+  "restoringFiles": "Restoring files...",
+  "movingFilesToAlbum": "Moving files to album...",
+  "unhidingFilesToAlbum": "Unhiding files to album",
+  "canNotUploadToAlbumsOwnedByOthers": "Can not upload to albums owned by others",
+  "uploadingFilesToAlbum": "Uploading files to album...",
+  "addedSuccessfullyTo": "Added successfully to  {albumName}",
+  "movedSuccessfullyTo": "Moved successfully to {albumName}",
+  "thisAlbumAlreadyHasACollaborativeLink": "This album already has a collaborative link",
+  "collaborativeLinkCreatedFor": "Collaborative link created for {albumName}"
 }

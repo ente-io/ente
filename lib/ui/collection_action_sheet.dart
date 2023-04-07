@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:photos/core/configuration.dart";
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/selected_files.dart';
@@ -29,33 +30,33 @@ enum CollectionActionType {
   collectPhotos,
 }
 
-String _actionName(CollectionActionType type, bool plural) {
-  bool addTitleSuffix = false;
-  final titleSuffix = (plural ? "s" : "");
+String _actionName(
+  BuildContext context,
+  CollectionActionType type,
+  int fileCount,
+) {
   String text = "";
   switch (type) {
     case CollectionActionType.addFiles:
-      text = "Add item";
-      addTitleSuffix = true;
+      text = S.of(context).addItem(fileCount);
       break;
     case CollectionActionType.moveFiles:
-      text = "Move item";
-      addTitleSuffix = true;
+      text = S.of(context).moveItem(fileCount);
       break;
     case CollectionActionType.restoreFiles:
-      text = "Restore to album";
+      text = S.of(context).restoreToAlbum;
       break;
     case CollectionActionType.unHide:
-      text = "Unhide to album";
+      text = S.of(context).unhideToAlbum;
       break;
     case CollectionActionType.shareCollection:
-      text = "Share";
+      text = S.of(context).share;
       break;
     case CollectionActionType.collectPhotos:
-      text = "Share";
+      text = S.of(context).share;
       break;
   }
-  return addTitleSuffix ? text + titleSuffix : text;
+  return text;
 }
 
 void showCollectionActionSheet(
@@ -137,12 +138,12 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                       children: [
                         BottomOfTitleBarWidget(
                           title: TitleBarTitleWidget(
-                            title:
-                                _actionName(widget.actionType, filesCount > 1),
+                            title: _actionName(
+                                context, widget.actionType, filesCount),
                           ),
                           caption: widget.showOptionToCreateNewAlbum
-                              ? "Create or select album"
-                              : "Select album",
+                              ? S.of(context).createOrSelectAlbum
+                              : S.of(context).selectAlbum,
                         ),
                         Padding(
                           padding: const EdgeInsets.only(
@@ -151,7 +152,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                             right: 16,
                           ),
                           child: TextInputWidget(
-                            hintText: "Album name",
+                            hintText: S.of(context).searchByAlbumNameHint,
                             prefixIcon: Icons.search_rounded,
                             onChange: (value) {
                               setState(() {
@@ -177,11 +178,11 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                           ),
                         ),
                       ),
-                      child: const ButtonWidget(
+                      child: ButtonWidget(
                         buttonType: ButtonType.secondary,
                         buttonAction: ButtonAction.cancel,
                         isInAlert: true,
-                        labelText: "Cancel",
+                        labelText: S.of(context).cancel,
                       ),
                     ),
                   )
