@@ -49,7 +49,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         captionedTextWidget: const CaptionedTextWidget(
           title: "Lockscreen",
         ),
-        trailingSwitch: ToggleSwitchWidget(
+        trailingWidget: ToggleSwitchWidget(
           value: _config.shouldShowLockScreen(),
           onChanged: (value) async {
             final hasAuthenticated = await LocalAuthenticationService.instance

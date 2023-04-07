@@ -67,7 +67,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           captionedTextWidget: CaptionedTextWidget(
             title: l10n.crashAndErrorReporting,
           ),
-          trailingSwitch: ToggleSwitchWidget(
+          trailingWidget: ToggleSwitchWidget(
             value: SuperLogging.shouldReportErrors(),
             onChanged: (value) async {
               await SuperLogging.setShouldReportErrors(value);

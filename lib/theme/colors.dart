@@ -21,6 +21,7 @@ class EnteColorScheme {
   final Color fillBase;
   final Color fillMuted;
   final Color fillFaint;
+  final Color fillFaintPressed;
 
   // Stroke Colors
   final Color strokeBase;
@@ -51,6 +52,7 @@ class EnteColorScheme {
     this.fillBase,
     this.fillMuted,
     this.fillFaint,
+    this.fillFaintPressed,
     this.strokeBase,
     this.strokeMuted,
     this.strokeFaint, {
@@ -78,6 +80,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   fillBaseLight,
   fillMutedLight,
   fillFaintLight,
+  fillFaintPressedLight,
   strokeBaseLight,
   strokeMutedLight,
   strokeFaintLight,
@@ -95,6 +98,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   fillBaseDark,
   fillMutedDark,
   fillFaintDark,
+  fillFaintPressedDark,
   strokeBaseDark,
   strokeMutedDark,
   strokeFaintDark,
@@ -129,10 +133,12 @@ const Color textFaintDark = Color.fromRGBO(255, 255, 255, 0.5);
 const Color fillBaseLight = Color.fromRGBO(0, 0, 0, 1);
 const Color fillMutedLight = Color.fromRGBO(0, 0, 0, 0.12);
 const Color fillFaintLight = Color.fromRGBO(0, 0, 0, 0.04);
+const Color fillFaintPressedLight = Color.fromRGBO(0, 0, 0, 0.08);
 
 const Color fillBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color fillMutedDark = Color.fromRGBO(255, 255, 255, 0.16);
 const Color fillFaintDark = Color.fromRGBO(255, 255, 255, 0.12);
+const Color fillFaintPressedDark = Color.fromRGBO(255, 255, 255, 0.06);
 
 // Stroke Colors
 const Color strokeBaseLight = Color.fromRGBO(0, 0, 0, 1);
