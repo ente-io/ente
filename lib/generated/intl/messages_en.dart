@@ -369,6 +369,7 @@ class MessageLookup extends MessageLookupByLibrary {
             " other albums they are part of?"),
         "deleteAlbumsDialogBody": MessageLookupByLibrary.simpleMessage(
             "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list."),
+        "deleteAll": MessageLookupByLibrary.simpleMessage("Delete All"),
         "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
             "You are about to permanently delete your account and all its data.\nThis action is irreversible."),
         "deleteEmptyAlbums":
@@ -402,6 +403,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "details": MessageLookupByLibrary.simpleMessage("Details"),
         "devAccountChanged": MessageLookupByLibrary.simpleMessage(
             "The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.\n\nOur apologies for the inconvenience, but this was unavoidable."),
+        "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
+            "Files added to this device album will automatically get uploaded to ente."),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster."),
         "disableAutoLock":
@@ -509,6 +512,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "howItWorks": MessageLookupByLibrary.simpleMessage("How it works"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
             "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match."),
+        "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
+            "Some files in this album are ignored from upload because they had previously been deleted from ente."),
         "importing": MessageLookupByLibrary.simpleMessage("Importing...."),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Incorrect password"),
@@ -531,6 +536,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Invite your friends"),
         "itemCount": m14,
         "itemSelectedCount": m15,
+        "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion":
+            MessageLookupByLibrary.simpleMessage(
+                "Items show the number of days remaining before permanent deletion"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Selected items will be removed from this album"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Keep Photos"),
@@ -538,7 +546,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Kindly help us with this information"),
         "lastUpdated": MessageLookupByLibrary.simpleMessage("Last updated"),
         "leave": MessageLookupByLibrary.simpleMessage("Leave"),
+        "leaveAlbum": MessageLookupByLibrary.simpleMessage("Leave album"),
         "leaveFamily": MessageLookupByLibrary.simpleMessage("Leave family"),
+        "leaveSharedAlbum":
+            MessageLookupByLibrary.simpleMessage("Leave shared album?"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Light"),
         "linkCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("Link copied to clipboard"),
@@ -626,6 +637,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("Photo grid size"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("photo"),
+        "photosAddedByYouWillBeRemovedFromTheAlbum":
+            MessageLookupByLibrary.simpleMessage(
+                "Photos added by you will be removed from the album"),
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore subscription"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
@@ -719,12 +733,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Remove?"),
         "removingFromFavorites":
             MessageLookupByLibrary.simpleMessage("Removing from favorites..."),
+        "rename": MessageLookupByLibrary.simpleMessage("Rename"),
+        "renameAlbum": MessageLookupByLibrary.simpleMessage("Rename album"),
         "renewSubscription":
             MessageLookupByLibrary.simpleMessage("Renew subscription"),
         "renewsOn": m27,
         "reportABug": MessageLookupByLibrary.simpleMessage("Report a bug"),
         "reportBug": MessageLookupByLibrary.simpleMessage("Report bug"),
         "resendEmail": MessageLookupByLibrary.simpleMessage("Resend email"),
+        "resetIgnoredFiles":
+            MessageLookupByLibrary.simpleMessage("Reset ignored files"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Reset password"),
         "restore": MessageLookupByLibrary.simpleMessage("Restore"),
@@ -870,6 +888,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "total": MessageLookupByLibrary.simpleMessage("total"),
         "trash": MessageLookupByLibrary.simpleMessage("Trash"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Try again"),
+        "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
+            "Turn on backup to automatically upload files added to this device folder to ente."),
         "twitter": MessageLookupByLibrary.simpleMessage("Twitter"),
         "twoMonthsFreeOnYearlyPlans": MessageLookupByLibrary.simpleMessage(
             "2 months free on yearly plans"),
@@ -948,6 +968,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "You cannot downgrade to this plan"),
         "youCannotShareWithYourself": MessageLookupByLibrary.simpleMessage(
             "You cannot share with yourself"),
+        "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
+            "You don\'t have any archived items."),
         "youHaveSuccessfullyFreedUp": m45,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Your account has been deleted"),
@@ -968,6 +990,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Your subscription was updated successfully"),
         "youveNoDuplicateFilesThatCanBeCleared":
             MessageLookupByLibrary.simpleMessage(
-                "You\'ve no duplicate files that can be cleared")
+                "You\'ve no duplicate files that can be cleared"),
+        "youveNoFilesInThisAlbumThatCanBeDeleted":
+            MessageLookupByLibrary.simpleMessage(
+                "You\'ve no files in this album that can be deleted")
       };
 }

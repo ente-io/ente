@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
@@ -112,9 +113,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
     final result = await showTextInputDialog(
       context,
-      title: "Rename album",
-      submitButtonLabel: "Rename",
-      hintText: "Enter album name",
+      title: S.of(context).renameAlbum,
+      submitButtonLabel: S.of(context).rename,
+      hintText: S.of(context).enterAlbumName,
       alwaysShowSuccessState: true,
       textCapitalization: TextCapitalization.words,
       onSubmit: (String text) async {
@@ -150,21 +151,21 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
-          labelText: "Leave album",
+          labelText: S.of(context).leaveAlbum,
           onTap: () async {
             await CollectionsService.instance.leaveAlbum(widget.collection!);
           },
         ),
-        const ButtonWidget(
+        ButtonWidget(
           buttonType: ButtonType.secondary,
           buttonAction: ButtonAction.cancel,
           isInAlert: true,
           shouldStickToDarkTheme: true,
-          labelText: "Cancel",
+          labelText: S.of(context).cancel,
         )
       ],
-      title: "Leave shared album?",
-      body: "Photos added by you will be removed from the album",
+      title: S.of(context).leaveSharedAlbum,
+      body: S.of(context).photosAddedByYouWillBeRemovedFromTheAlbum,
     );
     if (actionResult?.action != null && mounted) {
       if (actionResult!.action == ButtonAction.error) {
@@ -196,8 +197,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (status.localIDs.isEmpty) {
       showErrorDialog(
         context,
-        "✨ All clear",
-        "You've no files in this album that can be deleted",
+        S.of(context).allClear,
+        S.of(context).youveNoFilesInThisAlbumThatCanBeDeleted,
       );
     } else {
       final bool? result = await routeToPage(

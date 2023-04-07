@@ -5256,6 +5256,136 @@ class S {
       args: [],
     );
   }
+
+  /// `Items show the number of days remaining before permanent deletion`
+  String get itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion {
+    return Intl.message(
+      'Items show the number of days remaining before permanent deletion',
+      name: 'itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete All`
+  String get deleteAll {
+    return Intl.message(
+      'Delete All',
+      name: 'deleteAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rename album`
+  String get renameAlbum {
+    return Intl.message(
+      'Rename album',
+      name: 'renameAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rename`
+  String get rename {
+    return Intl.message(
+      'Rename',
+      name: 'rename',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Leave shared album?`
+  String get leaveSharedAlbum {
+    return Intl.message(
+      'Leave shared album?',
+      name: 'leaveSharedAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Leave album`
+  String get leaveAlbum {
+    return Intl.message(
+      'Leave album',
+      name: 'leaveAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Photos added by you will be removed from the album`
+  String get photosAddedByYouWillBeRemovedFromTheAlbum {
+    return Intl.message(
+      'Photos added by you will be removed from the album',
+      name: 'photosAddedByYouWillBeRemovedFromTheAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You've no files in this album that can be deleted`
+  String get youveNoFilesInThisAlbumThatCanBeDeleted {
+    return Intl.message(
+      'You\'ve no files in this album that can be deleted',
+      name: 'youveNoFilesInThisAlbumThatCanBeDeleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You don't have any archived items.`
+  String get youDontHaveAnyArchivedItems {
+    return Intl.message(
+      'You don\'t have any archived items.',
+      name: 'youDontHaveAnyArchivedItems',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Some files in this album are ignored from upload because they had previously been deleted from ente.`
+  String get ignoredFolderUploadReason {
+    return Intl.message(
+      'Some files in this album are ignored from upload because they had previously been deleted from ente.',
+      name: 'ignoredFolderUploadReason',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset ignored files`
+  String get resetIgnoredFiles {
+    return Intl.message(
+      'Reset ignored files',
+      name: 'resetIgnoredFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Files added to this device album will automatically get uploaded to ente.`
+  String get deviceFilesAutoUploading {
+    return Intl.message(
+      'Files added to this device album will automatically get uploaded to ente.',
+      name: 'deviceFilesAutoUploading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turn on backup to automatically upload files added to this device folder to ente.`
+  String get turnOnBackupForAutoUpload {
+    return Intl.message(
+      'Turn on backup to automatically upload files added to this device folder to ente.',
+      name: 'turnOnBackupForAutoUpload',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

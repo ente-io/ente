@@ -4,6 +4,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
@@ -28,7 +29,7 @@ class ArchivePage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(Object context) {
+  Widget build(BuildContext context) {
     final Set<int> hiddenCollectionIDs =
         CollectionsService.instance.getHiddenCollections();
     final gallery = Gallery(
@@ -63,8 +64,8 @@ class ArchivePage extends StatelessWidget {
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: null,
-      emptyState: const EmptyState(
-        text: "You don't have any archived items.",
+      emptyState: EmptyState(
+        text: S.of(context).youDontHaveAnyArchivedItems,
       ),
       header: Padding(
         padding: const EdgeInsets.only(bottom: 24, top: 8),
@@ -78,7 +79,7 @@ class ArchivePage extends StatelessWidget {
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
-          "Archive",
+          S.of(context).archive,
           _selectedFiles,
         ),
       ),

@@ -6,6 +6,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
@@ -27,7 +28,7 @@ class TrashPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(Object context) {
+  Widget build(BuildContext context) {
     final bool filesAreSelected = _selectedFiles.files.isNotEmpty;
 
     final gallery = Gallery(
@@ -60,7 +61,7 @@ class TrashPage extends StatelessWidget {
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
-          "Trash",
+          S.of(context).trash,
           _selectedFiles,
         ),
       ),
@@ -102,7 +103,9 @@ class TrashPage extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              'Items show the number of days remaining before permanent deletion',
+              S
+                  .of(context)
+                  .itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion,
               style:
                   Theme.of(context).textTheme.caption!.copyWith(fontSize: 16),
             ),
@@ -141,7 +144,7 @@ class BottomButtonsWidget extends StatelessWidget {
                       horizontal: 16,
                     ),
                     child: Text(
-                      'Delete All',
+                      S.of(context).deleteAll,
                       style: Theme.of(context).textTheme.subtitle2!.copyWith(
                             color: const Color.fromRGBO(255, 101, 101, 1),
                           ),

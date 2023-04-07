@@ -741,5 +741,18 @@
   "sharedByMe": "Shared by me",
   "doubleYourStorage": "Double your storage",
   "referFriendsAnd2xYourPlan": "Refer friends and 2x your plan",
-  "shareAlbumHint": "Open an album and tap the share button on the top right to share."
+  "shareAlbumHint": "Open an album and tap the share button on the top right to share.",
+  "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Items show the number of days remaining before permanent deletion",
+  "deleteAll": "Delete All",
+  "renameAlbum": "Rename album",
+  "rename": "Rename",
+  "leaveSharedAlbum": "Leave shared album?",
+  "leaveAlbum": "Leave album",
+  "photosAddedByYouWillBeRemovedFromTheAlbum": "Photos added by you will be removed from the album",
+  "youveNoFilesInThisAlbumThatCanBeDeleted": "You've no files in this album that can be deleted",
+  "youDontHaveAnyArchivedItems": "You don't have any archived items.",
+  "ignoredFolderUploadReason": "Some files in this album are ignored from upload because they had previously been deleted from ente.",
+  "resetIgnoredFiles": "Reset ignored files",
+  "deviceFilesAutoUploading": "Files added to this device album will automatically get uploaded to ente.",
+  "turnOnBackupForAutoUpload": "Turn on backup to automatically upload files added to this device folder to ente."
 }

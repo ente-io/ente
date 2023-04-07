@@ -4,6 +4,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
@@ -26,7 +27,7 @@ class HiddenPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(Object context) {
+  Widget build(BuildContext context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInCollections(
@@ -69,7 +70,7 @@ class HiddenPage extends StatelessWidget {
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
-          "Hidden",
+          S.of(context).hidden,
           _selectedFiles,
         ),
       ),
