@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -141,7 +142,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
               widget.selectedFiles,
               collection: widget.collection,
             ),
-            text: widget.selectedFiles.files.length.toString() + ' selected',
+            text: S
+                .of(context)
+                .itemSelectedCount(widget.selectedFiles.files.length),
             onCancel: () {
               if (widget.selectedFiles.files.isNotEmpty) {
                 widget.selectedFiles.clearAll();

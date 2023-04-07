@@ -538,7 +538,7 @@
   "support": "Support",
   "theme": "Theme",
   "lightTheme": "Light",
-  "darkTheme" : "Dark",
+  "darkTheme": "Dark",
   "systemTheme": "System",
   "freeTrial": "Free trial",
   "selectYourPlan": "Select your plan",
@@ -575,10 +575,10 @@
     "type": "text"
   },
   "yearly": "Yearly",
-    "@yearly": {
-        "description": "The text to display for yearly plans",
-        "type": "text"
-    },
+  "@yearly": {
+    "description": "The text to display for yearly plans",
+    "type": "text"
+  },
   "confirmPlanChange": "Confirm plan change",
   "areYouSureYouWantToChangeYourPlan": "Are you sure you want to change your plan?",
   "youCannotDowngradeToThisPlan": "You cannot downgrade to this plan",
@@ -610,7 +610,7 @@
   "couldNotUpdateSubscription": "Could not update subscription",
   "pleaseContactSupportAndWeWillBeHappyToHelp": "Please contact support@ente.io and we will be happy to help!",
   "paymentFailed": "Payment failed",
-  "paymentFailedTalkToProvider" : "Please talk to {providerName} support if you were charged",
+  "paymentFailedTalkToProvider": "Please talk to {providerName} support if you were charged",
   "@paymentFailedTalkToProvider": {
     "description": "The text to display when the payment failed",
     "type": "text",
@@ -697,5 +697,15 @@
   "addToEnte": "Add to ente",
   "addToAlbum": "Add to album",
   "delete": "Delete",
-  "hide": "Hide"
+  "hide": "Hide",
+  "itemSelectedCount": "{count} selected",
+  "@itemSelectedCount": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  }
 }

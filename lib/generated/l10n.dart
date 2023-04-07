@@ -4962,6 +4962,16 @@ class S {
       args: [],
     );
   }
+
+  /// `{count} selected`
+  String itemSelectedCount(int count) {
+    return Intl.message(
+      '$count selected',
+      name: 'itemSelectedCount',
+      desc: 'Text to indicate number of items selected',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
