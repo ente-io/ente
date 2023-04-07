@@ -11,6 +11,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/ignored_file.dart';
@@ -139,7 +140,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                     const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    const Text("Download"),
+                    Text(S.of(context).download),
                   ],
                 ),
               ),
@@ -161,7 +162,9 @@ class FadingAppBarState extends State<FadingAppBar> {
                     const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text(isArchived ? "Unarchive" : "Archive"),
+                    Text(isArchived
+                        ? S.of(context).unarchive
+                        : S.of(context).archive),
                   ],
                 ),
               ),
@@ -182,7 +185,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                     const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    const Text("Set as"),
+                    Text(S.of(context).setAs),
                   ],
                 ),
               ),
@@ -202,7 +205,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                       const Padding(
                         padding: EdgeInsets.all(8),
                       ),
-                      const Text("Hide"),
+                      Text(S.of(context).hide),
                     ],
                   ),
                 ),
@@ -220,7 +223,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                       const Padding(
                         padding: EdgeInsets.all(8),
                       ),
-                      const Text("Unhide"),
+                      Text(S.of(context).unhide),
                     ],
                   ),
                 ),
@@ -299,7 +302,8 @@ class FadingAppBarState extends State<FadingAppBar> {
           final shouldBlockUser = file.uploadedFileID == null;
           late ProgressDialog dialog;
           if (shouldBlockUser) {
-            dialog = createProgressDialog(context, "Adding to favorites...");
+            dialog =
+                createProgressDialog(context, S.of(context).addingToFavorites);
             await dialog.show();
           }
           try {
@@ -307,7 +311,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           } catch (e, s) {
             _logger.severe(e, s);
             hasError = true;
-            showToast(context, "Sorry, could not add this to favorites!");
+            showToast(context, S.of(context).sorryCouldNotAddToFavorites);
           } finally {
             if (shouldBlockUser) {
               await dialog.hide();
@@ -319,7 +323,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           } catch (e, s) {
             _logger.severe(e, s);
             hasError = true;
-            showToast(context, "Sorry, could not remove this from favorites!");
+            showToast(context, S.of(context).sorryCouldNotRemoveFromFavorites);
           }
         }
         return hasError ? oldValue : isLiked;
@@ -395,7 +399,7 @@ class FadingAppBarState extends State<FadingAppBar> {
       } else if (!downloadLivePhotoOnDroid && savedAsset == null) {
         _logger.severe('Failed to save assert of type $type');
       }
-      showToast(context, "File saved to gallery");
+      showToast(context, S.of(context).fileSavedToGallery);
       await dialog.hide();
     } catch (e) {
       _logger.warning("Failed to save file", e);
@@ -445,7 +449,7 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   Future<void> _setAs(File file) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
       final io.File? fileToSave = await (getFile(file));
@@ -455,7 +459,7 @@ class FadingAppBarState extends State<FadingAppBar> {
       final m = MediaExtension();
       final bool result = await m.setAs("file://${fileToSave.path}", "image/*");
       if (result == false) {
-        showShortToast(context, "Something went wrong");
+        showShortToast(context, S.of(context).somethingWentWrong);
       }
       dialog.hide();
     } catch (e) {

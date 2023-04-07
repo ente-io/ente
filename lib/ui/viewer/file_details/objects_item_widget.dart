@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/services/object_detection/object_detection_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
@@ -15,12 +16,15 @@ class ObjectsItemWidget extends StatelessWidget {
     return InfoItemWidget(
       key: const ValueKey("Objects"),
       leadingIcon: Icons.image_search_outlined,
-      subtitleSection: _objectTags(file),
+      subtitleSection: _objectTags(context, file),
       hasChipButtons: true,
     );
   }
 
-  Future<List<ChipButtonWidget>> _objectTags(File file) async {
+  Future<List<ChipButtonWidget>> _objectTags(
+    BuildContext context,
+    File file,
+  ) async {
     try {
       final chipButtons = <ChipButtonWidget>[];
       var objectTags = <String>[];
@@ -29,9 +33,9 @@ class ObjectsItemWidget extends StatelessWidget {
         objectTags = await ObjectDetectionService.instance.predict(thumbnail);
       }
       if (objectTags.isEmpty) {
-        return const [
+        return [
           ChipButtonWidget(
-            "No results",
+            S.of(context).noResults,
             noChips: true,
           )
         ];

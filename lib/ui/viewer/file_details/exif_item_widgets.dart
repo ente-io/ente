@@ -1,5 +1,6 @@
 import "package:exif/exif.dart";
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -58,7 +59,7 @@ class AllExifItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InfoItemWidget(
       leadingIcon: Icons.text_snippet_outlined,
-      title: "EXIF",
+      title: S.of(context).exif,
       subtitleSection: _exifButton(context, file, exif),
     );
   }
@@ -71,10 +72,10 @@ class AllExifItemWidget extends StatelessWidget {
     late final String label;
     late final VoidCallback? onTap;
     if (exif == null) {
-      label = "Loading EXIF data...";
+      label = S.of(context).loadingExifData;
       onTap = null;
     } else if (exif.isNotEmpty) {
-      label = "View all EXIF data";
+      label = S.of(context).viewAllExifData;
       onTap = () => showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -83,8 +84,9 @@ class AllExifItemWidget extends StatelessWidget {
             barrierColor: backdropFaintDark,
           );
     } else {
-      label = "No EXIF data";
-      onTap = () => showShortToast(context, "This image has no exif data");
+      label = S.of(context).noExifData;
+      onTap =
+          () => showShortToast(context, S.of(context).thisImageHasNoExifData);
     }
     return Future.value([
       InlineButtonWidget(

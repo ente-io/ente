@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection.dart";
 import "package:photos/models/collection_items.dart";
 import "package:photos/models/file.dart";
@@ -35,7 +36,7 @@ class AlbumsItemWidget extends StatelessWidget {
     return InfoItemWidget(
       key: const ValueKey("Albums"),
       leadingIcon: Icons.folder_outlined,
-      title: "Albums",
+      title: S.of(context).albums,
       subtitleSection: fileIsBackedup
           ? _collectionsListOfFile(
               context,
@@ -82,7 +83,7 @@ class AlbumsItemWidget extends StatelessWidget {
         collections.add(c!);
         chipButtons.add(
           ChipButtonWidget(
-            c.isHidden() ? "Hidden" : c.name,
+            c.isHidden() ? S.of(context).hidden : c.name,
             onTap: () {
               if (c.isHidden()) {
                 return;

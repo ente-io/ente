@@ -688,6 +688,10 @@
   "youCanManageYourLinksInTheShareTab": "You can manage your links in the share tab.",
   "linkCopiedToClipboard": "Link copied to clipboard",
   "restore": "Restore",
+  "@restore": {
+    "description": "Display text for an action which triggers a restore of item from trash",
+    "type": "text"
+  },
   "moveToAlbum": "Move to album",
   "unhide": "Unhide",
   "unarchive": "Unarchive",
@@ -768,5 +772,20 @@
   "searchHintText": "Albums, months, days, years, ...",
   "searchByExamples" : "\u2022 Album names (e.g. \"Camera\")\n\u2022 Types of files (e.g. \"Videos\", \".gif\")\n\u2022 Years and months (e.g. \"2022\", \"January\")\n\u2022 Holidays (e.g. \"Christmas\")\n\u2022 Photo descriptions (e.g. “#fun”)",
   "youCanTrySearchingForADifferentQuery": "You can try searching for a different query.",
-  "noResultsFound": "No results found"
+  "noResultsFound": "No results found",
+  "addedBy": "Added by {emailOrName}",
+  "loadingExifData": "Loading EXIF data...",
+  "viewAllExifData": "View all EXIF data",
+  "noExifData": "No EXIF data",
+  "thisImageHasNoExifData": "This image has no exif data",
+  "exif": "EXIF",
+  "noResults": "No results",
+  "weDontSupportEditingPhotosAndAlbumsThatYouDont": "We don't support editing photos and albums that you don't own yet",
+  "failedToFetchOriginalForEdit": "Failed to fetch original for edit",
+  "close": "Close",
+  "setAs": "Set as",
+  "fileSavedToGallery": "File saved to gallery",
+  "download": "Download",
+  "pressAndHoldToPlayVideo": "Press and hold to play video",
+  "downloadFailed": "Download failed"
 }

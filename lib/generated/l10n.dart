@@ -4858,7 +4858,8 @@ class S {
     return Intl.message(
       'Restore',
       name: 'restore',
-      desc: '',
+      desc:
+          'Display text for an action which triggers a restore of item from trash',
       args: [],
     );
   }
@@ -5522,6 +5523,156 @@ class S {
     return Intl.message(
       'No results found',
       name: 'noResultsFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Added by {emailOrName}`
+  String addedBy(Object emailOrName) {
+    return Intl.message(
+      'Added by $emailOrName',
+      name: 'addedBy',
+      desc: '',
+      args: [emailOrName],
+    );
+  }
+
+  /// `Loading EXIF data...`
+  String get loadingExifData {
+    return Intl.message(
+      'Loading EXIF data...',
+      name: 'loadingExifData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View all EXIF data`
+  String get viewAllExifData {
+    return Intl.message(
+      'View all EXIF data',
+      name: 'viewAllExifData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No EXIF data`
+  String get noExifData {
+    return Intl.message(
+      'No EXIF data',
+      name: 'noExifData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This image has no exif data`
+  String get thisImageHasNoExifData {
+    return Intl.message(
+      'This image has no exif data',
+      name: 'thisImageHasNoExifData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `EXIF`
+  String get exif {
+    return Intl.message(
+      'EXIF',
+      name: 'exif',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No results`
+  String get noResults {
+    return Intl.message(
+      'No results',
+      name: 'noResults',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We don't support editing photos and albums that you don't own yet`
+  String get weDontSupportEditingPhotosAndAlbumsThatYouDont {
+    return Intl.message(
+      'We don\'t support editing photos and albums that you don\'t own yet',
+      name: 'weDontSupportEditingPhotosAndAlbumsThatYouDont',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to fetch original for edit`
+  String get failedToFetchOriginalForEdit {
+    return Intl.message(
+      'Failed to fetch original for edit',
+      name: 'failedToFetchOriginalForEdit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close`
+  String get close {
+    return Intl.message(
+      'Close',
+      name: 'close',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set as`
+  String get setAs {
+    return Intl.message(
+      'Set as',
+      name: 'setAs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `File saved to gallery`
+  String get fileSavedToGallery {
+    return Intl.message(
+      'File saved to gallery',
+      name: 'fileSavedToGallery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download`
+  String get download {
+    return Intl.message(
+      'Download',
+      name: 'download',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Press and hold to play video`
+  String get pressAndHoldToPlayVideo {
+    return Intl.message(
+      'Press and hold to play video',
+      name: 'pressAndHoldToPlayVideo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download failed`
+  String get downloadFailed {
+    return Intl.message(
+      'Download failed',
+      name: 'downloadFailed',
       desc: '',
       args: [],
     );
