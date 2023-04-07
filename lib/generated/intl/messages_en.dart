@@ -294,6 +294,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Click on the overflow menu"),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
+        "clubByCaptureTime":
+            MessageLookupByLibrary.simpleMessage("Club by capture time"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Code applied"),
         "codeCopiedToClipboard":
@@ -345,6 +347,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "We could not backup your data.\nWe will retry later."),
         "couldNotUpdateSubscription": MessageLookupByLibrary.simpleMessage(
             "Could not update subscription"),
+        "count": MessageLookupByLibrary.simpleMessage("Count"),
         "createAccount": MessageLookupByLibrary.simpleMessage("Create account"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
             "Long press to select photos and click + to create an album"),
@@ -363,6 +366,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "custom": MessageLookupByLibrary.simpleMessage("Custom"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("Dark"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Decrypting..."),
+        "decryptingVideo":
+            MessageLookupByLibrary.simpleMessage("Decrypting video..."),
+        "deduplicateFiles":
+            MessageLookupByLibrary.simpleMessage("Deduplicate Files"),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Delete account"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
@@ -407,6 +414,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete shared album?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others"),
+        "deselectAll": MessageLookupByLibrary.simpleMessage("Deselect all"),
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Designed to outlive"),
         "details": MessageLookupByLibrary.simpleMessage("Details"),
@@ -587,6 +595,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "logInLabel": MessageLookupByLibrary.simpleMessage("Log in"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Logging out..."),
         "logout": MessageLookupByLibrary.simpleMessage("Logout"),
+        "longpressOnAnItemToViewInFullscreen":
+            MessageLookupByLibrary.simpleMessage(
+                "Long-press on an item to view in full-screen"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Lost device?"),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
@@ -783,6 +794,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "restoringFiles":
             MessageLookupByLibrary.simpleMessage("Restoring files..."),
         "retry": MessageLookupByLibrary.simpleMessage("Retry"),
+        "reviewDeduplicateItems": MessageLookupByLibrary.simpleMessage(
+            "Please review and delete the items you believe are duplicates."),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Safely stored"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Save key"),
         "saveYourRecoveryKeyIfYouHaventAlready":
@@ -924,9 +937,11 @@ class MessageLookup extends MessageLookupByLibrary {
                 "This will log you out of the following device:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "This will log you out of this device!"),
+        "time": MessageLookupByLibrary.simpleMessage("Time"),
         "toHideAPhotoOrVideo":
             MessageLookupByLibrary.simpleMessage("To hide a photo or video"),
         "total": MessageLookupByLibrary.simpleMessage("total"),
+        "totalSize": MessageLookupByLibrary.simpleMessage("Total size"),
         "trash": MessageLookupByLibrary.simpleMessage("Trash"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Try again"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(

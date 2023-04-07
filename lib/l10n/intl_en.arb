@@ -787,5 +787,14 @@
   "fileSavedToGallery": "File saved to gallery",
   "download": "Download",
   "pressAndHoldToPlayVideo": "Press and hold to play video",
-  "downloadFailed": "Download failed"
+  "downloadFailed": "Download failed",
+  "deduplicateFiles": "Deduplicate Files",
+  "deselectAll": "Deselect all",
+  "reviewDeduplicateItems": "Please review and delete the items you believe are duplicates.",
+  "clubByCaptureTime": "Club by capture time",
+  "count": "Count",
+  "totalSize": "Total size",
+  "time": "Time",
+  "longpressOnAnItemToViewInFullscreen": "Long-press on an item to view in full-screen",
+  "decryptingVideo": "Decrypting video..."
 }

@@ -5677,6 +5677,96 @@ class S {
       args: [],
     );
   }
+
+  /// `Deduplicate Files`
+  String get deduplicateFiles {
+    return Intl.message(
+      'Deduplicate Files',
+      name: 'deduplicateFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Deselect all`
+  String get deselectAll {
+    return Intl.message(
+      'Deselect all',
+      name: 'deselectAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please review and delete the items you believe are duplicates.`
+  String get reviewDeduplicateItems {
+    return Intl.message(
+      'Please review and delete the items you believe are duplicates.',
+      name: 'reviewDeduplicateItems',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Club by capture time`
+  String get clubByCaptureTime {
+    return Intl.message(
+      'Club by capture time',
+      name: 'clubByCaptureTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Count`
+  String get count {
+    return Intl.message(
+      'Count',
+      name: 'count',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total size`
+  String get totalSize {
+    return Intl.message(
+      'Total size',
+      name: 'totalSize',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Time`
+  String get time {
+    return Intl.message(
+      'Time',
+      name: 'time',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Long-press on an item to view in full-screen`
+  String get longpressOnAnItemToViewInFullscreen {
+    return Intl.message(
+      'Long-press on an item to view in full-screen',
+      name: 'longpressOnAnItemToViewInFullscreen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Decrypting video...`
+  String get decryptingVideo {
+    return Intl.message(
+      'Decrypting video...',
+      name: 'decryptingVideo',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
