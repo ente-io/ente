@@ -1,1 +1,12 @@
-{}
+{
+  "enterYourEmailAddress": "Geben Sie Ihre E-Mail-Adresse ein",
+  "accountWelcomeBack": "Willkommen zurück!",
+  "email": "E-Mail",
+  "cancel": "Abbrechen",
+  "deleteAccount": "Konto löschen",
+  "feedback": "Rückmeldung",
+  "createNewAccount": "Neues Konto erstellen",
+  "password": "Passwort",
+  "activeSessions": "Aktive Sitzungen",
+  "insecureDevice": "Unsicheres Gerät"
+}
