@@ -465,6 +465,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Files added to this device album will automatically get uploaded to ente."),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster."),
+        "didYouKnow": MessageLookupByLibrary.simpleMessage("Did you know?"),
         "disableAutoLock":
             MessageLookupByLibrary.simpleMessage("Disable auto lock"),
         "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
@@ -595,6 +596,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generating encryption keys..."),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
+        "grantPermission":
+            MessageLookupByLibrary.simpleMessage("Grant permission"),
         "hidden": MessageLookupByLibrary.simpleMessage("Hidden"),
         "hide": MessageLookupByLibrary.simpleMessage("Hide"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("How it works"),
@@ -655,10 +658,30 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("Link has expired"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Never"),
+        "loadMessage1": MessageLookupByLibrary.simpleMessage(
+            "You can share your subscription with your family"),
+        "loadMessage2": MessageLookupByLibrary.simpleMessage(
+            "We have preserved over 10 million memories so far"),
+        "loadMessage3": MessageLookupByLibrary.simpleMessage(
+            "We keep 3 copies of your data, one in an underground fallout shelter"),
+        "loadMessage4": MessageLookupByLibrary.simpleMessage(
+            "All our apps are open source"),
+        "loadMessage5": MessageLookupByLibrary.simpleMessage(
+            "Our source code and cryptography have been externally audited"),
+        "loadMessage6": MessageLookupByLibrary.simpleMessage(
+            "You can share links to your albums with your loved ones"),
+        "loadMessage7": MessageLookupByLibrary.simpleMessage(
+            "Our mobile apps run in the background to encrypt and backup any new photos you click"),
+        "loadMessage8": MessageLookupByLibrary.simpleMessage(
+            "web.ente.io has a slick uploader"),
+        "loadMessage9": MessageLookupByLibrary.simpleMessage(
+            "We use Xchacha20Poly1305 to safely encrypt your data"),
         "loadingExifData":
             MessageLookupByLibrary.simpleMessage("Loading EXIF data..."),
         "loadingGallery":
             MessageLookupByLibrary.simpleMessage("Loading gallery..."),
+        "loadingMessage":
+            MessageLookupByLibrary.simpleMessage("Loading your photos..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Local gallery"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lock"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(

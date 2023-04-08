@@ -62,7 +62,7 @@ class _AlbumHorizontalListWidgetState extends State<AlbumHorizontalListWidget> {
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               _logger.severe("failed to fetch albums", snapshot.error);
-              return const Text("Something went wrong");
+              return Text(S.of(context).somethingWentWrong);
             } else if (snapshot.hasData) {
               if (snapshot.data!.isEmpty) {
                 return const SizedBox.shrink();
