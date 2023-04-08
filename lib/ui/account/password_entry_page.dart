@@ -189,28 +189,6 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       ),
                     },
                   ),
-
-                  // RichText(
-                  //   text: TextSpan(
-                  //     style: Theme.of(context)
-                  //         .textTheme
-                  //         .subtitle1!
-                  //         .copyWith(fontSize: 14),
-                  //     children: [
-                  //       TextSpan(
-                  //         text: '${S.of(context).noPasswordWarningPart1} ',
-                  //       ),
-                  //       TextSpan(
-                  //         text: S.of(context).noPasswordWarningPart2,
-                  //         style:
-                  //             Theme.of(context).textTheme.subtitle1!.copyWith(
-                  //                   fontSize: 14,
-                  //                   decoration: TextDecoration.underline,
-                  //                 ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
                 ),
                 const Padding(padding: EdgeInsets.all(12)),
                 Visibility(
