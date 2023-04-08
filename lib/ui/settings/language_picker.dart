@@ -6,14 +6,15 @@ import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/separators.dart';
 import 'package:ente_auth/ui/components/title_bar_title_widget.dart';
 import 'package:ente_auth/ui/components/title_bar_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class DeviceLimitPickerPage extends StatelessWidget {
+class LanguageSelectorPage extends StatelessWidget {
   final List<Locale> supportedLocales;
   final ValueChanged<Locale> onLocaleChanged;
   final Locale currentLocale;
 
-  const DeviceLimitPickerPage(
+  const LanguageSelectorPage(
     this.supportedLocales,
     this.onLocaleChanged,
     this.currentLocale, {
@@ -86,22 +87,21 @@ class ItemsWidget extends StatefulWidget {
 }
 
 class _ItemsWidgetState extends State<ItemsWidget> {
-  late Locale currentDeviceLimit;
+  late Locale currentLocale;
   List<Widget> items = [];
 
   @override
   void initState() {
-    currentDeviceLimit = widget.currentLocale;
-
+    currentLocale = widget.currentLocale;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     items.clear();
-    for (Locale deviceLimit in widget.supportedLocales) {
+    for (Locale locale in widget.supportedLocales) {
       items.add(
-        _menuItemForPicker(deviceLimit),
+        _menuItemForPicker(locale),
       );
     }
     items = addSeparators(
@@ -117,22 +117,54 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     );
   }
 
+  String _getLanguageName(Locale locale) {
+    switch (locale.languageCode) {
+      case 'en':
+        return 'English';
+      case 'es':
+        return 'Español';
+      case 'fr':
+        return 'Français';
+      case 'de':
+        return 'Deutsch';
+      case 'it':
+        return 'Italiano';
+      case 'pt':
+        return 'Português';
+      case 'ru':
+        return 'Русский';
+      case 'tr':
+        return 'Türkçe';
+      case 'fi':
+        return 'Suomi';
+      case 'zh':
+        return '中文';
+      case 'ja':
+        return '日本語';
+      case 'ko':
+        return '한국어';
+      case 'ar':
+        return 'العربية';
+      default:
+        return locale.languageCode;
+    }
+  }
+
   Widget _menuItemForPicker(Locale locale) {
     return MenuItemWidget(
       key: ValueKey(locale.toString()),
       menuItemColor: getEnteColorScheme(context).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
-        title: locale.languageCode,
+        title: _getLanguageName(locale) + (kDebugMode ? ' ($locale)' : ''),
       ),
-      trailingIcon: currentDeviceLimit == locale ? Icons.check : null,
+      trailingIcon: currentLocale == locale ? Icons.check : null,
       alignCaptionedTextToLeft: true,
       isTopBorderRadiusRemoved: true,
       isBottomBorderRadiusRemoved: true,
       showOnlyLoadingState: true,
       onTap: () async {
         widget.onLocaleChanged(locale);
-
-        currentDeviceLimit = locale;
+        currentLocale = locale;
         setState(() {});
       },
     );

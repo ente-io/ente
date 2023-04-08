@@ -74,7 +74,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                   final locale = await getLocale();
                                   routeToPage(
                                     context,
-                                    DeviceLimitPickerPage(
+                                    LanguageSelectorPage(
                                       appSupportedLocales,
                                       (locale) async {
                                         await setLocale(locale);
