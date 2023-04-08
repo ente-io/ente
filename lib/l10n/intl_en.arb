@@ -95,16 +95,9 @@
     "description": "Note: there's a trailing space. This text is part the sentence 'I agree to the terms of service and privacy policy.'"
   },
   "privacyPolicy": "privacy policy",
-  "and": "and",
-  "@and": {
-    "description": "Separator used in sentences like 'I agree to the terms of service and privacy policy.'"
-  },
   "termsOfService": "terms of service",
   "logInLabel": "Log in",
-  "byClickingLogInIAgreeToThe": "By clicking log in, I agree to the",
-  "@byClickingLogInIAgreeToThe": {
-    "description": "This text is part the sentence 'By clicking log in, I agree to the terms of service and privacy policy'"
-  },
+  "loginTerms": "By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
   "changeEmail": "Change email",
   "enterYourPassword": "Enter your password",
   "welcomeBack": "Welcome back!",

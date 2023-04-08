@@ -842,17 +842,6 @@ class S {
     );
   }
 
-  /// `and`
-  String get and {
-    return Intl.message(
-      'and',
-      name: 'and',
-      desc:
-          'Separator used in sentences like \'I agree to the terms of service and privacy policy.\'',
-      args: [],
-    );
-  }
-
   /// `terms of service`
   String get termsOfService {
     return Intl.message(
@@ -873,13 +862,12 @@ class S {
     );
   }
 
-  /// `By clicking log in, I agree to the`
-  String get byClickingLogInIAgreeToThe {
+  /// `By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>`
+  String get loginTerms {
     return Intl.message(
-      'By clicking log in, I agree to the',
-      name: 'byClickingLogInIAgreeToThe',
-      desc:
-          'This text is part the sentence \'By clicking log in, I agree to the terms of service and privacy policy\'',
+      'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>',
+      name: 'loginTerms',
+      desc: '',
       args: [],
     );
   }

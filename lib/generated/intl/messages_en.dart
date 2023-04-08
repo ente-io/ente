@@ -225,7 +225,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Allow downloads"),
         "allowPeopleToAddPhotos":
             MessageLookupByLibrary.simpleMessage("Allow people to add photos"),
-        "and": MessageLookupByLibrary.simpleMessage("and"),
         "androidIosWebDesktop":
             MessageLookupByLibrary.simpleMessage("Android, iOS, Web, Desktop"),
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
@@ -295,8 +294,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Backup settings"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Backup videos"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "byClickingLogInIAgreeToThe": MessageLookupByLibrary.simpleMessage(
-            "By clicking log in, I agree to the"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cached data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
         "canNotUploadToAlbumsOwnedByOthers":
@@ -685,6 +682,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "lockscreen": MessageLookupByLibrary.simpleMessage("Lockscreen"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Log in"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Logging out..."),
+        "loginTerms": MessageLookupByLibrary.simpleMessage(
+            "By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("Logout"),
         "logsDialogBody": MessageLookupByLibrary.simpleMessage(
             "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files."),

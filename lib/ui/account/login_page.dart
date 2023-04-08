@@ -1,5 +1,4 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
@@ -7,6 +6,7 @@ import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
+import "package:styled_text/styled_text.dart";
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -142,63 +142,52 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Expanded(
                         flex: 5,
-                        child: RichText(
-                          text: TextSpan(
-                            style: Theme.of(context)
-                                .textTheme
-                                .subtitle1!
-                                .copyWith(fontSize: 12),
-                            children: [
-                              TextSpan(
-                                text: S.of(context).byClickingLogInIAgreeToThe +
-                                    " ",
+                        child: StyledText(
+                          text: S.of(context).loginTerms,
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle1!
+                              .copyWith(fontSize: 12),
+                          tags: {
+                            'u-terms': StyledTextActionTag(
+                              (String? text, Map<String?, String?> attrs) => {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                      return WebPage(
+                                        S.of(context).termsOfServicesTitle,
+                                        "https://ente.io/terms",
+                                      );
+                                    },
+                                  ),
+                                )
+                              },
+                              style: const TextStyle(
+                                decoration: TextDecoration.underline,
                               ),
-                              TextSpan(
-                                text: S.of(context).termsOfService,
-                                style: const TextStyle(
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (BuildContext context) {
-                                          return WebPage(
-                                            S.of(context).termsOfServicesTitle,
-                                            "https://ente.io/terms",
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
+                            ),
+                            'u-policy': StyledTextActionTag(
+                              (String? text, Map<String?, String?> attrs) => {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                      return WebPage(
+                                        S.of(context).privacyPolicyTitle,
+                                        "https://ente.io/privacy",
+                                      );
+                                    },
+                                  ),
+                                )
+                              },
+                              style: const TextStyle(
+                                decoration: TextDecoration.underline,
                               ),
-                              TextSpan(text: " ${S.of(context).and} "),
-                              TextSpan(
-                                text: S.of(context).privacyPolicy,
-                                style: const TextStyle(
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (BuildContext context) {
-                                          return WebPage(
-                                            S.of(context).privacyPolicyTitle,
-                                            "https://ente.io/privacy",
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
-                              ),
-                            ],
-                          ),
-                          textAlign: TextAlign.left,
+                            )
+                          },
                         ),
                       ),
                       Expanded(
-                        flex: 2,
+                        flex: 1,
                         child: Container(),
                       )
                     ],
