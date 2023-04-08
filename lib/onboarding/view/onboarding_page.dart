@@ -2,11 +2,13 @@
 
 import 'dart:async';
 
+import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
+import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/ui/account/email_entry_page.dart';
 import 'package:ente_auth/ui/account/login_page.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
@@ -14,6 +16,9 @@ import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/account/password_reentry_page.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/home_page.dart';
+import 'package:ente_auth/ui/settings/language_picker.dart';
+import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 
 class OnboardingPage extends StatefulWidget {
@@ -59,6 +64,30 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   children: [
                     Column(
                       children: [
+                        kDebugMode
+                            ? GestureDetector(
+                                child: const Align(
+                                  alignment: Alignment.topRight,
+                                  child: Text("Lang"),
+                                ),
+                                onTap: () async {
+                                  final locale = await getLocale();
+                                  routeToPage(
+                                    context,
+                                    LanguageSelectorPage(
+                                      appSupportedLocales,
+                                      (locale) async {
+                                        await setLocale(locale);
+                                        App.setLocale(context, locale);
+                                      },
+                                      locale,
+                                    ),
+                                  ).then((value) {
+                                    setState(() {});
+                                  });
+                                },
+                              )
+                            : const SizedBox(),
                         Image.asset(
                           "assets/sheild-front-gradient.png",
                           width: 200,

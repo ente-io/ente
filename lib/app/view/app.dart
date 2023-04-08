@@ -19,7 +19,13 @@ import "package:flutter/material.dart";
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 class App extends StatefulWidget {
-  const App({Key key});
+  final Locale locale;
+  const App({Key key, this.locale = const Locale("en")}) : super(key: key);
+
+  static void setLocale(BuildContext context, Locale newLocale) {
+    _AppState state = context.findAncestorStateOfType<_AppState>();
+    state.setLocale(newLocale);
+  }
 
   @override
   State<App> createState() => _AppState();
@@ -28,6 +34,12 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   StreamSubscription<SignedOutEvent> _signedOutEvent;
   StreamSubscription<SignedInEvent> _signedInEvent;
+  Locale locale;
+  setLocale(Locale newLocale) {
+    setState(() {
+      locale = newLocale;
+    });
+  }
 
   @override
   void initState() {
@@ -41,6 +53,7 @@ class _AppState extends State<App> {
         setState(() {});
       }
     });
+    locale = widget.locale;
     UpdateService.instance.shouldUpdate().then((shouldUpdate) {
       if (shouldUpdate) {
         Future.delayed(Duration.zero, () {
@@ -79,6 +92,7 @@ class _AppState extends State<App> {
           theme: lightTheme,
           darkTheme: dartTheme,
           debugShowCheckedModeBanner: false,
+          locale: locale,
           supportedLocales: appSupportedLocales,
           localeListResolutionCallback: localResolutionCallBack,
           localizationsDelegates: const [
@@ -97,6 +111,7 @@ class _AppState extends State<App> {
         theme: lightThemeData,
         darkTheme: darkThemeData,
         debugShowCheckedModeBanner: false,
+        locale: locale,
         supportedLocales: appSupportedLocales,
         localeListResolutionCallback: localResolutionCallBack,
         localizationsDelegates: const [

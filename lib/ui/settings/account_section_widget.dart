@@ -1,6 +1,9 @@
 // @dart=2.9
 
+import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/change_email_dialog.dart';
@@ -10,6 +13,7 @@ import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
+import 'package:ente_auth/ui/settings/language_picker.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
@@ -20,20 +24,22 @@ class AccountSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return ExpandableMenuItemWidget(
-      title: "Account",
+      title: l10n.account,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.account_circle_outlined,
     );
   }
 
   Column _getSectionOptions(BuildContext context) {
+    final l10n = context.l10n;
     List<Widget> children = [];
     children.addAll([
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Recovery key",
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.recoveryKey,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -42,7 +48,7 @@ class AccountSectionWidget extends StatelessWidget {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
             context,
-            "Please authenticate to view your recovery key",
+            l10n.authToViewYourRecoveryKey,
           );
           if (hasAuthenticated) {
             String recoveryKey;
@@ -57,7 +63,7 @@ class AccountSectionWidget extends StatelessWidget {
               context,
               RecoveryKeyPage(
                 recoveryKey,
-                "OK",
+                l10n.ok,
                 showAppBar: true,
                 onDone: () {},
               ),
@@ -67,8 +73,8 @@ class AccountSectionWidget extends StatelessWidget {
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Change email",
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.changeEmail,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -77,7 +83,7 @@ class AccountSectionWidget extends StatelessWidget {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
             context,
-            "Please authenticate to change your email",
+            l10n.authToChangeYourEmail,
           );
           if (hasAuthenticated) {
             showDialog(
@@ -93,8 +99,8 @@ class AccountSectionWidget extends StatelessWidget {
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Change password",
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.changePassword,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -103,7 +109,7 @@ class AccountSectionWidget extends StatelessWidget {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
             context,
-            "Please authenticate to change your password",
+            l10n.authToChangeYourPassword,
           );
           if (hasAuthenticated) {
             Navigator.of(context).push(
@@ -116,6 +122,29 @@ class AccountSectionWidget extends StatelessWidget {
               ),
             );
           }
+        },
+      ),
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.language,
+        ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () async {
+          final locale = await getLocale();
+          routeToPage(
+            context,
+            LanguageSelectorPage(
+              appSupportedLocales,
+              (locale) async {
+                await setLocale(locale);
+                App.setLocale(context, locale);
+              },
+              locale,
+            ),
+          );
         },
       ),
       sectionOptionSpacing,

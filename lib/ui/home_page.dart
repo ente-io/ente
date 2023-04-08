@@ -124,6 +124,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return WillPopScope(
       onWillPop: () async {
         if (_isSettingsOpen) {
@@ -166,8 +167,8 @@ class _HomePageState extends State<HomePage> {
                     _searchText = val;
                     _applyFiltering();
                   },
-                  decoration: const InputDecoration(
-                    hintText: 'Search...',
+                  decoration: InputDecoration(
+                    hintText: l10n.searchHint,
                     border: InputBorder.none,
                   ),
                 ),
@@ -176,7 +177,7 @@ class _HomePageState extends State<HomePage> {
               icon: _showSearchBox
                   ? const Icon(Icons.clear)
                   : const Icon(Icons.search),
-              tooltip: 'Search',
+              tooltip: l10n.search,
               onPressed: () {
                 setState(
                   () {
@@ -203,6 +204,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getBody() {
+    final l10n = context.l10n;
     if (_hasLoaded) {
       if (_filteredCodes.isEmpty && _searchText.isEmpty) {
         return _getEmptyState();
@@ -237,7 +239,7 @@ class _HomePageState extends State<HomePage> {
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  'Sorry, unable to generate code ${code?.issuer ?? ""}',
+                                  l10n.sorryUnableToGenCode(code?.issuer ?? ""),
                                 ),
                               ),
                             );
@@ -245,7 +247,7 @@ class _HomePageState extends State<HomePage> {
                         }),
                         itemCount: _filteredCodes.length,
                       )
-                    : const Center(child: (Text("No result"))),
+                    : Center(child: (Text(l10n.noResult))),
               ),
             ],
           );
@@ -265,7 +267,7 @@ class _HomePageState extends State<HomePage> {
       spacing: 3,
       childPadding: const EdgeInsets.all(5),
       spaceBetweenChildren: 4,
-      tooltip: 'Add Code',
+      tooltip: context.l10n.addCode,
       foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
       backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
       overlayOpacity: 0.5,
@@ -277,14 +279,14 @@ class _HomePageState extends State<HomePage> {
           child: const Icon(Icons.qr_code),
           foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
           backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
-          labelWidget: const SpeedDialLabelWidget("Scan a QR Code"),
+          labelWidget: SpeedDialLabelWidget(context.l10n.scanAQrCode),
           onTap: _redirectToScannerPage,
         ),
         SpeedDialChild(
           child: const Icon(Icons.keyboard),
           foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
           backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
-          labelWidget: const SpeedDialLabelWidget("Enter details manually"),
+          labelWidget: SpeedDialLabelWidget(context.l10n.enterDetailsManually),
           onTap: _redirectToManualEntryPage,
         ),
       ],

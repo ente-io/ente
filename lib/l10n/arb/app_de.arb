@@ -108,5 +108,6 @@
   "passwordStrengthModerate": "Mittel",
   "confirmPassword": "Bestätigen Sie das Passwort",
   "close": "Schließen",
-  "oopsSomethingWentWrong": "Ups, da ist etwas schief gelaufen."
+  "oopsSomethingWentWrong": "Ups, da ist etwas schief gelaufen.",
+  "selectLanguage": "Sprache auswählen"
 }

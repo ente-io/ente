@@ -34,8 +34,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return ExpandableMenuItemWidget(
-      title: "Security",
+      title: l10n.security,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.local_police_outlined,
     );
@@ -46,10 +47,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     final List<Widget> children = [];
     children.addAll([
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Lockscreen",
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.lockscreen,
         ),
-        trailingSwitch: ToggleSwitchWidget(
+        trailingWidget: ToggleSwitchWidget(
           value: _config.shouldShowLockScreen(),
           onChanged: (value) async {
             final hasAuthenticated = await LocalAuthenticationService.instance

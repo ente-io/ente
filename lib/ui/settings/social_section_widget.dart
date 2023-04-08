@@ -1,5 +1,6 @@
 // @dart=2.9
 
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
@@ -13,8 +14,9 @@ class SocialSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return ExpandableMenuItemWidget(
-      title: "Social",
+      title: l10n.social,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.interests_outlined,
     );

@@ -62,5 +62,7 @@
 		<string>Please allow auth to lock itself with FaceID or TouchID</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Please allow auth to pick a file to import data from</string>
-	</dict>
+		<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+</dict>
 </plist>

@@ -33,20 +33,22 @@ class DataSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return ExpandableMenuItemWidget(
-      title: "Data",
+      title: l10n.data,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.key_outlined,
     );
   }
 
   Column _getSectionOptions(BuildContext context) {
+    final l10n = context.l10n;
     List<Widget> children = [];
     children.addAll([
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Import codes",
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.importCodes,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -57,8 +59,8 @@ class DataSectionWidget extends StatelessWidget {
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Export codes",
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.exportCodes,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -75,17 +77,18 @@ class DataSectionWidget extends StatelessWidget {
   }
 
   Future<void> _showImportInstructionDialog(BuildContext context) async {
+    final l10n = context.l10n;
     final AlertDialog alert = AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       title: Text(
-        "Import codes",
+        l10n.importCodes,
         style: Theme.of(context).textTheme.headline6,
       ),
       content: SingleChildScrollView(
         child: Column(
           children: [
-            const Text(
-              "Please select a file that contains a list of your codes in the following format",
+            Text(
+              l10n.importInstruction,
             ),
             const SizedBox(
               height: 20,
@@ -107,17 +110,15 @@ class DataSectionWidget extends StatelessWidget {
             const SizedBox(
               height: 20,
             ),
-            const Text(
-              "The codes can be separated by a comma or a new line",
-            ),
+            Text(l10n.importCodeDelimiterInfo),
           ],
         ),
       ),
       actions: [
         TextButton(
-          child: const Text(
-            "Cancel",
-            style: TextStyle(
+          child: Text(
+            l10n.cancel,
+            style: const TextStyle(
               color: Colors.red,
             ),
           ),
@@ -126,9 +127,7 @@ class DataSectionWidget extends StatelessWidget {
           },
         ),
         TextButton(
-          child: const Text(
-            "Select file",
-          ),
+          child: Text(l10n.selectFile),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             _pickImportFile(context);

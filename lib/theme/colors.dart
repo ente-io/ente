@@ -21,11 +21,16 @@ class EnteColorScheme {
   final Color fillBase;
   final Color fillMuted;
   final Color fillFaint;
+  final Color fillFaintPressed;
 
   // Stroke Colors
   final Color strokeBase;
   final Color strokeMuted;
   final Color strokeFaint;
+  final Color strokeFainter;
+  final Color blurStrokeBase;
+  final Color blurStrokeFaint;
+  final Color blurStrokePressed;
 
   // Fixed Colors
   final Color primaryGreen;
@@ -51,9 +56,14 @@ class EnteColorScheme {
     this.fillBase,
     this.fillMuted,
     this.fillFaint,
+    this.fillFaintPressed,
     this.strokeBase,
     this.strokeMuted,
-    this.strokeFaint, {
+    this.strokeFaint,
+    this.strokeFainter,
+    this.blurStrokeBase,
+    this.blurStrokeFaint,
+    this.blurStrokePressed, {
     this.primaryGreen = _primaryGreen,
     this.primary700 = _primary700,
     this.primary500 = _primary500,
@@ -78,9 +88,14 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   fillBaseLight,
   fillMutedLight,
   fillFaintLight,
+  fillFaintPressedLight,
   strokeBaseLight,
   strokeMutedLight,
   strokeFaintLight,
+  strokeFainterLight,
+  blurStrokeBaseLight,
+  blurStrokeFaintLight,
+  blurStrokePressedLight,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -95,9 +110,14 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   fillBaseDark,
   fillMutedDark,
   fillFaintDark,
+  fillFaintPressedDark,
   strokeBaseDark,
   strokeMutedDark,
   strokeFaintDark,
+  strokeFainterDark,
+  blurStrokeBaseDark,
+  blurStrokeFaintDark,
+  blurStrokePressedDark,
 );
 
 // Background Colors
@@ -129,19 +149,29 @@ const Color textFaintDark = Color.fromRGBO(255, 255, 255, 0.5);
 const Color fillBaseLight = Color.fromRGBO(0, 0, 0, 1);
 const Color fillMutedLight = Color.fromRGBO(0, 0, 0, 0.12);
 const Color fillFaintLight = Color.fromRGBO(0, 0, 0, 0.04);
+const Color fillFaintPressedLight = Color.fromRGBO(0, 0, 0, 0.08);
 
 const Color fillBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color fillMutedDark = Color.fromRGBO(255, 255, 255, 0.16);
 const Color fillFaintDark = Color.fromRGBO(255, 255, 255, 0.12);
+const Color fillFaintPressedDark = Color.fromRGBO(255, 255, 255, 0.06);
 
 // Stroke Colors
 const Color strokeBaseLight = Color.fromRGBO(0, 0, 0, 1);
 const Color strokeMutedLight = Color.fromRGBO(0, 0, 0, 0.24);
 const Color strokeFaintLight = Color.fromRGBO(0, 0, 0, 0.04);
+const Color strokeFainterLight = Color.fromRGBO(0, 0, 0, 0.06);
+const Color blurStrokeBaseLight = Color.fromRGBO(0, 0, 0, 0.65);
+const Color blurStrokeFaintLight = Color.fromRGBO(0, 0, 0, 0.08);
+const Color blurStrokePressedLight = Color.fromRGBO(0, 0, 0, 0.50);
 
 const Color strokeBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color strokeMutedDark = Color.fromRGBO(255, 255, 255, 0.24);
 const Color strokeFaintDark = Color.fromRGBO(255, 255, 255, 0.16);
+const Color strokeFainterDark = Color.fromRGBO(255, 255, 255, 0.08);
+const Color blurStrokeBaseDark = Color.fromRGBO(255, 255, 255, 0.90);
+const Color blurStrokeFaintDark = Color.fromRGBO(255, 255, 255, 0.06);
+const Color blurStrokePressedDark = Color.fromRGBO(255, 255, 255, 0.50);
 
 // Fixed Colors
 

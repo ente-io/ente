@@ -68,7 +68,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               foregroundColor:
                   Theme.of(context).colorScheme.inverseBackgroundColor,
               icon: Icons.edit_outlined,
-              label: 'Edit',
+              label: l10n.edit,
               padding: const EdgeInsets.only(left: 4, right: 0),
               spacing: 8,
             ),
@@ -81,7 +81,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               borderRadius: const BorderRadius.all(Radius.circular(12.0)),
               foregroundColor: const Color(0xFFFE4A49),
               icon: Icons.delete,
-              label: 'Delete',
+              label: l10n.delete,
               padding: const EdgeInsets.only(left: 0, right: 0),
               spacing: 8,
             ),
@@ -212,9 +212,8 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   void _copyToClipboard() {
-    FlutterClipboard.copy(_getTotp()).then(
-      (value) => showToast(context, "Copied to clipboard"),
-    );
+    FlutterClipboard.copy(_getTotp())
+        .then((value) => showToast(context, context.l10n.copiedToClipboard));
   }
 
   Future<void> _onEditPressed(_) async {
@@ -256,7 +255,7 @@ class _CodeWidgetState extends State<CodeWidget> {
         ),
         TextButton(
           child: Text(
-            "Cancel",
+            l10n.cancel,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
             ),
@@ -291,7 +290,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     try {
       return getTotp(widget.code);
     } catch (e) {
-      return "Error";
+      return context.l10n.error;
     }
   }
 
@@ -299,7 +298,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     try {
       return getNextTotp(widget.code);
     } catch (e) {
-      return "Error";
+      return context.l10n.error;
     }
   }
 }

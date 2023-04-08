@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io' as io;
 
 import 'package:bip39/bip39.dart' as bip39;
@@ -7,6 +5,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -15,20 +14,20 @@ import 'package:share_plus/share_plus.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class RecoveryKeyPage extends StatefulWidget {
-  final bool showAppBar;
+  final bool? showAppBar;
   final String recoveryKey;
   final String doneText;
-  final Function() onDone;
-  final bool isDismissible;
-  final String title;
-  final String text;
-  final String subText;
+  final Function()? onDone;
+  final bool? isDismissible;
+  final String? title;
+  final String? text;
+  final String? subText;
   final bool showProgressBar;
 
   const RecoveryKeyPage(
     this.recoveryKey,
     this.doneText, {
-    Key key,
+    Key? key,
     this.showAppBar,
     this.onDone,
     this.isDismissible,
@@ -56,7 +55,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         'recovery code should have $mnemonicKeyWordCount words',
       );
     }
-    final double topPadding = widget.showAppBar
+    final double topPadding = widget.showAppBar!
         ? 40
         : widget.showProgressBar
             ? 32
@@ -65,6 +64,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     return Scaffold(
       appBar: widget.showProgressBar
           ? AppBar(
+              automaticallyImplyLeading: false,
               elevation: 0,
               title: Hero(
                 tag: "recovery_key",
@@ -78,10 +78,10 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                 ),
               ),
             )
-          : widget.showAppBar
+          : widget.showAppBar!
               ? AppBar(
                   elevation: 0,
-                  title: Text(widget.title ?? "Recovery key"),
+                  title: Text(widget.title ?? context.l10n.recoveryKey),
                 )
               : null,
       body: Padding(
@@ -97,19 +97,19 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                 child: IntrinsicHeight(
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      widget.showAppBar
+                      widget.showAppBar!
                           ? const SizedBox.shrink()
                           : Text(
-                              widget.title ?? "Recovery key",
+                              widget.title ?? context.l10n.recoveryKey,
                               style: Theme.of(context).textTheme.headline4,
                             ),
                       Padding(
-                        padding: EdgeInsets.all(widget.showAppBar ? 0 : 12),
+                        padding: EdgeInsets.all(widget.showAppBar! ? 0 : 12),
                       ),
                       Text(
-                        widget.text ??
-                            "If you forget your password, the only way you can recover your data is with this key.",
+                        widget.text ?? context.l10n.recoveryKeyOnForgotPassword,
                         style: Theme.of(context).textTheme.subtitle1,
                       ),
                       const Padding(padding: EdgeInsets.only(top: 24)),
@@ -134,9 +134,9 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                                   await Clipboard.setData(
                                     ClipboardData(text: recoveryKey),
                                   );
-                                  showToast(
+                                  showShortToast(
                                     context,
-                                    "Recovery key copied to clipboard",
+                                    context.l10n.recoveryKeyCopiedToClipboard,
                                   );
                                   setState(() {
                                     _hasTriedToSave = true;
@@ -145,11 +145,11 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     border: Border.all(
-                                      color: const Color.fromARGB(
-                                        51,
-                                        147,
-                                        43,
-                                        200,
+                                      color: const Color.fromRGBO(
+                                        49,
+                                        155,
+                                        86,
+                                        .2,
                                       ),
                                     ),
                                     borderRadius: const BorderRadius.all(
@@ -172,16 +172,12 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: 80,
-                        width: double.infinity,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: Text(
-                            widget.subText ??
-                                "We don’t store this key, please save this in a safe place.",
-                            style: Theme.of(context).textTheme.bodyText1,
-                          ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Text(
+                          widget.subText ??
+                              context.l10n.recoveryKeySaveDescription,
+                          style: Theme.of(context).textTheme.bodyText1,
                         ),
                       ),
                       Expanded(
@@ -216,7 +212,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
           onPressed: () async {
             await _saveKeys();
           },
-          child: const Text('Do this later'),
+          child: Text(context.l10n.doThisLater),
         ),
       );
       childrens.add(const SizedBox(height: 10));
@@ -227,7 +223,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         onTap: () async {
           await _shareRecoveryKey(recoveryKey);
         },
-        text: 'Save key',
+        text: context.l10n.saveKey,
       ),
     );
     if (_hasTriedToSave) {
@@ -265,6 +261,6 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     if (_recoveryKeyFile.existsSync()) {
       await _recoveryKeyFile.delete();
     }
-    widget.onDone();
+    widget.onDone!();
   }
 }
