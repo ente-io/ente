@@ -1,4 +1,7 @@
+
 {
+  "account": "Account",
+  "recoveryKey": "Recovery key",
   "counterAppBarTitle": "Counter",
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
@@ -62,7 +65,17 @@
   "madeWithLoveAtPrefix": "made with ❤️ at ",
   "supportDevs" : "Subscribe to <bold-green>ente</bold-green> to support this project.",
   "supportDiscount" : "Use coupon code \"AUTH\" to get 10% off first year",
-  "changeEmail": "change email",
+  "changeEmail": "Change email",
+  "changePassword": "Change password",
+  "data" : "Data",
+  "importCodes": "Import codes",
+  "exportCodes": "Export codes",
+  "importInstruction": "Please select a file that contains a list of your codes in the following format",
+  "importCodeDelimiterInfo": "The codes can be separated by a comma or a new line",
+  "selectFile": "Select file",
+  "authToViewYourRecoveryKey": "Please authenticate to view your recovery key",
+  "authToChangeYourEmail": "Please authenticate to change your email",
+  "authToChangeYourPassword": "Please authenticate to change your password",
   "ok": "Ok",
   "cancel": "Cancel",
   "yes": "Yes",
@@ -120,6 +133,9 @@
   "close": "Close",
   "oopsSomethingWentWrong": "Oops, Something went wrong.",
   "selectLanguage": "Select language",
-  "language": "Language"
+  "language": "Language",
+  "social": "Social",
+  "security": "Security",
+  "lockscreen": "Lockscreen"
 
 }

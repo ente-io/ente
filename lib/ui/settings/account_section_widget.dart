@@ -26,7 +26,7 @@ class AccountSectionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return ExpandableMenuItemWidget(
-      title: "Account",
+      title: l10n.account,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.account_circle_outlined,
     );
@@ -38,8 +38,8 @@ class AccountSectionWidget extends StatelessWidget {
     children.addAll([
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Recovery key",
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.recoveryKey,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -48,7 +48,7 @@ class AccountSectionWidget extends StatelessWidget {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
             context,
-            "Please authenticate to view your recovery key",
+            l10n.authToViewYourRecoveryKey,
           );
           if (hasAuthenticated) {
             String recoveryKey;
@@ -63,7 +63,7 @@ class AccountSectionWidget extends StatelessWidget {
               context,
               RecoveryKeyPage(
                 recoveryKey,
-                "OK",
+                l10n.ok,
                 showAppBar: true,
                 onDone: () {},
               ),
@@ -73,8 +73,8 @@ class AccountSectionWidget extends StatelessWidget {
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Change email",
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.changeEmail,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -83,7 +83,7 @@ class AccountSectionWidget extends StatelessWidget {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
             context,
-            "Please authenticate to change your email",
+            l10n.authToChangeYourEmail,
           );
           if (hasAuthenticated) {
             showDialog(
@@ -99,8 +99,8 @@ class AccountSectionWidget extends StatelessWidget {
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Change password",
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.changePassword,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -109,7 +109,7 @@ class AccountSectionWidget extends StatelessWidget {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
             context,
-            "Please authenticate to change your password",
+            l10n.authToChangeYourPassword,
           );
           if (hasAuthenticated) {
             Navigator.of(context).push(
