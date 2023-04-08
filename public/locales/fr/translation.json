@@ -350,7 +350,7 @@
     "PUBLIC_COLLECT": "Autoriser l'ajout de photos",
     "LINK_DEVICE_LIMIT": "Limite d'appareil",
     "LINK_EXPIRY": "Expiration du lien",
-    "LINK_EXPIRY_NEVER": "Jamais",
+    "NEVER": "Jamais",
     "DISABLE_FILE_DOWNLOAD": "Désactiver le téléchargement",
     "DISABLE_FILE_DOWNLOAD_MESSAGE": "<p>Êtes-vous certains de vouloir désactiver le bouton de téléchargement pour les fichiers?</p><p>Ceux qui les visualisent pourront tout de même prendre des imprim-écrans ou sauvegarder une copie de vos photos en utilisant des outils externes.</p>",
     "MALICIOUS_CONTENT": "Contient du contenu malveillant",
@@ -509,5 +509,6 @@
     "CONFIRM_DELETE_ACCOUNT": "Confirmer la suppression du compte",
     "FEEDBACK_REQUIRED": "Merci de nous aider avec cette information",
     "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "Qu'est-ce que l'autre service fait de mieux ?",
-    "RECOVER_TWO_FACTOR": "Récupérer la double-authentification"
+    "RECOVER_TWO_FACTOR": "Récupérer la double-authentification",
+    "at": "à"
 }
