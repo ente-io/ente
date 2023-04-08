@@ -25,7 +25,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   final _config = Configuration.instance;
   final _passwordController1 = TextEditingController();
   final _passwordController2 = TextEditingController();
-  final Color _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
+  final Color _validFieldValueColor = const Color.fromARGB(51, 157, 45, 194);
 
   String? _email;
   String? _password;
