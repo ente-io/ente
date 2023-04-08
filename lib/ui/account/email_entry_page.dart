@@ -10,6 +10,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
+import "package:styled_text/styled_text.dart";
 
 class EmailEntryPage extends StatefulWidget {
   const EmailEntryPage({Key? key}) : super(key: key);
@@ -369,59 +370,100 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             },
           ),
           Expanded(
-            child: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: S.of(context).termsAgreePart1,
+            child: StyledText(
+              text: S.of(context).signUpTerms,
+              style:
+                  Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 12),
+              tags: {
+                'u-terms': StyledTextActionTag(
+                  (String? text, Map<String?, String?> attrs) => {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return WebPage(
+                            S.of(context).termsOfServicesTitle,
+                            "https://ente.io/terms",
+                          );
+                        },
+                      ),
+                    )
+                  },
+                  style: const TextStyle(
+                    decoration: TextDecoration.underline,
                   ),
-                  TextSpan(
-                    text: S.of(context).termsOfService,
-                    style: const TextStyle(
-                      decoration: TextDecoration.underline,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return WebPage(
-                                S.of(context).termsOfServicesTitle,
-                                "https://ente.io/terms",
-                              );
-                            },
-                          ),
-                        );
-                      },
+                ),
+                'u-policy': StyledTextActionTag(
+                  (String? text, Map<String?, String?> attrs) => {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return WebPage(
+                            S.of(context).privacyPolicyTitle,
+                            "https://ente.io/privacy",
+                          );
+                        },
+                      ),
+                    )
+                  },
+                  style: const TextStyle(
+                    decoration: TextDecoration.underline,
                   ),
-                  TextSpan(text: ' ${S.of(context).and} '),
-                  TextSpan(
-                    text: S.of(context).privacyPolicy,
-                    style: const TextStyle(
-                      decoration: TextDecoration.underline,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return WebPage(
-                                S.of(context).privacyPolicyTitle,
-                                "https://ente.io/privacy",
-                              );
-                            },
-                          ),
-                        );
-                      },
-                  ),
-                ],
-                style: Theme.of(context)
-                    .textTheme
-                    .subtitle1!
-                    .copyWith(fontSize: 12),
-              ),
-              textAlign: TextAlign.left,
+                )
+              },
             ),
+            // child: RichText(
+            //   text: TextSpan(
+            //     children: [
+            //       TextSpan(
+            //         text: S.of(context).termsAgreePart1,
+            //       ),
+            //       TextSpan(
+            //         text: S.of(context).termsOfService,
+            //         style: const TextStyle(
+            //           decoration: TextDecoration.underline,
+            //         ),
+            //         recognizer: TapGestureRecognizer()
+            //           ..onTap = () {
+            //             Navigator.of(context).push(
+            //               MaterialPageRoute(
+            //                 builder: (BuildContext context) {
+            //                   return WebPage(
+            //                     S.of(context).termsOfServicesTitle,
+            //                     "https://ente.io/terms",
+            //                   );
+            //                 },
+            //               ),
+            //             );
+            //           },
+            //       ),
+            //       TextSpan(text: ' ${S.of(context).and} '),
+            //       TextSpan(
+            //         text: S.of(context).privacyPolicy,
+            //         style: const TextStyle(
+            //           decoration: TextDecoration.underline,
+            //         ),
+            //         recognizer: TapGestureRecognizer()
+            //           ..onTap = () {
+            //             Navigator.of(context).push(
+            //               MaterialPageRoute(
+            //                 builder: (BuildContext context) {
+            //                   return WebPage(
+            //                     S.of(context).privacyPolicyTitle,
+            //                     "https://ente.io/privacy",
+            //                   );
+            //                 },
+            //               ),
+            //             );
+            //           },
+            //       ),
+            //     ],
+            //     style: Theme.of(context)
+            //         .textTheme
+            //         .subtitle1!
+            //         .copyWith(fontSize: 12),
+            //   ),
+            //   textAlign: TextAlign.left,
+            // ),
           ),
         ],
       ),

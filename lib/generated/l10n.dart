@@ -821,6 +821,16 @@ class S {
     );
   }
 
+  /// `I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>`
+  String get signUpTerms {
+    return Intl.message(
+      'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>',
+      name: 'signUpTerms',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `I agree to the `
   String get termsAgreePart1 {
     return Intl.message(

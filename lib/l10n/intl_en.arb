@@ -90,6 +90,7 @@
   },
   "privacyPolicyTitle": "Privacy Policy",
   "termsOfServicesTitle": "Terms",
+  "signUpTerms" : "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
   "termsAgreePart1": "I agree to the ",
   "@termsAgreePart1": {
     "description": "Note: there's a trailing space. This text is part the sentence 'I agree to the terms of service and privacy policy.'"

@@ -973,6 +973,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWith": m44,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Shared with me"),
         "sharing": MessageLookupByLibrary.simpleMessage("Sharing..."),
+        "signUpTerms": MessageLookupByLibrary.simpleMessage(
+            "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>"),
         "singleFileDeleteFromDevice": m45,
         "singleFileDeleteHighlight": MessageLookupByLibrary.simpleMessage(
             "It will be deleted from all albums."),
