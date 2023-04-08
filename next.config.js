@@ -23,6 +23,27 @@ const IS_SENTRY_ENABLED = getIsSentryEnabled();
 module.exports = (phase) =>
     withSentryConfig(
         withBundleAnalyzer({
+            compiler: {
+                emotion: {
+                    importMap: {
+                        '@mui/material': {
+                            styled: {
+                                canonicalImport: ['@emotion/styled', 'default'],
+                                styledBaseImport: ['@mui/material', 'styled'],
+                            },
+                        },
+                        '@mui/material/styles': {
+                            styled: {
+                                canonicalImport: ['@emotion/styled', 'default'],
+                                styledBaseImport: [
+                                    '@mui/material/styles',
+                                    'styled',
+                                ],
+                            },
+                        },
+                    },
+                },
+            },
             transpilePackages: [
                 '@mui/material',
                 '@mui/system',
