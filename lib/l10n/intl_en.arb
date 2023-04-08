@@ -23,14 +23,7 @@
   "deleteReason4": "My reason isn’t listed",
   "sendEmail": "Send email",
   "deleteRequestSLAText": "Your request will be processed within 72 hours.",
-  "pleaseSendAnEmailTo": "Please send an email to",
-  "@pleaseSendAnEmailTo": {
-    "description": "This text is part of the sentence 'Please send an email to email@ente.io from your registered email address.'"
-  },
-  "fromYourRegisteredEmailAddress": "from your registered email address.",
-  "@fromYourRegisteredEmailAddress": {
-    "description": "This text is part of the sentence 'Please send an email to email@ente.io from your registered email address.'"
-  },
+  "deleteEmailRequest": "Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address.",
   "ok": "Ok",
   "createAccount": "Create account",
   "createNewAccount": "Create new account",
@@ -63,14 +56,7 @@
   "changePasswordTitle": "Change password",
   "resetPasswordTitle": "Reset password",
   "encryptionKeys": "Encryption keys",
-  "noPasswordWarningPart1": "We don't store this password, so if you forget,",
-  "@noPasswordWarningPart1": {
-    "description": "This text is part1 the sentence 'We don't store this password, so if you forget, we cannot decrypt your data.'"
-  },
-  "noPasswordWarningPart2": "we cannot decrypt your data",
-  "@noPasswordWarningPart2": {
-    "description": "This text is part2 the sentence 'We don't store this password, so if you forget, we cannot decrypt your data.'"
-  },
+  "passwordWarning": "We don't store this password, so if you forget, <underline>we cannot decrypt your data</underline>",
   "enterPasswordToEncrypt": "Enter a password we can use to encrypt your data",
   "enterNewPasswordToEncrypt": "Enter a new password we can use to encrypt your data",
   "weakStrength": "Weak",
@@ -340,18 +326,7 @@
   "canOnlyRemoveFilesOwnedByYou": "Can only remove files owned by you",
   "deleteSharedAlbum": "Delete shared album?",
   "deleteAlbum": "Delete album",
-  "deleteAlbumDialogPart1": "Also delete the photos (and videos) present in this album from ",
-  "@deleteAlbumDialogPart1": {
-    "description": "Part of this string 'Also delete the photos (and videos) present in this album from all other albums they are part of?'"
-  },
-  "deleteAlbumDialogPart2Bold": "all",
-  "@deleteAlbumDialogPart2Bold": {
-    "description": "Part of this string 'Also delete the photos (and videos) present in this album from all other albums they are part of?'"
-  },
-  "deleteAlbumDialogPart3": " other albums they are part of?",
-  "@deleteAlbumDialogPart3": {
-    "description": "Part of this string 'Also delete the photos (and videos) present in this album from all other albums they are part of?'"
-  },
+  "deleteAlbumDialog": "Also delete the photos (and videos) present in this album from <bold>all</bold> other albums they are part of?",
   "deleteSharedAlbumDialogBody": "The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others",
   "yesRemove": "Yes, remove",
   "creatingLink": "Creating link...",
@@ -628,16 +603,7 @@
   "pleaseWaitForSometimeBeforeRetrying": "Please wait for sometime before retrying",
   "paymentFailedWithReason": "Unfortunately your payment failed due to {reason}",
   "youAreOnAFamilyPlan": "You are on a family plan!",
-  "contactFamilyAdminPart1": "Please contact",
-  "@contactFamilyAdminPart1": {
-    "description": "Part1 of the sentence 'Please contact {familyAdminName} to manage your subscription'",
-    "type": "text"
-  },
-  "contactFamilyAdminPart2": "to manage your subscription",
-  "@contactFamilyAdminPart2": {
-    "description": "Part2 of the sentence 'Please contact {familyAdminName} to manage your subscription'",
-    "type": "text"
-  },
+  "contactFamilyAdmin": "Please contact <green>{familyAdminEmail}</green> to manage your subscription",
   "leaveFamily": "Leave family",
   "areYouSureThatYouWantToLeaveTheFamily": "Are you sure that you want to leave the family plan?",
   "leave": "Leave",

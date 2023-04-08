@@ -340,8 +340,11 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showErrorDialog(context, S.of(context).oops,
-          S.of(context).verificationFailedPleaseTryAgain);
+      showErrorDialog(
+        context,
+        S.of(context).oops,
+        S.of(context).verificationFailedPleaseTryAgain,
+      );
     }
   }
 
@@ -373,13 +376,19 @@ class UserService {
         Bus.instance.fire(UserDetailsChangedEvent());
         return;
       }
-      showErrorDialog(context, S.of(context).oops,
-          S.of(context).verificationFailedPleaseTryAgain);
+      showErrorDialog(
+        context,
+        S.of(context).oops,
+        S.of(context).verificationFailedPleaseTryAgain,
+      );
     } on DioError catch (e) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 403) {
         showErrorDialog(
-            context, S.of(context).oops, S.of(context).thisEmailIsAlreadyInUse);
+          context,
+          S.of(context).oops,
+          S.of(context).thisEmailIsAlreadyInUse,
+        );
       } else {
         showErrorDialog(
           context,
@@ -390,8 +399,11 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showErrorDialog(context, S.of(context).oops,
-          S.of(context).verificationFailedPleaseTryAgain);
+      showErrorDialog(
+        context,
+        S.of(context).oops,
+        S.of(context).verificationFailedPleaseTryAgain,
+      );
     }
   }
 
@@ -612,7 +624,9 @@ class UserService {
       );
       if (response.statusCode == 200) {
         showShortToast(
-            context, S.of(context).twofactorAuthenticationSuccessfullyReset);
+          context,
+          S.of(context).twofactorAuthenticationSuccessfullyReset,
+        );
         await _saveConfiguration(response);
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
@@ -733,7 +747,9 @@ class UserService {
 
   Future<void> disableTwoFactor(BuildContext context) async {
     final dialog = createProgressDialog(
-        context, S.of(context).disablingTwofactorAuthentication);
+      context,
+      S.of(context).disablingTwofactorAuthentication,
+    );
     await dialog.show();
     try {
       await _enteDio.post(

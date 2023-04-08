@@ -15,6 +15,7 @@ import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import "package:styled_text/styled_text.dart";
 
 enum PasswordEntryMode {
   set,
@@ -173,26 +174,20 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 const Padding(padding: EdgeInsets.all(8)),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: RichText(
-                    text: TextSpan(
-                      style: Theme.of(context)
-                          .textTheme
-                          .subtitle1!
-                          .copyWith(fontSize: 14),
-                      children: [
-                        TextSpan(
-                          text: '${S.of(context).noPasswordWarningPart1} ',
-                        ),
-                        TextSpan(
-                          text: S.of(context).noPasswordWarningPart2,
-                          style:
-                              Theme.of(context).textTheme.subtitle1!.copyWith(
-                                    fontSize: 14,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                        ),
-                      ],
-                    ),
+                  child: StyledText(
+                    text: S.of(context).passwordWarning,
+                    style: Theme.of(context)
+                        .textTheme
+                        .subtitle1!
+                        .copyWith(fontSize: 14),
+                    tags: {
+                      'underline': StyledTextTag(
+                        style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                              fontSize: 14,
+                              decoration: TextDecoration.underline,
+                            ),
+                      ),
+                    },
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(12)),

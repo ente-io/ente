@@ -3,8 +3,10 @@ import 'package:logging/logging.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import "package:styled_text/styled_text.dart";
 
 class ChildSubscriptionWidget extends StatelessWidget {
   const ChildSubscriptionWidget({
@@ -35,24 +37,16 @@ class ChildSubscriptionWidget extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: S.of(context).contactFamilyAdminPart1 + " ",
+            child: StyledText(
+              text: S.of(context).contactFamilyAdmin(familyAdmin),
+              style: Theme.of(context).textTheme.bodyText1,
+              tags: {
+                'green': StyledTextTag(
+                  style: TextStyle(
+                    color: getEnteColorScheme(context).primary500,
                   ),
-                  TextSpan(
-                    text: familyAdmin,
-                    style:
-                        const TextStyle(color: Color.fromRGBO(29, 185, 84, 1)),
-                  ),
-                  TextSpan(
-                    text: " " + S.of(context).contactFamilyAdminPart2,
-                  ),
-                ],
-                style: Theme.of(context).textTheme.bodyText1,
-              ),
+                ),
+              },
             ),
           ),
           const Padding(
@@ -90,17 +84,20 @@ class ChildSubscriptionWidget extends StatelessWidget {
           Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: S
-                          .of(context)
-                          .pleaseContactSupportAndWeWillBeHappyToHelp,
-                      style: Theme.of(context).textTheme.bodyText2,
-                    ),
-                  ],
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: S
+                            .of(context)
+                            .pleaseContactSupportAndWeWillBeHappyToHelp,
+                        style: Theme.of(context).textTheme.bodyText2,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

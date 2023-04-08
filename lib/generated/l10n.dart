@@ -290,24 +290,12 @@ class S {
     );
   }
 
-  /// `Please send an email to`
-  String get pleaseSendAnEmailTo {
+  /// `Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address.`
+  String get deleteEmailRequest {
     return Intl.message(
-      'Please send an email to',
-      name: 'pleaseSendAnEmailTo',
-      desc:
-          'This text is part of the sentence \'Please send an email to email@ente.io from your registered email address.\'',
-      args: [],
-    );
-  }
-
-  /// `from your registered email address.`
-  String get fromYourRegisteredEmailAddress {
-    return Intl.message(
-      'from your registered email address.',
-      name: 'fromYourRegisteredEmailAddress',
-      desc:
-          'This text is part of the sentence \'Please send an email to email@ente.io from your registered email address.\'',
+      'Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address.',
+      name: 'deleteEmailRequest',
+      desc: '',
       args: [],
     );
   }
@@ -632,24 +620,12 @@ class S {
     );
   }
 
-  /// `We don't store this password, so if you forget,`
-  String get noPasswordWarningPart1 {
+  /// `We don't store this password, so if you forget, <underline>we cannot decrypt your data</underline>`
+  String get passwordWarning {
     return Intl.message(
-      'We don\'t store this password, so if you forget,',
-      name: 'noPasswordWarningPart1',
-      desc:
-          'This text is part1 the sentence \'We don\'t store this password, so if you forget, we cannot decrypt your data.\'',
-      args: [],
-    );
-  }
-
-  /// `we cannot decrypt your data`
-  String get noPasswordWarningPart2 {
-    return Intl.message(
-      'we cannot decrypt your data',
-      name: 'noPasswordWarningPart2',
-      desc:
-          'This text is part2 the sentence \'We don\'t store this password, so if you forget, we cannot decrypt your data.\'',
+      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>',
+      name: 'passwordWarning',
+      desc: '',
       args: [],
     );
   }
@@ -2497,35 +2473,12 @@ class S {
     );
   }
 
-  /// `Also delete the photos (and videos) present in this album from `
-  String get deleteAlbumDialogPart1 {
+  /// `Also delete the photos (and videos) present in this album from <bold>all</bold> other albums they are part of?`
+  String get deleteAlbumDialog {
     return Intl.message(
-      'Also delete the photos (and videos) present in this album from ',
-      name: 'deleteAlbumDialogPart1',
-      desc:
-          'Part of this string \'Also delete the photos (and videos) present in this album from all other albums they are part of?\'',
-      args: [],
-    );
-  }
-
-  /// `all`
-  String get deleteAlbumDialogPart2Bold {
-    return Intl.message(
-      'all',
-      name: 'deleteAlbumDialogPart2Bold',
-      desc:
-          'Part of this string \'Also delete the photos (and videos) present in this album from all other albums they are part of?\'',
-      args: [],
-    );
-  }
-
-  /// ` other albums they are part of?`
-  String get deleteAlbumDialogPart3 {
-    return Intl.message(
-      ' other albums they are part of?',
-      name: 'deleteAlbumDialogPart3',
-      desc:
-          'Part of this string \'Also delete the photos (and videos) present in this album from all other albums they are part of?\'',
+      'Also delete the photos (and videos) present in this album from <bold>all</bold> other albums they are part of?',
+      name: 'deleteAlbumDialog',
+      desc: '',
       args: [],
     );
   }
@@ -4341,25 +4294,13 @@ class S {
     );
   }
 
-  /// `Please contact`
-  String get contactFamilyAdminPart1 {
+  /// `Please contact <green>{familyAdminEmail}</green> to manage your subscription`
+  String contactFamilyAdmin(Object familyAdminEmail) {
     return Intl.message(
-      'Please contact',
-      name: 'contactFamilyAdminPart1',
-      desc:
-          'Part1 of the sentence \'Please contact {familyAdminName} to manage your subscription\'',
-      args: [],
-    );
-  }
-
-  /// `to manage your subscription`
-  String get contactFamilyAdminPart2 {
-    return Intl.message(
-      'to manage your subscription',
-      name: 'contactFamilyAdminPart2',
-      desc:
-          'Part2 of the sentence \'Please contact {familyAdminName} to manage your subscription\'',
-      args: [],
+      'Please contact <green>$familyAdminEmail</green> to manage your subscription',
+      name: 'contactFamilyAdmin',
+      desc: '',
+      args: [familyAdminEmail],
     );
   }
 
