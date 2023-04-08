@@ -4317,25 +4317,13 @@ class S {
     );
   }
 
-  /// `Please contact`
-  String get contactFamilyAdminPart1 {
+  /// `Please contact <green>{familyAdminEmail}</green> to manage your subscription`
+  String contactFamilyAdmin(Object familyAdminEmail) {
     return Intl.message(
-      'Please contact',
-      name: 'contactFamilyAdminPart1',
-      desc:
-          'Part1 of the sentence \'Please contact {familyAdminName} to manage your subscription\'',
-      args: [],
-    );
-  }
-
-  /// `to manage your subscription`
-  String get contactFamilyAdminPart2 {
-    return Intl.message(
-      'to manage your subscription',
-      name: 'contactFamilyAdminPart2',
-      desc:
-          'Part2 of the sentence \'Please contact {familyAdminName} to manage your subscription\'',
-      args: [],
+      'Please contact <green>$familyAdminEmail</green> to manage your subscription',
+      name: 'contactFamilyAdmin',
+      desc: '',
+      args: [familyAdminEmail],
     );
   }
 

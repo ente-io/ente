@@ -614,16 +614,7 @@
   "pleaseWaitForSometimeBeforeRetrying": "Please wait for sometime before retrying",
   "paymentFailedWithReason": "Unfortunately your payment failed due to {reason}",
   "youAreOnAFamilyPlan": "You are on a family plan!",
-  "contactFamilyAdminPart1": "Please contact",
-  "@contactFamilyAdminPart1": {
-    "description": "Part1 of the sentence 'Please contact {familyAdminName} to manage your subscription'",
-    "type": "text"
-  },
-  "contactFamilyAdminPart2": "to manage your subscription",
-  "@contactFamilyAdminPart2": {
-    "description": "Part2 of the sentence 'Please contact {familyAdminName} to manage your subscription'",
-    "type": "text"
-  },
+  "contactFamilyAdmin": "Please contact <green>{familyAdminEmail}</green> to manage your subscription",
   "leaveFamily": "Leave family",
   "areYouSureThatYouWantToLeaveTheFamily": "Are you sure that you want to leave the family plan?",
   "leave": "Leave",
