@@ -620,24 +620,12 @@ class S {
     );
   }
 
-  /// `We don't store this password, so if you forget,`
-  String get noPasswordWarningPart1 {
+  /// `We don't store this password, so if you forget, <underline>we cannot decrypt your data</underline>`
+  String get passwordWarning {
     return Intl.message(
-      'We don\'t store this password, so if you forget,',
-      name: 'noPasswordWarningPart1',
-      desc:
-          'This text is part1 the sentence \'We don\'t store this password, so if you forget, we cannot decrypt your data.\'',
-      args: [],
-    );
-  }
-
-  /// `we cannot decrypt your data`
-  String get noPasswordWarningPart2 {
-    return Intl.message(
-      'we cannot decrypt your data',
-      name: 'noPasswordWarningPart2',
-      desc:
-          'This text is part2 the sentence \'We don\'t store this password, so if you forget, we cannot decrypt your data.\'',
+      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>',
+      name: 'passwordWarning',
+      desc: '',
       args: [],
     );
   }

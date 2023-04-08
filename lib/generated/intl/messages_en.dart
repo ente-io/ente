@@ -731,10 +731,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "noExifData": MessageLookupByLibrary.simpleMessage("No EXIF data"),
         "noHiddenPhotosOrVideos":
             MessageLookupByLibrary.simpleMessage("No hidden photos or videos"),
-        "noPasswordWarningPart1": MessageLookupByLibrary.simpleMessage(
-            "We don\'t store this password, so if you forget,"),
-        "noPasswordWarningPart2":
-            MessageLookupByLibrary.simpleMessage("we cannot decrypt your data"),
         "noPhotosAreBeingBackedUpRightNow":
             MessageLookupByLibrary.simpleMessage(
                 "No photos are being backed up right now"),
@@ -761,6 +757,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Password changed successfully"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("Password lock"),
         "passwordStrength": m28,
+        "passwordWarning": MessageLookupByLibrary.simpleMessage(
+            "We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>"),
         "paymentDetails":
             MessageLookupByLibrary.simpleMessage("Payment details"),
         "paymentFailed": MessageLookupByLibrary.simpleMessage("Payment failed"),
