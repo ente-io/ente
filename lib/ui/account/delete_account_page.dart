@@ -14,6 +14,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import "package:photos/utils/toast_util.dart";
+import "package:styled_text/styled_text.dart";
 
 class DeleteAccountPage extends StatefulWidget {
   const DeleteAccountPage({
@@ -51,7 +52,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
           icon: const Icon(Icons.arrow_back),
           color: Theme.of(context).iconTheme.color,
           onPressed: () {
-            Navigator.of(context).pop();
+            // Navigator.of(context).pop();
+            _requestEmailForDeletion(context);
           },
         ),
       ),
@@ -280,29 +282,17 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
           color: Colors.red,
         ),
       ),
-      content: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: S.of(context).pleaseSendAnEmailTo,
+      content: StyledText(
+        text:
+            "${S.of(context).deleteEmailRequest}\n\n${S.of(context).deleteRequestSLAText}",
+        tags: {
+          'warning': StyledTextTag(
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.orange[300],
             ),
-            TextSpan(
-              text: "account-deletion@ente.io",
-              style: TextStyle(
-                color: Colors.orange[300],
-              ),
-            ),
-            TextSpan(
-              text:
-                  " ${S.of(context).fromYourRegisteredEmailAddress}\n\n${S.of(context).deleteRequestSLAText}",
-            ),
-          ],
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            height: 1.5,
-            fontSize: 16,
           ),
-        ),
+        },
       ),
       actions: [
         TextButton(

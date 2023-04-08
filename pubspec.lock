@@ -1634,6 +1634,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  styled_text:
+    dependency: "direct main"
+    description:
+      name: styled_text
+      sha256: f72928d1ebe8cb149e3b34a689cb1ddca696b808187cf40ac3a0bd183dff379c
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.0.0"
   syncfusion_flutter_core:
     dependency: "direct main"
     description:
@@ -1984,6 +1992,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.2.2"
+  xmlstream:
+    dependency: transitive
+    description:
+      name: xmlstream
+      sha256: "2d10c69a9d5fc46f71798b80ee6db15bc0d5bf560fdbdd264776cbeee0c83631"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   yaml:
     dependency: transitive
     description:

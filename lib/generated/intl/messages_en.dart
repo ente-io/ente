@@ -429,6 +429,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteAll": MessageLookupByLibrary.simpleMessage("Delete All"),
         "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
             "You are about to permanently delete your account and all its data.\nThis action is irreversible."),
+        "deleteEmailRequest": MessageLookupByLibrary.simpleMessage(
+            "Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address."),
         "deleteEmptyAlbums":
             MessageLookupByLibrary.simpleMessage("Delete empty albums"),
         "deleteEmptyAlbumsWithQuestionMark":
@@ -590,8 +592,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Free up device space"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Free up space"),
         "freeUpSpaceSaving": m20,
-        "fromYourRegisteredEmailAddress": MessageLookupByLibrary.simpleMessage(
-            "from your registered email address."),
         "general": MessageLookupByLibrary.simpleMessage("General"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generating encryption keys..."),
@@ -794,8 +794,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Please grant permissions"),
         "pleaseLoginAgain":
             MessageLookupByLibrary.simpleMessage("Please login again"),
-        "pleaseSendAnEmailTo":
-            MessageLookupByLibrary.simpleMessage("Please send an email to"),
         "pleaseSendTheLogsTo": m32,
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Please try again"),

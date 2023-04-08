@@ -23,14 +23,7 @@
   "deleteReason4": "My reason isn’t listed",
   "sendEmail": "Send email",
   "deleteRequestSLAText": "Your request will be processed within 72 hours.",
-  "pleaseSendAnEmailTo": "Please send an email to",
-  "@pleaseSendAnEmailTo": {
-    "description": "This text is part of the sentence 'Please send an email to email@ente.io from your registered email address.'"
-  },
-  "fromYourRegisteredEmailAddress": "from your registered email address.",
-  "@fromYourRegisteredEmailAddress": {
-    "description": "This text is part of the sentence 'Please send an email to email@ente.io from your registered email address.'"
-  },
+  "deleteEmailRequest": "Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address.",
   "ok": "Ok",
   "createAccount": "Create account",
   "createNewAccount": "Create new account",

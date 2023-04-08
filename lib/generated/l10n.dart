@@ -290,24 +290,12 @@ class S {
     );
   }
 
-  /// `Please send an email to`
-  String get pleaseSendAnEmailTo {
+  /// `Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address.`
+  String get deleteEmailRequest {
     return Intl.message(
-      'Please send an email to',
-      name: 'pleaseSendAnEmailTo',
-      desc:
-          'This text is part of the sentence \'Please send an email to email@ente.io from your registered email address.\'',
-      args: [],
-    );
-  }
-
-  /// `from your registered email address.`
-  String get fromYourRegisteredEmailAddress {
-    return Intl.message(
-      'from your registered email address.',
-      name: 'fromYourRegisteredEmailAddress',
-      desc:
-          'This text is part of the sentence \'Please send an email to email@ente.io from your registered email address.\'',
+      'Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address.',
+      name: 'deleteEmailRequest',
+      desc: '',
       args: [],
     );
   }
