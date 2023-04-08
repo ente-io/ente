@@ -7,6 +7,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/local_import_progress.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
@@ -21,23 +22,13 @@ class LoadingPhotosWidget extends StatefulWidget {
 
 class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   late StreamSubscription<SyncStatusUpdate> _firstImportEvent;
-  late StreamSubscription<LocalImportProgressEvent> _imprortProgressEvent;
+  late StreamSubscription<LocalImportProgressEvent> _importProgressEvent;
   int _currentPage = 0;
   String _loadingMessage = "Loading your photos...";
   final PageController _pageController = PageController(
     initialPage: 0,
   );
-  final List<String> _messages = [
-    "You can share your plan with your family",
-    "We have preserved over 10 million memories so far",
-    "web.ente.io has a slick uploader",
-    "All our apps are open source",
-    "Our encryption protocols have been reviewed by engineers at Google, Apple, Amazon, and Facebook",
-    "You can share links to your albums with your loved ones",
-    "Our mobile apps run in the background to encrypt and backup new photos you take",
-    "We use Xchacha20Poly1305 to safely encrypt your data",
-    "One of our data centers is in an underground fall out shelter in Paris",
-  ];
+  final List<String> _messages = [];
 
   @override
   void initState() {
@@ -58,7 +49,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         }
       }
     });
-    _imprortProgressEvent =
+    _importProgressEvent =
         Bus.instance.on<LocalImportProgressEvent>().listen((event) {
       if (Platform.isAndroid) {
         _loadingMessage = 'Processing ${event.folderName}...';
@@ -88,12 +79,13 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   @override
   void dispose() {
     _firstImportEvent.cancel();
-    _imprortProgressEvent.cancel();
+    _importProgressEvent.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    _setupLoadingMessages(context);
     final isLightMode =
         MediaQuery.of(context).platformBrightness == Brightness.light;
     return Scaffold(
@@ -142,7 +134,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
-                          "Did you know?",
+                          S.of(context).didYouKnow,
                           style: Theme.of(context)
                               .textTheme
                               .headline6!
@@ -185,6 +177,18 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         ),
       ),
     );
+  }
+
+  void _setupLoadingMessages(BuildContext context) {
+    _messages.add(S.of(context).loadMessage1);
+    _messages.add(S.of(context).loadMessage2);
+    _messages.add(S.of(context).loadMessage3);
+    _messages.add(S.of(context).loadMessage4);
+    _messages.add(S.of(context).loadMessage5);
+    _messages.add(S.of(context).loadMessage6);
+    _messages.add(S.of(context).loadMessage7);
+    _messages.add(S.of(context).loadMessage8);
+    _messages.add(S.of(context).loadMessage9);
   }
 
   Widget _getMessage(String text) {

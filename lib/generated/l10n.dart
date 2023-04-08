@@ -6471,6 +6471,116 @@ class S {
       args: [],
     );
   }
+
+  /// `Did you know?`
+  String get didYouKnow {
+    return Intl.message(
+      'Did you know?',
+      name: 'didYouKnow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loading your photos...`
+  String get loadingMessage {
+    return Intl.message(
+      'Loading your photos...',
+      name: 'loadingMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can share your subscription with your family`
+  String get loadMessage1 {
+    return Intl.message(
+      'You can share your subscription with your family',
+      name: 'loadMessage1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We have preserved over 10 million memories so far`
+  String get loadMessage2 {
+    return Intl.message(
+      'We have preserved over 10 million memories so far',
+      name: 'loadMessage2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We keep 3 copies of your data, one in an underground fallout shelter`
+  String get loadMessage3 {
+    return Intl.message(
+      'We keep 3 copies of your data, one in an underground fallout shelter',
+      name: 'loadMessage3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All our apps are open source`
+  String get loadMessage4 {
+    return Intl.message(
+      'All our apps are open source',
+      name: 'loadMessage4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Our source code and cryptography have been externally audited`
+  String get loadMessage5 {
+    return Intl.message(
+      'Our source code and cryptography have been externally audited',
+      name: 'loadMessage5',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can share links to your albums with your loved ones`
+  String get loadMessage6 {
+    return Intl.message(
+      'You can share links to your albums with your loved ones',
+      name: 'loadMessage6',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Our mobile apps run in the background to encrypt and backup any new photos you click`
+  String get loadMessage7 {
+    return Intl.message(
+      'Our mobile apps run in the background to encrypt and backup any new photos you click',
+      name: 'loadMessage7',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `web.ente.io has a slick uploader`
+  String get loadMessage8 {
+    return Intl.message(
+      'web.ente.io has a slick uploader',
+      name: 'loadMessage8',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We use Xchacha20Poly1305 to safely encrypt your data`
+  String get loadMessage9 {
+    return Intl.message(
+      'We use Xchacha20Poly1305 to safely encrypt your data',
+      name: 'loadMessage9',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

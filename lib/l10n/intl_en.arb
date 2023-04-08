@@ -916,5 +916,16 @@
   "copyEmailAddress": "Copy email address",
   "exportLogs": "Export logs",
   "pleaseEmailUsAt": "Please email us at {toEmail}",
-  "dismiss": "Dismiss"
+  "dismiss": "Dismiss",
+  "didYouKnow": "Did you know?",
+  "loadingMessage": "Loading your photos...",
+  "loadMessage1": "You can share your subscription with your family",
+  "loadMessage2": "We have preserved over 10 million memories so far",
+  "loadMessage3": "We keep 3 copies of your data, one in an underground fallout shelter",
+  "loadMessage4": "All our apps are open source",
+  "loadMessage5": "Our source code and cryptography have been externally audited",
+  "loadMessage6": "You can share links to your albums with your loved ones",
+  "loadMessage7": "Our mobile apps run in the background to encrypt and backup any new photos you click",
+  "loadMessage8": "web.ente.io has a slick uploader",
+  "loadMessage9": "We use Xchacha20Poly1305 to safely encrypt your data"
 }

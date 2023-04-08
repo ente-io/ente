@@ -21,5 +21,21 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'de';
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{};
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "accountWelcomeBack":
+            MessageLookupByLibrary.simpleMessage("Willkommen zurück!"),
+        "activeSessions":
+            MessageLookupByLibrary.simpleMessage("Aktive Sitzungen"),
+        "cancel": MessageLookupByLibrary.simpleMessage("Abbrechen"),
+        "createNewAccount":
+            MessageLookupByLibrary.simpleMessage("Neues Konto erstellen"),
+        "deleteAccount": MessageLookupByLibrary.simpleMessage("Konto löschen"),
+        "email": MessageLookupByLibrary.simpleMessage("E-Mail"),
+        "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
+            "Geben Sie Ihre E-Mail-Adresse ein"),
+        "feedback": MessageLookupByLibrary.simpleMessage("Rückmeldung"),
+        "insecureDevice":
+            MessageLookupByLibrary.simpleMessage("Unsicheres Gerät"),
+        "password": MessageLookupByLibrary.simpleMessage("Passwort")
+      };
 }
