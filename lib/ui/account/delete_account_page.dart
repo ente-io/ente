@@ -52,8 +52,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
           icon: const Icon(Icons.arrow_back),
           color: Theme.of(context).iconTheme.color,
           onPressed: () {
-            // Navigator.of(context).pop();
-            _requestEmailForDeletion(context);
+            Navigator.of(context).pop();
           },
         ),
       ),
