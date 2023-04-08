@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import i18n, { t } from 'i18next';
 
 export function formatDateFull(date: number | Date) {
     const dateTimeFormat1 = new Intl.DateTimeFormat(i18n.language, {
@@ -55,11 +55,11 @@ export function formatTime(date: number | Date) {
 }
 
 export function formatDateTimeFull(dateTime: number | Date): string {
-    return [formatDateFull(dateTime), 'at', formatTime(dateTime)].join(' ');
+    return [formatDateFull(dateTime), t('at'), formatTime(dateTime)].join(' ');
 }
 
 export function formatDateTime(dateTime: number | Date): string {
-    return [formatDate(dateTime), 'at', formatTime(dateTime)].join(' ');
+    return [formatDate(dateTime), t('at'), formatTime(dateTime)].join(' ');
 }
 
 export function formatDateRelative(date: number) {

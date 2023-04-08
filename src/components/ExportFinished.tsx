@@ -9,6 +9,7 @@ import React from 'react';
 import { t } from 'i18next';
 import { formatDateTime } from 'utils/time/format';
 import { SpaceBetweenFlex } from './Container';
+import { formatNumber } from 'utils/number/format';
 
 interface Props {
     pendingFileCount: number;
@@ -26,14 +27,18 @@ export default function ExportFinished(props: Props) {
                         <Typography color={'text.secondary'}>
                             {t('PENDING_ITEMS')}
                         </Typography>
-                        <Typography>{props.pendingFileCount}</Typography>
+                        <Typography>
+                            {formatNumber(props.pendingFileCount)}
+                        </Typography>
                     </SpaceBetweenFlex>
                     <SpaceBetweenFlex minHeight={'48px'}>
                         <Typography color="text.secondary">
                             {t('LAST_EXPORT_TIME')}
                         </Typography>
                         <Typography>
-                            {formatDateTime(props.lastExportTime)}
+                            {props.lastExportTime
+                                ? formatDateTime(props.lastExportTime)
+                                : t('NEVER')}
                         </Typography>
                     </SpaceBetweenFlex>
                 </Stack>
