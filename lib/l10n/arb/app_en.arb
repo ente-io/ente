@@ -143,6 +143,9 @@
   "noResult": "No result",
   "addCode": "Add code",
   "scanAQrCode": "Scan a QR code",
-  "enterDetailsManually": "Enter details manually"
+  "enterDetailsManually": "Enter details manually",
+  "edit": "Edit",
+  "copiedToClipboard": "Copied to clipboard",
+  "error": "Error"
 
 }
