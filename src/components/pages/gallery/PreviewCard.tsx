@@ -320,11 +320,7 @@ export default function PreviewCard(props: IProps) {
                 />
             )}
             {file.metadata.hasStaticThumbnail ? (
-                <StaticThumbnail
-                    hasStaticThumbnail={file.metadata.hasStaticThumbnail}
-                    fileType={file.metadata.fileType}
-                    src={imgSrc}
-                />
+                <StaticThumbnail fileType={file.metadata.fileType} />
             ) : imgSrc ? (
                 <img src={imgSrc} />
             ) : (

@@ -5,9 +5,7 @@ import { FILE_TYPE } from 'constants/file';
 import { Overlay } from './Container';
 
 interface Iprops {
-    hasStaticThumbnail: boolean;
     fileType: FILE_TYPE;
-    src: string;
 }
 
 const CenteredOverlay = styled(Overlay)`
