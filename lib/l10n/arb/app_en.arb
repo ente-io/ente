@@ -136,6 +136,13 @@
   "language": "Language",
   "social": "Social",
   "security": "Security",
-  "lockscreen": "Lockscreen"
+  "lockscreen": "Lockscreen",
+  "searchHint": "Search...",
+  "search": "Search",
+  "sorryUnableToGenCode": "Sorry, unable to generate a code for {issuerName}",
+  "noResult": "No result",
+  "addCode": "Add code",
+  "scanAQrCode": "Scan a QR code",
+  "enterDetailsManually": "Enter details manually"
 
 }
