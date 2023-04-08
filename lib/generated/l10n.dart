@@ -2473,35 +2473,12 @@ class S {
     );
   }
 
-  /// `Also delete the photos (and videos) present in this album from `
-  String get deleteAlbumDialogPart1 {
+  /// `Also delete the photos (and videos) present in this album from <bold>all</bold> other albums they are part of?`
+  String get deleteAlbumDialog {
     return Intl.message(
-      'Also delete the photos (and videos) present in this album from ',
-      name: 'deleteAlbumDialogPart1',
-      desc:
-          'Part of this string \'Also delete the photos (and videos) present in this album from all other albums they are part of?\'',
-      args: [],
-    );
-  }
-
-  /// `all`
-  String get deleteAlbumDialogPart2Bold {
-    return Intl.message(
-      'all',
-      name: 'deleteAlbumDialogPart2Bold',
-      desc:
-          'Part of this string \'Also delete the photos (and videos) present in this album from all other albums they are part of?\'',
-      args: [],
-    );
-  }
-
-  /// ` other albums they are part of?`
-  String get deleteAlbumDialogPart3 {
-    return Intl.message(
-      ' other albums they are part of?',
-      name: 'deleteAlbumDialogPart3',
-      desc:
-          'Part of this string \'Also delete the photos (and videos) present in this album from all other albums they are part of?\'',
+      'Also delete the photos (and videos) present in this album from <bold>all</bold> other albums they are part of?',
+      name: 'deleteAlbumDialog',
+      desc: '',
       args: [],
     );
   }

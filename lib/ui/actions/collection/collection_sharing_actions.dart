@@ -25,6 +25,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import "package:styled_text/styled_text.dart";
 
 class CollectionActions {
   final Logger logger = Logger((CollectionActions).toString());
@@ -96,8 +97,11 @@ class CollectionActions {
     BuildContext context,
     List<File> files,
   ) async {
-    final dialog = createProgressDialog(context, S.of(context).creatingLink,
-        isDismissible: true);
+    final dialog = createProgressDialog(
+      context,
+      S.of(context).creatingLink,
+      isDismissible: true,
+    );
     dialog.show();
     try {
       // create album with emptyName, use collectionCreationTime on UI to
@@ -143,31 +147,32 @@ class CollectionActions {
     User user,
   ) async {
     final actionResult = await showActionSheet(
-        context: context,
-        buttons: [
-          ButtonWidget(
-            buttonType: ButtonType.critical,
-            isInAlert: true,
-            shouldStickToDarkTheme: true,
-            buttonAction: ButtonAction.first,
-            shouldSurfaceExecutionStates: true,
-            labelText: S.of(context).yesRemove,
-            onTap: () async {
-              final newSharees = await CollectionsService.instance
-                  .unshare(collection.id, user.email);
-              collection.updateSharees(newSharees);
-            },
-          ),
-          ButtonWidget(
-            buttonType: ButtonType.secondary,
-            buttonAction: ButtonAction.cancel,
-            isInAlert: true,
-            shouldStickToDarkTheme: true,
-            labelText: S.of(context).cancel,
-          )
-        ],
-        title: S.of(context).removeWithQuestionMark,
-        body: S.of(context).removeParticipantBody(user.email));
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: S.of(context).yesRemove,
+          onTap: () async {
+            final newSharees = await CollectionsService.instance
+                .unshare(collection.id, user.email);
+            collection.updateSharees(newSharees);
+          },
+        ),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: S.of(context).cancel,
+        )
+      ],
+      title: S.of(context).removeWithQuestionMark,
+      body: S.of(context).removeParticipantBody(user.email),
+    );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
         showGenericErrorDialog(context: context);
@@ -193,16 +198,22 @@ class CollectionActions {
       );
       return false;
     } else if (email.trim() == Configuration.instance.getEmail()) {
-      await showErrorDialog(context, S.of(context).oops,
-          S.of(context).youCannotShareWithYourself);
+      await showErrorDialog(
+        context,
+        S.of(context).oops,
+        S.of(context).youCannotShareWithYourself,
+      );
       return false;
     }
 
     ProgressDialog? dialog;
     String? publicKey;
     if (showProgress) {
-      dialog = createProgressDialog(context, S.of(context).sharing,
-          isDismissible: true);
+      dialog = createProgressDialog(
+        context,
+        S.of(context).sharing,
+        isDismissible: true,
+      );
       await dialog.show();
     }
 
@@ -325,22 +336,14 @@ class CollectionActions {
           isInAlert: true,
         ),
       ],
-      bodyWidget: RichText(
-        text: TextSpan(
-          style: textTheme.body.copyWith(color: textMutedDark),
-          children: <TextSpan>[
-            TextSpan(
-              text: S.of(bContext).deleteAlbumDialogPart1,
-            ),
-            TextSpan(
-              text: S.of(bContext).deleteAlbumDialogPart2Bold,
-              style: textTheme.body.copyWith(color: textBaseDark),
-            ),
-            TextSpan(
-              text: S.of(bContext).deleteAlbumDialogPart3,
-            ),
-          ],
-        ),
+      bodyWidget: StyledText(
+        text: S.of(bContext).deleteAlbumDialog,
+        style: textTheme.body.copyWith(color: textMutedDark),
+        tags: {
+          'bold': StyledTextTag(
+            style: textTheme.body.copyWith(color: textBaseDark),
+          ),
+        },
       ),
       actionSheetType: ActionSheetType.defaultActionSheet,
     );

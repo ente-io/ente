@@ -418,12 +418,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteAccountPermanentlyButton":
             MessageLookupByLibrary.simpleMessage("Delete Account Permanently"),
         "deleteAlbum": MessageLookupByLibrary.simpleMessage("Delete album"),
-        "deleteAlbumDialogPart1": MessageLookupByLibrary.simpleMessage(
-            "Also delete the photos (and videos) present in this album from "),
-        "deleteAlbumDialogPart2Bold":
-            MessageLookupByLibrary.simpleMessage("all"),
-        "deleteAlbumDialogPart3": MessageLookupByLibrary.simpleMessage(
-            " other albums they are part of?"),
+        "deleteAlbumDialog": MessageLookupByLibrary.simpleMessage(
+            "Also delete the photos (and videos) present in this album from <bold>all</bold> other albums they are part of?"),
         "deleteAlbumsDialogBody": MessageLookupByLibrary.simpleMessage(
             "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list."),
         "deleteAll": MessageLookupByLibrary.simpleMessage("Delete All"),
