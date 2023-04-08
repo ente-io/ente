@@ -184,10 +184,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "account": MessageLookupByLibrary.simpleMessage("Account"),
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Welcome back!"),
-        "ackPasswordLostWarningPart1": MessageLookupByLibrary.simpleMessage(
-            "I understand that if I lose my password, I may lose my data since my data is "),
-        "ackPasswordLostWarningPart2":
-            MessageLookupByLibrary.simpleMessage(" with ente"),
+        "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
+            "I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Active sessions"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage("Add a new email"),
@@ -225,7 +223,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Allow downloads"),
         "allowPeopleToAddPhotos":
             MessageLookupByLibrary.simpleMessage("Allow people to add photos"),
-        "and": MessageLookupByLibrary.simpleMessage("and"),
         "androidIosWebDesktop":
             MessageLookupByLibrary.simpleMessage("Android, iOS, Web, Desktop"),
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
@@ -295,8 +292,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Backup settings"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Backup videos"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "byClickingLogInIAgreeToThe": MessageLookupByLibrary.simpleMessage(
-            "By clicking log in, I agree to the"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cached data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
         "canNotUploadToAlbumsOwnedByOthers":
@@ -501,8 +496,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "encryption": MessageLookupByLibrary.simpleMessage("Encryption"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Encryption keys"),
-        "endToEndEncrypted":
-            MessageLookupByLibrary.simpleMessage("end-to-end encrypted"),
         "endtoendEncryptedByDefault": MessageLookupByLibrary.simpleMessage(
             "End-to-end encrypted by default"),
         "enteCanEncryptAndPreserveFilesOnlyIfYouGrant":
@@ -685,6 +678,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "lockscreen": MessageLookupByLibrary.simpleMessage("Lockscreen"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Log in"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Logging out..."),
+        "loginTerms": MessageLookupByLibrary.simpleMessage(
+            "By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("Logout"),
         "logsDialogBody": MessageLookupByLibrary.simpleMessage(
             "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files."),
@@ -806,7 +801,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "pressAndHoldToPlayVideo": MessageLookupByLibrary.simpleMessage(
             "Press and hold to play video"),
         "privacy": MessageLookupByLibrary.simpleMessage("Privacy"),
-        "privacyPolicy": MessageLookupByLibrary.simpleMessage("privacy policy"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Privacy Policy"),
         "privateBackups":
@@ -974,6 +968,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWith": m44,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Shared with me"),
         "sharing": MessageLookupByLibrary.simpleMessage("Sharing..."),
+        "signUpTerms": MessageLookupByLibrary.simpleMessage(
+            "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>"),
         "singleFileDeleteFromDevice": m45,
         "singleFileDeleteHighlight": MessageLookupByLibrary.simpleMessage(
             "It will be deleted from all albums."),
@@ -1040,10 +1036,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Terminate session?"),
         "terms": MessageLookupByLibrary.simpleMessage("Terms"),
-        "termsAgreePart1":
-            MessageLookupByLibrary.simpleMessage("I agree to the "),
-        "termsOfService":
-            MessageLookupByLibrary.simpleMessage("terms of service"),
         "termsOfServicesTitle": MessageLookupByLibrary.simpleMessage("Terms"),
         "thankYou": MessageLookupByLibrary.simpleMessage("Thank you"),
         "thankYouForSubscribing":
