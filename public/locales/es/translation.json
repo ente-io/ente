@@ -350,7 +350,7 @@
     "PUBLIC_COLLECT": "Permitir añadir fotos",
     "LINK_DEVICE_LIMIT": "Límites del dispositivo",
     "LINK_EXPIRY": "Enlace vencio",
-    "LINK_EXPIRY_NEVER": "Nunca",
+    "NEVER": "Nunca",
     "DISABLE_FILE_DOWNLOAD": "Deshabilitar descarga",
     "DISABLE_FILE_DOWNLOAD_MESSAGE": "",
     "MALICIOUS_CONTENT": "Contiene contenido malicioso",
@@ -509,5 +509,6 @@
     "CONFIRM_DELETE_ACCOUNT": "Corfirmar borrado de cuenta",
     "FEEDBACK_REQUIRED": "Ayúdanos con esta información",
     "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "Qué hace mejor el otro servicio?",
-    "RECOVER_TWO_FACTOR": "Recuperar dos factores"
+    "RECOVER_TWO_FACTOR": "Recuperar dos factores",
+    "at": ""
 }
