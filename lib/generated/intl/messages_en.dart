@@ -184,10 +184,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "account": MessageLookupByLibrary.simpleMessage("Account"),
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Welcome back!"),
-        "ackPasswordLostWarningPart1": MessageLookupByLibrary.simpleMessage(
-            "I understand that if I lose my password, I may lose my data since my data is "),
-        "ackPasswordLostWarningPart2":
-            MessageLookupByLibrary.simpleMessage(" with ente"),
+        "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
+            "I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Active sessions"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage("Add a new email"),
@@ -498,8 +496,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "encryption": MessageLookupByLibrary.simpleMessage("Encryption"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Encryption keys"),
-        "endToEndEncrypted":
-            MessageLookupByLibrary.simpleMessage("end-to-end encrypted"),
         "endtoendEncryptedByDefault": MessageLookupByLibrary.simpleMessage(
             "End-to-end encrypted by default"),
         "enteCanEncryptAndPreserveFilesOnlyIfYouGrant":
@@ -805,7 +801,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "pressAndHoldToPlayVideo": MessageLookupByLibrary.simpleMessage(
             "Press and hold to play video"),
         "privacy": MessageLookupByLibrary.simpleMessage("Privacy"),
-        "privacyPolicy": MessageLookupByLibrary.simpleMessage("privacy policy"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Privacy Policy"),
         "privateBackups":
@@ -1041,10 +1036,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Terminate session?"),
         "terms": MessageLookupByLibrary.simpleMessage("Terms"),
-        "termsAgreePart1":
-            MessageLookupByLibrary.simpleMessage("I agree to the "),
-        "termsOfService":
-            MessageLookupByLibrary.simpleMessage("terms of service"),
         "termsOfServicesTitle": MessageLookupByLibrary.simpleMessage("Terms"),
         "thankYou": MessageLookupByLibrary.simpleMessage("Thank you"),
         "thankYouForSubscribing":

@@ -1,5 +1,4 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:password_strength/password_strength.dart';
@@ -411,59 +410,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 )
               },
             ),
-            // child: RichText(
-            //   text: TextSpan(
-            //     children: [
-            //       TextSpan(
-            //         text: S.of(context).termsAgreePart1,
-            //       ),
-            //       TextSpan(
-            //         text: S.of(context).termsOfService,
-            //         style: const TextStyle(
-            //           decoration: TextDecoration.underline,
-            //         ),
-            //         recognizer: TapGestureRecognizer()
-            //           ..onTap = () {
-            //             Navigator.of(context).push(
-            //               MaterialPageRoute(
-            //                 builder: (BuildContext context) {
-            //                   return WebPage(
-            //                     S.of(context).termsOfServicesTitle,
-            //                     "https://ente.io/terms",
-            //                   );
-            //                 },
-            //               ),
-            //             );
-            //           },
-            //       ),
-            //       TextSpan(text: ' ${S.of(context).and} '),
-            //       TextSpan(
-            //         text: S.of(context).privacyPolicy,
-            //         style: const TextStyle(
-            //           decoration: TextDecoration.underline,
-            //         ),
-            //         recognizer: TapGestureRecognizer()
-            //           ..onTap = () {
-            //             Navigator.of(context).push(
-            //               MaterialPageRoute(
-            //                 builder: (BuildContext context) {
-            //                   return WebPage(
-            //                     S.of(context).privacyPolicyTitle,
-            //                     "https://ente.io/privacy",
-            //                   );
-            //                 },
-            //               ),
-            //             );
-            //           },
-            //       ),
-            //     ],
-            //     style: Theme.of(context)
-            //         .textTheme
-            //         .subtitle1!
-            //         .copyWith(fontSize: 12),
-            //   ),
-            //   textAlign: TextAlign.left,
-            // ),
           ),
         ],
       ),
@@ -490,41 +436,29 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             },
           ),
           Expanded(
-            child: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: S.of(context).ackPasswordLostWarningPart1,
+            child: StyledText(
+              text: S.of(context).ackPasswordLostWarning,
+              style:
+                  Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 12),
+              tags: {
+                'underline': StyledTextActionTag(
+                  (String? text, Map<String?, String?> attrs) => {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return WebPage(
+                            S.of(context).encryption,
+                            "https://ente.io/architecture",
+                          );
+                        },
+                      ),
+                    )
+                  },
+                  style: const TextStyle(
+                    decoration: TextDecoration.underline,
                   ),
-                  TextSpan(
-                    text: S.of(context).endToEndEncrypted,
-                    style: const TextStyle(
-                      decoration: TextDecoration.underline,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return WebPage(
-                                S.of(context).encryption,
-                                "https://ente.io/architecture",
-                              );
-                            },
-                          ),
-                        );
-                      },
-                  ),
-                  TextSpan(
-                    text: " ${S.of(context).ackPasswordLostWarningPart2}",
-                  ),
-                ],
-                style: Theme.of(context)
-                    .textTheme
-                    .subtitle1!
-                    .copyWith(fontSize: 12),
-              ),
-              textAlign: TextAlign.left,
+                ),
+              },
             ),
           ),
         ],
