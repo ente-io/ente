@@ -64,7 +64,7 @@ export function ManageLinkExpiry({
                 subText={
                     publicShareProp?.validTill
                         ? formatDateTime(publicShareProp?.validTill / 1000)
-                        : t('LINK_EXPIRY_NEVER')
+                        : t('NEVER')
                 }>
                 {t('LINK_EXPIRY')}
             </EnteMenuItem>

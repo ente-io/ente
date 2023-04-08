@@ -9,6 +9,7 @@ import BackButton from '@mui/icons-material/ArrowBackOutlined';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { getTrashFilesMessage } from 'utils/ui';
 import { t } from 'i18next';
+import { formatNumber } from 'utils/number/format';
 
 const VerticalLine = styled('div')`
     position: absolute;
@@ -56,7 +57,7 @@ export default function DeduplicateOptions({
                     </IconButton>
                 )}
                 <Box ml={1.5}>
-                    {count} {t('SELECTED')}
+                    {formatNumber(count)} {t('SELECTED')}
                 </Box>
             </FluidContainer>
             <input

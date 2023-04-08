@@ -53,14 +53,14 @@
     "ADD_PHOTOS": "Add photos",
     "ADD_MORE_PHOTOS": "Add more photos",
     "add_photos_one": "Add 1 Photo",
-    "add_photos_other": "Add {{count}} Photos",
+    "add_photos_other": "Add {{count, number}} Photos",
     "SELECT_PHOTOS": "Select photos",
     "FILE_UPLOAD": "File Upload",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Preparing to upload",
         "1": "Reading google metadata files",
-        "2": "{{uploadCounter.finished}} / {{uploadCounter.total}} files metadata extracted",
-        "3": "{{uploadCounter.finished}} / {{uploadCounter.total}} files backed up",
+        "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} files metadata extracted",
+        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} files backed up",
         "4": "Cancelling remaining uploads",
         "5": "Backup complete"
     },
@@ -208,7 +208,7 @@
     },
     "photos_count_zero": "No memories",
     "photos_count_one": "1 memory",
-    "photos_count_other": "{{count}} memories",
+    "photos_count_other": "{{count, number}} memories",
     "TERMS_AND_CONDITIONS": "I agree to the <a>terms</a> and <b>privacy policy</b>",
     "ADD_TO_COLLECTION": "Add to album",
     "SELECTED": "selected",
@@ -350,7 +350,7 @@
     "PUBLIC_COLLECT": "Allow adding photos",
     "LINK_DEVICE_LIMIT": "Device limit",
     "LINK_EXPIRY": "Link expiry",
-    "LINK_EXPIRY_NEVER": "Never",
+    "NEVER": "Never",
     "DISABLE_FILE_DOWNLOAD": "Disable download",
     "DISABLE_FILE_DOWNLOAD_MESSAGE": "<p>Are you sure that you want to disable the download button for files?</p><p>Viewers can still take screenshots or save a copy of your photos using external tools.</p>",
     "MALICIOUS_CONTENT": "Contains malicious content",
@@ -378,7 +378,7 @@
     "STOP_UPLOADS_HEADER": "Stop uploads?",
     "YES_STOP_UPLOADS": "Yes, stop uploads",
     "albums_one": "1 Album",
-    "albums_other": "{{count}} Albums",
+    "albums_other": "{{count, number}} Albums",
     "ALL_ALBUMS": "All Albums",
     "ALBUMS": "Albums",
     "ENTER_TWO_FACTOR_OTP": "Enter the 6-digit code from your authenticator app.",
@@ -509,5 +509,6 @@
     "CONFIRM_DELETE_ACCOUNT": "Confirm Account Deletion",
     "FEEDBACK_REQUIRED": "Kindly help us with this information",
     "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "What does the other service do better?",
-    "RECOVER_TWO_FACTOR": "Recover two-factor"
+    "RECOVER_TWO_FACTOR": "Recover two-factor",
+    "at": "at"
 }

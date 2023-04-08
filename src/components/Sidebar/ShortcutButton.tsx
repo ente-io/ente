@@ -2,6 +2,7 @@ import React, { FC } from 'react';
 import { Box, ButtonProps } from '@mui/material';
 import SidebarButton from './Button';
 import { DotSeparator } from './styledComponents';
+import { formatNumber } from 'utils/number/format';
 
 type Iprops = ButtonProps<
     'button',
@@ -23,7 +24,7 @@ const ShortcutButton: FC<ButtonProps<'button', Iprops>> = ({
 
             <Box sx={{ color: 'text.secondary' }}>
                 <DotSeparator />
-                {count}
+                {formatNumber(count)}
             </Box>
         </SidebarButton>
     );
