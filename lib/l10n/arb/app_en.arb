@@ -173,5 +173,8 @@
   "privacyPolicyTitle": "Privacy Policy",
   "termsOfServicesTitle": "Terms",
   "encryption": "Encryption",
-  "ackPasswordLostWarning": "I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>."
+  "ackPasswordLostWarning": "I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.",
+  "accountWelcomeBack": "Welcome back!",
+  "loginTerms": "By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
+  "logInLabel": "Log in"
 }
