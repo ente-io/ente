@@ -3,12 +3,12 @@ import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import { ComlinkWorker } from './comlinkWorker';
 
 class ComlinkCryptoWorker {
-    private comlinkWorkerInstance: Remote<DedicatedCryptoWorker>;
+    private comlinkWorkerInstance: Promise<Remote<DedicatedCryptoWorker>>;
 
     async getInstance() {
         if (!this.comlinkWorkerInstance) {
             const comlinkWorker = getDedicatedCryptoWorker();
-            this.comlinkWorkerInstance = await comlinkWorker.remote;
+            this.comlinkWorkerInstance = comlinkWorker.remote;
         }
         return this.comlinkWorkerInstance;
     }
