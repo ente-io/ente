@@ -135,7 +135,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             snapshot.error,
             snapshot.stackTrace,
           );
-          return const Center(child: Text("Something went wrong."));
+          return Center(child: Text(S.of(context).somethingWentWrong));
         } else {
           return const EnteLoadingWidget();
         }

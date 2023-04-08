@@ -4653,6 +4653,16 @@ class S {
     );
   }
 
+  /// `Grant permission`
+  String get grantPermission {
+    return Intl.message(
+      'Grant permission',
+      name: 'grantPermission',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Private sharing`
   String get privateSharing {
     return Intl.message(

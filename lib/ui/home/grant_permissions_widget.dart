@@ -92,7 +92,7 @@ class GrantPermissionsWidget extends StatelessWidget {
           bottom: 16,
         ),
         child: OutlinedButton(
-          child: const Text("Grant permission"),
+          child: Text(S.of(context).grantPermission),
           onPressed: () async {
             final state = await PhotoManager.requestPermissionExtend();
             if (state == PermissionState.authorized ||
