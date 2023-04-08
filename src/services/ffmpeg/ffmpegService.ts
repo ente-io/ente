@@ -12,7 +12,7 @@ export async function generateVideoThumbnail(
     file: File | ElectronFile
 ): Promise<File | ElectronFile> {
     try {
-        let seekTime = 1.0;
+        let seekTime = 1;
         const ffmpegClient = await ffmpegFactory.getFFmpegClient();
         while (seekTime >= 0) {
             try {
