@@ -12,9 +12,9 @@ export async function generateVideoThumbnail(
     file: File | ElectronFile
 ): Promise<File | ElectronFile> {
     try {
-        let seekTime = 1.0;
+        let seekTime = 1;
         const ffmpegClient = await ffmpegFactory.getFFmpegClient();
-        while (seekTime > 0) {
+        while (seekTime >= 0) {
             try {
                 return await ffmpegClient.run(
                     [
@@ -22,7 +22,7 @@ export async function generateVideoThumbnail(
                         '-i',
                         INPUT_PATH_PLACEHOLDER,
                         '-ss',
-                        `00:00:0${seekTime.toFixed(3)}`,
+                        `00:00:0${seekTime}`,
                         '-vframes',
                         '1',
                         '-vf',
@@ -33,11 +33,11 @@ export async function generateVideoThumbnail(
                     'thumb.jpeg'
                 );
             } catch (e) {
-                if (seekTime <= 0) {
+                if (seekTime === 0) {
                     throw e;
                 }
             }
-            seekTime = Number((seekTime / 10).toFixed(3));
+            seekTime--;
         }
     } catch (e) {
         logError(e, 'ffmpeg generateVideoThumbnail failed');
