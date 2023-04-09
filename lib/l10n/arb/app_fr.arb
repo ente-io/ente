@@ -1,4 +1,5 @@
 {
+  "recoveryKey": "Clé de récupération",
   "counterAppBarTitle": "Compteur",
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
@@ -55,7 +56,8 @@
   "welcomeBackTitle": "Bon retour parmi nous !",
   "madeWithLoveAtPrefix": "fait avec ❤️ à ",
   "supportDiscount": "Utilisez le code coupon \"AUTH\" pour obtenir 10% de réduction sur la première année",
-  "changeEmail": "modifier l'e-mail",
+  "changeEmail": "Modifier l'e-mail",
+  "changePassword": "Modifier le mot de passe",
   "cancel": "Annuler",
   "yes": "Oui",
   "no": "Non",
@@ -111,5 +113,9 @@
   "confirmPassword": "Confirmer le mot de passe",
   "close": "Fermer",
   "oopsSomethingWentWrong": "Oops ! Une erreur s'est produite.",
-  "selectLanguage": "Sélectionnez la langue"
+  "selectLanguage": "Sélectionnez la langue",
+  "search": "Rechercher",
+  "edit": "Éditer",
+  "error": "Erreur",
+  "doThisLater": "Plus tard"
 }
