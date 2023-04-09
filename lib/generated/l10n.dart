@@ -910,10 +910,10 @@ class S {
     );
   }
 
-  /// `The current device is not powerful enough to verify your `
+  /// `The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).`
   String get recreatePasswordBody {
     return Intl.message(
-      'The current device is not powerful enough to verify your ',
+      'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).',
       name: 'recreatePasswordBody',
       desc: '',
       args: [],
@@ -1190,10 +1190,10 @@ class S {
     );
   }
 
-  /// `The recovery key you entered is not valid. Please make sure it `
+  /// `The recovery key you entered is not valid. Please make sure it contains 24 words, and check the spelling of each.\n\nIf you entered an older recovery code, make sure it is 64 characters long, and check each of them.`
   String get invalidRecoveryKey {
     return Intl.message(
-      'The recovery key you entered is not valid. Please make sure it ',
+      'The recovery key you entered is not valid. Please make sure it contains 24 words, and check the spelling of each.\n\nIf you entered an older recovery code, make sure it is 64 characters long, and check each of them.',
       name: 'invalidRecoveryKey',
       desc: '',
       args: [],
