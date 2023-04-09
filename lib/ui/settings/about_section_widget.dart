@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/common/web_page.dart';
@@ -95,12 +93,13 @@ class AboutSectionWidget extends StatelessWidget {
 class AboutMenuItemWidget extends StatelessWidget {
   final String title;
   final String url;
-  final String webPageTitle;
+  final String? webPageTitle;
+
   const AboutMenuItemWidget({
-    @required this.title,
-    @required this.url,
+    required this.title,
+    required this.url,
     this.webPageTitle,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
