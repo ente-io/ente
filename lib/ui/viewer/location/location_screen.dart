@@ -1,7 +1,10 @@
 import 'dart:developer' as dev;
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/files_updated_event.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/gallery_type.dart";
@@ -211,6 +214,11 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
                   asc,
                 }) async {
                   return snapshot.data as FileLoadResult;
+                },
+                reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                removalEventTypes: const {
+                  EventType.deletedFromRemote,
+                  EventType.deletedFromEverywhere,
                 },
                 selectedFiles: _selectedFiles,
                 tagPrefix: "location_gallery",
