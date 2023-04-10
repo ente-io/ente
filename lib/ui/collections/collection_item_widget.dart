@@ -15,11 +15,13 @@ class CollectionItem extends StatelessWidget {
   final CollectionWithThumbnail c;
   final double sideOfThumbnail;
   final bool shouldRender;
+  final bool showFileCount;
 
   CollectionItem(
     this.c,
     this.sideOfThumbnail, {
     this.shouldRender = false,
+    this.showFileCount = true,
     Key? key,
   }) : super(key: Key(c.collection.id.toString()));
 
@@ -59,30 +61,33 @@ class CollectionItem extends StatelessWidget {
             children: [
               const SizedBox(height: 2),
               Text(
-                (c.collection.name ?? "Unnamed").trim(),
+                (c.collection.collectionName).trim(),
                 style: enteTextTheme.small,
                 overflow: TextOverflow.ellipsis,
               ),
-              FutureBuilder<int>(
-                future: FilesDB.instance.collectionFileCount(c.collection.id),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Text(
-                      snapshot.data.toString(),
-                      style: enteTextTheme.small.copyWith(
-                        color: enteColorScheme.textMuted,
-                      ),
-                    );
-                  } else {
-                    return Text(
-                      "",
-                      style: enteTextTheme.small.copyWith(
-                        color: enteColorScheme.textMuted,
-                      ),
-                    );
-                  }
-                },
-              ),
+              showFileCount
+                  ? FutureBuilder<int>(
+                      future:
+                          FilesDB.instance.collectionFileCount(c.collection.id),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return Text(
+                            snapshot.data.toString(),
+                            style: enteTextTheme.small.copyWith(
+                              color: enteColorScheme.textMuted,
+                            ),
+                          );
+                        } else {
+                          return Text(
+                            "",
+                            style: enteTextTheme.small.copyWith(
+                              color: enteColorScheme.textMuted,
+                            ),
+                          );
+                        }
+                      },
+                    )
+                  : const SizedBox.shrink(),
             ],
           ),
         ],

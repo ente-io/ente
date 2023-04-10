@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/generated/l10n.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/common/gradient_button.dart';
@@ -24,7 +25,7 @@ class StartBackupHookWidget extends StatelessWidget {
           ),
         ),
         Text(
-          'No photos are being backed up right now',
+          S.of(context).noPhotosAreBeingBackedUpRightNow,
           style: Theme.of(context)
               .textTheme
               .caption!
@@ -45,13 +46,13 @@ class StartBackupHookWidget extends StatelessWidget {
                   } else {
                     routeToPage(
                       context,
-                      const BackupFolderSelectionPage(
-                        buttonText: "Start backup",
+                      BackupFolderSelectionPage(
+                        buttonText: S.of(context).startBackup,
                       ),
                     );
                   }
                 },
-                text: "Start backup",
+                text: S.of(context).startBackup,
               ),
             ),
           ),

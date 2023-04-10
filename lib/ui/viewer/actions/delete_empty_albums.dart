@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
-import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 
 class DeleteEmptyAlbums extends StatefulWidget {
@@ -27,59 +28,61 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: ButtonWidget(
-        buttonSize: ButtonSize.small,
-        buttonType: ButtonType.secondary,
-        labelText: "Delete empty albums",
-        icon: Icons.delete_sweep_outlined,
-        shouldSurfaceExecutionStates: false,
-        onTap: () async {
-          await showActionSheet(
-            context: context,
-            isDismissible: true,
-            buttons: [
-              ButtonWidget(
-                labelText: "Yes",
-                buttonType: ButtonType.neutral,
-                buttonSize: ButtonSize.large,
-                shouldStickToDarkTheme: true,
-                shouldSurfaceExecutionStates: true,
-                progressStatus: _deleteProgress,
-                onTap: () async {
-                  await _deleteEmptyAlbums();
-                  if (!_isCancelled) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 2, 8, 12),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: ButtonWidget(
+          buttonSize: ButtonSize.small,
+          buttonType: ButtonType.secondary,
+          labelText: S.of(context).deleteEmptyAlbums,
+          icon: Icons.delete_sweep_outlined,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            await showActionSheet(
+              context: context,
+              isDismissible: true,
+              buttons: [
+                ButtonWidget(
+                  labelText: S.of(context).yes,
+                  buttonType: ButtonType.neutral,
+                  buttonSize: ButtonSize.large,
+                  shouldStickToDarkTheme: true,
+                  shouldSurfaceExecutionStates: true,
+                  progressStatus: _deleteProgress,
+                  onTap: () async {
+                    await _deleteEmptyAlbums();
+                    if (!_isCancelled) {
+                      Navigator.of(context, rootNavigator: true).pop();
+                    }
+                    Bus.instance.fire(
+                      CollectionUpdatedEvent(
+                        0,
+                        <File>[],
+                        "empty_albums_deleted",
+                      ),
+                    );
+                    CollectionsService.instance.sync().ignore();
+                    _isCancelled = false;
+                  },
+                ),
+                ButtonWidget(
+                  labelText: S.of(context).cancel,
+                  buttonType: ButtonType.secondary,
+                  buttonSize: ButtonSize.large,
+                  shouldStickToDarkTheme: true,
+                  onTap: () async {
+                    _isCancelled = true;
                     Navigator.of(context, rootNavigator: true).pop();
-                  }
-                  Bus.instance.fire(
-                    CollectionUpdatedEvent(
-                      0,
-                      <File>[],
-                      "empty_albums_deleted",
-                    ),
-                  );
-                  CollectionsService.instance.sync().ignore();
-                  _isCancelled = false;
-                },
-              ),
-              ButtonWidget(
-                labelText: "Cancel",
-                buttonType: ButtonType.secondary,
-                buttonSize: ButtonSize.large,
-                shouldStickToDarkTheme: true,
-                onTap: () async {
-                  _isCancelled = true;
-                  Navigator.of(context, rootNavigator: true).pop();
-                },
-              )
-            ],
-            title: "Delete empty albums?",
-            body:
-                "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.",
-            actionSheetType: ActionSheetType.defaultActionSheet,
-          );
-        },
+                  },
+                )
+              ],
+              title: S.of(context).deleteEmptyAlbumsWithQuestionMark,
+              body: S.of(context).deleteAlbumsDialogBody,
+              actionSheetType: ActionSheetType.defaultActionSheet,
+            );
+          },
+        ),
       ),
     );
   }
@@ -95,9 +98,11 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
     int failedCount = 0;
     for (int i = 0; i < collections.length; i++) {
       if (mounted && !_isCancelled) {
+        final String currentlyDeleting = (i + 1)
+            .toString()
+            .padLeft(collections.length.toString().length, '0');
         _deleteProgress.value =
-            "Deleting ${(i + 1).toString().padLeft(collections.length.toString().length, '0')} / "
-            "${collections.length}";
+            S.of(context).deleteProgress(currentlyDeleting, collections.length);
         try {
           await CollectionsService.instance.trashEmptyCollection(
             collections[i].collection,

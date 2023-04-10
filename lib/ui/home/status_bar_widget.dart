@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/notification_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/theme/text_style.dart';
@@ -24,6 +26,8 @@ class StatusBarWidget extends StatefulWidget {
 }
 
 class _StatusBarWidgetState extends State<StatusBarWidget> {
+  static final _logger = Logger("StatusBarWidget");
+
   late StreamSubscription<SyncStatusUpdate> _subscription;
   late StreamSubscription<NotificationEvent> _notificationSubscription;
   bool _showStatus = false;
@@ -33,6 +37,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   @override
   void initState() {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
+      _logger.info("Received event " + event.toString());
       if (event.status == SyncStatus.error) {
         setState(() {
           _syncError = event.error;
@@ -96,14 +101,14 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         _showErrorBanner
             ? HeaderErrorWidget(error: _syncError)
             : const SizedBox.shrink(),
-        UserRemoteFlagService.instance.shouldShowRecoveryVerification()
+        !UserRemoteFlagService.instance.shouldShowRecoveryVerification()
             ? Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
                 child: NotificationWidget(
                   startIcon: Icons.error_outline,
                   actionIcon: Icons.arrow_forward,
-                  text: "Confirm your recovery key",
+                  text: S.of(context).confirmYourRecoveryKey,
                   onTap: () async => {
                     await routeToPage(
                       context,
@@ -202,7 +207,7 @@ class RefreshIndicatorWidget extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 4, 0, 0),
-                  child: Text(_getRefreshingText()),
+                  child: Text(_getRefreshingText(context)),
                 ),
               ],
             ),
@@ -212,22 +217,19 @@ class RefreshIndicatorWidget extends StatelessWidget {
     );
   }
 
-  String _getRefreshingText() {
+  String _getRefreshingText(BuildContext context) {
     if (event!.status == SyncStatus.startedFirstGalleryImport ||
         event!.status == SyncStatus.completedFirstGalleryImport) {
-      return "Loading gallery...";
+      return S.of(context).loadingGallery;
     }
     if (event!.status == SyncStatus.applyingRemoteDiff) {
-      return "Syncing...";
+      return S.of(context).syncing;
     }
     if (event!.status == SyncStatus.preparingForUpload) {
-      return "Encrypting backup...";
+      return S.of(context).encryptingBackup;
     }
     if (event!.status == SyncStatus.inProgress) {
-      return event!.completed.toString() +
-          "/" +
-          event!.total.toString() +
-          " memories preserved";
+      return S.of(context).syncProgress(event!.completed!, event!.total!);
     }
     if (event!.status == SyncStatus.paused) {
       return event!.reason;
@@ -237,10 +239,10 @@ class RefreshIndicatorWidget extends StatelessWidget {
     }
     if (event!.status == SyncStatus.completedBackup) {
       if (event!.wasStopped) {
-        return "Sync stopped";
+        return S.of(context).syncStopped;
       }
     }
-    return "All memories preserved";
+    return S.of(context).allMemoriesPreserved;
   }
 }
 
@@ -267,9 +269,9 @@ class SyncStatusCompletedWidget extends StatelessWidget {
                   color: Theme.of(context).colorScheme.greenAlternative,
                   size: 22,
                 ),
-                const Padding(
-                  padding: EdgeInsets.only(left: 12),
-                  child: Text("All memories preserved"),
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Text(S.of(context).allMemoriesPreserved),
                 ),
               ],
             ),

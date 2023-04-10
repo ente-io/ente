@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 
 class EmptyState extends StatelessWidget {
-  final String text;
+  final String? text;
 
-  const EmptyState({Key? key, this.text = "Nothing to see here! 👀"})
-      : super(key: key);
+  const EmptyState({Key? key, this.text}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class EmptyState extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Text(
-          text,
+          text ?? S.of(context).nothingToSeeHere,
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Theme.of(context)

@@ -7,7 +7,7 @@ import "package:photos/models/search/button_result.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/utils/separators_util.dart';
 
 enum ActionSheetType {

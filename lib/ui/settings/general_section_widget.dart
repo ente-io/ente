@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -7,7 +8,6 @@ import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import "package:photos/ui/growth/referral_screen.dart";
-import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -17,7 +17,7 @@ class GeneralSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "General",
+      title: S.of(context).general,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.graphic_eq,
     );
@@ -28,20 +28,8 @@ class GeneralSectionWidget extends StatelessWidget {
       children: [
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Manage subscription",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            _onManageSubscriptionTapped(context);
-          },
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Family plans",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).familyPlans,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -53,8 +41,8 @@ class GeneralSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Referrals",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).referrals,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -69,8 +57,8 @@ class GeneralSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Advanced",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).advanced,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -81,16 +69,6 @@ class GeneralSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
       ],
-    );
-  }
-
-  void _onManageSubscriptionTapped(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return getSubscriptionPage();
-        },
-      ),
     );
   }
 

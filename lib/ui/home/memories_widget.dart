@@ -2,9 +2,10 @@ import "dart:io";
 
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/extents_page_view.dart";
@@ -120,10 +121,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
                   type: MaterialType.transparency,
                   child: Text(
                     title,
-                    style: Theme.of(context)
-                        .textTheme
-                        .subtitle1!
-                        .copyWith(fontSize: 12),
+                    style: getEnteTextTheme(context).mini,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -136,22 +134,21 @@ class _MemoryWidgetState extends State<MemoryWidget> {
   }
 
   Container _buildMemoryItem(BuildContext context, int index) {
+    final colorScheme = getEnteColorScheme(context);
     final memory = widget.memories[index];
     final isSeen = memory.isSeen();
     return Container(
       decoration: BoxDecoration(
-        border: isSeen
-            ? const Border()
-            : Border.all(
-                color: Theme.of(context).colorScheme.greenAlternative,
-                width: isSeen ? 0 : 2,
-              ),
+        border: Border.all(
+          color: isSeen ? colorScheme.strokeFaint : colorScheme.primary500,
+          width: 2,
+        ),
         borderRadius: BorderRadius.circular(40),
       ),
       child: ClipOval(
         child: SizedBox(
-          width: isSeen ? 60 : 56,
-          height: isSeen ? 60 : 56,
+          width: 56,
+          height: 56,
           child: Hero(
             tag: "memories" + memory.file.tag,
             child: ThumbnailWidget(
@@ -191,11 +188,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
     final present = DateTime.now();
     final then = DateTime.fromMicrosecondsSinceEpoch(memory.file.creationTime!);
     final diffInYears = present.year - then.year;
-    if (diffInYears == 1) {
-      return "1 year ago";
-    } else {
-      return diffInYears.toString() + " years ago";
-    }
+    return S.of(context).yearsAgo(diffInYears);
   }
 }
 

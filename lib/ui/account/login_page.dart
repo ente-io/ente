@@ -1,10 +1,12 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
+import "package:styled_text/styled_text.dart";
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -53,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _emailIsValid,
-        buttonText: 'Log in',
+        buttonText: S.of(context).logInLabel,
         onPressedFunction: () {
           UserService.instance.setEmail(_email!);
           UserService.instance
@@ -67,6 +69,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _getBody() {
+    final l10n = context.l10n;
     return Column(
       children: [
         Expanded(
@@ -77,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    'Welcome back!',
+                    l10n.accountWelcomeBack,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
@@ -88,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       fillColor: _emailInputFieldColor,
                       filled: true,
-                      hintText: 'Email',
+                      hintText: l10n.email,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 15,
                         vertical: 15,
@@ -139,62 +142,52 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Expanded(
                         flex: 5,
-                        child: RichText(
-                          text: TextSpan(
-                            style: Theme.of(context)
-                                .textTheme
-                                .subtitle1!
-                                .copyWith(fontSize: 12),
-                            children: [
-                              const TextSpan(
-                                text: "By clicking log in, I agree to the ",
+                        child: StyledText(
+                          text: S.of(context).loginTerms,
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle1!
+                              .copyWith(fontSize: 12),
+                          tags: {
+                            'u-terms': StyledTextActionTag(
+                              (String? text, Map<String?, String?> attrs) => {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                      return WebPage(
+                                        S.of(context).termsOfServicesTitle,
+                                        "https://ente.io/terms",
+                                      );
+                                    },
+                                  ),
+                                )
+                              },
+                              style: const TextStyle(
+                                decoration: TextDecoration.underline,
                               ),
-                              TextSpan(
-                                text: "terms of service",
-                                style: const TextStyle(
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (BuildContext context) {
-                                          return const WebPage(
-                                            "terms",
-                                            "https://ente.io/terms",
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
+                            ),
+                            'u-policy': StyledTextActionTag(
+                              (String? text, Map<String?, String?> attrs) => {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                      return WebPage(
+                                        S.of(context).privacyPolicyTitle,
+                                        "https://ente.io/privacy",
+                                      );
+                                    },
+                                  ),
+                                )
+                              },
+                              style: const TextStyle(
+                                decoration: TextDecoration.underline,
                               ),
-                              const TextSpan(text: " and "),
-                              TextSpan(
-                                text: "privacy policy",
-                                style: const TextStyle(
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (BuildContext context) {
-                                          return const WebPage(
-                                            "privacy",
-                                            "https://ente.io/privacy",
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
-                              ),
-                            ],
-                          ),
-                          textAlign: TextAlign.left,
+                            )
+                          },
                         ),
                       ),
                       Expanded(
-                        flex: 2,
+                        flex: 1,
                         child: Container(),
                       )
                     ],

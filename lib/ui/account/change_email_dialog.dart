@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
@@ -15,20 +16,21 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AlertDialog(
-      title: const Text("Enter your email address"),
+      title: Text(l10n.enterYourEmailAddress),
       content: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
-              decoration: const InputDecoration(
-                hintText: 'Email',
-                hintStyle: TextStyle(
+              decoration: InputDecoration(
+                hintText: l10n.email,
+                hintStyle: const TextStyle(
                   color: Colors.white30,
                 ),
-                contentPadding: EdgeInsets.all(12),
+                contentPadding: const EdgeInsets.all(12),
               ),
               onChanged: (value) {
                 setState(() {
@@ -45,9 +47,9 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
       ),
       actions: [
         TextButton(
-          child: const Text(
-            "Cancel",
-            style: TextStyle(
+          child: Text(
+            l10n.cancel,
+            style: const TextStyle(
               color: Colors.redAccent,
             ),
           ),
@@ -56,9 +58,9 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
           },
         ),
         TextButton(
-          child: const Text(
-            "Verify",
-            style: TextStyle(
+          child: Text(
+            l10n.verify,
+            style: const TextStyle(
               color: Colors.green,
             ),
           ),
@@ -66,8 +68,8 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
             if (!isValidEmail(_email)) {
               showErrorDialog(
                 context,
-                "Invalid email address",
-                "Please enter a valid email address.",
+                l10n.invalidEmailAddress,
+                l10n.enterValidEmail,
               );
               return;
             }

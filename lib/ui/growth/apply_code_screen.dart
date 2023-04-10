@@ -1,12 +1,13 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/extensions/input_formatter.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/button_widget.dart";
-import "package:photos/ui/components/icon_button_widget.dart";
+import 'package:photos/ui/components/buttons/button_widget.dart';
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
@@ -57,8 +58,8 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
-            flexibleSpaceTitle: const TitleBarTitleWidget(
-              title: "Apply code",
+            flexibleSpaceTitle: TitleBarTitleWidget(
+              title: S.of(context).applyCodeTitle,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -87,8 +88,7 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                         Column(
                           children: [
                             Text(
-                              "Enter the code provided by your friend to "
-                              "claim free storage for both of you",
+                              S.of(context).enterCodeDescription,
                               style: textStyle.small
                                   .copyWith(color: colorScheme.textMuted),
                             ),
@@ -115,7 +115,7 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                     ButtonWidget(
                       buttonType: ButtonType.neutral,
                       buttonSize: ButtonSize.large,
-                      labelText: "Apply",
+                      labelText: S.of(context).apply,
                       isDisabled: code.trim().length < 4,
                       onTap: () async {
                         try {
@@ -135,9 +135,10 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                           Logger('$runtimeType')
                               .severe("failed to apply referral", e);
                           showErrorDialogForException(
-                              context: context,
-                              exception: e as Exception,
-                              apiErrorPrefix: "Failed to apply code");
+                            context: context,
+                            exception: e as Exception,
+                            apiErrorPrefix: S.of(context).failedToApplyCode,
+                          );
                         }
                       },
                     )
@@ -166,7 +167,7 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
         ),
         fillColor: getEnteColorScheme(context).fillFaint,
         filled: true,
-        hintText: 'Enter referral code',
+        hintText: S.of(context).enterReferralCode,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,

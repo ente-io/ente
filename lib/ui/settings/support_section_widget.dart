@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -18,7 +19,7 @@ class SupportSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "Support",
+      title: S.of(context).support,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.help_outline_outlined,
     );
@@ -31,8 +32,8 @@ class SupportSectionWidget extends StatelessWidget {
       children: [
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Contact support",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).contactSupport,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -42,14 +43,14 @@ class SupportSectionWidget extends StatelessWidget {
           },
         ),
         sectionOptionSpacing,
-        const AboutMenuItemWidget(
-          title: "FAQ",
+        AboutMenuItemWidget(
+          title: S.of(context).faq,
           url: "https://ente.io/faq",
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Suggest features",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).suggestFeatures,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -65,7 +66,7 @@ class SupportSectionWidget extends StatelessWidget {
                           "?token=" +
                           Configuration.instance.getToken()!
                       : roadmapURL;
-                  return WebPage("Suggest features", url);
+                  return WebPage(S.of(context).suggestFeatures, url);
                 },
               ),
             );
@@ -73,14 +74,14 @@ class SupportSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Report a bug",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).reportABug,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            await sendLogs(context, "Report bug", bugsEmail);
+            await sendLogs(context, S.of(context).reportBug, bugsEmail);
           },
           onDoubleTap: () async {
             final zipFilePath = await getZippedLogsFile(context);

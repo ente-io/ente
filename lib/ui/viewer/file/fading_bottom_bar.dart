@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/selected_files.dart';
@@ -114,7 +115,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       if (isOwnedByUser) {
         children.add(
           Tooltip(
-            message: "Delete",
+            message: S.of(context).delete,
             child: Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: IconButton(
@@ -134,7 +135,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       }
       children.add(
         Tooltip(
-          message: "Share",
+          message: S.of(context).share,
           child: Padding(
             padding: const EdgeInsets.only(top: 12, bottom: 12),
             child: IconButton(
@@ -222,7 +223,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
   void _addTrashOptions(List<Widget> children) {
     children.add(
       Tooltip(
-        message: "Restore",
+        message: S.of(context).restore,
         child: Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
@@ -246,7 +247,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
 
     children.add(
       Tooltip(
-        message: "Delete",
+        message: S.of(context).delete,
         child: Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(

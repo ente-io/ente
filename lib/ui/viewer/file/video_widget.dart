@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import 'package:photos/services/files_service.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -94,7 +95,7 @@ class _VideoWidgetState extends State<VideoWidget> {
           setState(() {
             _progress = count / (widget.file.fileSize ?? total);
             if (_progress == 1) {
-              showShortToast(context, "Decrypting video...");
+              showShortToast(context, S.of(context).decryptingVideo);
             }
           });
         }

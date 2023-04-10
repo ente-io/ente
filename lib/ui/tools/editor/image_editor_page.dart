@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import "package:flutter_image_compress/flutter_image_compress.dart";
 import 'package:image_editor/image_editor.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
@@ -16,7 +17,7 @@ import 'package:photos/models/location.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
-import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/tools/editor/filtered_image.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
@@ -320,28 +321,30 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     option.addOption(ColorOption.saturation(_saturation!));
     option.addOption(ColorOption.brightness(_brightness!));
 
-    option.outputFormat = const OutputFormat.png(88);
+    option.outputFormat = const OutputFormat.jpeg(100);
 
     final DateTime start = DateTime.now();
-    final Uint8List? result = await ImageEditor.editImage(
+    Uint8List? result = await ImageEditor.editImage(
       image: img,
       imageEditorOption: option,
     );
-    _logger.info('result.length = ${result?.length}');
-    final Duration diff = DateTime.now().difference(start);
-    _logger.info('image_editor time : $diff');
-
     if (result == null) {
       _logger.severe("null result");
       showToast(context, "Something went wrong");
       return;
     }
+    _logger.info('Size before compression = ${result.length}');
+    result = await FlutterImageCompress.compressWithList(result);
+    _logger.info('Size after compression = ${result.length}');
+    final Duration diff = DateTime.now().difference(start);
+    _logger.info('image_editor time : $diff');
+
     try {
       final fileName =
           path.basenameWithoutExtension(widget.originalFile.title!) +
               "_edited_" +
               DateTime.now().microsecondsSinceEpoch.toString() +
-              path.extension(widget.originalFile.title!);
+              ".JPEG";
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
       PhotoManager.stopChangeNotify();

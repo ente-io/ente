@@ -3,12 +3,13 @@ import 'dart:ui';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/bottom_action_bar/action_bar_widget.dart';
-import 'package:photos/ui/components/icon_button_widget.dart';
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 
 class BottomActionBarWidget extends StatelessWidget {
   final String? text;
@@ -88,7 +89,7 @@ class BottomActionBarWidget extends StatelessWidget {
                   },
                   child: Center(
                     child: Text(
-                      "Cancel",
+                      S.of(context).cancel,
                       style: textTheme.bodyBold
                           .copyWith(color: colorScheme.blurTextBase),
                     ),

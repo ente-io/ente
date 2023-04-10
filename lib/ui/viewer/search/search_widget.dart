@@ -5,10 +5,11 @@ import 'package:logging/logging.dart';
 import "package:photos/core/event_bus.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/events/tab_changed_event.dart";
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/search_service.dart';
-import 'package:photos/ui/components/icon_button_widget.dart';
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/viewer/search/result/no_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
@@ -104,7 +105,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                       keyboardType: TextInputType.visiblePassword,
                       // Above parameters are to disable auto-suggestion
                       decoration: InputDecoration(
-                        hintText: "Albums, months, days, years, ...",
+                        hintText: S.of(context).searchHintText,
                         filled: true,
                         contentPadding: const EdgeInsets.symmetric(
                           vertical: 10,

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/sync_service.dart';
 
 class GrantPermissionsWidget extends StatelessWidget {
@@ -91,7 +92,7 @@ class GrantPermissionsWidget extends StatelessWidget {
           bottom: 16,
         ),
         child: OutlinedButton(
-          child: const Text("Grant permission"),
+          child: Text(S.of(context).grantPermission),
           onPressed: () async {
             final state = await PhotoManager.requestPermissionExtend();
             if (state == PermissionState.authorized ||
@@ -99,14 +100,14 @@ class GrantPermissionsWidget extends StatelessWidget {
               await SyncService.instance.onPermissionGranted(state);
             } else if (state == PermissionState.denied) {
               final AlertDialog alert = AlertDialog(
-                title: const Text("Please grant permissions"),
-                content: const Text(
-                  "ente can encrypt and preserve files only if you grant access to them",
+                title: Text(S.of(context).pleaseGrantPermissions),
+                content: Text(
+                  S.of(context).enteCanEncryptAndPreserveFilesOnlyIfYouGrant,
                 ),
                 actions: [
                   TextButton(
                     child: Text(
-                      "OK",
+                      S.of(context).ok,
                       style: Theme.of(context).textTheme.subtitle1!.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,

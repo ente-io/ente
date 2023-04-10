@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
@@ -62,7 +63,7 @@ class UnCatCollectionsButtonWidget extends StatelessWidget {
                             style: textStyle,
                             children: [
                               TextSpan(
-                                text: "Uncategorized",
+                                text: S.of(context).uncategorized,
                                 style: Theme.of(context).textTheme.subtitle1,
                               ),
                               const TextSpan(text: "  \u2022  "),
@@ -79,7 +80,7 @@ class UnCatCollectionsButtonWidget extends StatelessWidget {
                             style: textStyle,
                             children: [
                               TextSpan(
-                                text: "Uncategorized",
+                                text: S.of(context).uncategorized,
                                 style: Theme.of(context).textTheme.subtitle1,
                               ),
                               //need to query in db and bring this value

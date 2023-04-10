@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -23,9 +24,9 @@ class LinkExpiryPickerPage extends StatelessWidget {
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
-          const TitleBarWidget(
+          TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: "Link expiry",
+              title: S.of(context).linkExpiry,
             ),
           ),
           SliverList(
@@ -58,20 +59,25 @@ class LinkExpiryPickerPage extends StatelessWidget {
   }
 }
 
-class ItemsWidget extends StatelessWidget {
+class ItemsWidget extends StatefulWidget {
   final Collection collection;
   ItemsWidget(this.collection, {super.key});
 
+  @override
+  State<ItemsWidget> createState() => _ItemsWidgetState();
+}
+
+class _ItemsWidgetState extends State<ItemsWidget> {
   // index, title, milliseconds in future post which link should expire (when >0)
-  final List<Tuple2<String, int>> _expiryOptions = [
-    const Tuple2("Never", 0),
-    Tuple2("After 1 hour", const Duration(hours: 1).inMicroseconds),
-    Tuple2("After 1 day", const Duration(days: 1).inMicroseconds),
-    Tuple2("After 1 week", const Duration(days: 7).inMicroseconds),
+  late final List<Tuple2<String, int>> _expiryOptions = [
+    Tuple2(S.of(context).never, 0),
+    Tuple2(S.of(context).after1Hour, const Duration(hours: 1).inMicroseconds),
+    Tuple2(S.of(context).after1Day, const Duration(days: 1).inMicroseconds),
+    Tuple2(S.of(context).after1Week, const Duration(days: 7).inMicroseconds),
     // todo: make this time calculation perfect
-    Tuple2("After 1 month", const Duration(days: 30).inMicroseconds),
-    Tuple2("After 1 year", const Duration(days: 365).inMicroseconds),
-    const Tuple2("Custom", -1),
+    Tuple2(S.of(context).after1Month, const Duration(days: 30).inMicroseconds),
+    Tuple2(S.of(context).after1Year, const Duration(days: 365).inMicroseconds),
+    Tuple2(S.of(context).custom, -1),
   ];
 
   @override
@@ -172,7 +178,7 @@ class ItemsWidget extends StatelessWidget {
     Map<String, dynamic> prop,
   ) async {
     try {
-      await CollectionsService.instance.updateShareUrl(collection, prop);
+      await CollectionsService.instance.updateShareUrl(widget.collection, prop);
     } catch (e) {
       showGenericErrorDialog(context: context);
       rethrow;

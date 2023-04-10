@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -22,9 +23,9 @@ class DeviceLimitPickerPage extends StatelessWidget {
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
-          const TitleBarWidget(
+          TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: "Device Limit",
+              title: S.of(context).linkDeviceLimit,
             ),
           ),
           SliverList(
@@ -43,10 +44,8 @@ class DeviceLimitPickerPage extends StatelessWidget {
                             const BorderRadius.all(Radius.circular(8)),
                         child: ItemsWidget(collection),
                       ),
-                      const MenuSectionDescriptionWidget(
-                        content:
-                            "When set to the maximum (50), the device limit will be relaxed"
-                            " to allow for temporary spikes of large number of viewers.",
+                      MenuSectionDescriptionWidget(
+                        content: S.of(context).maxDeviceLimitSpikeHandling(50),
                       )
                     ],
                   ),

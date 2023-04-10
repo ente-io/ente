@@ -10,6 +10,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/extensions/list.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
@@ -21,6 +22,7 @@ import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/collections/trash_button_widget.dart';
 import 'package:photos/ui/collections/uncat_collections_button_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/viewer/actions/delete_empty_albums.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/local_settings.dart';
@@ -148,11 +150,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             const SectionTitle(title: "On device"),
             const SizedBox(height: 12),
             const DeviceFoldersGridViewWidget(),
-            const Padding(padding: EdgeInsets.all(4)),
-            const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 SectionTitle(titleWithBrand: getOnEnteSection(context)),
                 _sortMenu(),
@@ -164,11 +163,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     child: DeleteEmptyAlbums(),
                   )
                 : const SizedBox.shrink(),
-            const SizedBox(height: 12),
             Configuration.instance.hasConfiguredAccount()
                 ? RemoteCollectionsGridViewWidget(collections)
                 : const EmptyState(),
-            const SizedBox(height: 10),
             const Divider(),
             const SizedBox(height: 16),
             Padding(
@@ -185,7 +182,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                 ],
               ),
             ),
-            const Padding(padding: EdgeInsets.fromLTRB(12, 12, 12, 36)),
+            const SizedBox(height: 48),
           ],
         ),
       ),
@@ -197,13 +194,13 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       String text = key.toString();
       switch (key) {
         case AlbumSortKey.albumName:
-          text = "Name";
+          text = S.of(context).name;
           break;
         case AlbumSortKey.newestPhoto:
-          text = "Newest";
+          text = S.of(context).newest;
           break;
         case AlbumSortKey.lastUpdated:
-          text = "Last updated";
+          text = S.of(context).lastUpdated;
       }
       return Text(
         text,
@@ -215,47 +212,34 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     }
 
     return Padding(
-      padding: const EdgeInsets.only(right: 24),
-      child: PopupMenuButton(
-        offset: const Offset(10, 50),
-        initialValue: sortKey?.index ?? 0,
-        child: Align(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 5.0),
-              ),
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).hintColor.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Icon(
-                  Icons.sort,
-                  color: Theme.of(context).iconTheme.color,
-                  size: 20,
-                ),
-              ),
-            ],
-          ),
+      padding: const EdgeInsets.only(right: 8),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
         ),
-        onSelected: (int index) async {
-          sortKey = AlbumSortKey.values[index];
-          await LocalSettings.instance.setAlbumSortKey(sortKey!);
-          setState(() {});
-        },
-        itemBuilder: (context) {
-          return List.generate(AlbumSortKey.values.length, (index) {
-            return PopupMenuItem(
-              value: index,
-              child: sortOptionText(AlbumSortKey.values[index]),
-            );
-          });
-        },
+        child: PopupMenuButton(
+          offset: const Offset(10, 50),
+          initialValue: sortKey?.index ?? 0,
+          child: const IconButtonWidget(
+            icon: Icons.sort_outlined,
+            iconButtonType: IconButtonType.secondary,
+            disableGestureDetector: true,
+          ),
+          onSelected: (int index) async {
+            sortKey = AlbumSortKey.values[index];
+            await LocalSettings.instance.setAlbumSortKey(sortKey!);
+            setState(() {});
+          },
+          itemBuilder: (context) {
+            return List.generate(AlbumSortKey.values.length, (index) {
+              return PopupMenuItem(
+                value: index,
+                child: sortOptionText(AlbumSortKey.values[index]),
+              );
+            });
+          },
+        ),
       ),
     );
   }

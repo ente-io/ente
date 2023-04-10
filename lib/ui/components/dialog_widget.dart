@@ -2,12 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/button_result.dart";
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/text_input_widget.dart';
 import 'package:photos/utils/separators_util.dart';
@@ -256,11 +257,11 @@ class _TextInputDialogState extends State<TextInputDialog> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Expanded(
+                Expanded(
                   child: ButtonWidget(
                     buttonType: ButtonType.secondary,
                     buttonSize: ButtonSize.small,
-                    labelText: "Cancel",
+                    labelText: S.of(context).cancel,
                     isInAlert: true,
                   ),
                 ),

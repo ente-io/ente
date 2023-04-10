@@ -2,7 +2,9 @@ import 'dart:async';
 
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
@@ -14,7 +16,7 @@ import 'package:photos/ui/common/bottom_shadow.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/common/web_page.dart';
-import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import 'package:photos/ui/payment/child_subscription_widget.dart';
@@ -55,6 +57,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   bool _isStripeSubscriber = false;
   bool _showYearlyPlan = false;
   EnteColorScheme colorScheme = darkScheme;
+  final Logger logger = Logger("StripeSubscriptionPage");
 
   @override
   void initState() {
@@ -149,7 +152,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               )
             : AppBar(
                 elevation: 0,
-                title: const Text("Subscription${kDebugMode ? ' Stripe' : ''}"),
+                title: Text("${S.of(context).subscription}${kDebugMode ? ' '
+                    'Stripe' : ''}"),
               ),
       ),
     );
@@ -170,7 +174,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Widget _getBody() {
     if (!_isLoading) {
       _isLoading = true;
-      _dialog = createProgressDialog(context, "Please wait...");
+      _dialog = createProgressDialog(context, S.of(context).pleaseWait);
       _fetchSub();
     }
     if (_hasLoadedData) {
@@ -226,8 +230,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 40, 16, 4),
           child: MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Payment details",
+            captionedTextWidget: CaptionedTextWidget(
+              title: S.of(context).paymentDetails,
             ),
             menuItemColor: colorScheme.fillFaint,
             trailingWidget: Icon(
@@ -249,8 +253,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
           child: MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Manage Family",
+            captionedTextWidget: CaptionedTextWidget(
+              title: S.of(context).manageFamily,
             ),
             menuItemColor: colorScheme.fillFaint,
             trailingWidget: Icon(
@@ -299,9 +303,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             : '';
         showErrorDialog(
           context,
-          "Sorry",
-          "Please contact us at support@ente.io to manage your "
-              "$capitalizedWord subscription.",
+          S.of(context).sorry,
+          S.of(context).contactToManageSubscription(capitalizedWord),
         );
     }
   }
@@ -313,7 +316,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
-            return WebPage("Payment details", url);
+            return WebPage(S.of(context).paymentDetails, url);
           },
         ),
       ).then((value) => onWebPaymentGoBack);
@@ -327,8 +330,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Widget _stripeRenewOrCancelButton() {
     final bool isRenewCancelled =
         _currentSubscription!.attributes?.isCancelled ?? false;
-    final String title =
-        isRenewCancelled ? "Renew subscription" : "Cancel subscription";
+    final String title = isRenewCancelled
+        ? S.of(context).renewSubscription
+        : S.of(context).cancelSubscription;
     return TextButton(
       child: Text(
         title,
@@ -344,17 +348,17 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           final choice = await showChoiceDialog(
             context,
             title: title,
-            body: "Are you sure you want to renew?",
-            firstButtonLabel: "Yes, Renew",
+            body: S.of(context).areYouSureYouWantToRenew,
+            firstButtonLabel: S.of(context).yesRenew,
           );
           confirmAction = choice!.action == ButtonAction.first;
         } else {
           final choice = await showChoiceDialog(
             context,
             title: title,
-            body: "Are you sure you want to cancel?",
-            firstButtonLabel: "Yes, cancel",
-            secondButtonLabel: "No",
+            body: S.of(context).areYouSureYouWantToCancel,
+            firstButtonLabel: S.of(context).yesCancel,
+            secondButtonLabel: S.of(context).no,
             isCritical: true,
           );
           confirmAction = choice!.action == ButtonAction.first;
@@ -366,20 +370,45 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     );
   }
 
-  Future<void> toggleStripeSubscription(bool isRenewCancelled) async {
+  // toggleStripeSubscription, based on current auto renew status, will
+  // toggle the auto renew status of the user's subscription
+  Future<void> toggleStripeSubscription(bool isAutoRenewDisabled) async {
     await _dialog.show();
     try {
-      isRenewCancelled
+      isAutoRenewDisabled
           ? await _billingService.activateStripeSubscription()
           : await _billingService.cancelStripeSubscription();
       await _fetchSub();
     } catch (e) {
       showShortToast(
         context,
-        isRenewCancelled ? 'Failed to renew' : 'Failed to cancel',
+        isAutoRenewDisabled
+            ? S.of(context).failedToRenew
+            : S.of(context).failedToCancel,
       );
     }
     await _dialog.hide();
+    if (!isAutoRenewDisabled && mounted) {
+      await showTextInputDialog(
+        context,
+        title: S.of(context).askCancelReason,
+        submitButtonLabel: S.of(context).send,
+        hintText: S.of(context).optionalAsShortAsYouLike,
+        alwaysShowSuccessState: true,
+        textCapitalization: TextCapitalization.words,
+        onSubmit: (String text) async {
+          // indicates user cancelled the rename request
+          if (text == "" || text.trim().isEmpty) {
+            return;
+          }
+          try {
+            await UserService.instance.sendFeedback(context, text);
+          } catch (e, s) {
+            logger.severe("Failed to send feedback", e, s);
+          }
+        },
+      );
+    }
   }
 
   List<Widget> _getStripePlanWidgets() {
@@ -409,17 +438,18 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   _currentSubscription!.productID != freeProductID) {
                 showErrorDialog(
                   context,
-                  "Sorry",
-                  "Please cancel your existing subscription from "
-                      "${_currentSubscription!.paymentProvider} first",
+                  S.of(context).sorry,
+                  S.of(context).cancelOtherSubscription(
+                        _currentSubscription!.paymentProvider,
+                      ),
                 );
                 return;
               }
               if (_userDetails.getFamilyOrPersonalUsage() > plan.storage) {
                 showErrorDialog(
                   context,
-                  "Sorry",
-                  "You cannot downgrade to this plan",
+                  S.of(context).sorry,
+                  S.of(context).youCannotDowngradeToThisPlan,
                 );
                 return;
               }
@@ -428,9 +458,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 // confirm if user wants to change plan or not
                 final result = await showChoiceDialog(
                   context,
-                  title: "Confirm plan change",
-                  body: "Are you sure you want to change your plan?",
-                  firstButtonLabel: "Yes",
+                  title: S.of(context).confirmPlanChange,
+                  body: S.of(context).areYouSureYouWantToChangeYourPlan,
+                  firstButtonLabel: S.of(context).yes,
                 );
                 if (result!.action == ButtonAction.first) {
                   stripPurChaseAction = 'update';
@@ -466,8 +496,13 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     return planWidgets;
   }
 
+  bool _isFreePlanUser() {
+    return _currentSubscription != null &&
+        freeProductID == _currentSubscription!.productID;
+  }
+
   Widget _showSubscriptionToggle() {
-    Widget _planText(String title, bool reduceOpacity) {
+    Widget planText(String title, bool reduceOpacity) {
       return Padding(
         padding: const EdgeInsets.only(left: 4, right: 4),
         child: Text(
@@ -483,24 +518,36 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     }
 
     return Container(
-      padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
-      margin: const EdgeInsets.only(bottom: 12),
-      // coloome_r: Color.fromRGBO(10, 40, 40, 0.3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 2, bottom: 2),
+      margin: const EdgeInsets.only(bottom: 6),
+      child: Column(
         children: [
-          _planText("Monthly", _showYearlyPlan),
-          Switch(
-            value: _showYearlyPlan,
-            activeColor: Colors.white,
-            inactiveThumbColor: Colors.white,
-            activeTrackColor: getEnteColorScheme(context).strokeMuted,
-            onChanged: (value) async {
-              _showYearlyPlan = value;
-              await _filterStripeForUI();
-            },
+          RepaintBoundary(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                planText(S.of(context).monthly, _showYearlyPlan),
+                Switch(
+                  value: _showYearlyPlan,
+                  activeColor: Colors.white,
+                  inactiveThumbColor: Colors.white,
+                  activeTrackColor: getEnteColorScheme(context).strokeMuted,
+                  onChanged: (value) async {
+                    _showYearlyPlan = value;
+                    await _filterStripeForUI();
+                  },
+                ),
+                planText(S.of(context).yearly, !_showYearlyPlan),
+              ],
+            ),
           ),
-          _planText("Yearly", !_showYearlyPlan)
+          _isFreePlanUser()
+              ? Text(
+                  S.of(context).twoMonthsFreeOnYearlyPlans,
+                  style: getEnteTextTheme(context).miniMuted,
+                )
+              : const SizedBox.shrink(),
+          const Padding(padding: EdgeInsets.all(8)),
         ],
       ),
     );

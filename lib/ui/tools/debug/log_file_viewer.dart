@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 
 class LogFileViewer extends StatefulWidget {
@@ -29,7 +30,7 @@ class _LogFileViewerState extends State<LogFileViewer> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text("Today's logs"),
+        title: Text(S.of(context).todaysLogs),
       ),
       body: _getBody(),
     );

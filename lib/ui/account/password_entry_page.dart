@@ -6,6 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
@@ -14,6 +15,7 @@ import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import "package:styled_text/styled_text.dart";
 
 enum PasswordEntryMode {
   set,
@@ -87,13 +89,13 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       }
     }
 
-    String title = "Set password";
+    String title = S.of(context).setPasswordTitle;
     if (widget.mode == PasswordEntryMode.update) {
-      title = "Change password";
+      title = S.of(context).changePasswordTitle;
     } else if (widget.mode == PasswordEntryMode.reset) {
-      title = "Reset password";
+      title = S.of(context).resetPasswordTitle;
     } else if (_volatilePassword != null) {
-      title = "Encryption keys";
+      title = S.of(context).encryptionKeys;
     }
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
@@ -130,13 +132,13 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   Widget _getBody(String buttonTextAndHeading) {
     final email = Configuration.instance.getEmail();
-    var passwordStrengthText = 'Weak';
+    var passwordStrengthText = S.of(context).weakStrength;
     var passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {
-      passwordStrengthText = 'Strong';
+      passwordStrengthText = S.of(context).strongStrength;
       passwordStrengthColor = Colors.greenAccent;
     } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
-      passwordStrengthText = 'Moderate';
+      passwordStrengthText = S.of(context).moderateStrength;
       passwordStrengthColor = Colors.orangeAccent;
     }
     if (_volatilePassword != null) {
@@ -159,9 +161,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
-                    "Enter a" +
-                        (widget.mode != PasswordEntryMode.set ? " new " : " ") +
-                        "password we can use to encrypt your data",
+                    widget.mode == PasswordEntryMode.set
+                        ? S.of(context).enterPasswordToEncrypt
+                        : S.of(context).enterNewPasswordToEncrypt,
                     textAlign: TextAlign.start,
                     style: Theme.of(context)
                         .textTheme
@@ -172,27 +174,20 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 const Padding(padding: EdgeInsets.all(8)),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: RichText(
-                    text: TextSpan(
-                      style: Theme.of(context)
-                          .textTheme
-                          .subtitle1!
-                          .copyWith(fontSize: 14),
-                      children: [
-                        const TextSpan(
-                          text:
-                              "We don't store this password, so if you forget, ",
-                        ),
-                        TextSpan(
-                          text: "we cannot decrypt your data",
-                          style:
-                              Theme.of(context).textTheme.subtitle1!.copyWith(
-                                    fontSize: 14,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                        ),
-                      ],
-                    ),
+                  child: StyledText(
+                    text: S.of(context).passwordWarning,
+                    style: Theme.of(context)
+                        .textTheme
+                        .subtitle1!
+                        .copyWith(fontSize: 14),
+                    tags: {
+                      'underline': StyledTextTag(
+                        style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                              fontSize: 14,
+                              decoration: TextDecoration.underline,
+                            ),
+                      ),
+                    },
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(12)),
@@ -218,7 +213,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       fillColor:
                           _isPasswordValid ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: "Password",
+                      hintText: S.of(context).password,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
@@ -281,7 +276,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _passwordsMatch ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: "Confirm password",
+                      hintText: S.of(context).confirmPassword,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 20,
@@ -335,7 +330,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     child: Text(
-                      'Password Strength: $passwordStrengthText',
+                      S.of(context).passwordStrength(passwordStrengthText),
                       style: TextStyle(
                         color: passwordStrengthColor,
                       ),
@@ -349,8 +344,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (BuildContext context) {
-                          return const WebPage(
-                            "How it works",
+                          return WebPage(
+                            S.of(context).howItWorks,
                             "https://ente.io/architecture",
                           );
                         },
@@ -361,7 +356,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: RichText(
                       text: TextSpan(
-                        text: "How it works",
+                        text: S.of(context).howItWorks,
                         style: Theme.of(context).textTheme.subtitle1!.copyWith(
                               fontSize: 14,
                               decoration: TextDecoration.underline,
@@ -381,14 +376,14 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   void _updatePassword() async {
     final dialog =
-        createProgressDialog(context, "Generating encryption keys...");
+        createProgressDialog(context, S.of(context).generatingEncryptionKeys);
     await dialog.show();
     try {
       final keyAttributes = await Configuration.instance
           .updatePassword(_passwordController1.text);
       await UserService.instance.updateKeyAttributes(keyAttributes);
       await dialog.hide();
-      showShortToast(context, "Password changed successfully");
+      showShortToast(context, S.of(context).passwordChangedSuccessfully);
       Navigator.of(context).pop();
       if (widget.mode == PasswordEntryMode.reset) {
         Bus.instance.fire(SubscriptionPurchasedEvent());
@@ -403,14 +398,14 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   Future<void> _showRecoveryCodeDialog(String password) async {
     final dialog =
-        createProgressDialog(context, "Generating encryption keys...");
+        createProgressDialog(context, S.of(context).generatingEncryptionKeys);
     await dialog.show();
     try {
       final result = await Configuration.instance.generateKey(password);
       Configuration.instance.setVolatilePassword(null);
       await dialog.hide();
       onDone() async {
-        final dialog = createProgressDialog(context, "Please wait...");
+        final dialog = createProgressDialog(context, S.of(context).pleaseWait);
         await dialog.show();
         try {
           await UserService.instance.setAttributes(result);
@@ -435,7 +430,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         context,
         RecoveryKeyPage(
           result.privateKeyAttributes.recoveryKey,
-          "Continue",
+          S.of(context).continueLabel,
           showAppBar: false,
           isDismissible: false,
           onDone: onDone,
@@ -448,8 +443,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       if (e is UnsupportedError) {
         showErrorDialog(
           context,
-          "Insecure device",
-          "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.",
+          S.of(context).insecureDevice,
+          S.of(context).sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease,
         );
       } else {
         showGenericErrorDialog(context: context);

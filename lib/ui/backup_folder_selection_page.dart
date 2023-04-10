@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:ui';
 
-import "package:animated_list_plus/animated_list_plus.dart";
-import "package:animated_list_plus/transitions.dart";
+import 'package:animated_list_plus/animated_list_plus.dart';
+import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -10,6 +10,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/remote_sync_service.dart';
@@ -86,7 +87,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             child: Container(
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 8),
               child: Text(
-                'Select folders for backup',
+                S.of(context).selectFoldersForBackup,
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
@@ -100,7 +101,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           Padding(
             padding: const EdgeInsets.only(left: 24, right: 48),
             child: Text(
-              "Selected folders will be encrypted and backed up",
+              S.of(context).selectedFoldersWillBeEncryptedAndBackedUp,
               style: Theme.of(context).textTheme.caption!.copyWith(height: 1.3),
             ),
           ),
@@ -118,8 +119,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       child: Text(
                         _selectedDevicePathIDs.length ==
                                 _allDevicePathIDs.length
-                            ? "Unselect all"
-                            : "Select all",
+                            ? S.of(context).unselectAll
+                            : S.of(context).selectAll,
                         textAlign: TextAlign.right,
                         style: const TextStyle(
                           decoration: TextDecoration.underline,
@@ -188,7 +189,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           Navigator.of(context).pop();
                         },
                         child: Text(
-                          "Skip",
+                          S.of(context).skip,
                           style: Theme.of(context).textTheme.caption!.copyWith(
                                 decoration: TextDecoration.underline,
                               ),
@@ -206,7 +207,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   Future<void> updateFolderSettings() async {
     final dialog = createProgressDialog(
       context,
-      "Updating folder selection...",
+      S.of(context).updatingFolderSelection,
     );
     await dialog.show();
     try {
@@ -358,9 +359,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       const Padding(padding: EdgeInsets.only(top: 2)),
                       Text(
                         (kDebugMode ? 'inApp: $importedCount : device ' : '') +
-                            (deviceCollection.count).toString() +
-                            " item" +
-                            ((deviceCollection.count) == 1 ? "" : "s"),
+                            S.of(context).itemCount(deviceCollection.count),
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 12,

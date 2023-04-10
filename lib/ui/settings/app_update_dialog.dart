@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -53,7 +54,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          "A new version of ente is available.",
+          S.of(context).aNewVersionOfEnteIsAvailable,
           style: enteTextTheme.body.copyWith(color: enteColor.textMuted),
         ),
         const Padding(padding: EdgeInsets.all(8)),
@@ -83,8 +84,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                 barrierDismissible: false,
               );
             },
-            child: const Text(
-              "Update",
+            child: Text(
+              S.of(context).update,
             ),
           ),
         ),
@@ -92,7 +93,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         Center(
           child: InkWell(
             child: Text(
-              "Install manually",
+              S.of(context).installManually,
               style: Theme.of(context)
                   .textTheme
                   .caption!
@@ -124,8 +125,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
             ),
             Text(
               shouldForceUpdate
-                  ? "Critical update available"
-                  : "Update available",
+                  ? S.of(context).criticalUpdateAvailable
+                  : S.of(context).updateAvailable,
               style: enteTextTheme.h3Bold,
             ),
           ],
@@ -164,9 +165,9 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
     return WillPopScope(
       onWillPop: () async => false,
       child: AlertDialog(
-        title: const Text(
-          "Downloading...",
-          style: TextStyle(
+        title: Text(
+          S.of(context).downloading,
+          style: const TextStyle(
             fontSize: 16,
           ),
           textAlign: TextAlign.center,
@@ -197,8 +198,8 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
     } catch (e) {
       Logger("ApkDownloader").severe(e);
       final AlertDialog alert = AlertDialog(
-        title: const Text("Sorry"),
-        content: const Text("The download could not be completed"),
+        title: Text(S.of(context).sorry),
+        content: Text(S.of(context).theDownloadCouldNotBeCompleted),
         actions: [
           TextButton(
             child: const Text(
@@ -214,7 +215,7 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
           ),
           TextButton(
             child: Text(
-              "Retry",
+              S.of(context).retry,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.greenAlternative,
               ),

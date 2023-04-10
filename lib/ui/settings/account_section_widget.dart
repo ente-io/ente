@@ -1,20 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/account/change_email_dialog.dart';
 import 'package:photos/ui/account/delete_account_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
-import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
+import "package:photos/ui/payment/subscription.dart";
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 import "package:url_launcher/url_launcher_string.dart";
 
 class AccountSectionWidget extends StatelessWidget {
@@ -23,7 +22,7 @@ class AccountSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "Account",
+      title: S.of(context).account,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.account_circle_outlined,
     );
@@ -34,45 +33,20 @@ class AccountSectionWidget extends StatelessWidget {
       children: [
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Recovery key",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).manageSubscription,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          showOnlyLoadingState: true,
           onTap: () async {
-            final hasAuthenticated = await LocalAuthenticationService.instance
-                .requestLocalAuthentication(
-              context,
-              "Please authenticate to view your recovery key",
-            );
-            if (hasAuthenticated) {
-              String recoveryKey;
-              try {
-                recoveryKey = await _getOrCreateRecoveryKey(context);
-              } catch (e) {
-                await showGenericErrorDialog(context: context);
-                return;
-              }
-              unawaited(
-                routeToPage(
-                  context,
-                  RecoveryKeyPage(
-                    recoveryKey,
-                    "OK",
-                    showAppBar: true,
-                    onDone: () {},
-                  ),
-                ),
-              );
-            }
+            _onManageSubscriptionTapped(context);
           },
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Change email",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).changeEmail,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -82,7 +56,7 @@ class AccountSectionWidget extends StatelessWidget {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
               context,
-              "Please authenticate to change your email",
+              S.of(context).authToChangeYourEmail,
             );
             if (hasAuthenticated) {
               showDialog(
@@ -98,8 +72,8 @@ class AccountSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Change password",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).changePassword,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -109,7 +83,7 @@ class AccountSectionWidget extends StatelessWidget {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
               context,
-              "Please authenticate to change your password",
+              S.of(context).authToChangeYourPassword,
             );
             if (hasAuthenticated) {
               Navigator.of(context).push(
@@ -126,8 +100,8 @@ class AccountSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Export your data ",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).exportYourData,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -138,8 +112,8 @@ class AccountSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Logout",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).logout,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -150,14 +124,29 @@ class AccountSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Delete account",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).deleteAccount,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            routeToPage(context, const DeleteAccountPage());
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
+              context,
+              S.of(context).authToInitiateAccountDeletion,
+            );
+            if (hasAuthenticated) {
+              unawaited(
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return const DeleteAccountPage();
+                    },
+                  ),
+                ),
+              );
+            }
           },
         ),
         sectionOptionSpacing,
@@ -165,21 +154,25 @@ class AccountSectionWidget extends StatelessWidget {
     );
   }
 
-  Future<String> _getOrCreateRecoveryKey(BuildContext context) async {
-    return CryptoUtil.bin2hex(
-      await UserService.instance.getOrCreateRecoveryKey(context),
-    );
-  }
-
   void _onLogoutTapped(BuildContext context) {
     showChoiceActionSheet(
       context,
-      title: "Are you sure you want to logout?",
-      firstButtonLabel: "Yes, logout",
+      title: S.of(context).areYouSureYouWantToLogout,
+      firstButtonLabel: S.of(context).yesLogout,
       isCritical: true,
       firstButtonOnTap: () async {
         await UserService.instance.logout(context);
       },
+    );
+  }
+
+  void _onManageSubscriptionTapped(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return getSubscriptionPage();
+        },
+      ),
     );
   }
 }

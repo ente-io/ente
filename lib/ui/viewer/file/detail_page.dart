@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/tools/editor/image_editor_page.dart';
 import 'package:photos/ui/viewer/file/fading_app_bar.dart';
@@ -290,17 +291,17 @@ class _DetailPageState extends State<DetailPage> {
       );
       showErrorDialog(
         context,
-        "Sorry",
-        "We don't support editing photos and albums that you don't own yet",
+        S.of(context).sorry,
+        S.of(context).weDontSupportEditingPhotosAndAlbumsThatYouDont,
       );
       return;
     }
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
       final ioFile = await getFile(file);
       if (ioFile == null) {
-        showShortToast(context, "Failed to fetch original for edit");
+        showShortToast(context, S.of(context).failedToFetchOriginalForEdit);
         await dialog.hide();
         return;
       }

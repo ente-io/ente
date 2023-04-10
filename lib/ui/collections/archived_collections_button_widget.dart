@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/magic_metadata.dart';
 import "package:photos/services/collections_service.dart";
 import 'package:photos/ui/viewer/gallery/archive_page.dart';
@@ -58,7 +59,7 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
                             style: textStyle,
                             children: [
                               TextSpan(
-                                text: "Archive",
+                                text: S.of(context).archive,
                                 style: Theme.of(context).textTheme.subtitle1,
                               ),
                               const TextSpan(text: "  \u2022  "),
@@ -75,7 +76,7 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
                             style: textStyle,
                             children: [
                               TextSpan(
-                                text: "Archive",
+                                text: S.of(context).archive,
                                 style: Theme.of(context).textTheme.subtitle1,
                               ),
                               //need to query in db and bring this value

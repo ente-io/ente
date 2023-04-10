@@ -7,6 +7,7 @@ import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/collections/device_folder_icon_widget.dart';
@@ -68,8 +69,8 @@ class _DeviceFoldersGridViewWidgetState
                         padding: const EdgeInsets.all(22),
                         child: (isMigrationDone
                             ? const EmptyState()
-                            : const EmptyState(
-                                text: "Importing....",
+                            : EmptyState(
+                                text: S.of(context).importing,
                               )),
                       )
                     : ListView.builder(
@@ -86,7 +87,7 @@ class _DeviceFoldersGridViewWidgetState
                       );
               } else if (snapshot.hasError) {
                 logger.severe("failed to load device gallery", snapshot.error);
-                return const Text("Failed to load albums");
+                return Text(S.of(context).failedToLoadAlbums);
               } else {
                 return const EnteLoadingWidget();
               }

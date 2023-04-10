@@ -1,40 +1,44 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/exif_util.dart';
 
-class ExifInfoDialog extends StatefulWidget {
+class ExifInfoDialog extends StatelessWidget {
   final File file;
   const ExifInfoDialog(this.file, {Key? key}) : super(key: key);
 
   @override
-  State<ExifInfoDialog> createState() => _ExifInfoDialogState();
-}
-
-class _ExifInfoDialogState extends State<ExifInfoDialog> {
-  @override
   Widget build(BuildContext context) {
-    final scrollController = ScrollController();
+    final textTheme = getEnteTextTheme(context);
     return AlertDialog(
-      title: Text(
-        widget.file.title!,
-        style: Theme.of(context).textTheme.headline5,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            S.of(context).exif,
+            style: textTheme.h3Bold,
+          ),
+          Text(
+            file.title!,
+            style: textTheme.smallMuted,
+          ),
+        ],
       ),
       content: Scrollbar(
-        controller: scrollController,
         thumbVisibility: true,
         child: SingleChildScrollView(
-          controller: scrollController,
           child: _getInfo(),
         ),
       ),
       actions: [
         TextButton(
           child: Text(
-            "Close",
-            style: Theme.of(context).textTheme.bodyText1,
+            S.of(context).close,
+            style: textTheme.body,
           ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
@@ -46,7 +50,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
 
   Widget _getInfo() {
     return FutureBuilder(
-      future: getExif(widget.file),
+      future: getExif(file),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           final exif = snapshot.data;

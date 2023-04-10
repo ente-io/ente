@@ -9,6 +9,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/home_widget.dart';
@@ -18,10 +20,12 @@ import "package:photos/utils/intent_util.dart";
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
   final Future<void> Function(String) killBackgroundTask;
+  final AdaptiveThemeMode? savedThemeMode;
 
   const EnteApp(
     this.runBackgroundTask,
-    this.killBackgroundTask, {
+    this.killBackgroundTask,
+    this.savedThemeMode, {
     Key? key,
   }) : super(key: key);
 
@@ -56,7 +60,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       return AdaptiveTheme(
         light: lightThemeData,
         dark: darkThemeData,
-        initial: AdaptiveThemeMode.system,
+        initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
         builder: (lightTheme, dartTheme) => MaterialApp(
           title: "ente",
           themeMode: ThemeMode.system,
@@ -68,22 +72,29 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
               : const HomeWidget(),
           debugShowCheckedModeBanner: false,
           builder: EasyLoading.init(),
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: appSupportedLocales,
+          localeListResolutionCallback: localResolutionCallBack,
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            S.delegate
+          ],
         ),
       );
     } else {
       return MaterialApp(
-        title: "ente",
-        themeMode: ThemeMode.system,
-        theme: lightThemeData,
-        darkTheme: darkThemeData,
-        home: const HomeWidget(),
-        debugShowCheckedModeBanner: false,
-        builder: EasyLoading.init(),
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-      );
+          title: "ente",
+          themeMode: ThemeMode.system,
+          theme: lightThemeData,
+          darkTheme: darkThemeData,
+          home: const HomeWidget(),
+          debugShowCheckedModeBanner: false,
+          builder: EasyLoading.init(),
+          supportedLocales: appSupportedLocales,
+          localeListResolutionCallback: localResolutionCallBack,
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            S.delegate
+          ]);
     }
   }
 

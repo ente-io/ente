@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.7.31+431
+version: 0.7.39+439
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
@@ -30,13 +30,14 @@ dependencies:
   collection: # dart
   computer: ^2.0.0
   confetti: ^0.6.0
-  crypto: ^3.0.2
   connectivity_plus: ^3.0.3
+  crypto: ^3.0.2
   cupertino_icons: ^1.0.0
   device_info: ^2.0.2
   dio: ^4.0.6
   dots_indicator: ^2.0.0
   dotted_border: ^2.0.0+2
+  dropdown_button2: ^2.0.0
   email_validator: ^2.0.1
   equatable: ^2.0.5
   event_bus: ^2.0.0
@@ -63,19 +64,19 @@ dependencies:
     sdk: flutter
   flutter_native_splash: ^2.2.0+1
   flutter_password_strength: ^0.1.6
-  flutter_secure_storage: ^4.2.0
+  flutter_secure_storage: ^8.0.0
   flutter_sodium: ^0.2.0
   flutter_typeahead: ^4.0.0
   fluttertoast: ^8.0.6
   google_nav_bar: ^5.0.5
   http: ^0.13.4
   image: ^3.0.2
-  image_editor: ^1.0.0
+  image_editor: ^1.3.0
   in_app_purchase: ^3.0.7
   intl: ^0.17.0
   like_button: ^2.0.2
   loading_animations: ^2.1.0
-  local_auth: ^1.1.5
+  local_auth: ^2.1.5
   logging: ^1.0.1
   lottie: ^1.2.2
   media_extension: ^1.0.1
@@ -106,6 +107,7 @@ dependencies:
   sqflite: ^2.0.0+3
   sqflite_migration: ^0.3.0
   step_progress_indicator: ^1.0.2
+  styled_text: ^7.0.0
   syncfusion_flutter_core: ^19.2.49
   syncfusion_flutter_sliders: ^19.2.49
   tflite_flutter: ^0.9.0
@@ -123,6 +125,9 @@ dependencies:
   visibility_detector: ^0.3.3
   wakelock: ^0.6.1+2
   wallpaper_manager_flutter: ^0.0.2
+
+flutter_intl:
+    enabled: true
 
 dependency_overrides:
   provider: ^6.0.1 # for chewie 1.2.2 https://github.com/brianegan/chewie/issues/530
@@ -165,7 +170,9 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
-    - assets/models/
+    - assets/models/cocossd/
+    - assets/models/mobilenet/
+    - assets/models/scenes/
   fonts:
   - family: Inter
     fonts:

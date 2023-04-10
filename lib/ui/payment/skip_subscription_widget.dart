@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
@@ -42,7 +43,7 @@ class SkipSubscriptionWidget extends StatelessWidget {
           BillingService.instance
               .verifySubscription(freeProductID, "", paymentProvider: "ente");
         },
-        child: const Text("Continue on free trial"),
+        child: Text(S.of(context).continueOnFreeTrial),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/web_page.dart';
@@ -17,7 +18,7 @@ class AboutSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "About",
+      title: S.of(context).about,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.info_outline,
     );
@@ -28,8 +29,8 @@ class AboutSectionWidget extends StatelessWidget {
       children: [
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "We are open source!",
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).weAreOpenSource,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -39,13 +40,13 @@ class AboutSectionWidget extends StatelessWidget {
           },
         ),
         sectionOptionSpacing,
-        const AboutMenuItemWidget(
-          title: "Privacy",
+        AboutMenuItemWidget(
+          title: S.of(context).privacy,
           url: "https://ente.io/privacy",
         ),
         sectionOptionSpacing,
-        const AboutMenuItemWidget(
-          title: "Terms",
+        AboutMenuItemWidget(
+          title: S.of(context).termsOfServicesTitle,
           url: "https://ente.io/terms",
         ),
         sectionOptionSpacing,
@@ -53,15 +54,15 @@ class AboutSectionWidget extends StatelessWidget {
             ? Column(
                 children: [
                   MenuItemWidget(
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: "Check for updates",
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: S.of(context).checkForUpdates,
                     ),
                     pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingIcon: Icons.chevron_right_outlined,
                     trailingIconIsMuted: true,
                     onTap: () async {
                       final dialog =
-                          createProgressDialog(context, "Checking...");
+                          createProgressDialog(context, S.of(context).checking);
                       await dialog.show();
                       final shouldUpdate =
                           await UpdateService.instance.shouldUpdate();
@@ -79,7 +80,7 @@ class AboutSectionWidget extends StatelessWidget {
                       } else {
                         showShortToast(
                           context,
-                          "You are on the latest version",
+                          S.of(context).youAreOnTheLatestVersion,
                         );
                       }
                     },

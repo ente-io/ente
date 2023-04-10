@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
@@ -9,6 +10,7 @@ import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 ///https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=7480%3A33462&t=H5AvR79OYDnB9ekw-4
 class AlbumListItemWidget extends StatelessWidget {
   final CollectionWithThumbnail item;
+
   const AlbumListItemWidget(
     this.item, {
     super.key,
@@ -56,10 +58,8 @@ class AlbumListItemWidget extends StatelessWidget {
                         ),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
-                            final text =
-                                snapshot.data == 1 ? " memory" : " memories";
                             return Text(
-                              snapshot.data.toString() + text,
+                              S.of(context).memoryCount(snapshot.data!),
                               style: textTheme.small.copyWith(
                                 color: colorScheme.textMuted,
                               ),

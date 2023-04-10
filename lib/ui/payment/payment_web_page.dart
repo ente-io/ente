@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
@@ -48,7 +49,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   @override
   Widget build(BuildContext context) {
-    _dialog = createProgressDialog(context, "Please wait...");
+    _dialog = createProgressDialog(context, S.of(context).pleaseWait);
     if (initPaymentUrl == null) {
       return const EnteLoadingWidget();
     }
@@ -56,7 +57,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       onWillPop: (() async => _buildPageExitWidget(context)),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Subscription'),
+          title: Text(S.of(context).subscription),
         ),
         body: Column(
           children: <Widget>[
@@ -144,12 +145,12 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     final result = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Are you sure you want to exit?'),
+        title: Text(S.of(context).areYouSureYouWantToExit),
         actions: <Widget>[
           TextButton(
-            child: const Text(
-              'Yes',
-              style: TextStyle(
+            child: Text(
+              S.of(context).yes,
+              style: const TextStyle(
                 color: Colors.redAccent,
               ),
             ),
@@ -157,7 +158,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
           ),
           TextButton(
             child: Text(
-              'No',
+              S.of(context).no,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.greenAlternative,
               ),
@@ -198,11 +199,11 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Payment failed'),
-        content: Text("Unfortunately your payment failed due to $reason"),
+        title: Text(S.of(context).paymentFailed),
+        content: Text(S.of(context).paymentFailedWithReason(reason)),
         actions: <Widget>[
           TextButton(
-            child: const Text('Ok'),
+            child: Text(S.of(context).ok),
             onPressed: () {
               Navigator.of(context).pop('dialog');
             },
@@ -225,15 +226,16 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       );
       await _dialog.hide();
       final content = widget.actionType == 'buy'
-          ? 'Your purchase was successful'
-          : 'Your subscription was updated successfully';
-      await _showExitPageDialog(title: 'Thank you', content: content);
+          ? S.of(context).yourPurchaseWasSuccessful
+          : S.of(context).yourSubscriptionWasUpdatedSuccessfully;
+      await _showExitPageDialog(
+          title: S.of(context).thankYou, content: content);
     } catch (error) {
       _logger.severe(error);
       await _dialog.hide();
       await _showExitPageDialog(
-        title: 'Failed to verify payment status',
-        content: 'Please wait for sometime before retrying',
+        title: S.of(context).failedToVerifyPaymentStatus,
+        content: S.of(context).pleaseWaitForSometimeBeforeRetrying,
       );
     }
   }
@@ -249,7 +251,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         actions: <Widget>[
           TextButton(
             child: Text(
-              'Ok',
+              S.of(context).ok,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.greenAlternative,
               ),

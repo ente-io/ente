@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 
 class NoResultWidget extends StatelessWidget {
   const NoResultWidget({Key? key}) : super(key: key);
@@ -29,10 +30,10 @@ class NoResultWidget extends StatelessWidget {
           children: [
             Container(
               margin: const EdgeInsets.only(top: 8),
-              child: const Text(
-                "No results found",
+              child: Text(
+                S.of(context).noResultsFound,
                 textAlign: TextAlign.left,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                 ),
               ),
@@ -40,7 +41,7 @@ class NoResultWidget extends StatelessWidget {
             Container(
               margin: const EdgeInsets.only(top: 16),
               child: Text(
-                "You can try searching for a different query.",
+                S.of(context).youCanTrySearchingForADifferentQuery,
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context)
@@ -54,12 +55,7 @@ class NoResultWidget extends StatelessWidget {
             Container(
               margin: const EdgeInsets.only(bottom: 20, top: 12),
               child: Text(
-                '''\u2022 Album names (e.g. "Camera")
-\u2022 Types of files (e.g. "Videos", ".gif")
-\u2022 Years and months (e.g. "2022", "January")
-\u2022 Holidays (e.g. "Christmas")
-\u2022 Photo descriptions (e.g. “#fun”)
-''',
+                S.of(context).searchByExamples,
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context)
