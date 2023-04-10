@@ -1,51 +1,64 @@
-import "dart:collection";
 import "dart:convert";
 import "dart:math";
 
+import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/location_tag_updated_event.dart";
+import "package:photos/models/api/entity/type.dart";
+import "package:photos/models/local_entity_data.dart";
+import "package:photos/models/location/location.dart";
+import 'package:photos/models/location_tag/location_tag.dart';
+import "package:photos/services/entity_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LocationService {
-  SharedPreferences? prefs;
+  late SharedPreferences prefs;
+  final Logger _logger = Logger((LocationService).toString());
+
   LocationService._privateConstructor();
 
   static final LocationService instance = LocationService._privateConstructor();
 
-  Future<void> init() async {
-    prefs ??= await SharedPreferences.getInstance();
+  void init(SharedPreferences preferences) {
+    prefs = preferences;
   }
 
-  List<String> getAllLocationTags() {
-    var list = prefs!.getStringList('locations');
-    list ??= [];
-    return list;
+  Future<Iterable<LocalEntity<LocationTag>>> _getStoredLocationTags() async {
+    final data = await EntityService.instance.getEntities(EntityType.location);
+    return data.map(
+      (e) => LocalEntity(LocationTag.fromJson(json.decode(e.data)), e.id),
+    );
+  }
+
+  Future<Iterable<LocalEntity<LocationTag>>> getLocationTags() {
+    return _getStoredLocationTags();
   }
 
   Future<void> addLocation(
     String location,
-    double lat,
-    double long,
+    Location centerPoint,
     int radius,
   ) async {
-    final list = getAllLocationTags();
     //The area enclosed by the location tag will be a circle on a 3D spherical
     //globe and an ellipse on a 2D Mercator projection (2D map)
     //a & b are the semi-major and semi-minor axes of the ellipse
     //Converting the unit from kilometers to degrees for a and b as that is
     //the unit on the caritesian plane
-    final a = (radius * _scaleFactor(lat)) / kilometersPerDegree;
+
+    final a =
+        (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
     final b = radius / kilometersPerDegree;
-    final center = [lat, long];
-    final data = {
-      "name": location,
-      "radius": radius,
-      "aSquare": a * a,
-      "bSquare": b * b,
-      "center": center,
-    };
-    final encodedMap = json.encode(data);
-    list.add(encodedMap);
-    await prefs!.setStringList('locations', list);
+    final locationTag = LocationTag(
+      name: location,
+      radius: radius,
+      aSquare: a * a,
+      bSquare: b * b,
+      centerPoint: centerPoint,
+    );
+    await EntityService.instance
+        .addOrUpdate(EntityType.location, json.encode(locationTag.toJson()));
+    Bus.instance.fire(LocationTagUpdatedEvent(LocTagEventType.add));
   }
 
   ///The area bounded by the location tag becomes more elliptical with increase
@@ -56,79 +69,127 @@ class LocationService {
     return 1 / cos(lat * (pi / 180));
   }
 
-  List<String> enclosingLocationTags(List<double> coordinates) {
-    final result = List<String>.of([]);
-    final allLocationTags = getAllLocationTags();
-    for (var locationTag in allLocationTags) {
-      final locationJson = json.decode(locationTag);
-      final aSquare = locationJson["aSquare"];
-      final bSquare = locationJson["bSquare"];
-      final center = locationJson["center"];
-      final x = coordinates[0] - center[0];
-      final y = coordinates[1] - center[1];
-      if ((x * x) / (aSquare) + (y * y) / (bSquare) <= 1) {
-        result.add(locationJson["name"]);
+  Future<List<LocalEntity<LocationTag>>> enclosingLocationTags(
+    Location fileCoordinates,
+  ) async {
+    try {
+      final result = List<LocalEntity<LocationTag>>.of([]);
+      final locationTagEntities = await getLocationTags();
+      for (LocalEntity<LocationTag> locationTagEntity in locationTagEntities) {
+        final locationTag = locationTagEntity.item;
+        final x = fileCoordinates.latitude! - locationTag.centerPoint.latitude!;
+        final y =
+            fileCoordinates.longitude! - locationTag.centerPoint.longitude!;
+        if ((x * x) / (locationTag.aSquare) + (y * y) / (locationTag.bSquare) <=
+            1) {
+          result.add(
+            locationTagEntity,
+          );
+        }
       }
+      return result;
+    } catch (e, s) {
+      _logger.severe("Failed to get enclosing location tags", e, s);
+      rethrow;
     }
-    return result;
   }
 
   bool isFileInsideLocationTag(
-    List<double> center,
-    List<double> fileCoordinates,
+    Location centerPoint,
+    Location fileCoordinates,
     int radius,
   ) {
-    final a = (radius * _scaleFactor(center[0])) / kilometersPerDegree;
+    final a =
+        (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
     final b = radius / kilometersPerDegree;
-    final x = center[0] - fileCoordinates[0];
-    final y = center[1] - fileCoordinates[1];
+    final x = centerPoint.latitude! - fileCoordinates.latitude!;
+    final y = centerPoint.longitude! - fileCoordinates.longitude!;
     if ((x * x) / (a * a) + (y * y) / (b * b) <= 1) {
       return true;
     }
     return false;
   }
 
-  Future<void> addFileToLocation(int locationId, int fileId) async {
-    final list = getFilesByLocation(locationId.toString());
-    list.add(fileId.toString());
-    await prefs!.setStringList("location_$locationId", list);
+  String convertLocationToDMS(Location centerPoint) {
+    final lat = centerPoint.latitude!;
+    final long = centerPoint.longitude!;
+    final latRef = lat >= 0 ? "N" : "S";
+    final longRef = long >= 0 ? "E" : "W";
+    final latDMS = convertCoordinateToDMS(lat.abs());
+    final longDMS = convertCoordinateToDMS(long.abs());
+    return "${latDMS[0]}°${latDMS[1]}'${latDMS[2]}\"$latRef, ${longDMS[0]}°${longDMS[1]}'${longDMS[2]}\"$longRef";
   }
 
-  List<String> getFilesByLocation(String locationId) {
-    var fileList = prefs!.getStringList("location_$locationId");
-    fileList ??= [];
-    return fileList;
+  List<int> convertCoordinateToDMS(double coordinate) {
+    final degrees = coordinate.floor();
+    final minutes = ((coordinate - degrees) * 60).floor();
+    final seconds = ((coordinate - degrees - minutes / 60) * 3600).floor();
+    return [degrees, minutes, seconds];
   }
 
-  List<String> getLocationsByFileID(int fileId) {
-    final locationList = getAllLocationTags();
-    final locations = List<dynamic>.of([]);
-    for (String locationString in locationList) {
-      final locationJson = json.decode(locationString);
-      locations.add(locationJson);
-    }
-    final res = List<String>.of([]);
-    for (dynamic location in locations) {
-      final list = getFilesByLocation(location["id"].toString());
-      if (list.contains(fileId.toString())) {
-        res.add(location["name"]);
+  ///Will only update if there is a change in the locationTag's properties
+  Future<void> updateLocationTag({
+    required LocalEntity<LocationTag> locationTagEntity,
+    int? newRadius,
+    Location? newCenterPoint,
+    String? newName,
+  }) async {
+    try {
+      final radius = newRadius ?? locationTagEntity.item.radius;
+      final centerPoint = newCenterPoint ?? locationTagEntity.item.centerPoint;
+      final name = newName ?? locationTagEntity.item.name;
+
+      final locationTag = locationTagEntity.item;
+      //Exit if there is no change in locationTag's properties
+      if (radius == locationTag.radius &&
+          centerPoint == locationTag.centerPoint &&
+          name == locationTag.name) {
+        return;
       }
+      final a =
+          (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
+      final b = radius / kilometersPerDegree;
+      final updatedLoationTag = locationTagEntity.item.copyWith(
+        centerPoint: centerPoint,
+        aSquare: a * a,
+        bSquare: b * b,
+        radius: radius,
+        name: name,
+      );
+
+      await EntityService.instance.addOrUpdate(
+        EntityType.location,
+        json.encode(updatedLoationTag.toJson()),
+        id: locationTagEntity.id,
+      );
+      Bus.instance.fire(
+        LocationTagUpdatedEvent(
+          LocTagEventType.update,
+          updatedLocTagEntities: [
+            LocalEntity(updatedLoationTag, locationTagEntity.id)
+          ],
+        ),
+      );
+    } catch (e, s) {
+      _logger.severe("Failed to update location tag", e, s);
+      rethrow;
     }
-    return res;
   }
 
-  Map<String, List<String>> clusterFilesByLocation() {
-    final map = HashMap<String, List<String>>();
-    var locations = prefs!.getStringList('locations');
-    locations ??= [];
-    for (String locationData in locations) {
-      final locationJson = json.decode(locationData);
-      map.putIfAbsent(
-        locationData,
-        () => getFilesByLocation(locationJson['id'].toString()),
+  Future<void> deleteLocationTag(String locTagEntityId) async {
+    try {
+      await EntityService.instance.deleteEntry(
+        locTagEntityId,
       );
+      Bus.instance.fire(
+        LocationTagUpdatedEvent(
+          LocTagEventType.delete,
+        ),
+      );
+    } catch (e, s) {
+      _logger.severe("Failed to delete location tag", e, s);
+      rethrow;
     }
-    return map;
   }
 }
 
@@ -140,12 +201,12 @@ class GPSData {
 
   GPSData(this.latRef, this.lat, this.longRef, this.long);
 
-  List<double> toSignedDecimalDegreeCoordinates() {
+  Location toLocationObj() {
     final latSign = latRef == "N" ? 1 : -1;
     final longSign = longRef == "E" ? 1 : -1;
-    return [
-      latSign * lat[0] + lat[1] / 60 + lat[2] / 3600,
-      longSign * long[0] + long[1] / 60 + long[2] / 3600
-    ];
+    return Location(
+      latitude: latSign * lat[0] + lat[1] / 60 + lat[2] / 3600,
+      longitude: longSign * long[0] + long[1] / 60 + long[2] / 3600,
+    );
   }
 }

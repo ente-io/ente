@@ -38,6 +38,9 @@ class TextInputWidget extends StatefulWidget {
   final bool isClearable;
   final bool shouldUnfocusOnClearOrSubmit;
   final FocusNode? focusNode;
+  final VoidCallback? onCancel;
+  final TextEditingController? textEditingController;
+  final ValueNotifier? isEmptyNotifier;
   const TextInputWidget({
     this.onSubmit,
     this.onChange,
@@ -61,6 +64,9 @@ class TextInputWidget extends StatefulWidget {
     this.shouldUnfocusOnClearOrSubmit = false,
     this.borderRadius = 8,
     this.focusNode,
+    this.onCancel,
+    this.textEditingController,
+    this.isEmptyNotifier,
     super.key,
   });
 
@@ -70,7 +76,7 @@ class TextInputWidget extends StatefulWidget {
 
 class _TextInputWidgetState extends State<TextInputWidget> {
   ExecutionState executionState = ExecutionState.idle;
-  final _textController = TextEditingController();
+  late final TextEditingController _textController;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
   late final ValueNotifier<bool> _obscureTextNotifier;
 
@@ -82,6 +88,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   void initState() {
     widget.submitNotifier?.addListener(_onSubmit);
     widget.cancelNotifier?.addListener(_onCancel);
+    _textController = widget.textEditingController ?? TextEditingController();
 
     if (widget.initialValue != null) {
       _textController.value = TextEditingValue(
@@ -96,6 +103,12 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     }
     _obscureTextNotifier = ValueNotifier(widget.isPasswordInput);
     _obscureTextNotifier.addListener(_safeRefresh);
+
+    if (widget.isEmptyNotifier != null) {
+      _textController.addListener(() {
+        widget.isEmptyNotifier!.value = _textController.text.isEmpty;
+      });
+    }
     super.initState();
   }
 
@@ -105,6 +118,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     widget.cancelNotifier?.removeListener(_onCancel);
     _obscureTextNotifier.dispose();
     _textController.dispose();
+    widget.isEmptyNotifier?.dispose();
     super.dispose();
   }
 
@@ -318,8 +332,12 @@ class _TextInputWidgetState extends State<TextInputWidget> {
   }
 
   void _onCancel() {
-    _textController.clear();
-    FocusScope.of(context).unfocus();
+    if (widget.onCancel != null) {
+      widget.onCancel!();
+    } else {
+      _textController.clear();
+      FocusScope.of(context).unfocus();
+    }
   }
 
   void _popNavigatorStack(BuildContext context, {Exception? e}) {

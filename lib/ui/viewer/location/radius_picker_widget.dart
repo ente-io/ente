@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/states/add_location_state.dart";
+import "package:photos/states/location_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 
@@ -20,20 +20,34 @@ class CustomTrackShape extends RoundedRectSliderTrackShape {
 }
 
 class RadiusPickerWidget extends StatefulWidget {
-  final ValueNotifier<int?> memoriesCountNotifier;
-  const RadiusPickerWidget(this.memoriesCountNotifier, {super.key});
+  ///This notifier can be listened to get the selected radius index from
+  ///a parent widget.
+  final ValueNotifier<int> selectedRadiusIndexNotifier;
+  const RadiusPickerWidget(
+    this.selectedRadiusIndexNotifier, {
+    super.key,
+  });
 
   @override
   State<RadiusPickerWidget> createState() => _RadiusPickerWidgetState();
 }
 
 class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
-  //Will maintain the state of the slider using this varialbe. Can't use
-  //InheritedLocationData.selectedRadiusIndex as the state in the inheritedWidget
-  //only changes after debounce time and the slider will not reflect the change immediately.
-  int selectedRadiusIndex = defaultRadiusValueIndex;
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    widget.selectedRadiusIndexNotifier.value =
+        InheritedLocationTagData.of(context).selectedRadiusIndex;
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selectedRadiusIndex = widget.selectedRadiusIndexNotifier.value;
     final radiusValue = radiusValues[selectedRadiusIndex];
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
@@ -107,15 +121,9 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
                         value: selectedRadiusIndex.toDouble(),
                         onChanged: (value) {
                           setState(() {
-                            selectedRadiusIndex = value.toInt();
+                            widget.selectedRadiusIndexNotifier.value =
+                                value.toInt();
                           });
-
-                          InheritedLocationTagData.of(
-                            context,
-                          ).updateSelectedIndex(
-                            value.toInt(),
-                          );
-                          widget.memoriesCountNotifier.value = null;
                         },
                         min: 0,
                         max: radiusValues.length - 1,

@@ -5,7 +5,6 @@ import "package:photos/core/configuration.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import "package:photos/services/feature_flag_service.dart";
-import "package:photos/services/location_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
@@ -147,12 +146,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                 ? Column(
                     children: [
                       LocationTagsWidget(
-                        GPSData(
-                          _exifData["latRef"],
-                          _exifData["lat"],
-                          _exifData["longRef"],
-                          _exifData["long"],
-                        ).toSignedDecimalDegreeCoordinates(),
+                        widget.file.location!,
                       ),
                       const FileDetailsDivider(),
                     ],
@@ -238,10 +232,12 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   }
 
   bool _haGPSData() {
-    return _exifData["lat"] != null &&
-        _exifData["long"] != null &&
-        _exifData["latRef"] != null &&
-        _exifData["longRef"] != null;
+    final fileLocation = widget.file.location;
+    final hasLocation = (fileLocation != null &&
+            fileLocation.latitude != null &&
+            fileLocation.longitude != null) &&
+        (fileLocation.latitude != 0 || fileLocation.longitude != 0);
+    return hasLocation;
   }
 
   void _generateExifForLocation(Map<String, IfdTag> exif) {

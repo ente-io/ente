@@ -6,8 +6,10 @@ import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/extensions/list.dart';
 import 'package:photos/models/file.dart';
+import "package:photos/models/file_load_result.dart";
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/file_magic_service.dart';
+import "package:photos/services/ignored_files_service.dart";
 import 'package:photos/utils/date_time_util.dart';
 
 class FilesService {
@@ -93,6 +95,15 @@ class FilesService {
       basenameWithoutExtension(file.title ?? ""),
     );
     return timeResult?.microsecondsSinceEpoch;
+  }
+
+  Future<void> removeIgnoredFiles(Future<FileLoadResult> result) async {
+    final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+    (await result).files.removeWhere(
+          (f) =>
+              f.uploadedFileID == null &&
+              IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
+        );
   }
 }
 

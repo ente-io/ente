@@ -9,7 +9,7 @@ import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/models/location.dart';
+import 'package:photos/models/location/location.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
@@ -80,6 +80,7 @@ class FilesDB {
     ...createOnDeviceFilesAndPathCollection(),
     ...addFileSizeColumn(),
     ...updateIndexes(),
+    ...createEntityDataTable(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -332,6 +333,20 @@ class FilesDB {
     ];
   }
 
+  static List<String> createEntityDataTable() {
+    return [
+      '''
+       CREATE TABLE IF NOT EXISTS entities (
+          id TEXT PRIMARY KEY NOT NULL,
+          type TEXT NOT NULL,
+          ownerID INTEGER NOT NULL,
+          data TEXT NOT NULL DEFAULT '{}',
+          updatedAt INTEGER NOT NULL
+      );
+      '''
+    ];
+  }
+
   static List<String> addFileSizeColumn() {
     return [
       '''
@@ -529,7 +544,8 @@ class FilesDB {
       filesTable,
       where: onlyFilesWithLocation
           ? '$columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0)'
-              '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+              ' AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND '
+              '($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
               ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))'
           : '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
               ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
@@ -1390,6 +1406,33 @@ class FilesDB {
     return filesCount;
   }
 
+  Future<FileLoadResult> getAllUploadedAndSharedFiles(
+    int startTime,
+    int endTime, {
+    int? limit,
+    bool? asc,
+    Set<int>? ignoredCollectionIDs,
+  }) async {
+    final db = await instance.database;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    final results = await db.query(
+      filesTable,
+      where:
+          '$columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0)'
+          ' AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND '
+          '($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+          ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+      whereArgs: [startTime, endTime, visibilityVisible],
+      orderBy:
+          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+      limit: limit,
+    );
+    final files = convertToFiles(results);
+    final List<File> deduplicatedFiles =
+        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+    return FileLoadResult(deduplicatedFiles, files.length == limit);
+  }
+
   Map<String, dynamic> _getRowForFile(File file) {
     final row = <String, dynamic>{};
     if (file.generatedID != null) {
@@ -1489,7 +1532,10 @@ class FilesDB {
     file.title = row[columnTitle];
     file.deviceFolder = row[columnDeviceFolder];
     if (row[columnLatitude] != null && row[columnLongitude] != null) {
-      file.location = Location(row[columnLatitude], row[columnLongitude]);
+      file.location = Location(
+        latitude: row[columnLatitude],
+        longitude: row[columnLongitude],
+      );
     }
     file.fileType = getFileType(row[columnFileType]);
     file.creationTime = row[columnCreationTime];

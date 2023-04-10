@@ -38,6 +38,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final Stream<int> currentIndexStream;
   final int photoGirdSize;
   final bool areFilesCollatedByDay;
+  final bool limitSelectionToOne;
   LazyLoadingGallery(
     this.files,
     this.index,
@@ -50,6 +51,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.areFilesCollatedByDay, {
     this.logTag = "",
     this.photoGirdSize = photoGridSizeDefault,
+    this.limitSelectionToOne = false,
     Key? key,
   }) : super(key: key ?? UniqueKey());
 
@@ -198,42 +200,44 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                 _files[0].creationTime!,
                 widget.photoGirdSize,
               ),
-            ValueListenableBuilder(
-              valueListenable: _showSelectAllButton,
-              builder: (context, dynamic value, _) {
-                return !value
-                    ? const SizedBox.shrink()
-                    : GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        child: SizedBox(
-                          width: 48,
-                          height: 44,
-                          child: ValueListenableBuilder(
-                            valueListenable: _areAllFromDaySelected,
-                            builder: (context, dynamic value, _) {
-                              return value
-                                  ? const Icon(
-                                      Icons.check_circle,
-                                      size: 18,
-                                    )
-                                  : Icon(
-                                      Icons.check_circle_outlined,
-                                      color: getEnteColorScheme(context)
-                                          .strokeMuted,
-                                      size: 18,
-                                    );
-                            },
-                          ),
-                        ),
-                        onTap: () {
-                          //this value has no significance
-                          //changing only to notify the listeners
-                          _toggleSelectAllFromDay.value =
-                              !_toggleSelectAllFromDay.value;
-                        },
-                      );
-              },
-            )
+            widget.limitSelectionToOne
+                ? const SizedBox.shrink()
+                : ValueListenableBuilder(
+                    valueListenable: _showSelectAllButton,
+                    builder: (context, dynamic value, _) {
+                      return !value
+                          ? const SizedBox.shrink()
+                          : GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              child: SizedBox(
+                                width: 48,
+                                height: 44,
+                                child: ValueListenableBuilder(
+                                  valueListenable: _areAllFromDaySelected,
+                                  builder: (context, dynamic value, _) {
+                                    return value
+                                        ? const Icon(
+                                            Icons.check_circle,
+                                            size: 18,
+                                          )
+                                        : Icon(
+                                            Icons.check_circle_outlined,
+                                            color: getEnteColorScheme(context)
+                                                .strokeMuted,
+                                            size: 18,
+                                          );
+                                  },
+                                ),
+                              ),
+                              onTap: () {
+                                //this value has no significance
+                                //changing only to notify the listeners
+                                _toggleSelectAllFromDay.value =
+                                    !_toggleSelectAllFromDay.value;
+                              },
+                            );
+                    },
+                  )
           ],
         ),
         _shouldRender!
@@ -264,6 +268,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           _toggleSelectAllFromDay,
           _areAllFromDaySelected,
           widget.photoGirdSize,
+          limitSelectionToOne: widget.limitSelectionToOne,
         ),
       );
     }
@@ -292,6 +297,7 @@ class LazyLoadingGridView extends StatefulWidget {
   final ValueNotifier toggleSelectAllFromDay;
   final ValueNotifier areAllFilesSelected;
   final int? photoGridSize;
+  final bool limitSelectionToOne;
 
   LazyLoadingGridView(
     this.tag,
@@ -303,6 +309,7 @@ class LazyLoadingGridView extends StatefulWidget {
     this.toggleSelectAllFromDay,
     this.areAllFilesSelected,
     this.photoGridSize, {
+    this.limitSelectionToOne = false,
     Key? key,
   }) : super(key: key ?? UniqueKey());
 
@@ -424,28 +431,16 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       selectionColor = avatarColors[(randomID).remainder(avatarColors.length)];
     }
     return GestureDetector(
-      onTap: () async {
-        if (widget.selectedFiles?.files.isNotEmpty ?? false) {
-          _selectFile(file);
-        } else {
-          if (AppLifecycleService.instance.mediaExtensionAction.action ==
-              IntentAction.pick) {
-            final ioFile = await getFile(file);
-            MediaExtension().setResult("file://${ioFile!.path}");
-          } else {
-            _routeToDetailPage(file, context);
-          }
-        }
+      onTap: () {
+        widget.limitSelectionToOne
+            ? _onTapWithSelectionLimit(file)
+            : _onTapNoSelectionLimit(file);
       },
-      onLongPress: widget.selectedFiles != null
-          ? () {
-              if (AppLifecycleService.instance.mediaExtensionAction.action ==
-                  IntentAction.main) {
-                HapticFeedback.lightImpact();
-                _selectFile(file);
-              }
-            }
-          : null,
+      onLongPress: () {
+        widget.limitSelectionToOne
+            ? _onLongPressWithSelectionLimit(file)
+            : _onLongPressNoSelectionLimit(file);
+      },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(1),
         child: Stack(
@@ -490,8 +485,50 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     );
   }
 
-  void _selectFile(File file) {
+  void _toggleFileSelection(File file) {
     widget.selectedFiles!.toggleSelection(file);
+  }
+
+  void _onTapNoSelectionLimit(File file) async {
+    if (widget.selectedFiles?.files.isNotEmpty ?? false) {
+      _toggleFileSelection(file);
+    } else {
+      if (AppLifecycleService.instance.mediaExtensionAction.action ==
+          IntentAction.pick) {
+        final ioFile = await getFile(file);
+        MediaExtension().setResult("file://${ioFile!.path}");
+      } else {
+        _routeToDetailPage(file, context);
+      }
+    }
+  }
+
+  void _onTapWithSelectionLimit(File file) {
+    if (widget.selectedFiles!.files.isNotEmpty &&
+        widget.selectedFiles!.files.first != file) {
+      widget.selectedFiles!.clearAll();
+    }
+    _toggleFileSelection(file);
+  }
+
+  void _onLongPressNoSelectionLimit(File file) {
+    if (widget.selectedFiles!.files.isNotEmpty) {
+      _routeToDetailPage(file, context);
+    } else if (AppLifecycleService.instance.mediaExtensionAction.action ==
+        IntentAction.main) {
+      HapticFeedback.lightImpact();
+      _toggleFileSelection(file);
+    }
+  }
+
+  Future<void> _onLongPressWithSelectionLimit(File file) async {
+    if (AppLifecycleService.instance.mediaExtensionAction.action ==
+        IntentAction.pick) {
+      final ioFile = await getFile(file);
+      MediaExtension().setResult("file://${ioFile!.path}");
+    } else {
+      _routeToDetailPage(file, context);
+    }
   }
 
   void _routeToDetailPage(File file, BuildContext context) {

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/models/location/location.dart";
+import "package:photos/models/local_entity_data.dart";
+import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/services/location_service.dart";
-import 'package:photos/states/location_state.dart';
+import "package:photos/states/location_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -16,18 +17,19 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/text_input_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import 'package:photos/ui/viewer/location/dynamic_location_gallery_widget.dart';
+import "package:photos/ui/viewer/location/edit_center_point_tile_widget.dart";
 import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
-showAddLocationSheet(
+showEditLocationSheet(
   BuildContext context,
-  Location coordinates,
+  LocalEntity<LocationTag> locationTagEntity,
 ) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
       return LocationTagStateProvider(
-        centerPoint: coordinates,
-        const AddLocationSheet(),
+        locationTagEntity: locationTagEntity,
+        const EditLocationSheet(),
       );
     },
     shape: const RoundedRectangleBorder(
@@ -42,14 +44,16 @@ showAddLocationSheet(
   );
 }
 
-class AddLocationSheet extends StatefulWidget {
-  const AddLocationSheet({super.key});
+class EditLocationSheet extends StatefulWidget {
+  const EditLocationSheet({
+    super.key,
+  });
 
   @override
-  State<AddLocationSheet> createState() => _AddLocationSheetState();
+  State<EditLocationSheet> createState() => _EditLocationSheetState();
 }
 
-class _AddLocationSheetState extends State<AddLocationSheet> {
+class _EditLocationSheetState extends State<EditLocationSheet> {
   //The value of these notifiers has no significance.
   //When memoriesCountNotifier is null, we show the loading widget in the
   //memories count section which also means the gallery is loading.
@@ -60,7 +64,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
       ValueNotifier(defaultRadiusValueIndex);
   final _focusNode = FocusNode();
   final _textEditingController = TextEditingController();
-  final _isEmptyNotifier = ValueNotifier(true);
+  final _isEmptyNotifier = ValueNotifier(false);
   Widget? _keyboardTopButtons;
 
   @override
@@ -83,6 +87,8 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final locationName =
+        InheritedLocationTagData.of(context).locationTagEntity!.item.name;
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
       child: Column(
@@ -90,7 +96,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
           const Padding(
             padding: EdgeInsets.only(bottom: 16),
             child: BottomOfTitleBarWidget(
-              title: TitleBarTitleWidget(title: "Add location"),
+              title: TitleBarTitleWidget(title: "Edit location"),
             ),
           ),
           Expanded(
@@ -117,6 +123,12 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                                 popNavAfterSubmission: false,
                                 shouldUnfocusOnClearOrSubmit: true,
                                 alwaysShowSuccessState: true,
+                                initialValue: locationName,
+                                onCancel: () {
+                                  _focusNode.unfocus();
+                                  _textEditingController.value =
+                                      TextEditingValue(text: locationName);
+                                },
                                 textEditingController: _textEditingController,
                                 isEmptyNotifier: _isEmptyNotifier,
                               ),
@@ -133,27 +145,25 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                                     key: ValueKey(value),
                                     buttonType: ButtonType.secondary,
                                     buttonSize: ButtonSize.small,
-                                    labelText: "Add",
+                                    labelText: "Save",
                                     isDisabled: value,
                                     onTap: () async {
                                       _focusNode.unfocus();
-                                      await _addLocationTag();
+                                      await _editLocation();
                                     },
                                   ),
                                 );
                               },
-                            )
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
+                        const EditCenterPointTileWidget(),
+                        const SizedBox(height: 20),
                         RadiusPickerWidget(
                           _selectedRadiusIndexNotifier,
                         ),
                         const SizedBox(height: 24),
-                        Text(
-                          "A location tag groups all photos that were taken within some radius of a photo",
-                          style: textTheme.smallMuted,
-                        ),
                       ],
                     ),
                   ),
@@ -214,7 +224,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                   const SizedBox(height: 24),
                   DynamicLocationGalleryWidget(
                     _memoriesCountNotifier,
-                    "Add_location",
+                    "Edit_location",
                   ),
                 ],
               ),
@@ -225,16 +235,15 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
     );
   }
 
-  Future<void> _addLocationTag() async {
-    final locationData = InheritedLocationTagData.of(context);
-    final coordinates = locationData.centerPoint;
-    final radius = radiusValues[locationData.selectedRadiusIndex];
-    await LocationService.instance.addLocation(
-      _textEditingController.text.trim(),
-      coordinates,
-      radius,
+  Future<void> _editLocation() async {
+    final locationTagState = InheritedLocationTagData.of(context);
+    await LocationService.instance.updateLocationTag(
+      locationTagEntity: locationTagState.locationTagEntity!,
+      newRadius: radiusValues[locationTagState.selectedRadiusIndex],
+      newName: _textEditingController.text.trim(),
+      newCenterPoint: InheritedLocationTagData.of(context).centerPoint,
     );
-    Navigator.pop(context);
+    Navigator.of(context).pop();
   }
 
   void _focusNodeListener() {

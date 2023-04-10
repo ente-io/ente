@@ -2,36 +2,52 @@ import "dart:developer" as dev;
 import "dart:math";
 
 import "package:flutter/material.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/ignored_files_service.dart";
+import "package:photos/services/files_service.dart";
 import "package:photos/services/location_service.dart";
-import "package:photos/states/add_location_state.dart";
+import 'package:photos/states/location_state.dart';
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/utils/local_settings.dart";
 
-class AddLocationGalleryWidget extends StatefulWidget {
+///This gallery will get rebuilt with the updated radius when
+///InheritedLocationTagData notifies a change in radius.
+class DynamicLocationGalleryWidget extends StatefulWidget {
   final ValueNotifier<int?> memoriesCountNotifier;
-  const AddLocationGalleryWidget(this.memoriesCountNotifier, {super.key});
+  final String tagPrefix;
+  const DynamicLocationGalleryWidget(
+    this.memoriesCountNotifier,
+    this.tagPrefix, {
+    super.key,
+  });
 
   @override
-  State<AddLocationGalleryWidget> createState() =>
-      _AddLocationGalleryWidgetState();
+  State<DynamicLocationGalleryWidget> createState() =>
+      _DynamicLocationGalleryWidgetState();
 }
 
-class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
+class _DynamicLocationGalleryWidgetState
+    extends State<DynamicLocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
   late Future<void> removeIgnoredFiles;
   double heightOfGallery = 0;
 
   @override
   void initState() {
-    fileLoadResult = _fetchAllFilesWithLocationData();
-    removeIgnoredFiles = _removeIgnoredFiles(fileLoadResult);
+    final collectionsToHide =
+        CollectionsService.instance.collectionsHiddenFromTimeline();
+    fileLoadResult = FilesDB.instance.getAllUploadedAndSharedFiles(
+      galleryLoadStartTime,
+      galleryLoadEndTime,
+      limit: null,
+      asc: false,
+      ignoredCollectionIDs: collectionsToHide,
+    );
+    removeIgnoredFiles =
+        FilesService.instance.removeIgnoredFiles(fileLoadResult);
     super.initState();
   }
 
@@ -46,14 +62,9 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
       final stopWatch = Stopwatch()..start();
       final copyOfFiles = List<File>.from(result.files);
       copyOfFiles.removeWhere((f) {
-        assert(
-          f.location != null &&
-              f.location!.latitude != null &&
-              f.location!.longitude != null,
-        );
         return !LocationService.instance.isFileInsideLocationTag(
-          InheritedLocationTagData.of(context).coordinates,
-          [f.location!.latitude!, f.location!.longitude!],
+          InheritedLocationTagData.of(context).centerPoint,
+          f.location!,
           selectedRadius,
         );
       });
@@ -73,7 +84,10 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
     }
 
     return FutureBuilder(
-      key: ValueKey(selectedRadius),
+      //Only rebuild Gallery if the center point or radius changes
+      key: ValueKey(
+        "${InheritedLocationTagData.of(context).centerPoint}$selectedRadius",
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return SizedBox(
@@ -84,7 +98,6 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
               ),
             ),
             child: Gallery(
-              key: ValueKey(selectedRadius),
               loadingWidget: const SizedBox.shrink(),
               disableScroll: true,
               asyncLoader: (
@@ -95,7 +108,7 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
               }) async {
                 return snapshot.data as FileLoadResult;
               },
-              tagPrefix: "Add location",
+              tagPrefix: widget.tagPrefix,
               shouldCollateFilesByDay: false,
             ),
           );
@@ -112,15 +125,6 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
         InheritedLocationTagData.of(context).selectedRadiusIndex];
   }
 
-  Future<void> _removeIgnoredFiles(Future<FileLoadResult> result) async {
-    final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-    (await result).files.removeWhere(
-          (f) =>
-              f.uploadedFileID == null &&
-              IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
-        );
-  }
-
   double _galleryHeight(int fileCount) {
     final photoGridSize = LocalSettings.instance.getPhotoGridSize();
     final totalWhiteSpaceBetweenPhotos =
@@ -135,34 +139,5 @@ class _AddLocationGalleryWidgetState extends State<AddLocationGalleryWidget> {
     final galleryHeight = (thumbnailHeight * numberOfRows) +
         (galleryGridSpacing * (numberOfRows - 1));
     return galleryHeight + 120;
-  }
-
-  Future<FileLoadResult> _fetchAllFilesWithLocationData() {
-    final ownerID = Configuration.instance.getUserID();
-    final hasSelectedAllForBackup =
-        Configuration.instance.hasSelectedAllFoldersForBackup();
-    final collectionsToHide =
-        CollectionsService.instance.collectionsHiddenFromTimeline();
-    if (hasSelectedAllForBackup) {
-      return FilesDB.instance.getAllLocalAndUploadedFiles(
-        galleryLoadStartTime,
-        galleryLoadEndTime,
-        ownerID!,
-        limit: null,
-        asc: true,
-        ignoredCollectionIDs: collectionsToHide,
-        onlyFilesWithLocation: true,
-      );
-    } else {
-      return FilesDB.instance.getAllPendingOrUploadedFiles(
-        galleryLoadStartTime,
-        galleryLoadEndTime,
-        ownerID!,
-        limit: null,
-        asc: true,
-        ignoredCollectionIDs: collectionsToHide,
-        onlyFilesWithLocation: true,
-      );
-    }
   }
 }

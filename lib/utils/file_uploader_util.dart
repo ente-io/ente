@@ -13,7 +13,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/file_type.dart';
-import 'package:photos/models/location.dart';
+import 'package:photos/models/location/location.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -155,7 +155,8 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
   if (file.location == null ||
       (file.location!.latitude == 0 && file.location!.longitude == 0)) {
     final latLong = await asset.latlngAsync();
-    file.location = Location(latLong.latitude, latLong.longitude);
+    file.location =
+        Location(latitude: latLong.latitude, longitude: latLong.longitude);
   }
 
   if (file.title == null || file.title!.isEmpty) {
