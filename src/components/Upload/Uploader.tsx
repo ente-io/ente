@@ -508,7 +508,6 @@ export default function Uploader(props: Props) {
             logError(err, 'failed to upload files');
             showUserFacingError(err.message);
             closeUploadProgress();
-            throw err;
         } finally {
             postUploadAction();
         }
