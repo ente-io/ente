@@ -16,7 +16,7 @@
 .idea/
 
 #Visual Studio Code related
-.vscode/
+.vscode/launch.json
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -27,6 +27,8 @@
 .pub-cache/
 .pub/
 /build/
+
+lib/generated/*
 
 # Web related
 lib/generated_plugin_registrant.dart
