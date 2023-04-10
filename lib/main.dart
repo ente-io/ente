@@ -17,6 +17,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
@@ -67,13 +68,15 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
+    final Locale locale = await getLocale();
     unawaited(_scheduleFGSync('appStart in FG'));
     runApp(
       AppLock(
         builder: (args) =>
-            EnteApp(_runBackgroundTask, _killBGTask, savedThemeMode),
+            EnteApp(_runBackgroundTask, _killBGTask, locale, savedThemeMode),
         lockScreen: const LockScreen(),
         enabled: Configuration.instance.shouldShowLockScreen(),
+        locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
         backgroundLockLatency: kBackgroundLockLatency,

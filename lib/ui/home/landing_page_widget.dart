@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:dots_indicator/dots_indicator.dart';
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:photos/app.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/account/email_entry_page.dart';
 import 'package:photos/ui/account/login_page.dart';
@@ -15,6 +18,8 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/payment/subscription.dart';
+import "package:photos/ui/settings/language_picker.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class LandingPageWidget extends StatefulWidget {
   const LandingPageWidget({Key? key}) : super(key: key);
@@ -42,6 +47,31 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       child: SingleChildScrollView(
         child: Column(
           children: [
+            kDebugMode
+                ? GestureDetector(
+                    child: const Align(
+                      alignment: Alignment.topRight,
+                      child: Text("Lang"),
+                    ),
+                    onTap: () async {
+                      final locale = await getLocale();
+                      routeToPage(
+                        context,
+                        LanguageSelectorPage(
+                          appSupportedLocales,
+                          (locale) async {
+                            await setLocale(locale);
+                            EnteApp.setLocale(context, locale);
+                            S.delegate.load(locale);
+                          },
+                          locale,
+                        ),
+                      ).then((value) {
+                        setState(() {});
+                      });
+                    },
+                  )
+                : const SizedBox(),
             const Padding(padding: EdgeInsets.all(12)),
             const Text(
               "ente",
