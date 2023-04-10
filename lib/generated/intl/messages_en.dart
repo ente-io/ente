@@ -612,7 +612,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Invalid email address"),
         "invalidKey": MessageLookupByLibrary.simpleMessage("Invalid key"),
         "invalidRecoveryKey": MessageLookupByLibrary.simpleMessage(
-            "The recovery key you entered is not valid. Please make sure it "),
+            "The recovery key you entered is not valid. Please make sure it contains 24 words, and check the spelling of each.\n\nIf you entered an older recovery code, make sure it is 64 characters long, and check each of them."),
         "invite": MessageLookupByLibrary.simpleMessage("Invite"),
         "inviteToEnte": MessageLookupByLibrary.simpleMessage("Invite to ente"),
         "inviteYourFriends":
@@ -835,7 +835,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Recovery successful!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
-            "The current device is not powerful enough to verify your "),
+            "The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish)."),
         "recreatePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Recreate password"),
         "reddit": MessageLookupByLibrary.simpleMessage("Reddit"),
