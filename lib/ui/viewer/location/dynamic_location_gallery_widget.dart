@@ -43,7 +43,7 @@ class _DynamicLocationGalleryWidgetState
       galleryLoadStartTime,
       galleryLoadEndTime,
       limit: null,
-      asc: true,
+      asc: false,
       ignoredCollectionIDs: collectionsToHide,
     );
     removeIgnoredFiles =

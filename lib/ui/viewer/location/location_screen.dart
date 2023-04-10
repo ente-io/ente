@@ -134,7 +134,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       galleryLoadStartTime,
       galleryLoadEndTime,
       limit: null,
-      asc: true,
+      asc: false,
       ignoredCollectionIDs: collectionsToHide,
     );
     removeIgnoredFiles =
