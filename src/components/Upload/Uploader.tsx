@@ -239,7 +239,7 @@ export default function Uploader(props: Props) {
                     appContext?.sharedFiles.length
                 }`
             );
-            if (uploadRunning.current) {
+            if (uploadManager.isUploadRunning()) {
                 if (watchFolderService.isUploadRunning()) {
                     addLogLine(
                         'watchFolder upload was running, pausing it to run user upload'
