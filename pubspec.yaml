@@ -4,7 +4,7 @@ version: 1.0.36+36
 publish_to: none
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
   adaptive_theme: ^3.1.0 # done
@@ -48,6 +48,7 @@ dependencies:
   json_annotation: ^4.5.0
   local_auth: ^1.1.5
   logging: ^1.0.1
+  modal_bottom_sheet: ^3.0.0-pre
   move_to_background: ^1.0.2
   open_filex: ^4.3.2
   otp: ^3.1.1

@@ -54,7 +54,7 @@ class LanguageSelectorPage extends StatelessWidget {
                         ),
                       ),
                       // MenuSectionDescriptionWidget(
-                      //   content: S.of(context).maxDeviceLimitSpikeHandling(50),
+                      //   content: context.l10n.maxDeviceLimitSpikeHandling(50),
                       // )
                     ],
                   ),

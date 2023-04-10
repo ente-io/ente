@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 
 import 'package:ente_auth/core/configuration.dart';
@@ -16,7 +14,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 
 class DeleteAccountPage extends StatelessWidget {
   const DeleteAccountPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -153,7 +151,7 @@ class DeleteAccountPage extends StatelessWidget {
     );
 
     if (hasAuthenticated) {
-      final choice = await showChoiceDialog(
+      final choice = await showChoiceDialogOld(
         context,
         l10n.confirmAccountDeleteTitle,
         l10n.confirmAccountDeleteMessage,
@@ -167,8 +165,8 @@ class DeleteAccountPage extends StatelessWidget {
       }
       final decryptChallenge = CryptoUtil.openSealSync(
         Sodium.base642bin(response.encryptedChallenge),
-        Sodium.base642bin(Configuration.instance.getKeyAttributes().publicKey),
-        Configuration.instance.getSecretKey(),
+        Sodium.base642bin(Configuration.instance.getKeyAttributes()!.publicKey),
+        Configuration.instance.getSecretKey()!,
       );
       final challengeResponseStr = utf8.decode(decryptChallenge);
       await UserService.instance.deleteAccount(context, challengeResponseStr);

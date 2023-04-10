@@ -1,12 +1,11 @@
-// @dart=2.9
+import 'dart:async';
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/models/key_attributes.dart';
 import 'package:ente_auth/ui/account/recovery_page.dart';
-import 'package:ente_auth/ui/common/dialogs.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/email_util.dart';
@@ -14,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 class PasswordReentryPage extends StatefulWidget {
-  const PasswordReentryPage({Key key}) : super(key: key);
+  const PasswordReentryPage({Key? key}) : super(key: key);
 
   @override
   State<PasswordReentryPage> createState() => _PasswordReentryPageState();
@@ -24,7 +23,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
   final _logger = Logger((_PasswordReentryPageState).toString());
   final _passwordController = TextEditingController();
   final FocusNode _passwordFocusNode = FocusNode();
-  String email;
+  String? email;
   bool _passwordInFocus = false;
   bool _passwordVisible = false;
 
@@ -41,10 +40,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
-    FloatingActionButtonLocation fabLocation() {
+    FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
         return null;
       } else {
@@ -68,29 +66,26 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
-        buttonText: l10n.verifyPassword,
+        buttonText: context.l10n.verifyPassword,
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
-          final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
+          final dialog = createProgressDialog(context, context.l10n.pleaseWait);
           await dialog.show();
           try {
             await Configuration.instance.decryptAndSaveSecrets(
               _passwordController.text,
-              Configuration.instance.getKeyAttributes(),
+              Configuration.instance.getKeyAttributes()!,
             );
           } on KeyDerivationError catch (e, s) {
             _logger.severe("Password verification failed", e, s);
             await dialog.hide();
-            final dialogUserChoice = await showChoiceDialog(
+            final dialogChoice = await showChoiceDialog(
               context,
-              l10n.recreatePassword,
-              l10n.recreatePasswordMessage,
-              firstAction: l10n.cancel,
-              firstActionColor: Theme.of(context).colorScheme.primary,
-              secondAction: l10n.useRecoveryKeyAction,
-              secondActionColor: Theme.of(context).colorScheme.primary,
+              title: context.l10n.recreatePasswordTitle,
+              body: context.l10n.recreatePasswordBody,
+              firstButtonLabel: context.l10n.useRecoveryKey,
             );
-            if (dialogUserChoice == DialogUserChoice.secondChoice) {
+            if (dialogChoice!.action == ButtonAction.first) {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (BuildContext context) {
@@ -103,20 +98,17 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           } catch (e, s) {
             _logger.severe("Password verification failed", e, s);
             await dialog.hide();
-
-            final dialogUserChoice = await showChoiceDialog(
+            final dialogChoice = await showChoiceDialog(
               context,
-              l10n.incorrectPassword,
-              l10n.tryAgainMessage,
-              firstAction: l10n.contactSupport,
-              firstActionColor: Theme.of(context).colorScheme.primary,
-              secondAction: l10n.ok,
-              secondActionColor: Theme.of(context).colorScheme.primary,
+              title: context.l10n.incorrectPasswordTitle,
+              body: context.l10n.pleaseTryAgain,
+              firstButtonLabel: context.l10n.contactSupport,
+              secondButtonLabel: context.l10n.ok,
             );
-            if (dialogUserChoice == DialogUserChoice.firstChoice) {
+            if (dialogChoice!.action == ButtonAction.first) {
               await sendLogs(
                 context,
-                l10n.contactSupport,
+                context.l10n.contactSupport,
                 "support@ente.io",
                 postShare: () {},
               );
@@ -124,13 +116,15 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             return;
           }
           await dialog.hide();
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return const HomePage();
-              },
+          unawaited(
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return const HomePage();
+                },
+              ),
+              (route) => false,
             ),
-            (route) => false,
           );
         },
       ),
@@ -140,7 +134,6 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
   }
 
   Widget _getBody() {
-    final l10n = context.l10n;
     return Column(
       children: [
         Expanded(
@@ -151,7 +144,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    l10n.welcomeBackTitle,
+                    context.l10n.welcomeBack,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
@@ -174,7 +167,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                   child: TextFormField(
                     autofillHints: const [AutofillHints.password],
                     decoration: InputDecoration(
-                      hintText: l10n.enterYourPasswordHint,
+                      hintText: context.l10n.enterYourPasswordHint,
                       filled: true,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
@@ -236,9 +229,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         },
                         child: Center(
                           child: Text(
-                            l10n.forgotPassword,
+                            context.l10n.forgotPassword,
                             style:
-                                Theme.of(context).textTheme.subtitle1.copyWith(
+                                Theme.of(context).textTheme.subtitle1!.copyWith(
                                       fontSize: 14,
                                       decoration: TextDecoration.underline,
                                     ),
@@ -250,7 +243,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         onTap: () async {
                           final dialog = createProgressDialog(
                             context,
-                            l10n.pleaseWaitTitle,
+                            context.l10n.pleaseWait,
                           );
                           await dialog.show();
                           await Configuration.instance.logout();
@@ -260,9 +253,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         },
                         child: Center(
                           child: Text(
-                            l10n.changeEmail,
+                            context.l10n.changeEmail,
                             style:
-                                Theme.of(context).textTheme.subtitle1.copyWith(
+                                Theme.of(context).textTheme.subtitle1!.copyWith(
                                       fontSize: 14,
                                       decoration: TextDecoration.underline,
                                     ),
@@ -278,11 +271,5 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         ),
       ],
     );
-  }
-
-  void validatePreVerificationState(KeyAttributes keyAttributes) {
-    if (keyAttributes == null) {
-      throw Exception("Key Attributes can not be null");
-    }
   }
 }

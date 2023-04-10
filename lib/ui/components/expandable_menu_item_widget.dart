@@ -69,7 +69,7 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
             ),
             collapsed: const SizedBox.shrink(),
             expanded: widget.selectionOptionsWidget,
-            theme: getExpandableTheme(context),
+            theme: getExpandableTheme(),
             controller: expandableController,
           ),
         ),

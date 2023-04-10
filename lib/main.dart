@@ -1,4 +1,4 @@
-// @dart=2.9
+import 'package:adaptive_theme/adaptive_theme.dart';
 import "package:ente_auth/app/view/app.dart";
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
@@ -25,10 +25,11 @@ final _logger = Logger("main");
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await _runInForeground();
+  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+  await _runInForeground(savedThemeMode);
 }
 
-Future<void> _runInForeground() async {
+Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
@@ -42,9 +43,17 @@ Future<void> _runInForeground() async {
         locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
+        savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
   });
+}
+
+ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
+  if (savedThemeMode == null) return ThemeMode.system;
+  if (savedThemeMode.isLight) return ThemeMode.light;
+  if (savedThemeMode.isDark) return ThemeMode.dark;
+  return ThemeMode.system;
 }
 
 Future _runWithLogs(Function() function, {String prefix = ""}) async {
@@ -60,7 +69,7 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
   );
 }
 
-Future<void> _init(bool bool, {String via}) async {
+Future<void> _init(bool bool, {String? via}) async {
   CryptoUtil.init();
   await PreferenceService.instance.init();
   await CodeStore.instance.init();

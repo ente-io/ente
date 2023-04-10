@@ -790,6 +790,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.0"
+  modal_bottom_sheet:
+    dependency: "direct main"
+    description:
+      name: modal_bottom_sheet
+      sha256: "3bba63c62d35c931bce7f8ae23a47f9a05836d8cb3c11122ada64e0b2f3d718f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0-pre"
   move_to_background:
     dependency: "direct main"
     description:

@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 class LockScreen extends StatefulWidget {
-  const LockScreen({Key key}) : super(key: key);
+  const LockScreen({Key? key}) : super(key: key);
 
   @override
   State<LockScreen> createState() => _LockScreenState();
@@ -62,7 +62,7 @@ class _LockScreenState extends State<LockScreen> {
         "Please authenticate to view your secrets",
       );
       if (result) {
-        AppLock.of(context).didUnlock();
+        AppLock.of(context)!.didUnlock();
       }
     } catch (e, s) {
       _logger.severe(e, s);

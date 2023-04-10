@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class SocialSectionWidget extends StatelessWidget {
-  const SocialSectionWidget({Key key}) : super(key: key);
+  const SocialSectionWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class SocialSectionWidget extends StatelessWidget {
 class SocialsMenuItemWidget extends StatelessWidget {
   final String text;
   final String urlSring;
-  const SocialsMenuItemWidget(this.text, this.urlSring, {Key key})
+  const SocialsMenuItemWidget(this.text, this.urlSring, {Key? key})
       : super(key: key);
 
   @override
@@ -53,7 +53,7 @@ class SocialsMenuItemWidget extends StatelessWidget {
       trailingIconIsMuted: true,
       onTap: () {
         launchUrlString(urlSring);
-      },
+      } as Future<void> Function()?,
     );
   }
 }

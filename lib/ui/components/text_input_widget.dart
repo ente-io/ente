@@ -1,11 +1,11 @@
+import 'package:ente_auth/models/execution_states.dart';
+import 'package:ente_auth/models/typedefs.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/common/loading_widget.dart';
+import 'package:ente_auth/ui/components/separators.dart';
+import 'package:ente_auth/utils/debouncer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:photos/models/execution_states.dart';
-import 'package:photos/models/typedefs.dart';
-import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/utils/debouncer.dart';
-import 'package:photos/utils/separators_util.dart';
 
 class TextInputWidget extends StatefulWidget {
   final String? label;

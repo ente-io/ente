@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
@@ -24,7 +24,7 @@ enum PasswordEntryMode {
 class PasswordEntryPage extends StatefulWidget {
   final PasswordEntryMode mode;
 
-  const PasswordEntryPage({this.mode = PasswordEntryMode.set, Key key})
+  const PasswordEntryPage({this.mode = PasswordEntryMode.set, Key? key})
       : super(key: key);
 
   @override
@@ -39,7 +39,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   final _passwordController1 = TextEditingController(),
       _passwordController2 = TextEditingController();
   final Color _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
-  String _volatilePassword;
+  String? _volatilePassword;
   String _passwordInInputBox = '';
   String _passwordInInputConfirmationBox = '';
   double _passwordStrength = 0.0;
@@ -60,7 +60,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     if (_volatilePassword != null) {
       Future.delayed(
         Duration.zero,
-        () => _showRecoveryCodeDialog(_volatilePassword),
+        () => _showRecoveryCodeDialog(_volatilePassword!),
       );
     }
     _password1FocusNode.addListener(() {
@@ -79,7 +79,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
-    FloatingActionButtonLocation fabLocation() {
+    FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
         return null;
       } else {
@@ -165,7 +165,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     textAlign: TextAlign.start,
                     style: Theme.of(context)
                         .textTheme
-                        .subtitle1
+                        .subtitle1!
                         .copyWith(fontSize: 14),
                   ),
                 ),
@@ -176,7 +176,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     text: TextSpan(
                       style: Theme.of(context)
                           .textTheme
-                          .subtitle1
+                          .subtitle1!
                           .copyWith(fontSize: 14),
                       children: [
                         const TextSpan(
@@ -185,7 +185,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         ),
                         TextSpan(
                           text: "we cannot decrypt your data",
-                          style: Theme.of(context).textTheme.subtitle1.copyWith(
+                          style: Theme.of(context).textTheme.subtitle1!.copyWith(
                                 fontSize: 14,
                                 decoration: TextDecoration.underline,
                               ),
@@ -243,7 +243,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                   Icons.check,
                                   color: Theme.of(context)
                                       .inputDecorationTheme
-                                      .focusedBorder
+                                      .focusedBorder!
                                       .borderSide
                                       .color,
                                 )
@@ -305,7 +305,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                   Icons.check,
                                   color: Theme.of(context)
                                       .inputDecorationTheme
-                                      .focusedBorder
+                                      .focusedBorder!
                                       .borderSide
                                       .color,
                                 )
@@ -362,7 +362,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     child: RichText(
                       text: TextSpan(
                         text: "How it works",
-                        style: Theme.of(context).textTheme.subtitle1.copyWith(
+                        style: Theme.of(context).textTheme.subtitle1!.copyWith(
                               fontSize: 14,
                               decoration: TextDecoration.underline,
                             ),
@@ -396,7 +396,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     } catch (e, s) {
       _logger.severe(e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
@@ -410,7 +410,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       Configuration.instance.setVolatilePassword(null);
       await dialog.hide();
       onDone() async {
-        final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
+        final dialog = createProgressDialog(context, l10n.pleaseWait);
         await dialog.show();
         try {
           await UserService.instance.setAttributes(result);
@@ -426,7 +426,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         } catch (e, s) {
           _logger.severe(e, s);
           await dialog.hide();
-          showGenericErrorDialog(context);
+          showGenericErrorDialog(context: context);
         }
       }
 
@@ -451,7 +451,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.",
         );
       } else {
-        showGenericErrorDialog(context);
+        showGenericErrorDialog(context: context);
       }
     }
   }

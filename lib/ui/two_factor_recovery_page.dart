@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:ui';
 
 import 'package:ente_auth/l10n/l10n.dart';
@@ -16,7 +14,7 @@ class TwoFactorRecoveryPage extends StatefulWidget {
     this.sessionID,
     this.encryptedSecret,
     this.secretDecryptionNonce, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

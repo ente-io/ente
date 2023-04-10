@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/logging/super_logging.dart';
@@ -13,7 +13,7 @@ import 'package:ente_auth/utils/email_util.dart';
 import 'package:flutter/material.dart';
 
 class SupportSectionWidget extends StatefulWidget {
-  const SupportSectionWidget({Key key}) : super(key: key);
+  const SupportSectionWidget({Key? key}) : super(key: key);
 
   @override
   State<SupportSectionWidget> createState() => _SupportSectionWidgetState();

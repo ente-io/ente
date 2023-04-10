@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/network.dart';
@@ -9,9 +9,9 @@ import 'package:logging/logging.dart';
 import 'package:open_filex/open_filex.dart';
 
 class AppUpdateDialog extends StatefulWidget {
-  final LatestVersionInfo latestVersionInfo;
+  final LatestVersionInfo? latestVersionInfo;
 
-  const AppUpdateDialog(this.latestVersionInfo, {Key key}) : super(key: key);
+  const AppUpdateDialog(this.latestVersionInfo, {Key? key}) : super(key: key);
 
   @override
   State<AppUpdateDialog> createState() => _AppUpdateDialogState();
@@ -21,13 +21,13 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> changelog = [];
-    for (final log in widget.latestVersionInfo.changelog) {
+    for (final log in widget.latestVersionInfo!.changelog) {
       changelog.add(
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
           child: Text(
             "- " + log,
-            style: Theme.of(context).textTheme.caption.copyWith(
+            style: Theme.of(context).textTheme.caption!.copyWith(
                   fontSize: 14,
                 ),
           ),
@@ -39,7 +39,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          widget.latestVersionInfo.name,
+          widget.latestVersionInfo!.name!,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -62,8 +62,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
           width: double.infinity,
           height: 64,
           child: OutlinedButton(
-            style: Theme.of(context).outlinedButtonTheme.style.copyWith(
-              textStyle: MaterialStateProperty.resolveWith<TextStyle>(
+            style: Theme.of(context).outlinedButtonTheme.style!.copyWith(
+              textStyle: MaterialStateProperty.resolveWith<TextStyle?>(
                 (Set<MaterialState> states) {
                   return Theme.of(context).textTheme.subtitle1;
                 },
@@ -101,24 +101,24 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
 }
 
 class ApkDownloaderDialog extends StatefulWidget {
-  final LatestVersionInfo versionInfo;
+  final LatestVersionInfo? versionInfo;
 
-  const ApkDownloaderDialog(this.versionInfo, {Key key}) : super(key: key);
+  const ApkDownloaderDialog(this.versionInfo, {Key? key}) : super(key: key);
 
   @override
   State<ApkDownloaderDialog> createState() => _ApkDownloaderDialogState();
 }
 
 class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
-  String _saveUrl;
-  double _downloadProgress;
+  String? _saveUrl;
+  double? _downloadProgress;
 
   @override
   void initState() {
     super.initState();
     _saveUrl = Configuration.instance.getTempDirectory() +
         "ente-" +
-        widget.versionInfo.name +
+        widget.versionInfo!.name! +
         ".apk";
     _downloadApk();
   }
@@ -148,11 +148,11 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
   Future<void> _downloadApk() async {
     try {
       await Network.instance.getDio().download(
-        widget.versionInfo.url,
+        widget.versionInfo!.url!,
         _saveUrl,
         onReceiveProgress: (count, _) {
           setState(() {
-            _downloadProgress = count / widget.versionInfo.size;
+            _downloadProgress = count / widget.versionInfo!.size!;
           });
         },
       );

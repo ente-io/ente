@@ -1,12 +1,10 @@
-// @dart=2.9
-
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AppVersionWidget extends StatefulWidget {
   const AppVersionWidget({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -18,7 +16,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
   static const kConsecutiveTapTimeWindowInMilliseconds = 2000;
   static const kDummyDelayDurationInMilliseconds = 1500;
 
-  int _lastTap;
+  int? _lastTap;
   int _consecutiveTaps = 0;
 
   @override
@@ -43,14 +41,14 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
         }
         _lastTap = now;
       },
-      child: FutureBuilder(
+      child: FutureBuilder<String>(
         future: _getAppVersion(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                "Version: " + snapshot.data,
+                "Version: " + snapshot.data!,
                 style: Theme.of(context).textTheme.caption,
               ),
             );

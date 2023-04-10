@@ -79,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    l10n.accountWelcomeBack,
+                    l10n.welcomeBack,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),

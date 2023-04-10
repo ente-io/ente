@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';
@@ -32,14 +30,14 @@ class UserService {
   final _dio = Network.instance.getDio();
   final _logger = Logger("UserSerivce");
   final _config = Configuration.instance;
-  ValueNotifier<String> emailValueNotifier;
+  late ValueNotifier<String?> emailValueNotifier;
 
   UserService._privateConstructor();
   static final UserService instance = UserService._privateConstructor();
 
   Future<void> init() async {
     emailValueNotifier =
-        ValueNotifier<String>(Configuration.instance.getEmail());
+        ValueNotifier<String?>(Configuration.instance.getEmail());
   }
 
   Future<void> sendOtt(
@@ -49,7 +47,7 @@ class UserService {
     bool isCreateAccountScreen = false,
   }) async {
     final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
+    final dialog = createProgressDialog(context, l10n.pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.post(
@@ -75,19 +73,19 @@ class UserService {
         );
         return;
       }
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     } on DioError catch (e) {
       await dialog.hide();
       _logger.info(e);
-      if (e.response != null && e.response.statusCode == 403) {
+      if (e.response != null && e.response!.statusCode == 403) {
         showErrorDialog(context, "Oops", "This email is already in use");
       } else {
-        showGenericErrorDialog(context);
+        showGenericErrorDialog(context: context);
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
@@ -186,15 +184,15 @@ class UserService {
     } catch (e) {
       _logger.severe(e);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
-  Future<DeleteChallengeResponse> getDeleteChallenge(
+  Future<DeleteChallengeResponse?> getDeleteChallenge(
     BuildContext context,
   ) async {
     final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
+    final dialog = createProgressDialog(context, l10n.pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.get(
@@ -218,7 +216,7 @@ class UserService {
     } catch (e) {
       _logger.severe(e);
       await dialog.hide();
-      await showGenericErrorDialog(context);
+      await showGenericErrorDialog(context: context);
       return null;
     }
   }
@@ -257,13 +255,13 @@ class UserService {
     } catch (e) {
       _logger.severe(e);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
   Future<void> verifyEmail(BuildContext context, String ott) async {
     final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
+    final dialog = createProgressDialog(context, l10n.pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.post(
@@ -302,7 +300,7 @@ class UserService {
     } on DioError catch (e) {
       _logger.info(e);
       await dialog.hide();
-      if (e.response != null && e.response.statusCode == 410) {
+      if (e.response != null && e.response!.statusCode == 410) {
         await showErrorDialog(
           context,
           "Oops",
@@ -334,7 +332,7 @@ class UserService {
     String ott,
   ) async {
     final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
+    final dialog = createProgressDialog(context, l10n.pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.post(
@@ -360,7 +358,7 @@ class UserService {
       showErrorDialog(context, "Oops", "Verification failed, please try again");
     } on DioError catch (e) {
       await dialog.hide();
-      if (e.response != null && e.response.statusCode == 403) {
+      if (e.response != null && e.response!.statusCode == 403) {
         showErrorDialog(context, "Oops", "This email is already in use");
       } else {
         showErrorDialog(
@@ -447,7 +445,7 @@ class UserService {
     }
   }
 
-  Future<String> getPaymentToken() async {
+  Future<String?> getPaymentToken() async {
     try {
       final response = await _dio.get(
         "${_config.getHttpEndpoint()}/users/payment-token",
@@ -504,7 +502,7 @@ class UserService {
 
   Future<void> recoverTwoFactor(BuildContext context, String sessionID) async {
     final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
+    final dialog = createProgressDialog(context, l10n.pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.get(
@@ -529,7 +527,7 @@ class UserService {
       }
     } on DioError catch (e) {
       _logger.severe(e);
-      if (e.response != null && e.response.statusCode == 404) {
+      if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
@@ -589,7 +587,7 @@ class UserService {
     } on DioError catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      if (e.response != null && e.response.statusCode == 404) {
+      if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
@@ -625,7 +623,7 @@ class UserService {
     String secretDecryptionNonce,
   ) async {
     final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
+    final dialog = createProgressDialog(context, l10n.pleaseWait);
     await dialog.show();
     String secret;
     try {
@@ -675,7 +673,7 @@ class UserService {
       }
     } on DioError catch (e) {
       _logger.severe(e);
-      if (e.response != null && e.response.statusCode == 404) {
+      if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(

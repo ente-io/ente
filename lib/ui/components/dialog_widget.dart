@@ -1,17 +1,17 @@
 import 'dart:math';
 
+import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/models/typedefs.dart';
+import 'package:ente_auth/theme/colors.dart';
+import 'package:ente_auth/theme/effects.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/components_constants.dart';
+import 'package:ente_auth/ui/components/models/button_result.dart';
+import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/ui/components/separators.dart';
+import 'package:ente_auth/ui/components/text_input_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/core/constants.dart';
-import "package:photos/generated/l10n.dart";
-import "package:photos/models/search/button_result.dart";
-import 'package:photos/models/typedefs.dart';
-import 'package:photos/theme/colors.dart';
-import 'package:photos/theme/effects.dart';
-import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/components/text_input_widget.dart';
-import 'package:photos/utils/separators_util.dart';
 
 ///Will return null if dismissed by tapping outside
 Future<ButtonResult?> showDialogWidget({
@@ -261,7 +261,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
                   child: ButtonWidget(
                     buttonType: ButtonType.secondary,
                     buttonSize: ButtonSize.small,
-                    labelText: S.of(context).cancel,
+                    labelText: context.l10n.cancel,
                     isInAlert: true,
                   ),
                 ),
