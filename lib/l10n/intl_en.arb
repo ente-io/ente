@@ -877,5 +877,7 @@
   "loadMessage6": "You can share links to your albums with your loved ones",
   "loadMessage7": "Our mobile apps run in the background to encrypt and backup any new photos you click",
   "loadMessage8": "web.ente.io has a slick uploader",
-  "loadMessage9": "We use Xchacha20Poly1305 to safely encrypt your data"
+  "loadMessage9": "We use Xchacha20Poly1305 to safely encrypt your data",
+  "language": "Language",
+  "selectLanguage": "Select Language"
 }

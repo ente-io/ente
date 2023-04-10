@@ -1,5 +1,6 @@
 import "package:flutter/widgets.dart";
 import "package:photos/generated/l10n.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 extension AppLocalizationsX on BuildContext {
   S get l10n => S.of(this);
@@ -10,6 +11,8 @@ extension AppLocalizationsX on BuildContext {
 // translated in the corresponding language.
 const List<Locale> appSupportedLocales = <Locale>[
   Locale('en'),
+  Locale('fr'),
+  Locale("nl")
 ];
 
 Locale localResolutionCallBack(locales, supportedLocales) {
@@ -20,4 +23,22 @@ Locale localResolutionCallBack(locales, supportedLocales) {
   }
   // if device language is not supported by the app, use en as default
   return const Locale('en');
+}
+
+Future<Locale> getLocale() async {
+  final String? savedLocale =
+      (await SharedPreferences.getInstance()).getString('locale');
+  if (savedLocale != null &&
+      appSupportedLocales.contains(Locale(savedLocale))) {
+    return Locale(savedLocale);
+  }
+  return const Locale('en');
+}
+
+Future<void> setLocale(Locale locale) async {
+  if (!appSupportedLocales.contains(locale)) {
+    throw Exception('Locale $locale is not supported by the app');
+  }
+  await (await SharedPreferences.getInstance())
+      .setString('locale', locale.languageCode);
 }
