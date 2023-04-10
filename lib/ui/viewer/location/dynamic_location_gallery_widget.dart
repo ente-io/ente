@@ -3,8 +3,10 @@ import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/location_service.dart";
 import 'package:photos/states/location_state.dart';
@@ -35,7 +37,15 @@ class _DynamicLocationGalleryWidgetState
 
   @override
   void initState() {
-    fileLoadResult = FilesService.instance.fetchAllFilesWithLocationData();
+    final collectionsToHide =
+        CollectionsService.instance.collectionsHiddenFromTimeline();
+    fileLoadResult = FilesDB.instance.getAllUploadedAndSharedFiles(
+      galleryLoadStartTime,
+      galleryLoadEndTime,
+      limit: null,
+      asc: true,
+      ignoredCollectionIDs: collectionsToHide,
+    );
     removeIgnoredFiles =
         FilesService.instance.removeIgnoredFiles(fileLoadResult);
     super.initState();

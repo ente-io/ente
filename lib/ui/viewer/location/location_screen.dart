@@ -1,7 +1,11 @@
 import 'dart:developer' as dev;
 import "package:flutter/material.dart";
+import "package:photos/core/constants.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
+import "package:photos/models/selected_files.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_screen_state.dart";
@@ -121,9 +125,18 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
   late Future<void> removeIgnoredFiles;
   late Widget galleryHeaderWidget;
+  final _selectedFiles = SelectedFiles();
   @override
   void initState() {
-    fileLoadResult = FilesService.instance.fetchAllFilesWithLocationData();
+    final collectionsToHide =
+        CollectionsService.instance.collectionsHiddenFromTimeline();
+    fileLoadResult = FilesDB.instance.getAllUploadedAndSharedFiles(
+      galleryLoadStartTime,
+      galleryLoadEndTime,
+      limit: null,
+      asc: true,
+      ignoredCollectionIDs: collectionsToHide,
+    );
     removeIgnoredFiles =
         FilesService.instance.removeIgnoredFiles(fileLoadResult);
     galleryHeaderWidget = const GalleryHeaderWidget();
@@ -177,25 +190,34 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       key: ValueKey("$centerPoint$selectedRadius"),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return Gallery(
-            loadingWidget: Column(
-              children: [
-                galleryHeaderWidget,
-                EnteLoadingWidget(
-                  color: getEnteColorScheme(context).strokeMuted,
+          return Stack(
+            children: [
+              Gallery(
+                loadingWidget: Column(
+                  children: [
+                    galleryHeaderWidget,
+                    EnteLoadingWidget(
+                      color: getEnteColorScheme(context).strokeMuted,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            header: galleryHeaderWidget,
-            asyncLoader: (
-              creationStartTime,
-              creationEndTime, {
-              limit,
-              asc,
-            }) async {
-              return snapshot.data as FileLoadResult;
-            },
-            tagPrefix: "location_gallery",
+                header: galleryHeaderWidget,
+                asyncLoader: (
+                  creationStartTime,
+                  creationEndTime, {
+                  limit,
+                  asc,
+                }) async {
+                  return snapshot.data as FileLoadResult;
+                },
+                selectedFiles: _selectedFiles,
+                tagPrefix: "location_gallery",
+              ),
+              // FileSelectionOverlayBar(
+              //   GalleryType.ownedCollection,
+              //   _selectedFiles,
+              // )
+            ],
           );
         } else {
           return Column(

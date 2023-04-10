@@ -2,14 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
-import "package:photos/core/constants.dart";
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/extensions/list.dart';
 import 'package:photos/models/file.dart';
 import "package:photos/models/file_load_result.dart";
 import 'package:photos/models/magic_metadata.dart';
-import "package:photos/services/collections_service.dart";
 import 'package:photos/services/file_magic_service.dart';
 import "package:photos/services/ignored_files_service.dart";
 import 'package:photos/utils/date_time_util.dart';
@@ -106,35 +104,6 @@ class FilesService {
               f.uploadedFileID == null &&
               IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
         );
-  }
-
-  Future<FileLoadResult> fetchAllFilesWithLocationData() {
-    final ownerID = Configuration.instance.getUserID();
-    final hasSelectedAllForBackup =
-        Configuration.instance.hasSelectedAllFoldersForBackup();
-    final collectionsToHide =
-        CollectionsService.instance.collectionsHiddenFromTimeline();
-    if (hasSelectedAllForBackup) {
-      return FilesDB.instance.getAllLocalAndUploadedFiles(
-        galleryLoadStartTime,
-        galleryLoadEndTime,
-        ownerID!,
-        limit: null,
-        asc: true,
-        ignoredCollectionIDs: collectionsToHide,
-        onlyFilesWithLocation: true,
-      );
-    } else {
-      return FilesDB.instance.getAllPendingOrUploadedFiles(
-        galleryLoadStartTime,
-        galleryLoadEndTime,
-        ownerID!,
-        limit: null,
-        asc: true,
-        ignoredCollectionIDs: collectionsToHide,
-        onlyFilesWithLocation: true,
-      );
-    }
   }
 }
 

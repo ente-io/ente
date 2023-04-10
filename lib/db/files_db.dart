@@ -1406,6 +1406,33 @@ class FilesDB {
     return filesCount;
   }
 
+  Future<FileLoadResult> getAllUploadedAndSharedFiles(
+    int startTime,
+    int endTime, {
+    int? limit,
+    bool? asc,
+    Set<int>? ignoredCollectionIDs,
+  }) async {
+    final db = await instance.database;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    final results = await db.query(
+      filesTable,
+      where:
+          '$columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0)'
+          ' AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND '
+          '($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+          ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+      whereArgs: [startTime, endTime, visibilityVisible],
+      orderBy:
+          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+      limit: limit,
+    );
+    final files = convertToFiles(results);
+    final List<File> deduplicatedFiles =
+        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+    return FileLoadResult(deduplicatedFiles, files.length == limit);
+  }
+
   Map<String, dynamic> _getRowForFile(File file) {
     final row = <String, dynamic>{};
     if (file.generatedID != null) {
