@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 
 class AccountSectionWidget extends StatelessWidget {
-  AccountSectionWidget({Key key}) : super(key: key);
+  AccountSectionWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class AccountSectionWidget extends StatelessWidget {
               recoveryKey =
                   Sodium.bin2hex(Configuration.instance.getRecoveryKey());
             } catch (e) {
-              showGenericErrorDialog(context);
+              showGenericErrorDialog(context: context);
               return;
             }
             routeToPage(

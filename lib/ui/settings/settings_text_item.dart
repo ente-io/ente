@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:io';
 
@@ -8,9 +8,9 @@ class SettingsTextItem extends StatelessWidget {
   final String text;
   final IconData icon;
   const SettingsTextItem({
-    Key key,
-    @required this.text,
-    @required this.icon,
+    Key? key,
+    required this.text,
+    required this.icon,
   }) : super(key: key);
 
   @override

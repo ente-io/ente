@@ -11,6 +11,7 @@ class EnteColorScheme {
   // Backdrop Colors
   final Color backdropBase;
   final Color backdropBaseMute;
+  final Color backdropFaint;
 
   // Text Colors
   final Color textBase;
@@ -19,6 +20,7 @@ class EnteColorScheme {
 
   // Fill Colors
   final Color fillBase;
+  final Color fillBasePressed;
   final Color fillMuted;
   final Color fillFaint;
   final Color fillFaintPressed;
@@ -42,6 +44,8 @@ class EnteColorScheme {
   final Color warning700;
   final Color warning500;
   final Color warning400;
+  final Color warning800;
+
   final Color caution500;
 
   const EnteColorScheme(
@@ -50,10 +54,12 @@ class EnteColorScheme {
     this.backgroundElevated2,
     this.backdropBase,
     this.backdropBaseMute,
+    this.backdropFaint,
     this.textBase,
     this.textMuted,
     this.textFaint,
     this.fillBase,
+    this.fillBasePressed,
     this.fillMuted,
     this.fillFaint,
     this.fillFaintPressed,
@@ -70,6 +76,7 @@ class EnteColorScheme {
     this.primary400 = _primary400,
     this.primary300 = _primary300,
     this.warning700 = _warning700,
+    this.warning800 = _warning800,
     this.warning500 = _warning500,
     this.warning400 = _warning700,
     this.caution500 = _caution500,
@@ -81,11 +88,13 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   backgroundElevatedLight,
   backgroundElevated2Light,
   backdropBaseLight,
-  backdropBaseMuteLight,
+  backdropMutedLight,
+  backdropFaintLight,
   textBaseLight,
   textMutedLight,
   textFaintLight,
   fillBaseLight,
+  fillBasePressedLight,
   fillMutedLight,
   fillFaintLight,
   fillFaintPressedLight,
@@ -103,11 +112,13 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   backgroundElevatedDark,
   backgroundElevated2Dark,
   backdropBaseDark,
-  backdropBaseMuteDark,
+  backdropMutedDark,
+  backdropFaintDark,
   textBaseDark,
   textMutedDark,
   textFaintDark,
   fillBaseDark,
+  fillBasePressedDark,
   fillMutedDark,
   fillFaintDark,
   fillFaintPressedDark,
@@ -130,11 +141,13 @@ const Color backgroundElevatedDark = Color.fromRGBO(27, 27, 27, 1);
 const Color backgroundElevated2Dark = Color.fromRGBO(37, 37, 37, 1);
 
 // Backdrop Colors
-const Color backdropBaseLight = Color.fromRGBO(255, 255, 255, 0.75);
-const Color backdropBaseMuteLight = Color.fromRGBO(255, 255, 255, 0.30);
+const Color backdropBaseLight = Color.fromRGBO(255, 255, 255, 0.92);
+const Color backdropMutedLight = Color.fromRGBO(255, 255, 255, 0.75);
+const Color backdropFaintLight = Color.fromRGBO(255, 255, 255, 0.30);
 
-const Color backdropBaseDark = Color.fromRGBO(0, 0, 0, 0.65);
-const Color backdropBaseMuteDark = Color.fromRGBO(0, 0, 0, 0.20);
+const Color backdropBaseDark = Color.fromRGBO(0, 0, 0, 0.90);
+const Color backdropMutedDark = Color.fromRGBO(0, 0, 0, 0.65);
+const Color backdropFaintDark = Color.fromRGBO(0, 0, 0, 0.20);
 
 // Text Colors
 const Color textBaseLight = Color.fromRGBO(0, 0, 0, 1);
@@ -147,11 +160,13 @@ const Color textFaintDark = Color.fromRGBO(255, 255, 255, 0.5);
 
 // Fill Colors
 const Color fillBaseLight = Color.fromRGBO(0, 0, 0, 1);
+const Color fillBasePressedLight = Color.fromRGBO(0, 0, 0, 0.87);
 const Color fillMutedLight = Color.fromRGBO(0, 0, 0, 0.12);
 const Color fillFaintLight = Color.fromRGBO(0, 0, 0, 0.04);
 const Color fillFaintPressedLight = Color.fromRGBO(0, 0, 0, 0.08);
 
 const Color fillBaseDark = Color.fromRGBO(255, 255, 255, 1);
+const Color fillBasePressedDark = Color.fromRGBO(255, 255, 255, 0.9);
 const Color fillMutedDark = Color.fromRGBO(255, 255, 255, 0.16);
 const Color fillFaintDark = Color.fromRGBO(255, 255, 255, 0.12);
 const Color fillFaintPressedDark = Color.fromRGBO(255, 255, 255, 0.06);
@@ -184,6 +199,7 @@ const Color _primary300 = Color.fromARGB(255, 152, 77, 244);
 
 const Color _warning700 = Color.fromRGBO(234, 63, 63, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);
+const Color _warning800 = Color(0xFFF53434);
 const Color warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color _warning400 = Color.fromRGBO(255, 111, 111, 1);
 

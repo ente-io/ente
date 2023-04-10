@@ -1,15 +1,14 @@
-// @dart=2.9
-
 import 'package:email_validator/email_validator.dart';
 import 'package:ente_auth/core/configuration.dart';
+import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
 import 'package:ente_auth/ui/common/web_page.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import "package:styled_text/styled_text.dart";
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key key}) : super(key: key);
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -18,8 +17,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _config = Configuration.instance;
   bool _emailIsValid = false;
-  String _email;
-  Color _emailInputFieldColor;
+  String? _email;
+  Color? _emailInputFieldColor;
 
   @override
   void initState() {
@@ -31,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
-    FloatingActionButtonLocation fabLocation() {
+    FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
         return null;
       } else {
@@ -55,11 +54,11 @@ class _LoginPageState extends State<LoginPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _emailIsValid,
-        buttonText: 'Log in',
+        buttonText: context.l10n.logInLabel,
         onPressedFunction: () {
-          UserService.instance.setEmail(_email);
+          UserService.instance.setEmail(_email!);
           UserService.instance
-              .sendOtt(context, _email, isCreateAccountScreen: false);
+              .sendOtt(context, _email!, isCreateAccountScreen: false);
           FocusScope.of(context).unfocus();
         },
       ),
@@ -69,6 +68,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _getBody() {
+    final l10n = context.l10n;
     return Column(
       children: [
         Expanded(
@@ -79,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    'Welcome back!',
+                    l10n.welcomeBack,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
@@ -90,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: InputDecoration(
                       fillColor: _emailInputFieldColor,
                       filled: true,
-                      hintText: 'Email',
+                      hintText: l10n.email,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 15,
                         vertical: 15,
@@ -105,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                               size: 20,
                               color: Theme.of(context)
                                   .inputDecorationTheme
-                                  .focusedBorder
+                                  .focusedBorder!
                                   .borderSide
                                   .color,
                             )
@@ -114,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                     onChanged: (value) {
                       setState(() {
                         _email = value.trim();
-                        _emailIsValid = EmailValidator.validate(_email);
+                        _emailIsValid = EmailValidator.validate(_email!);
                         if (_emailIsValid) {
                           _emailInputFieldColor =
                               const Color.fromARGB(51, 157, 45, 194);
@@ -141,58 +141,48 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Expanded(
                         flex: 5,
-                        child: RichText(
-                          text: TextSpan(
-                            style: Theme.of(context)
-                                .textTheme
-                                .subtitle1
-                                .copyWith(fontSize: 12),
-                            children: [
-                              const TextSpan(
-                                text: "By clicking log in, I agree to the ",
+                        child: StyledText(
+                          text: context.l10n.loginTerms,
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle1!
+                              .copyWith(fontSize: 12),
+                          tags: {
+                            'u-terms': StyledTextActionTag(
+                              (String? text, Map<String?, String?> attrs) => {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                      return WebPage(
+                                        context.l10n.termsOfServicesTitle,
+                                        "https://ente.io/terms",
+                                      );
+                                    },
+                                  ),
+                                )
+                              },
+                              style: const TextStyle(
+                                decoration: TextDecoration.underline,
                               ),
-                              TextSpan(
-                                text: "terms of service",
-                                style: const TextStyle(
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (BuildContext context) {
-                                          return const WebPage(
-                                            "terms",
-                                            "https://ente.io/terms",
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
+                            ),
+                            'u-policy': StyledTextActionTag(
+                              (String? text, Map<String?, String?> attrs) => {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                      return WebPage(
+                                        context.l10n.privacyPolicyTitle,
+                                        "https://ente.io/privacy",
+                                      );
+                                    },
+                                  ),
+                                )
+                              },
+                              style: const TextStyle(
+                                decoration: TextDecoration.underline,
                               ),
-                              const TextSpan(text: " and "),
-                              TextSpan(
-                                text: "privacy policy",
-                                style: const TextStyle(
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (BuildContext context) {
-                                          return const WebPage(
-                                            "privacy",
-                                            "https://ente.io/privacy",
-                                          );
-                                        },
-                                      ),
-                                    );
-                                  },
-                              ),
-                            ],
-                          ),
-                          textAlign: TextAlign.left,
+                            )
+                          },
                         ),
                       ),
                       Expanded(

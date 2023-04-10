@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
@@ -13,14 +13,14 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 class SessionsPage extends StatefulWidget {
-  const SessionsPage({Key key}) : super(key: key);
+  const SessionsPage({Key? key}) : super(key: key);
 
   @override
   State<SessionsPage> createState() => _SessionsPageState();
 }
 
 class _SessionsPageState extends State<SessionsPage> {
-  Sessions _sessions;
+  Sessions? _sessions;
   final Logger _logger = Logger("SessionsPageState");
 
   @override
@@ -46,7 +46,7 @@ class _SessionsPageState extends State<SessionsPage> {
     }
     final List<Widget> rows = [];
     rows.add(const Padding(padding: EdgeInsets.all(4)));
-    for (final session in _sessions.sessions) {
+    for (final session in _sessions!.sessions) {
       rows.add(_getSessionWidget(session));
     }
     return SingleChildScrollView(
@@ -113,7 +113,7 @@ class _SessionsPageState extends State<SessionsPage> {
 
   Future<void> _terminateSession(Session session) async {
     final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
+    final dialog = createProgressDialog(context, l10n.pleaseWait);
     await dialog.show();
     try {
       await UserService.instance.terminateSession(session.token);
@@ -133,11 +133,11 @@ class _SessionsPageState extends State<SessionsPage> {
   Future<void> _fetchActiveSessions() async {
     _sessions = await UserService.instance
         .getActiveSessions()
-        .onError((error, stackTrace) {
+        .onError((dynamic error, stackTrace) {
       showToast(context, "Failed to fetch active sessions");
       throw error;
     });
-    _sessions.sessions.sort((first, second) {
+    _sessions!.sessions.sort((first, second) {
       return second.lastUsedTime.compareTo(first.lastUsedTime);
     });
     setState(() {});

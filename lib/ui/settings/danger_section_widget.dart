@@ -1,5 +1,6 @@
-// @dart=2.9
 
+
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/delete_account_page.dart';
@@ -11,12 +12,12 @@ import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
 
 class DangerSectionWidget extends StatelessWidget {
-  const DangerSectionWidget({Key key}) : super(key: key);
+  const DangerSectionWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "Exit",
+      title: context.l10n.exit,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.logout_outlined,
     );
@@ -27,25 +28,25 @@ class DangerSectionWidget extends StatelessWidget {
       children: [
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Logout",
+          captionedTextWidget: CaptionedTextWidget(
+            title: context.l10n.logout,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () {
+          onTap: () async {
             _onLogoutTapped(context);
           },
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Delete account",
+          captionedTextWidget: CaptionedTextWidget(
+            title: context.l10n.deleteAccount,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () {
+          onTap: () async {
             routeToPage(context, const DeleteAccountPage());
           },
         ),

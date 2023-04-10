@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 import 'dart:io';
@@ -13,8 +13,10 @@ import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
+import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
+import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:file_picker/file_picker.dart';
@@ -29,7 +31,7 @@ class DataSectionWidget extends StatelessWidget {
     Configuration.instance.getTempDirectory() + "ente-authenticator-codes.txt",
   );
 
-  DataSectionWidget({Key key}) : super(key: key);
+  DataSectionWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -216,14 +218,14 @@ class DataSectionWidget extends StatelessWidget {
 
   Future<void> _pickImportFile(BuildContext context) async {
     final l10n = context.l10n;
-    FilePickerResult result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result == null) {
       return;
     }
-    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
+    final dialog = createProgressDialog(context, l10n.pleaseWait);
     await dialog.show();
     try {
-      File file = File(result.files.single.path);
+      File file = File(result.files.single.path!);
       final codes = await file.readAsString();
       List<String> splitCodes = codes.split(",");
       if (splitCodes.length == 1) {
@@ -241,34 +243,20 @@ class DataSectionWidget extends StatelessWidget {
         await CodeStore.instance.addCode(code, shouldSync: false);
       }
       unawaited(AuthenticatorService.instance.sync());
-      await dialog.hide();
+
+      final DialogWidget dialog = choiceDialog(
+        title: "Yay!",
+        body: "You have imported " + parsedCodes.length.toString() + " codes!",
+        firstButtonLabel: l10n.ok,
+        firstButtonOnTap: () async {
+          Navigator.of(context, rootNavigator: true).pop('dialog');
+        },
+        firstButtonType: ButtonType.primary,
+      );
       await showConfettiDialog(
         context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            title: Text(
-              "Yay!",
-              style: Theme.of(context).textTheme.headline6,
-            ),
-            content: Text(
-              "You have imported " + parsedCodes.length.toString() + " codes!",
-            ),
-            actions: [
-              TextButton(
-                child: Text(
-                  l10n.ok,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.of(context, rootNavigator: true).pop('dialog');
-                },
-              ),
-            ],
-          );
+        dialogBuilder: (BuildContext context) {
+          return dialog;
         },
       );
     } catch (e) {

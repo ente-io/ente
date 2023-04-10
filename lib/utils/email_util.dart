@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
@@ -8,12 +6,13 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/ui/common/dialogs.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/dialog_widget.dart';
+import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
 // import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
@@ -34,9 +33,9 @@ Future<void> sendLogs(
   BuildContext context,
   String title,
   String toEmail, {
-  Function postShare,
-  String subject,
-  String body,
+  Function? postShare,
+  String? subject,
+  String? body,
 }) async {
   final l10n = context.l10n;
   final List<Widget> actions = [
@@ -46,7 +45,7 @@ Future<void> sendLogs(
         children: [
           Icon(
             Icons.feed_outlined,
-            color: Theme.of(context).iconTheme.color.withOpacity(0.85),
+            color: Theme.of(context).iconTheme.color?.withOpacity(0.85),
           ),
           const Padding(padding: EdgeInsets.all(4)),
           Text(
@@ -64,7 +63,7 @@ Future<void> sendLogs(
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            return LogFileViewer(SuperLogging.logFile);
+            return LogFileViewer(SuperLogging.logFile!);
           },
           barrierColor: Colors.black87,
           barrierDismissible: false,
@@ -128,14 +127,14 @@ Future<void> sendLogs(
 Future<void> _sendLogs(
   BuildContext context,
   String toEmail,
-  String subject,
-  String body,
+  String? subject,
+  String? body,
 ) async {
   final String zipFilePath = await getZippedLogsFile(context);
   final Email email = Email(
     recipients: [toEmail],
-    subject: subject,
-    body: body,
+    subject: subject ?? '',
+    body: body ?? '',
     attachmentPaths: [zipFilePath],
     isHTML: false,
   );
@@ -169,29 +168,49 @@ Future<void> shareLogs(
   String toEmail,
   String zipFilePath,
 ) async {
-  final l10n = context.l10n;
-  final result = await showChoiceDialog(
-    context,
-    l10n.emailLogsTitle,
-    l10n.emailLogsMessage(toEmail),
-    firstAction: l10n.copyEmailAction,
-    secondAction: l10n.exportLogsAction,
+  final result = await showDialogWidget(
+    context: context,
+    title: context.l10n.emailYourLogs,
+    body: context.l10n.pleaseSendTheLogsTo(toEmail),
+    buttons: [
+      ButtonWidget(
+        buttonType: ButtonType.neutral,
+        labelText: context.l10n.copyEmailAddress,
+        isInAlert: true,
+        buttonAction: ButtonAction.first,
+        onTap: () async {
+          await Clipboard.setData(ClipboardData(text: toEmail));
+        },
+        shouldShowSuccessConfirmation: true,
+      ),
+      ButtonWidget(
+        buttonType: ButtonType.neutral,
+        labelText: context.l10n.exportLogs,
+        isInAlert: true,
+        buttonAction: ButtonAction.second,
+      ),
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: context.l10n.cancel,
+        isInAlert: true,
+        buttonAction: ButtonAction.cancel,
+      ),
+    ],
   );
-  if (result != null && result == DialogUserChoice.firstChoice) {
-    await Clipboard.setData(ClipboardData(text: toEmail));
+  if (result?.action != null && result!.action == ButtonAction.second) {
+    final Size size = MediaQuery.of(context).size;
+    await Share.shareFiles(
+      [zipFilePath],
+      sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+    );
   }
-  final Size size = MediaQuery.of(context).size;
-  await Share.shareFiles(
-    [zipFilePath],
-    sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
-  );
 }
 
 Future<void> sendEmail(
   BuildContext context, {
-  @required String to,
-  String subject,
-  String body,
+  required String to,
+  String? subject,
+  String? body,
 }) async {
   try {
     final String clientDebugInfo = await _clientInfo();

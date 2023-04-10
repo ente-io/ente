@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
@@ -13,7 +13,7 @@ import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:flutter/material.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
-  const SecuritySectionWidget({Key key}) : super(key: key);
+  const SecuritySectionWidget({Key? key}) : super(key: key);
 
   @override
   State<SecuritySectionWidget> createState() => _SecuritySectionWidgetState();

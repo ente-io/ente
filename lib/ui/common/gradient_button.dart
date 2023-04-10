@@ -1,22 +1,22 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 
 class GradientButton extends StatelessWidget {
   final List<Color> linearGradientColors;
-  final Function onTap;
+  final Function? onTap;
 
   // text is ignored if child is specified
   final String text;
 
   // nullable
-  final IconData iconData;
+  final IconData? iconData;
 
   // padding between the text and icon
   final double paddingValue;
 
   const GradientButton({
-    Key key,
+    Key? key,
     this.linearGradientColors = const [
       Color.fromARGB(255, 133, 44, 210),
       Color.fromARGB(255, 187, 26, 93),
@@ -64,7 +64,7 @@ class GradientButton extends StatelessWidget {
       );
     }
     return InkWell(
-      onTap: onTap,
+      onTap: onTap as void Function()?,
       child: Container(
         height: 56,
         decoration: BoxDecoration(

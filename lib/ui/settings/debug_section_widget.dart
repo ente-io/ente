@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
@@ -10,7 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 
 class DebugSectionWidget extends StatelessWidget {
-  const DebugSectionWidget({Key key}) : super(key: key);
+  const DebugSectionWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     // This is a debug only section not shown to end users, so these strings are
@@ -19,7 +18,7 @@ class DebugSectionWidget extends StatelessWidget {
       header: const SettingsSectionTitle("Debug"),
       collapsed: Container(),
       expanded: _getSectionOptions(context),
-      theme: getExpandableTheme(context),
+      theme: getExpandableTheme(),
     );
   }
 
@@ -42,7 +41,7 @@ class DebugSectionWidget extends StatelessWidget {
 
   void _showKeyAttributesDialog(BuildContext context) {
     final l10n = context.l10n;
-    final keyAttributes = Configuration.instance.getKeyAttributes();
+    final keyAttributes = Configuration.instance.getKeyAttributes()!;
     final AlertDialog alert = AlertDialog(
       title: const Text("key attributes"),
       content: SingleChildScrollView(
@@ -52,7 +51,7 @@ class DebugSectionWidget extends StatelessWidget {
               "Key",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Text(Sodium.bin2base64(Configuration.instance.getKey())),
+            Text(Sodium.bin2base64(Configuration.instance.getKey()!)),
             const Padding(padding: EdgeInsets.all(12)),
             const Text(
               "Encrypted Key",

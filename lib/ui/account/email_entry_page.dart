@@ -1,26 +1,18 @@
-// @dart=2.9
-
-import 'dart:io';
-
 import 'package:email_validator/email_validator.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/models/billing_plan.dart';
-import 'package:ente_auth/services/billing_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
-import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/ui/common/web_page.dart';
-import 'package:ente_auth/utils/data_util.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:password_strength/password_strength.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
+import "package:styled_text/styled_text.dart";
 
 class EmailEntryPage extends StatefulWidget {
-  const EmailEntryPage({Key key}) : super(key: key);
+  const EmailEntryPage({Key? key}) : super(key: key);
 
   @override
   State<EmailEntryPage> createState() => _EmailEntryPageState();
@@ -35,8 +27,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   final _passwordController2 = TextEditingController();
   final Color _validFieldValueColor = const Color.fromARGB(51, 157, 45, 194);
 
-  String _email;
-  String _password;
+  String? _email;
+  String? _password;
   String _cnfPassword = '';
   double _passwordStrength = 0.0;
   bool _emailIsValid = false;
@@ -72,7 +64,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
-    FloatingActionButtonLocation fabLocation() {
+    FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
         return null;
       } else {
@@ -108,12 +100,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _isFormValid(),
-        buttonText: 'Create account',
+        buttonText: context.l10n.createAccount,
         onPressedFunction: () {
           _config.setVolatilePassword(_passwordController1.text);
-          UserService.instance.setEmail(_email);
+          UserService.instance.setEmail(_email!);
           UserService.instance
-              .sendOtt(context, _email, isCreateAccountScreen: true);
+              .sendOtt(context, _email!, isCreateAccountScreen: true);
           FocusScope.of(context).unfocus();
         },
       ),
@@ -123,14 +115,13 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   }
 
   Widget _getBody() {
-    final l10n = context.l10n;
-    var passwordStrengthText = l10n.passwordStrengthWeak;
+    var passwordStrengthText = context.l10n.weakStrength;
     var passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {
-      passwordStrengthText = l10n.passwordStrengthStrong;
+      passwordStrengthText = context.l10n.strongStrength;
       passwordStrengthColor = Colors.greenAccent;
     } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
-      passwordStrengthText = l10n.passwordStrengthModerate;
+      passwordStrengthText = context.l10n.moderateStrength;
       passwordStrengthColor = Colors.orangeAccent;
     }
     return Column(
@@ -143,7 +134,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    l10n.createNewAccount,
+                    context.l10n.createNewAccount,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
@@ -155,7 +146,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _emailIsValid ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: l10n.email,
+                      hintText: context.l10n.email,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -170,7 +161,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                               size: 20,
                               color: Theme.of(context)
                                   .inputDecorationTheme
-                                  .focusedBorder
+                                  .focusedBorder!
                                   .borderSide
                                   .color,
                             )
@@ -178,9 +169,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     ),
                     onChanged: (value) {
                       _email = value.trim();
-                      if (_emailIsValid != EmailValidator.validate(_email)) {
+                      if (_emailIsValid != EmailValidator.validate(_email!)) {
                         setState(() {
-                          _emailIsValid = EmailValidator.validate(_email);
+                          _emailIsValid = EmailValidator.validate(_email!);
                         });
                       }
                     },
@@ -203,7 +194,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       fillColor:
                           _passwordIsValid ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: "Password",
+                      hintText: context.l10n.password,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -228,7 +219,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                   Icons.check,
                                   color: Theme.of(context)
                                       .inputDecorationTheme
-                                      .focusedBorder
+                                      .focusedBorder!
                                       .borderSide
                                       .color,
                                 )
@@ -268,9 +259,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     autofillHints: const [AutofillHints.newPassword],
                     onEditingComplete: () => TextInput.finishAutofillContext(),
                     decoration: InputDecoration(
-                      fillColor: _passwordsMatch ? _validFieldValueColor : null,
+                      fillColor: _passwordsMatch && _passwordIsValid
+                          ? _validFieldValueColor
+                          : null,
                       filled: true,
-                      hintText: l10n.confirmPassword,
+                      hintText: context.l10n.confirmPassword,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -295,7 +288,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                   Icons.check,
                                   color: Theme.of(context)
                                       .inputDecorationTheme
-                                      .focusedBorder
+                                      .focusedBorder!
                                       .borderSide
                                       .color,
                                 )
@@ -322,7 +315,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                     child: Text(
-                      'Password strength: $passwordStrengthText',
+                      context.l10n.passwordStrength(passwordStrengthText),
                       style: TextStyle(
                         color: passwordStrengthColor,
                         fontWeight: FontWeight.w500,
@@ -371,63 +364,51 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             side: CheckboxTheme.of(context).side,
             onChanged: (value) {
               setState(() {
-                _hasAgreedToTOS = value;
+                _hasAgreedToTOS = value!;
               });
             },
           ),
           Expanded(
-            child: RichText(
-              text: TextSpan(
-                children: [
-                  const TextSpan(
-                    text: "I agree to the ",
+            child: StyledText(
+              text: context.l10n.signUpTerms,
+              style:
+                  Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 12),
+              tags: {
+                'u-terms': StyledTextActionTag(
+                  (String? text, Map<String?, String?> attrs) => {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return WebPage(
+                            context.l10n.termsOfServicesTitle,
+                            "https://ente.io/terms",
+                          );
+                        },
+                      ),
+                    )
+                  },
+                  style: const TextStyle(
+                    decoration: TextDecoration.underline,
                   ),
-                  TextSpan(
-                    text: "terms of service",
-                    style: const TextStyle(
-                      decoration: TextDecoration.underline,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return const WebPage(
-                                "Terms",
-                                "https://ente.io/terms",
-                              );
-                            },
-                          ),
-                        );
-                      },
+                ),
+                'u-policy': StyledTextActionTag(
+                  (String? text, Map<String?, String?> attrs) => {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return WebPage(
+                            context.l10n.privacyPolicyTitle,
+                            "https://ente.io/privacy",
+                          );
+                        },
+                      ),
+                    )
+                  },
+                  style: const TextStyle(
+                    decoration: TextDecoration.underline,
                   ),
-                  const TextSpan(text: " and "),
-                  TextSpan(
-                    text: "privacy policy",
-                    style: const TextStyle(
-                      decoration: TextDecoration.underline,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return const WebPage(
-                                "Privacy",
-                                "https://ente.io/privacy",
-                              );
-                            },
-                          ),
-                        );
-                      },
-                  ),
-                ],
-                style: Theme.of(context)
-                    .textTheme
-                    .subtitle1
-                    .copyWith(fontSize: 12),
-              ),
-              textAlign: TextAlign.left,
+                )
+              },
             ),
           ),
         ],
@@ -450,45 +431,34 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             side: CheckboxTheme.of(context).side,
             onChanged: (value) {
               setState(() {
-                _hasAgreedToE2E = value;
+                _hasAgreedToE2E = value!;
               });
             },
           ),
           Expanded(
-            child: RichText(
-              text: TextSpan(
-                children: [
-                  const TextSpan(
-                    text:
-                        "I understand that if I lose my password, I may lose my data since my data is ",
+            child: StyledText(
+              text: context.l10n.ackPasswordLostWarning,
+              style:
+                  Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 12),
+              tags: {
+                'underline': StyledTextActionTag(
+                  (String? text, Map<String?, String?> attrs) => {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return WebPage(
+                            context.l10n.encryption,
+                            "https://ente.io/architecture",
+                          );
+                        },
+                      ),
+                    )
+                  },
+                  style: const TextStyle(
+                    decoration: TextDecoration.underline,
                   ),
-                  TextSpan(
-                    text: "end-to-end encrypted",
-                    style: const TextStyle(
-                      decoration: TextDecoration.underline,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return const WebPage(
-                                "Encryption",
-                                "https://ente.io/architecture",
-                              );
-                            },
-                          ),
-                        );
-                      },
-                  ),
-                  const TextSpan(text: " with ente"),
-                ],
-                style: Theme.of(context)
-                    .textTheme
-                    .subtitle1
-                    .copyWith(fontSize: 12),
-              ),
-              textAlign: TextAlign.left,
+                ),
+              },
             ),
           ),
         ],
@@ -502,138 +472,5 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         _hasAgreedToTOS &&
         _hasAgreedToE2E &&
         _passwordIsValid;
-  }
-}
-
-class PricingWidget extends StatelessWidget {
-  const PricingWidget({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return FutureBuilder<BillingPlans>(
-      future: BillingService.instance.getBillingPlans(),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasData) {
-          return _buildPlans(context, snapshot.data);
-        } else if (snapshot.hasError) {
-          return Text(l10n.oopsSomethingWentWrong);
-        }
-        return const EnteLoadingWidget();
-      },
-    );
-  }
-
-  Container _buildPlans(BuildContext context, BillingPlans plans) {
-    final l10n = context.l10n;
-    final planWidgets = <BillingPlanWidget>[];
-    for (final plan in plans.plans) {
-      final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
-      if (productID != null && productID.isNotEmpty) {
-        planWidgets.add(BillingPlanWidget(plan));
-      }
-    }
-    final freePlan = plans.freePlan;
-    return Container(
-      height: 280,
-      color: Theme.of(context).cardColor,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          const Text(
-            "Pricing",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: planWidgets,
-            ),
-          ),
-          Text(
-            "We offer a free trial of " +
-                convertBytesToReadableFormat(freePlan.storage) +
-                " for " +
-                freePlan.duration.toString() +
-                " " +
-                freePlan.period,
-          ),
-          GestureDetector(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.close,
-                  size: 12,
-                  color: Colors.white38,
-                ),
-                const Padding(padding: EdgeInsets.all(1)),
-                Text(
-                  l10n.close,
-                  style: const TextStyle(
-                    color: Colors.white38,
-                  ),
-                ),
-              ],
-            ),
-            onTap: () => Navigator.pop(context),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class BillingPlanWidget extends StatelessWidget {
-  final BillingPlan plan;
-
-  const BillingPlanWidget(
-    this.plan, {
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(2.0),
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        color: Colors.black.withOpacity(0.2),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(12, 20, 12, 20),
-          child: Column(
-            children: [
-              Text(
-                convertBytesToGBs(plan.storage, precision: 0).toString() +
-                    " GB",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.all(4),
-              ),
-              Text(
-                plan.price + " / " + plan.period,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white70,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

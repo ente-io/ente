@@ -1,4 +1,4 @@
-// @dart=2.9
+
 import 'dart:async';
 import 'dart:io';
 
@@ -20,10 +20,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 class App extends StatefulWidget {
   final Locale locale;
-  const App({Key key, this.locale = const Locale("en")}) : super(key: key);
+  const App({Key? key, this.locale = const Locale("en")}) : super(key: key);
 
   static void setLocale(BuildContext context, Locale newLocale) {
-    _AppState state = context.findAncestorStateOfType<_AppState>();
+    _AppState state = context.findAncestorStateOfType<_AppState>()!;
     state.setLocale(newLocale);
   }
 
@@ -32,9 +32,9 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  StreamSubscription<SignedOutEvent> _signedOutEvent;
-  StreamSubscription<SignedInEvent> _signedInEvent;
-  Locale locale;
+  late StreamSubscription<SignedOutEvent> _signedOutEvent;
+  late StreamSubscription<SignedInEvent> _signedInEvent;
+  Locale? locale;
   setLocale(Locale newLocale) {
     setState(() {
       locale = newLocale;

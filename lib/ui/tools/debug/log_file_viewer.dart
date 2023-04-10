@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 import 'dart:ui';
 
@@ -8,14 +6,14 @@ import 'package:flutter/material.dart';
 
 class LogFileViewer extends StatefulWidget {
   final File file;
-  const LogFileViewer(this.file, {Key key}) : super(key: key);
+  const LogFileViewer(this.file, {Key? key}) : super(key: key);
 
   @override
   State<LogFileViewer> createState() => _LogFileViewerState();
 }
 
 class _LogFileViewerState extends State<LogFileViewer> {
-  String _logs;
+  String? _logs;
   @override
   void initState() {
     widget.file.readAsString().then((logs) {
@@ -45,7 +43,7 @@ class _LogFileViewerState extends State<LogFileViewer> {
       padding: const EdgeInsets.only(left: 12, top: 8, right: 12),
       child: SingleChildScrollView(
         child: Text(
-          _logs,
+          _logs!,
           style: const TextStyle(
             fontFeatures: [
               FontFeature.tabularFigures(),

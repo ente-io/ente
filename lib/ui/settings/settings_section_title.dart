@@ -1,14 +1,14 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 
 class SettingsSectionTitle extends StatelessWidget {
   final String title;
-  final Color color;
+  final Color? color;
 
   const SettingsSectionTitle(
     this.title, {
-    Key key,
+    Key? key,
     this.color,
   }) : super(key: key);
 
@@ -24,7 +24,7 @@ class SettingsSectionTitle extends StatelessWidget {
             style: color != null
                 ? Theme.of(context)
                     .textTheme
-                    .headline6
+                    .headline6!
                     .merge(TextStyle(color: color))
                 : Theme.of(context).textTheme.headline6,
           ),

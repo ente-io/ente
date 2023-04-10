@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +8,7 @@ class RenameDialog extends StatefulWidget {
   final String type;
   final int maxLength;
 
-  const RenameDialog(this.name, this.type, {Key key, this.maxLength = 100})
+  const RenameDialog(this.name, this.type, {Key? key, this.maxLength = 100})
       : super(key: key);
 
   @override
@@ -16,7 +16,7 @@ class RenameDialog extends StatefulWidget {
 }
 
 class _RenameDialogState extends State<RenameDialog> {
-  String _newName;
+  String? _newName;
 
   @override
   void initState() {
@@ -74,7 +74,7 @@ class _RenameDialogState extends State<RenameDialog> {
             ),
           ),
           onPressed: () {
-            if (_newName.trim().isEmpty) {
+            if (_newName!.trim().isEmpty) {
               showErrorDialog(
                 context,
                 "Empty name",
@@ -82,7 +82,7 @@ class _RenameDialogState extends State<RenameDialog> {
               );
               return;
             }
-            if (_newName.trim().length > widget.maxLength) {
+            if (_newName!.trim().length > widget.maxLength) {
               showErrorDialog(
                 context,
                 "Name too large",
@@ -90,7 +90,7 @@ class _RenameDialogState extends State<RenameDialog> {
               );
               return;
             }
-            Navigator.of(context).pop(_newName.trim());
+            Navigator.of(context).pop(_newName!.trim());
           },
         ),
       ],

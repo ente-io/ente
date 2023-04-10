@@ -36,10 +36,20 @@ EnteTheme darkTheme = EnteTheme(
   shadowButton: shadowButtonDark,
 );
 
-EnteColorScheme getEnteColorScheme(BuildContext context) {
-  return Theme.of(context).colorScheme.enteTheme.colorScheme;
+EnteColorScheme getEnteColorScheme(
+  BuildContext context, {
+  bool inverse = false,
+}) {
+  return inverse
+      ? Theme.of(context).colorScheme.inverseEnteTheme.colorScheme
+      : Theme.of(context).colorScheme.enteTheme.colorScheme;
 }
 
-EnteTextTheme getEnteTextTheme(BuildContext context) {
-  return Theme.of(context).colorScheme.enteTheme.textTheme;
+EnteTextTheme getEnteTextTheme(
+  BuildContext context, {
+  bool inverse = false,
+}) {
+  return inverse
+      ? Theme.of(context).colorScheme.inverseEnteTheme.textTheme
+      : Theme.of(context).colorScheme.enteTheme.textTheme;
 }

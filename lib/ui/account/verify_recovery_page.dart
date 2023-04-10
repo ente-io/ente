@@ -1,18 +1,15 @@
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:ui';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
-import 'package:ente_auth/events/notification_event.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/user_remote_flag_service.dart';
 import 'package:ente_auth/ui/account/recovery_key_page.dart';
-import 'package:ente_auth/ui/common/dialogs.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +28,8 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
   final Logger _logger = Logger((_VerifyRecoveryPageState).toString());
 
   void _verifyRecoveryKey() async {
-    final dialog = createProgressDialog(context, "Verifying recovery key...");
+    final dialog =
+        createProgressDialog(context, context.l10n.verifyingRecoveryKey);
     await dialog.show();
     try {
       final String inputKey = _recoveryKey.text.trim();
@@ -50,19 +48,17 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
               "Please check your internet connection and try again.",
             );
           } else {
-            await showGenericErrorDialog(context);
+            await showGenericErrorDialog(context: context);
           }
           return;
         }
-        Bus.instance.fire(NotificationEvent());
+
         await dialog.hide();
         // todo: change this as per figma once the component is ready
         await showErrorDialog(
           context,
-          "Recovery key verified",
-          "Great! Your recovery key is valid. Thank you for verifying.\n"
-              "\nPlease"
-              " remember to keep your recovery key safely backed up.",
+          context.l10n.recoveryKeyVerified,
+          context.l10n.recoveryKeySuccessBody,
         );
         Navigator.of(context).pop();
       } else {
@@ -71,18 +67,16 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
     } catch (e, s) {
       _logger.severe("failed to verify recovery key", e, s);
       await dialog.hide();
-      const String errMessage =
-          "The recovery key you entered is not valid. Please make sure it "
-          "contains 24 words, and check the spelling of each.\n\nIf you "
-          "entered an older recovery code, make sure it is 64 characters long, and check each of them.";
+      final String errMessage = context.l10n.invalidRecoveryKey;
       final result = await showChoiceDialog(
         context,
-        "Invalid key",
-        errMessage,
-        firstAction: "Try again",
-        secondAction: "View recovery key",
+        title: context.l10n.invalidKey,
+        body: errMessage,
+        firstButtonLabel: context.l10n.tryAgain,
+        secondButtonLabel: context.l10n.viewRecoveryKey,
+        secondButtonAction: ButtonAction.second,
       );
-      if (result == DialogUserChoice.secondChoice) {
+      if (result!.action == ButtonAction.second) {
         await _onViewRecoveryKeyClick();
       }
     }
@@ -102,7 +96,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           context,
           RecoveryKeyPage(
             recoveryKey,
-            "OK",
+            context.l10n.ok,
             showAppBar: true,
             onDone: () {
               Navigator.of(context).pop();
@@ -110,7 +104,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           ),
         );
       } catch (e) {
-        showGenericErrorDialog(context);
+        showGenericErrorDialog(context: context);
         return;
       }
     }
@@ -147,16 +141,14 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                       SizedBox(
                         width: double.infinity,
                         child: Text(
-                          'Verify recovery key',
+                          context.l10n.confirmRecoveryKey,
                           style: enteTheme.textTheme.h3Bold,
                           textAlign: TextAlign.left,
                         ),
                       ),
                       const SizedBox(height: 18),
                       Text(
-                        "If you forget your password, your recovery key is the "
-                        "only way to recover your photos.\n\nPlease verify that "
-                        "you have safely backed up your 24 word recovery key by re-entering it.",
+                        context.l10n.recoveryKeyVerifyReason,
                         style: enteTheme.textTheme.small
                             .copyWith(color: enteTheme.colorScheme.textMuted),
                       ),
@@ -164,7 +156,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                       TextFormField(
                         decoration: InputDecoration(
                           filled: true,
-                          hintText: "Enter your recovery key",
+                          hintText: context.l10n.enterYourRecoveryKey,
                           contentPadding: const EdgeInsets.all(20),
                           border: UnderlineInputBorder(
                             borderSide: BorderSide.none,
@@ -186,12 +178,6 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                         },
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        "If you saved the recovery key from older app versions, you might have a 64 character recovery code instead of 24 words. You can enter that too.",
-                        style: enteTheme.textTheme.mini
-                            .copyWith(color: enteTheme.colorScheme.textMuted),
-                      ),
-                      const SizedBox(height: 8),
                       Expanded(
                         child: Container(
                           alignment: Alignment.bottomCenter,
@@ -203,8 +189,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                             children: [
                               GradientButton(
                                 onTap: _verifyRecoveryKey,
-                                text: "Verify",
-                                iconData: Icons.shield_outlined,
+                                text: context.l10n.confirm,
                               ),
                               const SizedBox(height: 8),
                             ],
