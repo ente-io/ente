@@ -22,9 +22,9 @@ class LocationTagsWidget extends StatefulWidget {
 }
 
 class _LocationTagsWidgetState extends State<LocationTagsWidget> {
-  String title = "Add location";
-  IconData leadingIcon = Icons.add_location_alt_outlined;
-  bool hasChipButtons = false;
+  String? title;
+  IconData? leadingIcon;
+  bool? hasChipButtons;
   late Future<List<Widget>> locationTagChips;
   late StreamSubscription<LocationTagUpdatedEvent> _locTagUpdateListener;
   @override
@@ -51,10 +51,10 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       switchOutCurve: Curves.easeInOutExpo,
       child: InfoItemWidget(
         key: ValueKey(title),
-        leadingIcon: Icons.add_location_alt_outlined,
+        leadingIcon: leadingIcon ?? Icons.pin_drop_outlined,
         title: title,
         subtitleSection: locationTagChips,
-        hasChipButtons: hasChipButtons,
+        hasChipButtons: hasChipButtons ?? true,
       ),
     );
   }
@@ -63,6 +63,14 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
     final locationTags = await LocationService.instance
         .enclosingLocationTags(widget.centerPoint);
     if (locationTags.isEmpty) {
+      if (mounted) {
+        setState(() {
+          title = "Add location";
+          leadingIcon = Icons.add_location_alt_outlined;
+          hasChipButtons = false;
+        });
+      }
+
       return [
         InlineButtonWidget(
           "Group nearby photos",
@@ -72,13 +80,14 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
           ),
         ),
       ];
-    }
-    if (mounted) {
-      setState(() {
-        title = "Location";
-        leadingIcon = Icons.pin_drop_outlined;
-        hasChipButtons = true;
-      });
+    } else {
+      if (mounted) {
+        setState(() {
+          title = "Location";
+          leadingIcon = Icons.pin_drop_outlined;
+          hasChipButtons = true;
+        });
+      }
     }
 
     final result = locationTags
