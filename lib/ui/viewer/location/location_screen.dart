@@ -4,6 +4,7 @@ import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
+import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/files_service.dart";
@@ -15,6 +16,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
+import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/location/edit_location_sheet.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -213,10 +215,10 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
                 selectedFiles: _selectedFiles,
                 tagPrefix: "location_gallery",
               ),
-              // FileSelectionOverlayBar(
-              //   GalleryType.ownedCollection,
-              //   _selectedFiles,
-              // )
+              FileSelectionOverlayBar(
+                GalleryType.locationTag,
+                _selectedFiles,
+              )
             ],
           );
         } else {
