@@ -9,11 +9,9 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/models/location/location.dart';
 import "package:photos/models/location_tag/location_tag.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
-import 'package:photos/models/search/location_api_response.dart';
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/location_service.dart";
@@ -54,46 +52,6 @@ class SearchService {
   void clearCache() {
     _cachedFilesFuture = null;
   }
-
-  // Future<List<GenericSearchResult>> getLocationSearchResults(
-  //   String query,
-  // ) async {
-  //   final List<GenericSearchResult> searchResults = [];
-  //   try {
-  //     final List<File> allFiles = await _getAllFiles();
-  //     // This code used an deprecated API earlier. We've retained the
-  //     // scaffolding for when we implement a client side location search, and
-  //     // meanwhile have replaced the API response.data with an empty map here.
-  //     final matchedLocationSearchResults = LocationApiResponse.fromMap({});
-
-  //     for (var locationData in matchedLocationSearchResults.results) {
-  //       final List<File> filesInLocation = [];
-
-  //       for (var file in allFiles) {
-  //         if (_isValidLocation(file.location) &&
-  //             _isLocationWithinBounds(file.location!, locationData)) {
-  //           filesInLocation.add(file);
-  //         }
-  //       }
-  //       filesInLocation.sort(
-  //         (first, second) =>
-  //             second.creationTime!.compareTo(first.creationTime!),
-  //       );
-  //       if (filesInLocation.isNotEmpty) {
-  //         searchResults.add(
-  //           GenericSearchResult(
-  //             ResultType.location,
-  //             locationData.place,
-  //             filesInLocation,
-  //           ),
-  //         );
-  //       }
-  //     }
-  //   } catch (e) {
-  //     _logger.severe(e);
-  //   }
-  //   return searchResults;
-  // }
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
   // collections which don't have a file from search result
@@ -408,25 +366,6 @@ class SearchService {
       ]);
     }
     return durationsOfMonthInEveryYear;
-  }
-
-  bool _isValidLocation(Location? location) {
-    return location != null &&
-        location.latitude != null &&
-        location.latitude != 0 &&
-        location.longitude != null &&
-        location.longitude != 0;
-  }
-
-  bool _isLocationWithinBounds(
-    Location location,
-    LocationDataFromResponse locationData,
-  ) {
-    //format returned by the api is [lng,lat,lng,lat] where indexes 0 & 1 are southwest and 2 & 3 northeast
-    return location.longitude! > locationData.bbox[0] &&
-        location.latitude! > locationData.bbox[1] &&
-        location.longitude! < locationData.bbox[2] &&
-        location.latitude! < locationData.bbox[3];
   }
 
   List<Tuple3<int, MonthData, int?>> _getPossibleEventDate(String query) {
