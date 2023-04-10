@@ -877,5 +877,17 @@
   "loadMessage6": "You can share links to your albums with your loved ones",
   "loadMessage7": "Our mobile apps run in the background to encrypt and backup any new photos you click",
   "loadMessage8": "web.ente.io has a slick uploader",
-  "loadMessage9": "We use Xchacha20Poly1305 to safely encrypt your data"
+  "loadMessage9": "We use Xchacha20Poly1305 to safely encrypt your data",
+  "photoDescriptions": "Photo descriptions",
+  "fileTypesAndNames": "File types and names",
+  "location": "Location",
+  "people": "People",
+  "moments": "Moments",
+  "searchFaceEmptySection": "Find all photos of a person",
+  "searchDatesEmptySection": "Search by a date, month or year",
+  "searchLocationEmptySection": "Group photos that are taken within some radius of a photo",
+  "searchPeopleEmptySection": "Invite people, and you'll see all photos shared by them here",
+  "searchAlbumsEmptySection": "Albums",
+  "searchFileTypesAndNamesEmptySection": "File types and names",
+  "searchCaptionEmptySection": "Add descriptions like \"#trip\" in photo info to quickly find them here"
 }

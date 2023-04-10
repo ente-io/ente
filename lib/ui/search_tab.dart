@@ -20,7 +20,11 @@ class _SearchTabState extends State<SearchTab> {
   Widget build(BuildContext context) {
     // Return a ListViewBuilder for value search_types.dart SectionType,
     // render search section for each value
-    const searchTypes = SectionType.values;
+    final searchTypes = SectionType.values.toList(growable: true);
+    // remove face and content sectionType
+    searchTypes.remove(SectionType.face);
+    searchTypes.remove(SectionType.content);
+
     return Padding(
       padding: const EdgeInsets.only(
         left: 12.0,

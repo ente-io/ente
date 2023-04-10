@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 
 enum ResultType {
   collection,
@@ -35,17 +36,17 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.content:
         return "Contents";
       case SectionType.moment:
-        return "Moments";
+        return S.of(context).moments;
       case SectionType.location:
-        return "Location";
+        return S.of(context).location;
       case SectionType.people:
-        return "People";
+        return S.of(context).people;
       case SectionType.album:
-        return "Albums";
+        return S.of(context).albums;
       case SectionType.fileTypesAndExtension:
-        return "File types and names";
+        return S.of(context).fileTypesAndNames;
       case SectionType.fileCaption:
-        return "Photo descriptions";
+        return S.of(context).photoDescriptions;
     }
   }
 
@@ -74,22 +75,21 @@ extension SectionTypeExtensions on SectionType {
   String getEmptyStateText(BuildContext context) {
     switch (this) {
       case SectionType.face:
-        return "Find all photos of a person";
+        return S.of(context).searchFaceEmptySection;
       case SectionType.content:
         return "Contents";
       case SectionType.moment:
-        return "Search by a date, month or year";
+        return S.of(context).searchDatesEmptySection;
       case SectionType.location:
-        return "Group photos that are taken within some radius of a photo";
+        return S.of(context).searchLocationEmptySection;
       case SectionType.people:
-        return "Invite people, and you'll see all photos shared by them here";
+        return S.of(context).searchPeopleEmptySection;
       case SectionType.album:
-        return "Albums";
+        return S.of(context).searchAlbumsEmptySection;
       case SectionType.fileTypesAndExtension:
-        return "File types and names";
+        return S.of(context).searchFileTypesAndNamesEmptySection;
       case SectionType.fileCaption:
-        return "Add descriptions like \"#trip\" in photo info to quickly find "
-            "them here";
+        return S.of(context).searchCaptionEmptySection;
     }
   }
 
