@@ -326,15 +326,17 @@ export default function PreviewCard(props: IProps) {
             ) : (
                 <LoadingThumbnail />
             )}
-            <FileTypeIndicatorOverlay>
-                {file.metadata.fileType === FILE_TYPE.LIVE_PHOTO ? (
+            {file.metadata.fileType === FILE_TYPE.LIVE_PHOTO ? (
+                <FileTypeIndicatorOverlay>
                     <AlbumOutlined />
-                ) : (
-                    file.metadata.fileType === FILE_TYPE.VIDEO && (
+                </FileTypeIndicatorOverlay>
+            ) : (
+                file.metadata.fileType === FILE_TYPE.VIDEO && (
+                    <FileTypeIndicatorOverlay>
                         <PlayCircleOutlineOutlinedIcon />
-                    )
-                )}
-            </FileTypeIndicatorOverlay>
+                    </FileTypeIndicatorOverlay>
+                )
+            )}
             <SelectedOverlay selected={selected} />
             <HoverOverlay checked={selected} />
             <InSelectRangeOverLay
