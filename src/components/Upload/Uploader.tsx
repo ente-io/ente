@@ -250,6 +250,7 @@ export default function Uploader(props: Props) {
                     addLogLine(
                         'an upload is already running, rejecting new upload request'
                     );
+                    setUploadProgressView(true);
                     // no-op
                     // a user upload is already in progress
                     return;
