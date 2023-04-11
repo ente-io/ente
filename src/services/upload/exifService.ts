@@ -82,27 +82,39 @@ function parseEXIFDate(dataTimeString: string) {
         if (typeof dataTimeString !== 'string') {
             throw Error(CustomError.NOT_A_DATE);
         }
-        // attempt to parse using Date constructor
-        const parsedDate = new Date(dataTimeString);
-        if (!Number.isNaN(+parsedDate)) {
-            return parsedDate;
+
+        const [year, month, day, hour, minute, second] = dataTimeString
+            .match(/\d+/g)
+            .map((component) => parseInt(component, 10));
+
+        if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) {
+            throw Error(CustomError.NOT_A_DATE);
         }
-
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const [_, year, month, day, hours, minutes, seconds] =
-            /^(\d{4})[-:](\d{2})[-:](\d{2})\s(\d{2}):(\d{2}):(\d{2})/
-                .exec(dataTimeString)
-                .map((x) => parseInt(x, 10));
-
-        const date = new Date(year, month - 1, day);
+        let date: Date;
         if (
-            !Number.isNaN(hours) &&
-            !Number.isNaN(minutes) &&
-            !Number.isNaN(seconds)
+            Number.isNaN(hour) ||
+            Number.isNaN(minute) ||
+            Number.isNaN(second)
         ) {
-            date.setUTCHours(hours);
-            date.setUTCMinutes(minutes);
-            date.setUTCSeconds(seconds);
+            date = new Date(Date.UTC(year, month - 1, day));
+        } else {
+            const offset =
+                dataTimeString.match(/([+-]\d+:\d+)$/); /* UTC offset */
+            if (offset) {
+                const [offsetHour, offsetMinute] = offset[1]
+                    .split(':')
+                    .map((component) => parseInt(component, 10));
+                const offsetInMinutes = offsetHour * 60 + offsetMinute;
+                const offsetInMilliseconds = offsetInMinutes * 60 * 1000;
+                date = new Date(
+                    Date.UTC(year, month - 1, day, hour, minute, second) -
+                        offsetInMilliseconds
+                );
+            } else {
+                date = new Date(
+                    Date.UTC(year, month - 1, day, hour, minute, second)
+                );
+            }
         }
         if (Number.isNaN(+date)) {
             throw Error(CustomError.NOT_A_DATE);
