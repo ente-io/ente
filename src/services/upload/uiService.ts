@@ -17,6 +17,7 @@ import uploadCancelService from './uploadCancelService';
 const REQUEST_TIMEOUT_TIME = 30 * 1000; // 30 sec;
 class UIService {
     private progressUpdater: ProgressUpdater;
+
     // UPLOAD LEVEL STATES
     private uploadStage: UPLOAD_STAGES = UPLOAD_STAGES.START;
     private filenames: Map<number, string> = new Map();
