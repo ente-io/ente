@@ -9,7 +9,8 @@ enum GalleryType {
   // indicator for gallery view of collections shared with the user
   sharedCollection,
   ownedCollection,
-  searchResults
+  searchResults,
+  locationTag,
 }
 
 extension GalleyTypeExtension on GalleryType {
@@ -21,6 +22,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.ownedCollection:
       case GalleryType.searchResults:
       case GalleryType.favorite:
+      case GalleryType.locationTag:
         return true;
 
       case GalleryType.hidden:
@@ -45,6 +47,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.homepage:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
+      case GalleryType.locationTag:
         return false;
     }
   }
@@ -59,6 +62,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.favorite:
       case GalleryType.localFolder:
       case GalleryType.uncategorized:
+      case GalleryType.locationTag:
         return true;
       case GalleryType.trash:
       case GalleryType.archive:
@@ -78,6 +82,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.archive:
       case GalleryType.hidden:
       case GalleryType.localFolder:
+      case GalleryType.locationTag:
         return true;
       case GalleryType.trash:
       case GalleryType.sharedCollection:
@@ -93,6 +98,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.favorite:
       case GalleryType.archive:
       case GalleryType.uncategorized:
+      case GalleryType.locationTag:
         return true;
       case GalleryType.hidden:
       case GalleryType.localFolder:
@@ -115,6 +121,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.archive:
       case GalleryType.localFolder:
       case GalleryType.trash:
+      case GalleryType.locationTag:
         return false;
     }
   }
@@ -133,6 +140,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
+      case GalleryType.locationTag:
         return false;
     }
   }
@@ -148,6 +156,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.searchResults:
       case GalleryType.archive:
       case GalleryType.uncategorized:
+      case GalleryType.locationTag:
         return true;
 
       case GalleryType.hidden:
@@ -169,6 +178,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.homepage:
       case GalleryType.searchResults:
       case GalleryType.uncategorized:
+      case GalleryType.locationTag:
         return true;
 
       case GalleryType.hidden:
