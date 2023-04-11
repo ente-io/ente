@@ -173,6 +173,7 @@ class UploadManager {
         } catch (e) {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
                 if (isElectron()) {
+                    this.remainingFiles = [];
                     ImportService.cancelRemainingUploads();
                 }
             } else {
