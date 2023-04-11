@@ -19,19 +19,41 @@ class UIService {
     private perFileProgress: number;
     private filesUploaded: number;
     private totalFileCount: number;
-    private inProgressUploads: InProgressUploads;
-    private finishedUploads: FinishedUploads;
+    private uploadStage: UPLOAD_STAGES = UPLOAD_STAGES.START;
+    private percentComplete: number = 0;
+    private filenames: Map<number, string> = new Map();
+    private hasLivePhoto: boolean = false;
+    private inProgressUploads: InProgressUploads = new Map();
+    private finishedUploads: FinishedUploads = new Map();
     private progressUpdater: ProgressUpdater;
 
     init(progressUpdater: ProgressUpdater) {
         this.progressUpdater = progressUpdater;
+        this.progressUpdater.setUploadStage(this.uploadStage);
+        this.progressUpdater.setPercentComplete(this.percentComplete);
+        this.progressUpdater.setUploadFilenames(this.filenames);
+        this.progressUpdater.setHasLivePhotos(this.hasLivePhoto);
+        this.progressUpdater.setUploadCounter({
+            finished: this.filesUploaded,
+            total: this.totalFileCount,
+        });
+        this.progressUpdater.setInProgressUploads(
+            convertInProgressUploadsToList(this.inProgressUploads)
+        );
+        this.progressUpdater.setFinishedUploads(
+            segregatedFinishedUploadsToList(this.finishedUploads)
+        );
     }
 
     reset(count = 0) {
-        this.setTotalFileCount(count);
+        this.uploadStage = UPLOAD_STAGES.START;
+        this.percentComplete = 0;
+        this.filenames = new Map();
+        this.hasLivePhoto = false;
         this.filesUploaded = 0;
         this.inProgressUploads = new Map<number, number>();
         this.finishedUploads = new Map<number, UPLOAD_RESULT>();
+        this.setTotalFileCount(count);
         this.updateProgressBarUI();
     }
 
@@ -50,18 +72,22 @@ class UIService {
     }
 
     setUploadStage(stage: UPLOAD_STAGES) {
+        this.uploadStage = stage;
         this.progressUpdater.setUploadStage(stage);
     }
 
     setPercentComplete(percent: number) {
+        this.percentComplete = percent;
         this.progressUpdater.setPercentComplete(percent);
     }
 
     setFilenames(filenames: Map<number, string>) {
+        this.filenames = filenames;
         this.progressUpdater.setUploadFilenames(filenames);
     }
 
     setHasLivePhoto(hasLivePhoto: boolean) {
+        this.hasLivePhoto = hasLivePhoto;
         this.progressUpdater.setHasLivePhotos(hasLivePhoto);
     }
 
