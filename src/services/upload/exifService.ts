@@ -33,7 +33,7 @@ export async function getParsedExifData(
     receivedFile: File,
     fileTypeInfo: FileTypeInfo,
     tags?: string[]
-): Promise<Partial<ParsedEXIFData>> {
+): Promise<ParsedEXIFData> {
     try {
         const exifData: RawEXIFData = await exifr.parse(receivedFile, {
             reviveValues: false,
