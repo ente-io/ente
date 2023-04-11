@@ -7,11 +7,11 @@ import {
     removeFromFavorites,
 } from 'services/collectionService';
 import { EnteFile } from 'types/file';
-import exifr from 'exifr';
 import {
     downloadFile,
     copyFileToClipboard,
     getFileExtension,
+    getFileFromURL,
 } from 'utils/file';
 import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
@@ -40,6 +40,8 @@ import { addLocalLog } from 'utils/logging';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import { t } from 'i18next';
+import { getParsedExifData } from 'services/upload/exifService';
+import { getFileType } from 'services/typeDetectionService';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -451,13 +453,14 @@ function PhotoViewer(props: Iprops) {
             try {
                 if (file.isSourceLoaded) {
                     exifExtractionInProgress.current = file.src;
-                    const imageBlob = await (
-                        await fetch(file.originalImageURL)
-                    ).blob();
-                    const exifData = (await exifr.parse(imageBlob)) as Record<
-                        string,
-                        any
-                    >;
+                    const fileObject = await getFileFromURL(
+                        file.originalImageURL
+                    );
+                    const fileTypeInfo = await getFileType(fileObject);
+                    const exifData = await getParsedExifData(
+                        fileObject,
+                        fileTypeInfo
+                    );
                     if (exifExtractionInProgress.current === file.src) {
                         if (exifData) {
                             setExif({ key: file.src, value: exifData });

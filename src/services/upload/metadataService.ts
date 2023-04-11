@@ -1,6 +1,6 @@
 import { FILE_TYPE } from 'constants/file';
 import { logError } from 'utils/sentry';
-import { getExifData } from './exifService';
+import { getImageMetadata } from './exifService';
 import {
     Metadata,
     ParsedMetadataJSON,
@@ -38,7 +38,7 @@ export async function extractMetadata(
 ) {
     let extractedMetadata: ParsedExtractedMetadata = NULL_EXTRACTED_METADATA;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
-        extractedMetadata = await getExifData(receivedFile, fileTypeInfo);
+        extractedMetadata = await getImageMetadata(receivedFile, fileTypeInfo);
     } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
         extractedMetadata = await getVideoMetadata(receivedFile);
     }
