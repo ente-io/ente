@@ -80,7 +80,7 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
 function parseEXIFDate(dataTimeString: string) {
     try {
         if (typeof dataTimeString !== 'string') {
-            throw new Error(CustomError.NOT_A_DATE);
+            throw Error(CustomError.NOT_A_DATE);
         }
         // attempt to parse using Date constructor
         const parsedDate = new Date(dataTimeString);
@@ -103,6 +103,9 @@ function parseEXIFDate(dataTimeString: string) {
             date.setUTCHours(hours);
             date.setUTCMinutes(minutes);
             date.setUTCSeconds(seconds);
+        }
+        if (Number.isNaN(+date)) {
+            throw Error(CustomError.NOT_A_DATE);
         }
         return date;
     } catch (e) {
