@@ -64,28 +64,30 @@ export function ExifData(props: {
                 }
             />
             <Stack py={3} px={1} spacing={2}>
-                {[...Object.entries(exif)].map(([key, value]) =>
-                    value ? (
-                        <ExifItem key={key}>
-                            <Typography
-                                variant="body2"
-                                color={'text.secondary'}>
-                                {key}
-                            </Typography>
-                            <Typography
-                                sx={{
-                                    width: '100%',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                }}>
-                                {parseExifValue(value)}
-                            </Typography>
-                        </ExifItem>
-                    ) : (
-                        <></>
-                    )
-                )}
+                {[...Object.entries(exif)]
+                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .map(([key, value]) =>
+                        value ? (
+                            <ExifItem key={key}>
+                                <Typography
+                                    variant="body2"
+                                    color={'text.secondary'}>
+                                    {key}
+                                </Typography>
+                                <Typography
+                                    sx={{
+                                        width: '100%',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                    }}>
+                                    {parseExifValue(value)}
+                                </Typography>
+                            </ExifItem>
+                        ) : (
+                            <></>
+                        )
+                    )}
             </Stack>
         </FileInfoSidebar>
     );
