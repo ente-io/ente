@@ -115,6 +115,9 @@ function PhotoViewer(props: Iprops) {
     useEffect(() => {
         if (!photoSwipe) return;
         function handleCopyEvent() {
+            if (!isOpen || showInfo) {
+                return;
+            }
             copyToClipboardHelper(photoSwipe.currItem as EnteFile);
         }
 
