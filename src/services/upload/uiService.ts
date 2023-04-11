@@ -16,16 +16,19 @@ import uploadCancelService from './uploadCancelService';
 
 const REQUEST_TIMEOUT_TIME = 30 * 1000; // 30 sec;
 class UIService {
-    private perFileProgress: number;
-    private filesUploaded: number;
-    private totalFileCount: number;
+    private progressUpdater: ProgressUpdater;
+    // UPLOAD LEVEL STATES
     private uploadStage: UPLOAD_STAGES = UPLOAD_STAGES.START;
-    private percentComplete: number = 0;
     private filenames: Map<number, string> = new Map();
     private hasLivePhoto: boolean = false;
+
+    // STAGE LEVEL STATES
+    private perFileProgress: number;
+    private filesUploadedCount: number;
+    private totalFilesCount: number;
+    private percentComplete: number = 0;
     private inProgressUploads: InProgressUploads = new Map();
     private finishedUploads: FinishedUploads = new Map();
-    private progressUpdater: ProgressUpdater;
 
     init(progressUpdater: ProgressUpdater) {
         this.progressUpdater = progressUpdater;
@@ -34,8 +37,8 @@ class UIService {
         this.progressUpdater.setUploadFilenames(this.filenames);
         this.progressUpdater.setHasLivePhotos(this.hasLivePhoto);
         this.progressUpdater.setUploadCounter({
-            finished: this.filesUploaded,
-            total: this.totalFileCount,
+            finished: this.filesUploadedCount,
+            total: this.totalFilesCount,
         });
         this.progressUpdater.setInProgressUploads(
             convertInProgressUploadsToList(this.inProgressUploads)
@@ -46,21 +49,18 @@ class UIService {
     }
 
     reset(count = 0) {
-        this.uploadStage = UPLOAD_STAGES.START;
+        this.setTotalFileCount(count);
         this.percentComplete = 0;
-        this.filenames = new Map();
-        this.hasLivePhoto = false;
-        this.filesUploaded = 0;
+        this.filesUploadedCount = 0;
         this.inProgressUploads = new Map<number, number>();
         this.finishedUploads = new Map<number, UPLOAD_RESULT>();
-        this.setTotalFileCount(count);
         this.updateProgressBarUI();
     }
 
     setTotalFileCount(count: number) {
-        this.totalFileCount = count;
+        this.totalFilesCount = count;
         if (count > 0) {
-            this.perFileProgress = 100 / this.totalFileCount;
+            this.perFileProgress = 100 / this.totalFilesCount;
         } else {
             this.perFileProgress = 0;
         }
@@ -92,7 +92,7 @@ class UIService {
     }
 
     increaseFileUploaded() {
-        this.filesUploaded++;
+        this.filesUploadedCount++;
         this.updateProgressBarUI();
     }
 
@@ -126,12 +126,12 @@ class UIService {
             setFinishedUploads,
         } = this.progressUpdater;
         setUploadCounter({
-            finished: this.filesUploaded,
-            total: this.totalFileCount,
+            finished: this.filesUploadedCount,
+            total: this.totalFilesCount,
         });
         let percentComplete =
             this.perFileProgress *
-            (this.finishedUploads.size || this.filesUploaded);
+            (this.finishedUploads.size || this.filesUploadedCount);
         if (this.inProgressUploads) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             for (const [_, progress] of this.inProgressUploads) {
