@@ -27,14 +27,12 @@ class UIService {
     private perFileProgress: number;
     private filesUploadedCount: number;
     private totalFilesCount: number;
-    private percentComplete: number = 0;
     private inProgressUploads: InProgressUploads = new Map();
     private finishedUploads: FinishedUploads = new Map();
 
     init(progressUpdater: ProgressUpdater) {
         this.progressUpdater = progressUpdater;
         this.progressUpdater.setUploadStage(this.uploadStage);
-        this.progressUpdater.setPercentComplete(this.percentComplete);
         this.progressUpdater.setUploadFilenames(this.filenames);
         this.progressUpdater.setHasLivePhotos(this.hasLivePhoto);
         this.progressUpdater.setUploadCounter({
@@ -51,7 +49,6 @@ class UIService {
 
     reset(count = 0) {
         this.setTotalFileCount(count);
-        this.percentComplete = 0;
         this.filesUploadedCount = 0;
         this.inProgressUploads = new Map<number, number>();
         this.finishedUploads = new Map<number, UPLOAD_RESULT>();
@@ -77,11 +74,6 @@ class UIService {
         this.progressUpdater.setUploadStage(stage);
     }
 
-    setPercentComplete(percent: number) {
-        this.percentComplete = percent;
-        this.progressUpdater.setPercentComplete(percent);
-    }
-
     setFilenames(filenames: Map<number, string>) {
         this.filenames = filenames;
         this.progressUpdater.setUploadFilenames(filenames);
@@ -95,10 +87,6 @@ class UIService {
     increaseFileUploaded() {
         this.filesUploadedCount++;
         this.updateProgressBarUI();
-    }
-
-    removeFromInProgressList(key: number) {
-        this.inProgressUploads.delete(key);
     }
 
     moveFileToResultList(key: number, uploadResult: UPLOAD_RESULT) {
