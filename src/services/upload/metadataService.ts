@@ -1,6 +1,6 @@
 import { FILE_TYPE } from 'constants/file';
 import { logError } from 'utils/sentry';
-import { getImageMetadata } from './exifService';
+import { getEXIFLocation, getEXIFTime, getParsedExifData } from './exifService';
 import {
     Metadata,
     ParsedMetadataJSON,
@@ -31,6 +31,16 @@ const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     ...NULL_LOCATION,
 };
 
+const EXIF_TAGS_NEEDED = [
+    'DateTimeOriginal',
+    'CreateDate',
+    'ModifyDate',
+    'GPSLatitude',
+    'GPSLongitude',
+    'GPSLatitudeRef',
+    'GPSLongitudeRef',
+];
+
 export async function extractMetadata(
     worker: Remote<DedicatedCryptoWorker>,
     receivedFile: File | ElectronFile,
@@ -57,6 +67,36 @@ export async function extractMetadata(
         hash: fileHash,
     };
     return metadata;
+}
+
+export async function getImageMetadata(
+    receivedFile: File | ElectronFile,
+    fileTypeInfo: FileTypeInfo
+): Promise<ParsedExtractedMetadata> {
+    let imageMetadata = NULL_EXTRACTED_METADATA;
+    try {
+        if (!(receivedFile instanceof File)) {
+            receivedFile = new File(
+                [await receivedFile.blob()],
+                receivedFile.name,
+                {
+                    lastModified: receivedFile.lastModified,
+                }
+            );
+        }
+        const exifData = await getParsedExifData(
+            receivedFile,
+            fileTypeInfo,
+            EXIF_TAGS_NEEDED
+        );
+        imageMetadata = {
+            location: getEXIFLocation(exifData),
+            creationTime: getEXIFTime(exifData),
+        };
+    } catch (e) {
+        logError(e, 'getExifData failed');
+    }
+    return imageMetadata;
 }
 
 export const getMetadataJSONMapKey = (

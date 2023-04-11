@@ -1,82 +1,45 @@
 import {
     EXIFLESS_FORMATS,
     EXIF_LIBRARY_UNSUPPORTED_FORMATS,
-    NULL_EXTRACTED_METADATA,
     NULL_LOCATION,
 } from 'constants/upload';
-import { ElectronFile, Location } from 'types/upload';
+import { Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
 import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
-import { ParsedExtractedMetadata } from 'types/upload';
 import { getUnixTimeInMicroSeconds } from 'utils/time';
 import { CustomError } from 'utils/error';
 
-const EXIF_TAGS_NEEDED = [
-    'DateTimeOriginal',
-    'CreateDate',
-    'ModifyDate',
-    'GPSLatitude',
-    'GPSLongitude',
-    'GPSLatitudeRef',
-    'GPSLongitudeRef',
-];
-interface Exif {
-    DateTimeOriginal?: Date;
-    CreateDate?: Date;
-    ModifyDate?: Date;
-    GPSLatitude?: number;
-    GPSLongitude?: number;
-    GPSLatitudeRef?: number;
-    GPSLongitudeRef?: number;
-}
+type ParsedEXIFData = Record<string, any> &
+    Partial<{
+        DateTimeOriginal: Date;
+        CreateDate: Date;
+        ModifyDate: Date;
+        latitude: number;
+        longitude: number;
+    }>;
 
-export async function getImageMetadata(
-    receivedFile: File | ElectronFile,
-    fileTypeInfo: FileTypeInfo
-): Promise<ParsedExtractedMetadata> {
-    let imageMetadata = NULL_EXTRACTED_METADATA;
-    try {
-        if (!(receivedFile instanceof File)) {
-            receivedFile = new File(
-                [await receivedFile.blob()],
-                receivedFile.name,
-                {
-                    lastModified: receivedFile.lastModified,
-                }
-            );
-        }
-        const exifData = await getParsedExifData(
-            receivedFile,
-            fileTypeInfo,
-            EXIF_TAGS_NEEDED
-        );
-        if (!exifData) {
-            return imageMetadata;
-        }
-        imageMetadata = {
-            location: getEXIFLocation(exifData),
-            creationTime: getEXIFTime(exifData),
-        };
-    } catch (e) {
-        logError(e, 'getExifData failed');
-    }
-    return imageMetadata;
-}
+type RawEXIFData = Record<string, any> &
+    Partial<{
+        DateTimeOriginal: string;
+        CreateDate: string;
+        ModifyDate: string;
+        latitude: number;
+        longitude: number;
+    }>;
 
 export async function getParsedExifData(
     receivedFile: File,
     fileTypeInfo: FileTypeInfo,
     tags?: string[]
-) {
+): Promise<Partial<ParsedEXIFData>> {
     try {
-        const exifData = await exifr.parse(receivedFile, {
+        const exifData: RawEXIFData = await exifr.parse(receivedFile, {
             reviveValues: false,
             pick: tags,
         });
-        const parsedExif = parseExifData(exifData);
-        return parsedExif;
+        return parseExifData(exifData);
     } catch (e) {
         if (!EXIFLESS_FORMATS.includes(fileTypeInfo.mimeType)) {
             if (
@@ -91,20 +54,23 @@ export async function getParsedExifData(
                 });
             }
         }
+        throw e;
     }
 }
 
-function parseExifData(exifData: Record<string, any>) {
-    const parsedExif = {
-        ...exifData,
-    };
-    if (exifData.DateTimeOriginal) {
+function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
+    if (!exifData) {
+        throw new Error(CustomError.EXIF_DATA_NOT_FOUND);
+    }
+    const { DateTimeOriginal, CreateDate, ModifyDate, ...rest } = exifData;
+    const parsedExif: ParsedEXIFData = { ...rest };
+    if (DateTimeOriginal) {
         parsedExif.DateTimeOriginal = parseEXIFDate(exifData.DateTimeOriginal);
     }
-    if (exifData.CreateDate) {
+    if (CreateDate) {
         parsedExif.CreateDate = parseEXIFDate(exifData.CreateDate);
     }
-    if (exifData.ModifyDate) {
+    if (ModifyDate) {
         parsedExif.ModifyDate = parseEXIFDate(exifData.ModifyDate);
     }
     return parsedExif;
@@ -147,14 +113,14 @@ function parseEXIFDate(dataTimeString: string) {
     }
 }
 
-export function getEXIFLocation(exifData): Location {
+export function getEXIFLocation(exifData: ParsedEXIFData): Location {
     if (!exifData.latitude || !exifData.longitude) {
         return NULL_LOCATION;
     }
     return { latitude: exifData.latitude, longitude: exifData.longitude };
 }
 
-function getEXIFTime(exifData: Exif) {
+export function getEXIFTime(exifData: ParsedEXIFData): number {
     const dateTime =
         exifData.DateTimeOriginal ?? exifData.CreateDate ?? exifData.ModifyDate;
     if (!dateTime) {
@@ -197,12 +163,6 @@ async function convertImageToDataURL(reader: FileReader, blob: Blob) {
     return dataURL;
 }
 
-function convertToExifDateFormat(date: Date) {
-    return `${date.getFullYear()}:${
-        date.getMonth() + 1
-    }:${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-}
-
 function dataURIToBlob(dataURI) {
     // convert base64 to raw binary data held in a string
     // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
@@ -225,4 +185,10 @@ function dataURIToBlob(dataURI) {
     // write the ArrayBuffer to a blob, and you're done
     const blob = new Blob([ab], { type: mimeString });
     return blob;
+}
+
+function convertToExifDateFormat(date: Date) {
+    return `${date.getFullYear()}:${
+        date.getMonth() + 1
+    }:${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 }
