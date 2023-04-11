@@ -43,7 +43,6 @@ import {
 import { getDedicatedCryptoWorker } from 'utils/comlink/ComlinkCryptoWorker';
 
 const MAX_CONCURRENT_UPLOADS = 4;
-const FILE_UPLOAD_COMPLETED = 100;
 
 class UploadManager {
     private cryptoWorkers = new Array<
@@ -174,6 +173,7 @@ class UploadManager {
         } catch (e) {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
                 if (isElectron()) {
+                    this.remainingFiles = [];
                     ImportService.cancelRemainingUploads();
                 }
             } else {
@@ -182,7 +182,6 @@ class UploadManager {
             }
         } finally {
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
-            UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
                 this.cryptoWorkers[i]?.terminate();
             }

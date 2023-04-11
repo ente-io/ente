@@ -239,7 +239,7 @@ export default function Uploader(props: Props) {
                     appContext?.sharedFiles.length
                 }`
             );
-            if (uploadRunning.current) {
+            if (uploadManager.isUploadRunning()) {
                 if (watchFolderService.isUploadRunning()) {
                     addLogLine(
                         'watchFolder upload was running, pausing it to run user upload'
@@ -250,6 +250,7 @@ export default function Uploader(props: Props) {
                     addLogLine(
                         'an upload is already running, rejecting new upload request'
                     );
+                    setUploadProgressView(true);
                     // no-op
                     // a user upload is already in progress
                     return;
@@ -508,7 +509,6 @@ export default function Uploader(props: Props) {
             logError(err, 'failed to upload files');
             showUserFacingError(err.message);
             closeUploadProgress();
-            throw err;
         } finally {
             postUploadAction();
         }
