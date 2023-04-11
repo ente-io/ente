@@ -75,10 +75,7 @@ export async function getParsedExifData(
             reviveValues: false,
             pick: tags,
         });
-        console.log('raw exif data: ', exifData);
         const parsedExif = parseExifData(exifData);
-        console.log('parsed exif data: ', parsedExif);
-
         return parsedExif;
     } catch (e) {
         if (!EXIFLESS_FORMATS.includes(fileTypeInfo.mimeType)) {
