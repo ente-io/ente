@@ -888,5 +888,7 @@
   "addLocationButton": "Add",
   "radius": "Radius",
   "locationTagFeatureDescription": "A location tag groups all photos that were taken within some radius of a photo",
-  "galleryMemoryLimitInfo": "Up to 1000 memories shown in gallery"
+  "galleryMemoryLimitInfo": "Up to 1000 memories shown in gallery",
+  "save": "Save",
+  "centerPoint": "Center point"
 }

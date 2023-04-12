@@ -309,6 +309,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancelSubscription":
             MessageLookupByLibrary.simpleMessage("Cancel subscription"),
         "cannotAddMorePhotosAfterBecomingViewer": m4,
+        "centerPoint": MessageLookupByLibrary.simpleMessage("Center point"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Change email"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Change password"),
@@ -913,6 +914,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reviewDeduplicateItems": MessageLookupByLibrary.simpleMessage(
             "Please review and delete the items you believe are duplicates."),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Safely stored"),
+        "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Save key"),
         "saveYourRecoveryKeyIfYouHaventAlready":
             MessageLookupByLibrary.simpleMessage(
