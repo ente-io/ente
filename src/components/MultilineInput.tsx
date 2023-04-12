@@ -1,10 +1,10 @@
-import { Stack, TextField, Typography, TypographyTypeMap } from '@mui/material';
+import { Stack, TextField, Typography, TypographyProps } from '@mui/material';
 
 interface Iprops {
     label: string;
-    labelProps?: TypographyTypeMap['props'];
+    labelProps?: TypographyProps;
     message?: string;
-    messageProps?: TypographyTypeMap['props'];
+    messageProps?: TypographyProps;
     placeholder?: string;
     value: string;
     rowCount: number;

@@ -1,11 +1,14 @@
 import React, { FC } from 'react';
-import { Button, ButtonProps, Theme, TypographyVariant } from '@mui/material';
+import { Button, ButtonProps, Theme, TypographyProps } from '@mui/material';
 import { FluidContainer } from 'components/Container';
 import { SystemStyleObject } from '@mui/system';
 
-type Iprops = ButtonProps<'button', { typographyVariant?: TypographyVariant }>;
+export type SidebarButtonProps = ButtonProps<
+    'button',
+    { typographyVariant?: TypographyProps['variant'] }
+>;
 
-const SidebarButton: FC<Iprops> = ({
+const SidebarButton: FC<SidebarButtonProps> = ({
     children,
     sx,
     typographyVariant = 'body',

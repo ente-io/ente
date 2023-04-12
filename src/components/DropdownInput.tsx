@@ -6,7 +6,7 @@ import {
     SelectChangeEvent,
     Stack,
     Typography,
-    TypographyTypeMap,
+    TypographyProps,
 } from '@mui/material';
 
 export interface DropdownOption<T> {
@@ -16,10 +16,10 @@ export interface DropdownOption<T> {
 
 interface Iprops<T> {
     label: string;
-    labelProps?: TypographyTypeMap['props'];
+    labelProps?: TypographyProps;
     options: DropdownOption<T>[];
     message?: string;
-    messageProps?: TypographyTypeMap['props'];
+    messageProps?: TypographyProps;
     selected: string;
     setSelected: (selectedValue: T) => void;
     placeholder?: string;
