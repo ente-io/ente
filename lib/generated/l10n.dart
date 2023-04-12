@@ -6628,6 +6628,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Edit`
+  String get edit {
+    return Intl.message(
+      'Edit',
+      name: 'edit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete location`
+  String get deleteLocation {
+    return Intl.message(
+      'Delete location',
+      name: 'deleteLocation',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

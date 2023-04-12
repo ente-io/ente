@@ -435,6 +435,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete from device"),
         "deleteFromEnte":
             MessageLookupByLibrary.simpleMessage("Delete from ente"),
+        "deleteLocation":
+            MessageLookupByLibrary.simpleMessage("Delete location"),
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Delete photos"),
         "deleteProgress": m9,
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
@@ -486,6 +488,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "downloading": MessageLookupByLibrary.simpleMessage("Downloading..."),
         "dropSupportEmail": m11,
         "duplicateFileCountWithStorageSaved": m12,
+        "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "eligible": MessageLookupByLibrary.simpleMessage("eligible"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
         "emailChangedTo": m13,

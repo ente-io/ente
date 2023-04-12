@@ -892,5 +892,7 @@
   "save": "Save",
   "centerPoint": "Center point",
   "pickCenterPoint": "Pick center point",
-  "useSelectedPhoto": "Use selected photo"
+  "useSelectedPhoto": "Use selected photo", 
+  "edit": "Edit",
+  "deleteLocation": "Delete location"
 }
