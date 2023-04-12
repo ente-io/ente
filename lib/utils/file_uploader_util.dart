@@ -150,7 +150,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   }
   isDeleted = !(await asset.exists);
   int? h, w;
-  if (asset.type != AssetType.video && asset.width != 0 && asset.height != 0) {
+  if (asset.width != 0 && asset.height != 0) {
     h = asset.height;
     w = asset.width;
   }
