@@ -55,7 +55,7 @@ export default function UploadProgress({
             content: t('STOP_ALL_UPLOADS_MESSAGE'),
             proceed: {
                 text: t('YES_STOP_UPLOADS'),
-                variant: 'danger',
+                variant: 'critical',
                 action: props.cancelUploads,
             },
             close: {

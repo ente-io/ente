@@ -42,7 +42,7 @@ export default function InfoItem({
                             <Typography sx={{ wordBreak: 'break-all' }}>
                                 {title}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="small" color="text.muted">
                                 {caption}
                             </Typography>
                         </>

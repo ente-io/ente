@@ -27,10 +27,7 @@ export default function FreeSubscriptionPlanSelectorCard({
                             planPeriod={planPeriod}
                             togglePeriod={togglePeriod}
                         />
-                        <Typography
-                            variant="body2"
-                            mt={0.5}
-                            color="text.secondary">
+                        <Typography variant="small" mt={0.5} color="text.muted">
                             {t('TWO_MONTHS_FREE')}
                         </Typography>
                     </Box>

@@ -138,17 +138,12 @@ export default function Verify() {
                     <Trans
                         i18nKey="EMAIL_SENT"
                         components={{
-                            a: (
-                                <Box
-                                    color="text.secondary"
-                                    component={'span'}
-                                />
-                            ),
+                            a: <Box color="text.muted" component={'span'} />,
                         }}
                         values={{ email }}
                     />
                 </FormPaperTitle>
-                <Typography color={'text.secondary'} mb={2} variant="body2">
+                <Typography color={'text.muted'} mb={2} variant="small">
                     {t('CHECK_INBOX')}
                 </Typography>
                 <SingleInputForm

@@ -86,7 +86,7 @@ function StripeSubscriptionOptions({
                     closeModal,
                     setLoading
                 ),
-                variant: 'danger',
+                variant: 'critical',
             },
             close: {
                 text: t('NEVERMIND'),

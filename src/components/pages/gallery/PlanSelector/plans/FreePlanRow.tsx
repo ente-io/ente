@@ -17,7 +17,7 @@ export function FreePlanRow({ closeModal }) {
         <RowContainer onClick={closeModal}>
             <Box>
                 <Typography> {t('FREE_PLAN_OPTION_LABEL')}</Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="small" color="text.muted">
                     {t('FREE_PLAN_DESCRIPTION')}
                 </Typography>
             </Box>

@@ -4,20 +4,20 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import { THEME_COLOR } from 'constants/theme';
 interface Iprops {
-    theme: THEME_COLOR;
-    setTheme: (theme: THEME_COLOR) => void;
+    themeColor: THEME_COLOR;
+    setThemeColor: (theme: THEME_COLOR) => void;
 }
-export default function ThemeSwitcher({ theme, setTheme }: Iprops) {
-    const handleChange = (event, theme: THEME_COLOR) => {
-        if (theme !== null) {
-            setTheme(theme);
+export default function ThemeSwitcher({ themeColor, setThemeColor }: Iprops) {
+    const handleChange = (event, themeColor: THEME_COLOR) => {
+        if (themeColor !== null) {
+            setThemeColor(themeColor);
         }
     };
 
     return (
         <ToggleButtonGroup
             size="small"
-            value={theme}
+            value={themeColor}
             exclusive
             onChange={handleChange}>
             <ToggleButton value={THEME_COLOR.LIGHT}>

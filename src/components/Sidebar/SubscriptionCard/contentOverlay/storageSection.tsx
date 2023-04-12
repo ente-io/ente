@@ -23,7 +23,7 @@ interface Iprops {
 export default function StorageSection({ usage, storage }: Iprops) {
     return (
         <Box width="100%">
-            <Typography variant="body2" color={'text.secondary'}>
+            <Typography variant="small" color={'text.muted'}>
                 {t('STORAGE')}
             </Typography>
             <DefaultBox>

@@ -3,7 +3,7 @@ import { Typography, TypographyProps } from '@mui/material';
 
 const FormPaperTitle: FC<TypographyProps> = ({ sx, ...props }) => {
     return (
-        <Typography variant="title" sx={{ mb: 8, ...sx }} {...props}>
+        <Typography variant="h2" sx={{ mb: 8, ...sx }} {...props}>
             {props.children}
         </Typography>
     );

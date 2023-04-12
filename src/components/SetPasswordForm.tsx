@@ -65,7 +65,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
             onSubmit={onSubmit}>
             {({ values, errors, handleChange, handleSubmit }) => (
                 <form noValidate onSubmit={handleSubmit}>
-                    <Typography mb={2} color="text.secondary" variant="body2">
+                    <Typography mb={2} color="text.muted" variant="small">
                         {t('ENTER_ENC_PASSPHRASE')}
                     </Typography>
 
@@ -106,7 +106,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     />
                     <PasswordStrengthHint password={values.passphrase} />
 
-                    <Typography my={2} variant="body2">
+                    <Typography my={2} variant="small">
                         <Trans i18nKey={'PASSPHRASE_DISCLAIMER'} />
                     </Typography>
 
@@ -121,8 +121,8 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                             <Typography
                                 textAlign="center"
                                 mt={1}
-                                color="text.secondary"
-                                variant="body2">
+                                color="text.muted"
+                                variant="small">
                                 {t('KEY_GENERATION_IN_PROGRESS_MESSAGE')}
                             </Typography>
                         )}

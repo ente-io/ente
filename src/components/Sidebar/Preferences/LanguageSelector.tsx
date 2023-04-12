@@ -39,7 +39,7 @@ export const LanguageSelector = () => {
         <DropdownInput
             options={getLanguageOptions()}
             label={t('LANGUAGE')}
-            labelProps={{ color: 'text.secondary' }}
+            labelProps={{ color: 'text.muted' }}
             selected={userLocale}
             setSelected={updateCurrentLocale}
         />

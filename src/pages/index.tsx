@@ -79,7 +79,7 @@ const SideBox = styled('div')`
 `;
 
 const TextContainer = (props: TypographyProps) => (
-    <Typography color={'text.secondary'} mt={2} mb={3} {...props} />
+    <Typography color={'text.muted'} mt={2} mb={3} {...props} />
 );
 
 const FeatureText = (props: TypographyProps) => (

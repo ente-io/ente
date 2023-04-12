@@ -126,7 +126,7 @@ const DateContainer = styled(ListItemContainer)`
     overflow: hidden;
     text-overflow: ellipsis;
     height: ${DATE_CONTAINER_HEIGHT}px;
-    color: ${({ theme }) => theme.palette.text.secondary};
+    color: ${({ theme }) => theme.colors.text.muted};
 `;
 
 const SizeAndCountContainer = styled(DateContainer)`
@@ -495,7 +495,7 @@ export function PhotoList({
             height: FOOTER_HEIGHT,
             item: (
                 <FooterContainer span={columns}>
-                    <Typography variant="body2">
+                    <Typography variant="small">
                         <Trans
                             i18nKey={'INSTALL_MOBILE_APP'}
                             components={{
@@ -527,7 +527,7 @@ export function PhotoList({
             height: ALBUM_FOOTER_HEIGHT,
             item: (
                 <AlbumFooterContainer span={columns}>
-                    <Typography variant="body2">
+                    <Typography variant="small">
                         {t('SHARED_USING')}{' '}
                         <Link target="_blank" href={ENTE_WEBSITE_LINK}>
                             {t('ENTE_IO')}

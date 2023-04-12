@@ -24,7 +24,7 @@ export default function ExportFinished(props: Props) {
             <DialogContent>
                 <Stack pr={2}>
                     <SpaceBetweenFlex minHeight={'48px'}>
-                        <Typography color={'text.secondary'}>
+                        <Typography color={'text.muted'}>
                             {t('PENDING_ITEMS')}
                         </Typography>
                         <Typography>
@@ -32,7 +32,7 @@ export default function ExportFinished(props: Props) {
                         </Typography>
                     </SpaceBetweenFlex>
                     <SpaceBetweenFlex minHeight={'48px'}>
-                        <Typography color="text.secondary">
+                        <Typography color="text.muted">
                             {t('LAST_EXPORT_TIME')}
                         </Typography>
                         <Typography>

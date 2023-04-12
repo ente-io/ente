@@ -23,7 +23,7 @@ export default function TwoFactorModalManageSection(props: Iprops) {
             content: t('DISABLE_TWO_FACTOR_MESSAGE'),
             close: { text: t('CANCEL') },
             proceed: {
-                variant: 'danger',
+                variant: 'critical',
                 text: t('DISABLE'),
                 action: twoFactorDisable,
             },
@@ -96,7 +96,7 @@ export default function TwoFactorModalManageSection(props: Iprops) {
 
                 <Grid item sm={3} xs={12}>
                     <Button
-                        color={'danger'}
+                        color="critical"
                         onClick={warnTwoFactorDisable}
                         size="large">
                         {t('DISABLE')}

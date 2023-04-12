@@ -18,13 +18,13 @@ export const StaticThumbnail = (props: Iprops) => {
     return (
         <CenteredOverlay
             sx={(theme) => ({
-                backgroundColor: theme.palette.fill.dark,
+                backgroundColor: theme.colors.fill.faint,
                 borderWidth: '1px',
                 borderStyle: 'solid',
-                borderColor: theme.palette.stroke.faint,
+                borderColor: theme.colors.stroke.faint,
                 borderRadius: '4px',
                 '& > svg': {
-                    color: theme.palette.stroke.muted,
+                    color: theme.colors.stroke.muted,
                     fontSize: '50px',
                 },
             })}>
@@ -41,10 +41,10 @@ export const LoadingThumbnail = () => {
     return (
         <Overlay
             sx={(theme) => ({
-                backgroundColor: theme.palette.fill.dark,
+                backgroundColor: theme.colors.fill.faint,
                 borderWidth: '1px',
                 borderStyle: 'solid',
-                borderColor: theme.palette.stroke.faint,
+                borderColor: theme.colors.stroke.faint,
                 borderRadius: '4px',
             })}
         />

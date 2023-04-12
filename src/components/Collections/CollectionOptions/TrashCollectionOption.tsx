@@ -15,7 +15,7 @@ interface Iprops {
 export function TrashCollectionOption({ handleCollectionAction }: Iprops) {
     return (
         <OverflowMenuOption
-            color="danger"
+            color="critical"
             startIcon={<DeleteOutlinedIcon />}
             onClick={handleCollectionAction(
                 CollectionActions.CONFIRM_EMPTY_TRASH,

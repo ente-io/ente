@@ -53,7 +53,7 @@ export default function EnableFaceSearch({
                     onRootClose={handleRootClose}
                 />
                 <Stack py={'20px'} px={'8px'} spacing={'32px'}>
-                    <Typography color="text.secondary" px={'8px'}>
+                    <Typography color="text.muted" px={'8px'}>
                         <Trans
                             i18nKey={'ENABLE_FACE_SEARCH_DESCRIPTION'}
                             components={{
@@ -74,7 +74,7 @@ export default function EnableFaceSearch({
                     <FormGroup sx={{ width: '100%' }}>
                         <FormControlLabel
                             sx={{
-                                color: 'text.secondary',
+                                color: 'text.muted',
                                 ml: 0,
                                 mt: 2,
                             }}

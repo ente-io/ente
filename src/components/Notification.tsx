@@ -66,12 +66,12 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                         flex={1}
                         textAlign="left">
                         {attributes.subtext && (
-                            <Typography variant="body2">
+                            <Typography variant="small">
                                 {attributes.subtext}
                             </Typography>
                         )}
                         {attributes.message && (
-                            <Typography variant="button">
+                            <Typography fontWeight="bold">
                                 {attributes.message}
                             </Typography>
                         )}

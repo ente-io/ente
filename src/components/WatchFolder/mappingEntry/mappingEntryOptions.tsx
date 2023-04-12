@@ -16,13 +16,13 @@ export default function MappingEntryOptions({ confirmStopWatching }: Iprops) {
             menuPaperProps={{
                 sx: {
                     backgroundColor: (theme) =>
-                        theme.palette.background.overPaper,
+                        theme.colors.background.elevated2,
                 },
             }}
             ariaControls={'watch-mapping-option'}
             triggerButtonIcon={<MoreHorizIcon />}>
             <OverflowMenuOption
-                color="danger"
+                color="critical"
                 onClick={confirmStopWatching}
                 startIcon={<DoNotDisturbOutlinedIcon />}>
                 {t('STOP_WATCHING')}

@@ -65,7 +65,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const somethingWentWrong = () =>
         setDialogBoxAttributesV2({
             title: t('ERROR'),
-            close: { variant: 'danger' },
+            close: { variant: 'critical' },
             content: t('UNKNOWN_ERROR'),
         });
 
@@ -113,7 +113,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             proceed: {
                 text: t('DELETE'),
                 action: solveChallengeAndDeleteAccount,
-                variant: 'danger',
+                variant: 'critical',
             },
             close: { text: t('CANCEL') },
         });
@@ -136,7 +136,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 action: () => {
                     initiateEmail('account-deletion@ente.io');
                 },
-                variant: 'danger',
+                variant: 'critical',
             },
             close: { text: t('CANCEL') },
         });
@@ -202,7 +202,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     )}
                                     selected={values.reason}
                                     setSelected={handleChange('reason')}
-                                    messageProps={{ color: 'danger.main' }}
+                                    messageProps={{ color: 'critical.main' }}
                                     message={errors.reason}
                                 />
                                 <MultilineInput
@@ -213,7 +213,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     value={values.feedback}
                                     onChange={handleChange('feedback')}
                                     message={errors.feedback}
-                                    messageProps={{ color: 'danger.main' }}
+                                    messageProps={{ color: 'critical.main' }}
                                     rowCount={3}
                                 />
                                 <CheckboxInput
@@ -227,7 +227,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     <EnteButton
                                         type="submit"
                                         size="large"
-                                        color="danger"
+                                        color="critical"
                                         disabled={!acceptDataDeletion}
                                         loading={loading}>
                                         {t('CONFIRM_DELETE_ACCOUNT')}

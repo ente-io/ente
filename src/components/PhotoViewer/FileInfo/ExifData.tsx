@@ -70,8 +70,8 @@ export function ExifData(props: {
                         value ? (
                             <ExifItem key={key}>
                                 <Typography
-                                    variant="body2"
-                                    color={'text.secondary'}>
+                                    variant="small"
+                                    color={'text.muted'}>
                                     {key}
                                 </Typography>
                                 <Typography

@@ -57,7 +57,7 @@ export default function UserDetailsSection({ sidebarView }) {
     return (
         <>
             <Box px={0.5} mt={2} pb={1.5} mb={1}>
-                <Typography px={1} pb={1} color="text.secondary">
+                <Typography px={1} pb={1} color="text.muted">
                     {userDetails ? (
                         userDetails.email
                     ) : (

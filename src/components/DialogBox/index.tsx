@@ -63,7 +63,7 @@ export default function DialogBox({
             {(children || attributes?.content) && (
                 <DialogContent>
                     {children || (
-                        <Typography color="text.secondary">
+                        <Typography color="text.muted">
                             {attributes.content}
                         </Typography>
                     )}

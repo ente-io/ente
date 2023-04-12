@@ -28,7 +28,7 @@ function UploadStrategyChoiceModal({
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <CenteredFlex mb={1}>
-                    <Typography color="text.secondary">
+                    <Typography color="text.muted">
                         {t('UPLOAD_STRATEGY_CHOICE')}
                     </Typography>
                 </CenteredFlex>

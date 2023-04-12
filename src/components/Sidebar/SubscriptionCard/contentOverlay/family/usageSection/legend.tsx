@@ -11,7 +11,7 @@ export function Legend({ label, color }: Iprops) {
     return (
         <FlexWrapper>
             <LegendIndicator sx={{ color }} />
-            <Typography variant="caption" fontWeight={'bold'}>
+            <Typography variant="mini" fontWeight={'bold'}>
                 {label}
             </Typography>
         </FlexWrapper>

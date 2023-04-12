@@ -130,14 +130,14 @@ export default function Deduplicate() {
                     setDialogMessage({
                         title: t('ERROR'),
 
-                        close: { variant: 'danger' },
+                        close: { variant: 'critical' },
                         content: t('NOT_FILE_OWNER'),
                     });
             }
             setDialogMessage({
                 title: t('ERROR'),
 
-                close: { variant: 'danger' },
+                close: { variant: 'critical' },
                 content: t('UNKNOWN_ERROR'),
             });
         } finally {

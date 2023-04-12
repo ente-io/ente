@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getTwoFactorStatus } from 'services/userService';
 import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';

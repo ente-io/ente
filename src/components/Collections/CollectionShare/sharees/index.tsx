@@ -31,7 +31,7 @@ export function CollectionShareSharees({ collection }: Iprops) {
 
     return (
         <Box mb={3}>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="small" color="text.muted">
                 {t('SHAREES')}
             </Typography>
             {collection.sharees?.map((sharee) => (

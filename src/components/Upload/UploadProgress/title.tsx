@@ -11,7 +11,7 @@ import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 
 const UploadProgressTitleText = ({ expanded }) => {
     return (
-        <Typography variant={expanded ? 'title' : 'subtitle'}>
+        <Typography variant={expanded ? 'h2' : 'h3'}>
             {t('FILE_UPLOAD')}
         </Typography>
     );
@@ -21,7 +21,7 @@ function UploadProgressSubtitleText() {
     const { uploadStage, uploadCounter } = useContext(UploadProgressContext);
 
     return (
-        <Typography color="text.secondary">
+        <Typography color="text.muted">
             {uploadStage === UPLOAD_STAGES.UPLOADING
                 ? t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`, { uploadCounter })
                 : uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA

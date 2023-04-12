@@ -48,7 +48,7 @@ export function OverflowMenuOption({
                         {startIcon}
                     </Box>
                 )}
-                <Typography variant="button">{children}</Typography>
+                <Typography fontWeight="bold">{children}</Typography>
             </FluidContainer>
             {endIcon && (
                 <Box

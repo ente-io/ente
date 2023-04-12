@@ -20,7 +20,7 @@ export default function ExitSection() {
             proceed: {
                 text: t('LOGOUT'),
                 action: logoutUser,
-                variant: 'danger',
+                variant: 'critical',
             },
             close: { text: t('CANCEL') },
         });
@@ -28,10 +28,10 @@ export default function ExitSection() {
 
     return (
         <>
-            <SidebarButton onClick={confirmLogout} color="danger">
+            <SidebarButton onClick={confirmLogout} color="critical">
                 {t('LOGOUT')}
             </SidebarButton>
-            <SidebarButton onClick={openDeleteAccountModal} color="danger">
+            <SidebarButton onClick={openDeleteAccountModal} color="critical">
                 {t('DELETE_ACCOUNT')}
             </SidebarButton>
             <DeleteAccountModal

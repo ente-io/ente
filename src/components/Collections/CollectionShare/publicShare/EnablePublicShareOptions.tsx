@@ -88,9 +88,9 @@ export default function EnablePublicShareOptions({
             {sharableLinkError && (
                 <Typography
                     textAlign={'center'}
-                    variant="body2"
+                    variant="small"
                     sx={{
-                        color: (theme) => theme.palette.danger.main,
+                        color: (theme) => theme.colors.caution.A500,
                         mt: 0.5,
                     }}>
                     {sharableLinkError}

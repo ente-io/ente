@@ -17,14 +17,14 @@ export const PasswordStrengthHint = ({
     return (
         <FlexWrapper mt={'8px'} mb={'4px'}>
             <Typography
-                variant="body2"
+                variant="small"
                 sx={(theme) => ({
                     color:
                         passwordStrength === PasswordStrength.WEAK
-                            ? theme.palette.danger.main
+                            ? theme.colors.caution.A500
                             : passwordStrength === PasswordStrength.MODERATE
-                            ? theme.palette.warning.main
-                            : theme.palette.accent.main,
+                            ? theme.colors.warning.A500
+                            : theme.colors.accent.A500,
                 })}
                 textAlign={'left'}
                 flex={1}>

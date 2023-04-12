@@ -153,7 +153,7 @@ export async function updateSubscription(
         setDialogMessage({
             title: t('ERROR'),
             content: t('SUBSCRIPTION_UPDATE_FAILED'),
-            close: { variant: 'danger' },
+            close: { variant: 'critical' },
         });
     } finally {
         setLoading(false);
@@ -178,7 +178,7 @@ export async function cancelSubscription(
         setDialogMessage({
             title: t('ERROR'),
             content: t('SUBSCRIPTION_CANCEL_FAILED'),
-            close: { variant: 'danger' },
+            close: { variant: 'critical' },
         });
     } finally {
         closePlanSelectorModal();
@@ -203,7 +203,7 @@ export async function activateSubscription(
         setDialogMessage({
             title: t('ERROR'),
             content: t('SUBSCRIPTION_ACTIVATE_FAILED'),
-            close: { variant: 'danger' },
+            close: { variant: 'critical' },
         });
     } finally {
         closePlanSelectorModal();
@@ -223,7 +223,7 @@ export async function updatePaymentMethod(
         setDialogMessage({
             title: t('ERROR'),
             content: t('UNKNOWN_ERROR'),
-            close: { variant: 'danger' },
+            close: { variant: 'critical' },
         });
     }
 }
@@ -241,7 +241,7 @@ export async function manageFamilyMethod(
         setDialogMessage({
             title: t('ERROR'),
             content: t('UNKNOWN_ERROR'),
-            close: { variant: 'danger' },
+            close: { variant: 'critical' },
         });
     } finally {
         setLoading(false);
@@ -289,7 +289,7 @@ function handleFailureReason(
             setDialogMessage({
                 title: t('MESSAGE'),
                 content: t('SUBSCRIPTION_PURCHASE_CANCELLED'),
-                close: { variant: 'danger' },
+                close: { variant: 'critical' },
             });
             break;
         case FAILURE_REASON.REQUIRE_PAYMENT_METHOD:
@@ -334,7 +334,7 @@ function handleFailureReason(
             setDialogMessage({
                 title: t('ERROR'),
                 content: t('SUBSCRIPTION_PURCHASE_FAILED'),
-                close: { variant: 'danger' },
+                close: { variant: 'critical' },
             });
     }
 }

@@ -35,7 +35,7 @@ const DisabledPlanButton = styled((props: ButtonProps) => (
 ))(({ theme }) => ({
     '&.Mui-disabled': {
         backgroundColor: 'transparent',
-        color: theme.palette.text.primary,
+        color: theme.colors.text.base,
     },
 }));
 
@@ -70,7 +70,7 @@ export function PlanRow({
                     {convertBytesToGBs(plan.storage)}
                 </Typography>
                 <FlexWrapper flexWrap={'wrap'} gap={1}>
-                    <Typography variant="h3" color="text.secondary">
+                    <Typography variant="h3" color="text.muted">
                         {t('GB')}
                     </Typography>
                     {popular && !hasPaidSubscription(subscription) && (
@@ -88,10 +88,10 @@ export function PlanRow({
                     size="large"
                     onClick={handleClick}>
                     <Box textAlign={'right'}>
-                        <Typography fontWeight={'bold'} variant="h4">
+                        <Typography fontWeight={'bold'} variant="large">
                             {plan.price}{' '}
                         </Typography>{' '}
-                        <Typography color="text.secondary" variant="body2">
+                        <Typography color="text.muted" variant="small">
                             {`/ ${
                                 plan.period === PLAN_PERIOD.MONTH
                                     ? t('MONTH_SHORT')

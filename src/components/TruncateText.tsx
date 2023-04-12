@@ -15,7 +15,7 @@ export default function TruncateText({ text }) {
     return (
         <Tooltip title={text}>
             <Box height={'2.1em'} overflow="hidden">
-                <Ellipse variant="body2" sx={{ wordBreak: 'break-word' }}>
+                <Ellipse variant="small" sx={{ wordBreak: 'break-word' }}>
                     {text}
                 </Ellipse>
             </Box>

@@ -11,7 +11,7 @@ export function EnteLinkLogo() {
                     ':hover': {
                         cursor: 'pointer',
                         svg: {
-                            fill: theme.palette.text.secondary,
+                            fill: theme.colors.text.faint,
                         },
                     },
                 })}>

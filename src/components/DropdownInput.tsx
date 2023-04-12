@@ -6,7 +6,7 @@ import {
     SelectChangeEvent,
     Stack,
     Typography,
-    TypographyTypeMap,
+    TypographyProps,
 } from '@mui/material';
 
 export interface DropdownOption<T> {
@@ -16,10 +16,10 @@ export interface DropdownOption<T> {
 
 interface Iprops<T> {
     label: string;
-    labelProps?: TypographyTypeMap['props'];
+    labelProps?: TypographyProps;
     options: DropdownOption<T>[];
     message?: string;
-    messageProps?: TypographyTypeMap['props'];
+    messageProps?: TypographyProps;
     selected: string;
     setSelected: (selectedValue: T) => void;
     placeholder?: string;
@@ -53,14 +53,14 @@ export default function DropdownInput<T extends string>({
                     },
                     MenuListProps: {
                         sx: (theme) => ({
-                            backgroundColor: theme.palette.background.overPaper,
+                            backgroundColor: theme.colors.background.elevated2,
                             '.MuiMenuItem-root ': {
-                                color: theme.palette.text.secondary,
+                                color: theme.colors.text.faint,
                                 whiteSpace: 'normal',
                             },
-                            '&& > .Mui-selected': {
-                                background: theme.palette.background.overPaper,
-                                color: theme.palette.text.primary,
+                            '&&& > .Mui-selected': {
+                                background: theme.colors.background.elevated2,
+                                color: theme.colors.text.base,
                             },
                         }),
                     },
@@ -70,7 +70,7 @@ export default function DropdownInput<T extends string>({
                         borderBottom: 'none !important',
                     },
                     '.MuiSelect-select': {
-                        background: theme.palette.fill.dark,
+                        background: theme.colors.fill.faint,
                         borderRadius: '8px',
                     },
                     '&&& .MuiSelect-select': {
@@ -78,12 +78,12 @@ export default function DropdownInput<T extends string>({
                     },
                     '.MuiSelect-icon': {
                         mr: '12px',
-                        color: theme.palette.stroke.muted,
+                        color: theme.colors.stroke.muted,
                     },
                 })}
                 renderValue={(selected) => {
                     return !selected?.length ? (
-                        <Box color={'text.secondary'}>{placeholder ?? ''}</Box>
+                        <Box color={'text.muted'}>{placeholder ?? ''}</Box>
                     ) : (
                         options.find((o) => o.value === selected).label
                     );
@@ -108,9 +108,9 @@ export default function DropdownInput<T extends string>({
             </Select>
             {message && (
                 <Typography
-                    variant="body2"
+                    variant="small"
                     px={'8px'}
-                    color={'text.secondary'}
+                    color={'text.muted'}
                     {...messageProps}>
                     {message}
                 </Typography>

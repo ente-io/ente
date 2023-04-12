@@ -3,7 +3,7 @@ import {
     Checkbox,
     FormGroup,
     Typography,
-    TypographyTypeMap,
+    TypographyProps,
 } from '@mui/material';
 
 interface Iprops {
@@ -11,7 +11,7 @@ interface Iprops {
     checked: boolean;
     onChange: (value: boolean) => void;
     label: string;
-    labelProps?: TypographyTypeMap['props'];
+    labelProps?: TypographyProps;
 }
 export function CheckboxInput({
     disabled,

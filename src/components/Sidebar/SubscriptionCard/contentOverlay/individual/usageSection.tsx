@@ -19,10 +19,10 @@ export function IndividualUsageSection({ usage, storage, fileCount }: Iprops) {
                 sx={{
                     marginTop: 1.5,
                 }}>
-                <Typography variant="caption">{`${makeHumanReadableStorage(
+                <Typography variant="mini">{`${makeHumanReadableStorage(
                     storage - usage
                 )} ${t('FREE')}`}</Typography>
-                <Typography variant="caption" fontWeight={'bold'}>
+                <Typography variant="mini" fontWeight={'bold'}>
                     {t('photos_count', { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>

@@ -54,7 +54,7 @@ function CollectionCardIcon({ collectionType }) {
             {collectionType === CollectionSummaryType.archived && (
                 <ArchiveIcon
                     sx={(theme) => ({
-                        color: theme.palette.fixed.strokeMutedWhite,
+                        color: theme.colors.white.muted,
                     })}
                 />
             )}

@@ -64,13 +64,13 @@ export default function DialogBoxV2({
                         </Box>
                     )}
                     {attributes.title && (
-                        <Typography variant="h4" fontWeight={'bold'}>
+                        <Typography variant="large" fontWeight={'bold'}>
                             {attributes.title}
                         </Typography>
                     )}
                     {children ||
                         (attributes?.content && (
-                            <Typography color="text.secondary">
+                            <Typography color="text.muted">
                                 {attributes.content}
                             </Typography>
                         ))}

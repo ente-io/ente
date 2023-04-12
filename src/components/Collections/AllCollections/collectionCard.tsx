@@ -21,7 +21,7 @@ export default function AllCollectionCard({
             onClick={() => onCollectionClick(collectionSummary.id)}>
             <AllCollectionTileText>
                 <Typography>{collectionSummary.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="small" color="text.muted">
                     {t('photos_count', { count: collectionSummary.fileCount })}
                 </Typography>
             </AllCollectionTileText>

@@ -139,7 +139,7 @@ export default function ManagePublicShareOptions({
                                 {t('COPY_LINK')}
                             </EnteMenuItem>
                             <EnteMenuItem
-                                color="danger"
+                                color="critical"
                                 startIcon={<RemoveCircleOutline />}
                                 onClick={disablePublicSharing}>
                                 {t('REMOVE_LINK')}
@@ -148,9 +148,9 @@ export default function ManagePublicShareOptions({
                         {sharableLinkError && (
                             <Typography
                                 textAlign={'center'}
-                                variant="body2"
+                                variant="small"
                                 sx={{
-                                    color: (theme) => theme.palette.danger.main,
+                                    color: (theme) => theme.colors.caution.A500,
                                     mt: 0.5,
                                 }}>
                                 {sharableLinkError}

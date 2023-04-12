@@ -118,7 +118,7 @@ function PlanSelectorCard(props: Props) {
                 appContext.setDialogMessage({
                     title: t('ERROR'),
                     content: t('SUBSCRIPTION_PURCHASE_FAILED'),
-                    close: { variant: 'danger' },
+                    close: { variant: 'critical' },
                 });
             }
         } else if (hasStripeSubscription(subscription)) {

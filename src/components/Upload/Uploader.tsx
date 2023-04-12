@@ -416,7 +416,7 @@ export default function Uploader(props: Props) {
                 appContext.setDialogMessage({
                     title: t('ERROR'),
 
-                    close: { variant: 'danger' },
+                    close: { variant: 'critical' },
                     content: t('CREATE_ALBUM_FAILED'),
                 });
                 throw e;
@@ -542,7 +542,7 @@ export default function Uploader(props: Props) {
                 return props.showSessionExpiredMessage();
             case CustomError.SUBSCRIPTION_EXPIRED:
                 notification = {
-                    variant: 'danger',
+                    variant: 'critical',
                     subtext: t('SUBSCRIPTION_EXPIRED'),
                     message: t('RENEW_NOW'),
                     onClick: () => billingService.redirectToCustomerPortal(),
@@ -550,7 +550,7 @@ export default function Uploader(props: Props) {
                 break;
             case CustomError.STORAGE_QUOTA_EXCEEDED:
                 notification = {
-                    variant: 'danger',
+                    variant: 'critical',
                     subtext: t('STORAGE_QUOTA_EXCEEDED'),
                     message: t('UPGRADE_NOW'),
                     onClick: () => galleryContext.showPlanSelectorModal(),
@@ -559,7 +559,7 @@ export default function Uploader(props: Props) {
                 break;
             default:
                 notification = {
-                    variant: 'danger',
+                    variant: 'critical',
                     message: t('UNKNOWN_ERROR'),
                     onClick: () => null,
                 };

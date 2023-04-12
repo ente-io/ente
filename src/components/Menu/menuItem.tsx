@@ -37,7 +37,7 @@ export function EnteMenuItem({
             sx={{
                 minWidth: '220px',
                 color: (theme) => theme.palette[color].main,
-                backgroundColor: (theme) => theme.palette.background.overPaper,
+                backgroundColor: (theme) => theme.colors.background.elevated2,
                 padding: 2,
                 '& .MuiSvgIcon-root': {
                     fontSize: '20px',
@@ -55,12 +55,12 @@ export function EnteMenuItem({
                             {startIcon}
                         </Box>
                     )}
-                    <Typography variant="button">{children}</Typography>
+                    <Typography fontWeight="bold">{children}</Typography>
 
                     {subText && (
                         <FluidContainer
                             sx={{
-                                color: 'text.secondary',
+                                color: 'text.muted',
                                 fontSize: '14px',
                             }}>
                             <DotSeparator style={{ fontSize: 8 }} />

@@ -1,11 +1,12 @@
-import { Paper, styled } from '@mui/material';
-import { CSSProperties } from '@mui/styled-engine';
+import { Box, styled } from '@mui/material';
+import { CSSProperties } from '@mui/material/styles/createTypography';
 
-export const Badge = styled(Paper)(({ theme }) => ({
+export const Badge = styled(Box)(({ theme }) => ({
+    borderRadius: theme.shape.borderRadius,
     padding: '2px 4px',
-    backgroundColor: theme.palette.backdrop.main,
-    backdropFilter: `blur(${theme.palette.blur.muted})`,
-    color: theme.palette.primary.contrastText,
+    backgroundColor: theme.colors.black.muted,
+    backdropFilter: `blur(${theme.colors.blur.muted})`,
+    color: theme.colors.white.base,
     textTransform: 'uppercase',
-    ...(theme.typography.mini as CSSProperties),
+    ...(theme.typography.tiny as CSSProperties),
 }));

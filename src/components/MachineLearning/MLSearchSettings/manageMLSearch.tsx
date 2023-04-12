@@ -1,11 +1,9 @@
-import { Stack, Box, ButtonProps, TypographyVariant } from '@mui/material';
-import SidebarButton from 'components/Sidebar/Button';
+import { Stack, Box } from '@mui/material';
+import SidebarButton, { SidebarButtonProps } from 'components/Sidebar/Button';
 import Titlebar from 'components/Titlebar';
 import { t } from 'i18next';
 
-type Iprops = ButtonProps<'button', { typographyVariant?: TypographyVariant }>;
-
-const ManageOptions = (props: Iprops) => {
+const ManageOptions = (props: SidebarButtonProps) => {
     return (
         <SidebarButton
             variant="contained"

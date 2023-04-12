@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { styled } from '@mui/material/styles';
+import { styled } from '@mui/material';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
@@ -29,8 +28,8 @@ export const UploadProgressSectionContent = styled(MuiAccordionDetails)(
 
 export const SectionInfo = (props: TypographyProps) => (
     <Typography
-        color={'text.secondary'}
-        variant="body2"
+        color={'text.muted'}
+        variant="small"
         {...props}
         sx={{ mb: 1 }}
     />

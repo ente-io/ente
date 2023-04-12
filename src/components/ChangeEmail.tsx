@@ -82,14 +82,14 @@ function ChangeEmailForm() {
                 <>
                     {showMessage && (
                         <Alert
-                            color="accent"
+                            color="success"
                             onClose={() => setShowMessage(false)}>
                             <Trans
                                 i18nKey="EMAIL_SENT"
                                 components={{
                                     a: (
                                         <Box
-                                            color="text.secondary"
+                                            color="text.muted"
                                             component={'span'}
                                         />
                                     ),

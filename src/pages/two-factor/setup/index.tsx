@@ -64,7 +64,7 @@ export default function SetupTwoFactor() {
                 <CardContent>
                     <VerticallyCentered sx={{ p: 3 }}>
                         <Box mb={4}>
-                            <Typography variant="title">
+                            <Typography variant="h2">
                                 {t('TWO_FACTOR')}
                             </Typography>
                         </Box>

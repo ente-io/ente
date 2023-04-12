@@ -21,7 +21,7 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
         !data.hide && (
             <>
                 <Box className="main" px={2} py={1}>
-                    <Typography variant="caption" mb={1}>
+                    <Typography variant="mini" mb={1}>
                         {t(`SEARCH_TYPE.${data.type}`)}
                     </Typography>
                     <SpaceBetweenFlex>
@@ -31,7 +31,7 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
                                     {data.label}
                                 </Typography>
                             </FreeFlowText>
-                            <Typography color="text.secondary">
+                            <Typography color="text.muted">
                                 {t('photos_count', { count: data.fileCount })}
                             </Typography>
                         </Box>

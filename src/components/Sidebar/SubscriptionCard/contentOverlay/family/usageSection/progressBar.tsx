@@ -24,7 +24,7 @@ export function FamilyUsageProgressBar({
                     top: 0,
                     zIndex: 1,
                     '.MuiLinearProgress-bar ': {
-                        backgroundColor: 'text.secondary',
+                        backgroundColor: 'text.muted',
                     },
                     width: '100%',
                 }}

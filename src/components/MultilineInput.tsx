@@ -1,10 +1,10 @@
-import { Stack, TextField, Typography, TypographyTypeMap } from '@mui/material';
+import { Stack, TextField, Typography, TypographyProps } from '@mui/material';
 
 interface Iprops {
     label: string;
-    labelProps?: TypographyTypeMap['props'];
+    labelProps?: TypographyProps;
     message?: string;
-    messageProps?: TypographyTypeMap['props'];
+    messageProps?: TypographyProps;
     placeholder?: string;
     value: string;
     rowCount: number;
@@ -33,7 +33,7 @@ export default function MultilineInput({
                 placeholder={placeholder}
                 sx={(theme) => ({
                     border: '1px solid',
-                    borderColor: theme.palette.stroke.faint,
+                    borderColor: theme.colors.stroke.faint,
                     borderRadius: '8px',
                     padding: '12px',
                     '.MuiInputBase-formControl': {
@@ -45,7 +45,7 @@ export default function MultilineInput({
             />
             <Typography
                 px={'8px'}
-                variant="body2"
+                variant="small"
                 color="text.secondary"
                 {...messageProps}>
                 {message}

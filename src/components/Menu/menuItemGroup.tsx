@@ -10,7 +10,7 @@ export const EnteMenuItemGroup = styled('div')(
         border-top-left-radius: 0;
         border-top-right-radius: 0;
     }
-    background-color: ${theme.palette.background.overPaper};
+    background-color: ${theme.colors.background.elevated2};
     border-radius: 4px;
 `
 );

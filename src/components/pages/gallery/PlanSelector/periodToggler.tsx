@@ -7,16 +7,16 @@ const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
     textTransform: 'none',
     padding: '12px 16px',
     borderRadius: '4px',
-    backgroundColor: theme.palette.fill.dark,
+    backgroundColor: theme.colors.fill.faint,
     border: `1px solid transparent`,
-    color: theme.palette.text.disabled,
+    color: theme.colors.text.faint,
     '&.Mui-selected': {
-        backgroundColor: theme.palette.accent.main,
-        color: theme.palette.accent.contrastText,
+        backgroundColor: theme.colors.accent.A500,
+        color: theme.colors.text.base,
     },
     '&.Mui-selected:hover': {
-        backgroundColor: theme.palette.accent.main,
-        color: theme.palette.accent.contrastText,
+        backgroundColor: theme.colors.accent.A500,
+        color: theme.colors.text.base,
     },
     width: '97.433px',
 }));
