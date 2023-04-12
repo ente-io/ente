@@ -21,8 +21,8 @@ const darkThemePalette: PaletteOptions = {
         contrastText: darkThemeColors.text.base,
     },
     critical: {
-        main: fixedColors.warning.A700,
-        dark: fixedColors.warning.A800,
+        main: fixedColors.danger.A700,
+        dark: fixedColors.danger.A800,
         contrastText: darkThemeColors.text.base,
     },
     background: {

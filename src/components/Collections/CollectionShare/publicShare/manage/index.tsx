@@ -150,7 +150,7 @@ export default function ManagePublicShareOptions({
                                 textAlign={'center'}
                                 variant="small"
                                 sx={{
-                                    color: (theme) => theme.colors.caution.A500,
+                                    color: (theme) => theme.colors.danger.A700,
                                     mt: 0.5,
                                 }}>
                                 {sharableLinkError}

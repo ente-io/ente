@@ -7,10 +7,10 @@ const fixedColors: Pick<ThemeColorsOptions, keyof FixedColors> = {
         A400: '#26CB5F',
         A300: '#01DE4D',
     },
-    caution: {
+    warning: {
         A500: '#FFC247',
     },
-    warning: {
+    danger: {
         A800: '#F53434',
         A700: '#EA3F3F',
         A500: '#FF6565',
