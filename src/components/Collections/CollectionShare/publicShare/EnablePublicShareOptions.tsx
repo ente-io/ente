@@ -90,7 +90,7 @@ export default function EnablePublicShareOptions({
                     textAlign={'center'}
                     variant="small"
                     sx={{
-                        color: (theme) => theme.colors.caution.A500,
+                        color: (theme) => theme.colors.danger.A500,
                         mt: 0.5,
                     }}>
                     {sharableLinkError}

@@ -107,7 +107,7 @@ declare module '@mui/material/styles' {
         shadows: Shadows;
         accent: ColorStrength;
         warning: ColorStrength;
-        caution: ColorStrength;
+        danger: ColorStrength;
         blur: BlurStrength;
         white: Omit<Strength, 'faint'>;
         black: Omit<Strength, 'faint'>;
@@ -122,7 +122,7 @@ declare module '@mui/material/styles' {
         shadows?: Partial<Shadows>;
         accent?: Partial<ColorStrength>;
         warning?: Partial<ColorStrength>;
-        caution?: Partial<ColorStrength>;
+        danger?: Partial<ColorStrength>;
         blur?: Partial<BlurStrength>;
         white?: Partial<Omit<Strength, 'faint'>>;
         black?: Partial<Omit<Strength, 'faint'>>;
@@ -139,7 +139,7 @@ declare module '@mui/material/styles' {
     interface FixedColors {
         accent: string;
         warning: string;
-        caution: string;
+        danger: string;
         blur: number;
         white: string;
         black: string;
