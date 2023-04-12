@@ -59,7 +59,7 @@ export default function DebugSection() {
         <>
             <SidebarButton
                 onClick={confirmLogDownload}
-                typographyVariant="caption"
+                typographyVariant="mini"
                 sx={{ fontWeight: 'normal', color: 'text.muted' }}>
                 {t('DOWNLOAD_UPLOAD_LOGS')}
             </SidebarButton>
