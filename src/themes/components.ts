@@ -20,6 +20,13 @@ export const getComponents = (
     MuiTypography: {
         defaultProps: {
             variant: 'body',
+            variantMapping: {
+                large: 'p',
+                body: 'p',
+                small: 'p',
+                mini: 'p',
+                tiny: 'p',
+            },
         },
     },
 
