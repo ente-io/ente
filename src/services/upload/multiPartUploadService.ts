@@ -9,6 +9,7 @@ import * as convert from 'xml-js';
 import { CustomError } from 'utils/error';
 import { DataStream, MultipartUploadURLs } from 'types/upload';
 import uploadCancelService from './uploadCancelService';
+import uploadService from './uploadService';
 
 interface PartEtag {
     PartNumber: number;
@@ -26,7 +27,7 @@ export async function uploadStreamUsingMultipart(
     dataStream: DataStream
 ) {
     const uploadPartCount = calculatePartCount(dataStream.chunkCount);
-    const multipartUploadURLs = await UploadHttpClient.fetchMultipartUploadURLs(
+    const multipartUploadURLs = await uploadService.fetchMultipartUploadURLs(
         uploadPartCount
     );
     const fileObjectKey = await uploadStreamInParts(
