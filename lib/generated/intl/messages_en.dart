@@ -783,6 +783,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "photosAddedByYouWillBeRemovedFromTheAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Photos added by you will be removed from the album"),
+        "pickCenterPoint":
+            MessageLookupByLibrary.simpleMessage("Pick center point"),
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore subscription"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
@@ -1141,6 +1143,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Use public links for people not on ente"),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Use recovery key"),
+        "useSelectedPhoto":
+            MessageLookupByLibrary.simpleMessage("Use selected photo"),
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Verification failed, please try again"),

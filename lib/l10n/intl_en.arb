@@ -890,5 +890,7 @@
   "locationTagFeatureDescription": "A location tag groups all photos that were taken within some radius of a photo",
   "galleryMemoryLimitInfo": "Up to 1000 memories shown in gallery",
   "save": "Save",
-  "centerPoint": "Center point"
+  "centerPoint": "Center point",
+  "pickCenterPoint": "Pick center point",
+  "useSelectedPhoto": "Use selected photo"
 }

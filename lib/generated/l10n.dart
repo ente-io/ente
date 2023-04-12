@@ -6608,6 +6608,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Pick center point`
+  String get pickCenterPoint {
+    return Intl.message(
+      'Pick center point',
+      name: 'pickCenterPoint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use selected photo`
+  String get useSelectedPhoto {
+    return Intl.message(
+      'Use selected photo',
+      name: 'useSelectedPhoto',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
