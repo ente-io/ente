@@ -21,7 +21,7 @@ export const PasswordStrengthHint = ({
                 sx={(theme) => ({
                     color:
                         passwordStrength === PasswordStrength.WEAK
-                            ? theme.colors.danger.A500
+                            ? theme.colors.danger.A700
                             : passwordStrength === PasswordStrength.MODERATE
                             ? theme.colors.warning.A500
                             : theme.colors.accent.A500,
