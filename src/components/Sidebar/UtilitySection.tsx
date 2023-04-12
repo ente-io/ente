@@ -25,8 +25,8 @@ export default function UtilitySection({ closeSidebar }) {
         startLoading,
         watchFolderView,
         setWatchFolderView,
-        theme,
-        setTheme,
+        themeColor,
+        setThemeColor,
     } = useContext(AppContext);
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
@@ -85,7 +85,10 @@ export default function UtilitySection({ closeSidebar }) {
             {isInternalUser() && (
                 <SpaceBetweenFlex sx={{ px: 1.5 }}>
                     {t('CHOSE_THEME')}
-                    <ThemeSwitcher theme={theme} setTheme={setTheme} />
+                    <ThemeSwitcher
+                        themeColor={themeColor}
+                        setThemeColor={setThemeColor}
+                    />
                 </SpaceBetweenFlex>
             )}
             <SidebarButton onClick={openTwoFactorModal}>

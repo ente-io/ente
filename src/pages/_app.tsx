@@ -94,8 +94,8 @@ type AppContextType = {
     watchFolderFiles: FileList;
     setWatchFolderFiles: (files: FileList) => void;
     isMobile: boolean;
-    theme: THEME_COLOR;
-    setTheme: SetTheme;
+    themeColor: THEME_COLOR;
+    setThemeColor: SetTheme;
     somethingWentWrong: () => void;
     setDialogBoxAttributesV2: (attributes: DialogBoxAttributesV2) => void;
 };
@@ -149,7 +149,10 @@ export default function App(props) {
     const closeNotification = () => setNotificationView(false);
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
-    const [theme, setTheme] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
+    const [themeColor, setThemeColor] = useLocalState(
+        LS_KEYS.THEME,
+        THEME_COLOR.DARK
+    );
 
     useEffect(() => {
         setupI18n().finally(() => setIsI18nReady(true));
@@ -345,7 +348,7 @@ export default function App(props) {
                 />
             </Head>
 
-            <ThemeProvider theme={getTheme(theme)}>
+            <ThemeProvider theme={getTheme(themeColor)}>
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar />}
                 <MessageContainer>
@@ -407,8 +410,8 @@ export default function App(props) {
                         setWatchFolderFiles,
                         isMobile,
                         setNotificationAttributes,
-                        theme,
-                        setTheme,
+                        themeColor,
+                        setThemeColor,
                         somethingWentWrong,
                         setDialogBoxAttributesV2,
                     }}>
