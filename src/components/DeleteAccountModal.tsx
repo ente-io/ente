@@ -202,7 +202,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     )}
                                     selected={values.reason}
                                     setSelected={handleChange('reason')}
-                                    messageProps={{ color: 'warning.main' }}
+                                    messageProps={{ color: 'critical.main' }}
                                     message={errors.reason}
                                 />
                                 <MultilineInput
@@ -213,7 +213,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     value={values.feedback}
                                     onChange={handleChange('feedback')}
                                     message={errors.feedback}
-                                    messageProps={{ color: 'warning.main' }}
+                                    messageProps={{ color: 'critical.main' }}
                                     rowCount={3}
                                 />
                                 <CheckboxInput
@@ -227,7 +227,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     <EnteButton
                                         type="submit"
                                         size="large"
-                                        color="warning"
+                                        color="critical"
                                         disabled={!acceptDataDeletion}
                                         loading={loading}>
                                         {t('CONFIRM_DELETE_ACCOUNT')}
