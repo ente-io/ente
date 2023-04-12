@@ -11,7 +11,6 @@ import EnteSpinner from 'components/EnteSpinner';
 import { logError } from '../utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
-import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
 import { eventBus, Events } from 'services/events';
 import mlWorkManager from 'services/machineLearning/mlWorkManager';
@@ -79,7 +78,6 @@ type AppContextType = {
     showNavBar: (show: boolean) => void;
     sharedFiles: File[];
     resetSharedFiles: () => void;
-    setDisappearingFlashMessage: (message: FlashMessage) => void;
     redirectURL: string;
     setRedirectURL: (url: string) => void;
     mlSearchEnabled: boolean;
@@ -102,16 +100,6 @@ type AppContextType = {
     setDialogBoxAttributesV2: (attributes: DialogBoxAttributesV2) => void;
 };
 
-export enum FLASH_MESSAGE_TYPE {
-    DANGER = 'danger',
-    INFO = 'info',
-    SUCCESS = 'success',
-    WARNING = 'warning',
-}
-export interface FlashMessage {
-    message: string;
-    type: FLASH_MESSAGE_TYPE;
-}
 export const AppContext = createContext<AppContextType>(null);
 
 const redirectMap = new Map([
@@ -143,7 +131,6 @@ export default function App(props) {
     const [showNavbar, setShowNavBar] = useState(false);
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
-    const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
     const [redirectURL, setRedirectURL] = useState(null);
     const [mlSearchEnabled, setMlSearchEnabled] = useState(false);
     const isLoadingBarRunning = useRef(false);
@@ -315,10 +302,6 @@ export default function App(props) {
     }, [notificationAttributes]);
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
-    const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {
-        setFlashMessage(flashMessages);
-        setTimeout(() => setFlashMessage(null), 5000);
-    };
     const updateMlSearchEnabled = async (enabled: boolean) => {
         try {
             const mlSearchConfig = await getMLSearchConfig();
@@ -382,12 +365,6 @@ export default function App(props) {
                             })}
                         </MessageContainer>
                     ))}
-                {flashMessage && (
-                    <FlashMessageBar
-                        flashMessage={flashMessage}
-                        onClose={() => setFlashMessage(null)}
-                    />
-                )}
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
 
                 <DialogBox
@@ -416,7 +393,6 @@ export default function App(props) {
                         updateMlSearchEnabled,
                         sharedFiles,
                         resetSharedFiles,
-                        setDisappearingFlashMessage,
                         redirectURL,
                         setRedirectURL,
                         startLoading,
