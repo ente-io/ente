@@ -116,7 +116,7 @@ declare module '@mui/material/styles' {
         caution: ColorStrength;
         blur: BlurStrength;
         white: Omit<Strength, 'faint'>;
-        black: string;
+        black: Omit<Strength, 'faint'>;
     }
 
     interface ThemeColorsOptions {
@@ -131,7 +131,7 @@ declare module '@mui/material/styles' {
         caution?: Partial<ColorStrength>;
         blur?: Partial<BlurStrength>;
         white?: Partial<Omit<Strength, 'faint'>>;
-        black?: Partial<string>;
+        black?: Partial<Omit<Strength, 'faint'>>;
     }
 
     interface ColorStrength {

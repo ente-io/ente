@@ -23,7 +23,7 @@ const fixedColors: Pick<ThemeColorsOptions, keyof FixedColors> = {
     },
 
     white: { base: '#fff', muted: 'rgba(255, 255, 255, 0.48)' },
-    black: '#000',
+    black: { base: '#000', muted: 'rgba(0, 0, 0, 0.65)' },
 };
 
 export default fixedColors;
