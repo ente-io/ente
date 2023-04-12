@@ -13,7 +13,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart' as ente;
-import 'package:photos/models/location.dart';
+import 'package:photos/models/location/location.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -362,7 +362,10 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         final assetEntity = await widget.originalFile.getAsset;
         if (assetEntity != null) {
           final latLong = await assetEntity.latlngAsync();
-          newFile.location = Location(latLong.latitude, latLong.longitude);
+          newFile.location = Location(
+            latitude: latLong.latitude,
+            longitude: latLong.longitude,
+          );
         }
       }
       newFile.generatedID = await FilesDB.instance.insert(newFile);

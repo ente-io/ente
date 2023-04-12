@@ -32,11 +32,13 @@ class LazyLoadingGallery extends StatefulWidget {
   final Stream<FilesUpdatedEvent>? reloadEvent;
   final Set<EventType> removalEventTypes;
   final GalleryLoader asyncLoader;
-  final SelectedFiles selectedFiles;
+  final SelectedFiles? selectedFiles;
   final String tag;
   final String? logTag;
   final Stream<int> currentIndexStream;
   final int photoGirdSize;
+  final bool areFilesCollatedByDay;
+  final bool limitSelectionToOne;
   LazyLoadingGallery(
     this.files,
     this.index,
@@ -45,9 +47,11 @@ class LazyLoadingGallery extends StatefulWidget {
     this.asyncLoader,
     this.selectedFiles,
     this.tag,
-    this.currentIndexStream, {
+    this.currentIndexStream,
+    this.areFilesCollatedByDay, {
     this.logTag = "",
     this.photoGirdSize = photoGridSizeDefault,
+    this.limitSelectionToOne = false,
     Key? key,
   }) : super(key: key ?? UniqueKey());
 
@@ -62,7 +66,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   late Logger _logger;
 
   late List<File> _files;
-  late StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
+  late StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
   late StreamSubscription<int> _currentIndexSubscription;
   bool? _shouldRender;
   final ValueNotifier<bool> _toggleSelectAllFromDay = ValueNotifier(false);
@@ -72,7 +76,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   @override
   void initState() {
     //this is for removing the 'select all from day' icon on unselecting all files with 'cancel'
-    widget.selectedFiles.addListener(_selectedFilesListener);
+    widget.selectedFiles?.addListener(_selectedFilesListener);
     super.initState();
     _init();
   }
@@ -81,7 +85,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     _logger = Logger("LazyLoading_${widget.logTag}");
     _shouldRender = true;
     _files = widget.files;
-    _reloadEventSubscription = widget.reloadEvent!.listen((e) => _onReload(e));
+    _reloadEventSubscription = widget.reloadEvent?.listen((e) => _onReload(e));
 
     _currentIndexSubscription =
         widget.currentIndexStream.listen((currentIndex) {
@@ -162,9 +166,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
   @override
   void dispose() {
-    _reloadEventSubscription.cancel();
+    _reloadEventSubscription?.cancel();
     _currentIndexSubscription.cancel();
-    widget.selectedFiles.removeListener(_selectedFilesListener);
+    widget.selectedFiles?.removeListener(_selectedFilesListener);
     _toggleSelectAllFromDay.dispose();
     _showSelectAllButton.dispose();
     _areAllFromDaySelected.dispose();
@@ -175,7 +179,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   void didUpdateWidget(LazyLoadingGallery oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!listEquals(_files, widget.files)) {
-      _reloadEventSubscription.cancel();
+      _reloadEventSubscription?.cancel();
       _init();
     }
   }
@@ -190,47 +194,50 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            getDayWidget(
-              context,
-              _files[0].creationTime!,
-              widget.photoGirdSize,
-            ),
-            ValueListenableBuilder(
-              valueListenable: _showSelectAllButton,
-              builder: (context, dynamic value, _) {
-                return !value
-                    ? const SizedBox.shrink()
-                    : GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        child: SizedBox(
-                          width: 48,
-                          height: 44,
-                          child: ValueListenableBuilder(
-                            valueListenable: _areAllFromDaySelected,
-                            builder: (context, dynamic value, _) {
-                              return value
-                                  ? const Icon(
-                                      Icons.check_circle,
-                                      size: 18,
-                                    )
-                                  : Icon(
-                                      Icons.check_circle_outlined,
-                                      color: getEnteColorScheme(context)
-                                          .strokeMuted,
-                                      size: 18,
-                                    );
-                            },
-                          ),
-                        ),
-                        onTap: () {
-                          //this value has no significance
-                          //changing only to notify the listeners
-                          _toggleSelectAllFromDay.value =
-                              !_toggleSelectAllFromDay.value;
-                        },
-                      );
-              },
-            )
+            if (widget.areFilesCollatedByDay)
+              getDayWidget(
+                context,
+                _files[0].creationTime!,
+                widget.photoGirdSize,
+              ),
+            widget.limitSelectionToOne
+                ? const SizedBox.shrink()
+                : ValueListenableBuilder(
+                    valueListenable: _showSelectAllButton,
+                    builder: (context, dynamic value, _) {
+                      return !value
+                          ? const SizedBox.shrink()
+                          : GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              child: SizedBox(
+                                width: 48,
+                                height: 44,
+                                child: ValueListenableBuilder(
+                                  valueListenable: _areAllFromDaySelected,
+                                  builder: (context, dynamic value, _) {
+                                    return value
+                                        ? const Icon(
+                                            Icons.check_circle,
+                                            size: 18,
+                                          )
+                                        : Icon(
+                                            Icons.check_circle_outlined,
+                                            color: getEnteColorScheme(context)
+                                                .strokeMuted,
+                                            size: 18,
+                                          );
+                                  },
+                                ),
+                              ),
+                              onTap: () {
+                                //this value has no significance
+                                //changing only to notify the listeners
+                                _toggleSelectAllFromDay.value =
+                                    !_toggleSelectAllFromDay.value;
+                              },
+                            );
+                    },
+                  )
           ],
         ),
         _shouldRender!
@@ -261,6 +268,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           _toggleSelectAllFromDay,
           _areAllFromDaySelected,
           widget.photoGirdSize,
+          limitSelectionToOne: widget.limitSelectionToOne,
         ),
       );
     }
@@ -271,7 +279,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   }
 
   void _selectedFilesListener() {
-    if (widget.selectedFiles.files.isEmpty) {
+    if (widget.selectedFiles!.files.isEmpty) {
       _showSelectAllButton.value = false;
     } else {
       _showSelectAllButton.value = true;
@@ -283,12 +291,13 @@ class LazyLoadingGridView extends StatefulWidget {
   final String tag;
   final List<File> filesInDay;
   final GalleryLoader asyncLoader;
-  final SelectedFiles selectedFiles;
+  final SelectedFiles? selectedFiles;
   final bool shouldRender;
   final bool shouldRecycle;
   final ValueNotifier toggleSelectAllFromDay;
   final ValueNotifier areAllFilesSelected;
   final int? photoGridSize;
+  final bool limitSelectionToOne;
 
   LazyLoadingGridView(
     this.tag,
@@ -300,6 +309,7 @@ class LazyLoadingGridView extends StatefulWidget {
     this.toggleSelectAllFromDay,
     this.areAllFilesSelected,
     this.photoGridSize, {
+    this.limitSelectionToOne = false,
     Key? key,
   }) : super(key: key ?? UniqueKey());
 
@@ -316,7 +326,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void initState() {
     _shouldRender = widget.shouldRender;
     _currentUserID = Configuration.instance.getUserID();
-    widget.selectedFiles.addListener(_selectedFilesListener);
+    widget.selectedFiles?.addListener(_selectedFilesListener);
     _clearSelectionsEvent =
         Bus.instance.on<ClearSelectionsEvent>().listen((event) {
       if (mounted) {
@@ -329,7 +339,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
 
   @override
   void dispose() {
-    widget.selectedFiles.removeListener(_selectedFilesListener);
+    widget.selectedFiles?.removeListener(_selectedFilesListener);
     _clearSelectionsEvent.cancel();
     widget.toggleSelectAllFromDay
         .removeListener(_toggleSelectAllFromDayListener);
@@ -403,12 +413,12 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         mainAxisSpacing: 2,
         crossAxisCount: widget.photoGridSize!,
       ),
-      padding: const EdgeInsets.all(0),
+      padding: const EdgeInsets.symmetric(vertical: (galleryGridSpacing / 2)),
     );
   }
 
   Widget _buildFile(BuildContext context, File file) {
-    final isFileSelected = widget.selectedFiles.isFileSelected(file);
+    final isFileSelected = widget.selectedFiles?.isFileSelected(file) ?? false;
     Color selectionColor = Colors.white;
     if (isFileSelected &&
         file.isUploaded &&
@@ -421,25 +431,15 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       selectionColor = avatarColors[(randomID).remainder(avatarColors.length)];
     }
     return GestureDetector(
-      onTap: () async {
-        if (widget.selectedFiles.files.isNotEmpty) {
-          _selectFile(file);
-        } else {
-          if (AppLifecycleService.instance.mediaExtensionAction.action ==
-              IntentAction.pick) {
-            final ioFile = await getFile(file);
-            MediaExtension().setResult("file://${ioFile!.path}");
-          } else {
-            _routeToDetailPage(file, context);
-          }
-        }
+      onTap: () {
+        widget.limitSelectionToOne
+            ? _onTapWithSelectionLimit(file)
+            : _onTapNoSelectionLimit(file);
       },
       onLongPress: () {
-        if (AppLifecycleService.instance.mediaExtensionAction.action ==
-            IntentAction.main) {
-          HapticFeedback.lightImpact();
-          _selectFile(file);
-        }
+        widget.limitSelectionToOne
+            ? _onLongPressWithSelectionLimit(file)
+            : _onLongPressNoSelectionLimit(file);
       },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(1),
@@ -485,8 +485,50 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     );
   }
 
-  void _selectFile(File file) {
-    widget.selectedFiles.toggleSelection(file);
+  void _toggleFileSelection(File file) {
+    widget.selectedFiles!.toggleSelection(file);
+  }
+
+  void _onTapNoSelectionLimit(File file) async {
+    if (widget.selectedFiles?.files.isNotEmpty ?? false) {
+      _toggleFileSelection(file);
+    } else {
+      if (AppLifecycleService.instance.mediaExtensionAction.action ==
+          IntentAction.pick) {
+        final ioFile = await getFile(file);
+        MediaExtension().setResult("file://${ioFile!.path}");
+      } else {
+        _routeToDetailPage(file, context);
+      }
+    }
+  }
+
+  void _onTapWithSelectionLimit(File file) {
+    if (widget.selectedFiles!.files.isNotEmpty &&
+        widget.selectedFiles!.files.first != file) {
+      widget.selectedFiles!.clearAll();
+    }
+    _toggleFileSelection(file);
+  }
+
+  void _onLongPressNoSelectionLimit(File file) {
+    if (widget.selectedFiles!.files.isNotEmpty) {
+      _routeToDetailPage(file, context);
+    } else if (AppLifecycleService.instance.mediaExtensionAction.action ==
+        IntentAction.main) {
+      HapticFeedback.lightImpact();
+      _toggleFileSelection(file);
+    }
+  }
+
+  Future<void> _onLongPressWithSelectionLimit(File file) async {
+    if (AppLifecycleService.instance.mediaExtensionAction.action ==
+        IntentAction.pick) {
+      final ioFile = await getFile(file);
+      MediaExtension().setResult("file://${ioFile!.path}");
+    } else {
+      _routeToDetailPage(file, context);
+    }
   }
 
   void _routeToDetailPage(File file, BuildContext context) {
@@ -502,14 +544,14 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   void _selectedFilesListener() {
-    if (widget.selectedFiles.files.containsAll(widget.filesInDay.toSet())) {
+    if (widget.selectedFiles!.files.containsAll(widget.filesInDay.toSet())) {
       widget.areAllFilesSelected.value = true;
     } else {
       widget.areAllFilesSelected.value = false;
     }
     bool shouldRefresh = false;
     for (final file in widget.filesInDay) {
-      if (widget.selectedFiles.isPartOfLastSelected(file)) {
+      if (widget.selectedFiles!.isPartOfLastSelected(file)) {
         shouldRefresh = true;
       }
     }
@@ -519,12 +561,12 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   void _toggleSelectAllFromDayListener() {
-    if (widget.selectedFiles.files.containsAll(widget.filesInDay.toSet())) {
+    if (widget.selectedFiles!.files.containsAll(widget.filesInDay.toSet())) {
       setState(() {
-        widget.selectedFiles.unSelectAll(widget.filesInDay.toSet());
+        widget.selectedFiles!.unSelectAll(widget.filesInDay.toSet());
       });
     } else {
-      widget.selectedFiles.selectAll(widget.filesInDay.toSet());
+      widget.selectedFiles!.selectAll(widget.filesInDay.toSet());
     }
   }
 }
