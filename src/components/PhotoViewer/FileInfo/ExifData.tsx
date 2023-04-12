@@ -5,7 +5,7 @@ import { FileInfoSidebar } from '.';
 import Titlebar from 'components/Titlebar';
 import { Box } from '@mui/system';
 import CopyButton from 'components/CodeBlock/CopyButton';
-import { formatDateFull } from 'utils/time/format';
+import { formatDateTimeFull } from 'utils/time/format';
 import { t } from 'i18next';
 
 const ExifItem = styled(Box)`
@@ -23,7 +23,7 @@ function parseExifValue(value: any) {
             return value;
         default:
             if (value instanceof Date) {
-                return formatDateFull(value);
+                return formatDateTimeFull(value);
             }
             try {
                 return JSON.stringify(Array.from(value));
@@ -64,28 +64,30 @@ export function ExifData(props: {
                 }
             />
             <Stack py={3} px={1} spacing={2}>
-                {[...Object.entries(exif)].map(([key, value]) =>
-                    value ? (
-                        <ExifItem key={key}>
-                            <Typography
-                                variant="body2"
-                                color={'text.secondary'}>
-                                {key}
-                            </Typography>
-                            <Typography
-                                sx={{
-                                    width: '100%',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                }}>
-                                {parseExifValue(value)}
-                            </Typography>
-                        </ExifItem>
-                    ) : (
-                        <></>
-                    )
-                )}
+                {[...Object.entries(exif)]
+                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .map(([key, value]) =>
+                        value ? (
+                            <ExifItem key={key}>
+                                <Typography
+                                    variant="body2"
+                                    color={'text.secondary'}>
+                                    {key}
+                                </Typography>
+                                <Typography
+                                    sx={{
+                                        width: '100%',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                    }}>
+                                    {parseExifValue(value)}
+                                </Typography>
+                            </ExifItem>
+                        ) : (
+                            <></>
+                        )
+                    )}
             </Stack>
         </FileInfoSidebar>
     );

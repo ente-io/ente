@@ -1,64 +1,147 @@
 import {
     EXIFLESS_FORMATS,
     EXIF_LIBRARY_UNSUPPORTED_FORMATS,
-    NULL_EXTRACTED_METADATA,
     NULL_LOCATION,
 } from 'constants/upload';
-import { ElectronFile, Location } from 'types/upload';
+import { Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
 import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
-import { ParsedExtractedMetadata } from 'types/upload';
 import { getUnixTimeInMicroSeconds } from 'utils/time';
 import { CustomError } from 'utils/error';
 
-const EXIF_TAGS_NEEDED = [
-    'DateTimeOriginal',
-    'CreateDate',
-    'ModifyDate',
-    'GPSLatitude',
-    'GPSLongitude',
-    'GPSLatitudeRef',
-    'GPSLongitudeRef',
-];
-interface Exif {
-    DateTimeOriginal?: Date;
-    CreateDate?: Date;
-    ModifyDate?: Date;
-    GPSLatitude?: number;
-    GPSLongitude?: number;
-    GPSLatitudeRef?: number;
-    GPSLongitudeRef?: number;
+type ParsedEXIFData = Record<string, any> &
+    Partial<{
+        DateTimeOriginal: Date;
+        CreateDate: Date;
+        ModifyDate: Date;
+        latitude: number;
+        longitude: number;
+    }>;
+
+type RawEXIFData = Record<string, any> &
+    Partial<{
+        DateTimeOriginal: string;
+        CreateDate: string;
+        ModifyDate: string;
+        latitude: number;
+        longitude: number;
+    }>;
+
+export async function getParsedExifData(
+    receivedFile: File,
+    fileTypeInfo: FileTypeInfo,
+    tags?: string[]
+): Promise<ParsedEXIFData> {
+    try {
+        const exifData: RawEXIFData = await exifr.parse(receivedFile, {
+            reviveValues: false,
+            pick: tags,
+        });
+        return parseExifData(exifData);
+    } catch (e) {
+        if (!EXIFLESS_FORMATS.includes(fileTypeInfo.mimeType)) {
+            if (
+                EXIF_LIBRARY_UNSUPPORTED_FORMATS.includes(fileTypeInfo.mimeType)
+            ) {
+                logError(e, 'exif library unsupported format', {
+                    fileType: fileTypeInfo.exactType,
+                });
+            } else {
+                logError(e, 'get parsed exif data failed', {
+                    fileType: fileTypeInfo.exactType,
+                });
+            }
+        }
+        throw e;
+    }
 }
 
-export async function getExifData(
-    receivedFile: File | ElectronFile,
-    fileTypeInfo: FileTypeInfo
-): Promise<ParsedExtractedMetadata> {
-    let parsedEXIFData = NULL_EXTRACTED_METADATA;
-    try {
-        if (!(receivedFile instanceof File)) {
-            receivedFile = new File(
-                [await receivedFile.blob()],
-                receivedFile.name,
-                {
-                    lastModified: receivedFile.lastModified,
-                }
-            );
-        }
-        const exifData = await getRawExif(receivedFile, fileTypeInfo);
-        if (!exifData) {
-            return parsedEXIFData;
-        }
-        parsedEXIFData = {
-            location: getEXIFLocation(exifData),
-            creationTime: getExifTime(exifData),
-        };
-    } catch (e) {
-        logError(e, 'getExifData failed');
+function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
+    if (!exifData) {
+        throw new Error(CustomError.EXIF_DATA_NOT_FOUND);
     }
-    return parsedEXIFData;
+    const { DateTimeOriginal, CreateDate, ModifyDate, ...rest } = exifData;
+    const parsedExif: ParsedEXIFData = { ...rest };
+    if (DateTimeOriginal) {
+        parsedExif.DateTimeOriginal = parseEXIFDate(exifData.DateTimeOriginal);
+    }
+    if (CreateDate) {
+        parsedExif.CreateDate = parseEXIFDate(exifData.CreateDate);
+    }
+    if (ModifyDate) {
+        parsedExif.ModifyDate = parseEXIFDate(exifData.ModifyDate);
+    }
+    return parsedExif;
+}
+
+// can be '2009-09-23 17:40:52 UTC', '2010:07:06 20:45:12', or '2009-09-23 11:40:52-06:00'
+function parseEXIFDate(dataTimeString: string) {
+    try {
+        if (typeof dataTimeString !== 'string') {
+            throw Error(CustomError.NOT_A_DATE);
+        }
+
+        const [year, month, day, hour, minute, second] = dataTimeString
+            .match(/\d+/g)
+            .map((component) => parseInt(component, 10));
+
+        if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) {
+            throw Error(CustomError.NOT_A_DATE);
+        }
+        let date: Date;
+        if (
+            Number.isNaN(hour) ||
+            Number.isNaN(minute) ||
+            Number.isNaN(second)
+        ) {
+            date = new Date(Date.UTC(year, month - 1, day));
+        } else {
+            const offset =
+                dataTimeString.match(/([+-]\d+:\d+)$/); /* UTC offset */
+            if (offset) {
+                const [offsetHour, offsetMinute] = offset[1]
+                    .split(':')
+                    .map((component) => parseInt(component, 10));
+                const offsetInMinutes = offsetHour * 60 + offsetMinute;
+                const offsetInMilliseconds = offsetInMinutes * 60 * 1000;
+                date = new Date(
+                    Date.UTC(year, month - 1, day, hour, minute, second) -
+                        offsetInMilliseconds
+                );
+            } else {
+                date = new Date(
+                    Date.UTC(year, month - 1, day, hour, minute, second)
+                );
+            }
+        }
+        if (Number.isNaN(+date)) {
+            throw Error(CustomError.NOT_A_DATE);
+        }
+        return date;
+    } catch (e) {
+        logError(e, 'parseEXIFDate failed', {
+            dataTimeString,
+        });
+        return null;
+    }
+}
+
+export function getEXIFLocation(exifData: ParsedEXIFData): Location {
+    if (!exifData.latitude || !exifData.longitude) {
+        return NULL_LOCATION;
+    }
+    return { latitude: exifData.latitude, longitude: exifData.longitude };
+}
+
+export function getEXIFTime(exifData: ParsedEXIFData): number {
+    const dateTime =
+        exifData.DateTimeOriginal ?? exifData.CreateDate ?? exifData.ModifyDate;
+    if (!dateTime) {
+        return null;
+    }
+    return getUnixTimeInMicroSeconds(dateTime);
 }
 
 export async function updateFileCreationDateInEXIF(
@@ -118,66 +201,9 @@ function dataURIToBlob(dataURI) {
     const blob = new Blob([ab], { type: mimeString });
     return blob;
 }
-export async function getRawExif(
-    receivedFile: File,
-    fileTypeInfo: FileTypeInfo
-) {
-    let exifData: Exif;
-    try {
-        exifData = await exifr.parse(receivedFile, EXIF_TAGS_NEEDED);
-    } catch (e) {
-        if (!EXIFLESS_FORMATS.includes(fileTypeInfo.mimeType)) {
-            if (
-                EXIF_LIBRARY_UNSUPPORTED_FORMATS.includes(fileTypeInfo.mimeType)
-            ) {
-                logError(e, 'exif library unsupported format', {
-                    fileType: fileTypeInfo.exactType,
-                });
-            } else {
-                logError(e, 'get raw exif failed', {
-                    fileType: fileTypeInfo.exactType,
-                });
-            }
-        }
-    }
-    return exifData;
-}
-
-export function getEXIFLocation(exifData): Location {
-    if (!exifData.latitude || !exifData.longitude) {
-        return NULL_LOCATION;
-    }
-    return { latitude: exifData.latitude, longitude: exifData.longitude };
-}
-
-function getExifTime(exifData: Exif) {
-    let dateTime =
-        exifData.DateTimeOriginal ?? exifData.CreateDate ?? exifData.ModifyDate;
-    if (!dateTime) {
-        return null;
-    }
-    if (!(dateTime instanceof Date)) {
-        try {
-            dateTime = parseEXIFDate(dateTime);
-        } catch (e) {
-            logError(Error(CustomError.NOT_A_DATE), ' date revive failed', {
-                dateTime,
-            });
-            return null;
-        }
-    }
-    return getUnixTimeInMicroSeconds(dateTime);
-}
 
 function convertToExifDateFormat(date: Date) {
     return `${date.getFullYear()}:${
         date.getMonth() + 1
     }:${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-}
-
-function parseEXIFDate(dateTime: String) {
-    const [year, month, date, hour, minute, second] = dateTime
-        .match(/\d+/g)
-        .map((x) => parseInt(x));
-    return new Date(Date.UTC(year, month - 1, date, hour, minute, second));
 }

@@ -59,6 +59,7 @@ export const CustomError = {
     EXPORT_FOLDER_DOES_NOT_EXIST: 'export folder does not exist',
     NO_INTERNET_CONNECTION: 'no internet connection',
     AUTH_KEY_NOT_FOUND: 'auth key not found',
+    EXIF_DATA_NOT_FOUND: 'exif data not found',
 };
 
 export function parseUploadErrorCodes(error) {
