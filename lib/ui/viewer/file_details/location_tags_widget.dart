@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_screen_state.dart";
@@ -65,7 +66,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
     if (locationTags.isEmpty) {
       if (mounted) {
         setState(() {
-          title = "Add location";
+          title = S.of(context).addLocation;
           leadingIcon = Icons.add_location_alt_outlined;
           hasChipButtons = false;
         });
@@ -73,7 +74,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
 
       return [
         InlineButtonWidget(
-          "Group nearby photos",
+          S.of(context).groupNearbyPhotos,
           () => showAddLocationSheet(
             context,
             widget.centerPoint,
@@ -83,7 +84,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
     } else {
       if (mounted) {
         setState(() {
-          title = "Location";
+          title = S.of(context).location;
           leadingIcon = Icons.pin_drop_outlined;
           hasChipButtons = true;
         });

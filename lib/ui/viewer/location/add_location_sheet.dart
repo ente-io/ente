@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/services/location_service.dart";
 import 'package:photos/states/location_state.dart';
@@ -87,10 +88,10 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
       padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
       child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 16),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
             child: BottomOfTitleBarWidget(
-              title: TitleBarTitleWidget(title: "Add location"),
+              title: TitleBarTitleWidget(title: S.of(context).addLocation),
             ),
           ),
           Expanded(
@@ -109,7 +110,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           children: [
                             Expanded(
                               child: TextInputWidget(
-                                hintText: "Location name",
+                                hintText: S.of(context).locationName,
                                 borderRadius: 2,
                                 focusNode: _focusNode,
                                 submitNotifier: _submitNotifer,
@@ -133,7 +134,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                                     key: ValueKey(value),
                                     buttonType: ButtonType.secondary,
                                     buttonSize: ButtonSize.small,
-                                    labelText: "Add",
+                                    labelText: S.of(context).addLocationButton,
                                     isDisabled: value,
                                     onTap: () async {
                                       _focusNode.unfocus();
@@ -151,7 +152,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                         ),
                         const SizedBox(height: 24),
                         Text(
-                          "A location tag groups all photos that were taken within some radius of a photo",
+                          S.of(context).locationTagFeatureDescription,
                           style: textTheme.smallMuted,
                         ),
                       ],
@@ -167,7 +168,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: ValueListenableBuilder(
                         valueListenable: _memoriesCountNotifier,
-                        builder: (context, value, _) {
+                        builder: (context, int? value, _) {
                           Widget widget;
                           if (value == null) {
                             widget = RepaintBoundary(
@@ -184,14 +185,14 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  value == 1 ? "1 memory" : "$value memories",
+                                  S.of(context).memoryCount(value),
                                   style: textTheme.body,
                                 ),
-                                if (value as int > 1000)
+                                if (value > 1000)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 2),
                                     child: Text(
-                                      "Up to 1000 memories shown in gallery",
+                                      S.of(context).galleryMemoryLimitInfo,
                                       style: textTheme.miniMuted,
                                     ),
                                   ),
