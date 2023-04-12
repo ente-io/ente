@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:convert";
 import 'dart:io' as io;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -15,6 +16,8 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
+import "package:photos/models/magic_metadata.dart";
+import "package:photos/services/file_magic_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -173,6 +176,32 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
     _logger.warning("Title was missing ${file.tag}");
     file.title = await asset.titleAsync;
   }
+}
+
+Future<MetadataRequest> getPubMetadataRequest(
+  ente.File file,
+  Map<String, dynamic> newData,
+  Uint8List fileKey,
+) async {
+  final Map<String, dynamic> jsonToUpdate =
+      jsonDecode(file.pubMmdEncodedJson ?? '{}');
+  newData.forEach((key, value) {
+    jsonToUpdate[key] = value;
+  });
+
+  // update the local information so that it's reflected on UI
+  file.pubMmdEncodedJson = jsonEncode(jsonToUpdate);
+  file.pubMagicMetadata = PubMagicMetadata.fromJson(jsonToUpdate);
+  final encryptedMMd = await CryptoUtil.encryptChaCha(
+    utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+    fileKey,
+  );
+  return MetadataRequest(
+    version: file.pubMmdVersion,
+    count: jsonToUpdate.length,
+    data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+    header: CryptoUtil.bin2base64(encryptedMMd.header!),
+  );
 }
 
 Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
