@@ -49,9 +49,9 @@ const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
             },
             {
                 x: 0,
-                y: 2,
-                blur: 12,
-                color: 'rgba(0, 0, 0, 0.75)',
+                y: 3,
+                blur: 6,
+                color: 'rgba(0, 0, 0, 0.25)',
             },
         ],
         button: [

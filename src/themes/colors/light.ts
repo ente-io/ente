@@ -42,7 +42,7 @@ const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
             },
             {
                 x: 0,
-                y: 0,
+                y: 3,
                 blur: 6,
                 color: 'rgba(0, 0, 0, 0.12)',
             },
