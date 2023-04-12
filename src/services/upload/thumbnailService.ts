@@ -46,6 +46,8 @@ export async function generateThumbnail(
                         thumbnailSize: convertBytesToHumanReadable(
                             thumbnail.length
                         ),
+                        fileSize: convertBytesToHumanReadable(file.size),
+                        fileType: fileTypeInfo.exactType,
                     }
                 );
             }
