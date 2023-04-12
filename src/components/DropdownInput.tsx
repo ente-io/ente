@@ -53,12 +53,12 @@ export default function DropdownInput<T extends string>({
                     },
                     MenuListProps: {
                         sx: (theme) => ({
-                            backgroundColor: theme.palette.background.elevated2,
+                            backgroundColor: theme.colors.background.elevated2,
                             '.MuiMenuItem-root ': {
                                 color: theme.colors.text.faint,
                             },
                             '&&& > .Mui-selected': {
-                                background: theme.palette.background.elevated2,
+                                background: theme.colors.background.elevated2,
                                 color: theme.colors.text.base,
                             },
                         }),

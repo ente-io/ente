@@ -20,7 +20,7 @@ export default function CollectionSort(props: CollectionSortProps) {
                 sx: {
                     backgroundColor: (theme) =>
                         props.nestedInDialog &&
-                        theme.palette.background.elevated2,
+                        theme.colors.background.elevated2,
                 },
             }}
             triggerButtonProps={{

@@ -16,7 +16,7 @@ export default function MappingEntryOptions({ confirmStopWatching }: Iprops) {
             menuPaperProps={{
                 sx: {
                     backgroundColor: (theme) =>
-                        theme.palette.background.elevated2,
+                        theme.colors.background.elevated2,
                 },
             }}
             ariaControls={'watch-mapping-option'}

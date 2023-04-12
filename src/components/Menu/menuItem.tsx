@@ -37,7 +37,7 @@ export function EnteMenuItem({
             sx={{
                 minWidth: '220px',
                 color: (theme) => theme.palette[color].main,
-                backgroundColor: (theme) => theme.palette.background.elevated2,
+                backgroundColor: (theme) => theme.colors.background.elevated2,
                 padding: 2,
                 '& .MuiSvgIcon-root': {
                     fontSize: '20px',
