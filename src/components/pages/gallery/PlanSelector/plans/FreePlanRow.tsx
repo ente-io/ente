@@ -1,19 +1,17 @@
 import ArrowForward from '@mui/icons-material/ArrowForward';
-import { Box, IconButton, styled, Theme, Typography } from '@mui/material';
+import { Box, IconButton, styled, Typography } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
 import { t } from 'i18next';
 
-const RowContainer = styled(SpaceBetweenFlex)(
-    ({ theme }: { theme: Theme }) => ({
-        gap: theme.spacing(1.5),
-        padding: theme.spacing(1.5, 1),
-        cursor: 'pointer',
-        '&:hover .endIcon': {
-            backgroundColor: 'rgba(255,255,255,0.08)',
-        },
-    })
-);
+const RowContainer = styled(SpaceBetweenFlex)(({ theme }) => ({
+    gap: theme.spacing(1.5),
+    padding: theme.spacing(1.5, 1),
+    cursor: 'pointer',
+    '&:hover .endIcon': {
+        backgroundColor: 'rgba(255,255,255,0.08)',
+    },
+}));
 export function FreePlanRow({ closeModal }) {
     return (
         <RowContainer onClick={closeModal}>

@@ -1,7 +1,7 @@
 import React from 'react';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
-import { css, styled, Theme } from '@mui/material';
+import { css, styled } from '@mui/material';
 
 const Wrapper = styled('button')<{ direction: SCROLL_DIRECTION }>`
     position: absolute;
@@ -14,9 +14,8 @@ const Wrapper = styled('button')<{ direction: SCROLL_DIRECTION }>`
     margin: 0;
 
     border-radius: 50%;
-    background-color: ${({ theme }: { theme: Theme }) =>
-        theme.colors.backdrop.muted};
-    color: ${({ theme }: { theme: Theme }) => theme.colors.stroke.base};
+    background-color: ${({ theme }) => theme.colors.backdrop.muted};
+    color: ${({ theme }) => theme.colors.stroke.base};
 
     ${(props) =>
         props.direction === SCROLL_DIRECTION.LEFT

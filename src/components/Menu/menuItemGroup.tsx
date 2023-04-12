@@ -1,7 +1,7 @@
-import { styled, Theme } from '@mui/material';
+import { styled } from '@mui/material';
 
 export const EnteMenuItemGroup = styled('div')(
-    ({ theme }: { theme: Theme }) => `
+    ({ theme }) => `
     & > .MuiMenuItem-root:not(:last-of-type) {
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;

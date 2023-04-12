@@ -6,10 +6,10 @@ import { t } from 'i18next';
 
 import TwoFactorModalSetupSection from './Setup';
 import TwoFactorModalManageSection from './Manage';
-import { Dialog, DialogContent, styled, Theme } from '@mui/material';
+import { Dialog, DialogContent, styled } from '@mui/material';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 
-const TwoFactorDialog = styled(Dialog)(({ theme }: { theme: Theme }) => ({
+const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
         padding: theme.spacing(2, 4),
     },

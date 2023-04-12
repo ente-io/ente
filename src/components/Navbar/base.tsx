@@ -1,5 +1,5 @@
 import { FlexWrapper } from 'components/Container';
-import { styled, Theme } from '@mui/material';
+import { styled } from '@mui/material';
 import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from 'constants/gallery';
 const NavbarBase = styled(FlexWrapper)`
     min-height: 64px;
@@ -7,10 +7,8 @@ const NavbarBase = styled(FlexWrapper)`
     top: 0;
     left: 0;
     z-index: 1;
-    border-bottom: 1px solid
-        ${({ theme }: { theme: Theme }) => theme.palette.divider};
-    background-color: ${({ theme }: { theme: Theme }) =>
-        theme.palette.background.base};
+    border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
+    background-color: ${({ theme }) => theme.palette.background.base};
     margin-bottom: 16px;
     padding: 0 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {

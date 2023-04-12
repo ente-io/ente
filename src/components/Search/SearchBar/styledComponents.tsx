@@ -3,7 +3,7 @@ import {
     FlexWrapper,
     FluidContainer,
 } from 'components/Container';
-import { css, styled, Theme } from '@mui/material';
+import { css, styled } from '@mui/material';
 import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from 'constants/gallery';
 
 export const SearchBarWrapper = styled(FlexWrapper)`
@@ -24,8 +24,7 @@ export const SearchMobileBox = styled(FluidContainer)`
 `;
 
 export const SearchInputWrapper = styled(CenteredFlex)<{ isOpen: boolean }>`
-    background: ${({ theme }: { theme: Theme }) =>
-        theme.palette.background.base};
+    background: ${({ theme }) => theme.palette.background.base};
     max-width: 484px;
     margin: auto;
     ${(props) =>

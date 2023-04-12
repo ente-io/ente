@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useContext, useState } from 'react';
 import { VariableSizeList as List } from 'react-window';
-import { Box, Link, styled, Theme } from '@mui/material';
+import { Box, Link, styled } from '@mui/material';
 import { EnteFile } from 'types/file';
 import {
     IMAGE_CONTAINER_MAX_HEIGHT,
@@ -126,7 +126,7 @@ const DateContainer = styled(ListItemContainer)`
     overflow: hidden;
     text-overflow: ellipsis;
     height: ${DATE_CONTAINER_HEIGHT}px;
-    color: ${({ theme }: { theme: Theme }) => theme.colors.text.muted};
+    color: ${({ theme }) => theme.colors.text.muted};
 `;
 
 const SizeAndCountContainer = styled(DateContainer)`

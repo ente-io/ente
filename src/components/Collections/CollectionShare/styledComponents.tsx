@@ -1,13 +1,13 @@
-import { styled, Theme } from '@mui/material';
+import { styled } from '@mui/material';
 export const ManageSectionLabel = styled('summary')(
-    ({ theme }: { theme: Theme }) => `
+    ({ theme }) => `
     text-align: center;
     margin-bottom:${theme.spacing(1)};
 `
 );
 
 export const ManageSectionOptions = styled('section')(
-    ({ theme }: { theme: Theme }) => `
+    ({ theme }) => `
     margin-bottom:${theme.spacing(4)};
 `
 );

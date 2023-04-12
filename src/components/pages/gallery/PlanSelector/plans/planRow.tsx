@@ -1,11 +1,4 @@
-import {
-    Box,
-    Button,
-    ButtonProps,
-    styled,
-    Theme,
-    Typography,
-} from '@mui/material';
+import { Box, Button, ButtonProps, styled, Typography } from '@mui/material';
 import React from 'react';
 import {
     isUserSubscribedPlan,
@@ -39,7 +32,7 @@ const TopAlignedFluidContainer = styled(FluidContainer)`
 
 const DisabledPlanButton = styled((props: ButtonProps) => (
     <Button disabled endIcon={<Done />} {...props} />
-))(({ theme }: { theme: Theme }) => ({
+))(({ theme }) => ({
     '&.Mui-disabled': {
         backgroundColor: 'transparent',
         color: theme.colors.text.base,

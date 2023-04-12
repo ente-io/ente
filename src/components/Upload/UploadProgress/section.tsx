@@ -1,4 +1,4 @@
-import { styled, Theme } from '@mui/material';
+import { styled } from '@mui/material';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
@@ -6,7 +6,7 @@ import { Typography, TypographyProps } from '@mui/material';
 
 export const UploadProgressSection = styled((props: AccordionProps) => (
     <MuiAccordion disableGutters elevation={0} square {...props} />
-))(({ theme }: { theme: Theme }) => ({
+))(({ theme }) => ({
     borderTop: `1px solid ${theme.palette.divider}`,
     '&:last-child': {
         borderBottom: `1px solid ${theme.palette.divider}`,
@@ -21,7 +21,7 @@ export const UploadProgressSectionTitle = styled(MuiAccordionSummary)(() => ({
 }));
 
 export const UploadProgressSectionContent = styled(MuiAccordionDetails)(
-    ({ theme }: { theme: Theme }) => ({
+    ({ theme }) => ({
         padding: theme.spacing(2),
     })
 );

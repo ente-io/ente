@@ -35,7 +35,7 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
-import { styled, Theme } from '@mui/material';
+import { styled } from '@mui/material';
 import { addLocalLog } from 'utils/logging';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
@@ -49,7 +49,7 @@ interface PhotoswipeFullscreenAPI {
     isFullscreen: () => boolean;
 }
 
-const CaptionContainer = styled('div')(({ theme }: { theme: Theme }) => ({
+const CaptionContainer = styled('div')(({ theme }) => ({
     padding: theme.spacing(2),
     wordBreak: 'break-word',
     textAlign: 'right',
