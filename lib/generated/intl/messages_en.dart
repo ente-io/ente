@@ -192,6 +192,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Add collaborator"),
         "addItem": m0,
+        "addLocation": MessageLookupByLibrary.simpleMessage("Add location"),
+        "addLocationButton": MessageLookupByLibrary.simpleMessage("Add"),
         "addMore": MessageLookupByLibrary.simpleMessage("Add more"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("Add to album"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("Add to ente"),
@@ -307,6 +309,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancelSubscription":
             MessageLookupByLibrary.simpleMessage("Cancel subscription"),
         "cannotAddMorePhotosAfterBecomingViewer": m4,
+        "centerPoint": MessageLookupByLibrary.simpleMessage("Center point"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Change email"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Change password"),
@@ -432,6 +435,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete from device"),
         "deleteFromEnte":
             MessageLookupByLibrary.simpleMessage("Delete from ente"),
+        "deleteLocation":
+            MessageLookupByLibrary.simpleMessage("Delete location"),
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Delete photos"),
         "deleteProgress": m9,
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
@@ -483,6 +488,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "downloading": MessageLookupByLibrary.simpleMessage("Downloading..."),
         "dropSupportEmail": m11,
         "duplicateFileCountWithStorageSaved": m12,
+        "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "eligible": MessageLookupByLibrary.simpleMessage("eligible"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
         "emailChangedTo": m13,
@@ -581,12 +587,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Free up device space"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Free up space"),
         "freeUpSpaceSaving": m21,
+        "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
+            "Up to 1000 memories shown in gallery"),
         "general": MessageLookupByLibrary.simpleMessage("General"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generating encryption keys..."),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "grantPermission":
             MessageLookupByLibrary.simpleMessage("Grant permission"),
+        "groupNearbyPhotos":
+            MessageLookupByLibrary.simpleMessage("Group nearby photos"),
         "hidden": MessageLookupByLibrary.simpleMessage("Hidden"),
         "hide": MessageLookupByLibrary.simpleMessage("Hide"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("How it works"),
@@ -628,6 +638,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Selected items will be removed from this album"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Keep Photos"),
+        "kiloMeterUnit": MessageLookupByLibrary.simpleMessage("km"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Kindly help us with this information"),
         "language": MessageLookupByLibrary.simpleMessage("Language"),
@@ -673,6 +684,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingMessage":
             MessageLookupByLibrary.simpleMessage("Loading your photos..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Local gallery"),
+        "location": MessageLookupByLibrary.simpleMessage("Location"),
+        "locationName": MessageLookupByLibrary.simpleMessage("Location name"),
+        "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
+            "A location tag groups all photos that were taken within some radius of a photo"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lock"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "To enable lockscreen, please setup device passcode or screen lock in your system settings."),
@@ -771,6 +786,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "photosAddedByYouWillBeRemovedFromTheAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Photos added by you will be removed from the album"),
+        "pickCenterPoint":
+            MessageLookupByLibrary.simpleMessage("Pick center point"),
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore subscription"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
@@ -812,6 +829,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Public link created"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Public link enabled"),
+        "radius": MessageLookupByLibrary.simpleMessage("Radius"),
         "raiseTicket": MessageLookupByLibrary.simpleMessage("Raise ticket"),
         "rateTheApp": MessageLookupByLibrary.simpleMessage("Rate the app"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Rate us"),
@@ -901,6 +919,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reviewDeduplicateItems": MessageLookupByLibrary.simpleMessage(
             "Please review and delete the items you believe are duplicates."),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Safely stored"),
+        "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Save key"),
         "saveYourRecoveryKeyIfYouHaventAlready":
             MessageLookupByLibrary.simpleMessage(
@@ -1127,6 +1146,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Use public links for people not on ente"),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Use recovery key"),
+        "useSelectedPhoto":
+            MessageLookupByLibrary.simpleMessage("Use selected photo"),
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Verification failed, please try again"),

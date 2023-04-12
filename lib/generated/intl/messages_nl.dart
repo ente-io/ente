@@ -29,6 +29,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m11(supportEmail) =>
       "Stuur een e-mail naar ${supportEmail} vanaf het door jou geregistreerde e-mailadres";
 
+  static String m14(email) =>
+      "${email} heeft geen ente account.\n\nStuur ze een uitnodiging om foto\'s te delen.";
+
   static String m22(count) =>
       "${Intl.plural(count, one: '${count} item', other: '${count} items')}";
 
@@ -51,6 +54,15 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m39(count, yourCount) =>
       "${count} geselecteerd (${yourCount} van jou)";
 
+  static String m40(verificationID) =>
+      "Hier is mijn verificatie-ID: ${verificationID} voor ente.io.";
+
+  static String m41(verificationID) =>
+      "Hey, kunt u bevestigen dat dit uw ente.io verificatie-ID is: ${verificationID}";
+
+  static String m43(numberOfPeople) =>
+      "${Intl.plural(numberOfPeople, zero: 'Deel met specifieke mensen', one: 'Gedeeld met 1 persoon', other: 'Gedeeld met ${numberOfPeople} mensen')}";
+
   static String m45(fileType) =>
       "Dit ${fileType} zal worden verwijderd van jouw apparaat.";
 
@@ -59,6 +71,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(fileType) =>
       "Dit ${fileType} zal worden verwijderd uit ente.";
+
+  static String m53(email) => "Dit is de verificatie-ID van ${email}";
+
+  static String m54(email) => "Verifieer ${email}";
 
   static String m55(count) =>
       "${Intl.plural(count, one: '${count} jaar geleden', other: '${count} jaren geleden')}";
@@ -100,6 +116,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Foto\'s toevoegen toestaan"),
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Downloads toestaan"),
+        "applyCodeTitle":
+            MessageLookupByLibrary.simpleMessage("Code toepassen"),
         "archive": MessageLookupByLibrary.simpleMessage("Archiveer"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "Weet je zeker dat je wilt uitloggen?"),
@@ -224,9 +242,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Let op"),
         "disableLinkMessage": m10,
         "doThisLater": MessageLookupByLibrary.simpleMessage("Doe dit later"),
+        "done": MessageLookupByLibrary.simpleMessage("Voltooid"),
         "downloading": MessageLookupByLibrary.simpleMessage("Downloaden..."),
         "dropSupportEmail": m11,
         "email": MessageLookupByLibrary.simpleMessage("E-mail"),
+        "emailNoEnteAccount": m14,
         "encryption": MessageLookupByLibrary.simpleMessage("Encryptie"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Encryptiesleutels"),
@@ -263,6 +283,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Encryptiesleutels genereren..."),
         "hidden": MessageLookupByLibrary.simpleMessage("Verborgen"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Hoe het werkt"),
+        "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
+            "Vraag hen om hun e-mailadres lang in te drukken op het instellingenscherm en te controleren dat de ID\'s op beide apparaten overeenkomen."),
         "importing": MessageLookupByLibrary.simpleMessage("Importeren...."),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Onjuist wachtwoord"),
@@ -277,6 +299,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Ongeldig e-mailadres"),
         "invalidKey": MessageLookupByLibrary.simpleMessage("Ongeldige sleutel"),
+        "invalidRecoveryKey": MessageLookupByLibrary.simpleMessage(
+            "De herstelsleutel die je hebt ingevoerd is niet geldig. Zorg ervoor dat deze 24 woorden bevat en controleer de spelling van elk van deze woorden.\n\nAls je een oudere herstelcode hebt ingevoerd, zorg ervoor dat deze 64 tekens lang is, en controleer ze allemaal."),
         "inviteToEnte":
             MessageLookupByLibrary.simpleMessage("Uitnodigen voor ente"),
         "itemCount": m22,
@@ -313,6 +337,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Naar prullenbak verplaatst"),
         "never": MessageLookupByLibrary.simpleMessage("Nooit"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nieuw album"),
+        "noDuplicates":
+            MessageLookupByLibrary.simpleMessage("✨ Geen duplicaten"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Geen herstelcode?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -359,6 +385,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Je herstelsleutel is de enige manier om je foto\'s te herstellen als je je wachtwoord bent vergeten. Je vindt je herstelsleutel in Instellingen > Account.\n\nVoer hier je herstelsleutel in om te controleren of je hem correct hebt opgeslagen."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Herstel succesvol!"),
+        "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
+            "Het huidige apparaat is niet krachtig genoeg om je wachtwoord te verifiëren, dus moeten we de code een keer opnieuw genereren op een manier die met alle apparaten werkt.\n\nLog in met behulp van uw herstelcode en genereer opnieuw uw wachtwoord (je kunt dezelfde indien gewenst opnieuw gebruiken)."),
         "recreatePasswordTitle": MessageLookupByLibrary.simpleMessage(
             "Wachtwoord opnieuw instellen"),
         "remove": MessageLookupByLibrary.simpleMessage("Verwijder"),
@@ -397,14 +425,22 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedPhotos": m38,
         "selectedPhotosWithYours": m39,
         "sendEmail": MessageLookupByLibrary.simpleMessage("E-mail versturen"),
+        "sendInvite":
+            MessageLookupByLibrary.simpleMessage("Stuur een uitnodiging"),
         "sendLink": MessageLookupByLibrary.simpleMessage("Stuur link"),
         "setAPassword":
             MessageLookupByLibrary.simpleMessage("Stel een wachtwoord in"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Wachtwoord instellen"),
         "setupComplete": MessageLookupByLibrary.simpleMessage("Setup voltooid"),
+        "shareALink": MessageLookupByLibrary.simpleMessage("Deel een link"),
+        "shareMyVerificationID": m40,
+        "shareTextConfirmOthersVerificationID": m41,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Delen met niet-ente gebruikers"),
+        "shareWithPeopleSectionTitle": m43,
+        "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
+            "Maak gedeelde en collaboratieve albums met andere ente gebruikers, inclusief gebruikers met gratis abonnementen."),
         "sharing": MessageLookupByLibrary.simpleMessage("Delen..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Ik ga akkoord met de <u-terms>gebruiksvoorwaarden</u-terms> en <u-policy>privacybeleid</u-policy>"),
@@ -414,6 +450,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "singleFileInBothLocalAndRemote": m46,
         "singleFileInRemoteOnly": m47,
         "skip": MessageLookupByLibrary.simpleMessage("Overslaan"),
+        "someoneSharingAlbumsWithYouShouldSeeTheSameId":
+            MessageLookupByLibrary.simpleMessage(
+                "Iemand die albums met je deelt zou hetzelfde ID op hun apparaat moeten zien."),
+        "somethingWentWrong":
+            MessageLookupByLibrary.simpleMessage("Er ging iets mis"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Er is iets fout gegaan, probeer het opnieuw"),
@@ -426,6 +467,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Sorry, we konden geen beveiligde sleutels genereren op dit apparaat.\n\nGelieve je aan te melden vanaf een ander apparaat."),
+        "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Succes"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("Sterk"),
         "subscribe": MessageLookupByLibrary.simpleMessage("Abonneer"),
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
@@ -445,6 +487,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Dit kan worden gebruikt om je account te herstellen als je je tweede factor verliest"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("Dit apparaat"),
+        "thisIsPersonVerificationId": m53,
+        "thisIsYourVerificationId":
+            MessageLookupByLibrary.simpleMessage("Dit is uw verificatie-ID"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Dit zal je uitloggen van het volgende apparaat:"),
@@ -467,8 +512,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Map selectie bijwerken..."),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Herstelcode gebruiken"),
+        "verificationId":
+            MessageLookupByLibrary.simpleMessage("Verificatie ID"),
         "verify": MessageLookupByLibrary.simpleMessage("Verifiëren"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Bevestig e-mail"),
+        "verifyEmailID": m54,
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Bevestig wachtwoord"),
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(

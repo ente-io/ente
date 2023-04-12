@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -79,7 +80,7 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
               Expanded(
                 flex: 5,
                 child: Text(
-                  "km",
+                  S.of(context).kiloMeterUnit,
                   style: textTheme.miniMuted,
                 ),
               ),
@@ -94,7 +95,7 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("Radius", style: textTheme.body),
+                Text(S.of(context).radius, style: textTheme.body),
                 const SizedBox(height: 10),
                 SizedBox(
                   height: 12,

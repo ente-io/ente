@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_state.dart";
@@ -32,7 +33,7 @@ class EditCenterPointTileWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Center point",
+                  S.of(context).centerPoint,
                   style: textTheme.body,
                 ),
                 const SizedBox(height: 4),
