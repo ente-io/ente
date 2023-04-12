@@ -268,6 +268,18 @@ class UploadService {
             );
         }
     }
+
+    async fetchMultipartUploadURLs(count: number) {
+        if (this.publicUploadProps.accessedThroughSharedURL) {
+            return await publicUploadHttpClient.fetchMultipartUploadURLs(
+                count,
+                this.publicUploadProps.token,
+                this.publicUploadProps.passwordToken
+            );
+        } else {
+            return await UploadHttpClient.fetchMultipartUploadURLs(count);
+        }
+    }
 }
 
 export default new UploadService();
