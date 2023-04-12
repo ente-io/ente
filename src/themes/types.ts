@@ -87,12 +87,6 @@ declare module '@mui/material/SvgIcon' {
     }
 }
 
-declare module '@mui/material/Alert' {
-    interface AlertPropsColorOverrides {
-        accent: true;
-    }
-}
-
 declare module '@mui/material/CircularProgress' {
     interface CircularProgressPropsColorOverrides {
         accent: true;
