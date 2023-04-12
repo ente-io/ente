@@ -56,6 +56,7 @@ export default function DropdownInput<T extends string>({
                             backgroundColor: theme.colors.background.elevated2,
                             '.MuiMenuItem-root ': {
                                 color: theme.colors.text.faint,
+                                whiteSpace: 'normal',
                             },
                             '&&& > .Mui-selected': {
                                 background: theme.colors.background.elevated2,
