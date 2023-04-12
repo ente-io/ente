@@ -6498,6 +6498,96 @@ class S {
       args: [],
     );
   }
+
+  /// `Location name`
+  String get locationName {
+    return Intl.message(
+      'Location name',
+      name: 'locationName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add location`
+  String get addLocation {
+    return Intl.message(
+      'Add location',
+      name: 'addLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Group nearby photos`
+  String get groupNearbyPhotos {
+    return Intl.message(
+      'Group nearby photos',
+      name: 'groupNearbyPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location`
+  String get location {
+    return Intl.message(
+      'Location',
+      name: 'location',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `km`
+  String get kiloMeterUnit {
+    return Intl.message(
+      'km',
+      name: 'kiloMeterUnit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add`
+  String get addLocationButton {
+    return Intl.message(
+      'Add',
+      name: 'addLocationButton',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Radius`
+  String get radius {
+    return Intl.message(
+      'Radius',
+      name: 'radius',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A location tag groups all photos that were taken within some radius of a photo`
+  String get locationTagFeatureDescription {
+    return Intl.message(
+      'A location tag groups all photos that were taken within some radius of a photo',
+      name: 'locationTagFeatureDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Up to 1000 memories shown in gallery`
+  String get galleryMemoryLimitInfo {
+    return Intl.message(
+      'Up to 1000 memories shown in gallery',
+      name: 'galleryMemoryLimitInfo',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
