@@ -150,45 +150,18 @@ export const getComponents = (
     },
     MuiSvgIcon: {
         styleOverrides: {
-            root: ({ ownerState }) => {
-                switch (ownerState.color) {
-                    case 'primary':
-                        return {
-                            color: colors.stroke.base,
-                        };
-                    case 'secondary':
-                        return {
-                            color: colors.stroke.muted,
-                        };
-                }
-                if (ownerState.disabled) {
-                    return {
-                        color: colors.stroke.faint,
-                    };
-                }
-            },
+            root: ({ ownerState }) => ({
+                ...getIconColor(ownerState, colors),
+            }),
         },
     },
 
     MuiIconButton: {
         styleOverrides: {
-            root: ({ ownerState }) => {
-                switch (ownerState.color) {
-                    case 'primary':
-                        return {
-                            color: colors.stroke.base,
-                        };
-                    case 'secondary':
-                        return {
-                            color: colors.stroke.muted,
-                        };
-                }
-                if (ownerState.disabled) {
-                    return {
-                        color: colors.stroke.faint,
-                    };
-                }
-            },
+            root: ({ ownerState }) => ({
+                ...getIconColor(ownerState, colors),
+                padding: '12px',
+            }),
         },
     },
     MuiSnackbar: {
@@ -208,3 +181,21 @@ const getDropShadowStyle = (shadows: Shadow[]) => {
         )
         .join(' ');
 };
+
+function getIconColor(ownerState, colors: ThemeColorsOptions) {
+    switch (ownerState.color) {
+        case 'primary':
+            return {
+                color: colors.stroke.base,
+            };
+        case 'secondary':
+            return {
+                color: colors.stroke.muted,
+            };
+    }
+    if (ownerState.disabled) {
+        return {
+            color: colors.stroke.faint,
+        };
+    }
+}
