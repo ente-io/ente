@@ -28,9 +28,6 @@ const darkThemePalette: PaletteOptions = {
     background: {
         default: darkThemeColors.background.base,
         paper: darkThemeColors.background.elevated,
-        base: darkThemeColors.background.base,
-        elevated: darkThemeColors.background.elevated,
-        elevated2: darkThemeColors.background.elevated2,
     },
     text: {
         primary: darkThemeColors.text.base,

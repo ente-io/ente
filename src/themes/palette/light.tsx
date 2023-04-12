@@ -28,9 +28,6 @@ const lightThemePalette: PaletteOptions = {
     background: {
         default: lightThemeColors.background.base,
         paper: lightThemeColors.background.elevated,
-        base: lightThemeColors.background.base,
-        elevated: lightThemeColors.background.elevated,
-        elevated2: lightThemeColors.background.elevated2,
     },
     text: {
         primary: lightThemeColors.text.base,

@@ -20,12 +20,6 @@ declare module '@mui/material/styles' {
         critical?: PaletteColorOptions;
     }
 
-    interface TypeBackground {
-        base: string;
-        elevated: string;
-        elevated2: string;
-    }
-
     interface TypeText {
         base: string;
         muted: string;
@@ -111,7 +105,7 @@ declare module '@mui/material/CircularProgress' {
 
 declare module '@mui/material/styles' {
     interface ThemeColors {
-        background: TypeBackground;
+        background: BackgroundType;
         backdrop: Strength;
         text: Strength;
         fill: FillStrength;
