@@ -220,7 +220,7 @@
   "publicLinkEnabled": "Publieke link ingeschakeld",
   "shareALink": "Deel een link",
   "sharedAlbumSectionDescription": "Maak gedeelde en collaboratieve albums met andere ente gebruikers, inclusief gebruikers met gratis abonnementen.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Deel met specifieke mensen} =1 {Gedeeld met 1 persoon} other {Gedeeld met {numberOfPeople} mensen}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Deel met specifieke mensen} =1 {Gedeeld met 1 persoon} other {Gedeeld met {numberOfPeople} mensen}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
