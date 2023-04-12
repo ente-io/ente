@@ -6,7 +6,7 @@ import SingleInputForm, {
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
 
-import { Input } from '@mui/material';
+import { ButtonProps, Input } from '@mui/material';
 import { KeyAttributes, User } from 'types/user';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { t } from 'i18next';
@@ -16,6 +16,7 @@ export interface VerifyMasterPasswordFormProps {
     keyAttributes: KeyAttributes;
     callback: (key: string, passphrase: string) => void;
     buttonText: string;
+    submitButtonProps?: ButtonProps;
 }
 
 export default function VerifyMasterPasswordForm({
@@ -23,6 +24,7 @@ export default function VerifyMasterPasswordForm({
     keyAttributes,
     callback,
     buttonText,
+    submitButtonProps,
 }: VerifyMasterPasswordFormProps) {
     const verifyPassphrase: SingleInputFormProps['callback'] = async (
         passphrase,
@@ -72,6 +74,7 @@ export default function VerifyMasterPasswordForm({
             callback={verifyPassphrase}
             placeholder={t('RETURN_PASSPHRASE_HINT')}
             buttonText={buttonText}
+            submitButtonProps={submitButtonProps}
             hiddenPreInput={
                 <Input
                     id="email"

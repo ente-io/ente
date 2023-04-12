@@ -3,7 +3,8 @@ import { ExportStage } from 'constants/export';
 export type CollectionIDNameMap = Map<number, string>;
 export type CollectionIDPathMap = Map<number, string>;
 export interface ExportProgress {
-    current: number;
+    success: number;
+    failed: number;
     total: number;
 }
 export interface ExportedCollectionPaths {
@@ -36,4 +37,11 @@ export interface ExportRecord {
 export interface ExportSettings {
     folder: string;
     continuousExport: boolean;
+}
+
+export interface ExportUIUpdaters {
+    updateExportStage: (stage: ExportStage) => Promise<void>;
+    updateExportProgress: (progress: ExportProgress) => void;
+    updateFileExportStats: (fileExportStats: FileExportStats) => void;
+    updateLastExportTime: (exportTime: number) => Promise<void>;
 }

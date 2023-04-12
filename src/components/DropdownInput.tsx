@@ -16,11 +16,12 @@ export interface DropdownOption<T> {
 
 interface Iprops<T> {
     label: string;
-    labelProps: TypographyTypeMap['props'];
+    labelProps?: TypographyTypeMap['props'];
     options: DropdownOption<T>[];
     message?: string;
-    selectedValue: string;
-    setSelectedValue: (selectedValue: T) => void;
+    messageProps?: TypographyTypeMap['props'];
+    selected: string;
+    setSelected: (selectedValue: T) => void;
     placeholder?: string;
 }
 
@@ -29,9 +30,10 @@ export default function DropdownInput<T extends string>({
     labelProps,
     options,
     message,
-    selectedValue,
+    selected,
     placeholder,
-    setSelectedValue,
+    setSelected,
+    messageProps,
 }: Iprops<T>) {
     return (
         <Stack spacing={'4px'}>
@@ -41,6 +43,14 @@ export default function DropdownInput<T extends string>({
                 displayEmpty
                 variant="standard"
                 MenuProps={{
+                    PaperProps: {
+                        sx: {
+                            // Select component automatically sets the min width of the element to the width
+                            // of the select input's width, so setting the maxWidth to 0, forces to element
+                            // width to equal to minWidth
+                            maxWidth: 0,
+                        },
+                    },
                     MenuListProps: {
                         sx: (theme) => ({
                             backgroundColor: theme.palette.background.elevated2,
@@ -77,9 +87,9 @@ export default function DropdownInput<T extends string>({
                         options.find((o) => o.value === selected).label
                     );
                 }}
-                value={selectedValue}
+                value={selected}
                 onChange={(event: SelectChangeEvent) => {
-                    setSelectedValue(event.target.value as T);
+                    setSelected(event.target.value as T);
                 }}>
                 {options.map((option, index) => (
                     <MenuItem
@@ -96,7 +106,11 @@ export default function DropdownInput<T extends string>({
                 ))}
             </Select>
             {message && (
-                <Typography px={'8px'} color={'text.muted'}>
+                <Typography
+                    variant="small"
+                    px={'8px'}
+                    color={'text.muted'}
+                    {...messageProps}>
                     {message}
                 </Typography>
             )}

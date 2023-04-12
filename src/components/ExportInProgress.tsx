@@ -54,7 +54,9 @@ export default function ExportInProgress(props: Props) {
                                 isLoading
                                     ? 100
                                     : Math.round(
-                                          (props.exportProgress.current * 100) /
+                                          ((props.exportProgress.success +
+                                              props.exportProgress.failed) *
+                                              100) /
                                               props.exportProgress.total
                                       )
                             }

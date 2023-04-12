@@ -23,6 +23,7 @@ import MoveIcon from '@mui/icons-material/ArrowForward';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import { getTrashFilesMessage } from 'utils/ui';
 import { t } from 'i18next';
+import { formatNumber } from 'utils/number/format';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
@@ -144,8 +145,9 @@ const SelectedFileOptions = ({
                     <CloseIcon />
                 </IconButton>
                 <Box ml={1.5}>
-                    {count} {t('SELECTED')}{' '}
-                    {ownCount !== count && `(${ownCount} ${t('YOURS')})`}
+                    {formatNumber(count)} {t('SELECTED')}{' '}
+                    {ownCount !== count &&
+                        `(${formatNumber(ownCount)} ${t('YOURS')})`}
                 </Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>

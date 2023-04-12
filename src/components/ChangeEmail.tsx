@@ -41,7 +41,7 @@ function ChangeEmailForm() {
                 ottInputRef.current?.focus();
             }, 250);
         } catch (e) {
-            setFieldError('email', t('EMAIl_ALREADY_OWNED}'));
+            setFieldError('email', t('EMAIl_ALREADY_OWNED'));
         }
         setLoading(false);
     };

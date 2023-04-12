@@ -15,6 +15,7 @@ import {
     RecoveryKey,
     TwoFactorSecret,
     TwoFactorVerificationResponse,
+    TwoFactorRecoveryResponse,
     UserDetails,
     DeleteChallengeResponse,
     GetRemoteStoreValueResponse,
@@ -23,6 +24,7 @@ import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
 import safeStorageService from './electron/safeStorage';
 import { deleteAllCache } from 'utils/storage/cache';
+import { B64EncryptionResult } from 'types/crypto';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
 import { AxiosResponse } from 'axios';
 
@@ -217,11 +219,18 @@ export const setupTwoFactor = async () => {
     return resp.data as TwoFactorSecret;
 };
 
-export const enableTwoFactor = async (code: string) => {
+export const enableTwoFactor = async (
+    code: string,
+    recoveryEncryptedTwoFactorSecret: B64EncryptionResult
+) => {
     await HTTPService.post(
         `${ENDPOINT}/users/two-factor/enable`,
         {
             code,
+            encryptedTwoFactorSecret:
+                recoveryEncryptedTwoFactorSecret.encryptedData,
+            twoFactorSecretDecryptionNonce:
+                recoveryEncryptedTwoFactorSecret.nonce,
         },
         null,
         {
@@ -239,6 +248,21 @@ export const verifyTwoFactor = async (code: string, sessionID: string) => {
         },
         null
     );
+    return resp.data as TwoFactorVerificationResponse;
+};
+
+export const recoverTwoFactor = async (sessionID: string) => {
+    const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/recover`, {
+        sessionID,
+    });
+    return resp.data as TwoFactorRecoveryResponse;
+};
+
+export const removeTwoFactor = async (sessionID: string, secret: string) => {
+    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/remove`, {
+        sessionID,
+        secret,
+    });
     return resp.data as TwoFactorVerificationResponse;
 };
 
@@ -349,7 +373,11 @@ export const getAccountDeleteChallenge = async () => {
     }
 };
 
-export const deleteAccount = async (challenge: string) => {
+export const deleteAccount = async (
+    challenge: string,
+    reason: string,
+    feedback: string
+) => {
     try {
         const token = getToken();
         if (!token) {
@@ -358,7 +386,7 @@ export const deleteAccount = async (challenge: string) => {
 
         await HTTPService.delete(
             `${ENDPOINT}/users/delete`,
-            { challenge },
+            { challenge, reason, feedback },
             null,
             {
                 'X-Auth-Token': token,

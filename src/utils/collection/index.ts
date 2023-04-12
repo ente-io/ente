@@ -117,7 +117,7 @@ export function getDeviceLimitOptions() {
 }
 
 export const shareExpiryOptions = () => [
-    { label: t('LINK_EXPIRY_NEVER'), value: () => 0 },
+    { label: t('NEVER'), value: () => 0 },
     {
         label: t('AFTER_TIME.HOUR'),
         value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),

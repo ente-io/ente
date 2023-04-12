@@ -1,8 +1,8 @@
-import { Box, styled, Theme } from '@mui/material';
-import { CSSProperties } from 'react';
+import { Typography, TypographyProps, styled } from '@mui/material';
 
-export const Chip = styled(Box)(({ theme }: { theme: Theme }) => ({
-    ...(theme.typography.small as CSSProperties),
+export const Chip = styled((props: TypographyProps) => (
+    <Typography variant="small" {...props} />
+))(({ theme }) => ({
     padding: '8px 12px',
     borderRadius: '4px',
     backgroundColor: theme.colors.fill.faint,

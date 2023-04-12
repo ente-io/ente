@@ -8,13 +8,17 @@ import { GalleryContext } from 'pages/gallery';
 import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
-import LivePhotoIcon from '@mui/icons-material/LightMode';
-import { isLivePhoto } from 'utils/file';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { logError } from 'utils/sentry';
 import { Overlay } from 'components/Container';
 import { TRASH_SECTION } from 'constants/collection';
 import { formatDateRelative } from 'utils/time/format';
+import {
+    LoadingThumbnail,
+    StaticThumbnail,
+} from 'components/PlaceholderThumbnails';
+import { FILE_TYPE } from 'constants/file';
+import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 
 interface IProps {
     file: EnteFile;
@@ -150,11 +154,29 @@ export const SelectedOverlay = styled('div')<{ selected: boolean }>`
     border-radius: 4px;
 `;
 
-export const LivePhotoIndicatorOverlay = styled(Overlay)`
+export const FileTypeIndicatorOverlay = styled(Overlay)(
+    ({ theme }) => `
     display: flex;
     justify-content: flex-end;
+    align-items: flex-end;
+    background:${
+        theme.palette.mode === 'dark'
+            ? `linear-gradient(
+        315deg,
+        rgba(0, 0, 0, 0.14) 0%,
+        rgba(0, 0, 0, 0.05) 29.61%,
+        rgba(0, 0, 0, 0) 49.86%
+    )`
+            : `linear-gradient(
+        315deg,
+        rgba(255, 255, 255, 0.14) 0%,
+        rgba(255, 255, 255, 0.05) 29.61%,
+        rgba(255, 255, 255, 0) 49.86%
+    `
+    };
     padding: 8px;
-`;
+`
+);
 
 const Cont = styled('div')<{ disabled: boolean }>`
     background: #222;
@@ -173,18 +195,6 @@ const Cont = styled('div')<{ disabled: boolean }>`
         min-height: 100%;
         flex: 1;
         pointer-events: none;
-    }
-
-    & > svg {
-        position: absolute;
-        color: white;
-        width: 50px;
-        height: 50px;
-        margin-left: 50%;
-        margin-top: 50%;
-        top: -25px;
-        left: -25px;
-        filter: drop-shadow(3px 3px 2px rgba(0, 0, 0, 0.7));
     }
 
     &:hover ${Check} {
@@ -309,14 +319,29 @@ export default function PreviewCard(props: IProps) {
                     onClick={(e) => e.stopPropagation()}
                 />
             )}
-            {(file?.msrc || imgSrc) && <img src={file?.msrc || imgSrc} />}
-            {file?.metadata.fileType === 1 && <PlayCircleOutlineOutlinedIcon />}
+            {file.metadata.hasStaticThumbnail ? (
+                <StaticThumbnail fileType={file.metadata.fileType} />
+            ) : imgSrc ? (
+                <img src={imgSrc} />
+            ) : (
+                <LoadingThumbnail />
+            )}
+            {file.metadata.fileType === FILE_TYPE.LIVE_PHOTO ? (
+                <FileTypeIndicatorOverlay>
+                    <AlbumOutlined />
+                </FileTypeIndicatorOverlay>
+            ) : (
+                file.metadata.fileType === FILE_TYPE.VIDEO && (
+                    <FileTypeIndicatorOverlay>
+                        <PlayCircleOutlineOutlinedIcon />
+                    </FileTypeIndicatorOverlay>
+                )
+            )}
             <SelectedOverlay selected={selected} />
             <HoverOverlay checked={selected} />
             <InSelectRangeOverLay
                 $active={isRangeSelectActive && isInsSelectRange}
             />
-            {isLivePhoto(file) && <LivePhotoIndicator />}
             {deduplicateContext.isOnDeduplicatePage && (
                 <FileAndCollectionNameOverlay>
                     <p>{file.metadata.title}</p>
@@ -333,13 +358,5 @@ export default function PreviewCard(props: IProps) {
                 </FileAndCollectionNameOverlay>
             )}
         </Cont>
-    );
-}
-
-function LivePhotoIndicator() {
-    return (
-        <LivePhotoIndicatorOverlay>
-            <LivePhotoIcon />
-        </LivePhotoIndicatorOverlay>
     );
 }

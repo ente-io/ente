@@ -28,7 +28,9 @@ export const PasswordStrengthHint = ({
                 })}
                 textAlign={'left'}
                 flex={1}>
-                {password ? t('PASSPHRASE_STRENGTH', { passwordStrength }) : ''}
+                {password
+                    ? t('PASSPHRASE_STRENGTH', { context: passwordStrength })
+                    : ''}
             </Typography>
         </FlexWrapper>
     );

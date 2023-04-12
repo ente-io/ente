@@ -105,7 +105,7 @@ import useFileInput from 'hooks/useFileInput';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
-import { checkConnectivity } from 'utils/error/ui';
+import { checkConnectivity } from 'utils/common';
 import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
 import ElectronService from 'services/electron/common';
 import uploadManager from 'services/upload/uploadManager';
@@ -356,7 +356,6 @@ export default function Gallery() {
             const files = await syncFiles(collections, setFiles);
             await syncTrash(collections, files, setFiles);
         } catch (e) {
-            logError(e, 'syncWithRemote failed');
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
                     showSessionExpiredMessage();
@@ -365,6 +364,10 @@ export default function Gallery() {
                     clearKeys();
                     router.push(PAGES.CREDENTIALS);
                     break;
+                case CustomError.NO_INTERNET_CONNECTION:
+                    break;
+                default:
+                    logError(e, 'syncWithRemote failed');
             }
         } finally {
             setDeletedFileIds(new Set());

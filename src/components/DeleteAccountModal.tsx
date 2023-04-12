@@ -1,18 +1,7 @@
-import NoAccountsIcon from '@mui/icons-material/NoAccountsOutlined';
-import TickIcon from '@mui/icons-material/Done';
-import {
-    Dialog,
-    DialogContent,
-    Typography,
-    Button,
-    Stack,
-    Link,
-} from '@mui/material';
+import { Button, Link, Stack } from '@mui/material';
 import { AppContext } from 'pages/_app';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { preloadImage, initiateEmail } from 'utils/common';
-import VerticallyCentered from './Container';
-import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
 import {
     deleteAccount,
     getAccountDeleteChallenge,
@@ -23,41 +12,87 @@ import { logError } from 'utils/sentry';
 import { decryptDeleteAccountChallenge } from 'utils/crypto';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
-import { DELETE_ACCOUNT_EMAIL, FEEDBACK_EMAIL } from 'constants/urls';
+import { DELETE_ACCOUNT_EMAIL } from 'constants/urls';
+import DialogBoxV2 from './DialogBoxV2';
+import * as Yup from 'yup';
+import { Formik, FormikHelpers } from 'formik';
+import DropdownInput, { DropdownOption } from './DropdownInput';
+import MultilineInput from './MultilineInput';
+import { CheckboxInput } from './CheckboxInput';
+import EnteButton from './EnteButton';
 
 interface Iprops {
     onClose: () => void;
     open: boolean;
 }
+
+interface FormValues {
+    reason: string;
+    feedback: string;
+}
+
+enum DELETE_REASON {
+    MISSING_FEATURE = "It's missing a key feature that I need",
+    BROKEN_BEHAVIOR = 'The app or a certain feature does not behave as I think it should',
+    FOUND_ANOTHER_SERVICE = 'I found another service that I like better',
+    NOT_LISTED = "My reason isn't listed",
+}
+
+const getReasonOptions = (): DropdownOption<DELETE_REASON>[] => {
+    return Object.keys(DELETE_REASON).map((reason) => ({
+        label: t(`DELETE_REASON.${reason}`),
+        value: DELETE_REASON[reason],
+    }));
+};
+
 const DeleteAccountModal = ({ open, onClose }: Iprops) => {
-    const { setDialogMessage, isMobile } = useContext(AppContext);
+    const { setDialogBoxAttributesV2, isMobile } = useContext(AppContext);
+    const [loading, setLoading] = useState(false);
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);
-    const [deleteAccountChallenge, setDeleteAccountChallenge] = useState('');
+    const deleteAccountChallenge = useRef<string>();
 
     const openAuthenticateUserModal = () => setAuthenticateUserModalView(true);
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
+    const [acceptDataDeletion, setAcceptDataDeletion] = useState(false);
+    const reasonAndFeedbackRef = useRef<{ reason: string; feedback: string }>();
 
     useEffect(() => {
         preloadImage('/images/delete-account');
     }, []);
 
-    const sendFeedbackMail = () => initiateEmail('feedback@ente.io');
-
     const somethingWentWrong = () =>
-        setDialogMessage({
+        setDialogBoxAttributesV2({
             title: t('ERROR'),
             close: { variant: 'critical' },
             content: t('UNKNOWN_ERROR'),
         });
 
-    const initiateDelete = async () => {
+    const initiateDelete = async (
+        { reason, feedback }: FormValues,
+        { setFieldError }: FormikHelpers<FormValues>
+    ) => {
         try {
+            feedback = feedback.trim();
+            if (feedback.length === 0) {
+                switch (reason) {
+                    case DELETE_REASON.FOUND_ANOTHER_SERVICE:
+                        setFieldError(
+                            'feedback',
+                            t('FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE')
+                        );
+                        break;
+                    default:
+                        setFieldError('feedback', t('FEEDBACK_REQUIRED'));
+                }
+                return;
+            }
+            setLoading(true);
+            reasonAndFeedbackRef.current = { reason, feedback };
             const deleteChallengeResponse = await getAccountDeleteChallenge();
-            setDeleteAccountChallenge(
-                deleteChallengeResponse.encryptedChallenge
-            );
+            deleteAccountChallenge.current =
+                deleteChallengeResponse.encryptedChallenge;
             if (deleteChallengeResponse.allowDelete) {
                 openAuthenticateUserModal();
             } else {
@@ -66,12 +101,14 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         } catch (e) {
             logError(e, 'Error while initiating account deletion');
             somethingWentWrong();
+        } finally {
+            setLoading(false);
         }
     };
 
     const confirmAccountDeletion = () => {
-        setDialogMessage({
-            title: t('CONFIRM_ACCOUNT_DELETION_TITLE'),
+        setDialogBoxAttributesV2({
+            title: t('DELETE_ACCOUNT'),
             content: <Trans i18nKey="CONFIRM_ACCOUNT_DELETION_MESSAGE" />,
             proceed: {
                 text: t('DELETE'),
@@ -83,7 +120,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     };
 
     const askToMailForDeletion = () => {
-        setDialogMessage({
+        setDialogBoxAttributesV2({
             title: t('DELETE_ACCOUNT'),
             content: (
                 <Trans
@@ -105,71 +142,108 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         });
     };
 
-    const solveChallengeAndDeleteAccount = async () => {
+    const solveChallengeAndDeleteAccount = async (
+        setLoading: (value: boolean) => void
+    ) => {
         try {
+            setLoading(true);
             const decryptedChallenge = await decryptDeleteAccountChallenge(
-                deleteAccountChallenge
+                deleteAccountChallenge.current
             );
-            await deleteAccount(decryptedChallenge);
+            const { reason, feedback } = reasonAndFeedbackRef.current;
+            await deleteAccount(decryptedChallenge, reason, feedback);
             logoutUser();
         } catch (e) {
             logError(e, 'solveChallengeAndDeleteAccount failed');
             somethingWentWrong();
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <>
-            <Dialog
+            <DialogBoxV2
                 fullWidth
                 open={open}
                 onClose={onClose}
-                maxWidth="xs"
-                fullScreen={isMobile}>
-                <DialogTitleWithCloseButton onClose={onClose}>
-                    <Typography variant="h3" fontWeight={'bold'}>
-                        {t('DELETE_ACCOUNT')}
-                    </Typography>
-                </DialogTitleWithCloseButton>
-                <DialogContent>
-                    <VerticallyCentered>
-                        <img
-                            height={256}
-                            src="/images/delete-account/1x.png"
-                            srcSet="/images/delete-account/2x.png 2x,
-                            /images/delete-account/3x.png 3x"
-                        />
-                    </VerticallyCentered>
-
-                    <Typography color="text.muted" px={1.5}>
-                        <Trans
-                            i18nKey="ASK_FOR_FEEDBACK"
-                            components={{
-                                a: <Link href={`mailto:${FEEDBACK_EMAIL}`} />,
-                            }}
-                            values={{ emailID: FEEDBACK_EMAIL }}
-                        />
-                    </Typography>
-
-                    <Stack spacing={1} px={2} sx={{ width: '100%' }}>
-                        <Button
-                            size="large"
-                            color="accent"
-                            onClick={sendFeedbackMail}
-                            startIcon={<TickIcon />}>
-                            {t('SEND_FEEDBACK')}
-                        </Button>
-                        <Button
-                            size="large"
-                            variant="outlined"
-                            color="critical"
-                            onClick={initiateDelete}
-                            startIcon={<NoAccountsIcon />}>
-                            {t('DELETE_ACCOUNT')}
-                        </Button>
-                    </Stack>
-                </DialogContent>
-            </Dialog>
+                fullScreen={isMobile}
+                attributes={{
+                    title: t('DELETE_ACCOUNT'),
+                    secondary: {
+                        action: onClose,
+                        text: t('CANCEL'),
+                    },
+                }}>
+                <Formik<FormValues>
+                    initialValues={{
+                        reason: '',
+                        feedback: '',
+                    }}
+                    validationSchema={Yup.object().shape({
+                        reason: Yup.string().required(t('REQUIRED')),
+                    })}
+                    validateOnChange={false}
+                    validateOnBlur={false}
+                    onSubmit={initiateDelete}>
+                    {({
+                        values,
+                        errors,
+                        handleChange,
+                        handleSubmit,
+                    }): JSX.Element => (
+                        <form noValidate onSubmit={handleSubmit}>
+                            <Stack spacing={'24px'}>
+                                <DropdownInput
+                                    options={getReasonOptions()}
+                                    label={t('DELETE_ACCOUNT_REASON_LABEL')}
+                                    placeholder={t(
+                                        'DELETE_ACCOUNT_REASON_PLACEHOLDER'
+                                    )}
+                                    selected={values.reason}
+                                    setSelected={handleChange('reason')}
+                                    messageProps={{ color: 'warning.main' }}
+                                    message={errors.reason}
+                                />
+                                <MultilineInput
+                                    label={t('DELETE_ACCOUNT_FEEDBACK_LABEL')}
+                                    placeholder={t(
+                                        'DELETE_ACCOUNT_FEEDBACK_PLACEHOLDER'
+                                    )}
+                                    value={values.feedback}
+                                    onChange={handleChange('feedback')}
+                                    message={errors.feedback}
+                                    messageProps={{ color: 'warning.main' }}
+                                    rowCount={3}
+                                />
+                                <CheckboxInput
+                                    checked={acceptDataDeletion}
+                                    onChange={setAcceptDataDeletion}
+                                    label={t(
+                                        'CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL'
+                                    )}
+                                />
+                                <Stack spacing={'8px'}>
+                                    <EnteButton
+                                        type="submit"
+                                        size="large"
+                                        color="warning"
+                                        disabled={!acceptDataDeletion}
+                                        loading={loading}>
+                                        {t('CONFIRM_DELETE_ACCOUNT')}
+                                    </EnteButton>
+                                    <Button
+                                        size="large"
+                                        color={'secondary'}
+                                        onClick={onClose}>
+                                        {t('CANCEL')}
+                                    </Button>
+                                </Stack>
+                            </Stack>
+                        </form>
+                    )}
+                </Formik>
+            </DialogBoxV2>
             <AuthenticateUserModal
                 open={authenticateUserModalView}
                 onClose={closeAuthenticateUserModal}

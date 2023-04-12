@@ -22,7 +22,7 @@ import {
     Thing,
 } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
-import { runningInBrowser } from 'utils/common';
+import { runningInBrowser, runningInElectron } from 'utils/common';
 import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
 
@@ -63,7 +63,7 @@ class MLIDbStorage {
     public _db: Promise<IDBPDatabase<MLDb>>;
 
     constructor() {
-        if (!runningInBrowser()) {
+        if (!runningInBrowser() || !runningInElectron()) {
             return;
         }
 

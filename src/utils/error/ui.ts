@@ -20,10 +20,3 @@ export const handleSharingErrors = (error) => {
     }
     return errorMessage;
 };
-
-export function checkConnectivity() {
-    if (navigator.onLine) {
-        return true;
-    }
-    throw new Error(t('NO_INTERNET_CONNECTION'));
-}

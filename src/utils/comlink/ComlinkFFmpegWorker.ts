@@ -3,12 +3,12 @@ import { DedicatedFFmpegWorker } from 'worker/ffmpeg.worker';
 import { ComlinkWorker } from './comlinkWorker';
 
 class ComlinkFFmpegWorker {
-    private comlinkWorkerInstance: Remote<DedicatedFFmpegWorker>;
+    private comlinkWorkerInstance: Promise<Remote<DedicatedFFmpegWorker>>;
 
     async getInstance() {
         if (!this.comlinkWorkerInstance) {
             const comlinkWorker = getDedicatedFFmpegWorker();
-            this.comlinkWorkerInstance = await comlinkWorker.remote;
+            this.comlinkWorkerInstance = comlinkWorker.remote;
         }
         return this.comlinkWorkerInstance;
     }

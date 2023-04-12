@@ -33,7 +33,7 @@ const DialogBoxBase = styled(Dialog)(({ theme }: { theme: Theme }) => ({
         flexWrap: 'wrap-reverse',
     },
     '& .MuiButton-root': {
-        margin: theme.spacing(0.5, 0),
+        margin: `${theme.spacing(0.5, 0)} !important`,
     },
 }));
 

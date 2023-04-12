@@ -10,7 +10,7 @@ import downloadManager from './downloadManager';
 import { updateFilePublicMagicMetadata } from './fileService';
 import { EnteFile } from 'types/file';
 
-import { getRawExif } from './upload/exifService';
+import { getParsedExifData } from './upload/exifService';
 import { getFileType } from 'services/typeDetectionService';
 import { FILE_TYPE } from 'constants/file';
 import { getUnixTimeInMicroSeconds } from 'utils/time';
@@ -40,7 +40,10 @@ export async function updateCreationTimeWithExif(
                         .original[0];
                     const fileObject = await getFileFromURL(fileURL);
                     const fileTypeInfo = await getFileType(fileObject);
-                    const exifData = await getRawExif(fileObject, fileTypeInfo);
+                    const exifData = await getParsedExifData(
+                        fileObject,
+                        fileTypeInfo
+                    );
                     if (fixOption === FIX_OPTIONS.DATE_TIME_ORIGINAL) {
                         correctCreationTime = getUnixTimeInMicroSeconds(
                             exifData?.DateTimeOriginal
