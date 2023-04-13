@@ -41,20 +41,17 @@ export default function ManagePublicShare({
                 <MenuItemGroup>
                     <EnteMenuItem
                         startIcon={<ContentCopyIcon />}
-                        onClick={copyToClipboardHelper}>
-                        <Typography fontWeight={'bold'}>
-                            {t('COPY_LINK')}
-                        </Typography>
-                    </EnteMenuItem>
+                        onClick={copyToClipboardHelper}
+                        label={t('COPY_LINK')}
+                    />
+
                     <MenuItemDivider hasIcon={true} />
                     <EnteMenuItem
                         startIcon={<LinkIcon />}
                         endIcon={<ChevronRightIcon />}
-                        onClick={openManageShare}>
-                        <Typography fontWeight={'bold'}>
-                            {t('MANAGE_LINK')}
-                        </Typography>
-                    </EnteMenuItem>
+                        onClick={openManageShare}
+                        label={t('MANAGE_LINK')}
+                    />
                 </MenuItemGroup>
             </Stack>
             <ManagePublicShareOptions

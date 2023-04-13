@@ -9,7 +9,6 @@ import React, { useMemo, useState } from 'react';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { getDeviceLimitOptions } from 'utils/collection';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import { CaptionedText } from 'components/CaptionedText';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -55,13 +54,12 @@ export function ManageDeviceLimit({
     return (
         <>
             <EnteMenuItem
+                label={t('LINK_DEVICE_LIMIT')}
+                variant="captioned"
+                subText={publicShareProp.deviceLimit.toString()}
                 onClick={openDeviceLimitChangeModalView}
-                endIcon={<ChevronRight />}>
-                <CaptionedText
-                    mainText={t('LINK_DEVICE_LIMIT')}
-                    subText={publicShareProp.deviceLimit.toString()}
-                />
-            </EnteMenuItem>
+                endIcon={<ChevronRight />}
+            />
 
             <EnteDrawer
                 anchor="right"
@@ -78,12 +76,13 @@ export function ManageDeviceLimit({
                             {deviceLimitOptions.map((item, index) => (
                                 <>
                                     <EnteMenuItem
+                                        variant="regular"
                                         key={item.label}
                                         onClick={changeDeviceLimitValue(
                                             item.value
-                                        )}>
-                                        {item.label}
-                                    </EnteMenuItem>
+                                        )}
+                                        label={item.label}
+                                    />
                                     {index !==
                                         deviceLimitOptions.length - 1 && (
                                         <MenuItemDivider />

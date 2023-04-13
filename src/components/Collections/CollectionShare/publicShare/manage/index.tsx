@@ -138,21 +138,17 @@ export default function ManagePublicShareOptions({
                                     startIcon={<ContentCopyIcon />}
                                     onClick={copyToClipboardHelper(
                                         publicShareUrl
-                                    )}>
-                                    <Typography fontWeight={'bold'}>
-                                        {t('COPY_LINK')}
-                                    </Typography>
-                                </EnteMenuItem>
+                                    )}
+                                    label={t('COPY_LINK')}
+                                />
                             </MenuItemGroup>
                             <MenuItemGroup>
                                 <EnteMenuItem
                                     color="critical"
                                     startIcon={<RemoveCircleOutline />}
-                                    onClick={disablePublicSharing}>
-                                    <Typography fontWeight={'bold'}>
-                                        {t('REMOVE_LINK')}
-                                    </Typography>
-                                </EnteMenuItem>
+                                    onClick={disablePublicSharing}
+                                    label={t('REMOVE_LINK')}
+                                />
                             </MenuItemGroup>
                         </Stack>
                         {sharableLinkError && (

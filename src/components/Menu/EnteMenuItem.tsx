@@ -1,4 +1,5 @@
-import { MenuItem, ButtonProps, Box } from '@mui/material';
+import { MenuItem, ButtonProps, Box, Typography } from '@mui/material';
+import { CaptionedText } from 'components/CaptionedText';
 import PublicShareSwitch from 'components/Collections/CollectionShare/publicShare/switch';
 import { SpaceBetweenFlex, VerticallyCenteredFlex } from 'components/Container';
 import React from 'react';
@@ -6,10 +7,11 @@ import React from 'react';
 interface Iprops {
     onClick: () => void;
     color?: ButtonProps['color'];
+    variant?: 'primary' | 'regular' | 'captioned' | 'toggle';
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
-    children?: any;
-    hasSwitch?: boolean;
+    label?: string;
+    subText?: string;
     checked?: boolean;
 }
 export function EnteMenuItem({
@@ -17,9 +19,10 @@ export function EnteMenuItem({
     color = 'primary',
     startIcon,
     endIcon,
-    children,
-    hasSwitch = false,
+    label,
+    subText,
     checked,
+    variant = 'primary',
 }: Iprops) {
     const handleClick = () => {
         onClick();
@@ -41,11 +44,19 @@ export function EnteMenuItem({
             <SpaceBetweenFlex sx={{ pl: '16px', pr: '12px' }}>
                 <VerticallyCenteredFlex sx={{ py: '14px' }} gap={'10px'}>
                     {startIcon && startIcon}
-                    <Box px={'2px'}>{children}</Box>
+                    <Box px={'2px'}>
+                        {variant === 'primary' ? (
+                            <Typography fontWeight={'bold'}>{label}</Typography>
+                        ) : variant === 'captioned' ? (
+                            <CaptionedText mainText={label} subText={subText} />
+                        ) : (
+                            <Typography>{label}</Typography>
+                        )}
+                    </Box>
                 </VerticallyCenteredFlex>
                 <VerticallyCenteredFlex gap={'4px'}>
                     {endIcon && endIcon}
-                    {hasSwitch && (
+                    {variant === 'toggle' && (
                         <PublicShareSwitch
                             checked={checked}
                             onChange={handleClick}

@@ -30,10 +30,10 @@ export function ManagePublicCollect({
                 <EnteMenuItem
                     onClick={handleFileDownloadSetting}
                     color="primary"
-                    hasSwitch
-                    checked={publicShareProp?.enableCollect}>
-                    {t('PUBLIC_COLLECT')}
-                </EnteMenuItem>
+                    variant="toggle"
+                    checked={publicShareProp?.enableCollect}
+                    label={t('PUBLIC_COLLECT')}
+                />
             </MenuItemGroup>
             <MenuSectionTitle title={t('PUBLIC_COLLECT_SUBTEXT')} />
         </Stack>

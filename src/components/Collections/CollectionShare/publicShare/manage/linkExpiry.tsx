@@ -10,7 +10,6 @@ import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { formatDateTime } from 'utils/time/format';
 import Titlebar from 'components/Titlebar';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import { CaptionedText } from 'components/CaptionedText';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -62,18 +61,15 @@ export function ManageLinkExpiry({
             <MenuItemGroup>
                 <EnteMenuItem
                     onClick={openShareExpiryOptionsModalView}
-                    endIcon={<ChevronRight />}>
-                    <CaptionedText
-                        mainText={t('LINK_EXPIRY')}
-                        subText={
-                            publicShareProp?.validTill
-                                ? formatDateTime(
-                                      publicShareProp?.validTill / 1000
-                                  )
-                                : t('NEVER')
-                        }
-                    />
-                </EnteMenuItem>
+                    endIcon={<ChevronRight />}
+                    variant="captioned"
+                    label={t('LINK_EXPIRY')}
+                    subText={
+                        publicShareProp?.validTill
+                            ? formatDateTime(publicShareProp?.validTill / 1000)
+                            : t('NEVER')
+                    }
+                />
             </MenuItemGroup>
             <EnteDrawer
                 anchor="right"
@@ -90,12 +86,13 @@ export function ManageLinkExpiry({
                             {shareExpireOption.map((item, index) => (
                                 <>
                                     <EnteMenuItem
+                                        variant="regular"
                                         key={item.value()}
                                         onClick={changeShareExpiryValue(
                                             item.value()
-                                        )}>
-                                        {item.label}
-                                    </EnteMenuItem>
+                                        )}
+                                        label={item.label}
+                                    />
                                     {index !== shareExpireOption.length - 1 && (
                                         <MenuItemDivider />
                                     )}

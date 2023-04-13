@@ -72,22 +72,18 @@ export default function EnablePublicShareOptions({
             />
             <MenuItemGroup>
                 <EnteMenuItem
+                    label={t('CREATE_PUBLIC_SHARING')}
                     startIcon={<LinkIcon />}
                     color="primary"
-                    onClick={createSharableURLHelper}>
-                    <Typography fontWeight={'bold'}>
-                        {t('CREATE_PUBLIC_SHARING')}
-                    </Typography>
-                </EnteMenuItem>
+                    onClick={createSharableURLHelper}
+                />
                 <MenuItemDivider hasIcon />
                 <EnteMenuItem
+                    label={t('COLLECT_PHOTOS')}
                     startIcon={<LinkIcon />}
                     color="primary"
-                    onClick={createCollectPhotoShareableURLHelper}>
-                    <Typography fontWeight={'bold'}>
-                        {t('COLLECT_PHOTOS')}
-                    </Typography>
-                </EnteMenuItem>
+                    onClick={createCollectPhotoShareableURLHelper}
+                />
             </MenuItemGroup>
             {sharableLinkError && (
                 <Typography

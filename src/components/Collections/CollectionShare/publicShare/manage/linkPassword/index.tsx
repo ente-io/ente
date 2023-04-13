@@ -49,11 +49,11 @@ export function ManageLinkPassword({
     return (
         <>
             <EnteMenuItem
+                label={t('LINK_PASSWORD_LOCK')}
                 onClick={handlePasswordChangeSetting}
                 checked={!!publicShareProp?.passwordEnabled}
-                hasSwitch>
-                {t('LINK_PASSWORD_LOCK')}
-            </EnteMenuItem>
+                variant="toggle"
+            />
             <PublicLinkSetPassword
                 open={changePasswordView}
                 onClose={closeConfigurePassword}
