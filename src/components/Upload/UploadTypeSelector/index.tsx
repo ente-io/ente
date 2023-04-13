@@ -4,7 +4,6 @@ import { t } from 'i18next';
 import { default as FileUploadIcon } from '@mui/icons-material/ImageOutlined';
 import { default as FolderUploadIcon } from '@mui/icons-material/PermMediaOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
-import { UploadTypeOption } from './option';
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
 } from 'components/DialogBox/TitleWithCloseButton';
@@ -12,6 +11,8 @@ import { Box, Dialog, Stack, Typography } from '@mui/material';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { isMobileOrTable } from 'utils/common/deviceDetection';
 import { UploadTypeSelectorIntent } from 'types/gallery';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import ChevronRight from '@mui/icons-material/ChevronRight';
 interface Iprops {
     onClose: () => void;
     show: boolean;
@@ -68,24 +69,28 @@ export default function UploadTypeSelector({
                 <Stack spacing={0.5}>
                     {uploadTypeSelectorIntent !==
                         UploadTypeSelectorIntent.import && (
-                        <UploadTypeOption
+                        <EnteMenuItem
                             onClick={uploadFiles}
-                            startIcon={<FileUploadIcon />}>
-                            {t('UPLOAD_FILES')}
-                        </UploadTypeOption>
+                            startIcon={<FileUploadIcon />}
+                            endIcon={<ChevronRight />}
+                            label={t('UPLOAD_FILES')}
+                        />
                     )}
-                    <UploadTypeOption
+                    <EnteMenuItem
                         onClick={uploadFolders}
-                        startIcon={<FolderUploadIcon />}>
-                        {t('UPLOAD_DIRS')}
-                    </UploadTypeOption>
+                        startIcon={<FolderUploadIcon />}
+                        endIcon={<ChevronRight />}
+                        label={t('UPLOAD_DIRS')}
+                    />
+
                     {uploadTypeSelectorIntent !==
                         UploadTypeSelectorIntent.collectPhotos && (
-                        <UploadTypeOption
+                        <EnteMenuItem
                             onClick={uploadGoogleTakeoutZips}
-                            startIcon={<GoogleIcon />}>
-                            {t('UPLOAD_GOOGLE_TAKEOUT')}
-                        </UploadTypeOption>
+                            startIcon={<GoogleIcon />}
+                            endIcon={<ChevronRight />}
+                            label={t('UPLOAD_GOOGLE_TAKEOUT')}
+                        />
                     )}
                 </Stack>
                 <Typography p={1.5} pt={4} color="text.muted">
