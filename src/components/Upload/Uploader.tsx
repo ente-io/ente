@@ -568,21 +568,17 @@ export default function Uploader(props: Props) {
     }
 
     const uploadToSingleNewCollection = (collectionName: string) => {
-        if (collectionName) {
-            addLogLine(`upload to single collection - "${collectionName}"`);
-            uploadFilesToNewCollections(
-                UPLOAD_STRATEGY.SINGLE_COLLECTION,
-                collectionName
-            );
-        } else {
-            showCollectionCreateModal();
-        }
+        uploadFilesToNewCollections(
+            UPLOAD_STRATEGY.SINGLE_COLLECTION,
+            collectionName
+        );
     };
-    const showCollectionCreateModal = () => {
+
+    const showCollectionCreateModal = (suggestedName: string) => {
         props.setCollectionNamerAttributes({
             title: t('CREATE_COLLECTION'),
             buttonText: t('CREATE'),
-            autoFilledName: null,
+            autoFilledName: suggestedName,
             callback: uploadToSingleNewCollection,
         });
     };
@@ -611,7 +607,8 @@ export default function Uploader(props: Props) {
                     addLogLine(
                         `upload pending files to collection - ${pendingDesktopUploadCollectionName.current}`
                     );
-                    uploadToSingleNewCollection(
+                    uploadFilesToNewCollections(
+                        UPLOAD_STRATEGY.SINGLE_COLLECTION,
                         pendingDesktopUploadCollectionName.current
                     );
                     pendingDesktopUploadCollectionName.current = null;
@@ -641,9 +638,7 @@ export default function Uploader(props: Props) {
                 showNextModal = () => setChoiceModalView(true);
             } else {
                 showNextModal = () =>
-                    uploadToSingleNewCollection(
-                        importSuggestion.rootFolderName
-                    );
+                    showCollectionCreateModal(importSuggestion.rootFolderName);
             }
             props.setCollectionSelectorAttributes({
                 callback: uploadFilesToExistingCollection,
