@@ -7,8 +7,8 @@ import { useState } from 'react';
 import { t } from 'i18next';
 
 import AdvancedSettings from '../AdvancedSettings';
-import SidebarButton from '../Button';
 import { LanguageSelector } from './LanguageSelector';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 
 export default function Preferences({ open, onClose, onRootClose }) {
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
@@ -47,13 +47,11 @@ export default function Preferences({ open, onClose, onRootClose }) {
                     <Stack py="20px" spacing="24px">
                         <LanguageSelector />
                         {isElectron() && (
-                            <SidebarButton
-                                variant="contained"
-                                color="secondary"
+                            <EnteMenuItem
                                 onClick={openAdvancedSettings}
-                                endIcon={<ChevronRight />}>
-                                {t('ADVANCED')}
-                            </SidebarButton>
+                                endIcon={<ChevronRight />}
+                                label={t('ADVANCED')}
+                            />
                         )}
                     </Stack>
                 </Box>

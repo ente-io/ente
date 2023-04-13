@@ -69,8 +69,12 @@ export default function DropdownInput<T extends string>({
                     '::before , ::after': {
                         borderBottom: 'none !important',
                     },
+                    '.MuiInput-root': {
+                        background: theme.colors.background.elevated2,
+                        borderRadius: '8px',
+                    },
                     '.MuiSelect-select': {
-                        background: theme.colors.fill.faint,
+                        background: theme.colors.background.elevated2,
                         borderRadius: '8px',
                     },
                     '&&& .MuiSelect-select': {
