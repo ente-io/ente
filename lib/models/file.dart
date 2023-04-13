@@ -8,7 +8,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/ente_file.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/models/location.dart';
+import 'package:photos/models/location/location.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -72,7 +72,8 @@ class File extends EnteFile {
     file.localID = asset.id;
     file.title = asset.title;
     file.deviceFolder = pathName;
-    file.location = Location(asset.latitude, asset.longitude);
+    file.location =
+        Location(latitude: asset.latitude, longitude: asset.longitude);
     file.fileType = _fileTypeFromAsset(asset);
     file.creationTime = parseFileCreationTime(file.title, asset);
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
@@ -147,7 +148,7 @@ class File extends EnteFile {
     if (latitude == null || longitude == null) {
       location = null;
     } else {
-      location = Location(latitude, longitude);
+      location = Location(latitude: latitude, longitude: longitude);
     }
     fileType = getFileType(metadata["fileType"] ?? -1);
     fileSubType = metadata["subType"] ?? -1;

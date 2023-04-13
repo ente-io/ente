@@ -33,18 +33,22 @@ class Gallery extends StatefulWidget {
   final Stream<FilesUpdatedEvent>? reloadEvent;
   final List<Stream<Event>>? forceReloadEvents;
   final Set<EventType> removalEventTypes;
-  final SelectedFiles selectedFiles;
+  final SelectedFiles? selectedFiles;
   final String tagPrefix;
   final Widget? header;
   final Widget? footer;
   final Widget emptyState;
   final String? albumName;
   final double scrollBottomSafeArea;
+  final bool shouldCollateFilesByDay;
+  final Widget loadingWidget;
+  final bool disableScroll;
+  final bool limitSelectionToOne;
 
   const Gallery({
     required this.asyncLoader,
-    required this.selectedFiles,
     required this.tagPrefix,
+    this.selectedFiles,
     this.initialFiles,
     this.reloadEvent,
     this.forceReloadEvents,
@@ -54,6 +58,10 @@ class Gallery extends StatefulWidget {
     this.emptyState = const EmptyState(),
     this.scrollBottomSafeArea = 120.0,
     this.albumName = '',
+    this.shouldCollateFilesByDay = true,
+    this.loadingWidget = const EnteLoadingWidget(),
+    this.disableScroll = false,
+    this.limitSelectionToOne = false,
     Key? key,
   }) : super(key: key);
 
@@ -168,7 +176,8 @@ class _GalleryState extends State<Gallery> {
 
   // Collates files and returns `true` if it resulted in a gallery reload
   bool _onFilesLoaded(List<File> files) {
-    final updatedCollatedFiles = _collateFiles(files);
+    final updatedCollatedFiles =
+        widget.shouldCollateFilesByDay ? _collateFiles(files) : [files];
     if (_collatedFiles.length != updatedCollatedFiles.length ||
         _collatedFiles.isEmpty) {
       if (mounted) {
@@ -198,7 +207,7 @@ class _GalleryState extends State<Gallery> {
   Widget build(BuildContext context) {
     _logger.finest("Building Gallery  ${widget.tagPrefix}");
     if (!_hasLoadedFiles) {
-      return const EnteLoadingWidget();
+      return widget.loadingWidget;
     }
     _photoGridSize = LocalSettings.instance.getPhotoGridSize();
     return _getListView();
@@ -211,6 +220,7 @@ class _GalleryState extends State<Gallery> {
       startIndex: 0,
       totalCount: _collatedFiles.length,
       isDraggableScrollbarEnabled: _collatedFiles.length > 10,
+      disableScroll: widget.disableScroll,
       waitBuilder: (_) {
         return const EnteLoadingWidget();
       },
@@ -246,8 +256,10 @@ class _GalleryState extends State<Gallery> {
               .on<GalleryIndexUpdatedEvent>()
               .where((event) => event.tag == widget.tagPrefix)
               .map((event) => event.index),
+          widget.shouldCollateFilesByDay,
           logTag: _logTag,
           photoGirdSize: _photoGridSize,
+          limitSelectionToOne: widget.limitSelectionToOne,
         );
         if (widget.header != null && index == 0) {
           gallery = Column(children: [widget.header!, gallery]);

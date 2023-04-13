@@ -13,6 +13,7 @@ class TitleBarWidget extends StatelessWidget {
   final bool isFlexibleSpaceDisabled;
   final bool isOnTopOfScreen;
   final Color? backgroundColor;
+  final bool isSliver;
   const TitleBarWidget({
     this.leading,
     this.title,
@@ -24,103 +25,96 @@ class TitleBarWidget extends StatelessWidget {
     this.isFlexibleSpaceDisabled = false,
     this.isOnTopOfScreen = true,
     this.backgroundColor,
+    this.isSliver = true,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     const toolbarHeight = 48.0;
-    final textTheme = getEnteTextTheme(context);
-    final colorTheme = getEnteColorScheme(context);
-    return SliverAppBar(
-      backgroundColor: backgroundColor,
-      primary: isOnTopOfScreen ? true : false,
-      toolbarHeight: toolbarHeight,
-      leadingWidth: 48,
-      automaticallyImplyLeading: false,
-      pinned: true,
-      expandedHeight: isFlexibleSpaceDisabled ? toolbarHeight : 102,
-      centerTitle: false,
-      titleSpacing: 4,
-      title: Padding(
-        padding: EdgeInsets.only(left: isTitleH2WithoutLeading ? 16 : 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            title == null
-                ? const SizedBox.shrink()
-                : Text(
-                    title!,
-                    style: isTitleH2WithoutLeading
-                        ? textTheme.h2Bold
-                        : textTheme.largeBold,
-                  ),
-            caption == null || isTitleH2WithoutLeading
-                ? const SizedBox.shrink()
-                : Text(
-                    caption!,
-                    style: textTheme.mini.copyWith(color: colorTheme.textMuted),
-                  )
-          ],
+    if (isSliver) {
+      return SliverAppBar(
+        backgroundColor: backgroundColor,
+        primary: isOnTopOfScreen ? true : false,
+        toolbarHeight: toolbarHeight,
+        leadingWidth: 48,
+        automaticallyImplyLeading: false,
+        pinned: true,
+        expandedHeight: isFlexibleSpaceDisabled ? toolbarHeight : 102,
+        centerTitle: false,
+        titleSpacing: 4,
+        title: TitleWidget(
+          title: title,
+          caption: caption,
+          isTitleH2WithoutLeading: isTitleH2WithoutLeading,
         ),
-      ),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
-            children: _actionsWithPaddingInBetween(),
-          ),
-        ),
-      ],
-      leading: isTitleH2WithoutLeading
-          ? null
-          : leading ??
-              IconButtonWidget(
-                icon: Icons.arrow_back_outlined,
-                iconButtonType: IconButtonType.primary,
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-      flexibleSpace: isFlexibleSpaceDisabled
-          ? null
-          : FlexibleSpaceBar(
-              background: SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const SizedBox(height: toolbarHeight),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 4,
-                        horizontal: 16,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          flexibleSpaceTitle == null
-                              ? const SizedBox.shrink()
-                              : flexibleSpaceTitle!,
-                          flexibleSpaceCaption == null
-                              ? const SizedBox.shrink()
-                              : Text(
-                                  flexibleSpaceCaption!,
-                                  style: textTheme.small.copyWith(
-                                    color: colorTheme.textMuted,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Row(
+              children: _actionsWithPaddingInBetween(),
             ),
-    );
+          ),
+        ],
+        leading: isTitleH2WithoutLeading
+            ? null
+            : leading ??
+                IconButtonWidget(
+                  icon: Icons.arrow_back_outlined,
+                  iconButtonType: IconButtonType.primary,
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+        flexibleSpace: isFlexibleSpaceDisabled
+            ? null
+            : FlexibleSpaceBarWidget(
+                flexibleSpaceTitle,
+                flexibleSpaceCaption,
+                toolbarHeight,
+              ),
+      );
+    } else {
+      return AppBar(
+        backgroundColor: backgroundColor,
+        primary: isOnTopOfScreen ? true : false,
+        toolbarHeight: toolbarHeight,
+        leadingWidth: 48,
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        titleSpacing: 4,
+        title: TitleWidget(
+          title: title,
+          caption: caption,
+          isTitleH2WithoutLeading: isTitleH2WithoutLeading,
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Row(
+              children: _actionsWithPaddingInBetween(),
+            ),
+          ),
+        ],
+        leading: isTitleH2WithoutLeading
+            ? null
+            : leading ??
+                IconButtonWidget(
+                  icon: Icons.arrow_back_outlined,
+                  iconButtonType: IconButtonType.primary,
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+        flexibleSpace: isFlexibleSpaceDisabled
+            ? null
+            : FlexibleSpaceBarWidget(
+                flexibleSpaceTitle,
+                flexibleSpaceCaption,
+                toolbarHeight,
+              ),
+      );
+    }
   }
 
   _actionsWithPaddingInBetween() {
@@ -148,5 +142,91 @@ class TitleBarWidget extends StatelessWidget {
       }
     }
     return actions;
+  }
+}
+
+class TitleWidget extends StatelessWidget {
+  final String? title;
+  final String? caption;
+  final bool isTitleH2WithoutLeading;
+  const TitleWidget(
+      {this.title,
+      this.caption,
+      required this.isTitleH2WithoutLeading,
+      super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    return Padding(
+      padding: EdgeInsets.only(left: isTitleH2WithoutLeading ? 16 : 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          title == null
+              ? const SizedBox.shrink()
+              : Text(
+                  title!,
+                  style: isTitleH2WithoutLeading
+                      ? textTheme.h2Bold
+                      : textTheme.largeBold,
+                ),
+          caption == null || isTitleH2WithoutLeading
+              ? const SizedBox.shrink()
+              : Text(
+                  caption!,
+                  style: textTheme.miniMuted,
+                )
+        ],
+      ),
+    );
+  }
+}
+
+class FlexibleSpaceBarWidget extends StatelessWidget {
+  final Widget? flexibleSpaceTitle;
+  final String? flexibleSpaceCaption;
+  final double toolbarHeight;
+  const FlexibleSpaceBarWidget(
+      this.flexibleSpaceTitle, this.flexibleSpaceCaption, this.toolbarHeight,
+      {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    return FlexibleSpaceBar(
+      background: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            SizedBox(height: toolbarHeight),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 4,
+                horizontal: 16,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  flexibleSpaceTitle == null
+                      ? const SizedBox.shrink()
+                      : flexibleSpaceTitle!,
+                  flexibleSpaceCaption == null
+                      ? const SizedBox.shrink()
+                      : Text(
+                          flexibleSpaceCaption!,
+                          style: textTheme.smallMuted,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

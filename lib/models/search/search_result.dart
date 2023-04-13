@@ -1,6 +1,5 @@
 import 'package:photos/models/file.dart';
-
-import "search_types.dart";
+import "package:photos/models/search/search_types.dart";
 
 abstract class SearchResult {
   ResultType type();

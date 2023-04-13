@@ -6,6 +6,8 @@ on:
     paths:
       - 'lib/l10n/intl_en.arb'
     branches: [ main ]
+  schedule:
+    - cron: '0 */12 * * *' # Every 12 hours - https://crontab.guru/#0_*/12_*_*_*
 
 jobs:
   synchronize-with-crowdin:
