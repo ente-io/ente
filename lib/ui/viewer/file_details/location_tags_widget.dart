@@ -77,7 +77,6 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
               );
         });
       }
-
       return [
         Text(
           S.of(context).groupNearbyPhotos,
@@ -93,31 +92,30 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
           onTap = null;
         });
       }
+      final result = locationTags
+          .map(
+            (locationTagEntity) => ChipButtonWidget(
+              locationTagEntity.item.name,
+              onTap: () {
+                routeToPage(
+                  context,
+                  LocationScreenStateProvider(
+                    locationTagEntity,
+                    const LocationScreen(),
+                  ),
+                );
+              },
+            ),
+          )
+          .toList();
+      result.add(
+        ChipButtonWidget(
+          null,
+          leadingIcon: Icons.add_outlined,
+          onTap: () => showAddLocationSheet(context, widget.centerPoint),
+        ),
+      );
+      return result;
     }
-
-    final result = locationTags
-        .map(
-          (locationTagEntity) => ChipButtonWidget(
-            locationTagEntity.item.name,
-            onTap: () {
-              routeToPage(
-                context,
-                LocationScreenStateProvider(
-                  locationTagEntity,
-                  const LocationScreen(),
-                ),
-              );
-            },
-          ),
-        )
-        .toList();
-    result.add(
-      ChipButtonWidget(
-        null,
-        leadingIcon: Icons.add_outlined,
-        onTap: () => showAddLocationSheet(context, widget.centerPoint),
-      ),
-    );
-    return result;
   }
 }
