@@ -10,12 +10,14 @@ class InfoItemWidget extends StatelessWidget {
   final String? title;
   final Future<List<Widget>> subtitleSection;
   final bool hasChipButtons;
+  final VoidCallback? onTap;
   const InfoItemWidget({
     required this.leadingIcon,
     this.editOnTap,
     this.title,
     required this.subtitleSection,
     this.hasChipButtons = false,
+    this.onTap,
     super.key,
   });
 
@@ -83,10 +85,13 @@ class InfoItemWidget extends StatelessWidget {
               Flexible(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 3.5, 16, 3.5),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: children,
+                  child: GestureDetector(
+                    onTap: onTap,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: children,
+                    ),
                   ),
                 ),
               ),
