@@ -13,13 +13,14 @@ import React from 'react';
 interface Iprops {
     onClick: () => void;
     color?: ButtonProps['color'];
-    variant?: 'primary' | 'captioned' | 'toggle' | 'secondary';
+    variant?: 'primary' | 'captioned' | 'toggle' | 'secondary' | 'mini';
     fontWeight?: TypographyProps['fontWeight'];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
     label?: string;
     subText?: string;
     checked?: boolean;
+    labelComponent?: React.ReactNode;
 }
 export function EnteMenuItem({
     onClick,
@@ -31,6 +32,7 @@ export function EnteMenuItem({
     checked,
     variant = 'primary',
     fontWeight = 'bold',
+    labelComponent,
 }: Iprops) {
     const handleClick = () => {
         onClick();
@@ -42,10 +44,11 @@ export function EnteMenuItem({
             sx={{
                 minWidth: '220px',
                 color: (theme) => theme.palette[color].main,
-                ...(variant !== 'secondary' && {
-                    backgroundColor: (theme) =>
-                        theme.colors.background.elevated2,
-                }),
+                ...(variant !== 'secondary' &&
+                    variant !== 'mini' && {
+                        backgroundColor: (theme) =>
+                            theme.colors.background.elevated2,
+                    }),
                 '& .MuiSvgIcon-root': {
                     fontSize: '20px',
                 },
@@ -56,8 +59,14 @@ export function EnteMenuItem({
                 <VerticallyCenteredFlex sx={{ py: '14px' }} gap={'10px'}>
                     {startIcon && startIcon}
                     <Box px={'2px'}>
-                        {variant === 'captioned' ? (
+                        {labelComponent ? (
+                            labelComponent
+                        ) : variant === 'captioned' ? (
                             <CaptionedText mainText={label} subText={subText} />
+                        ) : variant === 'mini' ? (
+                            <Typography variant="mini" color="text.muted">
+                                {label}
+                            </Typography>
                         ) : (
                             <Typography fontWeight={fontWeight}>
                                 {label}
