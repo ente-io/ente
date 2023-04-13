@@ -5,7 +5,6 @@ import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
 import { addLogLine, getDebugLogs } from 'utils/logging';
-import SidebarButton from './Button';
 import isElectron from 'is-electron';
 import ElectronService from 'services/electron/common';
 import Typography from '@mui/material/Typography';
@@ -15,6 +14,7 @@ import {
     testZipFileReading,
     testZipWithRootFileReadingTest,
 } from '../../../tests/zip-file-reading.test';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 
 export default function DebugSection() {
     const appContext = useContext(AppContext);
@@ -57,28 +57,39 @@ export default function DebugSection() {
 
     return (
         <>
-            <SidebarButton
+            <EnteMenuItem
                 onClick={confirmLogDownload}
-                typographyVariant="mini"
-                sx={{ fontWeight: 'normal', color: 'text.muted' }}>
-                {t('DOWNLOAD_UPLOAD_LOGS')}
-            </SidebarButton>
+                variant="mini"
+                label={t('DOWNLOAD_UPLOAD_LOGS')}
+            />
             {appVersion && (
-                <Typography p={1.5} color="text.muted" variant="mini">
+                <Typography
+                    py={'14px'}
+                    px={'16px'}
+                    color="text.muted"
+                    variant="mini">
                     {appVersion}
                 </Typography>
             )}
             {isInternalUser() && (
                 <>
-                    <SidebarButton onClick={testUpload}>
-                        Test Upload
-                    </SidebarButton>
-                    <SidebarButton onClick={testZipFileReading}>
-                        Test Zip file reading
-                    </SidebarButton>
-                    <SidebarButton onClick={testZipWithRootFileReadingTest}>
-                        Zip with Root file Test
-                    </SidebarButton>
+                    <EnteMenuItem
+                        variant="secondary"
+                        onClick={testUpload}
+                        label={'Test Upload'}
+                    />
+
+                    <EnteMenuItem
+                        variant="secondary"
+                        onClick={testZipFileReading}
+                        label="Test Zip file reading"
+                    />
+
+                    <EnteMenuItem
+                        variant="secondary"
+                        onClick={testZipWithRootFileReadingTest}
+                        label="Zip with Root file Test"
+                    />
                 </>
             )}
         </>

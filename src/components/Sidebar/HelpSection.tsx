@@ -1,5 +1,4 @@
 import React, { useContext, useState } from 'react';
-import SidebarButton from './Button';
 import { t } from 'i18next';
 
 import ExportModal from 'components/ExportModal';
@@ -12,6 +11,8 @@ import EnteSpinner from 'components/EnteSpinner';
 import { getDownloadAppMessage } from 'utils/ui';
 import { NoStyleAnchor } from 'components/pages/sharedAlbum/GoToEnte';
 import { openLink } from 'utils/common';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import { Typography } from '@mui/material';
 
 export default function HelpSection() {
     const [exportModalView, setExportModalView] = useState(false);
@@ -25,7 +26,7 @@ export default function HelpSection() {
         openLink(feedbackURL, true);
     }
 
-    function exportFiles() {
+    function openExportModal() {
         if (isElectron()) {
             setExportModalView(true);
         } else {
@@ -35,23 +36,32 @@ export default function HelpSection() {
 
     return (
         <>
-            <SidebarButton onClick={openFeedbackURL}>
-                {t('REQUEST_FEATURE')}
-            </SidebarButton>
-            <SidebarButton
-                LinkComponent={NoStyleAnchor}
-                href="mailto:contact@ente.io">
-                {t('SUPPORT')}
-            </SidebarButton>
-            <SidebarButton onClick={exportFiles}>
-                <div style={{ display: 'flex' }}>
-                    {t('EXPORT')}
-                    <div style={{ width: '20px' }} />
-                    {exportService.isExportInProgress() && (
+            <EnteMenuItem
+                onClick={openFeedbackURL}
+                label={t('REQUEST_FEATURE')}
+                variant="secondary"
+            />
+            <EnteMenuItem
+                onClick={() => openLink('mailto:contact@ente.io', true)}
+                labelComponent={
+                    <NoStyleAnchor href="mailto:contact@ente.io">
+                        <Typography fontWeight={'bold'}>
+                            {t('SUPPORT')}
+                        </Typography>
+                    </NoStyleAnchor>
+                }
+                variant="secondary"
+            />
+            <EnteMenuItem
+                onClick={openExportModal}
+                label={t('EXPORT')}
+                endIcon={
+                    exportService.isExportInProgress() && (
                         <EnteSpinner size="20px" />
-                    )}
-                </div>
-            </SidebarButton>
+                    )
+                }
+                variant="secondary"
+            />
             <ExportModal
                 show={exportModalView}
                 onHide={() => setExportModalView(false)}
