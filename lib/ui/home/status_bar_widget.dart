@@ -101,7 +101,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         _showErrorBanner
             ? HeaderErrorWidget(error: _syncError)
             : const SizedBox.shrink(),
-        !UserRemoteFlagService.instance.shouldShowRecoveryVerification()
+        UserRemoteFlagService.instance.shouldShowRecoveryVerification()
             ? Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
