@@ -70,11 +70,11 @@ export default function DropdownInput<T extends string>({
                         borderBottom: 'none !important',
                     },
                     '.MuiInput-root': {
-                        background: theme.colors.background.elevated2,
+                        background: theme.colors.fill.faint,
                         borderRadius: '8px',
                     },
                     '.MuiSelect-select': {
-                        background: theme.colors.background.elevated2,
+                        background: theme.colors.fill.faint,
                         borderRadius: '8px',
                     },
                     '&&& .MuiSelect-select': {
