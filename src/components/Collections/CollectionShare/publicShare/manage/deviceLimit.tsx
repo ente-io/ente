@@ -76,7 +76,7 @@ export function ManageDeviceLimit({
                             {deviceLimitOptions.map((item, index) => (
                                 <>
                                     <EnteMenuItem
-                                        variant="regular"
+                                        fontWeight="normal"
                                         key={item.label}
                                         onClick={changeDeviceLimitValue(
                                             item.value

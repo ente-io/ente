@@ -86,7 +86,7 @@ export function ManageLinkExpiry({
                             {shareExpireOption.map((item, index) => (
                                 <>
                                     <EnteMenuItem
-                                        variant="regular"
+                                        fontWeight="normal"
                                         key={item.value()}
                                         onClick={changeShareExpiryValue(
                                             item.value()
