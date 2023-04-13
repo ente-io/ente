@@ -50,7 +50,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   bool _isImage = false;
   late int _currentUserID;
   bool showExifListTile = false;
-  bool hasGPSData = false;
+  bool hasLocationData = false;
 
   @override
   void initState() {
@@ -61,7 +61,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     _exifNotifier.addListener(() {
       if (_exifNotifier.value != null) {
         _generateExifForLocation(_exifNotifier.value!);
-        hasGPSData = _haGPSData();
+        hasLocationData = _hasLocationData();
       }
     });
     if (_isImage) {
@@ -142,7 +142,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         ValueListenableBuilder(
           valueListenable: _exifNotifier,
           builder: (context, _, __) {
-            return hasGPSData
+            return hasLocationData
                 ? Column(
                     children: [
                       LocationTagsWidget(
@@ -231,7 +231,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     );
   }
 
-  bool _haGPSData() {
+  bool _hasLocationData() {
     final fileLocation = widget.file.location;
     final hasLocation = (fileLocation != null &&
             fileLocation.latitude != null &&
