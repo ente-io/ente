@@ -1,4 +1,10 @@
-import { MenuItem, ButtonProps, Box, Typography } from '@mui/material';
+import {
+    MenuItem,
+    ButtonProps,
+    Box,
+    Typography,
+    TypographyProps,
+} from '@mui/material';
 import { CaptionedText } from 'components/CaptionedText';
 import PublicShareSwitch from 'components/Collections/CollectionShare/publicShare/switch';
 import { SpaceBetweenFlex, VerticallyCenteredFlex } from 'components/Container';
@@ -7,7 +13,8 @@ import React from 'react';
 interface Iprops {
     onClick: () => void;
     color?: ButtonProps['color'];
-    variant?: 'primary' | 'regular' | 'captioned' | 'toggle';
+    variant?: 'primary' | 'captioned' | 'toggle' | 'secondary';
+    fontWeight?: TypographyProps['fontWeight'];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
     label?: string;
@@ -23,6 +30,7 @@ export function EnteMenuItem({
     subText,
     checked,
     variant = 'primary',
+    fontWeight = 'bold',
 }: Iprops) {
     const handleClick = () => {
         onClick();
@@ -34,7 +42,10 @@ export function EnteMenuItem({
             sx={{
                 minWidth: '220px',
                 color: (theme) => theme.palette[color].main,
-                backgroundColor: (theme) => theme.colors.background.elevated2,
+                ...(variant !== 'secondary' && {
+                    backgroundColor: (theme) =>
+                        theme.colors.background.elevated2,
+                }),
                 '& .MuiSvgIcon-root': {
                     fontSize: '20px',
                 },
@@ -45,12 +56,12 @@ export function EnteMenuItem({
                 <VerticallyCenteredFlex sx={{ py: '14px' }} gap={'10px'}>
                     {startIcon && startIcon}
                     <Box px={'2px'}>
-                        {variant === 'primary' ? (
-                            <Typography fontWeight={'bold'}>{label}</Typography>
-                        ) : variant === 'captioned' ? (
+                        {variant === 'captioned' ? (
                             <CaptionedText mainText={label} subText={subText} />
                         ) : (
-                            <Typography>{label}</Typography>
+                            <Typography fontWeight={fontWeight}>
+                                {label}
+                            </Typography>
                         )}
                     </Box>
                 </VerticallyCenteredFlex>
