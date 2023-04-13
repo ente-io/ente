@@ -96,6 +96,7 @@
   "pleaseTryAgain": "Veuillez réessayer",
   "recreatePasswordTitle": "Recréer le mot de passe",
   "useRecoveryKey": "Utiliser la clé de récupération",
+  "recreatePasswordBody": "L'appareil actuel n'est pas assez puissant pour vérifier votre mot de passe, mais nous pouvons régénérer d'une manière qui fonctionne avec tous les appareils.\n\nVeuillez vous connecter à l'aide de votre clé de récupération et régénérer votre mot de passe (vous pouvez réutiliser le même si vous le souhaitez).",
   "verifyPassword": "Vérifier le mot de passe",
   "recoveryKey": "Clé de récupération",
   "recoveryKeyOnForgotPassword": "Si vous oubliez votre mot de passe, la seule façon de récupérer vos données sera grâce à cette clé.",
@@ -182,6 +183,78 @@
   "linkNeverExpires": "Jamais",
   "expiredLinkInfo": "Ce lien a expiré. Veuillez sélectionner un nouveau délai d'expiration ou désactiver l'expiration du lien.",
   "setAPassword": "Définir un mot de passe",
+  "lockButtonLabel": "Verrouiller",
+  "enterPassword": "Saisissez le mot de passe",
+  "removeLink": "Supprimer le lien",
+  "manageLink": "Gérer le lien",
+  "linkExpiresOn": "Le lien expirera le {expiryTime}",
+  "albumUpdated": "Album mis à jour",
+  "maxDeviceLimitSpikeHandling": "Lorsqu'elle est définie au maximum ({maxValue}), la limite de l'appareil sera assouplie pour permettre des pointes temporaires d'un grand nombre de téléspectateurs.",
+  "@maxDeviceLimitSpikeHandling": {
+    "placeholders": {
+      "maxValue": {
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
+  "never": "Jamais",
+  "custom": "Personnaliser",
+  "@custom": {
+    "description": "Label for setting custom value for link expiry"
+  },
+  "after1Hour": "Après 1 heure",
+  "after1Day": "Après 1 jour",
+  "after1Week": "Après 1 semaine",
+  "after1Month": "Après 1 mois",
+  "after1Year": "Après 1 an",
+  "manageParticipants": "Gérer",
+  "collabLinkSectionDescription": "Créez un lien pour permettre aux gens d'ajouter et de voir des photos dans votre album partagé sans avoir besoin d'une application ente ou d'un compte. Idéal pour collecter des photos d'événement.",
+  "collectPhotos": "Récupérer les photos",
+  "collaborativeLink": "Lien collaboratif",
+  "shareWithNonenteUsers": "Partager avec des utilisateurs non-ente",
+  "createPublicLink": "Créer un lien public",
+  "sendLink": "Envoyer le lien",
+  "copyLink": "Copier le lien",
+  "linkHasExpired": "Le lien a expiré",
+  "publicLinkEnabled": "Lien public activé",
+  "shareALink": "Partager le lien",
+  "sharedAlbumSectionDescription": "Créez des albums partagés et collaboratifs avec d'autres utilisateurs de ente, y compris des utilisateurs sur des plans gratuits.",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Partagez avec des personnes spécifiques} =1 {Partagé avec 1 personne} other {Partagé avec {numberOfPeople} des gens}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "thisIsYourVerificationId": "Ceci est votre ID de vérification",
+  "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Quelqu'un qui partage des albums avec vous devrait voir le même ID sur son appareil.",
+  "howToViewShareeVerificationID": "Demandez-leur d'appuyer longuement sur leur adresse e-mail sur l'écran des paramètres et de vérifier que les identifiants des deux appareils correspondent.",
+  "thisIsPersonVerificationId": "Ceci est l'ID de vérification de {email}",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
+  "verificationId": "ID de vérification",
+  "verifyEmailID": "Vérifier {email}",
+  "emailNoEnteAccount": "{email} n'a pas de compte ente.\n\nEnvoyez une invitation pour partager des photos.",
+  "shareMyVerificationID": "Voici mon ID de vérification : {verificationID} pour ente.io.",
+  "shareTextConfirmOthersVerificationID": "Hé, pouvez-vous confirmer qu'il s'agit de votre ID de vérification ente.io : {verificationID}",
+  "somethingWentWrong": "Un problème est survenu",
+  "sendInvite": "Envoyer Invitations",
+  "shareTextRecommendUsingEnte": "Téléchargez ente pour que nous puissions facilement partager des photos et des vidéos de qualité originale\n\nhttps://ente.io/#download",
+  "done": "Terminé",
+  "applyCodeTitle": "Utiliser le code",
+  "enterCodeDescription": "Entrez le code fourni par votre ami pour réclamer de l'espace de stockage gratuit pour vous deux",
+  "apply": "Appliquer",
+  "failedToApplyCode": "Impossible d'appliquer le code",
+  "enterReferralCode": "Entrez le code de parrainage",
   "codeAppliedPageTitle": "Code appliqué",
   "storageInGB": "{storageAmountInGB} Go",
   "claimed": "Réclamée",
@@ -195,5 +268,214 @@
   "shareTextReferralCode": "code de parrainage ente : {referralCode} \n\nAppliquez le dans Paramètres → Général → Références pour obtenir {referralStorageInGB} Go gratuitement après votre inscription à un plan payant\n\nhttps://ente.io",
   "claimFreeStorage": "Réclamer le stockage gratuit",
   "inviteYourFriends": "Invite tes ami(e)s",
-  "failedToFetchReferralDetails": "Impossible de récupérer les détails du parrainage. Veuillez réessayer plus tard."
+  "failedToFetchReferralDetails": "Impossible de récupérer les détails du parrainage. Veuillez réessayer plus tard.",
+  "referralStep1": "1. Donnez ce code à vos amis",
+  "referralStep2": "2. Ils s'inscrivent à une offre payante",
+  "referralStep3": "3. Vous recevez tous les deux {storageInGB} GB* gratuits",
+  "referralsAreCurrentlyPaused": "Les recommandations sont actuellement en pause",
+  "youCanAtMaxDoubleYourStorage": "* Vous pouvez au maximum doubler votre espace de stockage",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Votre famille a demandé {storageAmountInGb} Gb jusqu'à présent} false {Vous avez réclamé {storageAmountInGb} Gb jusqu'à présent} other {Vous avez réclamé {storageAmountInGb} Gbjusqu'à présent!}}",
+  "@claimedStorageSoFar": {
+    "placeholders": {
+      "isFamilyMember": {
+        "type": "String",
+        "example": "true"
+      },
+      "storageAmountInGb": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "faq": "FAQ",
+  "oopsSomethingWentWrong": "Oups, une erreur est arrivée",
+  "peopleUsingYourCode": "Personnes utilisant votre code",
+  "eligible": "éligible",
+  "total": "total",
+  "codeUsedByYou": "Code utilisé par vous",
+  "freeStorageClaimed": "Stockage gratuit réclamé",
+  "freeStorageUsable": "Stockage gratuit utilisable",
+  "usableReferralStorageInfo": "Le stockage utilisable est limité par votre offre actuelle. Le stockage excédentaire deviendra automatiquement utilisable lorsque vous mettez à niveau votre offre.",
+  "removeFromAlbumTitle": "Retirer de l'album ?",
+  "removeFromAlbum": "Retirer de l'album",
+  "itemsWillBeRemovedFromAlbum": "Les éléments sélectionnés seront supprimés de cet album",
+  "removeShareItemsWarning": "Certains des objets que vous êtes en train de retirer ont été ajoutés par d'autres personnes, vous perdrez l'accès vers ces objets",
+  "addingToFavorites": "Ajout aux favoris...",
+  "removingFromFavorites": "Suppression des favoris…",
+  "sorryCouldNotAddToFavorites": "Désolé, impossible d'ajouter aux favoris !",
+  "sorryCouldNotRemoveFromFavorites": "Désolé, impossible de supprimer des favoris !",
+  "subscribeToEnableSharing": "Il semble que votre abonnement ait expiré. Veuillez vous abonner pour activer le partage.",
+  "subscribe": "S'abonner",
+  "canOnlyRemoveFilesOwnedByYou": "Vous ne pouvez supprimer que les fichiers que vous possédez",
+  "deleteSharedAlbum": "Supprimer l'album partagé ?",
+  "deleteAlbum": "Supprimer l'album",
+  "deleteAlbumDialog": "Supprimer aussi les photos (et vidéos) présentes dans cet album depuis <bold>tous</bold> les autres albums dont ils font partie ?",
+  "deleteSharedAlbumDialogBody": "L'album sera supprimé pour tout le monde\n\nVous perdrez l'accès aux photos partagées dans cet album qui est détenues par d'autres personnes",
+  "yesRemove": "Oui, supprimer",
+  "creatingLink": "Création du lien...",
+  "removeWithQuestionMark": "Enlever?",
+  "removeParticipantBody": "{userEmail} sera retiré de cet album partagé\n\nToutes les photos ajoutées par eux seront également retirées de l'album",
+  "keepPhotos": "Conserver les photos",
+  "deletePhotos": "Supprimer des photos",
+  "inviteToEnte": "Inviter à ente",
+  "removePublicLink": "Supprimer le lien public",
+  "disableLinkMessage": "Cela supprimera le lien public pour accéder à \"{albumName}\".",
+  "sharing": "Partage...",
+  "youCannotShareWithYourself": "Vous ne pouvez pas partager avec vous-même",
+  "archive": "Archiver",
+  "createAlbumActionHint": "Appuyez longuement pour sélectionner des photos et cliquez sur + pour créer un album",
+  "about": "À propos",
+  "advanced": "Avancé",
+  "general": "Général",
+  "security": "Sécurité",
+  "authToViewYourRecoveryKey": "Veuillez vous authentifier pour afficher votre clé de récupération",
+  "twofactor": "Double authentification",
+  "authToConfigureTwofactorAuthentication": "Veuillez vous authentifier pour configurer l'authentification à deux facteurs",
+  "lockscreen": "Ecran de vérouillage",
+  "authToChangeLockscreenSetting": "Veuillez vous authentifier pour modifier les paramètres de l'écran de verrouillage",
+  "lockScreenEnablePreSteps": "Pour activer l'écran de verrouillage, veuillez configurer le code d'accès de l'appareil ou le verrouillage de l'écran dans les paramètres de votre système.",
+  "viewActiveSessions": "Afficher les sessions actives",
+  "mastodon": "Mastodon",
+  "matrix": "Matrix",
+  "discord": "Discord",
+  "reddit": "Reddit",
+  "yourStorageDetailsCouldNotBeFetched": "Vos informations de stockage n'ont pas pu être récupérées",
+  "reportABug": "Signaler un bug",
+  "reportBug": "Signaler un bug",
+  "suggestFeatures": "Suggérer des fonctionnalités",
+  "support": "Support",
+  "theme": "Thème",
+  "lightTheme": "Clair",
+  "darkTheme": "Sombre",
+  "systemTheme": "Système",
+  "freeTrial": "Essai gratuit",
+  "selectYourPlan": "Sélectionner votre offre",
+  "enteSubscriptionPitch": "ente conserve vos souvenirs, donc ils sont toujours disponibles pour vous, même si vous perdez votre appareil.",
+  "enteSubscriptionShareWithFamily": "Vous pouvez également ajouter votre famille à votre forfait.",
+  "currentUsageIs": "L'utilisation actuelle est ",
+  "@currentUsageIs": {
+    "description": "This text is followed by storage usaged",
+    "examples": {
+      "0": "Current usage is 1.2 GB"
+    },
+    "type": "text"
+  },
+  "faqs": "FAQ",
+  "renewsOn": "Renouvellement le {endDate}",
+  "subWillBeCancelledOn": "Votre abonnement sera annulé le {endDate}",
+  "subscription": "Abonnement",
+  "paymentDetails": "Détails de paiement",
+  "manageFamily": "Gérer la famille",
+  "contactToManageSubscription": "Veuillez nous contacter à support@ente.io pour gérer votre abonnement {provider}.",
+  "renewSubscription": "Renouveler l’abonnement",
+  "cancelSubscription": "Annuler l'abonnement",
+  "areYouSureYouWantToRenew": "Êtes-vous sûr de vouloir renouveler ?",
+  "yesRenew": "Oui, renouveler",
+  "areYouSureYouWantToCancel": "Es-tu sûre de vouloir annuler?",
+  "yesCancel": "Oui, annuler",
+  "failedToRenew": "Échec du renouvellement",
+  "failedToCancel": "Échec de l'annulation",
+  "twoMonthsFreeOnYearlyPlans": "2 mois gratuits sur les forfaits annuels",
+  "monthly": "Mensuel",
+  "@monthly": {
+    "description": "The text to display for monthly plans",
+    "type": "text"
+  },
+  "yearly": "Annuel",
+  "@yearly": {
+    "description": "The text to display for yearly plans",
+    "type": "text"
+  },
+  "confirmPlanChange": "Confirmer le changement de l'offre",
+  "areYouSureYouWantToChangeYourPlan": "Êtes-vous certains de vouloir changer d'offre ?",
+  "youCannotDowngradeToThisPlan": "Vous ne pouvez pas rétrograder vers cette offre",
+  "cancelOtherSubscription": "Veuillez d'abord annuler votre abonnement existant de {paymentProvider}",
+  "@cancelOtherSubscription": {
+    "description": "The text to display when the user has an existing subscription from a different payment provider",
+    "type": "text",
+    "placeholders": {
+      "paymentProvider": {
+        "example": "Apple",
+        "type": "String"
+      }
+    }
+  },
+  "optionalAsShortAsYouLike": "Optionnel, aussi court que vous le souhaitez...",
+  "send": "Envoyer",
+  "askCancelReason": "Votre abonnement a été annulé. Souhaitez-vous partager la raison ?",
+  "thankYouForSubscribing": "Merci de vous être abonné !",
+  "yourPurchaseWasSuccessful": "Votre achat a été effectué avec succès",
+  "yourPlanWasSuccessfullyUpgraded": "Votre offre a été mise à jour avec succès",
+  "yourPlanWasSuccessfullyDowngraded": "Votre plan a été rétrogradé avec succès",
+  "yourSubscriptionWasUpdatedSuccessfully": "Votre abonnement a été mis à jour avec succès",
+  "googlePlayId": "Identifiant Google Play",
+  "usePublicLinksForPeopleNotOnEnte": "Utiliser des liens publics pour les personnes qui ne sont pas sur ente",
+  "allowPeopleToAddPhotos": "Autoriser les personnes à ajouter des photos",
+  "shareAnAlbumNow": "Partagez un album maintenant",
+  "collectEventPhotos": "Collecter des photos de l'événement",
+  "sessionExpired": "Session expirée",
+  "loggingOut": "Deconnexion...",
+  "name": "Nom",
+  "newest": "Le plus récent",
+  "lastUpdated": "Dernière mise à jour",
+  "deleteEmptyAlbums": "Supprimer les albums vides",
+  "deleteEmptyAlbumsWithQuestionMark": "Supprimer les albums vides ?",
+  "deleteAlbumsDialogBody": "Ceci supprimera tous les albums vides. Ceci est utile lorsque vous voulez réduire l'encombrement dans votre liste d'albums.",
+  "deleteProgress": "Suppression de {currentlyDeleting} / {totalCount}",
+  "permanentlyDelete": "Supprimer définitivement",
+  "canOnlyCreateLinkForFilesOwnedByYou": "Ne peut créer de lien que pour les fichiers que vous possédez",
+  "publicLinkCreated": "Lien public créé",
+  "youCanManageYourLinksInTheShareTab": "Vous pouvez gérer vos liens dans l'onglet Partage.",
+  "linkCopiedToClipboard": "Lien copié dans le presse-papiers",
+  "restore": "Restaurer",
+  "@restore": {
+    "description": "Display text for an action which triggers a restore of item from trash",
+    "type": "text"
+  },
+  "moveToAlbum": "Déplacer vers l'album",
+  "unhide": "Dévoiler",
+  "unarchive": "Désarchiver",
+  "favorite": "Favori",
+  "removeFromFavorite": "Retirer des favoris",
+  "shareLink": "Partager le lien",
+  "addToEnte": "Ajouter à ente",
+  "addToAlbum": "Ajouter à l'album",
+  "delete": "Supprimer",
+  "hide": "Masquer",
+  "itemSelectedCount": "{count} sélectionné",
+  "@itemSelectedCount": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
+  "share": "Partager",
+  "unhideToAlbum": "Afficher dans l'album",
+  "restoreToAlbum": "Restaurer vers l'album",
+  "moveItem": "{count, plural, one {Déplacez l'objet} other {Déplacez des objets}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, one {Ajoutez un objet} other {Ajoutez des objets}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
+  "createOrSelectAlbum": "Créer ou sélectionner un album",
+  "selectAlbum": "Sélectionner album",
+  "searchByAlbumNameHint": "Nom de l'album",
+  "albumTitle": "Titre de l'album",
+  "enterAlbumName": "Saisir un nom d'album",
+  "restoringFiles": "Restauration des fichiers...",
+  "movingFilesToAlbum": "Déplacement des fichiers vers l'album...",
+  "unhidingFilesToAlbum": "Démasquage des fichiers vers l'album",
+  "canNotUploadToAlbumsOwnedByOthers": "Impossible de télécharger dans les albums appartenant à d'autres personnes",
+  "uploadingFilesToAlbum": "Envoi des fichiers vers l'album...",
+  "addedSuccessfullyTo": "Ajouté avec succès à  {albumName}",
+  "movedSuccessfullyTo": "Déplacé avec succès vers {albumName}",
+  "thisAlbumAlreadyHDACollaborativeLink": "Cet album a déjà un lien collaboratif",
+  "collaborativeLinkCreatedFor": "Lien collaboratif créé pour {albumName}",
+  "askYourLovedOnesToShare": "Demandez à vos proches de partager"
 }
