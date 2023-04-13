@@ -74,14 +74,12 @@ export default function EnablePublicShareOptions({
                 <EnteMenuItem
                     label={t('CREATE_PUBLIC_SHARING')}
                     startIcon={<LinkIcon />}
-                    color="primary"
                     onClick={createSharableURLHelper}
                 />
                 <MenuItemDivider hasIcon />
                 <EnteMenuItem
                     label={t('COLLECT_PHOTOS')}
                     startIcon={<LinkIcon />}
-                    color="primary"
                     onClick={createCollectPhotoShareableURLHelper}
                 />
             </MenuItemGroup>

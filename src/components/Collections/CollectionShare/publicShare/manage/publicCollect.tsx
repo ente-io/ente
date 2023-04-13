@@ -29,7 +29,6 @@ export function ManagePublicCollect({
             <MenuItemGroup>
                 <EnteMenuItem
                     onClick={handleFileDownloadSetting}
-                    color="primary"
                     variant="toggle"
                     checked={publicShareProp?.enableCollect}
                     label={t('PUBLIC_COLLECT')}
