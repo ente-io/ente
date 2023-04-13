@@ -1,14 +1,15 @@
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import { DialogProps, Stack } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
-import { EnteMenuItem } from 'components/Menu/menuItem';
-import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import Titlebar from 'components/Titlebar';
 import { t } from 'i18next';
 import React, { useMemo, useState } from 'react';
 import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { getDeviceLimitOptions } from 'utils/collection';
-import EnteMenuItemDivider from 'components/Menu/menuItemDivider';
+import MenuItemDivider from 'components/Menu/MenuItemDivider';
+import { CaptionedText } from 'components/CaptionedText';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -55,9 +56,11 @@ export function ManageDeviceLimit({
         <>
             <EnteMenuItem
                 onClick={openDeviceLimitChangeModalView}
-                endIcon={<ChevronRight />}
-                subText={String(publicShareProp.deviceLimit)}>
-                {t('LINK_DEVICE_LIMIT')}
+                endIcon={<ChevronRight />}>
+                <CaptionedText
+                    mainText={t('LINK_DEVICE_LIMIT')}
+                    subText={publicShareProp.deviceLimit.toString()}
+                />
             </EnteMenuItem>
 
             <EnteDrawer
@@ -71,7 +74,7 @@ export function ManageDeviceLimit({
                         onRootClose={onRootClose}
                     />
                     <Stack py={'20px'} px={'8px'} spacing={'32px'}>
-                        <EnteMenuItemGroup>
+                        <MenuItemGroup>
                             {deviceLimitOptions.map((item, index) => (
                                 <>
                                     <EnteMenuItem
@@ -83,11 +86,11 @@ export function ManageDeviceLimit({
                                     </EnteMenuItem>
                                     {index !==
                                         deviceLimitOptions.length - 1 && (
-                                        <EnteMenuItemDivider />
+                                        <MenuItemDivider />
                                     )}
                                 </>
                             ))}
-                        </EnteMenuItemGroup>
+                        </MenuItemGroup>
                     </Stack>
                 </Stack>
             </EnteDrawer>

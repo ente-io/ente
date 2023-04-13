@@ -8,7 +8,7 @@ import {
 } from 'services/collectionService';
 import { Collection, PublicURL } from 'types/collection';
 import { handleSharingErrors } from 'utils/error/ui';
-import { EnteMenuItem } from 'components/Menu/menuItem';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import PublicIcon from '@mui/icons-material/Public';
 interface Iprops {
     collection: Collection;
@@ -16,9 +16,9 @@ interface Iprops {
     setCopyLinkModalView: (value: boolean) => void;
 }
 import LinkIcon from '@mui/icons-material/Link';
-import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
+import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import EnteMenuItemDivider from 'components/Menu/menuItemDivider';
+import MenuItemDivider from 'components/Menu/MenuItemDivider';
 
 export default function EnablePublicShareOptions({
     collection,
@@ -70,21 +70,25 @@ export default function EnablePublicShareOptions({
                 title={t('LINK_SHARE_TITLE')}
                 icon={<PublicIcon />}
             />
-            <EnteMenuItemGroup>
+            <MenuItemGroup>
                 <EnteMenuItem
                     startIcon={<LinkIcon />}
                     color="primary"
                     onClick={createSharableURLHelper}>
-                    {t('CREATE_PUBLIC_SHARING')}
+                    <Typography fontWeight={'bold'}>
+                        {t('CREATE_PUBLIC_SHARING')}
+                    </Typography>
                 </EnteMenuItem>
-                <EnteMenuItemDivider hasIcon />
+                <MenuItemDivider hasIcon />
                 <EnteMenuItem
                     startIcon={<LinkIcon />}
                     color="primary"
                     onClick={createCollectPhotoShareableURLHelper}>
-                    {t('COLLECT_PHOTOS')}
+                    <Typography fontWeight={'bold'}>
+                        {t('COLLECT_PHOTOS')}
+                    </Typography>
                 </EnteMenuItem>
-            </EnteMenuItemGroup>
+            </MenuItemGroup>
             {sharableLinkError && (
                 <Typography
                     textAlign={'center'}

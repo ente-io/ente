@@ -1,4 +1,4 @@
-import { EnteMenuItem } from 'components/Menu/menuItem';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
 import { Trans } from 'react-i18next';
