@@ -3,11 +3,9 @@ import 'package:logging/logging.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/album_search_result.dart';
-import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
-import 'package:photos/ui/viewer/search/result/file_result_widget.dart';
 import 'package:photos/ui/viewer/search/result/search_result_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -71,8 +69,6 @@ class SearchSuggestionsWidget extends StatelessWidget {
                         ),
                       ),
                     );
-                  } else if (result is FileSearchResult) {
-                    return FileSearchResultWidget(result);
                   } else if (result is GenericSearchResult) {
                     return SearchResultWidget(result);
                   } else {
