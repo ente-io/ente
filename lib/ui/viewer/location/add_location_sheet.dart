@@ -118,6 +118,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                                 popNavAfterSubmission: false,
                                 shouldUnfocusOnClearOrSubmit: true,
                                 alwaysShowSuccessState: true,
+                                textCapitalization: TextCapitalization.words,
                                 textEditingController: _textEditingController,
                                 isEmptyNotifier: _isEmptyNotifier,
                               ),

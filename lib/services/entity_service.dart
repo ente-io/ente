@@ -162,7 +162,7 @@ class EntityService {
         final EntityKey response = await _gateway.getKey(type);
         encryptedKey = response.encryptedKey;
         header = response.header;
-        _prefs.setString(_getEntityKeyPrefix(type), encryptedKey);
+        await _prefs.setString(_getEntityKeyPrefix(type), encryptedKey);
         _prefs.setString(_getEntityHeaderPrefix(type), header);
       }
       final entityKey = CryptoUtil.decryptSync(
@@ -171,18 +171,15 @@ class EntityService {
         Sodium.base642bin(header),
       );
       return entityKey;
-    } on EntityKeyNotFound catch (e) {
-      _logger.info(
-          "EntityKeyNotFound generating key for type $type ${e.stackTrace}");
+    } on EntityKeyNotFound {
+      _logger.info("EntityKeyNotFound generating key for type $type");
       final key = CryptoUtil.generateKey();
       final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey()!);
-      await _gateway.createKey(
-        type,
-        Sodium.bin2base64(encryptedKeyData.encryptedData!),
-        Sodium.bin2base64(encryptedKeyData.nonce!),
-      );
-      _prefs.setString(_getEntityKeyPrefix(type), encryptedKey);
-      _prefs.setString(_getEntityHeaderPrefix(type), header);
+      encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData!);
+      header = Sodium.bin2base64(encryptedKeyData.nonce!);
+      await _gateway.createKey(type, encryptedKey, header);
+      await _prefs.setString(_getEntityKeyPrefix(type), encryptedKey);
+      await _prefs.setString(_getEntityHeaderPrefix(type), header);
       return key;
     } catch (e, s) {
       _logger.severe("Failed to getOrCreateKey for type $type", e, s);
