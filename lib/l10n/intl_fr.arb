@@ -220,7 +220,7 @@
   "publicLinkEnabled": "Lien public activé",
   "shareALink": "Partager le lien",
   "sharedAlbumSectionDescription": "Créez des albums partagés et collaboratifs avec d'autres utilisateurs de ente, y compris des utilisateurs sur des plans gratuits.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Partagez avec des personnes spécifiques} =1 {Partagé avec 1 personne} other {Partagé avec {numberOfPeople} des gens}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Partagez avec des personnes spécifiques} =1 {Partagé avec 1 personne} other {Partagé avec {numberOfPeople} des gens}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
