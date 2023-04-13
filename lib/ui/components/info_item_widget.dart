@@ -86,11 +86,15 @@ class InfoItemWidget extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 3.5, 16, 3.5),
                   child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
                     onTap: onTap,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: children,
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: children,
+                      ),
                     ),
                   ),
                 ),
