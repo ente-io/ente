@@ -46,8 +46,7 @@ export function EnteMenuItem({
                 color: (theme) => theme.palette[color].main,
                 ...(variant !== 'secondary' &&
                     variant !== 'mini' && {
-                        backgroundColor: (theme) =>
-                            theme.colors.background.elevated2,
+                        backgroundColor: (theme) => theme.colors.fill.faint,
                     }),
                 '& .MuiSvgIcon-root': {
                     fontSize: '20px',
