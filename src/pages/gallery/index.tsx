@@ -109,6 +109,7 @@ import { checkConnectivity } from 'utils/common';
 import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
 import ElectronService from 'services/electron/common';
 import uploadManager from 'services/upload/uploadManager';
+import { getToken } from 'utils/common/key';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -188,7 +189,8 @@ export default function Gallery() {
     const [searchResultSummary, setSetSearchResultSummary] =
         useState<SearchResultSummary>(null);
     const syncInProgress = useRef(true);
-    const resync = useRef(false);
+    const syncInterval = useRef<NodeJS.Timeout>();
+    const resync = useRef<{ force: boolean; silent: boolean }>();
     const [deletedFileIds, setDeletedFileIds] = useState<Set<number>>(
         new Set<number>()
     );
@@ -265,14 +267,18 @@ export default function Gallery() {
             setIsFirstLoad(false);
             setJustSignedUp(false);
             setIsFirstFetch(false);
-            setInterval(() => {
+            syncInterval.current = setInterval(() => {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
-            ElectronService.registerForegroundEventListener(() =>
-                syncWithRemote(false, true)
-            );
+            ElectronService.registerForegroundEventListener(() => {
+                syncWithRemote(false, true);
+            });
         };
         main();
+        return () => {
+            clearInterval(syncInterval.current);
+            ElectronService.registerForegroundEventListener(() => {});
+        };
     }, []);
 
     useEffect(() => {
@@ -341,13 +347,18 @@ export default function Gallery() {
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
-            resync.current = true;
+            resync.current = { force, silent };
             return;
         }
         syncInProgress.current = true;
         try {
             checkConnectivity();
-            if (!(await isTokenValid())) {
+            const token = getToken();
+            if (!token) {
+                return;
+            }
+            const tokenValid = await isTokenValid(token);
+            if (!tokenValid) {
                 throw new Error(ServerErrorCodes.SESSION_EXPIRED);
             }
             !silent && startLoading();
@@ -375,8 +386,9 @@ export default function Gallery() {
         }
         syncInProgress.current = false;
         if (resync.current) {
-            resync.current = false;
-            setTimeout(() => syncWithRemote(), 0);
+            const { force, silent } = resync.current;
+            setTimeout(() => syncWithRemote(force, silent), 0);
+            resync.current = null;
         }
     };
 
