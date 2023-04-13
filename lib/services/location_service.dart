@@ -46,19 +46,23 @@ class LocationService {
     //Converting the unit from kilometers to degrees for a and b as that is
     //the unit on the caritesian plane
 
-    final a =
-        (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
-    final b = radius / kilometersPerDegree;
-    final locationTag = LocationTag(
-      name: location,
-      radius: radius,
-      aSquare: a * a,
-      bSquare: b * b,
-      centerPoint: centerPoint,
-    );
-    await EntityService.instance
-        .addOrUpdate(EntityType.location, json.encode(locationTag.toJson()));
-    Bus.instance.fire(LocationTagUpdatedEvent(LocTagEventType.add));
+    try {
+      final a =
+          (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
+      final b = radius / kilometersPerDegree;
+      final locationTag = LocationTag(
+        name: location,
+        radius: radius,
+        aSquare: a * a,
+        bSquare: b * b,
+        centerPoint: centerPoint,
+      );
+      await EntityService.instance
+          .addOrUpdate(EntityType.location, json.encode(locationTag.toJson()));
+      Bus.instance.fire(LocationTagUpdatedEvent(LocTagEventType.add));
+    } catch (e, s) {
+      _logger.severe("Failed to add location tag", e, s);
+    }
   }
 
   ///The area bounded by the location tag becomes more elliptical with increase
