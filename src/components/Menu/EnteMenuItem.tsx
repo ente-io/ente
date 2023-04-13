@@ -42,7 +42,7 @@ export function EnteMenuItem({
         <MenuItem
             onClick={handleClick}
             sx={{
-                minWidth: '220px',
+                width: '100%',
                 color: (theme) => theme.palette[color].main,
                 ...(variant !== 'secondary' &&
                     variant !== 'mini' && {
