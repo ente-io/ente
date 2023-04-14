@@ -167,16 +167,13 @@ export const clearFiles = async () => {
     await localForage.clear();
 };
 
-export const isTokenValid = async () => {
+export const isTokenValid = async (token: string) => {
     try {
-        if (!getToken()) {
-            return false;
-        }
         const resp = await HTTPService.get(
             `${ENDPOINT}/users/session-validity/v2`,
             null,
             {
-                'X-Auth-Token': getToken(),
+                'X-Auth-Token': token,
             }
         );
         try {
@@ -186,7 +183,7 @@ export const isTokenValid = async () => {
             if (!resp.data['hasSetKeys']) {
                 try {
                     await putAttributes(
-                        getToken(),
+                        token,
                         getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
                     );
                 } catch (e) {
