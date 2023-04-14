@@ -7,6 +7,7 @@ import { useRouter } from 'next/router';
 import { AuthFooter } from 'components/Authenicator/AuthFooder';
 import { AppContext } from 'pages/_app';
 import AuthNavbar from 'components/pages/auth/Navbar';
+import { t } from 'i18next';
 
 const AuthenticatorCodesPage = () => {
     const appContext = useContext(AppContext);
@@ -53,13 +54,13 @@ const AuthenticatorCodesPage = () => {
                     justifyContent: 'flex-start',
                 }}>
                 <div style={{ marginBottom: '2rem' }} />
-                <h2>ente Authenticator</h2>
+                <h2>{t('AUTHENTICATOR_TITLE')}</h2>
                 {filteredCodes.length === 0 && searchTerm.length === 0 ? (
                     <></>
                 ) : (
                     <input
                         type="text"
-                        placeholder="Search"
+                        placeholder={t('SEARCH')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
