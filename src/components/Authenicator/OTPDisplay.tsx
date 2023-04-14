@@ -3,6 +3,7 @@ import { TOTP, HOTP } from 'otpauth';
 import { Code } from 'types/authenticator/code';
 import TimerProgress from './TimerProgress';
 import { t } from 'i18next';
+import { ButtonBase } from '@mui/material';
 
 const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
     return (
@@ -173,19 +174,21 @@ const OTPDisplay = (props: OTPDisplayProps) => {
     }, [codeInfo]);
 
     return (
-        <div
-            style={{ padding: '8px' }}
-            onClick={() => {
-                navigator.clipboard.writeText(code);
-            }}>
+        <div style={{ padding: '8px' }}>
             <TimerProgress period={codeInfo.period ?? Code.defaultPeriod} />
             {codeErr === '' ? (
-                <TOTPDisplay
-                    issuer={codeInfo.issuer}
-                    account={codeInfo.account}
-                    code={code}
-                    nextCode={nextCode}
-                />
+                <ButtonBase
+                    component="div"
+                    onClick={() => {
+                        navigator.clipboard.writeText(code);
+                    }}>
+                    <TOTPDisplay
+                        issuer={codeInfo.issuer}
+                        account={codeInfo.account}
+                        code={code}
+                        nextCode={nextCode}
+                    />
+                </ButtonBase>
             ) : (
                 <BadCodeInfo codeInfo={codeInfo} codeErr={codeErr} />
             )}
