@@ -37,8 +37,8 @@ export default function CollectionCard(props: {
 
     return (
         <CustomCollectionTile onClick={onClick}>
-            {file.metadata.hasStaticThumbnail ? (
-                <StaticThumbnail fileType={file.metadata.fileType} />
+            {file?.metadata.hasStaticThumbnail ? (
+                <StaticThumbnail fileType={file?.metadata.fileType} />
             ) : coverImageURL ? (
                 <img src={coverImageURL} />
             ) : (
