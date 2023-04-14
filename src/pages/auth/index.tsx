@@ -9,11 +9,14 @@ import { AppContext } from 'pages/_app';
 import { TextField } from '@mui/material';
 import AuthNavbar from 'components/pages/auth/Navbar';
 import { t } from 'i18next';
+import EnteSpinner from 'components/EnteSpinner';
+import VerticallyCentered from 'components/Container';
 
 const AuthenticatorCodesPage = () => {
     const appContext = useContext(AppContext);
     const router = useRouter();
     const [codes, setCodes] = useState([]);
+    const [hasFetched, setHasFetched] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
@@ -29,6 +32,7 @@ const AuthenticatorCodesPage = () => {
                     // do not log errors
                 }
             }
+            setHasFetched(true);
         };
         fetchCodes();
         appContext.showNavBar(false);
@@ -43,6 +47,17 @@ const AuthenticatorCodesPage = () => {
                 .toLowerCase()
                 .includes(searchTerm.toLowerCase())
     );
+
+    if (!hasFetched) {
+        return (
+            <>
+                <VerticallyCentered>
+                    <EnteSpinner></EnteSpinner>
+                </VerticallyCentered>
+                ;
+            </>
+        );
+    }
 
     return (
         <>
