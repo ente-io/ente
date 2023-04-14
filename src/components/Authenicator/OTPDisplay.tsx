@@ -7,7 +7,7 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
     return (
         <div
             style={{
-                padding: '4px 16px',
+                padding: '12px 20px 0px 20px',
                 display: 'flex',
                 alignItems: 'flex-start',
                 minWidth: '320px',
@@ -36,6 +36,7 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
                         marginBottom: '8px',
                         textAlign: 'left',
                         fontSize: '12px',
+                        maxWidth: '200px',
                     }}>
                     {account}
                 </p>
