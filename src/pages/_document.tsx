@@ -23,7 +23,7 @@ export default function EnteDocument({ emotionStyleTags }: EnteDocumentProps) {
             <Head>
                 <meta
                     name="description"
-                    content="ente is a privacy focussed photo storage service that offers end-to-end encryption."
+                    content="ente – end-to-end encrypted cloud with open-source apps"
                 />
                 <link rel="icon" href="/images/favicon.png" type="image/png" />
                 <link rel="manifest" href="manifest.json" />
