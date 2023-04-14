@@ -29,17 +29,12 @@ const TimerProgress = ({ period }) => {
     return (
         <div
             style={{
-                width: '100%',
+                borderTopLeftRadius: '3px',
+                width: `${progress * 100}%`,
                 height: '3px',
-                backgroundColor: 'transparent',
-            }}>
-            <div
-                style={{
-                    width: `${progress * 100}%`,
-                    height: '100%',
-                    backgroundColor: color,
-                }}></div>
-        </div>
+                backgroundColor: color,
+            }}
+        />
     );
 };
 

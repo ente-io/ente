@@ -28,6 +28,12 @@ export const ALLOWED_APP_PAGES = new Map([
     ],
 ]);
 
+export const CLIENT_PACKAGE_NAMES = new Map([
+    [APPS.ALBUMS, 'io.ente.albums.web'],
+    [APPS.PHOTOS, 'io.ente.photos.web'],
+    [APPS.AUTH, 'io.ente.auth.web'],
+]);
+
 export const getAppNameAndTitle = () => {
     if (!runningInBrowser()) {
         return {};

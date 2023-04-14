@@ -5,86 +5,93 @@ import TimerProgress from './TimerProgress';
 import { t } from 'i18next';
 import { ButtonBase, Snackbar } from '@mui/material';
 
-const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
+const TOTPDisplay = ({ issuer, account, code, nextCode, period }) => {
     return (
         <div
             style={{
-                padding: '12px 20px 0px 20px',
-                display: 'flex',
-                alignItems: 'flex-start',
-                minWidth: '320px',
-                borderRadius: '4px',
                 backgroundColor: 'rgba(40, 40, 40, 0.6)',
-                justifyContent: 'space-between',
+                borderRadius: '4px',
+                overflow: 'hidden',
             }}>
+            <TimerProgress period={period ?? Code.defaultPeriod} />
             <div
                 style={{
+                    padding: '12px 20px 0px 20px',
                     display: 'flex',
-                    flexDirection: 'column',
                     alignItems: 'flex-start',
-                    minWidth: '200px',
+                    minWidth: '320px',
+
+                    justifyContent: 'space-between',
                 }}>
-                <p
+                <div
                     style={{
-                        fontWeight: 'bold',
-                        marginBottom: '0px',
-                        fontSize: '14px',
-                        textAlign: 'left',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        minWidth: '200px',
                     }}>
-                    {issuer}
-                </p>
-                <p
+                    <p
+                        style={{
+                            fontWeight: 'bold',
+                            marginBottom: '0px',
+                            fontSize: '14px',
+                            textAlign: 'left',
+                        }}>
+                        {issuer}
+                    </p>
+                    <p
+                        style={{
+                            marginBottom: '8px',
+                            textAlign: 'left',
+                            fontSize: '12px',
+                            maxWidth: '200px',
+                            color: 'grey',
+                        }}>
+                        {account}
+                    </p>
+                    <p
+                        style={{
+                            fontSize: '24px',
+                            fontWeight: 'bold',
+                            textAlign: 'left',
+                        }}>
+                        {code}
+                    </p>
+                </div>
+                <div style={{ flex: 1 }} />
+                <div
                     style={{
-                        marginBottom: '8px',
-                        textAlign: 'left',
-                        fontSize: '12px',
-                        maxWidth: '200px',
-                        color: 'grey',
-                    }}>
-                    {account}
-                </p>
-                <p
-                    style={{
-                        fontSize: '24px',
-                        fontWeight: 'bold',
-                        textAlign: 'left',
-                    }}>
-                    {code}
-                </p>
-            </div>
-            <div style={{ flex: 1 }} />
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-end',
-                    minWidth: '120px',
-                    textAlign: 'right',
-                    marginTop: 'auto',
-                    marginBottom: '1rem',
-                }}>
-                <p
-                    style={{
-                        fontWeight: 'bold',
-                        marginBottom: '0px',
-                        fontSize: '10px',
-                        marginTop: 'auto',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        minWidth: '120px',
                         textAlign: 'right',
-                        color: 'grey',
-                    }}>
-                    {t('AUTH_NEXT')}
-                </p>
-                <p
-                    style={{
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                        marginBottom: '0px',
                         marginTop: 'auto',
-                        textAlign: 'right',
-                        color: 'grey',
+                        marginBottom: '1rem',
                     }}>
-                    {nextCode}
-                </p>
+                    <p
+                        style={{
+                            fontWeight: 'bold',
+                            marginBottom: '0px',
+                            fontSize: '10px',
+                            marginTop: 'auto',
+                            textAlign: 'right',
+                            color: 'grey',
+                        }}>
+                        {t('AUTH_NEXT')}
+                    </p>
+                    <p
+                        style={{
+                            fontSize: '14px',
+                            fontWeight: 'bold',
+                            marginBottom: '0px',
+                            marginTop: 'auto',
+                            textAlign: 'right',
+                            color: 'grey',
+                        }}>
+                        {nextCode}
+                    </p>
+                </div>
             </div>
         </div>
     );
@@ -188,7 +195,6 @@ const OTPDisplay = (props: OTPDisplayProps) => {
 
     return (
         <div style={{ padding: '8px' }}>
-            <TimerProgress period={codeInfo.period ?? Code.defaultPeriod} />
             {codeErr === '' ? (
                 <ButtonBase
                     component="div"
@@ -196,6 +202,7 @@ const OTPDisplay = (props: OTPDisplayProps) => {
                         copyCode();
                     }}>
                     <TOTPDisplay
+                        period={codeInfo.period}
                         issuer={codeInfo.issuer}
                         account={codeInfo.account}
                         code={code}
