@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Carousel from 'react-bootstrap/Carousel';
 import { styled, Button, Typography, TypographyProps } from '@mui/material';
-import { AppContext, APPS, getAppNameAndTitle } from './_app';
+import { AppContext } from './_app';
 import Login from 'components/Login';
 import { useRouter } from 'next/router';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -19,6 +19,7 @@ import { saveKeyInSessionStore } from 'utils/crypto';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { getAlbumsURL } from 'utils/common/apiUtil';
 import { Trans } from 'react-i18next';
+import { APPS, getAppName } from 'constants/apps';
 
 const Container = styled('div')`
     display: flex;
@@ -141,8 +142,8 @@ export default function LandingPage() {
             }
         }
         if (key) {
-            const { name } = getAppNameAndTitle();
-            if (name === APPS.AUTH) {
+            const appName = getAppName();
+            if (appName === APPS.AUTH) {
                 await router.push(PAGES.AUTH);
             } else {
                 await router.push(PAGES.GALLERY);

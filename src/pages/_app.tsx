@@ -1,4 +1,10 @@
-import React, { createContext, useEffect, useRef, useState } from 'react';
+import React, {
+    createContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import AppNavbar from 'components/Navbar/app';
 import { t } from 'i18next';
 
@@ -60,55 +66,18 @@ import { CacheProvider, EmotionCache } from '@emotion/react';
 import { AppProps } from 'next/app';
 import DialogBoxV2 from 'components/DialogBoxV2';
 import { getTheme } from 'themes';
-import { getAlbumsURL, getAuthURL } from 'utils/common/apiUtil';
-import { runningInBrowser } from 'utils/common';
 import { PAGES } from 'constants/pages';
-
-export enum APPS {
-    PHOTOS = 'PHOTOS',
-    AUTH = 'AUTH',
-    ALBUMS = 'ALBUMS',
-}
-
-const ALLOWED_PAGES = new Map([
-    [APPS.ALBUMS, [PAGES.SHARED_ALBUMS, PAGES.ROOT]],
-    [
-        APPS.AUTH,
-        [
-            PAGES.ROOT,
-            PAGES.LOGIN,
-            PAGES.SIGNUP,
-            PAGES.VERIFY,
-            PAGES.CREDENTIALS,
-            PAGES.RECOVER,
-            PAGES.GENERATE,
-            PAGES.AUTH,
-            PAGES.TWO_FACTOR_VERIFY,
-            PAGES.TWO_FACTOR_RECOVER,
-        ],
-    ],
-]);
+import {
+    ALLOWED_APP_PAGES,
+    APPS,
+    getAppName,
+    getAppTitle,
+} from 'constants/apps';
 
 const redirectMap = new Map([
     ['roadmap', getRoadmapRedirectURL],
     ['families', getFamilyPortalRedirectURL],
 ]);
-
-export const getAppNameAndTitle = () => {
-    if (!runningInBrowser()) {
-        return {};
-    }
-    const currentURL = new URL(window.location.href);
-    const albumsURL = new URL(getAlbumsURL());
-    const authURL = new URL(getAuthURL());
-    if (currentURL.origin === albumsURL.origin) {
-        return { name: APPS.ALBUMS, title: 'ente Albums' };
-    } else if (currentURL.origin === authURL.origin) {
-        return { name: APPS.AUTH, title: 'ente Auth' };
-    } else {
-        return { name: APPS.PHOTOS, title: 'ente Photos' };
-    }
-};
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -195,6 +164,12 @@ export default function App(props) {
         LS_KEYS.THEME,
         THEME_COLOR.DARK
     );
+
+    const [appName, appTitle] = useMemo(() => {
+        const appName = getAppName();
+        const appTitle = getAppTitle();
+        return [appName, appTitle];
+    }, []);
 
     useEffect(() => {
         setupI18n().finally(() => setIsI18nReady(true));
@@ -310,19 +285,19 @@ export default function App(props) {
                 setLoading(true);
             }
 
-            const { name } = getAppNameAndTitle();
+            const appName = getAppName();
             if (
-                name === APPS.ALBUMS &&
-                ALLOWED_PAGES.get(APPS.ALBUMS).indexOf(newPathname) === -1
+                appName === APPS.ALBUMS &&
+                ALLOWED_APP_PAGES.get(APPS.ALBUMS).indexOf(newPathname) === -1
             ) {
                 router.replace(PAGES.SHARED_ALBUMS);
-                throw `Aborting route change, changing page ${newPathname} is not allowed for ${name}`;
+                throw `Aborting route change, changing page ${newPathname} is not allowed for ${appName}`;
             } else if (
-                name === APPS.AUTH &&
-                ALLOWED_PAGES.get(APPS.AUTH).indexOf(newPathname) === -1
+                appName === APPS.AUTH &&
+                ALLOWED_APP_PAGES.get(APPS.AUTH).indexOf(newPathname) === -1
             ) {
                 router.replace(PAGES.AUTH);
-                throw `Aborting route change, changing page ${newPathname} is not allowed for ${name}`;
+                throw `Aborting route change, changing page ${newPathname} is not allowed for ${appName}`;
             }
 
             if (redirectName) {
@@ -396,15 +371,11 @@ export default function App(props) {
             content: t('UNKNOWN_ERROR'),
         });
 
-    const appNameAndTitle = getAppNameAndTitle();
-
     return (
         <CacheProvider value={emotionCache}>
             <Head>
                 <title>
-                    {isI18nReady
-                        ? t('TITLE', { context: appNameAndTitle.name })
-                        : appNameAndTitle.title}
+                    {isI18nReady ? t('TITLE', { context: appName }) : appTitle}
                 </title>
                 <meta
                     name="viewport"

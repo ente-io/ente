@@ -16,12 +16,13 @@ import RecoveryKey from 'components/RecoveryKey';
 import { PAGES } from 'constants/pages';
 import VerticallyCentered from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
-import { APPS, AppContext, getAppNameAndTitle } from 'pages/_app';
+import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
 import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormTitle from 'components/Form/FormPaper/Title';
+import { APPS, getAppName } from 'constants/apps';
 
 export default function Generate() {
     const [token, setToken] = useState<string>();
@@ -47,8 +48,8 @@ export default function Generate() {
                     setRecoveryModalView(true);
                     setLoading(false);
                 } else {
-                    const { name } = getAppNameAndTitle();
-                    if (name === APPS.AUTH) {
+                    const appName = getAppName();
+                    if (appName === APPS.AUTH) {
                         router.push(PAGES.AUTH);
                     } else {
                         router.push(PAGES.GALLERY);
@@ -99,8 +100,8 @@ export default function Generate() {
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);
-                        const { name } = getAppNameAndTitle();
-                        if (name === APPS.AUTH) {
+                        const appName = getAppName();
+                        if (appName === APPS.AUTH) {
                             router.push(PAGES.AUTH);
                         } else {
                             router.push(PAGES.GALLERY);

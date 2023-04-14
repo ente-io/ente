@@ -13,7 +13,7 @@ import {
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
-import { AppContext, APPS, getAppNameAndTitle } from 'pages/_app';
+import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
 import FormContainer from 'components/Form/FormContainer';
@@ -28,6 +28,7 @@ import EnteSpinner from 'components/EnteSpinner';
 import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
 } from 'components/VerifyMasterPasswordForm';
+import { APPS, getAppName } from 'constants/apps';
 
 export default function Credentials() {
     const router = useRouter();
@@ -86,8 +87,8 @@ export default function Credentials() {
             await decryptAndStoreToken(key);
             const redirectURL = appContext.redirectURL;
             appContext.setRedirectURL(null);
-            const { name } = getAppNameAndTitle();
-            if (name === APPS.AUTH) {
+            const appName = getAppName();
+            if (appName === APPS.AUTH) {
                 router.push(PAGES.AUTH);
             } else {
                 router.push(redirectURL ?? PAGES.GALLERY);
