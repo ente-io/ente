@@ -10,7 +10,7 @@ export const AuthFooter = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
             }}>
-            <p>{t('DOWNLOAD_AUTH_MOBILE_APP')}</p>
+            <p>{t('AUTH_DOWNLOAD_MOBILE_APP')}</p>
             <a href="https://github.com/ente-io/auth#-download" download>
                 <Button
                     style={{

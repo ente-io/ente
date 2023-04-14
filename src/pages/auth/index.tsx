@@ -4,15 +4,19 @@ import { getAuthCodes } from 'services/authenticator/authenticatorService';
 import { CustomError } from 'utils/error';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
-import { AuthFooter } from 'components/Authenicator/AuthFooder';
+import { AuthFooter } from 'components/Authenicator/AuthFooter';
 import { AppContext } from 'pages/_app';
+import { TextField } from '@mui/material';
 import AuthNavbar from 'components/pages/auth/Navbar';
 import { t } from 'i18next';
+import EnteSpinner from 'components/EnteSpinner';
+import VerticallyCentered from 'components/Container';
 
 const AuthenticatorCodesPage = () => {
     const appContext = useContext(AppContext);
     const router = useRouter();
     const [codes, setCodes] = useState([]);
+    const [hasFetched, setHasFetched] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
@@ -28,6 +32,7 @@ const AuthenticatorCodesPage = () => {
                     // do not log errors
                 }
             }
+            setHasFetched(true);
         };
         fetchCodes();
         appContext.showNavBar(false);
@@ -43,6 +48,17 @@ const AuthenticatorCodesPage = () => {
                 .includes(searchTerm.toLowerCase())
     );
 
+    if (!hasFetched) {
+        return (
+            <>
+                <VerticallyCentered>
+                    <EnteSpinner></EnteSpinner>
+                </VerticallyCentered>
+                ;
+            </>
+        );
+    }
+
     return (
         <>
             <AuthNavbar />
@@ -53,16 +69,18 @@ const AuthenticatorCodesPage = () => {
                     alignItems: 'center',
                     justifyContent: 'flex-start',
                 }}>
-                <div style={{ marginBottom: '2rem' }} />
-                <h2>{t('AUTHENTICATOR_TITLE')}</h2>
+                <div style={{ marginBottom: '1rem' }} />
                 {filteredCodes.length === 0 && searchTerm.length === 0 ? (
                     <></>
                 ) : (
-                    <input
-                        type="text"
-                        placeholder={t('SEARCH')}
-                        value={searchTerm}
+                    <TextField
+                        id="search"
+                        name="search"
+                        label={t('SEARCH')}
                         onChange={(e) => setSearchTerm(e.target.value)}
+                        variant="filled"
+                        value={searchTerm}
+                        autoFocus
                     />
                 )}
 
@@ -76,7 +94,7 @@ const AuthenticatorCodesPage = () => {
                             marginTop: '32px',
                         }}>
                         {searchTerm.length !== 0 ? (
-                            <p>No results found.</p>
+                            <p>{t('NO_RESULTS')}</p>
                         ) : (
                             <div />
                         )}

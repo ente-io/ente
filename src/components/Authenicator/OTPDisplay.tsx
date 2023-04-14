@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { TOTP, HOTP } from 'otpauth';
 import { Code } from 'types/authenticator/code';
 import TimerProgress from './TimerProgress';
+import { t } from 'i18next';
+import { ButtonBase, Snackbar } from '@mui/material';
 
 const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
     return (
         <div
             style={{
-                padding: '4px 16px',
+                padding: '12px 20px 0px 20px',
                 display: 'flex',
                 alignItems: 'flex-start',
                 minWidth: '320px',
@@ -36,6 +38,8 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
                         marginBottom: '8px',
                         textAlign: 'left',
                         fontSize: '12px',
+                        maxWidth: '200px',
+                        color: 'grey',
                     }}>
                     {account}
                 </p>
@@ -53,10 +57,11 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    marginTop: '32px',
                     alignItems: 'flex-end',
                     minWidth: '120px',
                     textAlign: 'right',
+                    marginTop: 'auto',
+                    marginBottom: '1rem',
                 }}>
                 <p
                     style={{
@@ -65,8 +70,9 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
                         fontSize: '10px',
                         marginTop: 'auto',
                         textAlign: 'right',
+                        color: 'grey',
                     }}>
-                    next
+                    {t('AUTH_NEXT')}
                 </p>
                 <p
                     style={{
@@ -75,6 +81,7 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
                         marginBottom: '0px',
                         marginTop: 'auto',
                         textAlign: 'right',
+                        color: 'grey',
                     }}>
                     {nextCode}
                 </p>
@@ -112,6 +119,7 @@ const OTPDisplay = (props: OTPDisplayProps) => {
     const [code, setCode] = useState('');
     const [nextCode, setNextCode] = useState('');
     const [codeErr, setCodeErr] = useState('');
+    const [hasCopied, setHasCopied] = useState(false);
 
     const generateCodes = () => {
         try {
@@ -141,6 +149,14 @@ const OTPDisplay = (props: OTPDisplayProps) => {
         } catch (err) {
             setCodeErr(err.message);
         }
+    };
+
+    const copyCode = () => {
+        navigator.clipboard.writeText(code);
+        setHasCopied(true);
+        setTimeout(() => {
+            setHasCopied(false);
+        }, 2000);
     };
 
     useEffect(() => {
@@ -174,12 +190,22 @@ const OTPDisplay = (props: OTPDisplayProps) => {
         <div style={{ padding: '8px' }}>
             <TimerProgress period={codeInfo.period ?? Code.defaultPeriod} />
             {codeErr === '' ? (
-                <TOTPDisplay
-                    issuer={codeInfo.issuer}
-                    account={codeInfo.account}
-                    code={code}
-                    nextCode={nextCode}
-                />
+                <ButtonBase
+                    component="div"
+                    onClick={() => {
+                        copyCode();
+                    }}>
+                    <TOTPDisplay
+                        issuer={codeInfo.issuer}
+                        account={codeInfo.account}
+                        code={code}
+                        nextCode={nextCode}
+                    />
+                    <Snackbar
+                        open={hasCopied}
+                        message="Code copied to clipboard"
+                    />
+                </ButtonBase>
             ) : (
                 <BadCodeInfo codeInfo={codeInfo} codeErr={codeErr} />
             )}
