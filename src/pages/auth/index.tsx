@@ -49,7 +49,8 @@ const AuthenticatorCodesPage = () => {
                 justifyContent: 'flex-start',
             }}>
             <div style={{ marginBottom: '2rem' }} />
-            <h2>ente Authenticator</h2>
+            <h2>Authenticator</h2>
+            <div style={{ marginBottom: '1rem' }} />
             {filteredCodes.length === 0 && searchTerm.length === 0 ? (
                 <></>
             ) : (
