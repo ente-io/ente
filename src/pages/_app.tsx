@@ -62,12 +62,32 @@ import DialogBoxV2 from 'components/DialogBoxV2';
 import { getTheme } from 'themes';
 import { getAlbumsURL, getAuthURL } from 'utils/common/apiUtil';
 import { runningInBrowser } from 'utils/common';
+import { PAGES } from 'constants/pages';
 
 export enum APPS {
     PHOTOS = 'PHOTOS',
     AUTH = 'AUTH',
     ALBUMS = 'ALBUMS',
 }
+
+const ALLOWED_PAGES = new Map([
+    [APPS.ALBUMS, [PAGES.SHARED_ALBUMS, PAGES.ROOT]],
+    [
+        APPS.AUTH,
+        [
+            PAGES.ROOT,
+            PAGES.LOGIN,
+            PAGES.SIGNUP,
+            PAGES.VERIFY,
+            PAGES.CREDENTIALS,
+            PAGES.RECOVER,
+            PAGES.GENERATE,
+            PAGES.AUTH,
+            PAGES.TWO_FACTOR_VERIFY,
+            PAGES.TWO_FACTOR_RECOVER,
+        ],
+    ],
+]);
 
 const redirectMap = new Map([
     ['roadmap', getRoadmapRedirectURL],
@@ -285,8 +305,24 @@ export default function App(props) {
         }
 
         router.events.on('routeChangeStart', (url: string) => {
-            if (window.location.pathname !== url.split('?')[0]) {
+            const newPathname = url.split('?')[0] as PAGES;
+            if (window.location.pathname !== newPathname) {
                 setLoading(true);
+            }
+
+            const { name } = getAppNameAndTitle();
+            if (
+                name === APPS.ALBUMS &&
+                ALLOWED_PAGES.get(APPS.ALBUMS).indexOf(newPathname) === -1
+            ) {
+                router.replace(PAGES.SHARED_ALBUMS);
+                throw 'Aborting route change, changing page';
+            } else if (
+                name === APPS.AUTH &&
+                ALLOWED_PAGES.get(APPS.AUTH).indexOf(newPathname) === -1
+            ) {
+                router.replace(PAGES.AUTH);
+                throw 'Aborting route change, changing pa';
             }
 
             if (redirectName) {
