@@ -34,11 +34,13 @@ function CollectionSelector({
     const collectionToShow = useMemo(() => {
         const personalCollectionsOtherThanFrom = [
             ...collectionSummaries.values(),
-        ]?.filter(
-            ({ type, id }) =>
-                id !== attributes?.fromCollection &&
-                isUploadAllowedCollection(type)
-        );
+        ]
+            ?.filter(
+                ({ type, id }) =>
+                    id !== attributes?.fromCollection &&
+                    isUploadAllowedCollection(type)
+            )
+            .sort((a, b) => a.name.localeCompare(b.name));
         return personalCollectionsOtherThanFrom;
     }, [collectionSummaries, attributes]);
 
