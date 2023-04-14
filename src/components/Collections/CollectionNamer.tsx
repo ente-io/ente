@@ -2,9 +2,8 @@ import React from 'react';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
-import DialogBoxBase from 'components/DialogBox/base';
-import { DialogContent, DialogTitle } from '@mui/material';
 import { t } from 'i18next';
+import DialogBoxV2 from 'components/DialogBoxV2';
 
 export interface CollectionNamerAttributes {
     callback: (name: string) => void;
@@ -40,19 +39,21 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
     };
 
     return (
-        <DialogBoxBase open={props.show} onClose={props.onHide}>
-            <DialogTitle>{attributes.title}</DialogTitle>
-            <DialogContent>
-                <SingleInputForm
-                    callback={onSubmit}
-                    fieldType="text"
-                    buttonText={attributes.buttonText}
-                    placeholder={t('ENTER_ALBUM_NAME')}
-                    initialValue={attributes.autoFilledName}
-                    submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
-                    secondaryButtonAction={props.onHide}
-                />
-            </DialogContent>
-        </DialogBoxBase>
+        <DialogBoxV2
+            open={props.show}
+            onClose={props.onHide}
+            attributes={{
+                title: attributes.title,
+            }}>
+            <SingleInputForm
+                callback={onSubmit}
+                fieldType="text"
+                buttonText={attributes.buttonText}
+                placeholder={t('ENTER_ALBUM_NAME')}
+                initialValue={attributes.autoFilledName}
+                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+                secondaryButtonAction={props.onHide}
+            />
+        </DialogBoxV2>
     );
 }
