@@ -68,6 +68,7 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
                         fontSize: '10px',
                         marginTop: 'auto',
                         textAlign: 'right',
+                        color: 'grey',
                     }}>
                     {t('AUTH_NEXT')}
                 </p>
@@ -78,6 +79,7 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
                         marginBottom: '0px',
                         marginTop: 'auto',
                         textAlign: 'right',
+                        color: 'grey',
                     }}>
                     {nextCode}
                 </p>
