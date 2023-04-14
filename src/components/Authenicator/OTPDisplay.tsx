@@ -39,6 +39,7 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
                         textAlign: 'left',
                         fontSize: '12px',
                         maxWidth: '200px',
+                        color: 'grey',
                     }}>
                     {account}
                 </p>
