@@ -1,4 +1,10 @@
-import React, { createContext, useEffect, useRef, useState } from 'react';
+import React, {
+    createContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import AppNavbar from 'components/Navbar/app';
 import { t } from 'i18next';
 
@@ -60,6 +66,13 @@ import { CacheProvider, EmotionCache } from '@emotion/react';
 import { AppProps } from 'next/app';
 import DialogBoxV2 from 'components/DialogBoxV2';
 import { getTheme } from 'themes';
+import { PAGES } from 'constants/pages';
+import { ALLOWED_APP_PAGES, APPS, getAppNameAndTitle } from 'constants/apps';
+
+const redirectMap = new Map([
+    ['roadmap', getRoadmapRedirectURL],
+    ['families', getFamilyPortalRedirectURL],
+]);
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -101,13 +114,6 @@ type AppContextType = {
 };
 
 export const AppContext = createContext<AppContextType>(null);
-
-const redirectMap = new Map([
-    ['roadmap', getRoadmapRedirectURL],
-    ['families', getFamilyPortalRedirectURL],
-]);
-
-const APP_TITLE = 'ente Photos';
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -153,6 +159,10 @@ export default function App(props) {
         LS_KEYS.THEME,
         THEME_COLOR.DARK
     );
+
+    const { name: appName, title: appTitle } = useMemo(() => {
+        return getAppNameAndTitle();
+    }, []);
 
     useEffect(() => {
         setupI18n().finally(() => setIsI18nReady(true));
@@ -263,8 +273,23 @@ export default function App(props) {
         }
 
         router.events.on('routeChangeStart', (url: string) => {
-            if (window.location.pathname !== url.split('?')[0]) {
+            const newPathname = url.split('?')[0] as PAGES;
+            if (window.location.pathname !== newPathname) {
                 setLoading(true);
+            }
+
+            if (
+                appName === APPS.ALBUMS &&
+                ALLOWED_APP_PAGES.get(APPS.ALBUMS).indexOf(newPathname) === -1
+            ) {
+                router.replace(PAGES.SHARED_ALBUMS);
+                throw `Aborting route change, changing page ${newPathname} is not allowed for ${appName}`;
+            } else if (
+                appName === APPS.AUTH &&
+                ALLOWED_APP_PAGES.get(APPS.AUTH).indexOf(newPathname) === -1
+            ) {
+                router.replace(PAGES.AUTH);
+                throw `Aborting route change, changing page ${newPathname} is not allowed for ${appName}`;
             }
 
             if (redirectName) {
@@ -341,7 +366,9 @@ export default function App(props) {
     return (
         <CacheProvider value={emotionCache}>
             <Head>
-                <title>{isI18nReady ? t('TITLE') : APP_TITLE}</title>
+                <title>
+                    {isI18nReady ? t('TITLE', { context: appName }) : appTitle}
+                </title>
                 <meta
                     name="viewport"
                     content="initial-scale=1, width=device-width"

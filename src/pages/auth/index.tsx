@@ -6,6 +6,8 @@ import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AuthFooter } from 'components/Authenicator/AuthFooder';
 import { AppContext } from 'pages/_app';
+import AuthNavbar from 'components/pages/auth/Navbar';
+import { t } from 'i18next';
 
 const AuthenticatorCodesPage = () => {
     const appContext = useContext(AppContext);
@@ -28,6 +30,7 @@ const AuthenticatorCodesPage = () => {
             }
         };
         fetchCodes();
+        appContext.showNavBar(false);
     }, []);
 
     const filteredCodes = codes.filter(
@@ -41,50 +44,53 @@ const AuthenticatorCodesPage = () => {
     );
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-            }}>
-            <div style={{ marginBottom: '2rem' }} />
-            <h2>ente Authenticator</h2>
-            {filteredCodes.length === 0 && searchTerm.length === 0 ? (
-                <></>
-            ) : (
-                <input
-                    type="text"
-                    placeholder="Search"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-            )}
+        <>
+            <AuthNavbar />
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                }}>
+                <div style={{ marginBottom: '2rem' }} />
+                <h2>{t('AUTHENTICATOR_TITLE')}</h2>
+                {filteredCodes.length === 0 && searchTerm.length === 0 ? (
+                    <></>
+                ) : (
+                    <input
+                        type="text"
+                        placeholder={t('SEARCH')}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                )}
 
-            <div style={{ marginBottom: '1rem' }} />
-            {filteredCodes.length === 0 ? (
-                <div
-                    style={{
-                        alignItems: 'center',
-                        display: 'flex',
-                        textAlign: 'center',
-                        marginTop: '32px',
-                    }}>
-                    {searchTerm.length !== 0 ? (
-                        <p>No results found.</p>
-                    ) : (
-                        <div />
-                    )}
-                </div>
-            ) : (
-                filteredCodes.map((code) => (
-                    <OTPDisplay codeInfo={code} key={code.id} />
-                ))
-            )}
-            <div style={{ marginBottom: '2rem' }} />
-            <AuthFooter />
-            <div style={{ marginBottom: '4rem' }} />
-        </div>
+                <div style={{ marginBottom: '1rem' }} />
+                {filteredCodes.length === 0 ? (
+                    <div
+                        style={{
+                            alignItems: 'center',
+                            display: 'flex',
+                            textAlign: 'center',
+                            marginTop: '32px',
+                        }}>
+                        {searchTerm.length !== 0 ? (
+                            <p>No results found.</p>
+                        ) : (
+                            <div />
+                        )}
+                    </div>
+                ) : (
+                    filteredCodes.map((code) => (
+                        <OTPDisplay codeInfo={code} key={code.id} />
+                    ))
+                )}
+                <div style={{ marginBottom: '2rem' }} />
+                <AuthFooter />
+                <div style={{ marginBottom: '4rem' }} />
+            </div>
+        </>
     );
 };
 

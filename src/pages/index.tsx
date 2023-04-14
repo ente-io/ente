@@ -19,6 +19,7 @@ import { saveKeyInSessionStore } from 'utils/crypto';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { getAlbumsURL } from 'utils/common/apiUtil';
 import { Trans } from 'react-i18next';
+import { APPS, getAppName } from 'constants/apps';
 
 const Container = styled('div')`
     display: flex;
@@ -128,6 +129,7 @@ export default function LandingPage() {
     };
 
     const handleNormalRedirect = async () => {
+        const appName = getAppName();
         const user = getData(LS_KEYS.USER);
         let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key && isElectron()) {
@@ -141,9 +143,17 @@ export default function LandingPage() {
             }
         }
         if (key) {
-            await router.push(PAGES.GALLERY);
+            if (appName === APPS.AUTH) {
+                await router.push(PAGES.AUTH);
+            } else {
+                await router.push(PAGES.GALLERY);
+            }
         } else if (user?.email) {
             await router.push(PAGES.VERIFY);
+        } else {
+            if (appName === APPS.AUTH) {
+                await router.push(PAGES.LOGIN);
+            }
         }
         await initLocalForage();
         setLoading(false);

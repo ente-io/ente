@@ -22,6 +22,9 @@ import { KeyAttributes, User } from 'types/user';
 import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormTitle from 'components/Form/FormPaper/Title';
+import { APPS, getAppName } from 'constants/apps';
+import FormPaperFooter from 'components/Form/FormPaper/Footer';
+import LinkButton from 'components/pages/gallery/LinkButton';
 
 export default function Generate() {
     const [token, setToken] = useState<string>();
@@ -47,7 +50,12 @@ export default function Generate() {
                     setRecoveryModalView(true);
                     setLoading(false);
                 } else {
-                    router.push(PAGES.GALLERY);
+                    const appName = getAppName();
+                    if (appName === APPS.AUTH) {
+                        router.push(PAGES.AUTH);
+                    } else {
+                        router.push(PAGES.GALLERY);
+                    }
                 }
             } else if (keyAttributes?.encryptedKey) {
                 router.push(PAGES.CREDENTIALS);
@@ -94,7 +102,12 @@ export default function Generate() {
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);
-                        router.push(PAGES.GALLERY);
+                        const appName = getAppName();
+                        if (appName === APPS.AUTH) {
+                            router.push(PAGES.AUTH);
+                        } else {
+                            router.push(PAGES.GALLERY);
+                        }
                     }}
                     somethingWentWrong={() => null}
                 />
@@ -106,8 +119,12 @@ export default function Generate() {
                             userEmail={user?.email}
                             callback={onSubmit}
                             buttonText={t('SET_PASSPHRASE')}
-                            back={logoutUser}
                         />
+                        <FormPaperFooter>
+                            <LinkButton onClick={logoutUser}>
+                                {t('GO_BACK')}
+                            </LinkButton>
+                        </FormPaperFooter>
                     </FormPaper>
                 </FormContainer>
             )}
