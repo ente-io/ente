@@ -97,6 +97,7 @@ It's a dev deployment (and should use the environment override for endpoints ) i
 1. when the URL opened is that of the staging web app, or
 2. when the URL opened is that of the staging album app, or
 3. if the app is running locally (hence node_env is development)
+4. if the app is running in test mode
 */
 const isDevDeployment = () => {
     if (globalThis?.location) {
