@@ -78,6 +78,16 @@ export const getFamilyPortalURL = () => {
     return `https://family.ente.io`;
 };
 
+// getAuthenticatorURL returns the endpoint for the authenticator which can be used to
+// view authenticator codes.
+export const getAuthURL = () => {
+    const authURL = process.env.NEXT_PUBLIC_ENTE_AUTH_ENDPOINT;
+    if (isDevDeployment() && authURL) {
+        return authURL;
+    }
+    return `https://auth.ente.io`;
+};
+
 export const getSentryTunnelURL = () => {
     return `https://sentry-reporter.ente.io`;
 };

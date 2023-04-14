@@ -17,7 +17,7 @@ import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';
 import { saveKeyInSessionStore } from 'utils/crypto';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { getAlbumsURL } from 'utils/common/apiUtil';
+import { getAlbumsURL, getAuthURL } from 'utils/common/apiUtil';
 import { Trans } from 'react-i18next';
 
 const Container = styled('div')`
@@ -105,12 +105,18 @@ export default function LandingPage() {
         appContext.showNavBar(false);
         const currentURL = new URL(window.location.href);
         const albumsURL = new URL(getAlbumsURL());
+        const authURL = new URL(getAuthURL());
         currentURL.pathname = router.pathname;
         if (
             currentURL.host === albumsURL.host &&
             currentURL.pathname !== PAGES.SHARED_ALBUMS
         ) {
             handleAlbumsRedirect(currentURL);
+        } else if (
+            authURL.host === currentURL.host &&
+            currentURL.pathname === PAGES.AUTH
+        ) {
+            handleAuthRedirect();
         } else {
             handleNormalRedirect();
         }
@@ -124,6 +130,11 @@ export default function LandingPage() {
             search: currentURL.search,
             hash: hash,
         });
+        await initLocalForage();
+    };
+
+    const handleAuthRedirect = async () => {
+        await router.replace(PAGES.AUTH);
         await initLocalForage();
     };
 
