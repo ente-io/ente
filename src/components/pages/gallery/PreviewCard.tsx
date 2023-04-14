@@ -179,7 +179,6 @@ export const FileTypeIndicatorOverlay = styled(Overlay)(
 );
 
 const Cont = styled('div')<{ disabled: boolean }>`
-    background: #222;
     display: flex;
     width: fit-content;
     margin-bottom: ${GAP_BTW_TILES}px;

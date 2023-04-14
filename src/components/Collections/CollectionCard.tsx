@@ -3,6 +3,8 @@ import { GalleryContext } from 'pages/gallery';
 import { useState, useContext, useEffect } from 'react';
 import downloadManager from 'services/downloadManager';
 import { EnteFile } from 'types/file';
+import { StaticThumbnail } from 'components/PlaceholderThumbnails';
+import { LoadingThumbnail } from 'components/PlaceholderThumbnails';
 
 export default function CollectionCard(props: {
     children?: any;
@@ -35,7 +37,13 @@ export default function CollectionCard(props: {
 
     return (
         <CustomCollectionTile onClick={onClick}>
-            {coverImageURL && <img src={coverImageURL} />}
+            {file.metadata.hasStaticThumbnail ? (
+                <StaticThumbnail fileType={file.metadata.fileType} />
+            ) : coverImageURL ? (
+                <img src={coverImageURL} />
+            ) : (
+                <LoadingThumbnail />
+            )}
             {children}
         </CustomCollectionTile>
     );
