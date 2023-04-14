@@ -166,6 +166,9 @@ export default function Uploader(props: Props) {
             props.setFiles,
             publicCollectionGalleryContext
         );
+        if (uploadManager.isUploadRunning()) {
+            setUploadProgressView(true);
+        }
 
         if (isElectron() && ImportService.checkAllElectronAPIsExists()) {
             ImportService.getPendingUploads().then(
@@ -250,7 +253,6 @@ export default function Uploader(props: Props) {
                     addLogLine(
                         'an upload is already running, rejecting new upload request'
                     );
-                    setUploadProgressView(true);
                     // no-op
                     // a user upload is already in progress
                     return;
