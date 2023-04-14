@@ -2,13 +2,17 @@ import { ThemeColorsOptions } from '@mui/material';
 import { THEME_COLOR } from 'constants/theme';
 import darkThemeColors from './dark';
 import lightThemeColors from './light';
-import fixedColors from './fixed';
+import { APPS } from 'constants/apps';
+import { getFixesColors } from './fixed';
 
-export const getColors = (themeColor: THEME_COLOR): ThemeColorsOptions => {
+export const getColors = (
+    themeColor: THEME_COLOR,
+    appName: APPS
+): ThemeColorsOptions => {
     switch (themeColor) {
         case THEME_COLOR.LIGHT:
-            return { ...fixedColors, ...lightThemeColors };
+            return { ...getFixesColors(appName), ...lightThemeColors };
         default:
-            return { ...fixedColors, ...darkThemeColors };
+            return { ...getFixesColors(appName), ...darkThemeColors };
     }
 };

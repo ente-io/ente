@@ -375,7 +375,7 @@ export default function App(props) {
                 />
             </Head>
 
-            <ThemeProvider theme={getTheme(themeColor)}>
+            <ThemeProvider theme={getTheme(themeColor, appName)}>
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar />}
                 <MessageContainer>

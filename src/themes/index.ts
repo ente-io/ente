@@ -4,10 +4,11 @@ import { getColors } from './colors';
 import { getComponents } from './components';
 import { getPallette } from './palette';
 import { typography } from './typography';
+import { APPS } from 'constants/apps';
 
-export const getTheme = (themeColor: THEME_COLOR) => {
-    const colors = getColors(themeColor);
-    const palette = getPallette(themeColor);
+export const getTheme = (themeColor: THEME_COLOR, appName: APPS) => {
+    const colors = getColors(themeColor, appName);
+    const palette = getPallette(themeColor, colors);
     const components = getComponents(colors, typography);
     const theme = createTheme({
         colors,
