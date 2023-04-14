@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:photos/models/location/location.dart';
+
 // Visibility Constants
 const visibilityVisible = 0;
 const visibilityArchive = 1;
@@ -17,6 +19,7 @@ const pubMagicKeyEditedTime = 'editedTime';
 const pubMagicKeyEditedName = 'editedName';
 const pubMagicKeyCaption = "caption";
 const pubMagicKeyUploaderName = "uploaderName";
+const pubMagicKeyLocation = "location";
 
 class MagicMetadata {
   // 0 -> visible
@@ -44,12 +47,14 @@ class PubMagicMetadata {
   String? editedName;
   String? caption;
   String? uploaderName;
+  Location? location;
 
   PubMagicMetadata({
     this.editedTime,
     this.editedName,
     this.caption,
     this.uploaderName,
+    this.location,
   });
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
@@ -65,6 +70,7 @@ class PubMagicMetadata {
       editedName: map[pubMagicKeyEditedName],
       caption: map[pubMagicKeyCaption],
       uploaderName: map[pubMagicKeyUploaderName],
+      location: map[pubMagicKeyLocation],
     );
   }
 }
