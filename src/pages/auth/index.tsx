@@ -6,6 +6,7 @@ import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AuthFooter } from 'components/Authenicator/AuthFooder';
 import { AppContext } from 'pages/_app';
+import { TextField } from '@mui/material';
 
 const AuthenticatorCodesPage = () => {
     const appContext = useContext(AppContext);
@@ -54,11 +55,14 @@ const AuthenticatorCodesPage = () => {
             {filteredCodes.length === 0 && searchTerm.length === 0 ? (
                 <></>
             ) : (
-                <input
-                    type="text"
-                    placeholder="Search"
-                    value={searchTerm}
+                <TextField
+                    id="search"
+                    name="search"
+                    label={'Search'}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    variant="filled"
+                    value={searchTerm}
+                    autoFocus
                 />
             )}
 
