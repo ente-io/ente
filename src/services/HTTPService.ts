@@ -36,7 +36,10 @@ class HTTPService {
      * Sets the headers to the given object.
      */
     public setHeaders(headers: IHTTPHeaders) {
-        this.headers = headers;
+        this.headers = {
+            ...this.headers,
+            ...headers,
+        };
     }
 
     /**

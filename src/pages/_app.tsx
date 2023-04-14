@@ -67,7 +67,12 @@ import { AppProps } from 'next/app';
 import DialogBoxV2 from 'components/DialogBoxV2';
 import { getTheme } from 'themes';
 import { PAGES } from 'constants/pages';
-import { ALLOWED_APP_PAGES, APPS, getAppNameAndTitle } from 'constants/apps';
+import {
+    ALLOWED_APP_PAGES,
+    APPS,
+    CLIENT_PACKAGE_NAMES,
+    getAppNameAndTitle,
+} from 'constants/apps';
 
 const redirectMap = new Map([
     ['roadmap', getRoadmapRedirectURL],
@@ -167,6 +172,15 @@ export default function App(props) {
     useEffect(() => {
         setupI18n().finally(() => setIsI18nReady(true));
     }, []);
+
+    useEffect(() => {
+        if (!appName) {
+            return;
+        }
+        HTTPService.setHeaders({
+            'X-Client-Package': CLIENT_PACKAGE_NAMES.get(appName),
+        });
+    }, [appName]);
 
     useEffect(() => {
         HTTPService.getInterceptors().response.use(
@@ -315,7 +329,7 @@ export default function App(props) {
             window.removeEventListener('online', setUserOnline);
             window.removeEventListener('offline', setUserOffline);
         };
-    }, [redirectName]);
+    }, [redirectName, appName]);
 
     useEffect(() => {
         setMessageDialogView(true);
