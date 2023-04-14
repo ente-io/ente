@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Carousel from 'react-bootstrap/Carousel';
 import { styled, Button, Typography, TypographyProps } from '@mui/material';
-import { AppContext } from './_app';
+import { AppContext, APPS, getAppNameAndTitle } from './_app';
 import Login from 'components/Login';
 import { useRouter } from 'next/router';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -141,7 +141,12 @@ export default function LandingPage() {
             }
         }
         if (key) {
-            await router.push(PAGES.GALLERY);
+            const { name } = getAppNameAndTitle();
+            if (name === APPS.AUTH) {
+                await router.push(PAGES.AUTH);
+            } else {
+                await router.push(PAGES.GALLERY);
+            }
         } else if (user?.email) {
             await router.push(PAGES.VERIFY);
         }
