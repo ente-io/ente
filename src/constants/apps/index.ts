@@ -27,7 +27,7 @@ export const ALLOWED_APP_PAGES = new Map([
     ],
 ]);
 
-const getAppNameAndTitle = () => {
+export const getAppNameAndTitle = () => {
     if (!runningInBrowser()) {
         return {};
     }

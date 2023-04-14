@@ -67,12 +67,7 @@ import { AppProps } from 'next/app';
 import DialogBoxV2 from 'components/DialogBoxV2';
 import { getTheme } from 'themes';
 import { PAGES } from 'constants/pages';
-import {
-    ALLOWED_APP_PAGES,
-    APPS,
-    getAppName,
-    getAppTitle,
-} from 'constants/apps';
+import { ALLOWED_APP_PAGES, APPS, getAppNameAndTitle } from 'constants/apps';
 
 const redirectMap = new Map([
     ['roadmap', getRoadmapRedirectURL],
@@ -165,10 +160,8 @@ export default function App(props) {
         THEME_COLOR.DARK
     );
 
-    const [appName, appTitle] = useMemo(() => {
-        const appName = getAppName();
-        const appTitle = getAppTitle();
-        return [appName, appTitle];
+    const { name: appName, title: appTitle } = useMemo(() => {
+        return getAppNameAndTitle();
     }, []);
 
     useEffect(() => {
@@ -285,7 +278,6 @@ export default function App(props) {
                 setLoading(true);
             }
 
-            const appName = getAppName();
             if (
                 appName === APPS.ALBUMS &&
                 ALLOWED_APP_PAGES.get(APPS.ALBUMS).indexOf(newPathname) === -1
