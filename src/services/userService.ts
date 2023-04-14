@@ -27,16 +27,20 @@ import { deleteAllCache } from 'utils/storage/cache';
 import { B64EncryptionResult } from 'types/crypto';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
 import { AxiosResponse } from 'axios';
+import { APPS, getAppName } from 'constants/apps';
 
 const ENDPOINT = getEndpoint();
 
 const HAS_SET_KEYS = 'hasSetKeys';
 
-export const sendOtt = (email: string) =>
-    HTTPService.post(`${ENDPOINT}/users/ott`, {
+export const sendOtt = (email: string) => {
+    const appName = getAppName();
+    return HTTPService.post(`${ENDPOINT}/users/ott`, {
         email,
-        client: 'web',
+        client: appName === APPS.AUTH ? 'totp' : 'web',
     });
+};
+
 export const getPublicKey = async (email: string) => {
     const token = getToken();
 

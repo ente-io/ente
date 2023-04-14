@@ -28,6 +28,7 @@ import EnteSpinner from 'components/EnteSpinner';
 import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
 } from 'components/VerifyMasterPasswordForm';
+import { APPS, getAppName } from 'constants/apps';
 
 export default function Credentials() {
     const router = useRouter();
@@ -86,7 +87,12 @@ export default function Credentials() {
             await decryptAndStoreToken(key);
             const redirectURL = appContext.redirectURL;
             appContext.setRedirectURL(null);
-            router.push(redirectURL ?? PAGES.GALLERY);
+            const appName = getAppName();
+            if (appName === APPS.AUTH) {
+                router.push(PAGES.AUTH);
+            } else {
+                router.push(redirectURL ?? PAGES.GALLERY);
+            }
         } catch (e) {
             logError(e, 'useMasterPassword failed');
         }

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "albums": "next dev -p 3002",
+    "auth": "next dev -p 3004",
     "lint": "next lint",
     "build": "next build",
     "postbuild": "next export",

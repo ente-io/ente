@@ -21,6 +21,7 @@ import FormPaper from 'components/Form/FormPaper';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { APPS, getAppName } from 'constants/apps';
 
 export default function ChangePassword() {
     const [token, setToken] = useState<string>();
@@ -74,12 +75,17 @@ export default function ChangePassword() {
         );
 
         await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
-        redirectToGallery();
+        redirectToAppHome();
     };
 
-    const redirectToGallery = () => {
+    const redirectToAppHome = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-        router.push(PAGES.GALLERY);
+        const appName = getAppName();
+        if (appName === APPS.AUTH) {
+            router.push(PAGES.AUTH);
+        } else {
+            router.push(PAGES.GALLERY);
+        }
     };
 
     return (
@@ -90,18 +96,14 @@ export default function ChangePassword() {
                     userEmail={user?.email}
                     callback={onSubmit}
                     buttonText={t('CHANGE_PASSWORD')}
-                    back={
-                        getData(LS_KEYS.SHOW_BACK_BUTTON)?.value
-                            ? redirectToGallery
-                            : null
-                    }
                 />
-
-                <FormPaperFooter>
-                    <LinkButton onClick={router.back}>
-                        {t('GO_BACK')}
-                    </LinkButton>
-                </FormPaperFooter>
+                {getData(LS_KEYS.SHOW_BACK_BUTTON)?.value && (
+                    <FormPaperFooter>
+                        <LinkButton onClick={router.back}>
+                            {t('GO_BACK')}
+                        </LinkButton>
+                    </FormPaperFooter>
+                )}
             </FormPaper>
         </VerticallyCentered>
     );
