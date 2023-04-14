@@ -3,7 +3,7 @@ import { TOTP, HOTP } from 'otpauth';
 import { Code } from 'types/authenticator/code';
 import TimerProgress from './TimerProgress';
 import { t } from 'i18next';
-import { ButtonBase } from '@mui/material';
+import { ButtonBase, Snackbar } from '@mui/material';
 
 const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
     return (
@@ -115,6 +115,7 @@ const OTPDisplay = (props: OTPDisplayProps) => {
     const [code, setCode] = useState('');
     const [nextCode, setNextCode] = useState('');
     const [codeErr, setCodeErr] = useState('');
+    const [hasCopied, setHasCopied] = useState(false);
 
     const generateCodes = () => {
         try {
@@ -144,6 +145,14 @@ const OTPDisplay = (props: OTPDisplayProps) => {
         } catch (err) {
             setCodeErr(err.message);
         }
+    };
+
+    const copyCode = () => {
+        navigator.clipboard.writeText(code);
+        setHasCopied(true);
+        setTimeout(() => {
+            setHasCopied(false);
+        }, 2000);
     };
 
     useEffect(() => {
@@ -180,13 +189,17 @@ const OTPDisplay = (props: OTPDisplayProps) => {
                 <ButtonBase
                     component="div"
                     onClick={() => {
-                        navigator.clipboard.writeText(code);
+                        copyCode();
                     }}>
                     <TOTPDisplay
                         issuer={codeInfo.issuer}
                         account={codeInfo.account}
                         code={code}
                         nextCode={nextCode}
+                    />
+                    <Snackbar
+                        open={hasCopied}
+                        message="Code copied to clipboard"
                     />
                 </ButtonBase>
             ) : (
