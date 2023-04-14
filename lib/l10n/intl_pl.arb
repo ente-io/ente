@@ -49,5 +49,17 @@
   "noRecoveryKeyNoDecryption": "Ze względu na charakter naszego protokołu szyfrowania end-to-end, dane nie mogą być odszyfrowane bez hasła lub klucza odzyskiwania",
   "verifyEmail": "Zweryfikuj adres e-mail",
   "checkInboxAndSpamFolder": "Sprawdź swoją skrzynkę odbiorczą (i spam), aby zakończyć weryfikację",
-  "confirm": "Potwierdź"
+  "resetPasswordTitle": "Zresetuj hasło",
+  "weakStrength": "Słabe",
+  "strongStrength": "Silne",
+  "pleaseWait": "Proszę czekać...",
+  "continueLabel": "Kontynuuj",
+  "termsOfServicesTitle": "Regulamin",
+  "logInLabel": "Zaloguj się",
+  "enterYourPassword": "Wprowadź hasło",
+  "welcomeBack": "Witaj ponownie!",
+  "doThisLater": "Spróbuj później",
+  "enterCode": "Wprowadź kod",
+  "confirm": "Potwierdź",
+  "tryAgain": "Spróbuj ponownie"
 }
