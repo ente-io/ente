@@ -173,7 +173,11 @@ const OTPDisplay = (props: OTPDisplayProps) => {
     }, [codeInfo]);
 
     return (
-        <div style={{ padding: '8px' }}>
+        <div
+            style={{ padding: '8px' }}
+            onClick={() => {
+                navigator.clipboard.writeText(code);
+            }}>
             <TimerProgress period={codeInfo.period ?? Code.defaultPeriod} />
             {codeErr === '' ? (
                 <TOTPDisplay
