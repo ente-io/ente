@@ -60,7 +60,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         widget.file.fileType == FileType.livePhoto;
     _exifNotifier.addListener(() {
       if (_exifNotifier.value != null) {
-        _generateExifForLocation(_exifNotifier.value!);
         hasLocationData = _hasLocationData();
       }
     });
@@ -238,29 +237,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             fileLocation.longitude != null) &&
         (fileLocation.latitude != 0 || fileLocation.longitude != 0);
     return hasLocation;
-  }
-
-  void _generateExifForLocation(Map<String, IfdTag> exif) {
-    if (exif["GPS GPSLatitude"] != null) {
-      _exifData["lat"] = exif["GPS GPSLatitude"]!
-          .values
-          .toList()
-          .map((e) => ((e as Ratio).numerator / e.denominator))
-          .toList();
-    }
-    if (exif["GPS GPSLongitude"] != null) {
-      _exifData["long"] = exif["GPS GPSLongitude"]!
-          .values
-          .toList()
-          .map((e) => ((e as Ratio).numerator / e.denominator))
-          .toList();
-    }
-    if (exif["GPS GPSLatitudeRef"] != null) {
-      _exifData["latRef"] = exif["GPS GPSLatitudeRef"].toString();
-    }
-    if (exif["GPS GPSLongitudeRef"] != null) {
-      _exifData["longRef"] = exif["GPS GPSLongitudeRef"].toString();
-    }
   }
 
   _generateExifForDetails(Map<String, IfdTag> exif) {

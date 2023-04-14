@@ -4,6 +4,7 @@ import 'package:exif/exif.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file.dart';
+import "package:photos/services/location_service.dart";
 import 'package:photos/utils/file_util.dart';
 
 const kDateTimeOriginal = "EXIF DateTimeOriginal";
@@ -45,4 +46,40 @@ Future<DateTime?> getCreationTimeFromEXIF(io.File file) async {
     _logger.severe("failed to getCreationTimeFromEXIF", e);
   }
   return null;
+}
+
+Future<GPSData> gpsDataFromExif(File file) async {
+  final Map<String, dynamic> exifLocationData = {
+    "lat": null,
+    "long": null,
+    "latRef": null,
+    "longRef": null,
+  };
+  final exif = await getExif(file);
+  if (exif["GPS GPSLatitude"] != null) {
+    exifLocationData["lat"] = exif["GPS GPSLatitude"]!
+        .values
+        .toList()
+        .map((e) => ((e as Ratio).numerator / e.denominator))
+        .toList();
+  }
+  if (exif["GPS GPSLongitude"] != null) {
+    exifLocationData["long"] = exif["GPS GPSLongitude"]!
+        .values
+        .toList()
+        .map((e) => ((e as Ratio).numerator / e.denominator))
+        .toList();
+  }
+  if (exif["GPS GPSLatitudeRef"] != null) {
+    exifLocationData["latRef"] = exif["GPS GPSLatitudeRef"].toString();
+  }
+  if (exif["GPS GPSLongitudeRef"] != null) {
+    exifLocationData["longRef"] = exif["GPS GPSLongitudeRef"].toString();
+  }
+  return GPSData(
+    exifLocationData["latRef"],
+    exifLocationData["lat"],
+    exifLocationData["longRef"],
+    exifLocationData["long"],
+  );
 }

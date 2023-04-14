@@ -15,6 +15,7 @@ import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location/location.dart';
 import 'package:photos/utils/crypto_util.dart';
+import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -154,7 +155,18 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   if (file.location == null ||
       (file.location!.latitude == 0 && file.location!.longitude == 0)) {
-    final latLong = await asset.latlngAsync();
+    LatLng latLong = await asset.latlngAsync();
+    if ((latLong.latitude ?? 0) == 0 && (latLong.longitude ?? 0) == 0) {
+      try {
+        final locationData = (await gpsDataFromExif(file)).toLocationObj();
+        latLong = LatLng(
+          latitude: locationData.latitude,
+          longitude: locationData.longitude,
+        );
+      } catch (e, s) {
+        _logger.warning("Failed to get location from exif", e, s);
+      }
+    }
     file.location =
         Location(latitude: latLong.latitude, longitude: latLong.longitude);
   }
