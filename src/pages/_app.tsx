@@ -60,6 +60,14 @@ import { CacheProvider, EmotionCache } from '@emotion/react';
 import { AppProps } from 'next/app';
 import DialogBoxV2 from 'components/DialogBoxV2';
 import { getTheme } from 'themes';
+import { getAlbumsURL, getAuthURL } from 'utils/common/apiUtil';
+import { runningInBrowser } from 'utils/common';
+
+enum APPS {
+    PHOTOS = 'PHOTOS',
+    AUTH = 'AUTH',
+    ALBUMS = 'ALBUMS',
+}
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -107,7 +115,21 @@ const redirectMap = new Map([
     ['families', getFamilyPortalRedirectURL],
 ]);
 
-const APP_TITLE = 'ente Photos';
+const getAppNameAndTitle = () => {
+    if (!runningInBrowser()) {
+        return {};
+    }
+    const currentURL = new URL(window.location.href);
+    const albumsURL = new URL(getAlbumsURL());
+    const authURL = new URL(getAuthURL());
+    if (currentURL.origin === albumsURL.origin) {
+        return { name: APPS.ALBUMS, title: 'ente Albums' };
+    } else if (currentURL.origin === authURL.origin) {
+        return { name: APPS.AUTH, title: 'ente Auth' };
+    } else {
+        return { name: APPS.PHOTOS, title: 'ente Photos' };
+    }
+};
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
@@ -338,10 +360,16 @@ export default function App(props) {
             content: t('UNKNOWN_ERROR'),
         });
 
+    const appNameAndTitle = getAppNameAndTitle();
+
     return (
         <CacheProvider value={emotionCache}>
             <Head>
-                <title>{isI18nReady ? t('TITLE') : APP_TITLE}</title>
+                <title>
+                    {isI18nReady
+                        ? t('TITLE', { context: appNameAndTitle.name })
+                        : appNameAndTitle.title}
+                </title>
                 <meta
                     name="viewport"
                     content="initial-scale=1, width=device-width"
