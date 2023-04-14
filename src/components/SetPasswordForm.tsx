@@ -7,6 +7,7 @@ import { PasswordStrengthHint } from './PasswordStrength';
 import { isWeakPassword } from 'utils/crypto';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
+import ShowHidePassword from './Form/ShowHidePassword';
 
 export interface SetPasswordFormProps {
     userEmail: string;
@@ -26,6 +27,17 @@ export interface SetPasswordFormValues {
 }
 function SetPasswordForm(props: SetPasswordFormProps) {
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const handleMouseDownPassword = (
+        event: React.MouseEvent<HTMLButtonElement>
+    ) => {
+        event.preventDefault();
+    };
 
     const onSubmit = async (
         values: SetPasswordFormValues,
@@ -82,7 +94,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         name="password"
                         id="password"
                         autoComplete="new-password"
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         label={t('PASSPHRASE_HINT')}
                         value={values.passphrase}
                         onChange={handleChange('passphrase')}
@@ -90,6 +102,19 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         helperText={errors.passphrase}
                         autoFocus
                         disabled={loading}
+                        InputProps={{
+                            endAdornment: (
+                                <ShowHidePassword
+                                    showPassword={showPassword}
+                                    handleClickShowPassword={
+                                        handleClickShowPassword
+                                    }
+                                    handleMouseDownPassword={
+                                        handleMouseDownPassword
+                                    }
+                                />
+                            ),
+                        }}
                     />
                     <TextField
                         fullWidth
