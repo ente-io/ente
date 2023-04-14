@@ -316,13 +316,13 @@ export default function App(props) {
                 ALLOWED_PAGES.get(APPS.ALBUMS).indexOf(newPathname) === -1
             ) {
                 router.replace(PAGES.SHARED_ALBUMS);
-                throw 'Aborting route change, changing page';
+                throw `Aborting route change, changing page ${newPathname} is not allowed for ${name}`;
             } else if (
                 name === APPS.AUTH &&
                 ALLOWED_PAGES.get(APPS.AUTH).indexOf(newPathname) === -1
             ) {
                 router.replace(PAGES.AUTH);
-                throw 'Aborting route change, changing pa';
+                throw `Aborting route change, changing page ${newPathname} is not allowed for ${name}`;
             }
 
             if (redirectName) {
