@@ -1,4 +1,4 @@
-import { CenteredFlex, HorizontalFlex } from 'components/Container';
+import { HorizontalFlex } from 'components/Container';
 import NavbarBase from 'components/Navbar/base';
 import React from 'react';
 import { t } from 'i18next';
@@ -12,10 +12,10 @@ import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
 export default function AuthNavbar() {
     return (
         <NavbarBase>
-            <CenteredFlex position={'absolute'}>
+            <HorizontalFlex flex={1} justifyContent={'center'}>
                 <EnteLogo />
-            </CenteredFlex>
-            <HorizontalFlex width={'100%'} justifyContent={'flex-end'}>
+            </HorizontalFlex>
+            <HorizontalFlex position={'absolute'} right="24px">
                 <OverflowMenu
                     ariaControls={'auth-options'}
                     triggerButtonIcon={<MoreHoriz />}>
