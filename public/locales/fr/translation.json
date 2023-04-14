@@ -82,7 +82,9 @@
     "ZOOM_IN_OUT": "Zoom +/-",
     "PREVIOUS": "Précédent (←)",
     "NEXT": "Suivant (→)",
-    "TITLE": "ente Photos",
+    "TITLE_PHOTOS": "",
+    "TITLE_ALBUMS": "",
+    "TITLE_AUTH": "",
     "UPLOAD_FIRST_PHOTO": "Chargez votre 1ere photo",
     "IMPORT_YOUR_FOLDERS": "Importez vos dossiers",
     "UPLOAD_DROPZONE_MESSAGE": "Déposez pour sauvegarder vos fichiers",
@@ -196,7 +198,9 @@
     "DOWNLOAD_COLLECTION": "Télécharger l'album",
     "DOWNLOAD_COLLECTION_MESSAGE": "<p>Êtes-vous certains de vouloir télécharger l'album complet?</p><p>Tous les fichiers seront mis en file d'attente pour un téléchargement fractionné</p>",
     "CREATE_ALBUM_FAILED": "Échec de création de l'album , veuillez réessayer",
+    "SEARCH": "",
     "SEARCH_RESULTS": "Résultats de la recherche",
+    "NO_RESULTS": "",
     "SEARCH_HINT": "Recherche d'albums, dates ...",
     "SEARCH_TYPE": {
         "COLLECTION": "l'album",
@@ -510,5 +514,7 @@
     "FEEDBACK_REQUIRED": "Merci de nous aider avec cette information",
     "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "Qu'est-ce que l'autre service fait de mieux ?",
     "RECOVER_TWO_FACTOR": "Récupérer la double-authentification",
-    "at": "à"
+    "at": "à",
+    "AUTH_NEXT": "",
+    "AUTH_DOWNLOAD_MOBILE_APP": ""
 }

@@ -82,7 +82,9 @@
     "ZOOM_IN_OUT": "",
     "PREVIOUS": "",
     "NEXT": "",
-    "TITLE": "",
+    "TITLE_PHOTOS": "",
+    "TITLE_ALBUMS": "",
+    "TITLE_AUTH": "",
     "UPLOAD_FIRST_PHOTO": "",
     "IMPORT_YOUR_FOLDERS": "",
     "UPLOAD_DROPZONE_MESSAGE": "",
@@ -196,7 +198,9 @@
     "DOWNLOAD_COLLECTION": "",
     "DOWNLOAD_COLLECTION_MESSAGE": "",
     "CREATE_ALBUM_FAILED": "",
+    "SEARCH": "",
     "SEARCH_RESULTS": "",
+    "NO_RESULTS": "",
     "SEARCH_HINT": "",
     "SEARCH_TYPE": {
         "COLLECTION": "",
@@ -510,5 +514,7 @@
     "FEEDBACK_REQUIRED": "",
     "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "",
     "RECOVER_TWO_FACTOR": "",
-    "at": ""
+    "at": "",
+    "AUTH_NEXT": "",
+    "AUTH_DOWNLOAD_MOBILE_APP": ""
 }
