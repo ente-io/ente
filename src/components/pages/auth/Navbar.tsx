@@ -4,6 +4,7 @@ import NavbarBase from 'components/Navbar/base';
 import React from 'react';
 import { t } from 'i18next';
 import { Button } from '@mui/material';
+import { logoutUser } from 'services/userService';
 
 export default function AuthNavbar() {
     return (
@@ -11,7 +12,9 @@ export default function AuthNavbar() {
             <FluidContainer>
                 <EnteLinkLogo />
             </FluidContainer>
-            <Button color="critical"> {t('LOGOUT')}</Button>
+            <Button color="critical" onClick={logoutUser}>
+                {t('LOGOUT')}
+            </Button>
         </NavbarBase>
     );
 }
