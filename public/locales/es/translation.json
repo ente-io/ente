@@ -82,7 +82,9 @@
     "ZOOM_IN_OUT": "Acercar/alejar",
     "PREVIOUS": "Anterior (←)",
     "NEXT": "Siguiente (→)",
-    "TITLE": "ente Photos",
+    "TITLE_PHOTOS": "",
+    "TITLE_ALBUMS": "",
+    "TITLE_AUTH": "",
     "UPLOAD_FIRST_PHOTO": "Carga tu primer archivo",
     "IMPORT_YOUR_FOLDERS": "Importar tus carpetas",
     "UPLOAD_DROPZONE_MESSAGE": "Soltar para respaldar tus archivos",
@@ -196,7 +198,9 @@
     "DOWNLOAD_COLLECTION": "Descargar álbum",
     "DOWNLOAD_COLLECTION_MESSAGE": "<p>¿Está seguro de que desea descargar el álbum completo?</p><p>Todos los archivos se pondrán en cola para su descarga secuencialmente</p>",
     "CREATE_ALBUM_FAILED": "Error al crear el álbum, inténtalo de nuevo",
+    "SEARCH": "",
     "SEARCH_RESULTS": "Buscar resultados",
+    "NO_RESULTS": "",
     "SEARCH_HINT": "Buscar álbumes, fechas...",
     "SEARCH_TYPE": {
         "COLLECTION": "Álbum",
@@ -510,5 +514,7 @@
     "FEEDBACK_REQUIRED": "Ayúdanos con esta información",
     "FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE": "Qué hace mejor el otro servicio?",
     "RECOVER_TWO_FACTOR": "Recuperar dos factores",
-    "at": ""
+    "at": "",
+    "AUTH_NEXT": "",
+    "AUTH_DOWNLOAD_MOBILE_APP": ""
 }
