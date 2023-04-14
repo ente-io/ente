@@ -1,5 +1,4 @@
-import React, { useContext, useState } from 'react';
-import SidebarButton from './Button';
+import { useContext, useState } from 'react';
 import { t } from 'i18next';
 
 // import FixLargeThumbnails from 'components/FixLargeThumbnail';
@@ -13,10 +12,11 @@ import isElectron from 'is-electron';
 import WatchFolder from 'components/WatchFolder';
 import { getDownloadAppMessage } from 'utils/ui';
 
-import ThemeSwitcher from './ThemeSwitcher';
-import { SpaceBetweenFlex } from 'components/Container';
 import { isInternalUser } from 'utils/user';
 import Preferences from './Preferences';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import ThemeSwitcher from './ThemeSwitcher';
+import { THEME_COLOR } from 'constants/theme';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
@@ -72,46 +72,77 @@ export default function UtilitySection({ closeSidebar }) {
             close: { variant: 'critical' },
         });
 
+    const toggleTheme = () => {
+        setThemeColor((themeColor) =>
+            themeColor === THEME_COLOR.DARK
+                ? THEME_COLOR.LIGHT
+                : THEME_COLOR.DARK
+        );
+    };
+
     return (
         <>
             {isElectron() && (
-                <SidebarButton onClick={openWatchFolder}>
-                    {t('WATCH_FOLDERS')}
-                </SidebarButton>
+                <EnteMenuItem
+                    onClick={openWatchFolder}
+                    variant="secondary"
+                    label={t('WATCH_FOLDERS')}
+                />
             )}
-            <SidebarButton onClick={openRecoveryKeyModal}>
-                {t('RECOVERY_KEY')}
-            </SidebarButton>
+            <EnteMenuItem
+                variant="secondary"
+                onClick={openRecoveryKeyModal}
+                label={t('RECOVERY_KEY')}
+            />
             {isInternalUser() && (
-                <SpaceBetweenFlex sx={{ px: 1.5 }}>
-                    {t('CHOSE_THEME')}
-                    <ThemeSwitcher
-                        themeColor={themeColor}
-                        setThemeColor={setThemeColor}
-                    />
-                </SpaceBetweenFlex>
+                <EnteMenuItem
+                    onClick={toggleTheme}
+                    variant="secondary"
+                    label={t('CHOSE_THEME')}
+                    endIcon={
+                        <ThemeSwitcher
+                            themeColor={themeColor}
+                            setThemeColor={setThemeColor}
+                        />
+                    }
+                />
             )}
-            <SidebarButton onClick={openTwoFactorModal}>
-                {t('TWO_FACTOR')}
-            </SidebarButton>
-            <SidebarButton onClick={redirectToChangePasswordPage}>
-                {t('CHANGE_PASSWORD')}
-            </SidebarButton>
-            <SidebarButton onClick={redirectToChangeEmailPage}>
-                {t('CHANGE_EMAIL')}
-            </SidebarButton>
-            <SidebarButton onClick={redirectToDeduplicatePage}>
-                {t('DEDUPLICATE_FILES')}
-            </SidebarButton>
-            {isInternalUser() && (
-                <SidebarButton onClick={redirectToAuthenticatorPage}>
-                    {t('AUTHENTICATOR_SECTION')}
-                </SidebarButton>
-            )}
-            <SidebarButton onClick={openPreferencesOptions}>
-                {t('PREFERENCES')}
-            </SidebarButton>
+            <EnteMenuItem
+                variant="secondary"
+                onClick={openTwoFactorModal}
+                label={t('TWO_FACTOR')}
+            />
 
+            <EnteMenuItem
+                variant="secondary"
+                onClick={redirectToChangePasswordPage}
+                label={t('CHANGE_PASSWORD')}
+            />
+
+            <EnteMenuItem
+                variant="secondary"
+                onClick={redirectToChangeEmailPage}
+                label={t('CHANGE_EMAIL')}
+            />
+
+            <EnteMenuItem
+                variant="secondary"
+                onClick={redirectToDeduplicatePage}
+                label={t('DEDUPLICATE_FILES')}
+            />
+
+            {isInternalUser() && (
+                <EnteMenuItem
+                    variant="secondary"
+                    onClick={redirectToAuthenticatorPage}
+                    label={t('AUTHENTICATOR_SECTION')}
+                />
+            )}
+            <EnteMenuItem
+                variant="secondary"
+                onClick={openPreferencesOptions}
+                label={t('PREFERENCES')}
+            />
             <RecoveryKey
                 show={recoverModalView}
                 onHide={closeRecoveryKeyModal}

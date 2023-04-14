@@ -1,10 +1,10 @@
 import React, { useContext, useState } from 'react';
-import SidebarButton from './Button';
 import { t } from 'i18next';
 
 import { logoutUser } from 'services/userService';
 import { AppContext } from 'pages/_app';
 import DeleteAccountModal from 'components/DeleteAccountModal';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 
 export default function ExitSection() {
     const { setDialogMessage } = useContext(AppContext);
@@ -28,12 +28,18 @@ export default function ExitSection() {
 
     return (
         <>
-            <SidebarButton onClick={confirmLogout} color="critical">
-                {t('LOGOUT')}
-            </SidebarButton>
-            <SidebarButton onClick={openDeleteAccountModal} color="critical">
-                {t('DELETE_ACCOUNT')}
-            </SidebarButton>
+            <EnteMenuItem
+                onClick={confirmLogout}
+                color="critical"
+                label={t('LOGOUT')}
+                variant="secondary"
+            />
+            <EnteMenuItem
+                onClick={openDeleteAccountModal}
+                color="critical"
+                variant="secondary"
+                label={t('DELETE_ACCOUNT')}
+            />
             <DeleteAccountModal
                 open={deleteAccountModalView}
                 onClose={closeDeleteAccountModal}

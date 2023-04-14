@@ -1,4 +1,5 @@
-import { Box, Stack, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
+import { VerticallyCenteredFlex } from 'components/Container';
 
 interface Iprops {
     title: string;
@@ -7,21 +8,20 @@ interface Iprops {
 
 export default function MenuSectionTitle({ title, icon }: Iprops) {
     return (
-        <Stack px="8px" py={'6px'} direction="row" spacing={'8px'}>
-            {icon && (
-                <Box
-                    sx={{
-                        '& > svg': {
-                            fontSize: '17px',
-                            color: 'text.muted',
-                        },
-                    }}>
-                    {icon}
-                </Box>
-            )}
+        <VerticallyCenteredFlex
+            px="8px"
+            py={'6px'}
+            gap={'8px'}
+            sx={{
+                '& > svg': {
+                    fontSize: '17px',
+                    color: (theme) => theme.colors.stroke.muted,
+                },
+            }}>
+            {icon && icon}
             <Typography variant="small" color="text.muted">
                 {title}
             </Typography>
-        </Stack>
+        </VerticallyCenteredFlex>
     );
 }

@@ -1,7 +1,7 @@
 import { Stack, Typography } from '@mui/material';
-import { EnteMenuItem } from 'components/Menu/menuItem';
-import EnteMenuItemDivider from 'components/Menu/menuItemDivider';
-import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import MenuItemDivider from 'components/Menu/MenuItemDivider';
+import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { Collection, PublicURL } from 'types/collection';
 import ManagePublicShareOptions from './manage';
 import PublicIcon from '@mui/icons-material/Public';
@@ -38,20 +38,21 @@ export default function ManagePublicShare({
                     <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
                     {t('PUBLIC_LINK_ENABLED')}
                 </Typography>
-                <EnteMenuItemGroup>
+                <MenuItemGroup>
                     <EnteMenuItem
                         startIcon={<ContentCopyIcon />}
-                        onClick={copyToClipboardHelper}>
-                        {t('COPY_LINK')}
-                    </EnteMenuItem>
-                    <EnteMenuItemDivider hasIcon={true} />
+                        onClick={copyToClipboardHelper}
+                        label={t('COPY_LINK')}
+                    />
+
+                    <MenuItemDivider hasIcon={true} />
                     <EnteMenuItem
                         startIcon={<LinkIcon />}
                         endIcon={<ChevronRightIcon />}
-                        onClick={openManageShare}>
-                        {t('MANAGE_LINK')}
-                    </EnteMenuItem>
-                </EnteMenuItemGroup>
+                        onClick={openManageShare}
+                        label={t('MANAGE_LINK')}
+                    />
+                </MenuItemGroup>
             </Stack>
             <ManagePublicShareOptions
                 open={manageShareView}

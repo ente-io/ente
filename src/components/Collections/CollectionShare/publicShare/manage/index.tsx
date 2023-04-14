@@ -16,12 +16,12 @@ import { ManagePublicCollect } from './publicCollect';
 import { EnteDrawer } from 'components/EnteDrawer';
 import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { EnteMenuItem } from 'components/Menu/menuItem';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { t } from 'i18next';
-import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
+import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { DialogProps } from '@mui/material';
 import Titlebar from 'components/Titlebar';
-import EnteMenuItemDivider from 'components/Menu/menuItemDivider';
+import MenuItemDivider from 'components/Menu/MenuItemDivider';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -107,7 +107,7 @@ export default function ManagePublicShareOptions({
                                 }
                                 onRootClose={onRootClose}
                             />
-                            <EnteMenuItemGroup>
+                            <MenuItemGroup>
                                 <ManageDeviceLimit
                                     collection={collection}
                                     publicShareProp={publicShareProp}
@@ -116,7 +116,7 @@ export default function ManagePublicShareOptions({
                                     }
                                     onRootClose={onRootClose}
                                 />
-                                <EnteMenuItemDivider />
+                                <MenuItemDivider />
                                 <ManageDownloadAccess
                                     collection={collection}
                                     publicShareProp={publicShareProp}
@@ -124,7 +124,7 @@ export default function ManagePublicShareOptions({
                                         updatePublicShareURLHelper
                                     }
                                 />
-                                <EnteMenuItemDivider />
+                                <MenuItemDivider />
                                 <ManageLinkPassword
                                     collection={collection}
                                     publicShareProp={publicShareProp}
@@ -132,18 +132,24 @@ export default function ManagePublicShareOptions({
                                         updatePublicShareURLHelper
                                     }
                                 />
-                            </EnteMenuItemGroup>
-                            <EnteMenuItem
-                                startIcon={<ContentCopyIcon />}
-                                onClick={copyToClipboardHelper(publicShareUrl)}>
-                                {t('COPY_LINK')}
-                            </EnteMenuItem>
-                            <EnteMenuItem
-                                color="critical"
-                                startIcon={<RemoveCircleOutline />}
-                                onClick={disablePublicSharing}>
-                                {t('REMOVE_LINK')}
-                            </EnteMenuItem>
+                            </MenuItemGroup>
+                            <MenuItemGroup>
+                                <EnteMenuItem
+                                    startIcon={<ContentCopyIcon />}
+                                    onClick={copyToClipboardHelper(
+                                        publicShareUrl
+                                    )}
+                                    label={t('COPY_LINK')}
+                                />
+                            </MenuItemGroup>
+                            <MenuItemGroup>
+                                <EnteMenuItem
+                                    color="critical"
+                                    startIcon={<RemoveCircleOutline />}
+                                    onClick={disablePublicSharing}
+                                    label={t('REMOVE_LINK')}
+                                />
+                            </MenuItemGroup>
                         </Stack>
                         {sharableLinkError && (
                             <Typography

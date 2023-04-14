@@ -8,11 +8,11 @@ import {
     TRASH_SECTION,
 } from 'constants/collection';
 import { CollectionSummaries } from 'types/collection';
-import ShortcutButton from './ShortcutButton';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 import CategoryIcon from '@mui/icons-material/Category';
 import { getUncategorizedCollection } from 'services/collectionService';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 interface Iprops {
     closeSidebar: () => void;
     collectionSummaries: CollectionSummaries;
@@ -53,26 +53,32 @@ export default function ShortcutSection({
     };
     return (
         <>
-            <ShortcutButton
+            <EnteMenuItem
                 startIcon={<CategoryIcon />}
-                label={t('UNCATEGORIZED')}
                 onClick={openUncategorizedSection}
-                count={
-                    collectionSummaries.get(uncategorizedCollectionId)
-                        ?.fileCount
-                }
+                variant="captioned"
+                label={t('UNCATEGORIZED')}
+                subText={collectionSummaries
+                    .get(uncategorizedCollectionId)
+                    ?.fileCount.toString()}
             />
-            <ShortcutButton
+            <EnteMenuItem
                 startIcon={<DeleteOutline />}
-                label={t('TRASH')}
-                count={collectionSummaries.get(TRASH_SECTION)?.fileCount}
                 onClick={openTrashSection}
+                variant="captioned"
+                label={t('TRASH')}
+                subText={collectionSummaries
+                    .get(TRASH_SECTION)
+                    ?.fileCount.toString()}
             />
-            <ShortcutButton
+            <EnteMenuItem
                 startIcon={<ArchiveOutlined />}
-                label={t('ARCHIVE_SECTION_NAME')}
-                count={collectionSummaries.get(ARCHIVE_SECTION)?.fileCount}
                 onClick={openArchiveSection}
+                variant="captioned"
+                label={t('ARCHIVE_SECTION_NAME')}
+                subText={collectionSummaries
+                    .get(ARCHIVE_SECTION)
+                    ?.fileCount.toString()}
             />
         </>
     );

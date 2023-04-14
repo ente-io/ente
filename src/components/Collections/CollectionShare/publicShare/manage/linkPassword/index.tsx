@@ -2,7 +2,7 @@ import { AppContext } from 'pages/_app';
 import React, { useContext, useState } from 'react';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import { PublicLinkSetPassword } from './setPassword';
-import { EnteMenuItem } from 'components/Menu/menuItem';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { t } from 'i18next';
 
 interface Iprops {
@@ -49,11 +49,11 @@ export function ManageLinkPassword({
     return (
         <>
             <EnteMenuItem
+                label={t('LINK_PASSWORD_LOCK')}
                 onClick={handlePasswordChangeSetting}
                 checked={!!publicShareProp?.passwordEnabled}
-                hasSwitch>
-                {t('LINK_PASSWORD_LOCK')}
-            </EnteMenuItem>
+                variant="toggle"
+            />
             <PublicLinkSetPassword
                 open={changePasswordView}
                 onClose={closeConfigurePassword}

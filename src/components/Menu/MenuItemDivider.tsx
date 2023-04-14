@@ -2,7 +2,7 @@ import { Divider } from '@mui/material';
 interface Iprops {
     hasIcon?: boolean;
 }
-export default function EnteMenuItemDivider({ hasIcon = false }: Iprops) {
+export default function MenuItemDivider({ hasIcon = false }: Iprops) {
     return (
         <Divider
             sx={{

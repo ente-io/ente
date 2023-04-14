@@ -7,8 +7,8 @@ import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import Titlebar from 'components/Titlebar';
 import { useState } from 'react';
 import { t } from 'i18next';
-
-import SidebarButton from './Button';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
     const [mlSearchSettingsView, setMlSearchSettingsView] = useState(false);
@@ -51,13 +51,13 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                                 title={t('LABS')}
                                 icon={<ScienceIcon />}
                             />
-                            <SidebarButton
-                                variant="contained"
-                                color="secondary"
-                                endIcon={<ChevronRight />}
-                                onClick={openMlSearchSettings}>
-                                {t('ML_SEARCH')}
-                            </SidebarButton>
+                            <MenuItemGroup>
+                                <EnteMenuItem
+                                    endIcon={<ChevronRight />}
+                                    onClick={openMlSearchSettings}
+                                    label={t('ML_SEARCH')}
+                                />
+                            </MenuItemGroup>
                         </Box>
                     </Stack>
                 </Box>

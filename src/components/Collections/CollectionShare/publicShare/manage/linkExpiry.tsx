@@ -1,15 +1,15 @@
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import { DialogProps, Stack } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
-import { EnteMenuItem } from 'components/Menu/menuItem';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import React, { useMemo, useState } from 'react';
 import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import { shareExpiryOptions } from 'utils/collection';
 import { t } from 'i18next';
-import { EnteMenuItemGroup } from 'components/Menu/menuItemGroup';
+import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { formatDateTime } from 'utils/time/format';
 import Titlebar from 'components/Titlebar';
-import EnteMenuItemDivider from 'components/Menu/menuItemDivider';
+import MenuItemDivider from 'components/Menu/MenuItemDivider';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -58,16 +58,19 @@ export function ManageLinkExpiry({
 
     return (
         <>
-            <EnteMenuItem
-                onClick={openShareExpiryOptionsModalView}
-                endIcon={<ChevronRight />}
-                subText={
-                    publicShareProp?.validTill
-                        ? formatDateTime(publicShareProp?.validTill / 1000)
-                        : t('NEVER')
-                }>
-                {t('LINK_EXPIRY')}
-            </EnteMenuItem>
+            <MenuItemGroup>
+                <EnteMenuItem
+                    onClick={openShareExpiryOptionsModalView}
+                    endIcon={<ChevronRight />}
+                    variant="captioned"
+                    label={t('LINK_EXPIRY')}
+                    subText={
+                        publicShareProp?.validTill
+                            ? formatDateTime(publicShareProp?.validTill / 1000)
+                            : t('NEVER')
+                    }
+                />
+            </MenuItemGroup>
             <EnteDrawer
                 anchor="right"
                 open={shareExpiryOptionsModalView}
@@ -79,22 +82,23 @@ export function ManageLinkExpiry({
                         onRootClose={onRootClose}
                     />
                     <Stack py={'20px'} px={'8px'} spacing={'32px'}>
-                        <EnteMenuItemGroup>
+                        <MenuItemGroup>
                             {shareExpireOption.map((item, index) => (
                                 <>
                                     <EnteMenuItem
+                                        fontWeight="normal"
                                         key={item.value()}
                                         onClick={changeShareExpiryValue(
                                             item.value()
-                                        )}>
-                                        {item.label}
-                                    </EnteMenuItem>
+                                        )}
+                                        label={item.label}
+                                    />
                                     {index !== shareExpireOption.length - 1 && (
-                                        <EnteMenuItemDivider />
+                                        <MenuItemDivider />
                                     )}
                                 </>
                             ))}
-                        </EnteMenuItemGroup>
+                        </MenuItemGroup>
                     </Stack>
                 </Stack>
             </EnteDrawer>

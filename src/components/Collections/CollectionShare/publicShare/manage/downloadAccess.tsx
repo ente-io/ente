@@ -1,4 +1,4 @@
-import { EnteMenuItem } from 'components/Menu/menuItem';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
 import { Trans } from 'react-i18next';
@@ -48,8 +48,8 @@ export function ManageDownloadAccess({
         <EnteMenuItem
             checked={publicShareProp?.enableDownload ?? true}
             onClick={handleFileDownloadSetting}
-            hasSwitch>
-            {t('FILE_DOWNLOAD')}
-        </EnteMenuItem>
+            variant="toggle"
+            label={t('FILE_DOWNLOAD')}
+        />
     );
 }
