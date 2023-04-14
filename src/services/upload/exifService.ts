@@ -76,7 +76,6 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     return parsedExif;
 }
 
-// can be '2009-09-23 17:40:52 UTC', '2010:07:06 20:45:12', or '2009-09-23 11:40:52-06:00'
 function parseEXIFDate(dataTimeString: string) {
     try {
         if (typeof dataTimeString !== 'string') {
@@ -96,25 +95,9 @@ function parseEXIFDate(dataTimeString: string) {
             Number.isNaN(minute) ||
             Number.isNaN(second)
         ) {
-            date = new Date(Date.UTC(year, month - 1, day));
+            date = new Date(year, month - 1, day);
         } else {
-            const offset =
-                dataTimeString.match(/([+-]\d+:\d+)$/); /* UTC offset */
-            if (offset) {
-                const [offsetHour, offsetMinute] = offset[1]
-                    .split(':')
-                    .map((component) => parseInt(component, 10));
-                const offsetInMinutes = offsetHour * 60 + offsetMinute;
-                const offsetInMilliseconds = offsetInMinutes * 60 * 1000;
-                date = new Date(
-                    Date.UTC(year, month - 1, day, hour, minute, second) -
-                        offsetInMilliseconds
-                );
-            } else {
-                date = new Date(
-                    Date.UTC(year, month - 1, day, hour, minute, second)
-                );
-            }
+            date = new Date(year, month - 1, day, hour, minute, second);
         }
         if (Number.isNaN(+date)) {
             throw Error(CustomError.NOT_A_DATE);
