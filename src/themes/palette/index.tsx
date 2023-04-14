@@ -5,7 +5,7 @@ export const getPallette = (
     themeColor: THEME_COLOR,
     colors: ThemeColorsOptions
 ): PaletteOptions => {
-    const paletteOptions = getPalletteOptions(colors);
+    const paletteOptions = getPalletteOptions(themeColor, colors);
     switch (themeColor) {
         case THEME_COLOR.LIGHT:
             return { mode: 'light', ...paletteOptions };
@@ -15,13 +15,15 @@ export const getPallette = (
 };
 
 export const getPalletteOptions = (
+    themeColor: THEME_COLOR,
     colors: ThemeColorsOptions
 ): PaletteOptions => {
     return {
         primary: {
             main: colors.fill.base,
             dark: colors.fill.basePressed,
-            contrastText: colors.white.base,
+            contrastText:
+                themeColor === 'dark' ? colors.black.base : colors.white.base,
         },
         secondary: {
             main: colors.fill.faint,
