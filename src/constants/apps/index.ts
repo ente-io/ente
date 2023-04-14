@@ -19,6 +19,7 @@ export const ALLOWED_APP_PAGES = new Map([
             PAGES.VERIFY,
             PAGES.CREDENTIALS,
             PAGES.RECOVER,
+            PAGES.CHANGE_PASSWORD,
             PAGES.GENERATE,
             PAGES.AUTH,
             PAGES.TWO_FACTOR_VERIFY,

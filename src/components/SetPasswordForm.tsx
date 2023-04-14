@@ -19,7 +19,6 @@ export interface SetPasswordFormProps {
         ) => void
     ) => Promise<void>;
     buttonText: string;
-    back: () => void;
 }
 export interface SetPasswordFormValues {
     passphrase: string;
