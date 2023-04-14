@@ -4,9 +4,10 @@ import { getAuthCodes } from 'services/authenticator/authenticatorService';
 import { CustomError } from 'utils/error';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
-import { AuthFooter } from 'components/Authenicator/AuthFooder';
+import { AuthFooter } from 'components/Authenicator/AuthFooter';
 import { AppContext } from 'pages/_app';
 import { TextField } from '@mui/material';
+import { t } from 'i18next';
 
 const AuthenticatorCodesPage = () => {
     const appContext = useContext(AppContext);
@@ -58,7 +59,7 @@ const AuthenticatorCodesPage = () => {
                 <TextField
                     id="search"
                     name="search"
-                    label={'Search'}
+                    label={t('SEARCH')}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     variant="filled"
                     value={searchTerm}
@@ -76,7 +77,7 @@ const AuthenticatorCodesPage = () => {
                         marginTop: '32px',
                     }}>
                     {searchTerm.length !== 0 ? (
-                        <p>No results found.</p>
+                        <p>{t('NO_RESULTS')}</p>
                     ) : (
                         <div />
                     )}

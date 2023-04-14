@@ -1,4 +1,5 @@
 import { Button } from '@mui/material';
+import { t } from 'i18next';
 
 export const AuthFooter = () => {
     return (
@@ -9,7 +10,7 @@ export const AuthFooter = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
             }}>
-            <p>Download our mobile app to add &amp; manage your secrets.</p>
+            <p>{t('AUTH_DOWNLOAD_MOBILE_APP')}</p>
             <a href="https://github.com/ente-io/auth#-download" download>
                 <Button
                     style={{
@@ -17,7 +18,7 @@ export const AuthFooter = () => {
                         padding: '12px 18px',
                         color: 'white',
                     }}>
-                    Download
+                    {t('DOWNLOAD')}
                 </Button>
             </a>
         </div>

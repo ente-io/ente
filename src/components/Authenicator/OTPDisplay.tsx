@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TOTP, HOTP } from 'otpauth';
 import { Code } from 'types/authenticator/code';
 import TimerProgress from './TimerProgress';
+import { t } from 'i18next';
 
 const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
     return (
@@ -67,7 +68,7 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
                         marginTop: 'auto',
                         textAlign: 'right',
                     }}>
-                    next
+                    {t('AUTH_NEXT')}
                 </p>
                 <p
                     style={{
