@@ -63,11 +63,32 @@ import { getTheme } from 'themes';
 import { getAlbumsURL, getAuthURL } from 'utils/common/apiUtil';
 import { runningInBrowser } from 'utils/common';
 
-enum APPS {
+export enum APPS {
     PHOTOS = 'PHOTOS',
     AUTH = 'AUTH',
     ALBUMS = 'ALBUMS',
 }
+
+const redirectMap = new Map([
+    ['roadmap', getRoadmapRedirectURL],
+    ['families', getFamilyPortalRedirectURL],
+]);
+
+export const getAppNameAndTitle = () => {
+    if (!runningInBrowser()) {
+        return {};
+    }
+    const currentURL = new URL(window.location.href);
+    const albumsURL = new URL(getAlbumsURL());
+    const authURL = new URL(getAuthURL());
+    if (currentURL.origin === albumsURL.origin) {
+        return { name: APPS.ALBUMS, title: 'ente Albums' };
+    } else if (currentURL.origin === authURL.origin) {
+        return { name: APPS.AUTH, title: 'ente Auth' };
+    } else {
+        return { name: APPS.PHOTOS, title: 'ente Photos' };
+    }
+};
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -109,27 +130,6 @@ type AppContextType = {
 };
 
 export const AppContext = createContext<AppContextType>(null);
-
-const redirectMap = new Map([
-    ['roadmap', getRoadmapRedirectURL],
-    ['families', getFamilyPortalRedirectURL],
-]);
-
-const getAppNameAndTitle = () => {
-    if (!runningInBrowser()) {
-        return {};
-    }
-    const currentURL = new URL(window.location.href);
-    const albumsURL = new URL(getAlbumsURL());
-    const authURL = new URL(getAuthURL());
-    if (currentURL.origin === albumsURL.origin) {
-        return { name: APPS.ALBUMS, title: 'ente Albums' };
-    } else if (currentURL.origin === authURL.origin) {
-        return { name: APPS.AUTH, title: 'ente Auth' };
-    } else {
-        return { name: APPS.PHOTOS, title: 'ente Photos' };
-    }
-};
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();

@@ -13,7 +13,7 @@ import {
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
-import { AppContext } from 'pages/_app';
+import { AppContext, APPS, getAppNameAndTitle } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
 import FormContainer from 'components/Form/FormContainer';
@@ -86,7 +86,12 @@ export default function Credentials() {
             await decryptAndStoreToken(key);
             const redirectURL = appContext.redirectURL;
             appContext.setRedirectURL(null);
-            router.push(redirectURL ?? PAGES.GALLERY);
+            const { name } = getAppNameAndTitle();
+            if (name === APPS.AUTH) {
+                router.push(PAGES.AUTH);
+            } else {
+                router.push(redirectURL ?? PAGES.GALLERY);
+            }
         } catch (e) {
             logError(e, 'useMasterPassword failed');
         }

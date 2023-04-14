@@ -16,7 +16,7 @@ import RecoveryKey from 'components/RecoveryKey';
 import { PAGES } from 'constants/pages';
 import VerticallyCentered from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
-import { AppContext } from 'pages/_app';
+import { APPS, AppContext, getAppNameAndTitle } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
 import FormContainer from 'components/Form/FormContainer';
@@ -47,7 +47,12 @@ export default function Generate() {
                     setRecoveryModalView(true);
                     setLoading(false);
                 } else {
-                    router.push(PAGES.GALLERY);
+                    const { name } = getAppNameAndTitle();
+                    if (name === APPS.AUTH) {
+                        router.push(PAGES.AUTH);
+                    } else {
+                        router.push(PAGES.GALLERY);
+                    }
                 }
             } else if (keyAttributes?.encryptedKey) {
                 router.push(PAGES.CREDENTIALS);
@@ -94,7 +99,12 @@ export default function Generate() {
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);
-                        router.push(PAGES.GALLERY);
+                        const { name } = getAppNameAndTitle();
+                        if (name === APPS.AUTH) {
+                            router.push(PAGES.AUTH);
+                        } else {
+                            router.push(PAGES.GALLERY);
+                        }
                     }}
                     somethingWentWrong={() => null}
                 />
