@@ -129,6 +129,7 @@ export default function LandingPage() {
     };
 
     const handleNormalRedirect = async () => {
+        const appName = getAppName();
         const user = getData(LS_KEYS.USER);
         let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key && isElectron()) {
@@ -142,7 +143,6 @@ export default function LandingPage() {
             }
         }
         if (key) {
-            const appName = getAppName();
             if (appName === APPS.AUTH) {
                 await router.push(PAGES.AUTH);
             } else {
@@ -150,6 +150,10 @@ export default function LandingPage() {
             }
         } else if (user?.email) {
             await router.push(PAGES.VERIFY);
+        } else {
+            if (appName === APPS.AUTH) {
+                await router.push(PAGES.LOGIN);
+            }
         }
         await initLocalForage();
         setLoading(false);
