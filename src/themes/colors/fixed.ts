@@ -47,7 +47,7 @@ const commonFixedColors: Partial<Pick<ThemeColorsOptions, keyof FixedColors>> =
 
 const authAccentColor = {
     A700: 'rgb(164, 0, 182)',
-    A500: 'rgb(204, 10, 101)',
+    A500: 'rgb(150, 13, 214)',
     A400: 'rgb(122, 41, 193)',
     A300: 'rgb(152, 77, 244)',
 };
