@@ -57,10 +57,11 @@ const TOTPDisplay = ({ issuer, account, code, nextCode }) => {
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    marginTop: '32px',
                     alignItems: 'flex-end',
                     minWidth: '120px',
                     textAlign: 'right',
+                    marginTop: 'auto',
+                    marginBottom: '1rem',
                 }}>
                 <p
                     style={{
