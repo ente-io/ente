@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/subscription.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:ente_auth/services/billing_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
