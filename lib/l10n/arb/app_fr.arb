@@ -181,5 +181,18 @@
   "invalidRecoveryKey": "La clé de récupération que vous avez saisie n'est pas valide. Assurez-vous qu'elle contient 24 mots et vérifiez l'orthographe de chacun.\n\nSi vous avez entré un ancien code de récupération, assurez-vous qu'il fait 64 caractères de long et vérifiez chacun d'entre eux.",
   "recreatePasswordTitle": "Recréer le mot de passe",
   "recreatePasswordBody": "L'appareil actuel n'est pas assez puissant pour vérifier votre mot de passe, donc nous avons besoin de le régénérer une fois d'une manière qu'il fonctionne avec tous les périphériques.\n\nVeuillez vous connecter en utilisant votre clé de récupération et régénérer votre mot de passe (vous pouvez utiliser le même si vous le souhaitez).",
-  "invalidKey": "Clé non valide"
+  "invalidKey": "Clé non valide",
+  "tryAgain": "Réessayer",
+  "viewRecoveryKey": "Voir la clé de récupération",
+  "confirmRecoveryKey": "Confirmer la clé de récupération",
+  "recoveryKeyVerifyReason": "Votre clé de récupération est la seule façon de récupérer vos photos si vous oubliez votre mot de passe. Vous pouvez trouver votre clé de récupération dans Paramètres > Compte.\n\nVeuillez entrer votre clé de récupération ici pour vous assurer que vous l'avez enregistrée correctement.",
+  "confirmYourRecoveryKey": "Confirmer la clé de récupération",
+  "confirm": "Confirmer",
+  "emailYourLogs": "Envoyez vos logs par e-mail",
+  "pleaseSendTheLogsTo": "Envoyez les logs à {toEmail}",
+  "copyEmailAddress": "Copier l’adresse e-mail",
+  "exportLogs": "Exporter les journaux",
+  "enterYourRecoveryKey": "Entrez votre clé de récupération",
+  "tempErrorContactSupportIfPersists": "Il semble qu'une erreur s'est produite. Veuillez réessayer après un certain temps. Si l'erreur persiste, veuillez contacter notre équipe d'assistance.",
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Il semble qu'une erreur s'est produite. Veuillez réessayer après un certain temps. Si l'erreur persiste, veuillez contacter notre équipe d'assistance."
 }
