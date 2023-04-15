@@ -42,9 +42,6 @@ export const LoadingThumbnail = () => {
         <Overlay
             sx={(theme) => ({
                 backgroundColor: theme.colors.fill.faint,
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                borderColor: theme.colors.stroke.faint,
                 borderRadius: '4px',
             })}
         />
