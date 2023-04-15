@@ -227,5 +227,7 @@
     }
   },
   "sorry" : "Sorry",
-  "importFailureDesc": "Could not parse the selected file.\nPlease write to support@ente.io if you need help!"
+  "importFailureDesc": "Could not parse the selected file.\nPlease write to support@ente.io if you need help!",
+  "pendingSyncs" : "Warning",
+  "pendingSyncsWarningBody": "Some of your codes are not backed up.\n\nPlease ensure you have backup for these codes before you logout."
 }
