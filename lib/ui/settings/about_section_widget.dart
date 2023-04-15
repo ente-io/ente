@@ -1,3 +1,4 @@
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/common/web_page.dart';
@@ -12,12 +13,12 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutSectionWidget extends StatelessWidget {
-  const AboutSectionWidget({super.key});
+  const AboutSectionWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: "About",
+      title: context.l10n.about,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.info_outline,
     );
@@ -27,41 +28,41 @@ class AboutSectionWidget extends StatelessWidget {
     return Column(
       children: [
         sectionOptionSpacing,
-        const AboutMenuItemWidget(
-          title: "Terms",
-          url: "https://ente.io/terms",
-        ),
-        sectionOptionSpacing,
-        const AboutMenuItemWidget(
-          title: "Privacy",
-          url: "https://ente.io/privacy",
-        ),
-        sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Source code",
+          captionedTextWidget: CaptionedTextWidget(
+            title: context.l10n.weAreOpenSource,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            launchUrl(Uri.parse("https://github.com/ente-io/auth"));
+            launchUrl(Uri.parse("https://github.com/ente-io/photos-app"));
           },
+        ),
+        sectionOptionSpacing,
+        AboutMenuItemWidget(
+          title: context.l10n.privacy,
+          url: "https://ente.io/privacy",
+        ),
+        sectionOptionSpacing,
+        AboutMenuItemWidget(
+          title: context.l10n.termsOfServicesTitle,
+          url: "https://ente.io/terms",
         ),
         sectionOptionSpacing,
         UpdateService.instance.isIndependent()
             ? Column(
                 children: [
                   MenuItemWidget(
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: "Check for updates",
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: context.l10n.checkForUpdates,
                     ),
                     pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingIcon: Icons.chevron_right_outlined,
                     trailingIconIsMuted: true,
                     onTap: () async {
                       final dialog =
-                          createProgressDialog(context, "Checking...");
+                          createProgressDialog(context, context.l10n.checking);
                       await dialog.show();
                       final shouldUpdate =
                           await UpdateService.instance.shouldUpdate();
@@ -77,7 +78,10 @@ class AboutSectionWidget extends StatelessWidget {
                           barrierColor: Colors.black.withOpacity(0.85),
                         );
                       } else {
-                        showToast(context, "You are on the latest version");
+                        showShortToast(
+                          context,
+                          context.l10n.youAreOnTheLatestVersion,
+                        );
                       }
                     },
                   ),
@@ -94,7 +98,6 @@ class AboutMenuItemWidget extends StatelessWidget {
   final String title;
   final String url;
   final String? webPageTitle;
-
   const AboutMenuItemWidget({
     required this.title,
     required this.url,
