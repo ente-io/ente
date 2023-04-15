@@ -1,5 +1,3 @@
-
-
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
@@ -51,9 +49,9 @@ class SocialsMenuItemWidget extends StatelessWidget {
       pressedColor: getEnteColorScheme(context).fillFaint,
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
-      onTap: () {
+      onTap: () async {
         launchUrlString(urlSring);
-      } as Future<void> Function()?,
+      },
     );
   }
 }
