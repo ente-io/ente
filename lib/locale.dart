@@ -6,9 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 // translated in the corresponding language.
 const List<Locale> appSupportedLocales = <Locale>[
   Locale('en'),
-  Locale('de'),
+  Locale('es'),
   Locale('fr'),
-  Locale('it'),
 ];
 
 Locale localResolutionCallBack(locales, supportedLocales) {
