@@ -142,6 +142,14 @@ class AuthenticatorDB {
         .delete(entityTable, where: 'shouldSync = ?', whereArgs: [0]);
   }
 
+  // getCount of entries which are not synced with the server
+  Future<int> getNeedSyncCount() async {
+    final db = await instance.database;
+    final rows = await db
+        .rawQuery("SELECT COUNT(*) from $entityTable WHERE shouldSync = 1");
+    return Sqflite.firstIntValue(rows)!;
+  }
+
 // deleteByID will prefer generated id if both ids are passed during deletion
   Future<void> deleteByIDs({List<int>? generatedIDs, List<String>? ids}) async {
     final db = await instance.database;

@@ -1,5 +1,3 @@
-
-
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
@@ -57,8 +55,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                 .requestLocalAuthForLockScreen(
               context,
               value,
-              "Please authenticate to change lockscreen setting",
-              "To enable lockscreen, please setup device passcode or screen lock in your system settings.",
+              context.l10n.authToChangeLockscreenSetting,
+              context.l10n.lockScreenEnablePreSteps,
             );
             if (hasAuthenticated) {
               setState(() {});
@@ -68,8 +66,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       ),
       sectionOptionSpacing,
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Active sessions",
+        captionedTextWidget: CaptionedTextWidget(
+          title: context.l10n.viewActiveSessions,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -78,7 +76,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
             context,
-            "Please authenticate to view your active sessions",
+            context.l10n.authToViewYourActiveSessions,
           );
           if (hasAuthenticated) {
             Navigator.of(context).push(

@@ -1,5 +1,3 @@
-
-
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -8,6 +6,7 @@ import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
+import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
 
@@ -55,41 +54,14 @@ class DangerSectionWidget extends StatelessWidget {
     );
   }
 
-  Future<void> _onLogoutTapped(BuildContext context) async {
-    final AlertDialog alert = AlertDialog(
-      title: const Text(
-        "Logout",
-        style: TextStyle(
-          color: Colors.red,
-        ),
-      ),
-      content: const Text("Are you sure you want to logout?"),
-      actions: [
-        TextButton(
-          child: const Text(
-            "Yes, logout",
-            style: TextStyle(
-              color: Colors.red,
-            ),
-          ),
-          onPressed: () async {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            await UserService.instance.logout(context);
-          },
-        ),
-        TextButton(
-          child: const Text("No"),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-      ],
-    );
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
+  void _onLogoutTapped(BuildContext context) {
+    showChoiceActionSheet(
+      context,
+      title: context.l10n.areYouSureYouWantToLogout,
+      firstButtonLabel: context.l10n.yesLogout,
+      isCritical: true,
+      firstButtonOnTap: () async {
+        await UserService.instance.logout(context);
       },
     );
   }

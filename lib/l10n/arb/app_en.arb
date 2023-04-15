@@ -137,6 +137,10 @@
   "social": "Social",
   "security": "Security",
   "lockscreen": "Lockscreen",
+  "authToChangeLockscreenSetting": "Please authenticate to change lockscreen setting",
+  "lockScreenEnablePreSteps": "To enable lockscreen, please setup device passcode or screen lock in your system settings.",
+  "viewActiveSessions": "View active sessions",
+  "authToViewYourActiveSessions": "Please authenticate to view your active sessions",
   "searchHint": "Search...",
   "search": "Search",
   "sorryUnableToGenCode": "Sorry, unable to generate a code for {issuerName}",
@@ -174,6 +178,7 @@
   "loginTerms": "By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
   "logInLabel": "Log in",
   "logout": "Logout",
+  "areYouSureYouWantToLogout": "Are you sure you want to logout?",
   "yesLogout": "Yes, logout",
   "exit": "Exit",
   "verifyingRecoveryKey": "Verifying recovery key...",
@@ -195,5 +200,34 @@
   "exportLogs": "Export logs",
   "enterYourRecoveryKey": "Enter your recovery key",
   "tempErrorContactSupportIfPersists": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
-  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team."
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
+  "about": "About",
+  "weAreOpenSource": "We are open source!",
+  "privacy": "Privacy",
+  "terms": "Terms",
+  "checkForUpdates": "Check for updates",
+  "checking": "Checking...",
+  "youAreOnTheLatestVersion": "You are on the latest version",
+  "warning": "Warning",
+  "exportWarningDesc": "The exported file contains sensitive information. Please store this safely.",
+  "iUnderStand" : "I understand",
+  "@iUnderStand": {
+    "description": "Text for the button to confirm the user understands the warning"
+  },
+  "authToExportCodes": "Please authenticate to export your codes",
+  "importSuccessTitle": "Yay!",
+  "importSuccessDesc": "You have imported {count} codes!",
+  "@importSuccessDes" : {
+    "placeholders": {
+      "count": {
+        "description": "The number of codes imported",
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "sorry" : "Sorry",
+  "importFailureDesc": "Could not parse the selected file.\nPlease write to support@ente.io if you need help!",
+  "pendingSyncs" : "Warning",
+  "pendingSyncsWarningBody": "Some of your codes have not been backed up.\n\nPlease ensure that you have a backup for these codes before you logout."
 }
