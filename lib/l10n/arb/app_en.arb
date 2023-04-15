@@ -203,5 +203,25 @@
   "terms": "Terms",
   "checkForUpdates": "Check for updates",
   "checking": "Checking...",
-  "youAreOnTheLatestVersion": "You are on the latest version"
+  "youAreOnTheLatestVersion": "You are on the latest version",
+  "warning": "Warning",
+  "exportWarningDesc": "The exported file contains sensitive information. Please store this safely.",
+  "iUnderStand" : "I understand",
+  "@iUnderStand": {
+    "description": "Text for the button to confirm the user understands the warning"
+  },
+  "authToExportCodes": "Please authenticate to export your codes",
+  "importSuccessTitle": "Yay!",
+  "importSuccessDesc": "You have imported {count} codes!",
+  "@importSuccessDes" : {
+    "placeholders": {
+      "count": {
+        "description": "The number of codes imported",
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "sorry" : "Sorry",
+  "importFailureDesc": "Could not parse the selected file.\nPlease write to support@ente.io if you need help!"
 }

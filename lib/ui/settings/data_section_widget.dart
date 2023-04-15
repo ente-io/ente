@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
@@ -151,17 +149,17 @@ class DataSectionWidget extends StatelessWidget {
     final AlertDialog alert = AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       title: Text(
-        "Warning",
+        context.l10n.warning,
         style: Theme.of(context).textTheme.headline6,
       ),
-      content: const Text(
-        "The exported file contains sensitive information. Please store this safely.",
+      content: Text(
+        context.l10n.exportWarningDesc,
       ),
       actions: [
         TextButton(
-          child: const Text(
-            "I understand",
-            style: TextStyle(
+          child: Text(
+            context.l10n.iUnderStand,
+            style: const TextStyle(
               color: Colors.red,
             ),
           ),
@@ -171,8 +169,8 @@ class DataSectionWidget extends StatelessWidget {
           },
         ),
         TextButton(
-          child: const Text(
-            "Cancel",
+          child: Text(
+            context.l10n.cancel,
           ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
@@ -191,11 +189,8 @@ class DataSectionWidget extends StatelessWidget {
   }
 
   Future<void> _exportCodes(BuildContext context) async {
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      "Please authenticate to export your codes",
-    );
+    final hasAuthenticated = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(context, context.l10n.authToExportCodes);
     if (!hasAuthenticated) {
       return;
     }
@@ -245,8 +240,9 @@ class DataSectionWidget extends StatelessWidget {
       unawaited(AuthenticatorService.instance.sync());
 
       final DialogWidget dialog = choiceDialog(
-        title: "Yay!",
-        body: "You have imported " + parsedCodes.length.toString() + " codes!",
+        title: context.l10n.importSuccessTitle,
+        body: context.l10n.importSuccessDesc(parsedCodes.length),
+        // body: "You have imported " + parsedCodes.length.toString() + " codes!",
         firstButtonLabel: l10n.ok,
         firstButtonOnTap: () async {
           Navigator.of(context, rootNavigator: true).pop('dialog');
@@ -263,8 +259,8 @@ class DataSectionWidget extends StatelessWidget {
       await dialog.hide();
       await showErrorDialog(
         context,
-        "Sorry",
-        "Could not parse the selected file.\nPlease write to support@ente.io if you need help!",
+        context.l10n.sorry,
+        context.l10n.importFailureDesc,
       );
     }
   }
