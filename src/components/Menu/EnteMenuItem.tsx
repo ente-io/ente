@@ -48,6 +48,9 @@ export function EnteMenuItem({
                     variant !== 'mini' && {
                         backgroundColor: (theme) => theme.colors.fill.faint,
                     }),
+                '&:hover': {
+                    backgroundColor: (theme) => theme.colors.fill.faintPressed,
+                },
                 '& .MuiSvgIcon-root': {
                     fontSize: '20px',
                 },
