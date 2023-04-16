@@ -102,14 +102,27 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   Widget _getChangeLog() {
     final scrollController = ScrollController();
     final List<ChangeLogEntry> items = [];
+
+    items.add(
+      ChangeLogEntry(
+        "Security Audit",
+        "It gives us immense joy to announce that ente's source code has been"
+            " successfully audited by Cure53, in collaboration with Symbolic "
+            "Software.\n\nTogether they have certified that ente's "
+            "architecture is sound and that our implementation across all "
+            "clients is cryptographically accurate.\n\nYou can find more "
+            "details at ente.io/blog.",
+      ),
+    );
+
     items.add(
       ChangeLogEntry(
         "Location tags",
-        "Introducing, a beautiful, privacy-friendly way to search through "
-            "your photos by location!\n\nTag a photo with a location, define a "
-            "radius, and ente will automatically cluster all photos clicked "
-            "within that area.\n\nOpen a photo, and click on the Info button "
-            "to get started!",
+        "This release includes a fresh, beautiful, privacy-friendly way to "
+            "search through your photos by location!\n\nTag a photo with a "
+            "location, define a radius, and ente will automatically cluster "
+            "all photos clicked within that area.\n\nOpen a photo, and click on"
+            " the Info button to get started!",
       ),
     );
 
