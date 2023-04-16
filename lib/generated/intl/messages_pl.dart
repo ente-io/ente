@@ -37,6 +37,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tak, chcę trwale usunąć konto i wszystkie dane z nim powiązane."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Powtórz hasło"),
+        "continueLabel": MessageLookupByLibrary.simpleMessage("Kontynuuj"),
         "createAccount": MessageLookupByLibrary.simpleMessage("Stwórz konto"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Stwórz nowe konto"),
@@ -61,11 +62,15 @@ class MessageLookup extends MessageLookupByLibrary {
             "Inna, niewymieniona wyżej przyczyna"),
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "Twoje żądanie zostanie przetworzone w ciągu 72 godzin."),
+        "doThisLater": MessageLookupByLibrary.simpleMessage("Spróbuj później"),
         "email": MessageLookupByLibrary.simpleMessage("Adres e-mail"),
+        "enterCode": MessageLookupByLibrary.simpleMessage("Wprowadź kod"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Podaj poprawny adres e-mail."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Podaj swój adres e-mail"),
+        "enterYourPassword":
+            MessageLookupByLibrary.simpleMessage("Wprowadź hasło"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Wprowadź swój klucz odzyskiwania"),
         "feedback": MessageLookupByLibrary.simpleMessage("Informacja zwrotna"),
@@ -79,6 +84,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nieprawidłowy adres e-mail"),
         "kindlyHelpUsWithThisInformation":
             MessageLookupByLibrary.simpleMessage("Pomóż nam z tą informacją"),
+        "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Brak klucza odzyskiwania?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -86,27 +92,36 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "password": MessageLookupByLibrary.simpleMessage("Hasło"),
+        "pleaseWait": MessageLookupByLibrary.simpleMessage("Proszę czekać..."),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Odzyskaj"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Odzyskano pomyślnie!"),
+        "resetPasswordTitle":
+            MessageLookupByLibrary.simpleMessage("Zresetuj hasło"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Wybierz powód"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Wyślij e-mail"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Coś poszło nie tak, spróbuj ponownie"),
         "sorry": MessageLookupByLibrary.simpleMessage("Przepraszamy"),
+        "strongStrength": MessageLookupByLibrary.simpleMessage("Silne"),
         "terminate": MessageLookupByLibrary.simpleMessage("Zakończ"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Zakończyć sesję?"),
+        "termsOfServicesTitle":
+            MessageLookupByLibrary.simpleMessage("Regulamin"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("To urządzenie"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "To wyloguje Cię z tego urządzenia:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "To wyloguje Cię z tego urządzenia!"),
+        "tryAgain": MessageLookupByLibrary.simpleMessage("Spróbuj ponownie"),
         "verify": MessageLookupByLibrary.simpleMessage("Weryfikuj"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("Zweryfikuj adres e-mail"),
+        "weakStrength": MessageLookupByLibrary.simpleMessage("Słabe"),
+        "welcomeBack": MessageLookupByLibrary.simpleMessage("Witaj ponownie!"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Twoje konto zostało usunięte")
       };
