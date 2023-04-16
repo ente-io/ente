@@ -1,5 +1,3 @@
-import "dart:io";
-
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/update_service.dart';
@@ -106,39 +104,12 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.add(
       ChangeLogEntry(
-        "Referrals ✨",
-        "You can now double your storage by referring your friends and family. Both you and your loved ones will get 10 GB of storage when "
-            "they upgrade to a paid plan.\n\nGo to Settings -> General -> "
-            "Referrals to get started!",
-      ),
-    );
-    if (Platform.isAndroid) {
-      items.add(
-        ChangeLogEntry(
-          "Pick Files",
-          "While sharing photos and videos through other apps, ente will now "
-              "be an option to pick files from. This means you can now easily"
-              " attach files backed up to ente.\n\nConsider this the first "
-              "step towards making ente your default gallery app!",
-        ),
-      );
-    }
-
-    items.add(
-      ChangeLogEntry(
-        "Verification ID",
-        "Security of your end-to-end encryption with those you are sharing your "
-            "albums with can now be verified, with the help of Verification IDs."
-            "\n\nPlease click on the Verify button on the album sharing page to learn more.",
-      ),
-    );
-
-    items.add(
-      ChangeLogEntry(
-        "Prettier Pixels",
-        "This release is also packed with a bunch of user interface improvements suggested by our community."
-            "\n\nWe have added more actions to your Memories section, introduced archived albums to your Archived section, improved the experience of the Trash screen and sprinkled a few more improvements here and there.",
-        isFeature: false,
+        "Location tags",
+        "Introducing, a beautiful, privacy-friendly way to search through "
+            "your photos by location!\n\nTag a photo with a location, define a "
+            "radius, and ente will automatically cluster all photos clicked "
+            "within that area.\n\nOpen a photo, and click on the Info button "
+            "to get started!",
       ),
     );
 
