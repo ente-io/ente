@@ -82,19 +82,20 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       );
     } else {
       return MaterialApp(
-          title: "ente",
-          themeMode: ThemeMode.system,
-          theme: lightThemeData,
-          darkTheme: darkThemeData,
-          home: const HomeWidget(),
-          debugShowCheckedModeBanner: false,
-          builder: EasyLoading.init(),
-          supportedLocales: appSupportedLocales,
-          localeListResolutionCallback: localResolutionCallBack,
-          localizationsDelegates: const [
-            ...AppLocalizations.localizationsDelegates,
-            S.delegate
-          ]);
+        title: "ente",
+        themeMode: ThemeMode.system,
+        theme: lightThemeData,
+        darkTheme: darkThemeData,
+        home: const HomeWidget(),
+        debugShowCheckedModeBanner: false,
+        builder: EasyLoading.init(),
+        supportedLocales: appSupportedLocales,
+        localeListResolutionCallback: localResolutionCallBack,
+        localizationsDelegates: const [
+          ...AppLocalizations.localizationsDelegates,
+          S.delegate
+        ],
+      );
     }
   }
 
