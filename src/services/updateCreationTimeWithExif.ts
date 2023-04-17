@@ -50,7 +50,7 @@ export async function updateCreationTimeWithExif(
                         );
                     } else {
                         correctCreationTime = getUnixTimeInMicroSeconds(
-                            exifData?.CreateDate
+                            exifData?.CreateDate ?? exifData?.DateCreated
                         );
                     }
                 }

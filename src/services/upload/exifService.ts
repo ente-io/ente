@@ -136,7 +136,10 @@ export function getEXIFLocation(exifData: ParsedEXIFData): Location {
 
 export function getEXIFTime(exifData: ParsedEXIFData): number {
     const dateTime =
-        exifData.DateTimeOriginal ?? exifData.CreateDate ?? exifData.ModifyDate;
+        exifData.DateTimeOriginal ??
+        exifData.CreateDate ??
+        exifData.DateCreated ??
+        exifData.ModifyDate;
     if (!dateTime) {
         return null;
     }
