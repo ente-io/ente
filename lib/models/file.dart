@@ -179,12 +179,26 @@ class File extends EnteFile {
       }
     }
     bool hasExifTime = false;
-    if (fileType == FileType.image && mediaUploadData.sourceFile != null) {
-      final exifTime =
-          await getCreationTimeFromEXIF(mediaUploadData.sourceFile!);
-      if (exifTime != null) {
-        hasExifTime = true;
-        creationTime = exifTime.microsecondsSinceEpoch;
+    if (mediaUploadData.sourceFile != null) {
+      final exifData = await getExifFromSourceFile(mediaUploadData.sourceFile!);
+      if (exifData != null) {
+        if (fileType == FileType.image) {
+          final exifTime = await getCreationTimeFromEXIF(null, exifData);
+          if (exifTime != null) {
+            hasExifTime = true;
+            creationTime = exifTime.microsecondsSinceEpoch;
+          }
+        }
+        if ((fileType == FileType.image || fileType == FileType.video) &&
+            Platform.isAndroid) {
+          //Fix for missing location data in lower android versions.
+          final exifLocation =
+              (await gpsDataFromExif(exifData)).toLocationObj();
+          if (exifLocation?.latitude != null &&
+              exifLocation?.longitude != null) {
+            location = exifLocation;
+          }
+        }
       }
     }
     // Try to get the timestamp from fileName. In case of iOS, file names are

@@ -31,9 +31,23 @@ Future<Map<String, IfdTag>> getExif(File file) async {
   }
 }
 
-Future<DateTime?> getCreationTimeFromEXIF(io.File file) async {
+Future<Map<String, IfdTag>?> getExifFromSourceFile(io.File originFile) async {
   try {
-    final exif = await readExifFromFile(file);
+    final exif = await readExifFromFile(originFile);
+    return exif;
+  } catch (e, s) {
+    _logger.severe("failed to get exif from origin file", e, s);
+    return null;
+  }
+}
+
+Future<DateTime?> getCreationTimeFromEXIF(
+  io.File? file,
+  Map<String, IfdTag>? exifData,
+) async {
+  try {
+    assert(file != null || exifData != null);
+    final exif = exifData ?? await readExifFromFile(file!);
     final exifTime = exif.containsKey(kDateTimeOriginal)
         ? exif[kDateTimeOriginal]!.printable
         : exif.containsKey(kImageDateTime)

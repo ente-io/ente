@@ -114,7 +114,7 @@ Future<List<File>> convertIncomingSharedMediaToFile(
     enteFile.fileType =
         media.type == SharedMediaType.IMAGE ? FileType.image : FileType.video;
     if (enteFile.fileType == FileType.image) {
-      final exifTime = await getCreationTimeFromEXIF(ioFile);
+      final exifTime = await getCreationTimeFromEXIF(ioFile, null);
       if (exifTime != null) {
         enteFile.creationTime = exifTime.microsecondsSinceEpoch;
       }
