@@ -74,7 +74,12 @@ class SearchSuggestionsWidget extends StatelessWidget {
                   } else if (result is FileSearchResult) {
                     return FileSearchResultWidget(result);
                   } else if (result is GenericSearchResult) {
-                    return SearchResultWidget(result);
+                    return SearchResultWidget(
+                      result,
+                      onResultTap: result.onResultTap != null
+                          ? () => result.onResultTap!(context)
+                          : null,
+                    );
                   } else {
                     Logger('SearchSuggestionsWidget')
                         .info("Invalid/Unsupported value");

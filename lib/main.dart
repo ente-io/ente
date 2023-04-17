@@ -17,13 +17,16 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/entity_service.dart";
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
+import "package:photos/services/location_service.dart";
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/notification_service.dart';
 import "package:photos/services/object_detection/object_detection_service.dart";
@@ -67,13 +70,15 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
+    final Locale locale = await getLocale();
     unawaited(_scheduleFGSync('appStart in FG'));
     runApp(
       AppLock(
         builder: (args) =>
-            EnteApp(_runBackgroundTask, _killBGTask, savedThemeMode),
+            EnteApp(_runBackgroundTask, _killBGTask, locale, savedThemeMode),
         lockScreen: const LockScreen(),
         enabled: Configuration.instance.shouldShowLockScreen(),
+        locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
         backgroundLockLatency: kBackgroundLockLatency,
@@ -153,6 +158,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   await NetworkClient.instance.init();
   await Configuration.instance.init();
   await UserService.instance.init();
+  await EntityService.instance.init();
+  LocationService.instance.init(preferences);
+
   await UserRemoteFlagService.instance.init();
   await UpdateService.instance.init();
   BillingService.instance.init();

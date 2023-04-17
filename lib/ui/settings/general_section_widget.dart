@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import "package:photos/app.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/billing_service.dart';
+import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/advanced_settings_screen.dart';
@@ -9,6 +12,7 @@ import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import "package:photos/ui/growth/referral_screen.dart";
 import 'package:photos/ui/settings/common_settings.dart';
+import "package:photos/ui/settings/language_picker.dart";
 import 'package:photos/utils/navigation_util.dart';
 
 class GeneralSectionWidget extends StatelessWidget {
@@ -24,21 +28,10 @@ class GeneralSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final bool showLanguageChangeOption =
+        FeatureFlagService.instance.isInternalUserOrDebugBuild();
     return Column(
       children: [
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).familyPlans,
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          showOnlyLoadingState: true,
-          onTap: () async {
-            await _onFamilyPlansTapped(context);
-          },
-        ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
@@ -56,6 +49,46 @@ class GeneralSectionWidget extends StatelessWidget {
           },
         ),
         sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).familyPlans,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          showOnlyLoadingState: true,
+          onTap: () async {
+            await _onFamilyPlansTapped(context);
+          },
+        ),
+        sectionOptionSpacing,
+        showLanguageChangeOption
+            ? MenuItemWidget(
+                captionedTextWidget:
+                    CaptionedTextWidget(title: S.of(context).language),
+                pressedColor: getEnteColorScheme(context).fillFaint,
+                trailingIcon: Icons.chevron_right_outlined,
+                trailingIconIsMuted: true,
+                onTap: () async {
+                  final locale = await getLocale();
+                  routeToPage(
+                    context,
+                    LanguageSelectorPage(
+                      appSupportedLocales,
+                      (locale) async {
+                        await setLocale(locale);
+                        EnteApp.setLocale(context, locale);
+                        S.load(locale);
+                      },
+                      locale,
+                    ),
+                  );
+                },
+              )
+            : const SizedBox.shrink(),
+        showLanguageChangeOption
+            ? sectionOptionSpacing
+            : const SizedBox.shrink(),
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).advanced,

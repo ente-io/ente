@@ -96,6 +96,7 @@
   "pleaseTryAgain": "Probeer het nog eens",
   "recreatePasswordTitle": "Wachtwoord opnieuw instellen",
   "useRecoveryKey": "Herstelcode gebruiken",
+  "recreatePasswordBody": "Het huidige apparaat is niet krachtig genoeg om je wachtwoord te verifiëren, dus moeten we de code een keer opnieuw genereren op een manier die met alle apparaten werkt.\n\nLog in met behulp van uw herstelcode en genereer opnieuw uw wachtwoord (je kunt dezelfde indien gewenst opnieuw gebruiken).",
   "verifyPassword": "Bevestig wachtwoord",
   "recoveryKey": "Herstelsleutel",
   "recoveryKeyOnForgotPassword": "Als je je wachtwoord vergeet, kun je alleen met deze sleutel je gegevens herstellen.",
@@ -132,6 +133,7 @@
   "verifyingRecoveryKey": "Herstelsleutel verifiëren...",
   "recoveryKeyVerified": "Herstel sleutel geverifieerd",
   "recoveryKeySuccessBody": "Super! Je herstelsleutel is geldig. Bedankt voor het verifiëren.\n\nVergeet niet om je herstelsleutel veilig te bewaren.",
+  "invalidRecoveryKey": "De herstelsleutel die je hebt ingevoerd is niet geldig. Zorg ervoor dat deze 24 woorden bevat en controleer de spelling van elk van deze woorden.\n\nAls je een oudere herstelcode hebt ingevoerd, zorg ervoor dat deze 64 tekens lang is, en controleer ze allemaal.",
   "invalidKey": "Ongeldige sleutel",
   "tryAgain": "Probeer opnieuw",
   "viewRecoveryKey": "Toon herstelsleutel",
@@ -216,6 +218,38 @@
   "copyLink": "Kopieer link",
   "linkHasExpired": "Link is vervallen",
   "publicLinkEnabled": "Publieke link ingeschakeld",
+  "shareALink": "Deel een link",
+  "sharedAlbumSectionDescription": "Maak gedeelde en collaboratieve albums met andere ente gebruikers, inclusief gebruikers met gratis abonnementen.",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Deel met specifieke mensen} =1 {Gedeeld met 1 persoon} other {Gedeeld met {numberOfPeople} mensen}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "thisIsYourVerificationId": "Dit is uw verificatie-ID",
+  "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Iemand die albums met je deelt zou hetzelfde ID op hun apparaat moeten zien.",
+  "howToViewShareeVerificationID": "Vraag hen om hun e-mailadres lang in te drukken op het instellingenscherm en te controleren dat de ID's op beide apparaten overeenkomen.",
+  "thisIsPersonVerificationId": "Dit is de verificatie-ID van {email}",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
+  "verificationId": "Verificatie ID",
+  "verifyEmailID": "Verifieer {email}",
+  "emailNoEnteAccount": "{email} heeft geen ente account.\n\nStuur ze een uitnodiging om foto's te delen.",
+  "shareMyVerificationID": "Hier is mijn verificatie-ID: {verificationID} voor ente.io.",
+  "shareTextConfirmOthersVerificationID": "Hey, kunt u bevestigen dat dit uw ente.io verificatie-ID is: {verificationID}",
+  "somethingWentWrong": "Er ging iets mis",
+  "sendInvite": "Stuur een uitnodiging",
+  "done": "Voltooid",
+  "applyCodeTitle": "Code toepassen",
   "removeShareItemsWarning": "Sommige van de items die je verwijdert zijn door andere mensen toegevoegd, en je verliest de toegang daartoe",
   "addingToFavorites": "Toevoegen aan favorieten...",
   "removingFromFavorites": "Verwijderen uit favorieten...",
@@ -340,5 +374,7 @@
   "updateAvailable": "Update beschikbaar",
   "downloading": "Downloaden...",
   "theDownloadCouldNotBeCompleted": "De download kon niet worden voltooid",
-  "retry": "Opnieuw"
+  "retry": "Opnieuw",
+  "noDuplicates": "✨ Geen duplicaten",
+  "sparkleSuccess": "✨ Succes"
 }

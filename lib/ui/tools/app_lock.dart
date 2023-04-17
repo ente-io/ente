@@ -35,6 +35,7 @@ class AppLock extends StatefulWidget {
   final ThemeData? darkTheme;
   final ThemeData? lightTheme;
   final ThemeMode savedThemeMode;
+  final Locale locale;
 
   const AppLock({
     Key? key,
@@ -42,6 +43,7 @@ class AppLock extends StatefulWidget {
     required this.lockScreen,
     required this.savedThemeMode,
     this.enabled = true,
+    this.locale = const Locale("en", "US"),
     this.backgroundLockLatency = const Duration(seconds: 0),
     this.darkTheme,
     this.lightTheme,
@@ -110,6 +112,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
       themeMode: widget.savedThemeMode,
       theme: widget.lightTheme,
       darkTheme: widget.darkTheme,
+      locale: widget.locale,
       supportedLocales: appSupportedLocales,
       localeListResolutionCallback: localResolutionCallBack,
       localizationsDelegates: const [

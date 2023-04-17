@@ -85,7 +85,7 @@
   "ackPasswordLostWarning": "I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.",
   "privacyPolicyTitle": "Privacy Policy",
   "termsOfServicesTitle": "Terms",
-  "signUpTerms" : "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
+  "signUpTerms": "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
   "logInLabel": "Log in",
   "loginTerms": "By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
   "changeEmail": "Change email",
@@ -720,7 +720,7 @@
   "calculating": "Calculating...",
   "pleaseWaitDeletingAlbum": "Please wait, deleting album",
   "searchHintText": "Albums, months, days, years, ...",
-  "searchByExamples": "\u2022 Album names (e.g. \"Camera\")\n\u2022 Types of files (e.g. \"Videos\", \".gif\")\n\u2022 Years and months (e.g. \"2022\", \"January\")\n\u2022 Holidays (e.g. \"Christmas\")\n\u2022 Photo descriptions (e.g. “#fun”)",
+  "searchByExamples": "• Album names (e.g. \"Camera\")\n• Types of files (e.g. \"Videos\", \".gif\")\n• Years and months (e.g. \"2022\", \"January\")\n• Holidays (e.g. \"Christmas\")\n• Photo descriptions (e.g. “#fun”)",
   "youCanTrySearchingForADifferentQuery": "You can try searching for a different query.",
   "noResultsFound": "No results found",
   "addedBy": "Added by {emailOrName}",
@@ -755,7 +755,7 @@
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
     "placeholders": {
-      "count" :{
+      "count": {
         "example": "1",
         "type": "int"
       },
@@ -770,7 +770,7 @@
   "@filesBackedUpFromDevice": {
     "description": "Text to tell user how many files have been backed up from this device",
     "placeholders": {
-      "count" :{
+      "count": {
         "example": "1",
         "type": "int"
       },
@@ -787,7 +787,7 @@
   "freeUpAccessPostDelete": "You can still access {count, plural, one {it} other {them}} on ente as long as you have an active subscription",
   "@freeUpAccessPostDelete": {
     "placeholders": {
-      "count" :{
+      "count": {
         "example": "1",
         "type": "int"
       }
@@ -820,7 +820,7 @@
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
     "placeholders": {
-      "completed" :{
+      "completed": {
         "type": "int"
       },
       "total": {
@@ -877,5 +877,22 @@
   "loadMessage6": "You can share links to your albums with your loved ones",
   "loadMessage7": "Our mobile apps run in the background to encrypt and backup any new photos you click",
   "loadMessage8": "web.ente.io has a slick uploader",
-  "loadMessage9": "We use Xchacha20Poly1305 to safely encrypt your data"
+  "loadMessage9": "We use Xchacha20Poly1305 to safely encrypt your data",
+  "language": "Language",
+  "selectLanguage": "Select Language",
+  "locationName": "Location name",
+  "addLocation": "Add location",
+  "groupNearbyPhotos": "Group nearby photos",
+  "location": "Location",
+  "kiloMeterUnit": "km",
+  "addLocationButton": "Add",
+  "radius": "Radius",
+  "locationTagFeatureDescription": "A location tag groups all photos that were taken within some radius of a photo",
+  "galleryMemoryLimitInfo": "Up to 1000 memories shown in gallery",
+  "save": "Save",
+  "centerPoint": "Center point",
+  "pickCenterPoint": "Pick center point",
+  "useSelectedPhoto": "Use selected photo", 
+  "edit": "Edit",
+  "deleteLocation": "Delete location"
 }

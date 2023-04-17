@@ -60,6 +60,8 @@ class HugeListView<T> extends StatefulWidget {
 
   final EdgeInsetsGeometry? thumbPadding;
 
+  final bool disableScroll;
+
   const HugeListView({
     Key? key,
     this.controller,
@@ -77,6 +79,7 @@ class HugeListView<T> extends StatefulWidget {
     this.bottomSafeArea = 120.0,
     this.isDraggableScrollbarEnabled = true,
     this.thumbPadding,
+    this.disableScroll = false,
   }) : super(key: key);
 
   @override
@@ -160,6 +163,9 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
           isEnabled: widget.isDraggableScrollbarEnabled,
           padding: widget.thumbPadding,
           child: ScrollablePositionedList.builder(
+            physics: widget.disableScroll
+                ? const NeverScrollableScrollPhysics()
+                : null,
             itemScrollController: widget.controller,
             itemPositionsListener: listener,
             initialScrollIndex: widget.startIndex,

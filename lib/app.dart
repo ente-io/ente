@@ -21,13 +21,20 @@ class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
   final Future<void> Function(String) killBackgroundTask;
   final AdaptiveThemeMode? savedThemeMode;
+  final Locale locale;
 
   const EnteApp(
     this.runBackgroundTask,
     this.killBackgroundTask,
+    this.locale,
     this.savedThemeMode, {
     Key? key,
   }) : super(key: key);
+
+  static void setLocale(BuildContext context, Locale newLocale) {
+    final state = context.findAncestorStateOfType<_EnteAppState>()!;
+    state.setLocale(newLocale);
+  }
 
   @override
   State<EnteApp> createState() => _EnteAppState();
@@ -35,13 +42,21 @@ class EnteApp extends StatefulWidget {
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   final _logger = Logger("EnteAppState");
+  late Locale locale;
 
   @override
   void initState() {
     _logger.info('init App');
     super.initState();
+    locale = widget.locale;
     setupIntentAction();
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  setLocale(Locale newLocale) {
+    setState(() {
+      locale = newLocale;
+    });
   }
 
   void setupIntentAction() async {
@@ -72,6 +87,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
               : const HomeWidget(),
           debugShowCheckedModeBanner: false,
           builder: EasyLoading.init(),
+          locale: locale,
           supportedLocales: appSupportedLocales,
           localeListResolutionCallback: localResolutionCallBack,
           localizationsDelegates: const [
@@ -89,6 +105,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         home: const HomeWidget(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
+        locale: locale,
         supportedLocales: appSupportedLocales,
         localeListResolutionCallback: localResolutionCallBack,
         localizationsDelegates: const [

@@ -16,6 +16,7 @@ import 'package:photos/ui/viewer/file_details/backed_up_time_item_widget.dart';
 import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
+import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
 import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
 import "package:photos/utils/exif_util.dart";
 
@@ -39,12 +40,17 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     "takenOnDevice": null,
     "exposureTime": null,
     "ISO": null,
-    "megaPixels": null
+    "megaPixels": null,
+    "lat": null,
+    "long": null,
+    "latRef": null,
+    "longRef": null,
   };
 
   bool _isImage = false;
   late int _currentUserID;
   bool showExifListTile = false;
+  bool hasLocationData = false;
 
   @override
   void initState() {
@@ -52,6 +58,12 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     _currentUserID = Configuration.instance.getUserID()!;
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
+    _exifNotifier.addListener(() {
+      if (_exifNotifier.value != null) {
+        _generateExifForLocation(_exifNotifier.value!);
+        hasLocationData = _hasLocationData();
+      }
+    });
     if (_isImage) {
       _exifNotifier.addListener(() {
         if (_exifNotifier.value != null) {
@@ -63,10 +75,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             _exifData["exposureTime"] != null ||
             _exifData["ISO"] != null;
       });
-      getExif(widget.file).then((exif) {
-        _exifNotifier.value = exif;
-      });
     }
+    getExif(widget.file).then((exif) {
+      _exifNotifier.value = exif;
+    });
     super.initState();
   }
 
@@ -125,6 +137,25 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         },
       ),
     );
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+      fileDetailsTiles.addAll([
+        ValueListenableBuilder(
+          valueListenable: _exifNotifier,
+          builder: (context, _, __) {
+            return hasLocationData
+                ? Column(
+                    children: [
+                      LocationTagsWidget(
+                        widget.file.location!,
+                      ),
+                      const FileDetailsDivider(),
+                    ],
+                  )
+                : const SizedBox.shrink();
+          },
+        )
+      ]);
+    }
     if (_isImage) {
       fileDetailsTiles.addAll([
         ValueListenableBuilder(
@@ -198,6 +229,38 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         ),
       ),
     );
+  }
+
+  bool _hasLocationData() {
+    final fileLocation = widget.file.location;
+    final hasLocation = (fileLocation != null &&
+            fileLocation.latitude != null &&
+            fileLocation.longitude != null) &&
+        (fileLocation.latitude != 0 || fileLocation.longitude != 0);
+    return hasLocation;
+  }
+
+  void _generateExifForLocation(Map<String, IfdTag> exif) {
+    if (exif["GPS GPSLatitude"] != null) {
+      _exifData["lat"] = exif["GPS GPSLatitude"]!
+          .values
+          .toList()
+          .map((e) => ((e as Ratio).numerator / e.denominator))
+          .toList();
+    }
+    if (exif["GPS GPSLongitude"] != null) {
+      _exifData["long"] = exif["GPS GPSLongitude"]!
+          .values
+          .toList()
+          .map((e) => ((e as Ratio).numerator / e.denominator))
+          .toList();
+    }
+    if (exif["GPS GPSLatitudeRef"] != null) {
+      _exifData["latRef"] = exif["GPS GPSLatitudeRef"].toString();
+    }
+    if (exif["GPS GPSLongitudeRef"] != null) {
+      _exifData["longRef"] = exif["GPS GPSLongitudeRef"].toString();
+    }
   }
 
   _generateExifForDetails(Map<String, IfdTag> exif) {
