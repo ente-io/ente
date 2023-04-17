@@ -2,8 +2,10 @@ import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
-import "package:photos/core/configuration.dart";
+import "package:photos/core/constants.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
@@ -89,38 +91,20 @@ class PickCenterPointWidget extends StatelessWidget {
                               limit,
                               asc,
                             }) async {
-                              final ownerID =
-                                  Configuration.instance.getUserID();
-                              final hasSelectedAllForBackup = Configuration
-                                  .instance
-                                  .hasSelectedAllFoldersForBackup();
                               final collectionsToHide = CollectionsService
                                   .instance
                                   .collectionsHiddenFromTimeline();
                               FileLoadResult result;
-                              if (hasSelectedAllForBackup) {
-                                result = await FilesDB.instance
-                                    .getAllLocalAndUploadedFiles(
-                                  creationStartTime,
-                                  creationEndTime,
-                                  ownerID!,
-                                  limit: limit,
-                                  asc: asc,
-                                  ignoredCollectionIDs: collectionsToHide,
-                                );
-                              } else {
-                                result = await FilesDB.instance
-                                    .getAllPendingOrUploadedFiles(
-                                  creationStartTime,
-                                  creationEndTime,
-                                  ownerID!,
-                                  limit: limit,
-                                  asc: asc,
-                                  ignoredCollectionIDs: collectionsToHide,
-                                );
-                              }
+                              result = await FilesDB.instance
+                                  .fetchAllUploadedAndSharedFilesWithLocation(
+                                galleryLoadStartTime,
+                                galleryLoadEndTime,
+                                limit: null,
+                                asc: false,
+                                ignoredCollectionIDs: collectionsToHide,
+                              );
 
-                              // hide ignored files from home page UI
+                              // hide ignored files from UI
                               final ignoredIDs =
                                   await IgnoredFilesService.instance.ignoredIDs;
                               result.files.removeWhere(
@@ -131,6 +115,8 @@ class PickCenterPointWidget extends StatelessWidget {
                               );
                               return result;
                             },
+                            reloadEvent:
+                                Bus.instance.on<LocalPhotosUpdatedEvent>(),
                             tagPrefix: "pick_center_point_gallery",
                             selectedFiles: selectedFiles,
                             limitSelectionToOne: true,

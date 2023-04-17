@@ -53,6 +53,7 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           height: 48,
@@ -96,9 +97,9 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(S.of(context).radius, style: textTheme.body),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
                 SizedBox(
-                  height: 12,
+                  height: 16,
                   child: SliderTheme(
                     data: SliderThemeData(
                       overlayColor: Colors.transparent,

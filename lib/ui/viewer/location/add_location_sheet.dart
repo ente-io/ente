@@ -151,7 +151,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                         RadiusPickerWidget(
                           _selectedRadiusIndexNotifier,
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
                         Text(
                           S.of(context).locationTagFeatureDescription,
                           style: textTheme.smallMuted,
