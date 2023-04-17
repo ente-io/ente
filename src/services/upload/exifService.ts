@@ -39,9 +39,19 @@ export async function getParsedExifData(
     try {
         const exifData: RawEXIFData = await exifr.parse(receivedFile, {
             reviveValues: false,
-            pick: tags,
+            tiff: true,
+            xmp: true,
+            icc: true,
+            iptc: true,
+            jfif: true,
+            ihdr: true,
         });
-        return parseExifData(exifData);
+        const filteredExifData = tags
+            ? Object.fromEntries(
+                  Object.entries(exifData).filter(([key]) => tags.includes(key))
+              )
+            : exifData;
+        return parseExifData(filteredExifData);
     } catch (e) {
         if (!EXIFLESS_FORMATS.includes(fileTypeInfo.mimeType)) {
             if (
