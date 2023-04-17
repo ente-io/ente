@@ -31,7 +31,7 @@ const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     ...NULL_LOCATION,
 };
 
-export const EXIF_TAGS_NEEDED = [
+const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',
     'CreateDate',
     'ModifyDate',
