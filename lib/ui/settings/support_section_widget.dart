@@ -83,7 +83,7 @@ class SupportSectionWidget extends StatelessWidget {
           onTap: () async {
             await sendLogs(context, S.of(context).reportBug, bugsEmail);
           },
-          onDoubleTap: () async {
+          onLongPress: () async {
             final zipFilePath = await getZippedLogsFile(context);
             await shareLogs(context, bugsEmail, zipFilePath);
           },
