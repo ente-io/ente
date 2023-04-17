@@ -4,7 +4,9 @@ import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
+import "package:photos/models/magic_metadata.dart";
 import "package:photos/services/feature_flag_service.dart";
+import "package:photos/services/file_magic_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
@@ -252,6 +254,13 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     if (locationDataFromExif?.latitude != null &&
         locationDataFromExif?.longitude != null) {
       widget.file.location = locationDataFromExif;
+      FileMagicService.instance.updatePublicMagicMetadata([
+        widget.file
+      ], {
+        pubMagicKeyLat: locationDataFromExif!.latitude,
+        pubMagicKeyLong: locationDataFromExif.longitude
+      });
+
       if (mounted) {
         setState(() {});
       }
