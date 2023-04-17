@@ -305,6 +305,11 @@ class FileUploader {
       debugPrint("File is already uploaded ${fileOnDisk.tag}");
       return fileOnDisk;
     }
+    if ((file.localID ?? '') == '') {
+      _logger.severe('Trying to upload file with missing localID');
+      return file;
+    }
+
     final String lockKey = file.localID!;
 
     try {
