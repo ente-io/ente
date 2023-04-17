@@ -31,7 +31,7 @@ const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     ...NULL_LOCATION,
 };
 
-const EXIF_TAGS_NEEDED = [
+export const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',
     'CreateDate',
     'ModifyDate',
@@ -39,6 +39,7 @@ const EXIF_TAGS_NEEDED = [
     'GPSLongitude',
     'GPSLatitudeRef',
     'GPSLongitudeRef',
+    'DateCreated',
 ];
 
 export async function extractMetadata(
