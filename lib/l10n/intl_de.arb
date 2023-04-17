@@ -132,6 +132,79 @@
   "lostDevice": "Gerät verloren?",
   "verifyingRecoveryKey": "Wiederherstellungs-Schlüssel wird überprüft...",
   "recoveryKeyVerified": "Wiederherstellungs-Schlüssel überprüft",
+  "recoveryKeySuccessBody": "Sehr gut! Ihr Wiederherstellungsschlüssel ist gültig. Vielen Dank für die Verifizierung.\n\nBitte vergessen Sie nicht eine Kopie Ihres Wiederherstellungsschlüssels sicher aufzubewahren.",
+  "invalidRecoveryKey": "Der von Ihnen eingegebene Wiederherstellungsschlüssel ist nicht gültig. Bitte stellen Sie sicher das aus 24 Wörtern zusammen gesetzt ist und jedes dieser Worte richtig geschrieben wurde.\n\nSollten Sie den Wiederherstellungscode eingegeben haben, stellen Sie bitte sicher, dass dieser 64 Worte lang ist und ebenfall richtig geschrieben wurde.",
+  "invalidKey": "Ungültiger Schlüssel",
+  "tryAgain": "Erneut versuchen",
+  "viewRecoveryKey": "Wiederherstellungsschlüssel anzeigen",
+  "confirmRecoveryKey": "Wiederherstellungsschlüssel bestätigen",
+  "recoveryKeyVerifyReason": "Ihr Wiederherstellungsschlüssel ist die einzige Möglichkeit Ihre Fotos wieder herzustellen, sollten Sie Ihr Passwort vergessen haben. Sie können diesen unter \"Einstellungen\" und dann \"Konto\" wieder finden.\n\nBitte geben Sie unten Ihren Wiederherstellungsschlüssel ein um sicher zu stellen, dass Sie ihn korrekt hinterlegt haben.",
+  "confirmYourRecoveryKey": "Bestätigen Sie ihren Wiederherstellungsschlüssel",
+  "addViewer": "Album teilen",
+  "addCollaborator": "Bearbeiter hinzufügen",
+  "addANewEmail": "Neue E-Mail-Adresse hinzufügen",
+  "orPickAnExistingOne": "Oder eine Vorherige auswählen",
+  "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Bearbeiter können Fotos & Videos zu dem geteilten Album hinzufügen.",
+  "enterEmail": "E-Mail eingeben",
+  "albumOwner": "Besitzer",
+  "@albumOwner": {
+    "description": "Role of the album owner"
+  },
+  "you": "Sie",
+  "collaborator": "Bearbeiter",
+  "addMore": "Mehr hinzufügen",
+  "@addMore": {
+    "description": "Button text to add more collaborators/viewers"
+  },
+  "viewer": "Zuschauer",
+  "remove": "Entfernen",
+  "removeParticipant": "Teilnehmer entfernen",
+  "@removeParticipant": {
+    "description": "menuSectionTitle for removing a participant"
+  },
+  "manage": "Verwalten",
+  "addedAs": "Hinzugefügt als",
+  "changePermissions": "Berechtigungen ändern?",
+  "yesConvertToViewer": "Ja, zu \"Beobachter\" ändern",
+  "cannotAddMorePhotosAfterBecomingViewer": "Der Nutzer \"{user}\" wird keine weiteren Fotos zum Album hinzufügen können.\n\nJedoch kann er weiterhin vorhandene Bilder, welche durch ihn hinzugefügt worden sind, wieder entfernen",
+  "allowAddingPhotos": "Hinzufügen von Fotos erlauben",
+  "@allowAddingPhotos": {
+    "description": "Switch button to enable uploading photos to a public link"
+  },
+  "allowAddPhotosDescription": "Erlaube Nutzern mit diesem Link ebenfalls Fotos zu diesem geteilten Album hinzuzufügen.",
+  "passwordLock": "Passwort Sperre",
+  "disableDownloadWarningTitle": "Bitte beachten Sie:",
+  "disableDownloadWarningBody": "Zuschauer können weiterhin Screenshots oder mit anderen externen Programmen Kopien der Bilder machen.",
+  "allowDownloads": "Downloads erlauben",
+  "linkDeviceLimit": "Geräte Limit",
+  "linkExpiry": "Ablaufdatum des Links",
+  "linkExpired": "Abgelaufen",
+  "linkEnabled": "Aktiviert",
+  "linkNeverExpires": "Niemals",
+  "expiredLinkInfo": "Dieser Link ist abgelaufen. Bitte wählen Sie ein neues Ablaufdatum oder deaktivieren Sie das Ablaufdatum des Links.",
+  "setAPassword": "Passwort setzen",
+  "lockButtonLabel": "Sperren",
+  "enterPassword": "Passwort eingeben",
+  "removeLink": "Link entfernen",
+  "manageLink": "Link verwalten",
+  "linkExpiresOn": "Link läuft am {expiryTime} ab",
+  "albumUpdated": "Album aktualisiert",
+  "maxDeviceLimitSpikeHandling": "Wenn auf den Höchstwert von {maxValue} gesetzt, dann wird das Limit gelockert um potenzielle Höchstlasten unterstützen zu können.",
+  "@maxDeviceLimitSpikeHandling": {
+    "placeholders": {
+      "maxValue": {
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
+  "never": "Niemals",
+  "custom": "Benutzerdefiniert",
+  "@custom": {
+    "description": "Label for setting custom value for link expiry"
+  },
+  "after1Hour": "Nach 1. Stunde",
+  "after1Day": "Nach einem Tag",
   "after1Week": "Nach 1 Woche",
   "after1Month": "Nach 1 Monat",
   "after1Year": "Nach 1 Jahr",
@@ -200,5 +273,79 @@
   "referralStep2": "2. Sie schließen einen bezahlten Tarif ab",
   "referralStep3": "3. Ihr beide erhaltet {storageInGB} GB* kostenlos",
   "referralsAreCurrentlyPaused": "Einlösungen sind derzeit pausiert",
-  "youCanAtMaxDoubleYourStorage": "* Du kannst deinen Speicher maximal verdoppeln"
+  "youCanAtMaxDoubleYourStorage": "* Du kannst deinen Speicher maximal verdoppeln",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Deine Familiengruppe hat bereits {storageAmountInGb} GB erhalten} false {Du hast bereits {storageAmountInGb} GB erhalten} other {Du hast bereits {storageAmountInGb} Gb erhalten!}}",
+  "@claimedStorageSoFar": {
+    "placeholders": {
+      "isFamilyMember": {
+        "type": "String",
+        "example": "true"
+      },
+      "storageAmountInGb": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "faq": "Häufig gestellte Fragen",
+  "oopsSomethingWentWrong": "Ups. Leider ist ein Fehler aufgetreten",
+  "peopleUsingYourCode": "Leute, die deinen Code verwenden",
+  "deleteFromBoth": "Aus beidem löschen",
+  "newAlbum": "Neues Album",
+  "albums": "Alben",
+  "memoryCount": "{count, plural, one{{count} Erinnerung} other{{count} Erinnerungen}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      }
+    }
+  },
+  "selectedPhotos": "{count} ausgewählt",
+  "@selectedPhotos": {
+    "description": "Display the number of selected photos",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "5",
+        "type": "int"
+      }
+    }
+  },
+  "selectedPhotosWithYours": "{count} ausgewählt ({yourCount} von Ihnen)",
+  "@selectedPhotosWithYours": {
+    "description": "Display the number of selected photos, including the number of selected photos owned by the user",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "yourCount": {
+        "example": "2",
+        "type": "int"
+      }
+    }
+  },
+  "advancedSettings": "Erweitert",
+  "@advancedSettings": {
+    "description": "The text to display in the advanced settings section"
+  },
+  "photoGridSize": "Fotorastergröße",
+  "manageDeviceStorage": "Gerätespeicher verwalten",
+  "selectFoldersForBackup": "Ordner für Sicherung auswählen",
+  "selectedFoldersWillBeEncryptedAndBackedUp": "Ausgewählte Ordner werden verschlüsselt und gesichert",
+  "unselectAll": "Alle demarkieren",
+  "selectAll": "Alle markieren",
+  "skip": "Überspringen",
+  "updatingFolderSelection": "Ordnerauswahl wird aktualisiert...",
+  "itemCount": "{count, plural, one{{count} Objekt} other{{count} Objekte}}",
+  "yearsAgo": "{count, plural, one{vor einem Jahr} other{vor {count} Jahren}}",
+  "backupSettings": "Backup-Einstellungen",
+  "backupOverMobileData": "Über mobile Daten sichern",
+  "backupVideos": "Videos sichern",
+  "disableAutoLock": "Automatische Sperre deaktivieren"
 }
