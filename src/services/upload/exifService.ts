@@ -16,6 +16,7 @@ type ParsedEXIFData = Record<string, any> &
         DateTimeOriginal: Date;
         CreateDate: Date;
         ModifyDate: Date;
+        DateCreated: Date;
         latitude: number;
         longitude: number;
     }>;
@@ -25,6 +26,7 @@ type RawEXIFData = Record<string, any> &
         DateTimeOriginal: string;
         CreateDate: string;
         ModifyDate: string;
+        DateCreated: string;
         latitude: number;
         longitude: number;
     }>;
@@ -60,9 +62,10 @@ export async function getParsedExifData(
 
 function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     if (!exifData) {
-        throw new Error(CustomError.EXIF_DATA_NOT_FOUND);
+        return null;
     }
-    const { DateTimeOriginal, CreateDate, ModifyDate, ...rest } = exifData;
+    const { DateTimeOriginal, CreateDate, ModifyDate, DateCreated, ...rest } =
+        exifData;
     const parsedExif: ParsedEXIFData = { ...rest };
     if (DateTimeOriginal) {
         parsedExif.DateTimeOriginal = parseEXIFDate(exifData.DateTimeOriginal);
@@ -72,6 +75,9 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     }
     if (ModifyDate) {
         parsedExif.ModifyDate = parseEXIFDate(exifData.ModifyDate);
+    }
+    if (DateCreated) {
+        parsedExif.DateCreated = parseEXIFDate(exifData.DateCreated);
     }
     return parsedExif;
 }
