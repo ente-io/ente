@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -306,10 +305,16 @@ class FileUploader {
       debugPrint("File is already uploaded ${fileOnDisk.tag}");
       return fileOnDisk;
     }
+    if ((file.localID ?? '') == '') {
+      _logger.severe('Trying to upload file with missing localID');
+      return file;
+    }
+
+    final String lockKey = file.localID!;
 
     try {
       await _uploadLocks.acquireLock(
-        file.localID!,
+        lockKey,
         _processType.toString(),
         DateTime.now().microsecondsSinceEpoch,
       );
@@ -502,6 +507,7 @@ class FileUploader {
         file,
         encryptedFilePath,
         encryptedThumbnailPath,
+        lockKey: lockKey,
       );
     }
   }
@@ -642,8 +648,9 @@ class FileUploader {
     bool uploadHardFailure,
     File file,
     String encryptedFilePath,
-    String encryptedThumbnailPath,
-  ) async {
+    String encryptedThumbnailPath, {
+    required String lockKey,
+  }) async {
     if (mediaUploadData != null && mediaUploadData.sourceFile != null) {
       // delete the file from app's internal cache if it was copied to app
       // for upload. On iOS, only remove the file from photo_manager/app cache
@@ -661,7 +668,7 @@ class FileUploader {
     if (io.File(encryptedThumbnailPath).existsSync()) {
       await io.File(encryptedThumbnailPath).delete();
     }
-    await _uploadLocks.releaseLock(file.localID!, _processType.toString());
+    await _uploadLocks.releaseLock(lockKey, _processType.toString());
   }
 
   Future _onInvalidFileError(File file, InvalidFileError e) async {
