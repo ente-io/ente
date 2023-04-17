@@ -89,6 +89,21 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     if (DateCreated) {
         parsedExif.DateCreated = parseEXIFDate(exifData.DateCreated);
     }
+    if (
+        exifData.GPSLatitude &&
+        exifData.GPSLongitude &&
+        exifData.GPSLatitudeRef &&
+        exifData.GPSLongitudeRef
+    ) {
+        const parsedLocation = parseEXIFLocation(
+            exifData.GPSLatitude,
+            exifData.GPSLatitudeRef,
+            exifData.GPSLongitude,
+            exifData.GPSLongitudeRef
+        );
+        parsedExif.latitude = parsedLocation.latitude;
+        parsedExif.longitude = parsedLocation.longitude;
+    }
     return parsedExif;
 }
 
@@ -125,6 +140,51 @@ function parseEXIFDate(dataTimeString: string) {
         });
         return null;
     }
+}
+
+export function parseEXIFLocation(
+    gpsLatitude: number[],
+    gpsLatitudeRef: string,
+    gpsLongitude: number[],
+    gpsLongitudeRef: string
+) {
+    try {
+        if (!gpsLatitude || !gpsLongitude) {
+            return NULL_LOCATION;
+        }
+        const latitude = convertDMSToDD(
+            gpsLatitude[0],
+            gpsLatitude[1],
+            gpsLatitude[2],
+            gpsLatitudeRef
+        );
+        const longitude = convertDMSToDD(
+            gpsLongitude[0],
+            gpsLongitude[1],
+            gpsLongitude[2],
+            gpsLongitudeRef
+        );
+        return { latitude, longitude };
+    } catch (e) {
+        logError(e, 'parseEXIFLocation failed', {
+            gpsLatitude,
+            gpsLatitudeRef,
+            gpsLongitude,
+            gpsLongitudeRef,
+        });
+        return NULL_LOCATION;
+    }
+}
+
+function convertDMSToDD(
+    degrees: number,
+    minutes: number,
+    seconds: number,
+    direction: string
+) {
+    let dd = degrees + minutes / 60 + seconds / (60 * 60);
+    if (direction === 'S' || direction === 'W') dd *= -1;
+    return dd;
 }
 
 export function getEXIFLocation(exifData: ParsedEXIFData): Location {
@@ -180,7 +240,7 @@ async function convertImageToDataURL(reader: FileReader, blob: Blob) {
     return dataURL;
 }
 
-function dataURIToBlob(dataURI) {
+function dataURIToBlob(dataURI: string) {
     // convert base64 to raw binary data held in a string
     // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
     const byteString = atob(dataURI.split(',')[1]);
