@@ -58,9 +58,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     _currentUserID = Configuration.instance.getUserID()!;
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
-    _exifNotifier.addListener(() {
+    _exifNotifier.addListener(() async {
       if (_exifNotifier.value != null) {
-        hasLocationData = _hasLocationData();
+        hasLocationData = await _hasLocationData();
       }
     });
     if (_isImage) {
@@ -230,13 +230,32 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     );
   }
 
-  bool _hasLocationData() {
+  Future<bool> _hasLocationData() async {
     final fileLocation = widget.file.location;
-    final hasLocation = (fileLocation != null &&
+    bool hasLocation = (fileLocation != null &&
             fileLocation.latitude != null &&
             fileLocation.longitude != null) &&
         (fileLocation.latitude != 0 || fileLocation.longitude != 0);
+
+    //This code is for updating the location of files in which location data is
+    //missing and the EXIF has location data. This is only happens for a
+    //certain specific minority of devices.
+    if (!hasLocation) {
+      hasLocation = await _setLocationDataFromExif();
+    }
     return hasLocation;
+  }
+
+  Future<bool> _setLocationDataFromExif() async {
+    final locationDataFromExif =
+        (await gpsDataFromExif(widget.file)).toLocationObj();
+    if (locationDataFromExif.latitude != null &&
+        locationDataFromExif.longitude != null) {
+      widget.file.location = locationDataFromExif;
+      setState(() {});
+      return true;
+    }
+    return false;
   }
 
   _generateExifForDetails(Map<String, IfdTag> exif) {
