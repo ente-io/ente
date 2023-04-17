@@ -162,8 +162,8 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
       try {
         final locationData = (await gpsDataFromExif(file)).toLocationObj();
         latLong = LatLng(
-          latitude: locationData.latitude,
-          longitude: locationData.longitude,
+          latitude: locationData?.latitude,
+          longitude: locationData?.longitude,
         );
       } catch (e, s) {
         _logger.warning("Failed to get location from exif", e, s);

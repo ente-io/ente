@@ -249,10 +249,12 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   Future<bool> _setLocationDataFromExif() async {
     final locationDataFromExif =
         (await gpsDataFromExif(widget.file)).toLocationObj();
-    if (locationDataFromExif.latitude != null &&
-        locationDataFromExif.longitude != null) {
+    if (locationDataFromExif?.latitude != null &&
+        locationDataFromExif?.longitude != null) {
       widget.file.location = locationDataFromExif;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
       return true;
     }
     return false;
