@@ -32,7 +32,7 @@ class EnteApp extends StatefulWidget {
   }) : super(key: key);
 
   static void setLocale(BuildContext context, Locale newLocale) {
-    _EnteAppState state = context.findAncestorStateOfType<_EnteAppState>()!;
+    final state = context.findAncestorStateOfType<_EnteAppState>()!;
     state.setLocale(newLocale);
   }
 
