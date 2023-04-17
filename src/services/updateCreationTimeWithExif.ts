@@ -15,6 +15,13 @@ import { getFileType } from 'services/typeDetectionService';
 import { FILE_TYPE } from 'constants/file';
 import { getUnixTimeInMicroSeconds } from 'utils/time';
 
+const EXIF_TIME_TAGS = [
+    'DateTimeOriginal',
+    'CreateDate',
+    'ModifyDate',
+    'DateCreated',
+];
+
 export async function updateCreationTimeWithExif(
     filesToBeUpdated: EnteFile[],
     fixOption: FIX_OPTIONS,
@@ -42,11 +49,12 @@ export async function updateCreationTimeWithExif(
                     const fileTypeInfo = await getFileType(fileObject);
                     const exifData = await getParsedExifData(
                         fileObject,
-                        fileTypeInfo
+                        fileTypeInfo,
+                        EXIF_TIME_TAGS
                     );
                     if (fixOption === FIX_OPTIONS.DATE_TIME_ORIGINAL) {
                         correctCreationTime = getUnixTimeInMicroSeconds(
-                            exifData?.DateTimeOriginal
+                            exifData?.DateTimeOriginal ?? exifData?.DateCreated
                         );
                     } else {
                         correctCreationTime = getUnixTimeInMicroSeconds(

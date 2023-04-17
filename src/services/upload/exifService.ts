@@ -16,6 +16,7 @@ type ParsedEXIFData = Record<string, any> &
         DateTimeOriginal: Date;
         CreateDate: Date;
         ModifyDate: Date;
+        DateCreated: Date;
         latitude: number;
         longitude: number;
     }>;
@@ -25,6 +26,7 @@ type RawEXIFData = Record<string, any> &
         DateTimeOriginal: string;
         CreateDate: string;
         ModifyDate: string;
+        DateCreated: string;
         latitude: number;
         longitude: number;
     }>;
@@ -37,9 +39,19 @@ export async function getParsedExifData(
     try {
         const exifData: RawEXIFData = await exifr.parse(receivedFile, {
             reviveValues: false,
-            pick: tags,
+            tiff: true,
+            xmp: true,
+            icc: true,
+            iptc: true,
+            jfif: true,
+            ihdr: true,
         });
-        return parseExifData(exifData);
+        const filteredExifData = tags
+            ? Object.fromEntries(
+                  Object.entries(exifData).filter(([key]) => tags.includes(key))
+              )
+            : exifData;
+        return parseExifData(filteredExifData);
     } catch (e) {
         if (!EXIFLESS_FORMATS.includes(fileTypeInfo.mimeType)) {
             if (
@@ -60,9 +72,10 @@ export async function getParsedExifData(
 
 function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     if (!exifData) {
-        throw new Error(CustomError.EXIF_DATA_NOT_FOUND);
+        return null;
     }
-    const { DateTimeOriginal, CreateDate, ModifyDate, ...rest } = exifData;
+    const { DateTimeOriginal, CreateDate, ModifyDate, DateCreated, ...rest } =
+        exifData;
     const parsedExif: ParsedEXIFData = { ...rest };
     if (DateTimeOriginal) {
         parsedExif.DateTimeOriginal = parseEXIFDate(exifData.DateTimeOriginal);
@@ -72,6 +85,24 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     }
     if (ModifyDate) {
         parsedExif.ModifyDate = parseEXIFDate(exifData.ModifyDate);
+    }
+    if (DateCreated) {
+        parsedExif.DateCreated = parseEXIFDate(exifData.DateCreated);
+    }
+    if (
+        exifData.GPSLatitude &&
+        exifData.GPSLongitude &&
+        exifData.GPSLatitudeRef &&
+        exifData.GPSLongitudeRef
+    ) {
+        const parsedLocation = parseEXIFLocation(
+            exifData.GPSLatitude,
+            exifData.GPSLatitudeRef,
+            exifData.GPSLongitude,
+            exifData.GPSLongitudeRef
+        );
+        parsedExif.latitude = parsedLocation.latitude;
+        parsedExif.longitude = parsedLocation.longitude;
     }
     return parsedExif;
 }
@@ -111,6 +142,51 @@ function parseEXIFDate(dataTimeString: string) {
     }
 }
 
+export function parseEXIFLocation(
+    gpsLatitude: number[],
+    gpsLatitudeRef: string,
+    gpsLongitude: number[],
+    gpsLongitudeRef: string
+) {
+    try {
+        if (!gpsLatitude || !gpsLongitude) {
+            return NULL_LOCATION;
+        }
+        const latitude = convertDMSToDD(
+            gpsLatitude[0],
+            gpsLatitude[1],
+            gpsLatitude[2],
+            gpsLatitudeRef
+        );
+        const longitude = convertDMSToDD(
+            gpsLongitude[0],
+            gpsLongitude[1],
+            gpsLongitude[2],
+            gpsLongitudeRef
+        );
+        return { latitude, longitude };
+    } catch (e) {
+        logError(e, 'parseEXIFLocation failed', {
+            gpsLatitude,
+            gpsLatitudeRef,
+            gpsLongitude,
+            gpsLongitudeRef,
+        });
+        return NULL_LOCATION;
+    }
+}
+
+function convertDMSToDD(
+    degrees: number,
+    minutes: number,
+    seconds: number,
+    direction: string
+) {
+    let dd = degrees + minutes / 60 + seconds / (60 * 60);
+    if (direction === 'S' || direction === 'W') dd *= -1;
+    return dd;
+}
+
 export function getEXIFLocation(exifData: ParsedEXIFData): Location {
     if (!exifData.latitude || !exifData.longitude) {
         return NULL_LOCATION;
@@ -120,7 +196,10 @@ export function getEXIFLocation(exifData: ParsedEXIFData): Location {
 
 export function getEXIFTime(exifData: ParsedEXIFData): number {
     const dateTime =
-        exifData.DateTimeOriginal ?? exifData.CreateDate ?? exifData.ModifyDate;
+        exifData.DateTimeOriginal ??
+        exifData.DateCreated ??
+        exifData.CreateDate ??
+        exifData.ModifyDate;
     if (!dateTime) {
         return null;
     }
@@ -161,7 +240,7 @@ async function convertImageToDataURL(reader: FileReader, blob: Blob) {
     return dataURL;
 }
 
-function dataURIToBlob(dataURI) {
+function dataURIToBlob(dataURI: string) {
     // convert base64 to raw binary data held in a string
     // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
     const byteString = atob(dataURI.split(',')[1]);
