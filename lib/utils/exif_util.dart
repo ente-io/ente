@@ -48,14 +48,13 @@ Future<DateTime?> getCreationTimeFromEXIF(io.File file) async {
   return null;
 }
 
-Future<GPSData> gpsDataFromExif(File file) async {
+Future<GPSData> gpsDataFromExif(Map<String, IfdTag> exif) async {
   final Map<String, dynamic> exifLocationData = {
     "lat": null,
     "long": null,
     "latRef": null,
     "longRef": null,
   };
-  final exif = await getExif(file);
   if (exif["GPS GPSLatitude"] != null) {
     exifLocationData["lat"] = exif["GPS GPSLatitude"]!
         .values

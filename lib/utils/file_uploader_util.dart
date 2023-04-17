@@ -160,13 +160,15 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
       //In some devices, asset.latlngAsync() doesn't fetch the location data even
       //if it is present. In such cases, extract location data from EXIF.
       try {
-        final locationData = (await gpsDataFromExif(file)).toLocationObj();
+        final exif = await getExif(file);
+        final locationData = (await gpsDataFromExif(exif)).toLocationObj();
         latLong = LatLng(
           latitude: locationData?.latitude,
           longitude: locationData?.longitude,
         );
       } catch (e, s) {
         _logger.warning("Failed to get location from exif", e, s);
+        return;
       }
     }
     file.location =
