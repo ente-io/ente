@@ -249,7 +249,7 @@ Future<bool> _isRunningInForeground() async {
   final lastFGHeartBeatTime = DateTime.fromMicrosecondsSinceEpoch(
     prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0,
   );
-  _logger.info("Last FG heart beat @ " + lastFGHeartBeatTime.toString());
+  _logger.info("Last FG heart beat @ $lastFGHeartBeatTime");
   return lastFGHeartBeatTime.microsecondsSinceEpoch >
       (currentTime - kFGTaskDeathTimeoutInMicroseconds);
 }
