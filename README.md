@@ -73,7 +73,7 @@ src="https://user-images.githubusercontent.com/1161789/154795157-c4468ff9-97fd-4
 
 ### Web
 
-You can view your 2FA codes at [https://auth.ente.io](https://auth.ente.io). For adding or managing your secrets, you will need to use our mobile app.
+You can view your 2FA codes at [https://auth.ente.io](auth.ente.io). For adding or managing your secrets, please use our mobile app.
 
 ### Desktop
 
