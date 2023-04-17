@@ -157,6 +157,8 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
       (file.location!.latitude == 0 && file.location!.longitude == 0)) {
     LatLng latLong = await asset.latlngAsync();
     if ((latLong.latitude ?? 0) == 0 && (latLong.longitude ?? 0) == 0) {
+      //In some devices, asset.latlngAsync() doesn't fetch the location data even
+      //if it is present. In such cases, extract location data from EXIF.
       try {
         final locationData = (await gpsDataFromExif(file)).toLocationObj();
         latLong = LatLng(
