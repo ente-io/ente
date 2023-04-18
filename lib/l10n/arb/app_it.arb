@@ -113,5 +113,14 @@
   "confirmPassword": "Conferma la password",
   "close": "Chiudi",
   "oopsSomethingWentWrong": "Oops, qualcosa è andato storto.",
-  "selectLanguage": "Seleziona lingua"
+  "selectLanguage": "Seleziona lingua",
+  "@importSuccessDes": {
+    "placeholders": {
+      "count": {
+        "description": "The number of codes imported",
+        "type": "int",
+        "example": "1"
+      }
+    }
+  }
 }

@@ -119,5 +119,14 @@
   "search": "Suchen",
   "noResult": "Kein Ergebnis",
   "scanAQrCode": "QR-Code scannen",
-  "saveKey": "Schlüssel speichern"
+  "saveKey": "Schlüssel speichern",
+  "@importSuccessDes": {
+    "placeholders": {
+      "count": {
+        "description": "The number of codes imported",
+        "type": "int",
+        "example": "1"
+      }
+    }
+  }
 }

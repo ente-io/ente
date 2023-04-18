@@ -194,5 +194,14 @@
   "exportLogs": "Exportar registros",
   "enterYourRecoveryKey": "Introduzca su clave de recuperación",
   "tempErrorContactSupportIfPersists": "Parece que algo salió mal. Por favor, vuelve a intentarlo después de algún tiempo. Si el error persiste, ponte en contacto con nuestro equipo de soporte.",
-  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Parece que algo salió mal. Por favor, vuelve a intentarlo después de algún tiempo. Si el error persiste, ponte en contacto con nuestro equipo de soporte."
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Parece que algo salió mal. Por favor, vuelve a intentarlo después de algún tiempo. Si el error persiste, ponte en contacto con nuestro equipo de soporte.",
+  "@importSuccessDes": {
+    "placeholders": {
+      "count": {
+        "description": "The number of codes imported",
+        "type": "int",
+        "example": "1"
+      }
+    }
+  }
 }
