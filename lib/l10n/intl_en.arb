@@ -894,5 +894,16 @@
   "pickCenterPoint": "Pick center point",
   "useSelectedPhoto": "Use selected photo", 
   "edit": "Edit",
-  "deleteLocation": "Delete location"
+  "deleteLocation": "Delete location",
+  "rotateLeft": "Rotate left",
+  "flip": "Flip",
+  "rotateRight": "Rotate right",
+  "saveCopy": "Save copy",
+  "light": "Light",
+  "color": "Color",
+  "yesDiscardChanges": "Yes, discard changes",
+  "doYouWantToDiscardTheEditsYouHaveMade": "Do you want to discard the edits you have made?",
+  "saving": "Saving...",
+  "editsSaved": "Edits saved",
+  "oopsCouldNotSaveEdits": "Oops, could not save edits"
 }

@@ -20,7 +20,7 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'pt';
 
-  static String m4(user) =>
+  static String m1(user) =>
       "${user} Não poderá adicionar mais fotos a este álbum\n\nEles ainda poderão remover as fotos existentes adicionadas por eles";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -47,7 +47,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Qual é o principal motivo para você excluir sua conta?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancelar"),
-        "cannotAddMorePhotosAfterBecomingViewer": m4,
+        "cannotAddMorePhotosAfterBecomingViewer": m1,
         "changePermissions":
             MessageLookupByLibrary.simpleMessage("Alterar permissões?"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
