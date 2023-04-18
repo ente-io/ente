@@ -136,6 +136,10 @@
   "social": "Réseaux Sociaux",
   "security": "Sécurité",
   "lockscreen": "Ecran de vérouillage",
+  "authToChangeLockscreenSetting": "Veuillez vous authentifier pour modifier les paramètres de l'écran de verrouillage",
+  "lockScreenEnablePreSteps": "Pour activer l'écran de verrouillage, veuillez configurer le code d'accès de l'appareil ou le verrouillage de l'écran dans les paramètres de votre système.",
+  "viewActiveSessions": "Afficher les sessions actives",
+  "authToViewYourActiveSessions": "Veuillez vous authentifier pour voir vos sessions actives",
   "searchHint": "Rechercher...",
   "search": "Rechercher",
   "sorryUnableToGenCode": "Désolé, impossible de générer un code pour {issuerName}",
@@ -173,6 +177,7 @@
   "loginTerms": "En cliquant sur \"Connexion\", j'accepte les <u-terms>conditions d'utilisation</u-terms> et la <u-policy>politique de confidentialité</u-policy>",
   "logInLabel": "Connexion",
   "logout": "Déconnexion",
+  "areYouSureYouWantToLogout": "Voulez-vous vraiment vous déconnecter ?",
   "yesLogout": "Oui, se déconnecter",
   "exit": "Quitter",
   "verifyingRecoveryKey": "Vérification de la clé de récupération...",
@@ -194,5 +199,34 @@
   "exportLogs": "Exporter les journaux",
   "enterYourRecoveryKey": "Entrez votre clé de récupération",
   "tempErrorContactSupportIfPersists": "Il semble qu'une erreur s'est produite. Veuillez réessayer après un certain temps. Si l'erreur persiste, veuillez contacter notre équipe d'assistance.",
-  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Il semble qu'une erreur s'est produite. Veuillez réessayer après un certain temps. Si l'erreur persiste, veuillez contacter notre équipe d'assistance."
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Il semble qu'une erreur s'est produite. Veuillez réessayer après un certain temps. Si l'erreur persiste, veuillez contacter notre équipe d'assistance.",
+  "about": "À propos",
+  "weAreOpenSource": "Nous sommes open source !",
+  "privacy": "Confidentialité",
+  "terms": "Conditions",
+  "checkForUpdates": "Vérifier les mises à jour",
+  "checking": "Vérification...",
+  "youAreOnTheLatestVersion": "Vous êtes sur la dernière version",
+  "warning": "Attention",
+  "exportWarningDesc": "Le fichier exporté contient des informations sensibles. Veuillez le stocker en toute sécurité.",
+  "iUnderStand": "J’ai compris",
+  "@iUnderStand": {
+    "description": "Text for the button to confirm the user understands the warning"
+  },
+  "authToExportCodes": "Veuillez vous authentifier pour exporter vos codes",
+  "importSuccessTitle": "Youpi !",
+  "importSuccessDesc": "Vous avez importé {count} codes !",
+  "@importSuccessDes": {
+    "placeholders": {
+      "count": {
+        "description": "The number of codes imported",
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "sorry": "Désolé",
+  "importFailureDesc": "Impossible d'analyser le fichier sélectionné.\nVeuillez écrire à support@ente.io si vous avez besoin d'aide !",
+  "pendingSyncs": "Attention",
+  "pendingSyncsWarningBody": "Certains de vos codes n'ont pas été sauvegardés.\n\nVeuillez vous assurer que vous avez une sauvegarde de ces codes avant de vous déconnecter."
 }
