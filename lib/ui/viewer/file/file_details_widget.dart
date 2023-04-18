@@ -64,8 +64,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         widget.file.fileType == FileType.livePhoto;
 
     _exifNotifier.addListener(() {
-      if (_exifNotifier.value != null &&
-              !widget.file.hasLocation &&) {
+      if (_exifNotifier.value != null && !widget.file.hasLocation) {
         _updateLocationFromExif(_exifNotifier.value!).ignore();
       }
     });
