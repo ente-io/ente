@@ -179,7 +179,8 @@ class File extends EnteFile {
       }
     }
     bool hasExifTime = false;
-    if (mediaUploadData.sourceFile != null) {
+    if ((fileType == FileType.image || fileType == FileType.video) &&
+        mediaUploadData.sourceFile != null) {
       final exifData = await getExifFromSourceFile(mediaUploadData.sourceFile!);
       if (exifData != null) {
         if (fileType == FileType.image) {
