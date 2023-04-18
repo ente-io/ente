@@ -1,0 +1,79 @@
+<div class="docs-menu">
+
+	<!-- <a class="docs-logo" href="http://photoswipe.com">PhotoSwipe</a> -->
+
+	<ul id="docs-menu-list">
+		<li>
+			<a href="getting-started.html">Getting started</a>
+		</li>
+
+		<li>
+			<a href="options.html">Options</a>
+		</li>
+
+		<li>
+			<a href="api.html">API</a>
+		</li>
+
+		<li>
+			<a href="faq.html">FAQ</a>
+		</li>
+
+
+
+		<li style="margin-top: 15px;">
+			<a href="custom-html-in-slides.html">HTML in slides</a>
+		</li>	
+
+		<li>
+			<a href="responsive-images.html">Responsive images</a>
+		</li>
+
+		<li>
+			<a href="performance-tips.html">Performance tips</a>
+		</li>
+
+		<li>
+			<a href="seo.html">SEO</a>
+		</li>
+
+
+
+		<li style="margin-top: 15px;">
+			<a href="https://github.com/dimsemenov/PhotoSwipe" class="external">GitHub</a>
+		</li>
+
+		<li>
+			<a href="https://photoswipe.uservoice.com/forums/275302-feature-requests-ideas" class="external">Ideas</a>
+		</li>
+
+		<li>
+			<a href="http://twitter.com/photoswipe" class="external">Twitter</a>
+		</li>
+	
+		<li>
+			<a href="http://dimsemenov.com/subscribe.html?i=pswp" class="external">Newsletter</a>
+		</li>
+
+		
+
+	</ul>
+
+	<div class="docs-menu__ad">
+		Code Computerlove are <a href="http://www.codecomputerlove.com/jobs/">hiring software engineers</a> in the UK.
+	</div>
+</div>
+<script>
+(function() {
+	// And this, kids, is what lazy JS developers do when they need a menu in Jekyll
+	var menuEls = document.getElementById('docs-menu-list').children,
+		el,
+		currUrl = window.location.href;
+	for(var i = 0, l = menuEls.length; i < l; i++) {
+		el = menuEls[i].children[0];
+		if( currUrl.indexOf( el.href ) > -1 ) {
+			el.className += 'docs-menu__item--active';
+		}
+	}
+}());
+</script>

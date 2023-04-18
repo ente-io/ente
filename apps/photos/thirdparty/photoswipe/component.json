@@ -1,0 +1,30 @@
+{
+  "name": "photoswipe",
+  "repository": "dimsemenov/PhotoSwipe",
+  "description": "JavaScript gallery",
+  "main": "dist/photoswipe.js",
+  "version": "4.1.4",
+  "keywords": [
+    "gallery",
+    "lightbox",
+    "photo",
+    "image",
+    "touch",
+    "swipe",
+    "zoom"
+  ],
+  "scripts": [
+    "dist/photoswipe.js",
+    "dist/photoswipe-ui-default.js"
+  ],
+  "styles": [
+    "dist/photoswipe.css",
+    "dist/default-skin/default-skin.css"
+  ],
+  "images": [
+    "dist/default-skin/default-skin.png",
+    "dist/default-skin/default-skin.svg",
+    "dist/default-skin/preloader.gif"
+  ],
+  "license": "MIT"
+}

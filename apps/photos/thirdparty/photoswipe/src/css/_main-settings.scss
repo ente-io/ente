@@ -1,0 +1,9 @@
+$pswp__show-hide-transition-duration: 333ms !default;
+$pswp__controls-transition-duration: 333ms !default;
+$pswp__background-color: #000 !default;
+$pswp__placeholder-color: #222 !default;
+$pswp__box-sizing-border-box: true !default; // disable .pswp * { box-sizing:border-box } (in case you already have it in your site css)
+$pswp__root-z-index: 1500 !default;
+$pswp__assets-path: '' !default; // path to skin assets folder (preloader, PNG and SVG sprite)
+$pswp__error-text-color: #ccc !default; // "Image not loaded" text color
+$pswp__include-minimal-style: true !default;
