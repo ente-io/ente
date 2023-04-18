@@ -118,14 +118,5 @@
   "moderateStrength": "Orta",
   "confirmPassword": "Şifreyi onayla",
   "close": "Kapat",
-  "oopsSomethingWentWrong": "Hay aksi, bir sorun oluştu.",
-  "@importSuccessDes": {
-    "placeholders": {
-      "count": {
-        "description": "The number of codes imported",
-        "type": "int",
-        "example": "1"
-      }
-    }
-  }
+  "oopsSomethingWentWrong": "Hay aksi, bir sorun oluştu."
 }

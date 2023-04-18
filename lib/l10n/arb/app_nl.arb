@@ -111,14 +111,5 @@
   "moderateStrength": "Matig",
   "confirmPassword": "Wachtwoord bevestigen",
   "close": "Sluiten",
-  "oopsSomethingWentWrong": "Oeps, er is iets fout gegaan.",
-  "@importSuccessDes": {
-    "placeholders": {
-      "count": {
-        "description": "The number of codes imported",
-        "type": "int",
-        "example": "1"
-      }
-    }
-  }
+  "oopsSomethingWentWrong": "Oeps, er is iets fout gegaan."
 }

@@ -1,11 +1,1 @@
-{
-  "@importSuccessDes": {
-    "placeholders": {
-      "count": {
-        "description": "The number of codes imported",
-        "type": "int",
-        "example": "1"
-      }
-    }
-  }
-}
+{}

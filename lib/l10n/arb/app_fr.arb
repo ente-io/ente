@@ -216,7 +216,7 @@
   "authToExportCodes": "Veuillez vous authentifier pour exporter vos codes",
   "importSuccessTitle": "Youpi !",
   "importSuccessDesc": "Vous avez importé {count} codes !",
-  "@importSuccessDes": {
+  "@importSuccessDesc": {
     "placeholders": {
       "count": {
         "description": "The number of codes imported",
