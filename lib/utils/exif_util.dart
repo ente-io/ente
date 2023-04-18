@@ -64,7 +64,12 @@ Future<DateTime?> getCreationTimeFromEXIF(
 }
 
 Location? locationFromExif(Map<String, IfdTag> exif) {
-  return _gpsDataFromExif(exif).toLocationObj();
+  try {
+    return _gpsDataFromExif(exif).toLocationObj();
+  } catch (e, s) {
+    _logger.severe("failed to get location from exif", e, s);
+    return null;
+  }
 }
 
 GPSData _gpsDataFromExif(Map<String, IfdTag> exif) {

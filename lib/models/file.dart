@@ -190,8 +190,7 @@ class File extends EnteFile {
             creationTime = exifTime.microsecondsSinceEpoch;
           }
         }
-        if ((fileType == FileType.image || fileType == FileType.video) &&
-            Platform.isAndroid) {
+        if (Platform.isAndroid) {
           //Fix for missing location data in lower android versions.
           final exifLocation = locationFromExif(exifData);
           if (exifLocation?.latitude != null &&
