@@ -70,3 +70,4 @@ analyzer:
 
   exclude:
     - thirdparty/**
+    - lib/generated/**
