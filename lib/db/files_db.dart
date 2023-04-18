@@ -520,7 +520,8 @@ class FilesDB {
     final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     dev.log(
-        "getAllPendingOrUploadedFiles time taken: ${stopWatch.elapsedMilliseconds} ms");
+      "getAllPendingOrUploadedFiles time taken: ${stopWatch.elapsedMilliseconds} ms",
+    );
     stopWatch.stop();
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }

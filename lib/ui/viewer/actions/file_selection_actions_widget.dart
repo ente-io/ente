@@ -388,7 +388,9 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   Future<void> _onCreatedSharedLinkClicked() async {
     if (split.ownedByCurrentUser.isEmpty) {
       showShortToast(
-          context, S.of(context).canOnlyCreateLinkForFilesOwnedByYou);
+        context,
+        S.of(context).canOnlyCreateLinkForFilesOwnedByYou,
+      );
       return;
     }
     _cachedCollectionForSharedLink ??= await collectionActions

@@ -259,7 +259,9 @@ class CollectionsListWidget extends StatelessWidget {
           );
         }
         showShortToast(
-            context, S.of(context).thisAlbumAlreadyHDACollaborativeLink);
+          context,
+          S.of(context).thisAlbumAlreadyHDACollaborativeLink,
+        );
         return Future.value(false);
       } else {
         try {

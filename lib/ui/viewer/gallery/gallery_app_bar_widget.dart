@@ -292,9 +292,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(isArchived
-                    ? S.of(context).unarchiveAlbum
-                    : S.of(context).archiveAlbum),
+                Text(
+                  isArchived
+                      ? S.of(context).unarchiveAlbum
+                      : S.of(context).archiveAlbum,
+                ),
               ],
             ),
           ),
