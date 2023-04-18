@@ -245,26 +245,17 @@ class SearchService {
       return searchResults;
     }
     final allFiles = await _getAllFiles();
-    for (LocalEntity<LocationTag> tag in result.keys) {
-      File? mostRecentFile;
-      for (File file in allFiles) {
-        if (file.hasLocation && file.uploadedFileID != null) {
+    for (File file in allFiles) {
+      if (file.hasLocation) {
+        for (LocalEntity<LocationTag> tag in result.keys) {
           if (LocationService.instance.isFileInsideLocationTag(
             tag.item.centerPoint,
             file.location!,
             tag.item.radius,
           )) {
-            mostRecentFile ??= file;
-            if (file.creationTime! > ((mostRecentFile.creationTime) ?? 0)) {
-              mostRecentFile = file;
-            }
             result[tag]!.add(file);
           }
         }
-      }
-      if (mostRecentFile != null) {
-        result[tag]!.remove(mostRecentFile);
-        result[tag]!.insert(0, mostRecentFile);
       }
     }
     for (MapEntry<LocalEntity<LocationTag>, List<File>> entry

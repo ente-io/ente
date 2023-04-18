@@ -1375,7 +1375,8 @@ class FilesDB {
 
   Future<List<File>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {
     final db = await instance.database;
-    final List<Map<String, dynamic>> result = await db.query(filesTable);
+    final List<Map<String, dynamic>> result =
+        await db.query(filesTable, orderBy: '$columnCreationTime DESC');
     final List<File> files = convertToFiles(result);
     final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, collectionsToIgnore);
