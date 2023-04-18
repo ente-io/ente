@@ -217,7 +217,7 @@
   "authToExportCodes": "Please authenticate to export your codes",
   "importSuccessTitle": "Yay!",
   "importSuccessDesc": "You have imported {count} codes!",
-  "@importSuccessDes" : {
+  "@importSuccessDesc" : {
     "placeholders": {
       "count": {
         "description": "The number of codes imported",
