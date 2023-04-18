@@ -111,14 +111,5 @@
   "moderateStrength": "Средний",
   "confirmPassword": "Подтвердить пароль",
   "close": "Закрыть",
-  "oopsSomethingWentWrong": "Ой, что-то пошло не так.",
-  "@importSuccessDes": {
-    "placeholders": {
-      "count": {
-        "description": "The number of codes imported",
-        "type": "int",
-        "example": "1"
-      }
-    }
-  }
+  "oopsSomethingWentWrong": "Ой, что-то пошло не так."
 }

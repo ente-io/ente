@@ -118,14 +118,5 @@
   "moderateStrength": "Kohtalainen salasana",
   "confirmPassword": "Vahvista salasana",
   "close": "Sulje",
-  "oopsSomethingWentWrong": "Hupsista! Jotakin meni nyt pieleen.",
-  "@importSuccessDes": {
-    "placeholders": {
-      "count": {
-        "description": "The number of codes imported",
-        "type": "int",
-        "example": "1"
-      }
-    }
-  }
+  "oopsSomethingWentWrong": "Hupsista! Jotakin meni nyt pieleen."
 }

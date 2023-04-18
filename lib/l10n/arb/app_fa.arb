@@ -216,7 +216,7 @@
   "authToExportCodes": "لطفا جهت صدور کدهای خود، اعتبارسنجی کنید",
   "importSuccessTitle": "آره!",
   "importSuccessDesc": "شما {count} کد را وارد کردید!",
-  "@importSuccessDes": {
+  "@importSuccessDesc": {
     "placeholders": {
       "count": {
         "description": "The number of codes imported",
