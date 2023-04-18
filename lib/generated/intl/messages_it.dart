@@ -21,5 +21,12 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'it';
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{};
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "accountWelcomeBack":
+            MessageLookupByLibrary.simpleMessage("Bentornato!"),
+        "cancel": MessageLookupByLibrary.simpleMessage("Annulla"),
+        "email": MessageLookupByLibrary.simpleMessage("Email"),
+        "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
+            "Inserisci il tuo indirizzo email")
+      };
 }
