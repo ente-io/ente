@@ -1375,7 +1375,8 @@ class FilesDB {
 
   Future<List<File>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {
     final db = await instance.database;
-    final List<Map<String, dynamic>> result = await db.query(filesTable);
+    final List<Map<String, dynamic>> result =
+        await db.query(filesTable, orderBy: '$columnCreationTime DESC');
     final List<File> files = convertToFiles(result);
     final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, collectionsToIgnore);
@@ -1463,11 +1464,16 @@ class FilesDB {
     row[columnMMdVisibility] = file.magicMetadata.visibility;
     row[columnPubMMdVersion] = file.pubMmdVersion;
     row[columnPubMMdEncodedJson] = file.pubMmdEncodedJson ?? '{}';
-    if (file.pubMagicMetadata != null &&
-        file.pubMagicMetadata!.editedTime != null) {
-      // override existing creationTime to avoid re-writing all queries related
-      // to loading the gallery
-      row[columnCreationTime] = file.pubMagicMetadata!.editedTime;
+    // override existing fields to avoid re-writing all queries and logic
+    if (file.pubMagicMetadata != null) {
+      if (file.pubMagicMetadata!.editedTime != null) {
+        row[columnCreationTime] = file.pubMagicMetadata!.editedTime;
+      }
+      if (file.pubMagicMetadata!.lat != null &&
+          file.pubMagicMetadata!.long != null) {
+        row[columnLatitude] = file.pubMagicMetadata!.lat;
+        row[columnLongitude] = file.pubMagicMetadata!.long;
+      }
     }
     return row;
   }

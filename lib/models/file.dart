@@ -179,12 +179,25 @@ class File extends EnteFile {
       }
     }
     bool hasExifTime = false;
-    if (fileType == FileType.image && mediaUploadData.sourceFile != null) {
-      final exifTime =
-          await getCreationTimeFromEXIF(mediaUploadData.sourceFile!);
-      if (exifTime != null) {
-        hasExifTime = true;
-        creationTime = exifTime.microsecondsSinceEpoch;
+    if ((fileType == FileType.image || fileType == FileType.video) &&
+        mediaUploadData.sourceFile != null) {
+      final exifData = await getExifFromSourceFile(mediaUploadData.sourceFile!);
+      if (exifData != null) {
+        if (fileType == FileType.image) {
+          final exifTime = await getCreationTimeFromEXIF(null, exifData);
+          if (exifTime != null) {
+            hasExifTime = true;
+            creationTime = exifTime.microsecondsSinceEpoch;
+          }
+        }
+        if (Platform.isAndroid) {
+          //Fix for missing location data in lower android versions.
+          final Location? exifLocation = locationFromExif(exifData);
+          if (exifLocation?.latitude != null &&
+              exifLocation?.longitude != null) {
+            location = exifLocation;
+          }
+        }
       }
     }
     // Try to get the timestamp from fileName. In case of iOS, file names are
@@ -289,7 +302,7 @@ class File extends EnteFile {
 
   bool get hasLocation {
     return location != null &&
-        (location!.longitude != 0 || location!.latitude != 0);
+        ((location!.longitude ?? 0) != 0 || (location!.latitude ?? 0) != 0);
   }
 
   @override
