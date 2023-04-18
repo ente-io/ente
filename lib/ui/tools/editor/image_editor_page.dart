@@ -351,7 +351,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       final AssetEntity? newAsset =
           await (PhotoManager.editor.saveImage(result, title: fileName));
       final newFile = await ente.File.fromAsset(
-        widget.originalFile.deviceFolder!,
+        widget.originalFile.deviceFolder ?? '',
         newAsset!,
       );
 
