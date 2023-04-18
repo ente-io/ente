@@ -126,6 +126,68 @@
   "enterThe6digitCodeFromnyourAuthenticatorApp": "Ingrese el código de seis dígitos de su aplicación de autenticación",
   "confirm": "Confirmar",
   "setupComplete": "Configuración completa",
+  "saveYourRecoveryKeyIfYouHaventAlready": "Guarda tu clave de recuperación si aún no lo has hecho",
+  "thisCanBeUsedToRecoverYourAccountIfYou": "Esto puede utilizarse para recuperar su cuenta si pierde su segundo factor",
+  "twofactorAuthenticationPageTitle": "Autenticación en dos pasos",
+  "lostDevice": "¿Perdió su dispositivo?",
+  "verifyingRecoveryKey": "Verificando clave de recuperación...",
+  "recoveryKeyVerified": "Clave de recuperación verificada",
+  "recoveryKeySuccessBody": "¡Genial! Su clave de recuperación es válida. Gracias por verificar.\n\nPor favor, recuerde mantener su clave de recuperación segura.",
+  "invalidRecoveryKey": "La clave de recuperación introducida no es válida. Por favor, asegúrese de que contiene 24 palabras y compruebe la ortografía de cada una.\n\nSi ha introducido un código de recuperación antiguo, asegúrese de que tiene 64 caracteres de largo y compruebe cada uno de ellos.",
+  "invalidKey": "Clave inválida",
+  "tryAgain": "Inténtelo de nuevo",
+  "viewRecoveryKey": "Ver código de recuperación",
+  "confirmRecoveryKey": "Confirmar clave de recuperación",
+  "recoveryKeyVerifyReason": "Su clave de recuperación es la única forma de recuperar sus fotos si olvida su contraseña. Puede encontrar su clave de recuperación en Ajustes > Cuenta.\n\nPor favor, introduzca su clave de recuperación aquí para verificar que la ha guardado correctamente.",
+  "confirmYourRecoveryKey": "Confirme su clave de recuperación",
+  "addViewer": "Añadir espectador",
+  "addCollaborator": "Agregar colaborador",
+  "addANewEmail": "Agregar nuevo correo electrónico",
+  "orPickAnExistingOne": "O elige uno existente",
+  "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Colaboradores pueden añadir fotos y videos al álbum compartido.",
+  "enterEmail": "Ingresar correo electrónico ",
+  "albumOwner": "Propietario",
+  "@albumOwner": {
+    "description": "Role of the album owner"
+  },
+  "you": "Usted",
+  "collaborator": "Colaborador",
+  "addMore": "Añadir más",
+  "@addMore": {
+    "description": "Button text to add more collaborators/viewers"
+  },
+  "viewer": "Espectador",
+  "remove": "Quitar",
+  "removeParticipant": "Quitar participante",
+  "@removeParticipant": {
+    "description": "menuSectionTitle for removing a participant"
+  },
+  "manage": "Administrar",
+  "addedAs": "Agregado como",
+  "changePermissions": "¿Cambiar permisos?",
+  "yesConvertToViewer": "Sí, convertir a espectador",
+  "cannotAddMorePhotosAfterBecomingViewer": "{user} no podrá añadir más fotos a este álbum\n\nTodavía podrán eliminar las fotos ya añadidas por ellos",
+  "allowAddingPhotos": "Permitir añadir fotos",
+  "@allowAddingPhotos": {
+    "description": "Switch button to enable uploading photos to a public link"
+  },
+  "allowAddPhotosDescription": "Permitir a las personas con el enlace añadir fotos al álbum compartido.",
+  "passwordLock": "Bloqueo por contraseña",
+  "disableDownloadWarningTitle": "Por favor tenga en cuenta",
+  "disableDownloadWarningBody": "Los espectadores todavía pueden tomar capturas de pantalla o guardar una copia de sus fotos usando herramientas externas",
+  "allowDownloads": "Permitir descargas",
+  "linkDeviceLimit": "Límite del dispositivo",
+  "linkExpiry": "Enlace vence",
+  "linkExpired": "Vencido",
+  "linkEnabled": "Habilitado",
+  "linkNeverExpires": "Nunca",
+  "expiredLinkInfo": "Este enlace ha caducado. Por favor, seleccione una nueva fecha de caducidad o deshabilite la fecha de caducidad.",
+  "setAPassword": "Establecer una contraseña",
+  "lockButtonLabel": "Bloquear",
+  "enterPassword": "Introduzca contraseña",
+  "removeLink": "Eliminar enlace",
+  "manageLink": "Administrar enlace",
+  "linkExpiresOn": "El enlace caducará en {expiryTime}",
   "albumUpdated": "Álbum actualizado",
   "maxDeviceLimitSpikeHandling": "Cuando se establece al máximo ({maxValue}), el límite del dispositivo se relajará para permitir picos temporales de un gran número de espectadores.",
   "@maxDeviceLimitSpikeHandling": {
@@ -157,5 +219,69 @@
   "linkHasExpired": "El enlace ha caducado",
   "publicLinkEnabled": "Enlace público habilitado",
   "shareALink": "Compartir un enlace",
-  "sharedAlbumSectionDescription": "Crear álbumes compartidos y colaborativos con otros usuarios ente, incluyendo usuarios en planes gratuitos."
+  "sharedAlbumSectionDescription": "Crear álbumes compartidos y colaborativos con otros usuarios ente, incluyendo usuarios en planes gratuitos.",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Compartir con personas específicas} =1 {Compartido con 1 persona} other {Compartido con {numberOfPeople} personas}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "thisIsYourVerificationId": "Esta es tu ID de verificación",
+  "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Alguien compartiendo álbumes con usted debería ver el mismo ID en su dispositivo.",
+  "howToViewShareeVerificationID": "Por favor, pídeles que mantengan presionada su dirección de correo electrónico en la pantalla de ajustes, y verifique que los IDs de ambos dispositivos coincidan.",
+  "thisIsPersonVerificationId": "Este es el ID de verificación de {email}",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
+  "verificationId": "ID de verificación",
+  "verifyEmailID": "Verificar {email}",
+  "emailNoEnteAccount": "{email} no tiene una cuenta ente.\n\nEnvíale una invitación para compartir fotos.",
+  "shareMyVerificationID": "Aquí está mi ID de verificación: {verificationID} para ente.io.",
+  "shareTextConfirmOthersVerificationID": "Hola, ¿puedes confirmar que esta es tu ID de verificación ente.io: {verificationID}?",
+  "somethingWentWrong": "Algo salió mal",
+  "sendInvite": "Enviar invitación",
+  "shareTextRecommendUsingEnte": "Descarga ente para que podamos compartir fácilmente fotos y videos en su calidad original\n\nhttps://ente.io/#download",
+  "done": "Hecho",
+  "applyCodeTitle": "Usar código",
+  "enterCodeDescription": "Introduce el código proporcionado por tu amigo para reclamar almacenamiento gratuito para ambos",
+  "apply": "Aplicar",
+  "failedToApplyCode": "Error al aplicar el código",
+  "enterReferralCode": "Ingresar código de referencia",
+  "codeAppliedPageTitle": "Código aplicado",
+  "storageInGB": "{storageAmountInGB} GB",
+  "claimed": "Reclamado",
+  "@claimed": {
+    "description": "Used to indicate storage claimed, like 10GB Claimed"
+  },
+  "details": "Detalles",
+  "claimMore": "¡Reclama más!",
+  "theyAlsoGetXGb": "También obtienen {storageAmountInGB} GB",
+  "freeStorageOnReferralSuccess": "{storageAmountInGB} GB cada vez que alguien se registra en un plan de pago y aplica tu código",
+  "shareTextReferralCode": "ente código de referencia: {referralCode} \n\nAplicarlo en Ajustes → General → Referencias para obtener {referralStorageInGB} GB gratis después de registrarse en un plan de pago\n\nhttps://ente.io",
+  "claimFreeStorage": "Reclamar almacenamiento gratis",
+  "inviteYourFriends": "Invita a tus amigos",
+  "authToViewYourHiddenFiles": "Por favor, autentifiquese para ver sus archivos ocultos",
+  "trash": "Papelera",
+  "uncategorized": "Sin categorizar",
+  "videoSmallCase": "vídeo",
+  "photoSmallCase": "foto",
+  "singleFileDeleteHighlight": "Se borrará de todos los álbumes.",
+  "singleFileInBothLocalAndRemote": "Este {fileType} está tanto en ente como en tu dispositivo.",
+  "singleFileInRemoteOnly": "Este {fileType} se eliminará de ente.",
+  "singleFileDeleteFromDevice": "Este {fileType} se eliminará de tu dispositivo.",
+  "deleteFromEnte": "Eliminar de ente",
+  "yesDelete": "Sí, eliminar",
+  "movedToTrash": "Movido a la papelera",
+  "deleteFromDevice": "Eliminar del dispositivo",
+  "deleteFromBoth": "Eliminar de ambos",
+  "newAlbum": "Nuevo álbum",
+  "albums": "Álbunes"
 }
