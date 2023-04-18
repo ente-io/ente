@@ -193,8 +193,7 @@ class File extends EnteFile {
         if ((fileType == FileType.image || fileType == FileType.video) &&
             Platform.isAndroid) {
           //Fix for missing location data in lower android versions.
-          final exifLocation =
-              (await gpsDataFromExif(exifData)).toLocationObj();
+          final exifLocation = locationFromExif(exifData);
           if (exifLocation?.latitude != null &&
               exifLocation?.longitude != null) {
             location = exifLocation;

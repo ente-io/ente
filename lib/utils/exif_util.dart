@@ -4,6 +4,7 @@ import 'package:exif/exif.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file.dart';
+import "package:photos/models/location/location.dart";
 import "package:photos/services/location_service.dart";
 import 'package:photos/utils/file_util.dart';
 
@@ -62,7 +63,11 @@ Future<DateTime?> getCreationTimeFromEXIF(
   return null;
 }
 
-Future<GPSData> gpsDataFromExif(Map<String, IfdTag> exif) async {
+Location? locationFromExif(Map<String, IfdTag> exif) {
+  return _gpsDataFromExif(exif).toLocationObj();
+}
+
+GPSData _gpsDataFromExif(Map<String, IfdTag> exif) {
   final Map<String, dynamic> exifLocationData = {
     "lat": null,
     "long": null,
