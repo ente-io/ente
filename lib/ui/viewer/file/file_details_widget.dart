@@ -52,20 +52,23 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   bool _isImage = false;
   late int _currentUserID;
   bool showExifListTile = false;
-  final hasLocationDataNotifer = ValueNotifier(false);
+  final ValueNotifier<bool> hasLocationData = ValueNotifier(false);
   final Logger _logger = Logger("_FileDetailsWidgetState");
 
   @override
   void initState() {
     debugPrint('file_details_sheet initState');
     _currentUserID = Configuration.instance.getUserID()!;
+    hasLocationData.value = widget.file.hasLocation;
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
+
     _exifNotifier.addListener(() {
       if (_exifNotifier.value != null && !widget.file.hasLocation) {
         _updateLocationFromExif(_exifNotifier.value!).ignore();
       }
     });
+
     if (_isImage) {
       _exifNotifier.addListener(() {
         if (_exifNotifier.value != null) {
@@ -142,9 +145,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
       fileDetailsTiles.addAll([
         ValueListenableBuilder(
-          valueListenable: hasLocationDataNotifer,
-          builder: (context, bool hasLocationData, __) {
-            return hasLocationData
+          valueListenable: hasLocationData,
+          builder: (context, bool value, __) {
+            return value
                 ? Column(
                     children: [
                       LocationTagsWidget(
@@ -248,7 +251,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           pubMagicKeyLat: locationDataFromExif!.latitude,
           pubMagicKeyLong: locationDataFromExif.longitude
         });
-        hasLocationDataNotifer.value = true;
+        hasLocationData.value = true;
       }
     } catch (e, s) {
       _logger.severe("Error while updating location from EXIF", e, s);
