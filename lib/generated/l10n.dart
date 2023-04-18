@@ -6648,6 +6648,116 @@ class S {
       args: [],
     );
   }
+
+  /// `Rotate left`
+  String get rotateLeft {
+    return Intl.message(
+      'Rotate left',
+      name: 'rotateLeft',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Flip`
+  String get flip {
+    return Intl.message(
+      'Flip',
+      name: 'flip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rotate right`
+  String get rotateRight {
+    return Intl.message(
+      'Rotate right',
+      name: 'rotateRight',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save copy`
+  String get saveCopy {
+    return Intl.message(
+      'Save copy',
+      name: 'saveCopy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Light`
+  String get light {
+    return Intl.message(
+      'Light',
+      name: 'light',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Color`
+  String get color {
+    return Intl.message(
+      'Color',
+      name: 'color',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, discard changes`
+  String get yesDiscardChanges {
+    return Intl.message(
+      'Yes, discard changes',
+      name: 'yesDiscardChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do you want to discard the edits you have made?`
+  String get doYouWantToDiscardTheEditsYouHaveMade {
+    return Intl.message(
+      'Do you want to discard the edits you have made?',
+      name: 'doYouWantToDiscardTheEditsYouHaveMade',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Saving...`
+  String get saving {
+    return Intl.message(
+      'Saving...',
+      name: 'saving',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edits saved`
+  String get editsSaved {
+    return Intl.message(
+      'Edits saved',
+      name: 'editsSaved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Oops, could not save edits`
+  String get oopsCouldNotSaveEdits {
+    return Intl.message(
+      'Oops, could not save edits',
+      name: 'oopsCouldNotSaveEdits',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -6663,6 +6773,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'it'),
       Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'nl'),
+      Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'pl'),
       Locale.fromSubtags(languageCode: 'pt'),
     ];

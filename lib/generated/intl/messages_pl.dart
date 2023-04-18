@@ -20,6 +20,9 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'pl';
 
+  static String m14(passwordStrengthValue) =>
+      "Siła hasła: ${passwordStrengthValue}";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
@@ -28,8 +31,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Jaka jest przyczyna usunięcia konta?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Anuluj"),
+        "changeEmail":
+            MessageLookupByLibrary.simpleMessage("Zmień adres e-mail"),
+        "changePasswordTitle":
+            MessageLookupByLibrary.simpleMessage("Zmień hasło"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Sprawdź swoją skrzynkę odbiorczą (i spam), aby zakończyć weryfikację"),
+        "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
+            "Kod został skopiowany do schowka"),
         "confirm": MessageLookupByLibrary.simpleMessage("Potwierdź"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Potwierdź usunięcie konta"),
@@ -37,6 +46,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tak, chcę trwale usunąć konto i wszystkie dane z nim powiązane."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Powtórz hasło"),
+        "contactSupport": MessageLookupByLibrary.simpleMessage(
+            "Skontaktuj się z pomocą techniczną"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("Kontynuuj"),
         "createAccount": MessageLookupByLibrary.simpleMessage("Stwórz konto"),
         "createNewAccount":
@@ -64,7 +75,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Twoje żądanie zostanie przetworzone w ciągu 72 godzin."),
         "doThisLater": MessageLookupByLibrary.simpleMessage("Spróbuj później"),
         "email": MessageLookupByLibrary.simpleMessage("Adres e-mail"),
+        "encryption": MessageLookupByLibrary.simpleMessage("Szyfrowanie"),
         "enterCode": MessageLookupByLibrary.simpleMessage("Wprowadź kod"),
+        "enterNewPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
+            "Wprowadź nowe hasło, którego możemy użyć do zaszyfrowania Twoich danych"),
+        "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
+            "Wprowadź hasło, którego możemy użyć do zaszyfrowania Twoich danych"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Podaj poprawny adres e-mail."),
         "enterYourEmailAddress":
@@ -76,6 +92,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("Informacja zwrotna"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Nie pamiętam hasła"),
+        "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
+            "Generowanie kluczy szyfrujących..."),
+        "howItWorks": MessageLookupByLibrary.simpleMessage("Jak to działa"),
+        "incorrectPasswordTitle":
+            MessageLookupByLibrary.simpleMessage("Nieprawidłowe hasło"),
         "incorrectRecoveryKeyBody":
             MessageLookupByLibrary.simpleMessage("Kod jest nieprawidłowy"),
         "incorrectRecoveryKeyTitle": MessageLookupByLibrary.simpleMessage(
@@ -85,6 +106,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "kindlyHelpUsWithThisInformation":
             MessageLookupByLibrary.simpleMessage("Pomóż nam z tą informacją"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
+        "moderateStrength": MessageLookupByLibrary.simpleMessage("Umiarkowana"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Brak klucza odzyskiwania?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -92,14 +114,37 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "password": MessageLookupByLibrary.simpleMessage("Hasło"),
+        "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
+            "Hasło zostało pomyślnie zmienione"),
+        "passwordStrength": m14,
+        "passwordWarning": MessageLookupByLibrary.simpleMessage(
+            "Nie przechowujemy tego hasła, więc jeśli go zapomnisz, <underline>nie będziemy w stanie odszyfrować Twoich danych</underline>"),
+        "pleaseTryAgain":
+            MessageLookupByLibrary.simpleMessage("Spróbuj ponownie"),
         "pleaseWait": MessageLookupByLibrary.simpleMessage("Proszę czekać..."),
+        "privacyPolicyTitle":
+            MessageLookupByLibrary.simpleMessage("Polityka prywatności"),
+        "recoverAccount":
+            MessageLookupByLibrary.simpleMessage("Odzyskaj konto"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Odzyskaj"),
+        "recoveryKey":
+            MessageLookupByLibrary.simpleMessage("Klucz odzyskiwania"),
+        "recoveryKeyCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
+            "Klucz odzyskiwania został skopiowany do schowka"),
+        "recoveryKeyOnForgotPassword": MessageLookupByLibrary.simpleMessage(
+            "Jeśli zapomnisz hasła, jedynym sposobem odzyskania danych jest ten klucz."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Odzyskano pomyślnie!"),
+        "resendEmail":
+            MessageLookupByLibrary.simpleMessage("Wyślij e-mail ponownie"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Zresetuj hasło"),
+        "saveKey": MessageLookupByLibrary.simpleMessage("Zapisz klucz"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Wybierz powód"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Wyślij e-mail"),
+        "setPasswordTitle": MessageLookupByLibrary.simpleMessage("Ustaw hasło"),
+        "signUpTerms": MessageLookupByLibrary.simpleMessage(
+            "Akceptuję <u-terms>warunki korzystania z usługi</u-terms> i <u-policy>politykę prywatności</u-policy>"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Coś poszło nie tak, spróbuj ponownie"),
@@ -117,11 +162,22 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "To wyloguje Cię z tego urządzenia!"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Spróbuj ponownie"),
+        "twofactorAuthenticationPageTitle":
+            MessageLookupByLibrary.simpleMessage(
+                "Uwierzytelnianie dwuskładnikowe"),
+        "twofactorSetup": MessageLookupByLibrary.simpleMessage(
+            "Uwierzytelnianie dwuskładnikowe"),
+        "useRecoveryKey":
+            MessageLookupByLibrary.simpleMessage("Użyj kodu odzyskiwania"),
         "verify": MessageLookupByLibrary.simpleMessage("Weryfikuj"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("Zweryfikuj adres e-mail"),
+        "verifyPassword":
+            MessageLookupByLibrary.simpleMessage("Zweryfikuj hasło"),
         "weakStrength": MessageLookupByLibrary.simpleMessage("Słabe"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Witaj ponownie!"),
+        "weveSentAMailTo": MessageLookupByLibrary.simpleMessage(
+            "E-mail został wysłany na adres"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Twoje konto zostało usunięte")
       };
