@@ -1375,6 +1375,40 @@ class FilesDB {
     return result;
   }
 
+  // For givenUserID, get List of unique LocalIDs for files which are
+  // uploaded by the given user and location is missing
+  Future<List<String>> getLocalIDsForFilesWithoutLocation(int ownerID) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      columns: [columnLocalID],
+      distinct: true,
+      where: '$columnOwnerID = ? AND $columnLocalID IS NOT NULL AND '
+          '($columnLatitude IS NULL OR '
+          '$columnLongitude IS NULL OR $columnLongitude = 0.0 or $columnLongitude = 0.0)',
+      whereArgs: [ownerID],
+    );
+    final result = <String>[];
+    for (final row in rows) {
+      result.add(row[columnLocalID].toString());
+    }
+    return result;
+  }
+
+  // For given list of localIDs and ownerID, get a list of uploaded files
+  // owned by given user
+  Future<List<File>> getFilesForLocalIDs(
+      List<String> localIDs, int ownerID) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      where:
+          '$columnLocalID IN (${localIDs.map((e) => "'$e'").join(',')}) AND $columnOwnerID = ?',
+      whereArgs: [ownerID],
+    );
+    return _deduplicatedAndFilterIgnoredFiles(convertToFiles(rows), {});
+  }
+
   Future<List<File>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> result =

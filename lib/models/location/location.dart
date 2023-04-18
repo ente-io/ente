@@ -1,7 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'location.freezed.dart';
-
 part 'location.g.dart';
 
 @freezed

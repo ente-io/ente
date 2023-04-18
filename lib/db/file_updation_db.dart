@@ -17,6 +17,9 @@ class FileUpdationDB {
   static const missingLocation = 'missing_location';
   static const modificationTimeUpdated = 'modificationTimeUpdated';
   static const badCreationTime = 'badCreationTime';
+  // refers to the patching of files which had location in exif but the app
+  // did not extracted the location to include it in the file metadata
+  static const missingLocationV2 = 'missingLocationV2';
 
   // SQL code to create the database table
   static List<String> _createTable() {
