@@ -561,8 +561,11 @@
   "googlePlayId": "Identifiant Google Play",
   "appleId": "Apple ID",
   "playstoreSubscription": "Abonnement au PlayStore",
+  "areYouSureYouWantToExit": "Êtes-vous sûr de vouloir quitter ?",
   "thankYou": "Merci",
   "pleaseWaitForSometimeBeforeRetrying": "Veuillez attendre quelque temps avant de réessayer",
+  "available": "Disponible",
+  "upgrade": "Améliorer",
   "usePublicLinksForPeopleNotOnEnte": "Utiliser des liens publics pour les personnes qui ne sont pas sur ente",
   "allowPeopleToAddPhotos": "Autoriser les personnes à ajouter des photos",
   "shareAnAlbumNow": "Partagez un album maintenant",
@@ -723,5 +726,6 @@
   "dismiss": "Rejeter",
   "didYouKnow": "Le savais-tu ?",
   "loadingMessage": "Chargement de vos photos...",
-  "language": "Langue"
+  "language": "Langue",
+  "edit": "Éditer"
 }
