@@ -142,25 +142,23 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         },
       ),
     );
-    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
-      fileDetailsTiles.addAll([
-        ValueListenableBuilder(
-          valueListenable: hasLocationData,
-          builder: (context, bool value, __) {
-            return value
-                ? Column(
-                    children: [
-                      LocationTagsWidget(
-                        widget.file.location!,
-                      ),
-                      const FileDetailsDivider(),
-                    ],
-                  )
-                : const SizedBox.shrink();
-          },
-        )
-      ]);
-    }
+    fileDetailsTiles.addAll([
+      ValueListenableBuilder(
+        valueListenable: hasLocationData,
+        builder: (context, bool value, __) {
+          return value
+              ? Column(
+                  children: [
+                    LocationTagsWidget(
+                      widget.file.location!,
+                    ),
+                    const FileDetailsDivider(),
+                  ],
+                )
+              : const SizedBox.shrink();
+        },
+      )
+    ]);
     if (_isImage) {
       fileDetailsTiles.addAll([
         ValueListenableBuilder(
