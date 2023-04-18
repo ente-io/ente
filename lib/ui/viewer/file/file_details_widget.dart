@@ -64,7 +64,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         widget.file.fileType == FileType.livePhoto;
 
     _exifNotifier.addListener(() {
-      if (_exifNotifier.value != null && !widget.file.hasLocation) {
+      if (_exifNotifier.value != null &&
+              !widget.file.hasLocation &&) {
         _updateLocationFromExif(_exifNotifier.value!).ignore();
       }
     });
@@ -238,6 +239,11 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   //missing and the EXIF has location data. This is only happens for a
   //certain specific minority of devices.
   Future<void> _updateLocationFromExif(Map<String, IfdTag> exif) async {
+    // If the file is not uploaded or the file is not owned by the current user
+    // then we don't need to update the location.
+    if (!widget.file.isUploaded || widget.file.ownerID! != _currentUserID) {
+      return;
+    }
     try {
       final locationDataFromExif = locationFromExif(exif);
       if (locationDataFromExif?.latitude != null &&
