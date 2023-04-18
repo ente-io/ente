@@ -1,5 +1,4 @@
 import "package:exif/exif.dart";
-import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/models/file.dart";
@@ -233,26 +232,22 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   }
 
   bool _hasLocationData() {
-    final fileLocation = widget.file.location;
-    bool hasLocation = (fileLocation != null &&
-            fileLocation.latitude != null &&
-            fileLocation.longitude != null) &&
-        (fileLocation.latitude != 0 || fileLocation.longitude != 0);
-
     //This code is for updating the location of files in which location data is
     //missing and the EXIF has location data. This is only happens for a
     //certain specific minority of devices.
-    if (!hasLocation) {
-      hasLocation = _setLocationDataFromExif();
+    if (!widget.file.hasLocation) {
+      return _setLocationDataFromExif();
     }
-    return hasLocation;
+    return true;
   }
 
+  // _setLocationDataFromExif returns true if the location data is set from exif
   bool _setLocationDataFromExif() {
     final locationDataFromExif = locationFromExif(_exifNotifier.value!);
     if (locationDataFromExif?.latitude != null &&
         locationDataFromExif?.longitude != null) {
       widget.file.location = locationDataFromExif;
+
       FileMagicService.instance.updatePublicMagicMetadata([
         widget.file
       ], {
