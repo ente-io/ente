@@ -13,21 +13,32 @@ class HomeHeaderWidget extends StatefulWidget {
 class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Stack(
       children: [
-        IconButtonWidget(
-          iconButtonType: IconButtonType.primary,
-          icon: Icons.menu_outlined,
-          onTap: () {
-            Scaffold.of(context).openDrawer();
-          },
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            IconButtonWidget(
+              iconButtonType: IconButtonType.primary,
+              icon: Icons.menu_outlined,
+              onTap: () {
+                Scaffold.of(context).openDrawer();
+              },
+            ),
+          ],
         ),
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 250),
-          child: widget.centerWidget,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: widget.centerWidget,
+              ),
+            ),
+          ],
         ),
-        // const SearchIconWidget(),
       ],
     );
   }
