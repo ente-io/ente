@@ -52,7 +52,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   bool _isImage = false;
   late int _currentUserID;
   bool showExifListTile = false;
-  bool hasLocationData = false;
+  final hasLocationDataNotifer = ValueNotifier(false);
 
   @override
   void initState() {
@@ -62,7 +62,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         widget.file.fileType == FileType.livePhoto;
     _exifNotifier.addListener(() async {
       if (_exifNotifier.value != null) {
-        hasLocationData = await _hasLocationData();
+        _hasLocationData().then(
+          (value) => hasLocationDataNotifer.value = value,
+        );
       }
     });
     if (_isImage) {
@@ -141,8 +143,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
       fileDetailsTiles.addAll([
         ValueListenableBuilder(
-          valueListenable: _exifNotifier,
-          builder: (context, _, __) {
+          valueListenable: hasLocationDataNotifer,
+          builder: (context, bool hasLocationData, __) {
             return hasLocationData
                 ? Column(
                     children: [
