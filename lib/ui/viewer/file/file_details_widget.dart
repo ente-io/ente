@@ -259,10 +259,6 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         pubMagicKeyLat: locationDataFromExif!.latitude,
         pubMagicKeyLong: locationDataFromExif.longitude
       });
-
-      if (mounted) {
-        setState(() {});
-      }
       return true;
     }
     return false;
