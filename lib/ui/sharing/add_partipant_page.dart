@@ -61,9 +61,11 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
-        title: Text(widget.isAddingViewer
-            ? S.of(context).addViewer
-            : S.of(context).addCollaborator),
+        title: Text(
+          widget.isAddingViewer
+              ? S.of(context).addViewer
+              : S.of(context).addCollaborator,
+        ),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
