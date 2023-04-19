@@ -209,6 +209,9 @@ class GPSData {
     if (lat == null || long == null) {
       return null;
     }
+    if (lat!.length < 3 || long!.length < 3) {
+      return null;
+    }
     final latSign = (latRef ?? 'N') == "N" ? 1 : -1;
     final longSign = (longRef ?? 'E') == "E" ? 1 : -1;
     return Location(
