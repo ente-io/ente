@@ -3,12 +3,12 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "build": "turbo run build",
+        "build": "turbo run build && turbo run export",
         "dev": "turbo run dev --parallel",
         "lint": "turbo run lint",
         "albums": "next dev -p 3002",
         "auth": "next dev -p 3004",
-        "postbuild": "next export",
+        "export": "next export",
         "build-analyze": "ANALYZE=true next build",
         "start": "next start",
         "prepare": "husky install"

@@ -48,6 +48,8 @@ module.exports = (phase) =>
                 '@mui/material',
                 '@mui/system',
                 '@mui/icons-material',
+                'tsconfig',
+                'eslint-config-custom'
             ],
             env: {
                 SENTRY_RELEASE: GIT_SHA,
