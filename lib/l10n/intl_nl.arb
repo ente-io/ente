@@ -272,6 +272,33 @@
   "referralStep1": "1. Geef deze code aan je vrienden",
   "referralStep2": "2. Ze registreren voor een betaald plan",
   "referralStep3": "Jullie krijgen allebei {storageInGB} GB* gratis",
+  "referralsAreCurrentlyPaused": "Verwijzingen zijn momenteel gepauzeerd",
+  "youCanAtMaxDoubleYourStorage": "* Je kunt maximaal je opslag verdubbelen",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Jouw familie heeft {storageAmountInGb} Gb geclaimd tot nu toe} false {Je hebt {storageAmountInGb} Gb geclaimd tot nu toe} other {Je hebt {storageAmountInGb} Gb geclaimd tot nu toe!}}",
+  "@claimedStorageSoFar": {
+    "placeholders": {
+      "isFamilyMember": {
+        "type": "String",
+        "example": "true"
+      },
+      "storageAmountInGb": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "faq": "Veelgestelde vragen",
+  "oopsSomethingWentWrong": "Oeps, er is iets misgegaan",
+  "peopleUsingYourCode": "Mensen die jouw code gebruiken",
+  "eligible": "gerechtigd",
+  "total": "totaal",
+  "codeUsedByYou": "Code gebruikt door jou",
+  "freeStorageClaimed": "Gratis opslag geclaimd",
+  "freeStorageUsable": "Gratis opslag bruikbaar",
+  "usableReferralStorageInfo": "Bruikbare opslag is beperkt door je huidige abonnement. Buitensporige geclaimde opslag zal automatisch bruikbaar worden wanneer je je abonnement upgrade.",
+  "removeFromAlbumTitle": "Uit album verwijderen?",
+  "removeFromAlbum": "Verwijder uit album",
+  "itemsWillBeRemovedFromAlbum": "Geselecteerde items zullen worden verwijderd uit dit album",
   "removeShareItemsWarning": "Sommige van de items die je verwijdert zijn door andere mensen toegevoegd, en je verliest de toegang daartoe",
   "addingToFavorites": "Toevoegen aan favorieten...",
   "removingFromFavorites": "Verwijderen uit favorieten...",
@@ -397,6 +424,13 @@
   "downloading": "Downloaden...",
   "theDownloadCouldNotBeCompleted": "De download kon niet worden voltooid",
   "retry": "Opnieuw",
+  "backedUpFolders": "Gebackupte mappen",
+  "backup": "Back-up",
+  "freeUpDeviceSpace": "Apparaatruimte vrijmaken",
+  "allClear": "✨ Alles in orde",
+  "noDeviceThatCanBeDeleted": "Je hebt geen bestanden op dit apparaat die verwijderd kunnen worden",
+  "removeDuplicates": "Duplicaten verwijderen",
   "noDuplicates": "✨ Geen duplicaten",
+  "youveNoDuplicateFilesThatCanBeCleared": "Je hebt geen dubbele bestanden die kunnen worden gewist",
   "sparkleSuccess": "✨ Succes"
 }
