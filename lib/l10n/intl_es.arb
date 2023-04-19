@@ -61,7 +61,7 @@
   "weakStrength": "Poco segura",
   "strongStrength": "Segura",
   "moderateStrength": "Moderada",
-  "passwordStrength": "Seguridad de la contraseña :",
+  "passwordStrength": "Seguridad de la contraseña : {passwordStrengthValue}",
   "@passwordStrength": {
     "description": "Text to indicate the password strength",
     "placeholders": {
