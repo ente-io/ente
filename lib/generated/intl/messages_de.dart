@@ -780,8 +780,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "weakStrength": MessageLookupByLibrary.simpleMessage("Schwach"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Willkommen zurück!"),
-        "weveSentAMailTo": MessageLookupByLibrary.simpleMessage(
-            "Wir haben eine E-Mail geschickt an"),
         "yearly": MessageLookupByLibrary.simpleMessage("Jährlich"),
         "yearsAgo": m35,
         "yes": MessageLookupByLibrary.simpleMessage("Ja"),

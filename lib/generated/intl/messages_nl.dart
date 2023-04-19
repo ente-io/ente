@@ -614,8 +614,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("We zijn open source!"),
         "weakStrength": MessageLookupByLibrary.simpleMessage("Zwak"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Welkom terug!"),
-        "weveSentAMailTo": MessageLookupByLibrary.simpleMessage(
-            "We hebben een e-mail gestuurd naar"),
         "yearsAgo": m35,
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("Ja, converteren naar viewer"),

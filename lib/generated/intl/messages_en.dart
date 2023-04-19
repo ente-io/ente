@@ -170,6 +170,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m34(email) => "Verify ${email}";
 
+  static String m57(email) => "We have sent a mail to <green>${email}</green>";
+
   static String m35(count) =>
       "${Intl.plural(count, one: '${count} year ago', other: '${count} years ago')}";
 
@@ -1190,10 +1192,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
             MessageLookupByLibrary.simpleMessage(
                 "We don\'t support editing photos and albums that you don\'t own yet"),
+        "weHaveSendEmailTo": m57,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Weak"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Welcome back!"),
-        "weveSentAMailTo":
-            MessageLookupByLibrary.simpleMessage("We\'ve sent a mail to"),
         "yearly": MessageLookupByLibrary.simpleMessage("Yearly"),
         "yearsAgo": m35,
         "yes": MessageLookupByLibrary.simpleMessage("Yes"),

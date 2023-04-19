@@ -1010,8 +1010,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Nous ne prenons pas en charge l\'édition des photos et des albums que vous ne possédez pas encore"),
         "weakStrength": MessageLookupByLibrary.simpleMessage("Faible"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Bienvenue !"),
-        "weveSentAMailTo": MessageLookupByLibrary.simpleMessage(
-            "Nous avons envoyé un email à"),
         "yearly": MessageLookupByLibrary.simpleMessage("Annuel"),
         "yearsAgo": m35,
         "yes": MessageLookupByLibrary.simpleMessage("Oui"),
