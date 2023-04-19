@@ -220,7 +220,7 @@
   "publicLinkEnabled": "Öffentlicher Link aktiviert",
   "shareALink": "Einen Link teilen",
   "sharedAlbumSectionDescription": "Erstelle gemeinsame Alben mit anderen ente Benutzern, einschließlich solchen im kostenlosen Tarif.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Teile mit bestimmten Personen} =1 {Teilen mit 1 Person} other {Teilen mit {numberOfPeople} Personen}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Teile mit bestimmten Personen} =1 {Teilen mit 1 Person} other {Teilen mit {numberOfPeople} Personen}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
