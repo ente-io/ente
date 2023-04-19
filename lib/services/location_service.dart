@@ -206,15 +206,17 @@ class GPSData {
   GPSData(this.latRef, this.lat, this.longRef, this.long);
 
   Location? toLocationObj() {
-    if (lat == null || long == null || latRef == null || longRef == null) {
+    if (lat == null || long == null) {
       return null;
-    } else {
-      final latSign = (latRef == "N" ? 1 : -1);
-      final longSign = (longRef == "E" ? 1 : -1);
-      return Location(
-        latitude: latSign * lat![0] + lat![1] / 60 + lat![2] / 3600,
-        longitude: longSign * long![0] + long![1] / 60 + long![2] / 3600,
-      );
     }
+    if (lat!.length < 3 || long!.length < 3) {
+      return null;
+    }
+    final latSign = (latRef ?? 'N') == "N" ? 1 : -1;
+    final longSign = (longRef ?? 'E') == "E" ? 1 : -1;
+    return Location(
+      latitude: latSign * lat![0] + lat![1] / 60 + lat![2] / 3600,
+      longitude: longSign * long![0] + long![1] / 60 + long![2] / 3600,
+    );
   }
 }
