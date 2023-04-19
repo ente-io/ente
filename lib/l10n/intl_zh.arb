@@ -51,7 +51,6 @@
   "checkInboxAndSpamFolder": "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证",
   "tapToEnterCode": "点击以输入代码",
   "resendEmail": "重新发送电子邮件",
-  "weveSentAMailTo": "我们已经发送一封邮件到",
   "setPasswordTitle": "设置密码",
   "changePasswordTitle": "修改密码",
   "resetPasswordTitle": "重置密码",

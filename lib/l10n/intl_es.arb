@@ -51,7 +51,6 @@
   "checkInboxAndSpamFolder": "Revisa tu bandeja de entrada (y spam) para completar la verificación",
   "tapToEnterCode": "Toca para introducir el código",
   "resendEmail": "Reenviar correo electrónico",
-  "weveSentAMailTo": "Enviamos un correo electrónico a",
   "setPasswordTitle": "Establecer contraseña",
   "changePasswordTitle": "Cambiar contraseña",
   "resetPasswordTitle": "Restablecer contraseña",
@@ -342,5 +341,213 @@
   "deleteFromDevice": "Eliminar del dispositivo",
   "deleteFromBoth": "Eliminar de ambos",
   "newAlbum": "Nuevo álbum",
-  "albums": "Álbunes"
+  "albums": "Álbunes",
+  "memoryCount": "{count, plural, zero{no recuerdos} one{{count} recuerdo} other{{count} recuerdos}}\n",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      }
+    }
+  },
+  "selectedPhotos": "{count} seleccionados",
+  "@selectedPhotos": {
+    "description": "Display the number of selected photos",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "5",
+        "type": "int"
+      }
+    }
+  },
+  "selectedPhotosWithYours": "{count} seleccionados ({yourCount} tuyos)",
+  "@selectedPhotosWithYours": {
+    "description": "Display the number of selected photos, including the number of selected photos owned by the user",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "yourCount": {
+        "example": "2",
+        "type": "int"
+      }
+    }
+  },
+  "advancedSettings": "Avanzado",
+  "@advancedSettings": {
+    "description": "The text to display in the advanced settings section"
+  },
+  "photoGridSize": "Tamaño de la cuadrícula de fotos",
+  "manageDeviceStorage": "Administrar almacenamiento del dispositivo",
+  "selectFoldersForBackup": "Seleccionar carpetas para el respaldo",
+  "selectedFoldersWillBeEncryptedAndBackedUp": "Las carpetas seleccionadas se cifrarán y se respaldarán",
+  "unselectAll": "Desmarcar todos",
+  "selectAll": "Seleccionar todos",
+  "skip": "Omitir",
+  "updatingFolderSelection": "Actualizando la selección de carpeta...",
+  "itemCount": "{count, plural, one{{count} elemento} other{{count} elementos}}",
+  "yearsAgo": "{count, plural, one{{count} hace un año} other{{count} hace años}}",
+  "backupSettings": "Ajustes de copia de seguridad",
+  "backupOverMobileData": "Copia de seguridad usando datos móviles",
+  "backupVideos": "Respaldar vídeos",
+  "disableAutoLock": "Desactivar autobloqueo",
+  "deviceLockExplanation": "Deshabilita el bloqueo de pantalla del dispositivo cuando ente está en primer plano y hay una copia de seguridad en curso. Normalmente esto no es necesario, pero puede ayudar a que las grandes cargas y las importaciones iniciales de grandes bibliotecas se completen más rápido.",
+  "about": "Acerca de",
+  "weAreOpenSource": "¡Somos de código abierto!",
+  "privacy": "Privacidad",
+  "terms": "Términos",
+  "checkForUpdates": "Comprobar actualizaciónes",
+  "checking": "Comprobando...",
+  "youAreOnTheLatestVersion": "Estás usando la última versión",
+  "account": "Cuenta",
+  "manageSubscription": "Administrar tu suscripción",
+  "authToChangeYourEmail": "Por favor, autentifíquese para cambiar su correo electrónico",
+  "changePassword": "Cambiar contraseña",
+  "authToChangeYourPassword": "Por favor, autentifíquese para cambiar su contraseña",
+  "exportYourData": "Exportar tus datos",
+  "logout": "Cerrar sesión",
+  "authToInitiateAccountDeletion": "Por favor, autentifíquese para iniciar la eliminación de la cuenta",
+  "areYouSureYouWantToLogout": "¿Seguro que quiere cerrar la sesión?",
+  "yesLogout": "Sí, cerrar sesión",
+  "aNewVersionOfEnteIsAvailable": "Hay una nueva versión de ente disponible.",
+  "update": "Actualizar",
+  "installManually": "Instalar manualmente",
+  "criticalUpdateAvailable": "Actualización crítica disponible",
+  "updateAvailable": "Actualizacion disponible",
+  "downloading": "Descargando...",
+  "theDownloadCouldNotBeCompleted": "No se ha podido completar la descarga",
+  "retry": "Reintentar",
+  "backedUpFolders": "Carpetas respaldadas",
+  "backup": "Copia de respaldo",
+  "freeUpDeviceSpace": "Liberar espacio del dispositivo",
+  "allClear": "✨ Todo limpio",
+  "noDeviceThatCanBeDeleted": "No tienes archivos en este dispositivo que puedan ser borrados",
+  "removeDuplicates": "Eliminar duplicados",
+  "noDuplicates": "✨ Sin duplicados",
+  "youveNoDuplicateFilesThatCanBeCleared": "No tienes archivos duplicados que puedan ser borrados",
+  "success": "Éxito",
+  "rateUs": "Califícanos",
+  "remindToEmptyDeviceTrash": "También vacía \"Eliminado Recientemente\" de \"Configuración\" -> \"Almacenamiento\" para reclamar el espacio libre",
+  "youHaveSuccessfullyFreedUp": "¡Has liberado {storageSaved} con éxito!",
+  "@youHaveSuccessfullyFreedUp": {
+    "description": "The text to display when the user has successfully freed up storage",
+    "type": "text",
+    "placeholders": {
+      "storageSaved": {
+        "example": "1.2 GB",
+        "type": "String"
+      }
+    }
+  },
+  "remindToEmptyEnteTrash": "También vacía tu \"Papelera\" para reclamar el espacio liberado",
+  "sparkleSuccess": "✨ Éxito",
+  "matrix": "Matrix",
+  "discord": "Discord",
+  "reddit": "Reddit",
+  "yourStorageDetailsCouldNotBeFetched": "Tus datos de almacenamiento no se han podido obtener",
+  "reportABug": "Reportar un error",
+  "reportBug": "Reportar error",
+  "suggestFeatures": "Sugerir una característica",
+  "support": "Soporte",
+  "theme": "Tema",
+  "lightTheme": "Claro",
+  "darkTheme": "Oscuro",
+  "systemTheme": "Sistema",
+  "freeTrial": "Prueba gratuita",
+  "selectYourPlan": "Elegir tu suscripción",
+  "enteSubscriptionPitch": "ente conserva tus recuerdos, así que siempre están disponibles para ti, incluso si pierdes tu dispositivo.",
+  "enteSubscriptionShareWithFamily": "Tu familia también puede ser agregada a tu plan.",
+  "currentUsageIs": "El uso actual es ",
+  "@currentUsageIs": {
+    "description": "This text is followed by storage usaged",
+    "examples": {
+      "0": "Current usage is 1.2 GB"
+    },
+    "type": "text"
+  },
+  "faqs": "Preguntas frecuentes",
+  "renewsOn": "Se renueva el {endDate}",
+  "freeTrialValidTill": "Prueba gratuita válida hasta{endDate}",
+  "subWillBeCancelledOn": "Tu suscripción se cancelará el {endDate}",
+  "subscription": "Suscripción",
+  "paymentDetails": "Detalles de pago",
+  "manageFamily": "Administrar familia",
+  "contactToManageSubscription": "Por favor, contáctenos en support@ente.io para gestionar su suscripción a {provider}.",
+  "renewSubscription": "Renovar suscripción",
+  "cancelSubscription": "Cancelar suscripción",
+  "areYouSureYouWantToRenew": "¿Estás seguro de que quieres renovar?",
+  "yesRenew": "Sí, Renovar",
+  "areYouSureYouWantToCancel": "¿Estás seguro de que quieres cancelar?",
+  "yesCancel": "Sí, cancelar",
+  "failedToRenew": "Renovación fallida",
+  "failedToCancel": "Error al cancelar",
+  "twoMonthsFreeOnYearlyPlans": "2 meses gratis en planes anuales",
+  "monthly": "Mensual",
+  "@monthly": {
+    "description": "The text to display for monthly plans",
+    "type": "text"
+  },
+  "yearly": "Anualmente",
+  "@yearly": {
+    "description": "The text to display for yearly plans",
+    "type": "text"
+  },
+  "confirmPlanChange": "Confirmar los cambios en el plan",
+  "areYouSureYouWantToChangeYourPlan": "¿Estás seguro de que quieres cambiar tu plan?",
+  "youCannotDowngradeToThisPlan": "No puedes degradar a este plan",
+  "cancelOtherSubscription": "Por favor, cancele primero su suscripción existente de {paymentProvider}",
+  "@cancelOtherSubscription": {
+    "description": "The text to display when the user has an existing subscription from a different payment provider",
+    "type": "text",
+    "placeholders": {
+      "paymentProvider": {
+        "example": "Apple",
+        "type": "String"
+      }
+    }
+  },
+  "optionalAsShortAsYouLike": "Opcional, tan corto como quieras...",
+  "send": "Enviar",
+  "askCancelReason": "Tu suscripción ha sido cancelada. ¿Quieres compartir el motivo?",
+  "thankYouForSubscribing": "¡Gracias por suscribirte!",
+  "yourPurchaseWasSuccessful": "Tu compra ha sido exitosa",
+  "yourPlanWasSuccessfullyUpgraded": "Tu plan se ha actualizado correctamente",
+  "yourPlanWasSuccessfullyDowngraded": "Tu plan ha sido degradado con éxito",
+  "yourSubscriptionWasUpdatedSuccessfully": "Tu suscripción se ha actualizado con éxito",
+  "googlePlayId": "ID de Google Play",
+  "appleId": "ID de Apple",
+  "shareAnAlbumNow": "Compartir un álbum ahora",
+  "collectEventPhotos": "Recopilar fotos del evento",
+  "sessionExpired": "La sesión ha expirado",
+  "loggingOut": "Cerrando sesión...",
+  "name": "Nombre",
+  "newest": "Más reciente",
+  "lastUpdated": "Última actualización",
+  "deleteEmptyAlbums": "Eliminar álbunes vacíos",
+  "deleteEmptyAlbumsWithQuestionMark": "¿Eliminar álbunes vacíos?",
+  "deleteAlbumsDialogBody": "Esto eliminará todos los álbunes vacíos. Esto es útil cuando quieres reducir el desorden en tu lista de álbumes.",
+  "deleteProgress": "Borrando {currentlyDeleting} / {totalCount}",
+  "permanentlyDelete": "Borrar permanentemente",
+  "canOnlyCreateLinkForFilesOwnedByYou": "Sólo puedes crear un enlace para archivos de tu propiedad",
+  "publicLinkCreated": "Enlace público creado",
+  "youCanManageYourLinksInTheShareTab": "Puedes administrar tus enlaces en la pestaña compartir.",
+  "linkCopiedToClipboard": "Enlace copiado al portapapeles",
+  "restore": "Restaurar",
+  "@restore": {
+    "description": "Display text for an action which triggers a restore of item from trash",
+    "type": "text"
+  },
+  "moveToAlbum": "Mover al álbum",
+  "unhide": "Dejar de ocultar",
+  "unarchive": "Desarchivar",
+  "favorite": "Favorito",
+  "removeFromFavorite": "Quitar de favoritos",
+  "shareLink": "Compartir enlace",
+  "addToEnte": "Añadir a ente"
 }
