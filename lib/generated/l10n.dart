@@ -570,13 +570,13 @@ class S {
     );
   }
 
-  /// `We've sent a mail to`
-  String get weveSentAMailTo {
+  /// `We have sent a mail to <green>{email}</green>`
+  String weHaveSendEmailTo(String email) {
     return Intl.message(
-      'We\'ve sent a mail to',
-      name: 'weveSentAMailTo',
-      desc: '',
-      args: [],
+      'We have sent a mail to <green>$email</green>',
+      name: 'weHaveSendEmailTo',
+      desc: 'Text to indicate that we have sent a mail to the user',
+      args: [email],
     );
   }
 

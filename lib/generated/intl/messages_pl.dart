@@ -176,8 +176,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zweryfikuj hasło"),
         "weakStrength": MessageLookupByLibrary.simpleMessage("Słabe"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Witaj ponownie!"),
-        "weveSentAMailTo": MessageLookupByLibrary.simpleMessage(
-            "E-mail został wysłany na adres"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Twoje konto zostało usunięte")
       };

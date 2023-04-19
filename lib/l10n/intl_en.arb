@@ -51,7 +51,17 @@
   "checkInboxAndSpamFolder": "Please check your inbox (and spam) to complete verification",
   "tapToEnterCode": "Tap to enter code",
   "resendEmail": "Resend email",
-  "weveSentAMailTo": "We've sent a mail to",
+  "weHaveSendEmailTo": "We have sent a mail to <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
   "setPasswordTitle": "Set password",
   "changePasswordTitle": "Change password",
   "resetPasswordTitle": "Reset password",

@@ -161,7 +161,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifyEmail": MessageLookupByLibrary.simpleMessage("验证电子邮件"),
         "weakStrength": MessageLookupByLibrary.simpleMessage("弱"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("欢迎回来！"),
-        "weveSentAMailTo": MessageLookupByLibrary.simpleMessage("我们已经发送一封邮件到"),
         "yesConvertToViewer": MessageLookupByLibrary.simpleMessage("是的，转换为查看者"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("您的账户已删除")

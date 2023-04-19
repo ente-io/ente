@@ -532,8 +532,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "weakStrength": MessageLookupByLibrary.simpleMessage("Poco segura"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("¡Bienvenido de nuevo!"),
-        "weveSentAMailTo": MessageLookupByLibrary.simpleMessage(
-            "Enviamos un correo electrónico a"),
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("Sí, convertir a espectador"),
         "yesDelete": MessageLookupByLibrary.simpleMessage("Sí, eliminar"),
