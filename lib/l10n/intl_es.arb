@@ -51,6 +51,17 @@
   "checkInboxAndSpamFolder": "Revisa tu bandeja de entrada (y spam) para completar la verificación",
   "tapToEnterCode": "Toca para introducir el código",
   "resendEmail": "Reenviar correo electrónico",
+  "weHaveSendEmailTo": "Hemos enviado un correo a <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
   "setPasswordTitle": "Establecer contraseña",
   "changePasswordTitle": "Cambiar contraseña",
   "resetPasswordTitle": "Restablecer contraseña",
@@ -447,6 +458,44 @@
   },
   "remindToEmptyEnteTrash": "También vacía tu \"Papelera\" para reclamar el espacio liberado",
   "sparkleSuccess": "✨ Éxito",
+  "duplicateFileCountWithStorageSaved": "¡Has limpiado {count, plural, one{{count} archivo duplicado} other{{count} archivos duplicados}}, ahorrando ({storageSaved}!)",
+  "@duplicateFileCountWithStorageSaved": {
+    "description": "The text to display when the user has successfully cleaned up duplicate files",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "storageSaved": {
+        "example": "1.2 GB",
+        "type": "String"
+      }
+    }
+  },
+  "familyPlans": "Planes familiares",
+  "referrals": "Referidos",
+  "advanced": "Avanzado",
+  "general": "General",
+  "security": "Seguridad",
+  "authToViewYourRecoveryKey": "Por favor, autentifíquese para ver su clave de recuperación",
+  "twofactor": "Dos factores",
+  "authToConfigureTwofactorAuthentication": "Por favor autentificar para configurar autenticación de dos factores",
+  "lockscreen": "Pantalla de bloqueo",
+  "authToChangeLockscreenSetting": "Por favor autentificar para cambiar la configuración de bloqueo de pantalla",
+  "lockScreenEnablePreSteps": "Para activar la pantalla de bloqueo, por favor configure el código de acceso del dispositivo o el bloqueo de pantalla en los ajustes de su sistema.",
+  "viewActiveSessions": "Ver sesiones activas",
+  "authToViewYourActiveSessions": "Por favor, autentifíquese para ver sus sesiones activas",
+  "disableTwofactor": "Deshabilitar dos factores",
+  "confirm2FADisable": "¿Estás seguro de que desea deshabilitar la autenticación de doble factor?",
+  "no": "No",
+  "yes": "Sí",
+  "social": "Social",
+  "rateUsOnStore": "Califícanos en {storeName}",
+  "blog": "Blog",
+  "merchandise": "Mercancías",
+  "twitter": "Twitter",
+  "mastodon": "Mastodon",
   "matrix": "Matrix",
   "discord": "Discord",
   "reddit": "Reddit",
@@ -522,6 +571,43 @@
   "yourSubscriptionWasUpdatedSuccessfully": "Tu suscripción se ha actualizado con éxito",
   "googlePlayId": "ID de Google Play",
   "appleId": "ID de Apple",
+  "playstoreSubscription": "Suscripción en la PlayStore",
+  "appstoreSubscription": "Suscripción en la AppStore",
+  "subAlreadyLinkedErrMessage": "Su {id} ya está vinculado a otra cuenta ente.\nSi desea utilizar su {id} con esta cuenta, póngase en contacto con nuestro servicio de asistencia''",
+  "visitWebToManage": "Por favor visite web.ente.io para administrar su suscripción",
+  "couldNotUpdateSubscription": "No se pudo actualizar la suscripción",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "¡Por favor, contacta con support@ente.io y estaremos encantados de ayudar!",
+  "paymentFailed": "Pago fallido",
+  "paymentFailedTalkToProvider": "Por favor hable con el soporte de {providerName} si se le cobró",
+  "@paymentFailedTalkToProvider": {
+    "description": "The text to display when the payment failed",
+    "type": "text",
+    "placeholders": {
+      "providerName": {
+        "example": "AppStore|PlayStore",
+        "type": "String"
+      }
+    }
+  },
+  "continueOnFreeTrial": "Continuar con el plan gratuito",
+  "areYouSureYouWantToExit": "¿Seguro que quieres salir?",
+  "thankYou": "Gracias",
+  "failedToVerifyPaymentStatus": "Error al verificar el estado de su pago",
+  "pleaseWaitForSometimeBeforeRetrying": "Por favor espere un momento antes de volver a intentarlo",
+  "paymentFailedWithReason": "Lamentablemente tu pago falló debido a {reason}",
+  "youAreOnAFamilyPlan": "¡Estás en un plan familiar!",
+  "contactFamilyAdmin": "Por favor contacta con <green>{familyAdminEmail}</green> para administrar tu suscripción",
+  "leaveFamily": "Abandonar plan familiar",
+  "areYouSureThatYouWantToLeaveTheFamily": "¿Está seguro de que desea abandonar el plan familiar?",
+  "leave": "Abandonar",
+  "rateTheApp": "Evalúa la aplicación",
+  "startBackup": "Iniciar copia de seguridad",
+  "noPhotosAreBeingBackedUpRightNow": "No se están respaldando fotos ahora mismo",
+  "preserveMore": "Preservar más",
+  "existingUser": "Usuario existente",
+  "privateBackups": "Copias de seguridad privadas",
+  "forYourMemories": "para tus recuerdos",
+  "allowPeopleToAddPhotos": "Permitir que la gente añada fotos",
   "shareAnAlbumNow": "Compartir un álbum ahora",
   "collectEventPhotos": "Recopilar fotos del evento",
   "sessionExpired": "La sesión ha expirado",
@@ -549,5 +635,61 @@
   "favorite": "Favorito",
   "removeFromFavorite": "Quitar de favoritos",
   "shareLink": "Compartir enlace",
-  "addToEnte": "Añadir a ente"
+  "addToEnte": "Añadir a ente",
+  "addToAlbum": "Añadir al álbum",
+  "delete": "Eliminar",
+  "hide": "Ocultar",
+  "itemSelectedCount": "{count} seleccionados",
+  "@itemSelectedCount": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
+  "share": "Compartir",
+  "unhideToAlbum": "Hacer visible al álbum",
+  "restoreToAlbum": "Restaurar al álbum",
+  "moveItem": "{count, plural, one {Mover elemento} other {Mover elementos}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, one {Agregar elemento} other {Agregar elementos}}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
+  "createOrSelectAlbum": "Crear o seleccionar álbum",
+  "selectAlbum": "Seleccionar álbum",
+  "searchByAlbumNameHint": "Nombre del álbum",
+  "albumTitle": "Título del álbum",
+  "enterAlbumName": "Introduzca el nombre del álbum",
+  "restoringFiles": "Restaurando los archivos...",
+  "movingFilesToAlbum": "Moviendo archivos al álbum...",
+  "unhidingFilesToAlbum": "Desocultar archivos al álbum",
+  "canNotUploadToAlbumsOwnedByOthers": "No se puede subir a álbumes propiedad de otros",
+  "uploadingFilesToAlbum": "Subiendo archivos al álbum...",
+  "addedSuccessfullyTo": "Añadido exitosamente a  {albumName}",
+  "movedSuccessfullyTo": "Movido exitosamente a {albumName}",
+  "thisAlbumAlreadyHDACollaborativeLink": "Este álbum ya tiene un enlace de colaboración",
+  "collaborativeLinkCreatedFor": "Enlace colaborativo creado para {albumName}",
+  "askYourLovedOnesToShare": "Pide a tus seres queridos que compartan",
+  "invite": "Invitar",
+  "shareYourFirstAlbum": "Comparte tu primer álbum",
+  "sharedWith": "Compartido con {emailIDs}",
+  "sharedWithMe": "Compartido conmigo",
+  "sharedByMe": "Compartido por mí",
+  "doubleYourStorage": "Duplica tu almacenamiento",
+  "referFriendsAnd2xYourPlan": "Refiere a amigos y 2x su plan",
+  "shareAlbumHint": "Abre un álbum y pulsa el botón compartir en la parte superior derecha para compartir.",
+  "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Los artículos muestran el número de días restantes antes de ser borrados permanente",
+  "deleteAll": "Borrar Todo",
+  "renameAlbum": "Renombrar álbum",
+  "rename": "Renombrar",
+  "leaveSharedAlbum": "¿Dejar álbum compartido?",
+  "leaveAlbum": "Abandonar álbum",
+  "photosAddedByYouWillBeRemovedFromTheAlbum": "Las fotos añadidas por ti serán removidas del álbum",
+  "youveNoFilesInThisAlbumThatCanBeDeleted": "No tienes archivos en este álbum que puedan ser borrados",
+  "youDontHaveAnyArchivedItems": "No tienes nada de elementos archivados."
 }
