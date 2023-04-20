@@ -697,6 +697,8 @@
   "movedSuccessfullyTo": "成功移动到 {albumName}",
   "thisAlbumAlreadyHDACollaborativeLink": "此相册已经有一个协作链接",
   "collaborativeLinkCreatedFor": "为 {albumName} 创建了协作链接",
+  "askYourLovedOnesToShare": "请您的亲人分享",
+  "invite": "邀请",
   "shareYourFirstAlbum": "分享您的第一个相册",
   "sharedWith": "与 {emailIDs} 共享",
   "sharedWithMe": "与我共享",
