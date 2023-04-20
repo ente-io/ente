@@ -7,7 +7,7 @@
     "HERO_SLIDE_3": "安卓, iOS, 网页端, 桌面端",
     "LOGIN": "登录",
     "SIGN_UP": "注册",
-    "NEW_USER": "刚来到ente",
+    "NEW_USER": "刚来到 ente",
     "EXISTING_USER": "现有用户",
     "ENTER_NAME": "现有用户",
     "PUBLIC_UPLOADER_NAME_MESSAGE": "请添加一个名字，以便您的朋友知晓该感谢谁拍摄了这些精美的照片！",
@@ -59,8 +59,8 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "正在准备上传",
         "1": "正在读取 Google 元数据文件",
-        "2": "文件元数据提取状态：已完成{{uploadCounter.finished, number}} / 共{{uploadCounter.total, number}}",
-        "3": "文件备份状态：已完成{{uploadCounter.finished, number}} / 共{{uploadCounter.total, number}}",
+        "2": "文件元数据提取状态：已完成 {{uploadCounter.finished, number}} / 共 {{uploadCounter.total, number}}",
+        "3": "文件备份状态：已完成 {{uploadCounter.finished, number}} / 共 {{uploadCounter.total, number}}",
         "4": "正在取消剩余的上传内容",
         "5": "备份完成"
     },
