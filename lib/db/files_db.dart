@@ -1398,7 +1398,9 @@ class FilesDB {
   // For given list of localIDs and ownerID, get a list of uploaded files
   // owned by given user
   Future<List<File>> getFilesForLocalIDs(
-      List<String> localIDs, int ownerID) async {
+    List<String> localIDs,
+    int ownerID,
+  ) async {
     final db = await instance.database;
     final rows = await db.query(
       filesTable,

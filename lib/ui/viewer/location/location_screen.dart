@@ -272,6 +272,12 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
               width: double.infinity,
               child: TitleBarTitleWidget(
                 title: locationName,
+                onTap: () {
+                  showEditLocationSheet(
+                    context,
+                    InheritedLocationScreenState.of(context).locationTagEntity,
+                  );
+                },
               ),
             ),
             ValueListenableBuilder(
