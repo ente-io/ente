@@ -4,6 +4,7 @@ import "package:photos/models/file.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/location/pick_center_point_widget.dart";
 
 class EditCenterPointTileWidget extends StatelessWidget {
@@ -50,8 +51,8 @@ class EditCenterPointTileWidget extends StatelessWidget {
             ),
           ),
         ),
-        IconButton(
-          onPressed: () async {
+        IconButtonWidget(
+          onTap: () async {
             final File? centerPointFile = await showPickCenterPointSheet(
               context,
               InheritedLocationTagData.of(context).locationTagEntity!,
@@ -61,8 +62,8 @@ class EditCenterPointTileWidget extends StatelessWidget {
                   .updateCenterPoint(centerPointFile.location!);
             }
           },
-          icon: const Icon(Icons.edit),
-          color: getEnteColorScheme(context).strokeMuted,
+          icon: Icons.edit,
+          iconButtonType: IconButtonType.secondary,
         ),
       ],
     );
