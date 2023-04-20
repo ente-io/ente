@@ -40,10 +40,7 @@ class EditCenterPointTileWidget extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   LocationService.instance.convertLocationToDMS(
-                    InheritedLocationTagData.of(context)
-                        .locationTagEntity!
-                        .item
-                        .centerPoint,
+                    InheritedLocationTagData.of(context).centerPoint,
                   ),
                   style: textTheme.miniMuted,
                 ),
