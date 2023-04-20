@@ -382,7 +382,7 @@
     "STOP_UPLOADS_HEADER": "要停止上传吗？",
     "YES_STOP_UPLOADS": "是的，停止上传",
     "albums_one": "1个相册",
-    "albums_other": "{count, number}个相册",
+    "albums_other": "{{count, number}} 个相册",
     "ALL_ALBUMS": "所有相册",
     "ALBUMS": "相册",
     "ENTER_TWO_FACTOR_OTP": "请输入您从身份验证应用上获得的6位数代码",
