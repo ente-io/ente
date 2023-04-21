@@ -49,16 +49,17 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   final Map<int?, int> _fileSizeMap = {};
   late List<DuplicateFiles> _duplicates;
   bool? _shouldClubByCaptureTime = true;
+  bool toastShown = false;
 
   SortKey sortKey = SortKey.size;
 
   @override
   void initState() {
-    super.initState();
     _duplicates =
         DeduplicationService.instance.clubDuplicatesByTime(widget.duplicates);
     _selectAllFilesButFirst();
-    showShortToast(context, S.of(context).longpressOnAnItemToViewInFullscreen);
+
+    super.initState();
   }
 
   void _selectAllFilesButFirst() {
@@ -77,6 +78,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!toastShown) {
+      toastShown = true;
+      showShortToast(
+          context, S.of(context).longpressOnAnItemToViewInFullscreen);
+    }
     _sortDuplicates();
     return Scaffold(
       appBar: AppBar(
