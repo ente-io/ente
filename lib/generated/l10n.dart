@@ -4630,6 +4630,26 @@ class S {
     );
   }
 
+  /// `On device`
+  String get onDevice {
+    return Intl.message(
+      'On device',
+      name: 'onDevice',
+      desc: 'The text displayed above folders/albums stored on device',
+      args: [],
+    );
+  }
+
+  /// `On <branding>ente</branding>`
+  String get onEnte {
+    return Intl.message(
+      'On <branding>ente</branding>',
+      name: 'onEnte',
+      desc: 'The text displayed above albums backed up to ente',
+      args: [],
+    );
+  }
+
   /// `Name`
   String get name {
     return Intl.message(

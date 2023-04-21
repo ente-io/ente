@@ -147,7 +147,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         child: Column(
           children: [
             const SizedBox(height: 12),
-            const SectionTitle(title: "On device"),
+            SectionTitle(title: S.of(context).onDevice),
             const SizedBox(height: 12),
             const DeviceFoldersGridViewWidget(),
             Row(
