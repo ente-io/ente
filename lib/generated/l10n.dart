@@ -4635,7 +4635,7 @@ class S {
     return Intl.message(
       'On device',
       name: 'onDevice',
-      desc: '',
+      desc: 'The text displayed above folders/albums stored on device',
       args: [],
     );
   }
@@ -4645,7 +4645,7 @@ class S {
     return Intl.message(
       'On <branding>ente</branding>',
       name: 'onEnte',
-      desc: '',
+      desc: 'The text displayed above albums backed up to ente',
       args: [],
     );
   }
