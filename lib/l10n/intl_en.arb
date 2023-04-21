@@ -625,6 +625,8 @@
   "collectEventPhotos": "Collect event photos",
   "sessionExpired": "Session expired",
   "loggingOut": "Logging out...",
+  "onDevice": "On device",
+  "onEnte": "On <branding>ente</branding>",
   "name": "Name",
   "newest": "Newest",
   "lastUpdated": "Last updated",

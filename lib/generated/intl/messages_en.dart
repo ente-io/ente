@@ -751,6 +751,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "nothingToSeeHere":
             MessageLookupByLibrary.simpleMessage("Nothing to see here! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
+        "onDevice": MessageLookupByLibrary.simpleMessage("On device"),
+        "onEnte": MessageLookupByLibrary.simpleMessage(
+            "On <branding>ente</branding>"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oops, something went wrong"),
