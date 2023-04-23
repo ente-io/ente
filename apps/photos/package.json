@@ -86,7 +86,8 @@
         "workbox-window": "^6.1.5",
         "xml-js": "^1.6.11",
         "yup": "^0.29.3",
-        "zxcvbn": "^4.4.2"
+        "zxcvbn": "^4.4.2",
+        "eslint-config-ente": "*"
     },
     "devDependencies": {
         "@next/bundle-analyzer": "^13.1.6",
@@ -113,7 +114,7 @@
         "prettier": "2.3.2",
         "typescript": "^4.1.3",
         "tsconfig": "*",
-        "eslint-config-custom": "*"
+        "eslint-config-ente": "*"
     },
     "standard": {
         "parser": "babel-eslint"
