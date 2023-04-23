@@ -635,6 +635,16 @@
   "collectEventPhotos": "Recopilar fotos del evento",
   "sessionExpired": "La sesión ha expirado",
   "loggingOut": "Cerrando sesión...",
+  "@onDevice": {
+    "description": "The text displayed above folders/albums stored on device",
+    "type": "text"
+  },
+  "onDevice": "En el dispositivo",
+  "@onEnte": {
+    "description": "The text displayed above albums backed up to ente",
+    "type": "text"
+  },
+  "onEnte": "En <branding>ente</branding>",
   "name": "Nombre",
   "newest": "Más reciente",
   "lastUpdated": "Última actualización",
