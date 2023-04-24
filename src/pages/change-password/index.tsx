@@ -97,7 +97,7 @@ export default function ChangePassword() {
                     callback={onSubmit}
                     buttonText={t('CHANGE_PASSWORD')}
                 />
-                {getData(LS_KEYS.SHOW_BACK_BUTTON)?.value && (
+                {(getData(LS_KEYS.SHOW_BACK_BUTTON)?.value ?? true) && (
                     <FormPaperFooter>
                         <LinkButton onClick={router.back}>
                             {t('GO_BACK')}
