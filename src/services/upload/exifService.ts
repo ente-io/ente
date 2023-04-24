@@ -46,6 +46,9 @@ export async function getParsedExifData(
             jfif: true,
             ihdr: true,
         });
+        if (!exifData) {
+            return null;
+        }
         const filteredExifData = tags
             ? Object.fromEntries(
                   Object.entries(exifData).filter(([key]) => tags.includes(key))
