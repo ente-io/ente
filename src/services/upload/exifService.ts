@@ -155,7 +155,7 @@ function parseEXIFDate(dateTimeString: string) {
         return date;
     } catch (e) {
         logError(e, 'parseEXIFDate failed', {
-            dataTimeString: dateTimeString,
+            dateTimeString,
         });
         return null;
     }
