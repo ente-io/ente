@@ -23,6 +23,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/entity_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
@@ -321,6 +322,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       return const LandingPageWidget();
     }
     if (!LocalSyncService.instance.hasGrantedPermissions()) {
+      EntityService.instance.syncEntities();
       return const GrantPermissionsWidget();
     }
     if (!LocalSyncService.instance.hasCompletedFirstImport()) {
@@ -349,6 +351,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         !Configuration.instance.hasSelectedAnyBackupFolder() &&
             !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
             CollectionsService.instance.getActiveCollections().isEmpty;
+
     return Stack(
       children: [
         Builder(
