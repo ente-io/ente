@@ -206,8 +206,8 @@ export function FileInfo({
                         caption={
                             <Link
                                 href={getOpenStreetMapLink({
-                                    latitude: file.metadata.latitude,
-                                    longitude: file.metadata.longitude,
+                                    latitude: location.latitude,
+                                    longitude: location.longitude,
                                 })}
                                 target="_blank"
                                 sx={{ fontWeight: 'bold' }}>
