@@ -9,7 +9,7 @@ import AppNavbar from 'components/Navbar/app';
 import { t } from 'i18next';
 
 import { useRouter } from 'next/router';
-import VerticallyCentered from 'components/Container';
+import { Overlay } from 'components/Container';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
 import 'styles/global.css';
@@ -456,15 +456,21 @@ export default function App(props) {
                         somethingWentWrong,
                         setDialogBoxAttributesV2,
                     }}>
-                    {loading || !isI18nReady ? (
-                        <VerticallyCentered>
+                    {(loading || !isI18nReady) && (
+                        <Overlay
+                            sx={(theme) => ({
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                zIndex: 2000,
+                                backgroundColor: theme.colors.background.base,
+                            })}>
                             <EnteSpinner>
                                 <span className="sr-only">Loading...</span>
                             </EnteSpinner>
-                        </VerticallyCentered>
-                    ) : (
-                        <Component setLoading={setLoading} {...pageProps} />
+                        </Overlay>
                     )}
+                    <Component setLoading={setLoading} {...pageProps} />
                 </AppContext.Provider>
             </ThemeProvider>
         </CacheProvider>
