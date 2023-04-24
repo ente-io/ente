@@ -23,6 +23,9 @@ const IS_SENTRY_ENABLED = getIsSentryEnabled();
 module.exports = (phase) =>
     withSentryConfig(
         withBundleAnalyzer({
+            sentry: {
+                hideSourceMaps: false,
+            },
             compiler: {
                 emotion: {
                     importMap: {
