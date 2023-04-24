@@ -25,6 +25,7 @@ module.exports = (phase) =>
         withBundleAnalyzer({
             sentry: {
                 hideSourceMaps: false,
+                widenClientFileUpload: true,
             },
             compiler: {
                 emotion: {
