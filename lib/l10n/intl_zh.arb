@@ -635,6 +635,16 @@
   "collectEventPhotos": "收集活动照片",
   "sessionExpired": "会话已过期",
   "loggingOut": "正在退出登录...",
+  "@onDevice": {
+    "description": "The text displayed above folders/albums stored on device",
+    "type": "text"
+  },
+  "onDevice": "在设备上",
+  "@onEnte": {
+    "description": "The text displayed above albums backed up to ente",
+    "type": "text"
+  },
+  "onEnte": "在 <branding>ente</branding> 上",
   "name": "名称",
   "newest": "最新",
   "lastUpdated": "最后更新",
