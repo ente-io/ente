@@ -215,8 +215,8 @@ class GPSData {
     final latSign = (latRef ?? 'N') == "N" ? 1 : -1;
     final longSign = (longRef ?? 'E') == "E" ? 1 : -1;
     return Location(
-      latitude: latSign * lat![0] + lat![1] / 60 + lat![2] / 3600,
-      longitude: longSign * long![0] + long![1] / 60 + long![2] / 3600,
+      latitude: latSign * (lat![0] + lat![1] / 60 + lat![2] / 3600),
+      longitude: longSign * (long![0] + long![1] / 60 + long![2] / 3600),
     );
   }
 }
