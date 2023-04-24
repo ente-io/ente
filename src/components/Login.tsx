@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'next/router';
 import { sendOtt } from 'services/userService';
-import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
+import { setData, LS_KEYS } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
 import FormPaperTitle from './Form/FormPaper/Title';
 import FormPaperFooter from './Form/FormPaper/Footer';
@@ -16,17 +16,6 @@ interface LoginProps {
 
 export default function Login(props: LoginProps) {
     const router = useRouter();
-
-    useEffect(() => {
-        const main = async () => {
-            router.prefetch(PAGES.VERIFY);
-            const user = getData(LS_KEYS.USER);
-            if (user?.email) {
-                await router.push(PAGES.VERIFY);
-            }
-        };
-        main();
-    }, []);
 
     const loginUser: SingleInputFormProps['callback'] = async (
         email,
