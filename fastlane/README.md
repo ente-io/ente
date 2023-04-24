@@ -21,13 +21,13 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Download iOS screenshots
 
-### download_selected_ios_metadata
+### download_android_metadata
 
 ```sh
-[bundle exec] fastlane download_selected_ios_metadata
+[bundle exec] fastlane download_android_metadata
 ```
 
-Download selected iOS metadata
+Download Android metadata
 
 ----
 
