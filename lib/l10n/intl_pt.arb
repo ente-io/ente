@@ -51,7 +51,7 @@
   "checkInboxAndSpamFolder": "Verifique sua caixa de entrada (e ‘spam’) para concluir a verificação",
   "tapToEnterCode": "Clica para inserir código",
   "resendEmail": "Reenviar e-mail",
-  "weHaveSendEmailTo": "Enviamos um e-mail à exemplo@exemplo.com",
+  "weHaveSendEmailTo": "Enviamos um e-mail à <green>{email}</green>",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
     "placeholders": {

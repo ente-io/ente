@@ -81,7 +81,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     if (!toastShown) {
       toastShown = true;
       showShortToast(
-          context, S.of(context).longpressOnAnItemToViewInFullscreen);
+        context,
+        S.of(context).longpressOnAnItemToViewInFullscreen,
+      );
     }
     _sortDuplicates();
     return Scaffold(
