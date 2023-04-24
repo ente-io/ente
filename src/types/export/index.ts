@@ -25,14 +25,6 @@ export interface ExportRecordV1 {
     exportedCollectionPaths?: ExportedEntityPaths;
 }
 
-export interface ExportRecordV2 {
-    version: number;
-    stage: ExportStage;
-    lastAttemptTimestamp: number;
-    exportedFiles: string[];
-    exportedCollectionPaths: ExportedEntityPaths;
-}
-
 export interface ExportRecord {
     version: number;
     stage: ExportStage;

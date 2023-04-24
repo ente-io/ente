@@ -5,6 +5,7 @@ import {
     getExportRecordFileUID,
     getUniqueCollectionFolderPath,
     getUniqueFileSaveName,
+    getUniqueFileSaveNameForMigration,
     getOldFileSavePath,
     getOldCollectionFolderPath,
     getFileMetadataSavePath,
@@ -14,6 +15,7 @@ import {
     getMetadataFolderPath,
     getCollectionsRenamedAfterLastExport,
     convertIDPathObjectToMap,
+    convertMapToIDPathObject,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
@@ -666,6 +668,15 @@ class ExportService {
                 version: currentVersion,
             });
         }
+        if (currentVersion === 2) {
+            await this.addExportedFilePathsProperty(
+                getExportedFiles(files, exportRecord)
+            );
+            currentVersion++;
+            await this.updateExportRecord({
+                version: currentVersion,
+            });
+        }
     }
 
     /*
@@ -758,6 +769,30 @@ class ExportService {
         if (exportRecord?.failedFiles) {
             exportRecord.failedFiles = undefined;
         }
+        await this.updateExportRecord(exportRecord);
+    }
+
+    private async addExportedFilePathsProperty(exportedFiles: EnteFile[]) {
+        const exportRecord = await this.getExportRecord();
+        const exportedFilePaths = new Map<number, string>();
+        const usedFilePaths = new Set<string>();
+        const exportedCollectionPaths = convertIDPathObjectToMap(
+            exportRecord?.exportedCollectionPaths
+        );
+        for (const file of exportedFiles) {
+            const collectionPath = exportedCollectionPaths.get(
+                file.collectionID
+            );
+            const fileSaveName = getUniqueFileSaveNameForMigration(
+                collectionPath,
+                file.metadata.title,
+                usedFilePaths
+            );
+            const filePath = getFileSavePath(collectionPath, fileSaveName);
+            exportedFilePaths.set(file.id, filePath);
+        }
+        exportRecord.exportedFilePaths =
+            convertMapToIDPathObject(exportedFilePaths);
         await this.updateExportRecord(exportRecord);
     }
 }

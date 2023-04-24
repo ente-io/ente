@@ -40,6 +40,16 @@ export const convertIDPathObjectToMap = (
     );
 };
 
+export const convertMapToIDPathObject = (
+    exportedEntityPaths: Map<number, string>
+) => {
+    const exportedEntityPathsObject: ExportedEntityPaths = {};
+    exportedEntityPaths.forEach((value, key) => {
+        exportedEntityPathsObject[key] = value;
+    });
+    return exportedEntityPathsObject;
+};
+
 export const getCollectionsRenamedAfterLastExport = (
     collections: Collection[],
     exportRecord: ExportRecord
@@ -212,3 +222,23 @@ export const getOldFileMetadataSavePath = (
     `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${
         file.id
     }_${oldSanitizeName(file.metadata.title)}.json`;
+
+export const getUniqueFileSaveNameForMigration = (
+    collectionPath: string,
+    filename: string,
+    usedFilePaths: Set<string>
+) => {
+    let fileSaveName = sanitizeName(filename);
+    let count = 1;
+    while (usedFilePaths.has(getFileSavePath(collectionPath, fileSaveName))) {
+        usedFilePaths.add(getFileSavePath(collectionPath, fileSaveName));
+        const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
+        if (filenameParts[1]) {
+            fileSaveName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
+        } else {
+            fileSaveName = `${filenameParts[0]}(${count})`;
+        }
+        count++;
+    }
+    return fileSaveName;
+};
