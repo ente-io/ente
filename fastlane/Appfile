@@ -1,0 +1,21 @@
+app_identifier(ENV["PHOTOS_APP_BUNDLE_ID"])
+apple_id(ENV["PHOTOS_APPLE_ID"])
+team_id(ENV["PHOTOS_TEAM_ID"])
+api_key(ENV["PHOTOS_CONNECT_KEY"])
+
+
+# app_identifier("<your app bundle identifier>")
+# apple_id("<your app store connect email>")
+# team_id("<your app store connect team id>")
+
+
+
+# For more information about available options, see the documentation:
+# https://docs.fastlane.tools/actions/sigh/
+# https://docs.fastlane.tools/actions/match/
+# https://docs.fastlane.tools/actions/pem/
+# https://docs.fastlane.tools/actions/cert/
+# https://docs.fastlane.tools/actions/supply/
+# https://docs.fastlane.tools/actions/testflight/
+# https://docs.fastlane.tools/actions/increment_build_number/
+# https://docs.fastlane.tools/actions/increment_version_number/
