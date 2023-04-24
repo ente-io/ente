@@ -65,7 +65,6 @@ import {
     CollectionType,
     DUMMY_UNCATEGORIZED_SECTION,
     TRASH_SECTION,
-    UNCATEGORIZED_COLLECTION_NAME,
 } from 'constants/collection';
 import { AppContext } from 'pages/_app';
 import { CustomError, ServerErrorCodes } from 'utils/error';
@@ -307,11 +306,11 @@ export default function Gallery() {
         if (activeCollection !== ALL_SECTION) {
             collectionURL += '?collection=';
             if (activeCollection === ARCHIVE_SECTION) {
-                collectionURL += t('ARCHIVE');
+                collectionURL += t('ARCHIVE_SECTION_NAME');
             } else if (activeCollection === TRASH_SECTION) {
                 collectionURL += t('TRASH');
             } else if (activeCollection === DUMMY_UNCATEGORIZED_SECTION) {
-                collectionURL += UNCATEGORIZED_COLLECTION_NAME;
+                collectionURL += t('UNCATEGORIZED');
             } else {
                 collectionURL += activeCollection;
             }
