@@ -1,8 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { RenderFileName } from './RenderFileName';
 import { RenderCreationTime } from './RenderCreationTime';
 import { Box, DialogProps, Link, Stack, styled } from '@mui/material';
-import { Location } from 'types/upload';
 import { getEXIFLocation } from 'services/upload/exifService';
 import { RenderCaption } from './RenderCaption';
 
@@ -90,7 +89,6 @@ export function FileInfo({
     isTrashCollection,
 }: Iprops) {
     const appContext = useContext(AppContext);
-    const [location, setLocation] = useState<Location>(null);
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
     const [showExif, setShowExif] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -99,25 +97,23 @@ export function FileInfo({
     const openExif = () => setShowExif(true);
     const closeExif = () => setShowExif(false);
 
-    useEffect(() => {
-        if (!location && file && file.metadata) {
+    const location = useMemo(() => {
+        if (file && file.metadata) {
             if (file.metadata.longitude || file.metadata.longitude === 0) {
-                setLocation({
+                return {
                     latitude: file.metadata.latitude,
                     longitude: file.metadata.longitude,
-                });
+                };
             }
         }
-    }, [file]);
-
-    useEffect(() => {
-        if (!location && exif) {
+        if (exif) {
             const exifLocation = getEXIFLocation(exif);
             if (exifLocation.latitude || exifLocation.latitude === 0) {
-                setLocation(exifLocation);
+                return exifLocation;
             }
         }
-    }, [exif]);
+        return null;
+    }, [file, exif]);
 
     useEffect(() => {
         if (!exif) {
@@ -205,10 +201,7 @@ export function FileInfo({
                         title={t('LOCATION')}
                         caption={
                             <Link
-                                href={getOpenStreetMapLink({
-                                    latitude: location.latitude,
-                                    longitude: location.longitude,
-                                })}
+                                href={getOpenStreetMapLink(location)}
                                 target="_blank"
                                 sx={{ fontWeight: 'bold' }}>
                                 {t('SHOW_ON_MAP')}
@@ -216,10 +209,7 @@ export function FileInfo({
                         }
                         customEndButton={
                             <CopyButton
-                                code={getOpenStreetMapLink({
-                                    latitude: file.metadata.latitude,
-                                    longitude: file.metadata.longitude,
-                                })}
+                                code={getOpenStreetMapLink(location)}
                                 color="secondary"
                                 size="medium"
                             />
