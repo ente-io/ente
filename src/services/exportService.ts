@@ -1,7 +1,6 @@
 import { runningInBrowser } from 'utils/common';
 import {
     getUnExportedFiles,
-    dedupe,
     getGoogleLikeMetadataFile,
     getExportRecordFileUID,
     getUniqueCollectionFolderPath,
@@ -14,7 +13,7 @@ import {
     getExportedFiles,
     getMetadataFolderPath,
     getCollectionsRenamedAfterLastExport,
-    getCollectionIDPathMapFromExportRecord,
+    convertIDPathObjectToMap,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
@@ -39,8 +38,6 @@ import { updateFileCreationDateInEXIF } from './upload/exifService';
 import QueueProcessor from './queueProcessor';
 import { Collection } from 'types/collection';
 import {
-    CollectionIDNameMap,
-    CollectionIDPathMap,
     ExportProgress,
     ExportRecord,
     ExportRecordV1,
@@ -49,7 +46,7 @@ import {
 } from 'types/export';
 import { User } from 'types/user';
 import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
-import { ExportStage, RecordType } from 'constants/export';
+import { ExportStage } from 'constants/export';
 import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
 import { addLogLine } from 'utils/logging';
@@ -257,8 +254,9 @@ class ExportService {
                 `exportFiles: filesToExportCount: ${filesToExport?.length}, userPersonalFileCount: ${userPersonalFiles?.length}`
             );
 
-            const collectionIDPathMap: CollectionIDPathMap =
-                getCollectionIDPathMapFromExportRecord(exportRecord);
+            const collectionIDPathMap = convertIDPathObjectToMap(
+                exportRecord.exportedCollectionPaths
+            );
             const collectionIDNameMap = getCollectionNameMap(collections);
             const renamedCollections = getCollectionsRenamedAfterLastExport(
                 userCollections,
@@ -278,9 +276,9 @@ class ExportService {
 
     async fileExporter(
         files: EnteFile[],
-        collectionIDNameMap: CollectionIDNameMap,
+        collectionIDNameMap: Map<number, string>,
         renamedCollections: Collection[],
-        collectionIDPathMap: CollectionIDPathMap,
+        collectionIDPathMap: Map<number, string>,
         exportDir: string
     ): Promise<void> {
         try {
@@ -325,11 +323,14 @@ class ExportService {
                             collectionIDPathMap
                         );
                     }
-                    await this.downloadAndSave(file, collectionPath);
+                    const fileSavePath = await this.downloadAndSave(
+                        file,
+                        collectionPath
+                    );
                     await this.addFileExportedRecord(
                         exportDir,
                         file,
-                        RecordType.SUCCESS
+                        fileSavePath
                     );
                     success++;
                 } catch (e) {
@@ -341,11 +342,6 @@ class ExportService {
                     ) {
                         throw e;
                     }
-                    await this.addFileExportedRecord(
-                        exportDir,
-                        file,
-                        RecordType.FAILED
-                    );
                 }
                 this.updateExportProgress({
                     success,
@@ -373,18 +369,22 @@ class ExportService {
     async addFileExportedRecord(
         folder: string,
         file: EnteFile,
-        type: RecordType
+        fileSavePath: string
     ) {
         try {
             const fileUID = getExportRecordFileUID(file);
             const exportRecord = await this.getExportRecord(folder);
-            if (type === RecordType.SUCCESS) {
-                if (!exportRecord.exportedFiles) {
-                    exportRecord.exportedFiles = [];
-                }
-                exportRecord.exportedFiles.push(fileUID);
+            if (!exportRecord.exportedFiles) {
+                exportRecord.exportedFiles = [];
             }
-            exportRecord.exportedFiles = dedupe(exportRecord.exportedFiles);
+            exportRecord.exportedFiles.push(fileUID);
+            if (!exportRecord.exportedFilePaths) {
+                exportRecord.exportedFilePaths = {};
+            }
+            exportRecord.exportedFilePaths = {
+                ...exportRecord.exportedFilePaths,
+                [fileUID]: fileSavePath,
+            };
             await this.updateExportRecord(exportRecord, folder);
         } catch (e) {
             logError(e, 'addFileExportedRecord failed');
@@ -461,8 +461,8 @@ class ExportService {
     async createNewCollectionFolder(
         exportFolder: string,
         collectionID: number,
-        collectionIDNameMap: CollectionIDNameMap,
-        collectionIDPathMap: CollectionIDPathMap
+        collectionIDNameMap: Map<number, string>,
+        collectionIDPathMap: Map<number, string>
     ) {
         const collectionName = collectionIDNameMap.get(collectionID);
         const collectionFolderPath = getUniqueCollectionFolderPath(
@@ -485,7 +485,7 @@ class ExportService {
     async renameCollectionFolders(
         renamedCollections: Collection[],
         exportFolder: string,
-        collectionIDPathMap: CollectionIDPathMap
+        collectionIDPathMap: Map<number, string>
     ) {
         for (const collection of renamedCollections) {
             const oldCollectionFolderPath = collectionIDPathMap.get(
@@ -511,7 +511,10 @@ class ExportService {
         }
     }
 
-    async downloadAndSave(file: EnteFile, collectionPath: string) {
+    async downloadAndSave(
+        file: EnteFile,
+        collectionPath: string
+    ): Promise<string> {
         try {
             file.metadata = mergeMetadata([file])[0].metadata;
             const fileSaveName = getUniqueFileSaveName(
@@ -539,7 +542,11 @@ class ExportService {
                 fileStream = updatedFileBlob.stream();
             }
             if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                await this.exportMotionPhoto(fileStream, file, collectionPath);
+                return await this.exportMotionPhoto(
+                    fileStream,
+                    file,
+                    collectionPath
+                );
             } else {
                 await this.saveMediaFile(
                     collectionPath,
@@ -547,6 +554,11 @@ class ExportService {
                     fileStream
                 );
                 await this.saveMetadataFile(collectionPath, fileSaveName, file);
+                const fileSavePath = getFileSavePath(
+                    collectionPath,
+                    fileSaveName
+                );
+                return fileSavePath;
             }
         } catch (e) {
             logError(e, 'download and save failed');
@@ -578,6 +590,11 @@ class ExportService {
         );
         await this.saveMediaFile(collectionPath, videoSaveName, videoStream);
         await this.saveMetadataFile(collectionPath, videoSaveName, file);
+
+        const imageSavePath = getFileSavePath(collectionPath, imageSaveName);
+        const videoSavePath = getFileSavePath(collectionPath, videoSaveName);
+
+        return [imageSavePath, videoSavePath].join('-');
     }
 
     private async saveMediaFile(
@@ -658,7 +675,7 @@ class ExportService {
     private async migrateCollectionFolders(
         collections: Collection[],
         exportDir: string,
-        collectionIDPathMap: CollectionIDPathMap
+        collectionIDPathMap: Map<number, string>
     ) {
         for (const collection of collections) {
             const oldCollectionFolderPath = getOldCollectionFolderPath(

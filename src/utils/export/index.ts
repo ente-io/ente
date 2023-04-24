@@ -1,6 +1,6 @@
 import { Collection } from 'types/collection';
 import exportService from 'services/exportService';
-import { CollectionIDPathMap, ExportRecord } from 'types/export';
+import { ExportRecord, ExportedEntityPaths } from 'types/export';
 
 import { EnteFile } from 'types/file';
 
@@ -30,11 +30,11 @@ export const getCollectionsCreatedAfterLastExport = (
     });
     return unExportedCollections;
 };
-export const getCollectionIDPathMapFromExportRecord = (
-    exportRecord: ExportRecord
-): CollectionIDPathMap => {
+export const convertIDPathObjectToMap = (
+    exportedEntityPaths: ExportedEntityPaths
+) => {
     return new Map<number, string>(
-        Object.entries(exportRecord.exportedCollectionPaths ?? {}).map((e) => {
+        Object.entries(exportedEntityPaths ?? {}).map((e) => {
             return [Number(e[0]), String(e[1])];
         })
     );
@@ -44,8 +44,9 @@ export const getCollectionsRenamedAfterLastExport = (
     collections: Collection[],
     exportRecord: ExportRecord
 ) => {
-    const collectionIDPathMap =
-        getCollectionIDPathMapFromExportRecord(exportRecord);
+    const collectionIDPathMap = convertIDPathObjectToMap(
+        exportRecord.exportedCollectionPaths
+    );
     const renamedCollections = collections.filter((collection) => {
         if (collectionIDPathMap.has(collection.id)) {
             const currentFolderName = collectionIDPathMap.get(collection.id);
@@ -91,11 +92,6 @@ export const getExportedFiles = (
         return false;
     });
     return exportedFiles;
-};
-
-export const dedupe = (files: string[]) => {
-    const fileSet = new Set(files);
-    return Array.from(fileSet);
 };
 
 export const getGoogleLikeMetadataFile = (

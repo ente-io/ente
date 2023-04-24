@@ -1,15 +1,14 @@
 import { ExportStage } from 'constants/export';
 
-export type CollectionIDNameMap = Map<number, string>;
-export type CollectionIDPathMap = Map<number, string>;
 export interface ExportProgress {
     success: number;
     failed: number;
     total: number;
 }
-export interface ExportedCollectionPaths {
-    [collectionID: number]: string;
+export interface ExportedEntityPaths {
+    [ID: number]: string;
 }
+
 export interface FileExportStats {
     totalCount: number;
     pendingCount: number;
@@ -23,7 +22,15 @@ export interface ExportRecordV1 {
     queuedFiles?: string[];
     exportedFiles?: string[];
     failedFiles?: string[];
-    exportedCollectionPaths?: ExportedCollectionPaths;
+    exportedCollectionPaths?: ExportedEntityPaths;
+}
+
+export interface ExportRecordV2 {
+    version: number;
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    exportedFiles: string[];
+    exportedCollectionPaths: ExportedEntityPaths;
 }
 
 export interface ExportRecord {
@@ -31,7 +38,8 @@ export interface ExportRecord {
     stage: ExportStage;
     lastAttemptTimestamp: number;
     exportedFiles: string[];
-    exportedCollectionPaths: ExportedCollectionPaths;
+    exportedCollectionPaths: ExportedEntityPaths;
+    exportedFilePaths: ExportedEntityPaths;
 }
 
 export interface ExportSettings {
