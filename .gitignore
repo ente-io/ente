@@ -39,3 +39,4 @@ lib/generated_plugin_registrant.dart
 android/key.properties
 android/app/.settings/*
 .env
+fastlane/report.xml
