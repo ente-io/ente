@@ -16,6 +16,8 @@ export function getBestPossibleUserLocale(): Language {
             return Language.fr;
         } else if (lc.startsWith('zh')) {
             return Language.zh;
+        } else if (lc.startsWith('nl')) {
+            return Language.nl;
         }
     }
     return Language.en;
