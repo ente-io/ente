@@ -221,13 +221,6 @@ class _SearchWidgetState extends State<SearchWidget> {
           await _searchService.getCollectionSearchResults(query);
       allResults.addAll(collectionResults);
 
-      // if (FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
-      //     query.startsWith("l:")) {
-      //   final locationResults = await _searchService
-      //       .getLocationSearchResults(query.replaceAll("l:", ""));
-      //   allResults.addAll(locationResults);
-      // }
-
       final monthResults = await _searchService.getMonthSearchResults(query);
       allResults.addAll(monthResults);
 
