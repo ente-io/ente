@@ -21,6 +21,10 @@ class FileUpdationDB {
   // did not extracted the location to include it in the file metadata
   static const missingLocationV2 = 'missingLocationV2';
 
+  // refers to the patching of files which had location in exif but the app
+  // mapped the location to a wrong location
+  static const badLocationCord = 'badLocationCord';
+
   // SQL code to create the database table
   static List<String> _createTable() {
     return [
