@@ -269,6 +269,17 @@ class ExportService {
                 exportRecord.exportedCollectionPaths
             );
             const collectionIDNameMap = getCollectionNameMap(collections);
+
+            const removedFileUIDs = getDeletedExportedFiles(
+                userPersonalFiles,
+                exportRecord
+            );
+
+            if (removedFileUIDs?.length > 0) {
+                addLogLine(`removing ${removedFileUIDs.length} files`);
+                await this.fileRemover(removedFileUIDs, exportDir);
+            }
+
             const renamedCollections = getRenamedCollections(
                 userCollections,
                 exportRecord
@@ -299,15 +310,6 @@ class ExportService {
                     collectionIDPathMap,
                     exportDir
                 );
-            }
-            const removedFileUIDs = getDeletedExportedFiles(
-                userPersonalFiles,
-                exportRecord
-            );
-
-            if (removedFileUIDs?.length > 0) {
-                addLogLine(`removing ${removedFileUIDs.length} files`);
-                await this.fileRemover(removedFileUIDs, exportDir);
             }
 
             const deletedExportedCollections = getDeletedExportedCollections(
