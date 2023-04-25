@@ -80,8 +80,18 @@ class ExportService {
     };
 
     constructor() {
-        this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.allElectronAPIsExist = !!this.electronAPIs?.exists;
+        if (runningInBrowser()) {
+            this.electronAPIs = window['ElectronAPIs'];
+            this.allElectronAPIsExist = !!this.electronAPIs?.exists;
+            this.fileReader = new FileReader();
+            const exportDir = getData(LS_KEYS.EXPORT)?.folder;
+            if (!exportDir) {
+                return;
+            }
+            if (this.checkAllElectronAPIsExists()) {
+                void this.migrateExport(exportDir);
+            }
+        }
     }
 
     async setUIUpdaters(uiUpdater: ExportUIUpdaters) {
@@ -249,13 +259,6 @@ class ExportService {
                     (collectionA, collectionB) =>
                         collectionA.id - collectionB.id
                 );
-            if (this.checkAllElectronAPIsExists()) {
-                await this.migrateExport(
-                    exportDir,
-                    userCollections,
-                    userPersonalFiles
-                );
-            }
             const exportRecord = await this.getExportRecord(exportDir);
 
             const collectionIDPathMap = convertCollectionIDPathObjectToMap(
@@ -778,45 +781,69 @@ class ExportService {
     later this will be converted to a loop which applies the migration one by one 
     till the files reaches the latest version 
     */
-    private async migrateExport(
-        exportDir: string,
-        collections: Collection[],
-        files: EnteFile[]
-    ) {
-        const exportRecord = await this.getExportRecord(exportDir);
-        let currentVersion = exportRecord?.version ?? 0;
-        if (currentVersion === 0) {
-            const collectionIDPathMap = new Map<number, string>();
+    private async migrateExport(exportDir: string) {
+        try {
+            const exportRecord = await this.getExportRecord(exportDir);
+            let currentVersion = exportRecord?.version ?? 0;
+            if (currentVersion === 0) {
+                const collectionIDPathMap = new Map<number, string>();
+                const user: User = getData(LS_KEYS.USER);
 
-            await this.migrateCollectionFolders(
-                collections,
-                exportDir,
-                collectionIDPathMap
-            );
-            await this.migrateFiles(
-                getExportedFiles(files, exportRecord),
-                collectionIDPathMap
-            );
-            currentVersion++;
-            await this.updateExportRecord({
-                version: currentVersion,
-            });
-        }
-        if (currentVersion === 1) {
-            await this.removeDeprecatedExportRecordProperties();
-            currentVersion++;
-            await this.updateExportRecord({
-                version: currentVersion,
-            });
-        }
-        if (currentVersion === 2) {
-            await this.updateExportedFilesToExportedFilePathsProperty(
-                getExportedFiles(files, exportRecord)
-            );
-            currentVersion++;
-            await this.updateExportRecord({
-                version: currentVersion,
-            });
+                const localFiles = await getLocalFiles();
+                const files = localFiles
+                    .filter((file) => file.ownerID === user?.id)
+                    .sort((fileA, fileB) => fileA.id - fileB.id);
+
+                const localCollections = await getLocalCollections();
+                const nonEmptyCollections = getNonEmptyCollections(
+                    localCollections,
+                    files
+                );
+                const collections = nonEmptyCollections
+                    .filter((collection) => collection.owner.id === user?.id)
+                    .sort(
+                        (collectionA, collectionB) =>
+                            collectionA.id - collectionB.id
+                    );
+                await this.migrateCollectionFolders(
+                    collections,
+                    exportDir,
+                    collectionIDPathMap
+                );
+                await this.migrateFiles(
+                    getExportedFiles(files, exportRecord),
+                    collectionIDPathMap
+                );
+                currentVersion++;
+                await this.updateExportRecord({
+                    version: currentVersion,
+                });
+            }
+            if (currentVersion === 1) {
+                await this.removeDeprecatedExportRecordProperties();
+                currentVersion++;
+                await this.updateExportRecord({
+                    version: currentVersion,
+                });
+            }
+            if (currentVersion === 2) {
+                const user: User = getData(LS_KEYS.USER);
+
+                const localFiles = await getLocalFiles();
+                const files = localFiles
+                    .filter((file) => file.ownerID === user?.id)
+                    .sort((fileA, fileB) => fileA.id - fileB.id);
+
+                await this.updateExportedFilesToExportedFilePathsProperty(
+                    getExportedFiles(files, exportRecord)
+                );
+                currentVersion++;
+                await this.updateExportRecord({
+                    version: currentVersion,
+                });
+            }
+        } catch (e) {
+            logError(e, 'export record migration failed');
         }
     }
 
