@@ -38,7 +38,7 @@ class LocationService {
   Future<void> addLocation(
     String location,
     Location centerPoint,
-    int radius,
+    double radius,
   ) async {
     //The area enclosed by the location tag will be a circle on a 3D spherical
     //globe and an ellipse on a 2D Mercator projection (2D map)
@@ -101,7 +101,7 @@ class LocationService {
   bool isFileInsideLocationTag(
     Location centerPoint,
     Location fileCoordinates,
-    int radius,
+    double radius,
   ) {
     final a =
         (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
@@ -134,7 +134,7 @@ class LocationService {
   ///Will only update if there is a change in the locationTag's properties
   Future<void> updateLocationTag({
     required LocalEntity<LocationTag> locationTagEntity,
-    int? newRadius,
+    double? newRadius,
     Location? newCenterPoint,
     String? newName,
   }) async {

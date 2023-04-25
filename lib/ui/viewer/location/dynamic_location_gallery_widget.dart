@@ -121,7 +121,7 @@ class _DynamicLocationGalleryWidgetState
     );
   }
 
-  int _selectedRadius() {
+  double _selectedRadius() {
     return radiusValues[
         InheritedLocationTagData.of(context).selectedRadiusIndex];
   }

@@ -9,7 +9,7 @@ part of 'location_tag.dart';
 _$_LocationTag _$$_LocationTagFromJson(Map<String, dynamic> json) =>
     _$_LocationTag(
       name: json['name'] as String,
-      radius: json['radius'] as int,
+      radius: (json['radius'] as num).toDouble(),
       aSquare: (json['aSquare'] as num).toDouble(),
       bSquare: (json['bSquare'] as num).toDouble(),
       centerPoint:
