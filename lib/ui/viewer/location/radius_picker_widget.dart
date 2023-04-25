@@ -1,9 +1,11 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/utils/dialog_util.dart";
 
 class CustomTrackShape extends RoundedRectSliderTrackShape {
   @override
@@ -56,37 +58,52 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          height: 48,
-          width: 48,
-          decoration: BoxDecoration(
-            color: colorScheme.fillFaint,
-            borderRadius: const BorderRadius.all(Radius.circular(2)),
-          ),
-          padding: const EdgeInsets.all(4),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                flex: 6,
-                child: Text(
-                  roundedRadius,
-                  style: double.parse(roundedRadius) < 1000
-                      ? textTheme.largeBold
-                      : textTheme.bodyBold,
-                  textAlign: TextAlign.center,
+        GestureDetector(
+          onTap: () {
+            showTextInputDialog(
+              context,
+              title: "Custom radius",
+              onSubmit: (customRadius) async {},
+              submitButtonLabel: "Done",
+              textInputFormatter: [
+                NumberWithDecimalInputFormatter(maxValue: 10000)
+              ],
+              textInputType:
+                  const TextInputType.numberWithOptions(decimal: true),
+            );
+          },
+          child: Container(
+            height: 48,
+            width: 48,
+            decoration: BoxDecoration(
+              color: colorScheme.fillFaint,
+              borderRadius: const BorderRadius.all(Radius.circular(2)),
+            ),
+            padding: const EdgeInsets.all(4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 6,
+                  child: Text(
+                    roundedRadius,
+                    style: double.parse(roundedRadius) < 1000
+                        ? textTheme.largeBold
+                        : textTheme.bodyBold,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
-              Expanded(
-                flex: 5,
-                child: Text(
-                  S.of(context).kiloMeterUnit,
-                  style: textTheme.miniMuted,
+                Expanded(
+                  flex: 5,
+                  child: Text(
+                    S.of(context).kiloMeterUnit,
+                    style: textTheme.miniMuted,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         const SizedBox(width: 4),
@@ -159,5 +176,32 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
     }
 
     return result;
+  }
+}
+
+class NumberWithDecimalInputFormatter extends TextInputFormatter {
+  final RegExp _pattern = RegExp(r'^(?:\d+(\.\d*)?)?$');
+  final double maxValue;
+
+  NumberWithDecimalInputFormatter({required this.maxValue});
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Check if the new value matches the pattern
+    if (_pattern.hasMatch(newValue.text)) {
+      if (newValue.text.isEmpty) {
+        return newValue;
+      }
+      final newValueAsDouble = double.tryParse(newValue.text);
+
+      // Check if the new value is within the allowed range
+      if (newValueAsDouble != null && newValueAsDouble <= maxValue) {
+        return newValue;
+      }
+    }
+    return oldValue;
   }
 }

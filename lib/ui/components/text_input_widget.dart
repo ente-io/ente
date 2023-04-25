@@ -42,6 +42,7 @@ class TextInputWidget extends StatefulWidget {
   final TextEditingController? textEditingController;
   final ValueNotifier? isEmptyNotifier;
   final List<TextInputFormatter>? textInputFormatter;
+  final TextInputType? textInputType;
   const TextInputWidget({
     this.onSubmit,
     this.onChange,
@@ -69,6 +70,7 @@ class TextInputWidget extends StatefulWidget {
     this.textEditingController,
     this.isEmptyNotifier,
     this.textInputFormatter,
+    this.textInputType,
     super.key,
   });
 
@@ -145,6 +147,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         borderRadius: BorderRadius.all(Radius.circular(widget.borderRadius)),
         child: Material(
           child: TextFormField(
+            keyboardType: widget.textInputType,
             textCapitalization: widget.textCapitalization!,
             autofocus: widget.autoFocus ?? false,
             controller: _textController,

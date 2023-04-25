@@ -177,6 +177,7 @@ class TextInputDialog extends StatefulWidget {
   final bool isPasswordInput;
   final TextEditingController? textEditingController;
   final List<TextInputFormatter>? textInputFormatter;
+  final TextInputType? textInputType;
   const TextInputDialog({
     required this.title,
     this.body,
@@ -196,6 +197,7 @@ class TextInputDialog extends StatefulWidget {
     this.isPasswordInput = false,
     this.textEditingController,
     this.textInputFormatter,
+    this.textInputType,
     super.key,
   });
 
@@ -258,6 +260,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 isPasswordInput: widget.isPasswordInput,
                 textEditingController: widget.textEditingController,
                 textInputFormatter: widget.textInputFormatter,
+                textInputType: widget.textInputType,
               ),
             ),
             const SizedBox(height: 36),

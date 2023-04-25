@@ -306,6 +306,7 @@ Future<dynamic> showTextInputDialog(
   bool isPasswordInput = false,
   TextEditingController? textEditingController,
   List<TextInputFormatter>? textInputFormatter,
+  TextInputType? textInputType,
 }) {
   return showDialog(
     barrierColor: backdropFaintDark,
@@ -335,6 +336,7 @@ Future<dynamic> showTextInputDialog(
             isPasswordInput: isPasswordInput,
             textEditingController: textEditingController,
             textInputFormatter: textInputFormatter,
+            textInputType: textInputType,
           ),
         ),
       );
