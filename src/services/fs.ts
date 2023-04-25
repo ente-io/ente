@@ -255,7 +255,7 @@ export async function moveFile(
     // check if destination folder exists
     const destinationFolder = path.dirname(destinationPath);
     if (!existsSync(destinationFolder)) {
-        throw new Error('Destination folder does not exist');
+        await fs.mkdir(destinationFolder, { recursive: true });
     }
     await fs.rename(sourcePath, destinationPath);
 }
