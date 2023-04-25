@@ -6,7 +6,6 @@ import "package:collection/collection.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -15,7 +14,6 @@ import 'package:photos/models/file.dart' as ente;
 import "package:photos/models/location/location.dart";
 import "package:photos/models/magic_metadata.dart";
 import "package:photos/services/file_magic_service.dart";
-import 'package:photos/services/files_service.dart';
 import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -60,7 +58,6 @@ class LocalFileUpdateService {
     try {
       await _markFilesWhichAreActuallyUpdated();
       if (Platform.isAndroid) {
-        await _migrationForFixingBadCreationTime();
         await _migrationFilesWithMissingLocationV2();
       }
     } catch (e, s) {
@@ -156,66 +153,6 @@ class LocalFileUpdateService {
       await mediaUploadData.sourceFile?.delete();
     }
     return mediaUploadData;
-  }
-
-  Future<void> _migrationForFixingBadCreationTime() async {
-    if (_prefs.containsKey(isBadCreationTimeMigrationComplete)) {
-      return;
-    }
-    await _importFilesWithBadCreationTime();
-    const int singleRunLimit = 100;
-    try {
-      final generatedIDs =
-          await _fileUpdationDB.getLocalIDsForPotentialReUpload(
-        singleRunLimit,
-        FileUpdationDB.badCreationTime,
-      );
-      if (generatedIDs.isNotEmpty) {
-        final List<int> genIdIntList = [];
-        for (String genIdString in generatedIDs) {
-          final int? genIdInt = int.tryParse(genIdString);
-          if (genIdInt != null) {
-            genIdIntList.add(genIdInt);
-          }
-        }
-
-        final filesWithBadTime =
-            (await FilesDB.instance.getFilesFromGeneratedIDs(genIdIntList))
-                .values
-                .toList();
-        filesWithBadTime.removeWhere(
-          (e) => e.isUploaded && e.pubMagicMetadata?.editedTime != null,
-        );
-        await FilesService.instance
-            .bulkEditTime(filesWithBadTime, EditTimeSource.fileName);
-      } else {
-        // everything is done
-        await _prefs.setBool(isBadCreationTimeMigrationComplete, true);
-      }
-      await _fileUpdationDB.deleteByLocalIDs(
-        generatedIDs,
-        FileUpdationDB.badCreationTime,
-      );
-    } catch (e) {
-      _logger.severe("Failed to fix bad creationTime", e);
-    }
-  }
-
-  Future<void> _importFilesWithBadCreationTime() async {
-    if (_prefs.containsKey(isBadCreationTimeImportDone)) {
-      return;
-    }
-    _logger.info('_importFilesWithBadCreationTime');
-    final EnteWatch watch = EnteWatch("_importFilesWithBadCreationTime");
-    final int ownerID = Configuration.instance.getUserID()!;
-    final filesGeneratedID = await FilesDB.instance
-        .getGeneratedIDForFilesOlderThan(jan011981Time, ownerID);
-    await _fileUpdationDB.insertMultiple(
-      filesGeneratedID,
-      FileUpdationDB.badCreationTime,
-    );
-    watch.log("imported ${filesGeneratedID.length} files");
-    _prefs.setBool(isBadCreationTimeImportDone, true);
   }
 
   Future<void> _migrationFilesWithMissingLocationV2() async {
