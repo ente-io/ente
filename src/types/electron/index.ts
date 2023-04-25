@@ -90,6 +90,6 @@ export interface ElectronAPIs {
     logRendererProcessMemoryUsage: (message: string) => Promise<void>;
     registerForegroundEventListener: (onForeground: () => void) => void;
     openDirectory: (dirPath: string) => Promise<void>;
-    removeFile: (filePath: string) => Promise<void>;
-    removeFolder: (folderPath: string) => Promise<void>;
+    moveFile: (oldPath: string, newPath: string) => Promise<void>;
+    deleteEmptyFolder: (dirPath: string) => Promise<void>;
 }
