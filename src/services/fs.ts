@@ -241,3 +241,17 @@ export async function readTextFile(filePath: string) {
     }
     return await fs.readFile(filePath, 'utf-8');
 }
+
+export async function removeFile(filePath: string) {
+    if (!existsSync(filePath)) {
+        return;
+    }
+    await fs.unlink(filePath);
+}
+
+export async function removeFolder(folderPath: string) {
+    if (!existsSync(folderPath)) {
+        return;
+    }
+    await fs.rmdir(folderPath);
+}
