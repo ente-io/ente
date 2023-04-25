@@ -173,7 +173,7 @@ export default function ExportModal(props: Props) {
             const exportRecord = await exportService.getExportRecord(
                 exportFolder
             );
-            if (!exportRecord) {
+            if (!exportRecord?.stage) {
                 setExportStage(ExportStage.INIT);
                 return null;
             }

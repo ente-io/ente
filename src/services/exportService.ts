@@ -55,7 +55,7 @@ import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
 import { ExportStage } from 'constants/export';
 import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
-import { addLogLine } from 'utils/logging';
+import { addLocalLog, addLogLine } from 'utils/logging';
 import { eventBus, Events } from './events';
 import { getCollectionNameMap } from 'utils/collection';
 
@@ -244,9 +244,11 @@ class ExportService {
             const user: User = getData(LS_KEYS.USER);
 
             const localFiles = await getLocalFiles();
-            const userPersonalFiles = localFiles
-                .filter((file) => file.ownerID === user?.id)
-                .sort((fileA, fileB) => fileA.id - fileB.id);
+            const userPersonalFiles = mergeMetadata(
+                localFiles
+                    .filter((file) => file.ownerID === user?.id)
+                    .sort((fileA, fileB) => fileA.id - fileB.id)
+            );
 
             const collections = await getLocalCollections();
             const nonEmptyCollections = getNonEmptyCollections(
@@ -274,6 +276,7 @@ class ExportService {
                 renamedCollections?.length > 0 &&
                 this.checkAllElectronAPIsExists()
             ) {
+                addLogLine(`renaming ${renamedCollections.length} collections`);
                 this.collectionRenamer(
                     exportDir,
                     collectionIDPathMap,
@@ -287,6 +290,9 @@ class ExportService {
             );
 
             if (deletedExportedCollections?.length > 0) {
+                addLogLine(
+                    `removing ${deletedExportedCollections.length} collections`
+                );
                 await this.collectionRemover(
                     deletedExportedCollections,
                     exportDir
@@ -299,6 +305,7 @@ class ExportService {
             );
 
             if (filesToExport?.length > 0) {
+                addLogLine(`exporting ${filesToExport.length} files`);
                 await this.fileExporter(
                     filesToExport,
                     collectionIDNameMap,
@@ -311,7 +318,8 @@ class ExportService {
                 exportRecord
             );
 
-            if (removedFileUIDs?.length) {
+            if (removedFileUIDs?.length > 0) {
+                addLogLine(`removing ${removedFileUIDs.length} files`);
                 await this.fileRemover(removedFileUIDs, exportDir);
             }
         } catch (e) {
@@ -325,6 +333,10 @@ class ExportService {
         renamedCollections: Collection[]
     ) {
         for (const collection of renamedCollections) {
+            addLocalLog(
+                () =>
+                    `renaming collection ${collection.name} with id ${collection.id}`
+            );
             const oldCollectionFolderPath = collectionIDPathMap.get(
                 collection.id
             );
@@ -357,6 +369,10 @@ class ExportService {
             exportRecord.exportedCollectionPaths
         );
         for (const collectionID of deletedExportedCollectionIDs) {
+            addLocalLog(
+                () =>
+                    `removing collection with id ${collectionID} from export folder`
+            );
             const collectionFolderPath = collectionIDPathMap.get(collectionID);
             await this.electronAPIs.removeFolder(collectionFolderPath);
             await this.removeCollectionExportedRecord(
@@ -381,6 +397,14 @@ class ExportService {
                 total: files.length,
             });
             for (const file of files) {
+                addLocalLog(
+                    () =>
+                        `exporting file ${file.metadata.title} with id ${
+                            file.id
+                        } from collection ${collectionIDNameMap.get(
+                            file.collectionID
+                        )}`
+                );
                 if (this.stopExport) {
                     break;
                 }
@@ -445,6 +469,7 @@ class ExportService {
                 exportRecord.exportedFilePaths
             );
             for (const fileUID of removedFileUIDs) {
+                addLocalLog(() => `removing file with id ${fileUID}`);
                 if (this.stopExport) {
                     break;
                 }
@@ -525,7 +550,7 @@ class ExportService {
 
             exportRecord.exportedCollectionPaths = Object.fromEntries(
                 Object.entries(exportRecord.exportedCollectionPaths).filter(
-                    ([key]) => key === collectionID.toString()
+                    ([key]) => key !== collectionID.toString()
                 )
             );
 
@@ -541,7 +566,7 @@ class ExportService {
             const exportRecord = await this.getExportRecord(folder);
             exportRecord.exportedFilePaths = Object.fromEntries(
                 Object.entries(exportRecord.exportedFilePaths).filter(
-                    ([key]) => key === fileUID
+                    ([key]) => key !== fileUID
                 )
             );
             await this.updateExportRecord(exportRecord, folder);
@@ -658,7 +683,6 @@ class ExportService {
         collectionPath: string
     ): Promise<string> {
         try {
-            file.metadata = mergeMetadata([file])[0].metadata;
             const fileSaveName = getUniqueFileSaveName(
                 collectionPath,
                 file.metadata.title,

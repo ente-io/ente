@@ -13,6 +13,7 @@ import { splitFilenameAndExtension } from 'utils/file';
 import { ENTE_METADATA_FOLDER } from 'constants/export';
 import sanitize from 'sanitize-filename';
 import { formatDateTimeShort } from 'utils/time/format';
+import { addLocalLog } from 'utils/logging';
 
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
@@ -21,10 +22,11 @@ export const getCollectionsCreatedAfterLastExport = (
     collections: Collection[],
     exportRecord: ExportRecord
 ) => {
+    if (!exportRecord?.exportedCollectionPaths) {
+        return collections;
+    }
     const exportedCollections = new Set(
-        Object.keys(exportRecord?.exportedCollectionPaths ?? {}).map((x) =>
-            Number(x)
-        )
+        Object.keys(exportRecord?.exportedCollectionPaths).map((x) => Number(x))
     );
     const unExportedCollections = collections.filter((collection) => {
         if (!exportedCollections.has(collection.id)) {
@@ -85,8 +87,19 @@ export const getDeletedExportedCollections = (
     exportRecord: ExportRecord
 ) => {
     const presentCollections = new Set(
-        collections?.map((collection) => collection.id)
+        collections.map((collection) => collection.id)
     );
+    addLocalLog(
+        () => `
+    presentCollections: ${collections.map((c) => c.id)} 
+    exportRecord?.exportedCollectionPaths: ${JSON.stringify(
+        exportRecord?.exportedCollectionPaths
+    )}
+    `
+    );
+    if (!exportRecord?.exportedCollectionPaths) {
+        return [];
+    }
     const deletedExportedCollections = Object.keys(
         exportRecord?.exportedCollectionPaths
     )
@@ -121,6 +134,9 @@ export const getExportedFiles = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
+    if (!exportRecord?.exportedFilePaths) {
+        return [];
+    }
     const exportedFileIds = new Set(
         Object.keys(exportRecord?.exportedFilePaths)
     );
@@ -140,6 +156,9 @@ export const getDeletedExportedFiles = (
     const presentFileUIDs = new Set(
         allFiles?.map((file) => getExportRecordFileUID(file))
     );
+    if (!exportRecord?.exportedFilePaths) {
+        return [];
+    }
     const deletedExportedFiles = Object.keys(
         exportRecord?.exportedFilePaths
     ).filter((fileUID) => {
