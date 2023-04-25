@@ -13,7 +13,6 @@ import { splitFilenameAndExtension } from 'utils/file';
 import { ENTE_METADATA_FOLDER, ENTE_TRASH_FOLDER } from 'constants/export';
 import sanitize from 'sanitize-filename';
 import { formatDateTimeShort } from 'utils/time/format';
-import { addLocalLog } from 'utils/logging';
 
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
@@ -88,14 +87,6 @@ export const getDeletedExportedCollections = (
 ) => {
     const presentCollections = new Set(
         collections.map((collection) => collection.id)
-    );
-    addLocalLog(
-        () => `
-    presentCollections: ${collections.map((c) => c.id)} 
-    exportRecord?.exportedCollectionPaths: ${JSON.stringify(
-        exportRecord?.exportedCollectionPaths
-    )}
-    `
     );
     if (!exportRecord?.exportedCollectionPaths) {
         return [];

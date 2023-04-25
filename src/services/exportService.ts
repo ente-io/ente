@@ -479,16 +479,57 @@ class ExportService {
                 }
                 try {
                     const filePath = fileIDPathMap.get(fileUID);
-                    await this.electronAPIs.moveFile(
-                        filePath,
-                        getTrashedFilePath(exportDir, filePath)
-                    );
-                    const metadataFilePath = getMetadataFilePath(filePath);
-                    await this.electronAPIs.moveFile(
-                        metadataFilePath,
-                        getTrashedFilePath(exportDir, metadataFilePath)
-                    );
-                    await this.removeFileExportedRecord(exportDir, fileUID);
+                    // check if filepath is for live photo
+                    // livePhoto has the path in format: `JSON.stringify({image,video})`
+                    const isLivePhotoPath =
+                        filePath.startsWith('{') && filePath.endsWith('}');
+
+                    if (isLivePhotoPath) {
+                        const { image: imagePath, video: videoPath } =
+                            JSON.parse(filePath);
+                        await this.electronAPIs.moveFile(
+                            imagePath,
+                            getTrashedFilePath(exportDir, imagePath)
+                        );
+
+                        addLocalLog(
+                            () =>
+                                `moving image file ${imagePath} to trash folder`
+                        );
+                        const imageMetadataFilePath =
+                            getMetadataFilePath(imagePath);
+
+                        await this.electronAPIs.moveFile(
+                            imageMetadataFilePath,
+                            getTrashedFilePath(exportDir, imageMetadataFilePath)
+                        );
+                        addLocalLog(
+                            () =>
+                                `moving video file ${videoPath} to trash folder`
+                        );
+                        await this.electronAPIs.moveFile(
+                            videoPath,
+                            getTrashedFilePath(exportDir, videoPath)
+                        );
+                        const videoMetadataFilePath =
+                            getMetadataFilePath(videoPath);
+                        await this.electronAPIs.moveFile(
+                            videoMetadataFilePath,
+                            getTrashedFilePath(exportDir, videoMetadataFilePath)
+                        );
+                        await this.removeFileExportedRecord(exportDir, fileUID);
+                    } else {
+                        await this.electronAPIs.moveFile(
+                            filePath,
+                            getTrashedFilePath(exportDir, filePath)
+                        );
+                        const metadataFilePath = getMetadataFilePath(filePath);
+                        await this.electronAPIs.moveFile(
+                            metadataFilePath,
+                            getTrashedFilePath(exportDir, metadataFilePath)
+                        );
+                        await this.removeFileExportedRecord(exportDir, fileUID);
+                    }
                     success++;
                 } catch (e) {
                     failed++;
@@ -772,7 +813,10 @@ class ExportService {
         const imageSavePath = getFileSavePath(collectionPath, imageSaveName);
         const videoSavePath = getFileSavePath(collectionPath, videoSaveName);
 
-        return [imageSavePath, videoSavePath].join('-');
+        return JSON.stringify({
+            image: imageSavePath,
+            video: videoSavePath,
+        });
     }
 
     private async saveMediaFile(
