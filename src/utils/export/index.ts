@@ -10,7 +10,7 @@ import { EnteFile } from 'types/file';
 
 import { Metadata } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
-import { ENTE_METADATA_FOLDER } from 'constants/export';
+import { ENTE_METADATA_FOLDER, ENTE_TRASH_FOLDER } from 'constants/export';
 import sanitize from 'sanitize-filename';
 import { formatDateTimeShort } from 'utils/time/format';
 import { addLocalLog } from 'utils/logging';
@@ -307,4 +307,18 @@ export const getUniqueFileSaveNameForMigration = (
         count++;
     }
     return fileSaveName;
+};
+
+export const getTrashedFilePath = (exportDir: string, path: string) => {
+    const fileRelativePath = path.replace(`${exportDir}/`, '');
+    return `${exportDir}/${ENTE_TRASH_FOLDER}/${fileRelativePath}`;
+};
+
+// if filepath is /home/user/Ente/Export/Collection1/1.jpg
+// then metadata path is /home/user/Ente/Export/Collection1/ENTE_METADATA_FOLDER/1.jpg.json
+export const getMetadataPath = (path: string) => {
+    // extract filename and collection folder path
+    const filename = path.split('/').pop();
+    const collectionFolderPath = path.replace(`/${filename}`, '');
+    return `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${filename}.json`;
 };

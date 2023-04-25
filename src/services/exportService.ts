@@ -18,6 +18,8 @@ import {
     convertCollectionIDPathObjectToMap,
     convertFileIDPathObjectToMap,
     getDeletedExportedCollections,
+    getTrashedFilePath,
+    getMetadataPath,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
@@ -284,21 +286,6 @@ class ExportService {
                 );
             }
 
-            const deletedExportedCollections = getDeletedExportedCollections(
-                userCollections,
-                exportRecord
-            );
-
-            if (deletedExportedCollections?.length > 0) {
-                addLogLine(
-                    `removing ${deletedExportedCollections.length} collections`
-                );
-                await this.collectionRemover(
-                    deletedExportedCollections,
-                    exportDir
-                );
-            }
-
             const filesToExport = getUnExportedFiles(
                 userPersonalFiles,
                 exportRecord
@@ -321,6 +308,21 @@ class ExportService {
             if (removedFileUIDs?.length > 0) {
                 addLogLine(`removing ${removedFileUIDs.length} files`);
                 await this.fileRemover(removedFileUIDs, exportDir);
+            }
+
+            const deletedExportedCollections = getDeletedExportedCollections(
+                userCollections,
+                exportRecord
+            );
+
+            if (deletedExportedCollections?.length > 0) {
+                addLogLine(
+                    `removing ${deletedExportedCollections.length} collections`
+                );
+                await this.collectionRemover(
+                    deletedExportedCollections,
+                    exportDir
+                );
             }
         } catch (e) {
             logError(e, 'runExport failed');
@@ -374,7 +376,7 @@ class ExportService {
                     `removing collection with id ${collectionID} from export folder`
             );
             const collectionFolderPath = collectionIDPathMap.get(collectionID);
-            await this.electronAPIs.removeFolder(collectionFolderPath);
+            await this.electronAPIs.deleteEmptyFolder(collectionFolderPath);
             await this.removeCollectionExportedRecord(
                 exportFolder,
                 collectionID
@@ -475,7 +477,16 @@ class ExportService {
                 }
                 try {
                     const filePath = fileIDPathMap.get(fileUID);
-                    await this.removeFile(filePath);
+                    const trashedFilePath = getTrashedFilePath(
+                        exportDir,
+                        filePath
+                    );
+                    await this.electronAPIs.moveFile(filePath, trashedFilePath);
+                    const fileMetadataPath = getMetadataPath(filePath);
+                    await this.electronAPIs.moveFile(
+                        fileMetadataPath,
+                        getTrashedFilePath(exportDir, fileMetadataPath)
+                    );
                     await this.removeFileExportedRecord(exportDir, fileUID);
                     success++;
                 } catch (e) {
@@ -782,10 +793,6 @@ class ExportService {
             getFileMetadataSavePath(collectionFolderPath, fileSaveName),
             getGoogleLikeMetadataFile(fileSaveName, file)
         );
-    }
-
-    private async removeFile(filePath: string) {
-        await this.electronAPIs.removeFile(filePath);
     }
 
     isExportInProgress = () => {
