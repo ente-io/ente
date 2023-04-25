@@ -31,6 +31,7 @@ class LocalFileUpdateService {
   static const isMissingLocationV2ImportDone = "fm_missingLocationV2ImportDone";
   static const isMissingLocationV2MigrationDone =
       "fm_missingLocationV2MigrationDone";
+
   Completer<void>? _existingMigration;
 
   LocalFileUpdateService._privateConstructor() {
@@ -169,7 +170,7 @@ class LocalFileUpdateService {
       );
       if (localIDs.isEmpty) {
         // everything is done
-        await _prefs.setBool(isBadCreationTimeMigrationComplete, true);
+        await _prefs.setBool(isMissingLocationV2MigrationDone, true);
         return;
       }
 
