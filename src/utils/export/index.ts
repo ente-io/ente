@@ -104,6 +104,9 @@ export const getUnExportedFiles = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
+    if (!exportRecord?.exportedFilePaths) {
+        return allFiles;
+    }
     const exportedFiles = new Set(Object.keys(exportRecord?.exportedFilePaths));
     const unExportedFiles = allFiles.filter((file) => {
         if (!exportedFiles.has(getExportRecordFileUID(file))) {
