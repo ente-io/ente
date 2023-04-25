@@ -316,9 +316,9 @@ export const getTrashedFilePath = (exportDir: string, path: string) => {
 
 // if filepath is /home/user/Ente/Export/Collection1/1.jpg
 // then metadata path is /home/user/Ente/Export/Collection1/ENTE_METADATA_FOLDER/1.jpg.json
-export const getMetadataPath = (path: string) => {
+export const getMetadataFilePath = (filePath: string) => {
     // extract filename and collection folder path
-    const filename = path.split('/').pop();
-    const collectionFolderPath = path.replace(`/${filename}`, '');
+    const filename = filePath.split('/').pop();
+    const collectionFolderPath = filePath.replace(`/${filename}`, '');
     return `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${filename}.json`;
 };

@@ -19,7 +19,7 @@ import {
     convertFileIDPathObjectToMap,
     getDeletedExportedCollections,
     getTrashedFilePath,
-    getMetadataPath,
+    getMetadataFilePath,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
@@ -479,15 +479,14 @@ class ExportService {
                 }
                 try {
                     const filePath = fileIDPathMap.get(fileUID);
-                    const trashedFilePath = getTrashedFilePath(
-                        exportDir,
-                        filePath
-                    );
-                    await this.electronAPIs.moveFile(filePath, trashedFilePath);
-                    const fileMetadataPath = getMetadataPath(filePath);
                     await this.electronAPIs.moveFile(
-                        fileMetadataPath,
-                        getTrashedFilePath(exportDir, fileMetadataPath)
+                        filePath,
+                        getTrashedFilePath(exportDir, filePath)
+                    );
+                    const metadataFilePath = getMetadataFilePath(filePath);
+                    await this.electronAPIs.moveFile(
+                        metadataFilePath,
+                        getTrashedFilePath(exportDir, metadataFilePath)
                     );
                     await this.removeFileExportedRecord(exportDir, fileUID);
                     success++;
