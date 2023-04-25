@@ -5,10 +5,13 @@ export interface ExportProgress {
     failed: number;
     total: number;
 }
-export interface ExportedEntityPaths {
+export interface ExportedCollectionPaths {
     [ID: number]: string;
 }
 
+export interface ExportedFilePaths {
+    [ID: string]: string;
+}
 export interface FileExportStats {
     totalCount: number;
     pendingCount: number;
@@ -22,16 +25,23 @@ export interface ExportRecordV1 {
     queuedFiles?: string[];
     exportedFiles?: string[];
     failedFiles?: string[];
-    exportedCollectionPaths?: ExportedEntityPaths;
+    exportedCollectionPaths?: ExportedCollectionPaths;
+}
+
+export interface ExportRecordV2 {
+    version: number;
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    exportedFiles: string[];
+    exportedCollectionPaths: ExportedCollectionPaths;
 }
 
 export interface ExportRecord {
     version: number;
     stage: ExportStage;
     lastAttemptTimestamp: number;
-    exportedFiles: string[];
-    exportedCollectionPaths: ExportedEntityPaths;
-    exportedFilePaths: ExportedEntityPaths;
+    exportedCollectionPaths: ExportedCollectionPaths;
+    exportedFilePaths: ExportedFilePaths;
 }
 
 export interface ExportSettings {

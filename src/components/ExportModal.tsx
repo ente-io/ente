@@ -225,7 +225,7 @@ export default function ExportModal(props: Props) {
     const startExport = () => {
         try {
             verifyExportFolderExists();
-            exportService.runExport();
+            exportService.scheduleExport();
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 logError(e, 'startExport failed');

@@ -1,6 +1,10 @@
 import { Collection } from 'types/collection';
 import exportService from 'services/exportService';
-import { ExportRecord, ExportedEntityPaths } from 'types/export';
+import {
+    ExportRecord,
+    ExportedCollectionPaths,
+    ExportedFilePaths,
+} from 'types/export';
 
 import { EnteFile } from 'types/file';
 
@@ -30,31 +34,31 @@ export const getCollectionsCreatedAfterLastExport = (
     });
     return unExportedCollections;
 };
-export const convertIDPathObjectToMap = (
-    exportedEntityPaths: ExportedEntityPaths
-) => {
+export const convertCollectionIDPathObjectToMap = (
+    exportedCollectionPaths: ExportedCollectionPaths
+): Map<number, string> => {
     return new Map<number, string>(
-        Object.entries(exportedEntityPaths ?? {}).map((e) => {
+        Object.entries(exportedCollectionPaths ?? {}).map((e) => {
             return [Number(e[0]), String(e[1])];
         })
     );
 };
 
-export const convertMapToIDPathObject = (
-    exportedEntityPaths: Map<number, string>
-) => {
-    const exportedEntityPathsObject: ExportedEntityPaths = {};
-    exportedEntityPaths.forEach((value, key) => {
-        exportedEntityPathsObject[key] = value;
-    });
-    return exportedEntityPathsObject;
+export const convertFileIDPathObjectToMap = (
+    exportedFilePaths: ExportedFilePaths
+): Map<string, string> => {
+    return new Map<string, string>(
+        Object.entries(exportedFilePaths ?? {}).map((e) => {
+            return [String(e[0]), String(e[1])];
+        })
+    );
 };
 
-export const getCollectionsRenamedAfterLastExport = (
+export const getRenamedCollections = (
     collections: Collection[],
     exportRecord: ExportRecord
 ) => {
-    const collectionIDPathMap = convertIDPathObjectToMap(
+    const collectionIDPathMap = convertCollectionIDPathObjectToMap(
         exportRecord.exportedCollectionPaths
     );
     const renamedCollections = collections.filter((collection) => {
@@ -76,11 +80,31 @@ export const getCollectionsRenamedAfterLastExport = (
     return renamedCollections;
 };
 
+export const getDeletedExportedCollections = (
+    collections: Collection[],
+    exportRecord: ExportRecord
+) => {
+    const presentCollections = new Set(
+        collections?.map((collection) => collection.id)
+    );
+    const deletedExportedCollections = Object.keys(
+        exportRecord?.exportedCollectionPaths
+    )
+        .map(Number)
+        .filter((collectionID) => {
+            if (!presentCollections.has(collectionID)) {
+                return true;
+            }
+            return false;
+        });
+    return deletedExportedCollections;
+};
+
 export const getUnExportedFiles = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
-    const exportedFiles = new Set(exportRecord?.exportedFiles);
+    const exportedFiles = new Set(Object.keys(exportRecord?.exportedFilePaths));
     const unExportedFiles = allFiles.filter((file) => {
         if (!exportedFiles.has(getExportRecordFileUID(file))) {
             return true;
@@ -94,7 +118,9 @@ export const getExportedFiles = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
-    const exportedFileIds = new Set(exportRecord?.exportedFiles);
+    const exportedFileIds = new Set(
+        Object.keys(exportRecord?.exportedFilePaths)
+    );
     const exportedFiles = allFiles.filter((file) => {
         if (exportedFileIds.has(getExportRecordFileUID(file))) {
             return true;
@@ -102,6 +128,24 @@ export const getExportedFiles = (
         return false;
     });
     return exportedFiles;
+};
+
+export const getDeletedExportedFiles = (
+    allFiles: EnteFile[],
+    exportRecord: ExportRecord
+): string[] => {
+    const presentFileUIDs = new Set(
+        allFiles?.map((file) => getExportRecordFileUID(file))
+    );
+    const deletedExportedFiles = Object.keys(
+        exportRecord?.exportedFilePaths
+    ).filter((fileUID) => {
+        if (!presentFileUIDs.has(fileUID)) {
+            return true;
+        }
+        return false;
+    });
+    return deletedExportedFiles;
 };
 
 export const getGoogleLikeMetadataFile = (
