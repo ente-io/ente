@@ -52,6 +52,7 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
     final radiusValue = radiusValues[selectedRadiusIndex];
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final roundedRadius = roundRadius(radiusValue);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -71,8 +72,8 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
               Expanded(
                 flex: 6,
                 child: Text(
-                  radiusValue.toString(),
-                  style: radiusValue != 1200
+                  roundedRadius,
+                  style: double.parse(roundedRadius) < 1000
                       ? textTheme.largeBold
                       : textTheme.bodyBold,
                   textAlign: TextAlign.center,
@@ -140,5 +141,23 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
         ),
       ],
     );
+  }
+
+  //9.99 -> 10, 9.0 -> 9, 5.02 -> 5, 5.09 -> 5.1
+  //12.3 -> 12, 121.65 -> 122, 999.9 -> 1000
+  String roundRadius(double radius) {
+    String result;
+    final roundedRadius = (radius * 10).round() / 10;
+    if (radius >= 10) {
+      result = roundedRadius.toStringAsFixed(0);
+    } else {
+      if (roundedRadius == roundedRadius.truncate()) {
+        result = roundedRadius.truncate().toString();
+      } else {
+        result = roundedRadius.toStringAsFixed(1);
+      }
+    }
+
+    return result;
   }
 }
