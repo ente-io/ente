@@ -27,8 +27,6 @@ class LocalFileUpdateService {
   late FileUpdationDB _fileUpdationDB;
   late SharedPreferences _prefs;
   late Logger _logger;
-  static const isLocationMigrationComplete = "fm_isLocationMigrationComplete";
-  static const isLocalImportDone = "fm_IsLocalImportDone";
   static const isBadCreationTimeImportDone = 'fm_badCreationTime';
   static const isBadCreationTimeMigrationComplete =
       'fm_badCreationTimeCompleted';
