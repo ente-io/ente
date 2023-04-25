@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/button_result.dart";
@@ -174,6 +175,8 @@ class TextInputDialog extends StatefulWidget {
   final TextCapitalization? textCapitalization;
   final bool alwaysShowSuccessState;
   final bool isPasswordInput;
+  final TextEditingController? textEditingController;
+  final List<TextInputFormatter>? textInputFormatter;
   const TextInputDialog({
     required this.title,
     this.body,
@@ -191,6 +194,8 @@ class TextInputDialog extends StatefulWidget {
     this.showOnlyLoadingState = false,
     this.alwaysShowSuccessState = false,
     this.isPasswordInput = false,
+    this.textEditingController,
+    this.textInputFormatter,
     super.key,
   });
 
@@ -251,6 +256,8 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 textCapitalization: widget.textCapitalization,
                 alwaysShowSuccessState: widget.alwaysShowSuccessState,
                 isPasswordInput: widget.isPasswordInput,
+                textEditingController: widget.textEditingController,
+                textInputFormatter: widget.textInputFormatter,
               ),
             ),
             const SizedBox(height: 36),

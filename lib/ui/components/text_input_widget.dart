@@ -41,6 +41,7 @@ class TextInputWidget extends StatefulWidget {
   final VoidCallback? onCancel;
   final TextEditingController? textEditingController;
   final ValueNotifier? isEmptyNotifier;
+  final List<TextInputFormatter>? textInputFormatter;
   const TextInputWidget({
     this.onSubmit,
     this.onChange,
@@ -67,6 +68,7 @@ class TextInputWidget extends StatefulWidget {
     this.onCancel,
     this.textEditingController,
     this.isEmptyNotifier,
+    this.textInputFormatter,
     super.key,
   });
 
@@ -147,9 +149,10 @@ class _TextInputWidgetState extends State<TextInputWidget> {
             autofocus: widget.autoFocus ?? false,
             controller: _textController,
             focusNode: widget.focusNode,
-            inputFormatters: widget.maxLength != null
-                ? [LengthLimitingTextInputFormatter(50)]
-                : null,
+            inputFormatters: widget.textInputFormatter ??
+                (widget.maxLength != null
+                    ? [LengthLimitingTextInputFormatter(50)]
+                    : null),
             obscureText: _obscureTextNotifier.value,
             decoration: InputDecoration(
               hintText: widget.hintText,
