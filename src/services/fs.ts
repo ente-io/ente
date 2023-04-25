@@ -253,5 +253,5 @@ export async function removeFolder(folderPath: string) {
     if (!existsSync(folderPath)) {
         return;
     }
-    await fs.rmdir(folderPath);
+    fs.rmSync(folderPath, { recursive: true, force: true });
 }
