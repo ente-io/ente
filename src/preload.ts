@@ -45,7 +45,7 @@ import {
     openDirectory,
 } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
-import { isFolder, getDirFiles, moveFile } from './api/fs';
+import { isFolder, getDirFiles, moveFile, deleteEmptyFolder } from './api/fs';
 import { convertHEIC, generateImageThumbnail } from './api/imageProcessor';
 import { setupLogging } from './utils/logging';
 import {
@@ -106,4 +106,5 @@ windowObject['ElectronAPIs'] = {
     registerForegroundEventListener,
     openDirectory,
     moveFile,
+    deleteEmptyFolder,
 };
