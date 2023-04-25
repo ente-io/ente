@@ -262,11 +262,8 @@ export async function moveFile(
 
 export async function deleteEmptyFolder(folderPath: string) {
     if (!existsSync(folderPath)) {
-        throw new Error('Folder does not exist');
+        return;
     }
-    const files = await fs.readdir(folderPath);
-    if (files.length > 0) {
-        throw new Error('Folder is not empty');
-    }
+    // TODO: handle error and throw custom error
     await fs.rmdir(folderPath);
 }
