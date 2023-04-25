@@ -242,16 +242,20 @@ export async function readTextFile(filePath: string) {
     return await fs.readFile(filePath, 'utf-8');
 }
 
-export async function removeFile(filePath: string) {
-    if (!existsSync(filePath)) {
-        return;
+export async function moveFile(
+    sourcePath: string,
+    destinationPath: string
+): Promise<void> {
+    if (!existsSync(sourcePath)) {
+        throw new Error('File does not exist');
     }
-    await fs.unlink(filePath);
-}
-
-export async function removeFolder(folderPath: string) {
-    if (!existsSync(folderPath)) {
-        return;
+    if (existsSync(destinationPath)) {
+        throw new Error('Destination file already exists');
     }
-    fs.rmSync(folderPath, { recursive: true, force: true });
+    // check if destination folder exists
+    const destinationFolder = path.dirname(destinationPath);
+    if (!existsSync(destinationFolder)) {
+        throw new Error('Destination folder does not exist');
+    }
+    await fs.rename(sourcePath, destinationPath);
 }
