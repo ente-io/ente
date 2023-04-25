@@ -15,6 +15,7 @@ import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/feature_flag_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
@@ -233,6 +234,8 @@ class SearchService {
     final locationTagEntities =
         (await LocationService.instance.getLocationTags());
     final Map<LocalEntity<LocationTag>, List<File>> result = {};
+    final bool showNoLocationTag = query.length > 2 &&
+        "No Location Tag".toLowerCase().startsWith(query.toLowerCase());
 
     final List<GenericSearchResult> searchResults = [];
 
@@ -241,7 +244,7 @@ class SearchService {
         result[tag] = [];
       }
     }
-    if (result.isEmpty) {
+    if (result.isEmpty && !showNoLocationTag) {
       return searchResults;
     }
     final allFiles = await _getAllFiles();
@@ -256,6 +259,35 @@ class SearchService {
             result[tag]!.add(file);
           }
         }
+      }
+    }
+    if (showNoLocationTag) {
+      _logger.fine("finding photos with no location");
+      // find files that have location but the file's location is not inside
+      // any location tag
+      final noLocationTagFiles = allFiles.where((file) {
+        if (!file.hasLocation) {
+          return false;
+        }
+        for (LocalEntity<LocationTag> tag in locationTagEntities) {
+          if (LocationService.instance.isFileInsideLocationTag(
+            tag.item.centerPoint,
+            file.location!,
+            tag.item.radius,
+          )) {
+            return false;
+          }
+        }
+        return true;
+      }).toList();
+      if (noLocationTagFiles.isNotEmpty) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.fileType,
+            "No Location Tag",
+            noLocationTagFiles,
+          ),
+        );
       }
     }
     for (MapEntry<LocalEntity<LocationTag>, List<File>> entry
