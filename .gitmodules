@@ -1,6 +1,6 @@
-[submodule "apps/photos/thirdparty/ffmpeg.wasm"]
-	path = apps/photos/ffmpeg-wasm
+[submodule "apps/photos/thirdparty/ffmpeg-wasm"]
+	path = apps/photos/thirdparty/ffmpeg-wasm
 	url = https://github.com/abhinavkgrd/ffmpeg.wasm.git
 [submodule "apps/photos/thirdparty/photoswipe"]
-	path = apps/photos/photoswipe
+	path = apps/photos/thirdparty/photoswipe
 	url = https://github.com/ente-io/PhotoSwipe.git
