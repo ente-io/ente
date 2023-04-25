@@ -46,6 +46,9 @@ export async function getParsedExifData(
             jfif: true,
             ihdr: true,
         });
+        if (!exifData) {
+            return null;
+        }
         const filteredExifData = tags
             ? Object.fromEntries(
                   Object.entries(exifData).filter(([key]) => tags.includes(key))
@@ -107,13 +110,29 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     return parsedExif;
 }
 
-function parseEXIFDate(dataTimeString: string) {
+function parseEXIFDate(dateTimeString: string) {
     try {
-        if (typeof dataTimeString !== 'string') {
+        if (typeof dateTimeString !== 'string') {
             throw Error(CustomError.NOT_A_DATE);
         }
 
-        const [year, month, day, hour, minute, second] = dataTimeString
+        // Check and parse date in the format YYYYMMDD
+        if (dateTimeString.length === 8) {
+            const year = parseInt(dateTimeString.slice(0, 4), 10);
+            const month = parseInt(dateTimeString.slice(4, 6), 10);
+            const day = parseInt(dateTimeString.slice(6, 8), 10);
+            if (
+                !Number.isNaN(year) &&
+                !Number.isNaN(month) &&
+                !Number.isNaN(day)
+            ) {
+                const date = new Date(year, month - 1, day);
+                if (!Number.isNaN(+date)) {
+                    return date;
+                }
+            }
+        }
+        const [year, month, day, hour, minute, second] = dateTimeString
             .match(/\d+/g)
             .map((component) => parseInt(component, 10));
 
@@ -136,7 +155,7 @@ function parseEXIFDate(dataTimeString: string) {
         return date;
     } catch (e) {
         logError(e, 'parseEXIFDate failed', {
-            dataTimeString,
+            dateTimeString,
         });
         return null;
     }
