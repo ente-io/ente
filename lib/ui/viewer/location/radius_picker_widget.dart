@@ -59,31 +59,7 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
-          onTap: () {
-            showTextInputDialog(
-              context,
-              title: "Custom radius",
-              onSubmit: (customRadius) async {
-                final radius = double.tryParse(customRadius);
-                if (radius != null) {
-                  InheritedLocationTagData.of(context)
-                      .updateRadiusValues([radius]);
-                } else {
-                  showErrorDialog(
-                    context,
-                    "Invalid radius",
-                    "Please enter a valid radius",
-                  );
-                }
-              },
-              submitButtonLabel: "Done",
-              textInputFormatter: [
-                NumberWithDecimalInputFormatter(maxValue: 10000)
-              ],
-              textInputType:
-                  const TextInputType.numberWithOptions(decimal: true),
-            );
-          },
+          onTap: _customRadiusOnTap,
           child: Container(
             height: 52,
             width: 52,
@@ -196,6 +172,37 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
     }
 
     return result;
+  }
+
+  void _customRadiusOnTap() {
+    showTextInputDialog(
+      context,
+      title: "Custom radius",
+      onSubmit: (customRadius) async {
+        final radius = double.tryParse(customRadius);
+        if (radius != null) {
+          final locationTagState = InheritedLocationTagData.of(context);
+          locationTagState.updateRadiusValues([radius]);
+          if (mounted) {
+            setState(() {
+              widget.selectedRadiusIndexNotifier.value =
+                  InheritedLocationTagData.of(context)
+                      .radiusValues
+                      .indexOf(radius);
+            });
+          }
+        } else {
+          showErrorDialog(
+            context,
+            "Invalid radius",
+            "Please enter a valid radius",
+          );
+        }
+      },
+      submitButtonLabel: "Done",
+      textInputFormatter: [NumberWithDecimalInputFormatter(maxValue: 10000)],
+      textInputType: const TextInputType.numberWithOptions(decimal: true),
+    );
   }
 }
 
