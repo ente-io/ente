@@ -250,6 +250,7 @@ export async function moveFile(
         throw new Error('File does not exist');
     }
     if (existsSync(destinationPath)) {
+        // TODO: should we overwrite or ignore as no-op or throw error?
         throw new Error('Destination file already exists');
     }
     // check if destination folder exists
@@ -267,23 +268,27 @@ export async function moveFolder(
     if (!existsSync(sourcePath)) {
         throw new Error('Folder does not exist');
     }
+
+    // check if destination folder exists
+    if (!existsSync(destinationPath)) {
+        await fs.mkdir(destinationPath, { recursive: true });
+    }
+
     // if source folder has files, first move them to destination folder
     const files = await fs.readdir(sourcePath);
     for (const file of files) {
-        const sourceFilePath = path.join(sourcePath, file);
-        const destinationFilePath = path.join(destinationPath, file);
-        // check if source file is a folder
-        const isFolder = await fs.stat(sourceFilePath);
-        if (isFolder.isDirectory()) {
-            await moveFolder(sourceFilePath, destinationFilePath);
-        } else {
-            try {
+        try {
+            const sourceFilePath = path.join(sourcePath, file);
+            const destinationFilePath = path.join(destinationPath, file);
+            // check if source file is a folder
+            const isFolder = await fs.stat(sourceFilePath);
+            if (isFolder.isDirectory()) {
+                await moveFolder(sourceFilePath, destinationFilePath);
+            } else {
                 await moveFile(sourceFilePath, destinationFilePath);
-            } catch (e) {
-                if (e.message === 'Destination file already exists') {
-                    await fs.unlink(sourceFilePath);
-                }
             }
+        } catch (e) {
+            logError(e, 'failed to move file');
         }
     }
     // delete source folder
