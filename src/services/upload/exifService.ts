@@ -1,8 +1,4 @@
-import {
-    EXIFLESS_FORMATS,
-    EXIF_LIBRARY_UNSUPPORTED_FORMATS,
-    NULL_LOCATION,
-} from 'constants/upload';
+import { EXIFLESS_FORMATS, NULL_LOCATION } from 'constants/upload';
 import { Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
@@ -10,6 +6,8 @@ import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
 import { getUnixTimeInMicroSeconds } from 'utils/time';
 import { CustomError } from 'utils/error';
+
+const EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE = 'Unknown file format';
 
 type ParsedEXIFData = Record<string, any> &
     Partial<{
@@ -37,6 +35,9 @@ export async function getParsedExifData(
     tags?: string[]
 ): Promise<ParsedEXIFData> {
     try {
+        if (EXIFLESS_FORMATS.includes(fileTypeInfo.exactType)) {
+            return null;
+        }
         const exifData: RawEXIFData = await exifr.parse(receivedFile, {
             reviveValues: false,
             tiff: true,
@@ -56,20 +57,16 @@ export async function getParsedExifData(
             : exifData;
         return parseExifData(filteredExifData);
     } catch (e) {
-        if (!EXIFLESS_FORMATS.includes(fileTypeInfo.mimeType)) {
-            if (
-                EXIF_LIBRARY_UNSUPPORTED_FORMATS.includes(fileTypeInfo.mimeType)
-            ) {
-                logError(e, 'exif library unsupported format', {
-                    fileType: fileTypeInfo.exactType,
-                });
-            } else {
-                logError(e, 'get parsed exif data failed', {
-                    fileType: fileTypeInfo.exactType,
-                });
-            }
+        if (e.message === EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE) {
+            logError(e, 'exif library unsupported format', {
+                fileType: fileTypeInfo.exactType,
+            });
+        } else {
+            logError(e, 'get parsed exif data failed', {
+                fileType: fileTypeInfo.exactType,
+            });
+            throw e;
         }
-        throw e;
     }
 }
 
@@ -112,15 +109,15 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
 
 function parseEXIFDate(dateTimeString: string) {
     try {
-        if (typeof dateTimeString !== 'string') {
+        if (typeof dateTimeString !== 'string' || dateTimeString === '') {
             throw Error(CustomError.NOT_A_DATE);
         }
 
         // Check and parse date in the format YYYYMMDD
         if (dateTimeString.length === 8) {
-            const year = parseInt(dateTimeString.slice(0, 4), 10);
-            const month = parseInt(dateTimeString.slice(4, 6), 10);
-            const day = parseInt(dateTimeString.slice(6, 8), 10);
+            const year = Number(dateTimeString.slice(0, 4));
+            const month = Number(dateTimeString.slice(4, 6));
+            const day = Number(dateTimeString.slice(6, 8));
             if (
                 !Number.isNaN(year) &&
                 !Number.isNaN(month) &&
@@ -134,15 +131,25 @@ function parseEXIFDate(dateTimeString: string) {
         }
         const [year, month, day, hour, minute, second] = dateTimeString
             .match(/\d+/g)
-            .map((component) => parseInt(component, 10));
+            .map(Number);
 
-        if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) {
+        if (
+            typeof year === 'undefined' ||
+            Number.isNaN(year) ||
+            typeof month === 'undefined' ||
+            Number.isNaN(month) ||
+            typeof day === 'undefined' ||
+            Number.isNaN(day)
+        ) {
             throw Error(CustomError.NOT_A_DATE);
         }
         let date: Date;
         if (
+            typeof hour === 'undefined' ||
             Number.isNaN(hour) ||
+            typeof minute === 'undefined' ||
             Number.isNaN(minute) ||
+            typeof second === 'undefined' ||
             Number.isNaN(second)
         ) {
             date = new Date(year, month - 1, day);
@@ -168,8 +175,13 @@ export function parseEXIFLocation(
     gpsLongitudeRef: string
 ) {
     try {
-        if (!gpsLatitude || !gpsLongitude) {
-            return NULL_LOCATION;
+        if (
+            !Array.isArray(gpsLatitudeRef) ||
+            !Array.isArray(gpsLongitudeRef) ||
+            gpsLatitude.length !== 3 ||
+            gpsLongitude.length !== 3
+        ) {
+            throw Error(CustomError.NOT_A_LOCATION);
         }
         const latitude = convertDMSToDD(
             gpsLatitude[0],
@@ -207,13 +219,16 @@ function convertDMSToDD(
 }
 
 export function getEXIFLocation(exifData: ParsedEXIFData): Location {
-    if (!exifData.latitude || !exifData.longitude) {
+    if (!exifData || (!exifData.latitude && exifData.latitude !== 0)) {
         return NULL_LOCATION;
     }
     return { latitude: exifData.latitude, longitude: exifData.longitude };
 }
 
 export function getEXIFTime(exifData: ParsedEXIFData): number {
+    if (!exifData) {
+        return null;
+    }
     const dateTime =
         exifData.DateTimeOriginal ??
         exifData.DateCreated ??
