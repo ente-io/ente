@@ -91,5 +91,5 @@ export interface ElectronAPIs {
     registerForegroundEventListener: (onForeground: () => void) => void;
     openDirectory: (dirPath: string) => Promise<void>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
-    moveFolder: (oldPath: string, newPath: string) => Promise<void>;
+    deleteFolder: (path: string) => Promise<void>;
 }

@@ -20,6 +20,7 @@ import {
     getDeletedExportedCollections,
     getTrashedFilePath,
     getMetadataFilePath,
+    getCollectionExportedFiles,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
@@ -463,11 +464,18 @@ class ExportService {
                     );
                     const collectionFolderPath =
                         collectionIDPathMap.get(collectionID);
-                    // move the collection folder to trash
-                    await this.electronAPIs.moveFolder(
-                        collectionFolderPath,
-                        getTrashedFilePath(exportFolder, collectionFolderPath)
+                    // verify that the all exported files from the collection has been removed
+                    const collectionExportedFiles = getCollectionExportedFiles(
+                        exportRecord,
+                        collectionID
                     );
+                    if (collectionExportedFiles.length > 0) {
+                        throw new Error(
+                            "collection is not empty, can't remove"
+                        );
+                    }
+                    // delete the collection folder
+                    await this.electronAPIs.deleteFolder(collectionFolderPath);
                     await this.removeCollectionExportedRecord(
                         exportFolder,
                         collectionID

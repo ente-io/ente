@@ -17,24 +17,6 @@ import { formatDateTimeShort } from 'utils/time/format';
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
 
-export const getCollectionsCreatedAfterLastExport = (
-    collections: Collection[],
-    exportRecord: ExportRecord
-) => {
-    if (!exportRecord?.exportedCollectionPaths) {
-        return collections;
-    }
-    const exportedCollections = new Set(
-        Object.keys(exportRecord?.exportedCollectionPaths).map((x) => Number(x))
-    );
-    const unExportedCollections = collections.filter((collection) => {
-        if (!exportedCollections.has(collection.id)) {
-            return true;
-        }
-        return false;
-    });
-    return unExportedCollections;
-};
 export const convertCollectionIDPathObjectToMap = (
     exportedCollectionPaths: ExportedCollectionPaths
 ): Map<number, string> => {
@@ -59,6 +41,9 @@ export const getRenamedCollections = (
     collections: Collection[],
     exportRecord: ExportRecord
 ) => {
+    if (!exportRecord?.exportedCollectionPaths) {
+        return [];
+    }
     const collectionIDPathMap = convertCollectionIDPathObjectToMap(
         exportRecord.exportedCollectionPaths
     );
@@ -85,12 +70,12 @@ export const getDeletedExportedCollections = (
     collections: Collection[],
     exportRecord: ExportRecord
 ) => {
-    const presentCollections = new Set(
-        collections.map((collection) => collection.id)
-    );
     if (!exportRecord?.exportedCollectionPaths) {
         return [];
     }
+    const presentCollections = new Set(
+        collections.map((collection) => collection.id)
+    );
     const deletedExportedCollections = Object.keys(
         exportRecord?.exportedCollectionPaths
     )
@@ -144,12 +129,12 @@ export const getDeletedExportedFiles = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord
 ): string[] => {
-    const presentFileUIDs = new Set(
-        allFiles?.map((file) => getExportRecordFileUID(file))
-    );
     if (!exportRecord?.exportedFilePaths) {
         return [];
     }
+    const presentFileUIDs = new Set(
+        allFiles?.map((file) => getExportRecordFileUID(file))
+    );
     const deletedExportedFiles = Object.keys(
         exportRecord?.exportedFilePaths
     ).filter((fileUID) => {
@@ -159,6 +144,26 @@ export const getDeletedExportedFiles = (
         return false;
     });
     return deletedExportedFiles;
+};
+
+export const getCollectionExportedFiles = (
+    exportRecord: ExportRecord,
+    collectionID: number
+): string[] => {
+    if (!exportRecord?.exportedFilePaths) {
+        return [];
+    }
+    const collectionExportedFiles = Object.keys(
+        exportRecord?.exportedFilePaths
+    ).filter((fileUID) => {
+        const fileCollectionID = Number(fileUID.split('_')[1]);
+        if (fileCollectionID === collectionID) {
+            return true;
+        } else {
+            return false;
+        }
+    });
+    return collectionExportedFiles;
 };
 
 export const getGoogleLikeMetadataFile = (
