@@ -261,36 +261,9 @@ export async function moveFile(
     await fs.rename(sourcePath, destinationPath);
 }
 
-export async function moveFolder(
-    sourcePath: string,
-    destinationPath: string
-): Promise<void> {
+export async function deleteFolder(sourcePath: string): Promise<void> {
     if (!existsSync(sourcePath)) {
-        throw new Error('Folder does not exist');
+        return;
     }
-
-    // check if destination folder exists
-    if (!existsSync(destinationPath)) {
-        await fs.mkdir(destinationPath, { recursive: true });
-    }
-
-    // if source folder has files, first move them to destination folder
-    const files = await fs.readdir(sourcePath);
-    for (const file of files) {
-        try {
-            const sourceFilePath = path.join(sourcePath, file);
-            const destinationFilePath = path.join(destinationPath, file);
-            // check if source file is a folder
-            const isFolder = await fs.stat(sourceFilePath);
-            if (isFolder.isDirectory()) {
-                await moveFolder(sourceFilePath, destinationFilePath);
-            } else {
-                await moveFile(sourceFilePath, destinationFilePath);
-            }
-        } catch (e) {
-            logError(e, 'failed to move file');
-        }
-    }
-    // delete source folder
-    await fs.rmdir(sourcePath);
+    fs.rmSync(sourcePath, { force: true, recursive: true });
 }
