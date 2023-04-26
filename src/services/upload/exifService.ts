@@ -1,8 +1,4 @@
-import {
-    EXIFLESS_FORMATS,
-    EXIF_LIBRARY_UNSUPPORTED_FORMATS,
-    NULL_LOCATION,
-} from 'constants/upload';
+import { EXIFLESS_FORMATS, NULL_LOCATION } from 'constants/upload';
 import { Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
@@ -60,10 +56,7 @@ export async function getParsedExifData(
     } catch (e) {
         if (EXIFLESS_FORMATS.includes(fileTypeInfo.exactType)) {
             // ignore
-        } else if (
-            EXIF_LIBRARY_UNSUPPORTED_FORMATS.includes(fileTypeInfo.exactType) ||
-            e.message === EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE
-        ) {
+        } else if (e.message === EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE) {
             logError(e, 'exif library unsupported format', {
                 fileType: fileTypeInfo.exactType,
             });
