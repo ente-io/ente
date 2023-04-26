@@ -94,12 +94,8 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     widget.cancelNotifier?.addListener(_onCancel);
     _textController = widget.textEditingController ?? TextEditingController();
 
-    if (widget.initialValue != null) {
-      _textController.value = TextEditingValue(
-        text: widget.initialValue!,
-        selection: TextSelection.collapsed(offset: widget.initialValue!.length),
-      );
-    }
+    _setInitialValue();
+
     if (widget.onChange != null) {
       _textController.addListener(() {
         widget.onChange!.call(_textController.text);
@@ -348,6 +344,42 @@ class _TextInputWidgetState extends State<TextInputWidget> {
 
   void _popNavigatorStack(BuildContext context, {Exception? e}) {
     Navigator.of(context).canPop() ? Navigator.of(context).pop(e) : null;
+  }
+
+  void _setInitialValue() {
+    if (widget.initialValue != null) {
+      final formattedInitialValue = _formatInitialValue(
+        widget.initialValue!,
+        widget.textInputFormatter,
+      );
+      _textController.value = TextEditingValue(
+        text: formattedInitialValue,
+        selection:
+            TextSelection.collapsed(offset: formattedInitialValue.length),
+      );
+    }
+  }
+
+  String _formatInitialValue(
+    String initialValue,
+    List<TextInputFormatter>? formatters,
+  ) {
+    if (formatters == null || formatters.isEmpty) {
+      return initialValue;
+    }
+
+    String formattedValue = initialValue;
+
+    for (final formatter in formatters) {
+      formattedValue = formatter
+          .formatEditUpdate(
+            TextEditingValue.empty,
+            TextEditingValue(text: formattedValue),
+          )
+          .text;
+    }
+
+    return formattedValue;
   }
 }
 
