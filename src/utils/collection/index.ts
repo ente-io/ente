@@ -1,5 +1,6 @@
 import {
     addToCollection,
+    getNonEmptyCollections,
     moveToCollection,
     removeFromCollection,
     restoreToCollection,
@@ -271,4 +272,22 @@ export function getCollectionNameMap(
     return new Map<number, string>(
         collections.map((collection) => [collection.id, collection.name])
     );
+}
+
+export async function getNonEmptyPersonalCollections(
+    collections: Collection[],
+    personalFiles: EnteFile[],
+    user: User
+): Promise<Collection[]> {
+    if (!user?.id) {
+        throw Error('user missing');
+    }
+    const nonEmptyCollections = getNonEmptyCollections(
+        collections,
+        personalFiles
+    );
+    const personalCollections = nonEmptyCollections
+        .filter((collection) => collection.owner.id === user?.id)
+        .sort((collectionA, collectionB) => collectionA.id - collectionB.id);
+    return personalCollections;
 }

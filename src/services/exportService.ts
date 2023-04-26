@@ -59,7 +59,10 @@ import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
 import { addLocalLog, addLogLine } from 'utils/logging';
 import { eventBus, Events } from './events';
-import { getCollectionNameMap } from 'utils/collection';
+import {
+    getCollectionNameMap,
+    getNonEmptyPersonalCollections,
+} from 'utils/collection';
 
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
@@ -166,7 +169,16 @@ class ExportService {
     getFileExportStats = async (): Promise<FileExportStats> => {
         try {
             const exportRecord = await this.getExportRecord();
-            const userPersonalFiles = await getPersonalFiles();
+            const user: User = getData(LS_KEYS.USER);
+            const files = await getLocalFiles();
+            const collections = await getLocalCollections();
+            const userPersonalFiles = await getPersonalFiles(files, user);
+            const userNonEmptyPersonalCollections =
+                await getNonEmptyPersonalCollections(
+                    collections,
+                    userPersonalFiles,
+                    user
+                );
             const unExportedFiles = getUnExportedFiles(
                 userPersonalFiles,
                 exportRecord
@@ -175,10 +187,21 @@ class ExportService {
                 userPersonalFiles,
                 exportRecord
             );
+            const renamedCollections = getRenamedCollections(
+                userNonEmptyPersonalCollections,
+                exportRecord
+            );
+            const deletedCollections = getDeletedExportedCollections(
+                userNonEmptyPersonalCollections,
+                exportRecord
+            );
             return {
                 totalCount: userPersonalFiles.length,
                 pendingCount:
-                    unExportedFiles.length + deletedExportedFiles.length,
+                    unExportedFiles.length +
+                    deletedExportedFiles.length +
+                    renamedCollections.length +
+                    deletedCollections.length,
             };
         } catch (e) {
             logError(e, 'getUpdateFileLists failed');
@@ -249,61 +272,55 @@ class ExportService {
                 return;
             }
             const user: User = getData(LS_KEYS.USER);
-
-            const localFiles = await getLocalFiles();
-            const userPersonalFiles = mergeMetadata(
-                localFiles
-                    .filter((file) => file.ownerID === user?.id)
-                    .sort((fileA, fileB) => fileA.id - fileB.id)
-            );
-
+            const files = await getLocalFiles();
             const collections = await getLocalCollections();
-            const nonEmptyCollections = getNonEmptyCollections(
-                collections,
-                userPersonalFiles
-            );
-            const userCollections = nonEmptyCollections
-                .filter((collection) => collection.owner.id === user?.id)
-                .sort(
-                    (collectionA, collectionB) =>
-                        collectionA.id - collectionB.id
+            const personalFiles = await getPersonalFiles(files, user);
+            const nonEmptyPersonalCollections =
+                await getNonEmptyPersonalCollections(
+                    collections,
+                    personalFiles,
+                    user
                 );
             const exportRecord = await this.getExportRecord(exportDir);
 
             const collectionIDPathMap = convertCollectionIDPathObjectToMap(
                 exportRecord.exportedCollectionPaths
             );
-            const collectionIDNameMap = getCollectionNameMap(collections);
+            const collectionIDNameMap = getCollectionNameMap(
+                nonEmptyPersonalCollections
+            );
 
             const renamedCollections = getRenamedCollections(
-                userCollections,
+                nonEmptyPersonalCollections,
+                exportRecord
+            );
+
+            const removedFileUIDs = getDeletedExportedFiles(
+                personalFiles,
+                exportRecord
+            );
+            const filesToExport = getUnExportedFiles(
+                personalFiles,
+                exportRecord
+            );
+            const deletedExportedCollections = getDeletedExportedCollections(
+                nonEmptyPersonalCollections,
                 exportRecord
             );
 
             if (
-                renamedCollections?.length > 0 &&
-                this.checkAllElectronAPIsExists()
+                removedFileUIDs.length > 0 ||
+                filesToExport.length > 0 ||
+                renamedCollections.length > 0 ||
+                deletedExportedCollections.length > 0
             ) {
-                addLogLine(`renaming ${renamedCollections.length} collections`);
-                this.collectionRenamer(
-                    exportDir,
-                    collectionIDPathMap,
-                    renamedCollections
-                );
-            }
-
-            const removedFileUIDs = getDeletedExportedFiles(
-                userPersonalFiles,
-                exportRecord
-            );
-            const filesToExport = getUnExportedFiles(
-                userPersonalFiles,
-                exportRecord
-            );
-
-            if (removedFileUIDs?.length > 0 || filesToExport?.length > 0) {
                 let success = 0;
                 let failed = 0;
+                this.uiUpdater.updateExportProgress({
+                    success: success,
+                    failed: failed,
+                    total: removedFileUIDs.length + filesToExport.length,
+                });
                 const incrementSuccess = () => {
                     this.updateExportProgress({
                         success: ++success,
@@ -318,6 +335,21 @@ class ExportService {
                         total: removedFileUIDs.length + filesToExport.length,
                     });
                 };
+                if (
+                    renamedCollections?.length > 0 &&
+                    this.checkAllElectronAPIsExists()
+                ) {
+                    addLogLine(
+                        `renaming ${renamedCollections.length} collections`
+                    );
+                    this.collectionRenamer(
+                        exportDir,
+                        collectionIDPathMap,
+                        renamedCollections,
+                        incrementSuccess,
+                        incrementFailed
+                    );
+                }
 
                 if (removedFileUIDs?.length > 0) {
                     addLogLine(`removing ${removedFileUIDs.length} files`);
@@ -339,21 +371,17 @@ class ExportService {
                         incrementFailed
                     );
                 }
-            }
-
-            const deletedExportedCollections = getDeletedExportedCollections(
-                userCollections,
-                exportRecord
-            );
-
-            if (deletedExportedCollections?.length > 0) {
-                addLogLine(
-                    `removing ${deletedExportedCollections.length} collections`
-                );
-                await this.collectionRemover(
-                    deletedExportedCollections,
-                    exportDir
-                );
+                if (deletedExportedCollections?.length > 0) {
+                    addLogLine(
+                        `removing ${deletedExportedCollections.length} collections`
+                    );
+                    await this.collectionRemover(
+                        deletedExportedCollections,
+                        exportDir,
+                        incrementSuccess,
+                        incrementFailed
+                    );
+                }
             }
         } catch (e) {
             logError(e, 'runExport failed');
@@ -363,7 +391,9 @@ class ExportService {
     async collectionRenamer(
         exportFolder: string,
         collectionIDPathMap: Map<number, string>,
-        renamedCollections: Collection[]
+        renamedCollections: Collection[],
+        incrementSuccess: () => void,
+        incrementFailed: () => void
     ) {
         try {
             for (const collection of renamedCollections) {
@@ -396,7 +426,9 @@ class ExportService {
                         collection.id,
                         newCollectionFolderPath
                     );
+                    incrementSuccess();
                 } catch (e) {
+                    incrementFailed();
                     logError(e, 'collectionRenamer failed a collection');
                     if (
                         e.message ===
@@ -414,7 +446,9 @@ class ExportService {
 
     async collectionRemover(
         deletedExportedCollectionIDs: number[],
-        exportFolder: string
+        exportFolder: string,
+        incrementSuccess: () => void,
+        incrementFailed: () => void
     ) {
         try {
             const exportRecord = await this.getExportRecord(exportFolder);
@@ -438,7 +472,9 @@ class ExportService {
                         exportFolder,
                         collectionID
                     );
+                    incrementSuccess();
                 } catch (e) {
+                    incrementFailed();
                     logError(e, 'collectionRemover failed a collection');
                     if (
                         e.message ===
@@ -459,8 +495,8 @@ class ExportService {
         collectionIDNameMap: Map<number, string>,
         collectionIDPathMap: Map<number, string>,
         exportDir: string,
-        incrementSuccess,
-        incrementFailed
+        incrementSuccess: () => void,
+        incrementFailed: () => void
     ): Promise<void> {
         try {
             for (const file of files) {
