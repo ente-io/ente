@@ -378,7 +378,11 @@ class ExportService {
                     `removing collection with id ${collectionID} from export folder`
             );
             const collectionFolderPath = collectionIDPathMap.get(collectionID);
-            await this.electronAPIs.deleteEmptyFolder(collectionFolderPath);
+            // move the collection folder to trash
+            await this.electronAPIs.moveFolder(
+                collectionFolderPath,
+                getTrashedFilePath(exportFolder, collectionFolderPath)
+            );
             await this.removeCollectionExportedRecord(
                 exportFolder,
                 collectionID
