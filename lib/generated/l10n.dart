@@ -4495,7 +4495,8 @@ class S {
     return Intl.message(
       'Raise ticket',
       name: 'raiseTicket',
-      desc: '',
+      desc:
+          'Button text for raising a support tickets in case of unhandled errors during backup',
       args: [],
     );
   }
