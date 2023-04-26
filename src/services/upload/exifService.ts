@@ -35,6 +35,9 @@ export async function getParsedExifData(
     tags?: string[]
 ): Promise<ParsedEXIFData> {
     try {
+        if (EXIFLESS_FORMATS.includes(fileTypeInfo.exactType)) {
+            return null;
+        }
         const exifData: RawEXIFData = await exifr.parse(receivedFile, {
             reviveValues: false,
             tiff: true,
@@ -54,9 +57,7 @@ export async function getParsedExifData(
             : exifData;
         return parseExifData(filteredExifData);
     } catch (e) {
-        if (EXIFLESS_FORMATS.includes(fileTypeInfo.exactType)) {
-            // ignore
-        } else if (e.message === EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE) {
+        if (e.message === EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE) {
             logError(e, 'exif library unsupported format', {
                 fileType: fileTypeInfo.exactType,
             });
@@ -213,13 +214,16 @@ function convertDMSToDD(
 }
 
 export function getEXIFLocation(exifData: ParsedEXIFData): Location {
-    if (!exifData.latitude || !exifData.longitude) {
+    if (!exifData || (!exifData.latitude && exifData.latitude !== 0)) {
         return NULL_LOCATION;
     }
     return { latitude: exifData.latitude, longitude: exifData.longitude };
 }
 
 export function getEXIFTime(exifData: ParsedEXIFData): number {
+    if (!exifData) {
+        return null;
+    }
     const dateTime =
         exifData.DateTimeOriginal ??
         exifData.DateCreated ??
