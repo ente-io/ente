@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/colors.dart";
@@ -50,6 +49,7 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final radiusValues = InheritedLocationTagData.of(context).radiusValues;
     final selectedRadiusIndex = widget.selectedRadiusIndexNotifier.value;
     final radiusValue = radiusValues[selectedRadiusIndex];
     final textTheme = getEnteTextTheme(context);
@@ -63,7 +63,19 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
             showTextInputDialog(
               context,
               title: "Custom radius",
-              onSubmit: (customRadius) async {},
+              onSubmit: (customRadius) async {
+                final radius = double.tryParse(customRadius);
+                if (radius != null) {
+                  InheritedLocationTagData.of(context)
+                      .updateRadiusValues([radius]);
+                } else {
+                  showErrorDialog(
+                    context,
+                    "Invalid radius",
+                    "Please enter a valid radius",
+                  );
+                }
+              },
               submitButtonLabel: "Done",
               textInputFormatter: [
                 NumberWithDecimalInputFormatter(maxValue: 10000)

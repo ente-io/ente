@@ -230,6 +230,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   Future<void> _addLocationTag() async {
     final locationData = InheritedLocationTagData.of(context);
     final coordinates = locationData.centerPoint;
+    final radiusValues = locationData.radiusValues;
     final radius = radiusValues[locationData.selectedRadiusIndex];
     await LocationService.instance.addLocation(
       _textEditingController.text.trim(),

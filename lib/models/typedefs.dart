@@ -9,3 +9,4 @@ typedef VoidCallbackParamStr = void Function(String);
 typedef FutureOrVoidCallback = FutureOr<void> Function();
 typedef VoidCallbackParamInt = void Function(int);
 typedef VoidCallbackParamLocation = void Function(Location);
+typedef VoidCallbackParamListDouble = void Function(List<double>);

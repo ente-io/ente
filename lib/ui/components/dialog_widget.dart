@@ -229,7 +229,6 @@ class _TextInputDialogState extends State<TextInputDialog> {
   @override
   void dispose() {
     _submitNotifier.dispose();
-    _textEditingController.dispose();
     _inputIsEmptyNotifier.dispose();
     super.dispose();
   }

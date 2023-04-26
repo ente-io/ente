@@ -240,7 +240,8 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
     final locationTagState = InheritedLocationTagData.of(context);
     await LocationService.instance.updateLocationTag(
       locationTagEntity: locationTagState.locationTagEntity!,
-      newRadius: radiusValues[locationTagState.selectedRadiusIndex],
+      newRadius:
+          locationTagState.radiusValues[locationTagState.selectedRadiusIndex],
       newName: _textEditingController.text.trim(),
       newCenterPoint: InheritedLocationTagData.of(context).centerPoint,
     );

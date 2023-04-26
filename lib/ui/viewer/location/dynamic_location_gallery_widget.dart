@@ -122,8 +122,8 @@ class _DynamicLocationGalleryWidgetState
   }
 
   double _selectedRadius() {
-    return radiusValues[
-        InheritedLocationTagData.of(context).selectedRadiusIndex];
+    final locationTagState = InheritedLocationTagData.of(context);
+    return locationTagState.radiusValues[locationTagState.selectedRadiusIndex];
   }
 
   double _galleryHeight(int fileCount) {
