@@ -296,25 +296,49 @@ class ExportService {
                 userPersonalFiles,
                 exportRecord
             );
-
-            if (removedFileUIDs?.length > 0) {
-                addLogLine(`removing ${removedFileUIDs.length} files`);
-                await this.fileRemover(removedFileUIDs, exportDir);
-            }
-
             const filesToExport = getUnExportedFiles(
                 userPersonalFiles,
                 exportRecord
             );
 
-            if (filesToExport?.length > 0) {
-                addLogLine(`exporting ${filesToExport.length} files`);
-                await this.fileExporter(
-                    filesToExport,
-                    collectionIDNameMap,
-                    collectionIDPathMap,
-                    exportDir
-                );
+            if (removedFileUIDs?.length > 0 || filesToExport?.length > 0) {
+                let success = 0;
+                let failed = 0;
+                const incrementSuccess = () => {
+                    this.updateExportProgress({
+                        success: ++success,
+                        failed: failed,
+                        total: removedFileUIDs.length + filesToExport.length,
+                    });
+                };
+                const incrementFailed = () => {
+                    this.updateExportProgress({
+                        success: success,
+                        failed: ++failed,
+                        total: removedFileUIDs.length + filesToExport.length,
+                    });
+                };
+
+                if (removedFileUIDs?.length > 0) {
+                    addLogLine(`removing ${removedFileUIDs.length} files`);
+                    await this.fileRemover(
+                        removedFileUIDs,
+                        exportDir,
+                        incrementSuccess,
+                        incrementFailed
+                    );
+                }
+                if (filesToExport?.length > 0) {
+                    addLogLine(`exporting ${filesToExport.length} files`);
+                    await this.fileExporter(
+                        filesToExport,
+                        collectionIDNameMap,
+                        collectionIDPathMap,
+                        exportDir,
+                        incrementSuccess,
+                        incrementFailed
+                    );
+                }
             }
 
             const deletedExportedCollections = getDeletedExportedCollections(
@@ -341,31 +365,50 @@ class ExportService {
         collectionIDPathMap: Map<number, string>,
         renamedCollections: Collection[]
     ) {
-        for (const collection of renamedCollections) {
-            addLocalLog(
-                () =>
-                    `renaming collection ${collection.name} with id ${collection.id}`
-            );
-            const oldCollectionFolderPath = collectionIDPathMap.get(
-                collection.id
-            );
+        try {
+            for (const collection of renamedCollections) {
+                try {
+                    addLocalLog(
+                        () =>
+                            `renaming collection ${collection.name} with id ${collection.id}`
+                    );
+                    const oldCollectionFolderPath = collectionIDPathMap.get(
+                        collection.id
+                    );
 
-            const newCollectionFolderPath = getUniqueCollectionFolderPath(
-                exportFolder,
-                collection.id,
-                collection.name
-            );
-            await this.electronAPIs.checkExistsAndRename(
-                oldCollectionFolderPath,
-                newCollectionFolderPath
-            );
+                    const newCollectionFolderPath =
+                        getUniqueCollectionFolderPath(
+                            exportFolder,
+                            collection.id,
+                            collection.name
+                        );
+                    await this.electronAPIs.checkExistsAndRename(
+                        oldCollectionFolderPath,
+                        newCollectionFolderPath
+                    );
 
-            await this.addCollectionExportedRecord(
-                exportFolder,
-                collection.id,
-                newCollectionFolderPath
-            );
-            collectionIDPathMap.set(collection.id, newCollectionFolderPath);
+                    await this.addCollectionExportedRecord(
+                        exportFolder,
+                        collection.id,
+                        newCollectionFolderPath
+                    );
+                    collectionIDPathMap.set(
+                        collection.id,
+                        newCollectionFolderPath
+                    );
+                } catch (e) {
+                    logError(e, 'collectionRenamer failed a collection');
+                    if (
+                        e.message ===
+                        CustomError.ADD_FILE_EXPORTED_RECORD_FAILED
+                    ) {
+                        throw e;
+                    }
+                }
+            }
+        } catch (e) {
+            logError(e, 'collectionRenamer failed');
+            throw e;
         }
     }
 
@@ -373,25 +416,41 @@ class ExportService {
         deletedExportedCollectionIDs: number[],
         exportFolder: string
     ) {
-        const exportRecord = await this.getExportRecord(exportFolder);
-        const collectionIDPathMap = convertCollectionIDPathObjectToMap(
-            exportRecord.exportedCollectionPaths
-        );
-        for (const collectionID of deletedExportedCollectionIDs) {
-            addLocalLog(
-                () =>
-                    `removing collection with id ${collectionID} from export folder`
+        try {
+            const exportRecord = await this.getExportRecord(exportFolder);
+            const collectionIDPathMap = convertCollectionIDPathObjectToMap(
+                exportRecord.exportedCollectionPaths
             );
-            const collectionFolderPath = collectionIDPathMap.get(collectionID);
-            // move the collection folder to trash
-            await this.electronAPIs.moveFolder(
-                collectionFolderPath,
-                getTrashedFilePath(exportFolder, collectionFolderPath)
-            );
-            await this.removeCollectionExportedRecord(
-                exportFolder,
-                collectionID
-            );
+            for (const collectionID of deletedExportedCollectionIDs) {
+                try {
+                    addLocalLog(
+                        () =>
+                            `removing collection with id ${collectionID} from export folder`
+                    );
+                    const collectionFolderPath =
+                        collectionIDPathMap.get(collectionID);
+                    // move the collection folder to trash
+                    await this.electronAPIs.moveFolder(
+                        collectionFolderPath,
+                        getTrashedFilePath(exportFolder, collectionFolderPath)
+                    );
+                    await this.removeCollectionExportedRecord(
+                        exportFolder,
+                        collectionID
+                    );
+                } catch (e) {
+                    logError(e, 'collectionRemover failed a collection');
+                    if (
+                        e.message ===
+                        CustomError.ADD_FILE_EXPORTED_RECORD_FAILED
+                    ) {
+                        throw e;
+                    }
+                }
+            }
+        } catch (e) {
+            logError(e, 'collectionRemover failed');
+            throw e;
         }
     }
 
@@ -399,16 +458,11 @@ class ExportService {
         files: EnteFile[],
         collectionIDNameMap: Map<number, string>,
         collectionIDPathMap: Map<number, string>,
-        exportDir: string
+        exportDir: string,
+        incrementSuccess,
+        incrementFailed
     ): Promise<void> {
         try {
-            let success = 0;
-            let failed = 0;
-            this.updateExportProgress({
-                success,
-                failed,
-                total: files.length,
-            });
             for (const file of files) {
                 addLocalLog(
                     () =>
@@ -442,9 +496,9 @@ class ExportService {
                         file,
                         fileSavePath
                     );
-                    success++;
+                    incrementSuccess();
                 } catch (e) {
-                    failed++;
+                    incrementFailed();
                     logError(e, 'export failed for a file');
                     if (
                         e.message ===
@@ -453,11 +507,6 @@ class ExportService {
                         throw e;
                     }
                 }
-                this.updateExportProgress({
-                    success,
-                    failed,
-                    total: files.length,
-                });
             }
         } catch (e) {
             logError(e, 'fileExporter failed');
@@ -467,16 +516,11 @@ class ExportService {
 
     async fileRemover(
         removedFileUIDs: string[],
-        exportDir: string
+        exportDir: string,
+        incrementSuccess: () => void,
+        incrementFailed: () => void
     ): Promise<void> {
         try {
-            let success = 0;
-            let failed = 0;
-            this.updateExportProgress({
-                success,
-                failed,
-                total: removedFileUIDs.length,
-            });
             const exportRecord = await this.getExportRecord(exportDir);
             const fileIDPathMap = convertFileIDPathObjectToMap(
                 exportRecord.exportedFilePaths
@@ -539,9 +583,9 @@ class ExportService {
                         );
                         await this.removeFileExportedRecord(exportDir, fileUID);
                     }
-                    success++;
+                    incrementSuccess();
                 } catch (e) {
-                    failed++;
+                    incrementFailed();
                     logError(e, 'remove failed for a file');
                     if (
                         e.message ===
@@ -550,11 +594,6 @@ class ExportService {
                         throw e;
                     }
                 }
-                this.updateExportProgress({
-                    success,
-                    failed,
-                    total: removedFileUIDs.length,
-                });
             }
         } catch (e) {
             logError(e, 'fileRemover failed');
