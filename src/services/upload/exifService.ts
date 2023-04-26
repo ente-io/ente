@@ -112,15 +112,15 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
 
 function parseEXIFDate(dateTimeString: string) {
     try {
-        if (typeof dateTimeString !== 'string') {
+        if (typeof dateTimeString !== 'string' || dateTimeString === '') {
             throw Error(CustomError.NOT_A_DATE);
         }
 
         // Check and parse date in the format YYYYMMDD
         if (dateTimeString.length === 8) {
-            const year = parseInt(dateTimeString.slice(0, 4), 10);
-            const month = parseInt(dateTimeString.slice(4, 6), 10);
-            const day = parseInt(dateTimeString.slice(6, 8), 10);
+            const year = Number(dateTimeString.slice(0, 4));
+            const month = Number(dateTimeString.slice(4, 6));
+            const day = Number(dateTimeString.slice(6, 8));
             if (
                 !Number.isNaN(year) &&
                 !Number.isNaN(month) &&
@@ -134,15 +134,25 @@ function parseEXIFDate(dateTimeString: string) {
         }
         const [year, month, day, hour, minute, second] = dateTimeString
             .match(/\d+/g)
-            .map((component) => parseInt(component, 10));
+            .map(Number);
 
-        if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) {
+        if (
+            typeof year === 'undefined' ||
+            Number.isNaN(year) ||
+            typeof month === 'undefined' ||
+            Number.isNaN(month) ||
+            typeof day === 'undefined' ||
+            Number.isNaN(day)
+        ) {
             throw Error(CustomError.NOT_A_DATE);
         }
         let date: Date;
         if (
+            typeof hour === 'undefined' ||
             Number.isNaN(hour) ||
+            typeof minute === 'undefined' ||
             Number.isNaN(minute) ||
+            typeof second === 'undefined' ||
             Number.isNaN(second)
         ) {
             date = new Date(year, month - 1, day);
