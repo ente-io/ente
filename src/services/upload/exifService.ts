@@ -175,8 +175,13 @@ export function parseEXIFLocation(
     gpsLongitudeRef: string
 ) {
     try {
-        if (!gpsLatitude || !gpsLongitude) {
-            return NULL_LOCATION;
+        if (
+            !Array.isArray(gpsLatitudeRef) ||
+            !Array.isArray(gpsLongitudeRef) ||
+            gpsLatitude.length !== 3 ||
+            gpsLongitude.length !== 3
+        ) {
+            throw Error(CustomError.NOT_A_LOCATION);
         }
         const latitude = convertDMSToDD(
             gpsLatitude[0],
