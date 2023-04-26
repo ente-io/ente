@@ -261,9 +261,9 @@ export async function moveFile(
     await fs.rename(sourcePath, destinationPath);
 }
 
-export async function deleteFolder(sourcePath: string): Promise<void> {
-    if (!existsSync(sourcePath)) {
+export async function deleteFolder(folderPath: string): Promise<void> {
+    if (!existsSync(folderPath)) {
         return;
     }
-    fs.rmSync(sourcePath, { force: true, recursive: true });
+    fs.rmSync(folderPath, { force: true, recursive: true });
 }
