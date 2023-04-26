@@ -208,10 +208,29 @@ class TextInputDialog extends StatefulWidget {
 class _TextInputDialogState extends State<TextInputDialog> {
   //the value of this ValueNotifier has no significance
   final _submitNotifier = ValueNotifier(false);
+  late final ValueNotifier<bool> _inputIsEmptyNotifier;
+  late final TextEditingController _textEditingController;
+
+  @override
+  void initState() {
+    _textEditingController =
+        widget.textEditingController ?? TextEditingController();
+    _inputIsEmptyNotifier = widget.initialValue?.isEmpty ?? true
+        ? ValueNotifier(true)
+        : ValueNotifier(false);
+    _textEditingController.addListener(() {
+      if (_textEditingController.text.isEmpty != _inputIsEmptyNotifier.value) {
+        _inputIsEmptyNotifier.value = _textEditingController.text.isEmpty;
+      }
+    });
+    super.initState();
+  }
 
   @override
   void dispose() {
     _submitNotifier.dispose();
+    _textEditingController.dispose();
+    _inputIsEmptyNotifier.dispose();
     super.dispose();
   }
 
@@ -258,7 +277,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 textCapitalization: widget.textCapitalization,
                 alwaysShowSuccessState: widget.alwaysShowSuccessState,
                 isPasswordInput: widget.isPasswordInput,
-                textEditingController: widget.textEditingController,
+                textEditingController: _textEditingController,
                 textInputFormatter: widget.textInputFormatter,
                 textInputType: widget.textInputType,
               ),
@@ -277,12 +296,18 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: ButtonWidget(
-                    buttonSize: ButtonSize.small,
-                    buttonType: ButtonType.neutral,
-                    labelText: widget.submitButtonLabel,
-                    onTap: () async {
-                      _submitNotifier.value = !_submitNotifier.value;
+                  child: ValueListenableBuilder(
+                    valueListenable: _inputIsEmptyNotifier,
+                    builder: (context, bool value, _) {
+                      return ButtonWidget(
+                        buttonSize: ButtonSize.small,
+                        buttonType: ButtonType.neutral,
+                        labelText: widget.submitButtonLabel,
+                        isDisabled: value,
+                        onTap: () async {
+                          _submitNotifier.value = !_submitNotifier.value;
+                        },
+                      );
                     },
                   ),
                 ),
