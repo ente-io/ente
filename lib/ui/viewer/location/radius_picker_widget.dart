@@ -73,8 +73,8 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
             );
           },
           child: Container(
-            height: 48,
-            width: 48,
+            height: 52,
+            width: 52,
             decoration: BoxDecoration(
               color: colorScheme.fillFaint,
               borderRadius: const BorderRadius.all(Radius.circular(2)),
@@ -92,12 +92,14 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
               children: [
                 Expanded(
                   flex: 6,
-                  child: Text(
-                    roundedRadius,
-                    style: double.parse(roundedRadius) < 1000
-                        ? textTheme.largeBold
-                        : textTheme.bodyBold,
-                    textAlign: TextAlign.center,
+                  child: Center(
+                    child: Text(
+                      roundedRadius,
+                      style: double.parse(roundedRadius) < 1000
+                          ? textTheme.largeBold
+                          : textTheme.bodyBold,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
                 Expanded(
@@ -119,6 +121,7 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                const SizedBox(height: 4),
                 Text(S.of(context).radius, style: textTheme.body),
                 const SizedBox(height: 16),
                 SizedBox(

@@ -164,7 +164,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                         RadiusPickerWidget(
                           _selectedRadiusIndexNotifier,
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
