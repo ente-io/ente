@@ -171,9 +171,14 @@ class ExportService {
                 userPersonalFiles,
                 exportRecord
             );
+            const deletedExportedFiles = getDeletedExportedFiles(
+                userPersonalFiles,
+                exportRecord
+            );
             return {
                 totalCount: userPersonalFiles.length,
-                pendingCount: unExportedFiles.length,
+                pendingCount:
+                    unExportedFiles.length + deletedExportedFiles.length,
             };
         } catch (e) {
             logError(e, 'getUpdateFileLists failed');
