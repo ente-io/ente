@@ -11,6 +11,8 @@ import { logError } from 'utils/sentry';
 import { getUnixTimeInMicroSeconds } from 'utils/time';
 import { CustomError } from 'utils/error';
 
+const EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE = 'Unknown file format';
+
 type ParsedEXIFData = Record<string, any> &
     Partial<{
         DateTimeOriginal: Date;
@@ -56,20 +58,21 @@ export async function getParsedExifData(
             : exifData;
         return parseExifData(filteredExifData);
     } catch (e) {
-        if (!EXIFLESS_FORMATS.includes(fileTypeInfo.mimeType)) {
-            if (
-                EXIF_LIBRARY_UNSUPPORTED_FORMATS.includes(fileTypeInfo.mimeType)
-            ) {
-                logError(e, 'exif library unsupported format', {
-                    fileType: fileTypeInfo.exactType,
-                });
-            } else {
-                logError(e, 'get parsed exif data failed', {
-                    fileType: fileTypeInfo.exactType,
-                });
-            }
+        if (EXIFLESS_FORMATS.includes(fileTypeInfo.exactType)) {
+            // ignore
+        } else if (
+            EXIF_LIBRARY_UNSUPPORTED_FORMATS.includes(fileTypeInfo.exactType) ||
+            e.message === EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE
+        ) {
+            logError(e, 'exif library unsupported format', {
+                fileType: fileTypeInfo.exactType,
+            });
+        } else {
+            logError(e, 'get parsed exif data failed', {
+                fileType: fileTypeInfo.exactType,
+            });
+            throw e;
         }
-        throw e;
     }
 }
 
