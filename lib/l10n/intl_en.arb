@@ -622,6 +622,11 @@
   "storageLimitExceeded": "Storage limit exceeded",
   "upgrade": "Upgrade",
   "raiseTicket": "Raise ticket",
+  "@raiseTicket": {
+    "description": "Button text for raising a support tickets in case of unhandled errors during backup",
+    "type": "text"
+  },
+
   "backupFailed": "Backup failed",
   "couldNotBackUpTryLater": "We could not backup your data.\nWe will retry later.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "ente can encrypt and preserve files only if you grant access to them",
