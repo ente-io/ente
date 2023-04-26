@@ -78,6 +78,11 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
             decoration: BoxDecoration(
               color: colorScheme.fillFaint,
               borderRadius: const BorderRadius.all(Radius.circular(2)),
+              border: Border.all(
+                color: colorScheme.strokeFainter,
+                width: 1,
+                strokeAlign: BorderSide.strokeAlignInside,
+              ),
             ),
             padding: const EdgeInsets.all(4),
             child: Column(
