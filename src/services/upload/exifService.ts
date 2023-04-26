@@ -25,8 +25,10 @@ type RawEXIFData = Record<string, any> &
         CreateDate: string;
         ModifyDate: string;
         DateCreated: string;
-        latitude: number;
-        longitude: number;
+        GPSLatitude: number[];
+        GPSLongitude: number[];
+        GPSLatitudeRef: string;
+        GPSLongitudeRef: string;
     }>;
 
 export async function getParsedExifData(
@@ -89,12 +91,7 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     if (DateCreated) {
         parsedExif.DateCreated = parseEXIFDate(exifData.DateCreated);
     }
-    if (
-        exifData.GPSLatitude &&
-        exifData.GPSLongitude &&
-        exifData.GPSLatitudeRef &&
-        exifData.GPSLongitudeRef
-    ) {
+    if (exifData.GPSLatitude && exifData.GPSLongitude) {
         const parsedLocation = parseEXIFLocation(
             exifData.GPSLatitude,
             exifData.GPSLatitudeRef,
@@ -176,8 +173,8 @@ export function parseEXIFLocation(
 ) {
     try {
         if (
-            !Array.isArray(gpsLatitudeRef) ||
-            !Array.isArray(gpsLongitudeRef) ||
+            !Array.isArray(gpsLatitude) ||
+            !Array.isArray(gpsLongitude) ||
             gpsLatitude.length !== 3 ||
             gpsLongitude.length !== 3
         ) {
