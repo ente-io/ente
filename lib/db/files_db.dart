@@ -1395,6 +1395,32 @@ class FilesDB {
     return result;
   }
 
+  // returns the localID of all files which are uploaded and belong to the
+  // user and upload time is greater than 20 April 2023 epoch time and less than
+  // 15 May 2023 epoch time
+  Future<List<String>> getFilesWithLocationUploadedBtw20AprTo15May2023(
+      int ownerID) async {
+    final db = await database;
+    final result = await db.query(
+      filesTable,
+      columns: [columnLocalID],
+      distinct: true,
+      where: ''
+          '($columnUploadedFileID IS NOT NULL'
+          ' AND $columnUploadedFileID IS NOT -1)'
+          ' AND $columnOwnerID = ?'
+          ' AND $columnUpdationTime > ? AND $columnUpdationTime < ? '
+          'AND ($columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL) '
+          'AND ($columnLongitude IS NOT 0.0 AND $columnLongitude IS NOT 0.0)',
+      whereArgs: [
+        ownerID,
+        1681952400000000,
+        1684112400000000,
+      ],
+    );
+    return result.map((row) => row[columnLocalID].toString()).toList();
+  }
+
   // For given list of localIDs and ownerID, get a list of uploaded files
   // owned by given user
   Future<List<File>> getFilesForLocalIDs(

@@ -622,6 +622,10 @@
   "storageLimitExceeded": "Límite de datos excedido",
   "upgrade": "Mejorar",
   "raiseTicket": "Generar ticket",
+  "@raiseTicket": {
+    "description": "Button text for raising a support tickets in case of unhandled errors during backup",
+    "type": "text"
+  },
   "backupFailed": "La copia de seguridad ha fallado",
   "couldNotBackUpTryLater": "No pudimos hacer una copia de seguridad de tus datos.\nVolveremos a intentarlo más tarde.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "ente puede cifrar y preservar archivos sólo si concede acceso a ellos",

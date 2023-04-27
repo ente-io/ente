@@ -622,6 +622,10 @@
   "storageLimitExceeded": "已超出存储限制",
   "upgrade": "升级",
   "raiseTicket": "提升工单",
+  "@raiseTicket": {
+    "description": "Button text for raising a support tickets in case of unhandled errors during backup",
+    "type": "text"
+  },
   "backupFailed": "备份失败",
   "couldNotBackUpTryLater": "我们无法备份您的数据。\n我们将稍后再试。",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "只有您授予访问权限，ente 才能加密和保存文件",
