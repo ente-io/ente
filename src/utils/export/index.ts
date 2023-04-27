@@ -300,7 +300,7 @@ export const getOldCollectionExportPath = (
     collectionName: string
 ) => `${dir}/${collectionID}_${oldSanitizeName(collectionName)}`;
 
-export const getOldfileExportPath = (
+export const getOldFileExportPath = (
     collectionExportPath: string,
     file: EnteFile
 ) =>
@@ -308,7 +308,7 @@ export const getOldfileExportPath = (
         file.metadata.title
     )}`;
 
-export const getOldFileMetadataexportPath = (
+export const getOldFileMetadataExportPath = (
     collectionExportPath: string,
     file: EnteFile
 ) =>

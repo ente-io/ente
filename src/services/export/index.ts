@@ -18,8 +18,8 @@ import {
     getCollectionExportedFiles,
     getCollectionExportPath,
     getOldCollectionExportPath,
-    getOldfileExportPath as getOldFileExportPath,
-    getOldFileMetadataexportPath as getOldFileMetadataExportPath,
+    getOldFileExportPath,
+    getOldFileMetadataExportPath,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
