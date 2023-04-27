@@ -7,7 +7,6 @@ import {
     getUniqueFileExportName,
     getFileMetadataExportPath,
     getFileExportPath,
-    getMetadataFolderPath,
     getRenamedCollections,
     getDeletedExportedFiles,
     convertCollectionIDExportNameObjectToMap,
@@ -17,9 +16,7 @@ import {
     getMetadataFileExportPath,
     getCollectionExportedFiles,
     getCollectionExportPath,
-    getOldCollectionExportPath,
-    getOldFileExportPath,
-    getOldFileMetadataExportPath,
+    getMetadataFolderExportPath,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
@@ -34,7 +31,6 @@ import {
     generateStreamFromArrayBuffer,
     getFileExtension,
     getPersonalFiles,
-    mergeMetadata,
 } from 'utils/file';
 
 import { updateFileCreationDateInEXIF } from '../upload/exifService';
@@ -421,7 +417,6 @@ class ExportService {
                     const newCollectionExportName =
                         getUniqueCollectionExportName(
                             exportFolder,
-                            collection.id,
                             collection.name
                         );
                     const newCollectionExportPath = getCollectionExportPath(
@@ -854,7 +849,6 @@ class ExportService {
         const collectionName = collectionIDNameMap.get(collectionID);
         const collectionExportName = getUniqueCollectionExportName(
             exportFolder,
-            collectionID,
             collectionName
         );
         const collectionExportPath = getCollectionExportPath(
@@ -863,37 +857,36 @@ class ExportService {
         );
         await this.electronAPIs.checkExistsAndCreateDir(collectionExportPath);
         await this.electronAPIs.checkExistsAndCreateDir(
-            getMetadataFolderPath(collectionExportPath)
+            getMetadataFolderExportPath(collectionExportPath)
         );
 
         return collectionExportName;
     }
-    async renamecollectionExports(
+    async renameCollectionExports(
         renamedCollections: Collection[],
         exportFolder: string,
         collectionIDPathMap: Map<number, string>
     ) {
         for (const collection of renamedCollections) {
-            const oldcollectionExportPath = collectionIDPathMap.get(
+            const oldCollectionExportPath = collectionIDPathMap.get(
                 collection.id
             );
 
-            const newcollectionExportPath = getUniqueCollectionExportName(
+            const newCollectionExportPath = getUniqueCollectionExportName(
                 exportFolder,
-                collection.id,
                 collection.name
             );
             await this.electronAPIs.checkExistsAndRename(
-                oldcollectionExportPath,
-                newcollectionExportPath
+                oldCollectionExportPath,
+                newCollectionExportPath
             );
 
             await this.addCollectionExportedRecord(
                 exportFolder,
                 collection.id,
-                newcollectionExportPath
+                newCollectionExportPath
             );
-            collectionIDPathMap.set(collection.id, newcollectionExportPath);
+            collectionIDPathMap.set(collection.id, newCollectionExportPath);
         }
     }
 
@@ -904,8 +897,7 @@ class ExportService {
         try {
             const fileExportName = getUniqueFileExportName(
                 collectionExportPath,
-                file.metadata.title,
-                file.id
+                file.metadata.title
             );
             let fileStream = await retryAsyncFunction(() =>
                 downloadManager.downloadFile(file)
@@ -965,8 +957,7 @@ class ExportService {
         const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
         const imageExportName = getUniqueFileExportName(
             collectionExportPath,
-            motionPhoto.imageNameTitle,
-            file.id
+            motionPhoto.imageNameTitle
         );
         await this.saveMediaFile(
             collectionExportPath,
@@ -982,8 +973,7 @@ class ExportService {
         const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
         const videoExportName = getUniqueFileExportName(
             collectionExportPath,
-            motionPhoto.videoNameTitle,
-            file.id
+            motionPhoto.videoNameTitle
         );
         await this.saveMediaFile(
             collectionExportPath,
@@ -1032,103 +1022,19 @@ class ExportService {
         );
     }
 
-    /*
-    This updates the folder name of already exported folders from the earlier format of 
-    `collectionID_collectionName` to newer `collectionName(numbered)` format
-    */
-    async migrateCollectionExports(
-        collections: Collection[],
-        exportDir: string,
-        collectionIDPathMap: Map<number, string>
-    ) {
-        for (const collection of collections) {
-            const oldCollectionExportPath = getOldCollectionExportPath(
-                exportDir,
-                collection.id,
-                collection.name
-            );
-            const newCollectionExportPath = getCollectionExportPath(
-                exportDir,
-                getUniqueCollectionExportName(
-                    exportDir,
-                    collection.id,
-                    collection.name
-                )
-            );
-            collectionIDPathMap.set(collection.id, newCollectionExportPath);
-            if (this.exists(oldCollectionExportPath)) {
-                await this.electronAPIs.checkExistsAndRename(
-                    oldCollectionExportPath,
-                    newCollectionExportPath
-                );
-            } else {
-                await this.electronAPIs.checkExistsAndCreateDir(
-                    newCollectionExportPath
-                );
-            }
-            await this.addCollectionExportedRecord(
-                exportDir,
-                collection.id,
-                newCollectionExportPath
-            );
-        }
-    }
-
-    /*
-    This updates the file name of already exported files from the earlier format of 
-    `fileID_fileName` to newer `fileName(numbered)` format
-    */
-    async migrateFiles(
-        exportDir: string,
-        files: EnteFile[],
-        collectionIDExportNameMap: Map<number, string>
-    ) {
-        for (let file of files) {
-            const collectionExportPath = getCollectionExportPath(
-                exportDir,
-                collectionIDExportNameMap.get(file.collectionID)
-            );
-            const oldFileExportPath = getOldFileExportPath(
-                collectionExportPath,
-                file
-            );
-            const oldFileMetadataExportPath = getOldFileMetadataExportPath(
-                collectionExportPath,
-                file
-            );
-            file = mergeMetadata([file])[0];
-            const newFileExportName = getUniqueFileExportName(
-                collectionExportPath,
-                file.metadata.title,
-                file.id
-            );
-
-            const newFileExportPath = getFileExportPath(
-                collectionExportPath,
-                newFileExportName
-            );
-
-            const newFileMetadataExportPath = getFileMetadataExportPath(
-                collectionExportPath,
-                newFileExportName
-            );
-            await this.electronAPIs.checkExistsAndRename(
-                oldFileExportPath,
-                newFileExportPath
-            );
-            await this.electronAPIs.checkExistsAndRename(
-                oldFileMetadataExportPath,
-                newFileMetadataExportPath
-            );
-        }
-    }
-
     isExportInProgress = () => {
         return this.exportInProgress;
     };
 
     exists = (path: string) => {
         return this.electronAPIs.exists(path);
+    };
+    checkExistsAndRename = (oldPath: string, newPath: string) => {
+        return this.electronAPIs.checkExistsAndRename(oldPath, newPath);
+    };
+
+    checkExistsAndCreateDir = (path: string) => {
+        return this.electronAPIs.checkExistsAndCreateDir(path);
     };
 
     checkAllElectronAPIsExists = () => this.allElectronAPIsExist;
