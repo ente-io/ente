@@ -25,10 +25,7 @@ import {
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import {
-    getLocalCollections,
-    getNonEmptyCollections,
-} from './collectionService';
+import { getLocalCollections } from './collectionService';
 import downloadManager from './downloadManager';
 import { getLocalFiles } from './fileService';
 import { EnteFile } from 'types/file';
@@ -37,6 +34,7 @@ import { decodeMotionPhoto } from './motionPhotoService';
 import {
     generateStreamFromArrayBuffer,
     getFileExtension,
+    getIDBasedSortedFiles,
     getPersonalFiles,
     mergeMetadata,
 } from 'utils/file';
@@ -73,7 +71,7 @@ class ExportService {
     private electronAPIs: ElectronAPIs;
     private exportInProgress: boolean = false;
     private reRunNeeded = false;
-    private exportRecordUpdater = new QueueProcessor<void>(1);
+    private exportRecordUpdater = new QueueProcessor<ExportRecord>(1);
     private stopExport: boolean = false;
     private allElectronAPIsExist: boolean = false;
     private fileReader: FileReader = null;
@@ -173,9 +171,9 @@ class ExportService {
             const user: User = getData(LS_KEYS.USER);
             const files = await getLocalFiles();
             const collections = await getLocalCollections();
-            const userPersonalFiles = await getPersonalFiles(files, user);
+            const userPersonalFiles = getPersonalFiles(files, user);
             const userNonEmptyPersonalCollections =
-                await getNonEmptyPersonalCollections(
+                getNonEmptyPersonalCollections(
                     collections,
                     userPersonalFiles,
                     user
@@ -275,13 +273,12 @@ class ExportService {
             const user: User = getData(LS_KEYS.USER);
             const files = await getLocalFiles();
             const collections = await getLocalCollections();
-            const personalFiles = await getPersonalFiles(files, user);
-            const nonEmptyPersonalCollections =
-                await getNonEmptyPersonalCollections(
-                    collections,
-                    personalFiles,
-                    user
-                );
+            const personalFiles = getPersonalFiles(files, user);
+            const nonEmptyPersonalCollections = getNonEmptyPersonalCollections(
+                collections,
+                personalFiles,
+                user
+            );
             const exportRecord = await this.getExportRecord(exportDir);
 
             const collectionIDPathMap = convertCollectionIDPathObjectToMap(
@@ -721,11 +718,11 @@ class ExportService {
         }
     }
 
-    async updateExportRecord(newData: Partial<ExportRecord>, folder?: string) {
+    updateExportRecord(newData: Partial<ExportRecord>, folder?: string) {
         const response = this.exportRecordUpdater.queueUpRequest(() =>
             this.updateExportRecordHelper(folder, newData)
         );
-        await response.promise;
+        return response.promise;
     }
 
     async updateExportRecordHelper(
@@ -737,11 +734,12 @@ class ExportService {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
             }
             const exportRecord = await this.getExportRecord(folder);
-            const newRecord = { ...exportRecord, ...newData };
+            const newRecord: ExportRecord = { ...exportRecord, ...newData };
             await this.electronAPIs.setExportRecord(
                 `${folder}/${EXPORT_RECORD_FILE_NAME}`,
                 JSON.stringify(newRecord, null, 2)
             );
+            return newRecord;
         } catch (e) {
             logError(e, 'error updating Export Record');
             throw e;
@@ -951,64 +949,71 @@ class ExportService {
     */
     private async migrateExport(exportDir: string) {
         try {
-            const exportRecord = await this.getExportRecord(exportDir);
-            let currentVersion = exportRecord?.version ?? 0;
-            if (currentVersion === 0) {
+            let exportRecord: ExportRecordV1 | ExportRecordV2 | ExportRecord =
+                await this.getExportRecord(exportDir);
+            if (!exportRecord) {
+                exportRecord = {
+                    version: 0,
+                };
+            }
+            addLogLine(`current export version: ${exportRecord.version}`);
+            if (exportRecord.version === 0) {
+                addLogLine('migrating export to version 1');
                 const collectionIDPathMap = new Map<number, string>();
                 const user: User = getData(LS_KEYS.USER);
-
                 const localFiles = await getLocalFiles();
-                const files = localFiles
-                    .filter((file) => file.ownerID === user?.id)
-                    .sort((fileA, fileB) => fileA.id - fileB.id);
-
                 const localCollections = await getLocalCollections();
-                const nonEmptyCollections = getNonEmptyCollections(
-                    localCollections,
-                    files
+                const personalFiles = getIDBasedSortedFiles(
+                    getPersonalFiles(localFiles, user)
                 );
-                const collections = nonEmptyCollections
-                    .filter((collection) => collection.owner.id === user?.id)
-                    .sort(
-                        (collectionA, collectionB) =>
-                            collectionA.id - collectionB.id
+                const nonEmptyPersonalCollections =
+                    getNonEmptyPersonalCollections(
+                        localCollections,
+                        personalFiles,
+                        user
                     );
                 await this.migrateCollectionFolders(
-                    collections,
+                    nonEmptyPersonalCollections,
                     exportDir,
                     collectionIDPathMap
                 );
                 await this.migrateFiles(
-                    getExportedFiles(files, exportRecord),
+                    getExportedFiles(personalFiles, exportRecord),
                     collectionIDPathMap
                 );
-                currentVersion++;
-                await this.updateExportRecord({
-                    version: currentVersion,
+                exportRecord = await this.updateExportRecord({
+                    version: 1,
                 });
+                addLogLine('migration to version 1 complete');
             }
-            if (currentVersion === 1) {
+            if (exportRecord.version === 1) {
+                addLogLine('migrating export to version 2');
                 await this.removeDeprecatedExportRecordProperties();
-                currentVersion++;
-                await this.updateExportRecord({
-                    version: currentVersion,
+                exportRecord = await this.updateExportRecord({
+                    version: 2,
                 });
+                addLogLine('migration to version 2 complete');
             }
-            if (currentVersion === 2) {
+            if (exportRecord.version === 2) {
+                addLogLine('migrating export to version 3');
                 const user: User = getData(LS_KEYS.USER);
-
                 const localFiles = await getLocalFiles();
-                const files = localFiles
-                    .filter((file) => file.ownerID === user?.id)
-                    .sort((fileA, fileB) => fileA.id - fileB.id);
-
-                await this.updateExportedFilesToExportedFilePathsProperty(
-                    getExportedFiles(files, exportRecord)
+                const personalFiles = getIDBasedSortedFiles(
+                    getPersonalFiles(localFiles, user)
                 );
-                currentVersion++;
-                await this.updateExportRecord({
-                    version: currentVersion,
+                addLogLine(`personal files count: ${personalFiles.length}`);
+                // earlier the file were sorted by id,
+                // which we can use to determine which file got which number suffix
+                // this can be used to determine the filepaths of the those already exported files
+                // and update the exportedFilePaths property of the exportRecord
+                await this.updateExportedFilesToExportedFilePathsProperty(
+                    exportRecord as ExportRecordV2,
+                    getExportedFiles(personalFiles, exportRecord)
+                );
+                exportRecord = await this.updateExportRecord({
+                    version: 3,
                 });
+                addLogLine('migration to version 3 complete');
             }
         } catch (e) {
             logError(e, 'export record migration failed');
@@ -1109,10 +1114,13 @@ class ExportService {
     }
 
     private async updateExportedFilesToExportedFilePathsProperty(
+        exportRecord: ExportRecordV2,
         exportedFiles: EnteFile[]
     ) {
-        const exportRecord =
-            (await this.getExportRecord()) as unknown as ExportRecordV2;
+        addLogLine(
+            'updating exported files to exported file paths property',
+            `got ${exportedFiles.length} files`
+        );
         let exportedFilePaths: ExportedFilePaths;
         const usedFilePaths = new Set<string>();
         const exportedCollectionPaths = convertCollectionIDPathObjectToMap(
@@ -1133,10 +1141,9 @@ class ExportService {
                 [getExportRecordFileUID(file)]: filePath,
             };
         }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { exportedFiles: _, ...rest } = exportRecord;
+        exportRecord.exportedFiles = undefined;
         const updatedExportRecord: ExportRecord = {
-            ...rest,
+            ...exportRecord,
             exportedFilePaths,
         };
 

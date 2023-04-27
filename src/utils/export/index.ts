@@ -2,6 +2,8 @@ import { Collection } from 'types/collection';
 import exportService from 'services/exportService';
 import {
     ExportRecord,
+    ExportRecordV1,
+    ExportRecordV2,
     ExportedCollectionPaths,
     ExportedFilePaths,
 } from 'types/export';
@@ -107,6 +109,25 @@ export const getUnExportedFiles = (
 };
 
 export const getExportedFiles = (
+    allFiles: EnteFile[],
+    exportRecord: ExportRecordV1 | ExportRecordV2
+) => {
+    if (!exportRecord?.exportedFiles) {
+        return [];
+    }
+
+    const exportedFileIds = new Set(exportRecord?.exportedFiles);
+    const exportedFiles = allFiles.filter((file) => {
+        if (exportedFileIds.has(getExportRecordFileUID(file))) {
+            return true;
+        } else {
+            return false;
+        }
+    });
+    return exportedFiles;
+};
+
+export const getExportedFilePaths = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
@@ -293,7 +314,6 @@ export const getUniqueFileSaveNameForMigration = (
     let fileSaveName = sanitizeName(filename);
     let count = 1;
     while (usedFilePaths.has(getFileSavePath(collectionPath, fileSaveName))) {
-        usedFilePaths.add(getFileSavePath(collectionPath, fileSaveName));
         const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
         if (filenameParts[1]) {
             fileSaveName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
@@ -302,6 +322,7 @@ export const getUniqueFileSaveNameForMigration = (
         }
         count++;
     }
+    usedFilePaths.add(getFileSavePath(collectionPath, fileSaveName));
     return fileSaveName;
 };
 

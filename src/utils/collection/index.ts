@@ -274,11 +274,11 @@ export function getCollectionNameMap(
     );
 }
 
-export async function getNonEmptyPersonalCollections(
+export function getNonEmptyPersonalCollections(
     collections: Collection[],
     personalFiles: EnteFile[],
     user: User
-): Promise<Collection[]> {
+): Collection[] {
     if (!user?.id) {
         throw Error('user missing');
     }
