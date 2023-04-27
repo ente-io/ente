@@ -27,7 +27,7 @@ import downloadManager from './downloadManager';
 import { getLocalFiles } from './fileService';
 import { EnteFile } from 'types/file';
 
-import { decodeMotionPhoto } from './motionPhotoService';
+import { decodeLivePhoto } from './livePhotoService';
 import {
     generateStreamFromArrayBuffer,
     getFileExtension,
@@ -539,7 +539,7 @@ class ExportService {
                 fileStream = updatedFileBlob.stream();
             }
             if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                await this.exportMotionPhoto(fileStream, file, collectionPath);
+                await this.exportLivePhoto(fileStream, file, collectionPath);
             } else {
                 await this.saveMediaFile(
                     collectionPath,
@@ -554,26 +554,26 @@ class ExportService {
         }
     }
 
-    private async exportMotionPhoto(
+    private async exportLivePhoto(
         fileStream: ReadableStream<any>,
         file: EnteFile,
         collectionPath: string
     ) {
         const fileBlob = await new Response(fileStream).blob();
-        const motionPhoto = await decodeMotionPhoto(file, fileBlob);
-        const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
+        const livePhoto = await decodeLivePhoto(file, fileBlob);
+        const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
         const imageSaveName = getUniqueFileSaveName(
             collectionPath,
-            motionPhoto.imageNameTitle,
+            livePhoto.imageNameTitle,
             file.id
         );
         await this.saveMediaFile(collectionPath, imageSaveName, imageStream);
         await this.saveMetadataFile(collectionPath, imageSaveName, file);
 
-        const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
+        const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
         const videoSaveName = getUniqueFileSaveName(
             collectionPath,
-            motionPhoto.videoNameTitle,
+            livePhoto.videoNameTitle,
             file.id
         );
         await this.saveMediaFile(collectionPath, videoSaveName, videoStream);

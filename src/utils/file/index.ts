@@ -1,6 +1,6 @@
 import { SelectedState } from 'types/gallery';
 import { EnteFile, EncryptedEnteFile } from 'types/file';
-import { decodeMotionPhoto } from 'services/motionPhotoService';
+import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
@@ -82,25 +82,19 @@ export async function downloadFile(
         }
 
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const motionPhoto = await decodeMotionPhoto(file, fileBlob);
-            const image = new File(
-                [motionPhoto.image],
-                motionPhoto.imageNameTitle
-            );
+            const livePhoto = await decodeLivePhoto(file, fileBlob);
+            const image = new File([livePhoto.image], livePhoto.imageNameTitle);
             const imageType = await getFileType(image);
             const tempImageURL = URL.createObjectURL(
-                new Blob([motionPhoto.image], { type: imageType.mimeType })
+                new Blob([livePhoto.image], { type: imageType.mimeType })
             );
-            const video = new File(
-                [motionPhoto.video],
-                motionPhoto.videoNameTitle
-            );
+            const video = new File([livePhoto.video], livePhoto.videoNameTitle);
             const videoType = await getFileType(video);
             const tempVideoURL = URL.createObjectURL(
-                new Blob([motionPhoto.video], { type: videoType.mimeType })
+                new Blob([livePhoto.video], { type: videoType.mimeType })
             );
-            downloadUsingAnchor(tempImageURL, motionPhoto.imageNameTitle);
-            downloadUsingAnchor(tempVideoURL, motionPhoto.videoNameTitle);
+            downloadUsingAnchor(tempImageURL, livePhoto.imageNameTitle);
+            downloadUsingAnchor(tempVideoURL, livePhoto.videoNameTitle);
         } else {
             const fileType = await getFileType(
                 new File([fileBlob], file.metadata.title)
@@ -315,11 +309,11 @@ async function getRenderableLivePhoto(
     file: EnteFile,
     fileBlob: Blob
 ): Promise<Blob[]> {
-    const motionPhoto = await decodeMotionPhoto(file, fileBlob);
-    const imageBlob = new Blob([motionPhoto.image]);
+    const livePhoto = await decodeLivePhoto(file, fileBlob);
+    const imageBlob = new Blob([livePhoto.image]);
     return await Promise.all([
-        getRenderableImage(motionPhoto.imageNameTitle, imageBlob),
-        getPlayableVideo(motionPhoto.videoNameTitle, motionPhoto.video),
+        getRenderableImage(livePhoto.imageNameTitle, imageBlob),
+        getPlayableVideo(livePhoto.videoNameTitle, livePhoto.video),
     ]);
 }
 
