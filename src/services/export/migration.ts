@@ -117,13 +117,6 @@ async function migrationV2ToV3(
     exportRecord: ExportRecordV2,
     updateExportRecord: UpdatedExportRecord
 ) {
-    addLocalLog(() => `migrationV2ToV3: ${JSON.stringify(exportRecord)}`);
-    await extractExportDirPathPrefix(
-        exportDir,
-        exportRecord,
-        updateExportRecord
-    );
-    addLocalLog(() => `migrationV2ToV3: ${JSON.stringify(exportRecord)}`);
     const user: User = getData(LS_KEYS.USER);
     const localFiles = await getLocalFiles();
     const personalFiles = getIDBasedSortedFiles(
@@ -139,6 +132,11 @@ async function migrationV2ToV3(
         exportRecord,
         updateExportRecord,
         getExportedFiles(personalFiles, exportRecord)
+    );
+    await extractExportDirPathPrefix(
+        exportDir,
+        exportRecord,
+        updateExportRecord
     );
 }
 
