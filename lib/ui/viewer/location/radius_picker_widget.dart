@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/colors.dart";
@@ -35,6 +36,7 @@ class RadiusPickerWidget extends StatefulWidget {
 }
 
 class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
+  final _logger = Logger("RadiusPickerWidget");
   @override
   void initState() {
     super.initState();
@@ -174,8 +176,8 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
     return result;
   }
 
-  void _customRadiusOnTap() {
-    showTextInputDialog(
+  Future<void> _customRadiusOnTap() async {
+    final result = await showTextInputDialog(
       context,
       title: "Custom radius",
       onSubmit: (customRadius) async {
@@ -192,17 +194,20 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
             });
           }
         } else {
-          showErrorDialog(
-            context,
-            "Invalid radius",
-            "Please enter a valid radius",
-          );
+          throw Exception("Radius is null");
         }
       },
       submitButtonLabel: "Done",
       textInputFormatter: [NumberWithDecimalInputFormatter(maxValue: 10000)],
       textInputType: const TextInputType.numberWithOptions(decimal: true),
     );
+    if (result is Exception) {
+      await showGenericErrorDialog(context: context);
+      _logger.severe(
+        "Failed to create custom radius",
+        result,
+      );
+    }
   }
 }
 
