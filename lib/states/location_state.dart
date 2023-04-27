@@ -28,7 +28,8 @@ class LocationTagStateProvider extends StatefulWidget {
 }
 
 class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
-  int _selectedRaduisIndex = defaultRadiusValueIndex;
+  late double _selectedRadius;
+
   late Location? _centerPoint;
   late LocalEntity<LocationTag>? _locationTagEntity;
   final Debouncer _selectedRadiusDebouncer =
@@ -47,9 +48,9 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
     ///value to the list of default radius values only for this location tag and
     ///keep it in the state of this widget.
     _radiusValues = _getRadiusValuesOfLocTag(_locationTagEntity?.item.radius);
-    _selectedRaduisIndex =
-        _locationTagEntity?.item.radiusIndex(_radiusValues) ??
-            defaultRadiusValueIndex;
+
+    _selectedRadius = _locationTagEntity?.item.radius ?? defaultRadiusValue;
+
     _locTagEntityListener =
         Bus.instance.on<LocationTagUpdatedEvent>().listen((event) {
       _locationTagUpdateListener(event);
@@ -66,11 +67,11 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
   void _locationTagUpdateListener(LocationTagUpdatedEvent event) {
     if (event.type == LocTagEventType.update) {
       if (event.updatedLocTagEntities!.first.id == _locationTagEntity!.id) {
-        //Update state when locationTag is updated.
         setState(() {
           final updatedLocTagEntity = event.updatedLocTagEntities!.first;
-          _selectedRaduisIndex =
-              updatedLocTagEntity.item.radiusIndex(_radiusValues);
+
+          _selectedRadius = updatedLocTagEntity.item.radius;
+
           _centerPoint = updatedLocTagEntity.item.centerPoint;
           _locationTagEntity = updatedLocTagEntity;
         });
@@ -78,12 +79,12 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
     }
   }
 
-  void _updateSelectedIndex(int index) {
+  void _updateSelectedRadius(double radius) {
     _selectedRadiusDebouncer.cancelDebounce();
     _selectedRadiusDebouncer.run(() async {
       if (mounted) {
         setState(() {
-          _selectedRaduisIndex = index;
+          _selectedRadius = radius;
         });
       }
     });
@@ -126,9 +127,9 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
   @override
   Widget build(BuildContext context) {
     return InheritedLocationTagData(
-      _selectedRaduisIndex,
+      _selectedRadius,
       _centerPoint!,
-      _updateSelectedIndex,
+      _updateSelectedRadius,
       _locationTagEntity,
       _updateCenterPoint,
       _updateRadiusValues,
@@ -140,18 +141,18 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
 
 ///This InheritedWidget's state is used in add & edit location sheets
 class InheritedLocationTagData extends InheritedWidget {
-  final int selectedRadiusIndex;
+  final double selectedRadius;
   final Location centerPoint;
   //locationTag is null when we are creating a new location tag in add location sheet
   final LocalEntity<LocationTag>? locationTagEntity;
-  final VoidCallbackParamInt updateSelectedIndex;
+  final VoidCallbackParamDouble updateSelectedRadius;
   final VoidCallbackParamLocation updateCenterPoint;
   final VoidCallbackParamListDouble updateRadiusValues;
   final List<double> radiusValues;
   const InheritedLocationTagData(
-    this.selectedRadiusIndex,
+    this.selectedRadius,
     this.centerPoint,
-    this.updateSelectedIndex,
+    this.updateSelectedRadius,
     this.locationTagEntity,
     this.updateCenterPoint,
     this.updateRadiusValues,
@@ -167,7 +168,9 @@ class InheritedLocationTagData extends InheritedWidget {
 
   @override
   bool updateShouldNotify(InheritedLocationTagData oldWidget) {
-    return oldWidget.selectedRadiusIndex != selectedRadiusIndex ||
+    print(selectedRadius);
+    print(oldWidget.selectedRadius != selectedRadius);
+    return oldWidget.selectedRadius != selectedRadius ||
         !oldWidget.radiusValues.equals(radiusValues) ||
         oldWidget.centerPoint != centerPoint ||
         oldWidget.locationTagEntity != locationTagEntity;

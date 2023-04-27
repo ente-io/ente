@@ -23,11 +23,11 @@ class CustomTrackShape extends RoundedRectSliderTrackShape {
 }
 
 class RadiusPickerWidget extends StatefulWidget {
-  ///This notifier can be listened to get the selected radius index from
-  ///a parent widget.
-  final ValueNotifier<int> selectedRadiusIndexNotifier;
+  ///This notifier can be listened from a parent widget to get the selected radius
+  final ValueNotifier<double> selectedRadiusNotifier;
+
   const RadiusPickerWidget(
-    this.selectedRadiusIndexNotifier, {
+    this.selectedRadiusNotifier, {
     super.key,
   });
 
@@ -44,19 +44,18 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
 
   @override
   void didChangeDependencies() {
-    widget.selectedRadiusIndexNotifier.value =
-        InheritedLocationTagData.of(context).selectedRadiusIndex;
+    widget.selectedRadiusNotifier.value =
+        InheritedLocationTagData.of(context).selectedRadius;
     super.didChangeDependencies();
   }
 
   @override
   Widget build(BuildContext context) {
     final radiusValues = InheritedLocationTagData.of(context).radiusValues;
-    final selectedRadiusIndex = widget.selectedRadiusIndexNotifier.value;
-    final radiusValue = radiusValues[selectedRadiusIndex];
+    final selectedRadius = widget.selectedRadiusNotifier.value;
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-    final roundedRadius = roundRadius(radiusValue);
+    final roundedRadius = roundRadius(selectedRadius);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -136,11 +135,11 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
                     ),
                     child: RepaintBoundary(
                       child: Slider(
-                        value: selectedRadiusIndex.toDouble(),
+                        value: radiusValues.indexOf(selectedRadius).toDouble(),
                         onChanged: (value) {
                           setState(() {
-                            widget.selectedRadiusIndexNotifier.value =
-                                value.toInt();
+                            widget.selectedRadiusNotifier.value =
+                                radiusValues[value.toInt()];
                           });
                         },
                         min: 0,
@@ -187,10 +186,7 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
           locationTagState.updateRadiusValues([radius]);
           if (mounted) {
             setState(() {
-              widget.selectedRadiusIndexNotifier.value =
-                  InheritedLocationTagData.of(context)
-                      .radiusValues
-                      .indexOf(radius);
+              widget.selectedRadiusNotifier.value = radius;
             });
           }
         } else {
