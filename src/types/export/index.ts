@@ -9,9 +9,14 @@ export interface ExportedCollectionPaths {
     [ID: number]: string;
 }
 
-export interface ExportedFilePaths {
+export interface CollectionExportNames {
+    [ID: number]: string;
+}
+
+export interface FileExportNames {
     [ID: string]: string;
 }
+
 export interface FileExportStats {
     totalCount: number;
     pendingCount: number;
@@ -40,8 +45,9 @@ export interface ExportRecord {
     version: number;
     stage: ExportStage;
     lastAttemptTimestamp: number;
-    exportedCollectionPaths: ExportedCollectionPaths;
-    exportedFilePaths: ExportedFilePaths;
+    exportFolderPath: string;
+    collectionExportNames: CollectionExportNames;
+    fileExportNames: FileExportNames;
 }
 
 export interface ExportSettings {

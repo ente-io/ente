@@ -1,11 +1,11 @@
 import { Collection } from 'types/collection';
-import exportService from 'services/exportService';
+import exportService from 'services/export';
 import {
     ExportRecord,
     ExportRecordV1,
     ExportRecordV2,
-    ExportedCollectionPaths,
-    ExportedFilePaths,
+    CollectionExportNames,
+    FileExportNames,
 } from 'types/export';
 
 import { EnteFile } from 'types/file';
@@ -19,21 +19,21 @@ import { formatDateTimeShort } from 'utils/time/format';
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
 
-export const convertCollectionIDPathObjectToMap = (
-    exportedCollectionPaths: ExportedCollectionPaths
+export const convertCollectionIDExportNameObjectToMap = (
+    exportedCollectionNames: CollectionExportNames
 ): Map<number, string> => {
     return new Map<number, string>(
-        Object.entries(exportedCollectionPaths ?? {}).map((e) => {
+        Object.entries(exportedCollectionNames ?? {}).map((e) => {
             return [Number(e[0]), String(e[1])];
         })
     );
 };
 
-export const convertFileIDPathObjectToMap = (
-    exportedFilePaths: ExportedFilePaths
+export const convertFileIDExportNameObjectToMap = (
+    exportedFileNames: FileExportNames
 ): Map<string, string> => {
     return new Map<string, string>(
-        Object.entries(exportedFilePaths ?? {}).map((e) => {
+        Object.entries(exportedFileNames ?? {}).map((e) => {
             return [String(e[0]), String(e[1])];
         })
     );
@@ -43,23 +43,17 @@ export const getRenamedCollections = (
     collections: Collection[],
     exportRecord: ExportRecord
 ) => {
-    if (!exportRecord?.exportedCollectionPaths) {
+    if (!exportRecord?.collectionExportNames) {
         return [];
     }
-    const collectionIDPathMap = convertCollectionIDPathObjectToMap(
-        exportRecord.exportedCollectionPaths
+    const collectionIDFolderMap = convertCollectionIDExportNameObjectToMap(
+        exportRecord.collectionExportNames
     );
     const renamedCollections = collections.filter((collection) => {
-        if (collectionIDPathMap.has(collection.id)) {
-            const currentFolderName = collectionIDPathMap.get(collection.id);
-            const startIndex = currentFolderName.lastIndexOf('/');
-            const lastIndex = currentFolderName.lastIndexOf('(');
-            const nameRoot = currentFolderName.slice(
-                startIndex + 1,
-                lastIndex !== -1 ? lastIndex : currentFolderName.length
-            );
+        if (collectionIDFolderMap.has(collection.id)) {
+            const currentFolderName = collectionIDFolderMap.get(collection.id);
 
-            if (nameRoot !== sanitizeName(collection.name)) {
+            if (currentFolderName !== sanitizeName(collection.name)) {
                 return true;
             }
         }
@@ -72,14 +66,14 @@ export const getDeletedExportedCollections = (
     collections: Collection[],
     exportRecord: ExportRecord
 ) => {
-    if (!exportRecord?.exportedCollectionPaths) {
+    if (!exportRecord?.collectionExportNames) {
         return [];
     }
     const presentCollections = new Set(
         collections.map((collection) => collection.id)
     );
     const deletedExportedCollections = Object.keys(
-        exportRecord?.exportedCollectionPaths
+        exportRecord?.collectionExportNames
     )
         .map(Number)
         .filter((collectionID) => {
@@ -95,10 +89,10 @@ export const getUnExportedFiles = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
-    if (!exportRecord?.exportedFilePaths) {
+    if (!exportRecord?.fileExportNames) {
         return allFiles;
     }
-    const exportedFiles = new Set(Object.keys(exportRecord?.exportedFilePaths));
+    const exportedFiles = new Set(Object.keys(exportRecord?.fileExportNames));
     const unExportedFiles = allFiles.filter((file) => {
         if (!exportedFiles.has(getExportRecordFileUID(file))) {
             return true;
@@ -131,12 +125,10 @@ export const getExportedFilePaths = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord
 ) => {
-    if (!exportRecord?.exportedFilePaths) {
+    if (!exportRecord?.fileExportNames) {
         return [];
     }
-    const exportedFileIds = new Set(
-        Object.keys(exportRecord?.exportedFilePaths)
-    );
+    const exportedFileIds = new Set(Object.keys(exportRecord?.fileExportNames));
     const exportedFiles = allFiles.filter((file) => {
         if (exportedFileIds.has(getExportRecordFileUID(file))) {
             return true;
@@ -150,14 +142,14 @@ export const getDeletedExportedFiles = (
     allFiles: EnteFile[],
     exportRecord: ExportRecord
 ): string[] => {
-    if (!exportRecord?.exportedFilePaths) {
+    if (!exportRecord?.fileExportNames) {
         return [];
     }
     const presentFileUIDs = new Set(
         allFiles?.map((file) => getExportRecordFileUID(file))
     );
     const deletedExportedFiles = Object.keys(
-        exportRecord?.exportedFilePaths
+        exportRecord?.fileExportNames
     ).filter((fileUID) => {
         if (!presentFileUIDs.has(fileUID)) {
             return true;
@@ -171,11 +163,11 @@ export const getCollectionExportedFiles = (
     exportRecord: ExportRecord,
     collectionID: number
 ): string[] => {
-    if (!exportRecord?.exportedFilePaths) {
+    if (!exportRecord?.fileExportNames) {
         return [];
     }
     const collectionExportedFiles = Object.keys(
-        exportRecord?.exportedFilePaths
+        exportRecord?.fileExportNames
     ).filter((fileUID) => {
         const fileCollectionID = Number(fileUID.split('_')[1]);
         if (fileCollectionID === collectionID) {
@@ -188,7 +180,7 @@ export const getCollectionExportedFiles = (
 };
 
 export const getGoogleLikeMetadataFile = (
-    fileSaveName: string,
+    fileExportName: string,
     file: EnteFile
 ) => {
     const metadata: Metadata = file.metadata;
@@ -199,7 +191,7 @@ export const getGoogleLikeMetadataFile = (
     const captionValue: string = file?.pubMagicMetadata?.data?.caption;
     return JSON.stringify(
         {
-            title: fileSaveName,
+            title: fileExportName,
             caption: captionValue,
             creationTime: {
                 timestamp: creationTime,
@@ -225,117 +217,126 @@ export const oldSanitizeName = (name: string) =>
 export const sanitizeName = (name: string) =>
     sanitize(name, { replacement: '_' });
 
-export const getUniqueCollectionFolderPath = (
+export const getUniqueCollectionExportName = (
     dir: string,
     collectionID: number,
     collectionName: string
 ): string => {
     if (!exportService.checkAllElectronAPIsExists()) {
-        return getOldCollectionFolderPath(dir, collectionID, collectionName);
+        return getOldCollectionExportPath(dir, collectionID, collectionName);
     }
-    let collectionFolderPath = `${dir}/${sanitizeName(collectionName)}`;
+    let collectionExportName = sanitizeName(collectionName);
     let count = 1;
-    while (exportService.exists(collectionFolderPath)) {
-        collectionFolderPath = `${dir}/${sanitizeName(
-            collectionName
-        )}(${count})`;
+    while (
+        exportService.exists(getCollectionExportPath(dir, collectionExportName))
+    ) {
+        collectionExportName = `${collectionExportName}(${count})`;
         count++;
     }
-    return collectionFolderPath;
+    return collectionExportName;
 };
 
-export const getMetadataFolderPath = (collectionFolderPath: string) =>
-    `${collectionFolderPath}/${ENTE_METADATA_FOLDER}`;
+export const getMetadataFolderPath = (collectionExportPath: string) =>
+    `${collectionExportPath}/${ENTE_METADATA_FOLDER}`;
 
-export const getUniqueFileSaveName = (
-    collectionPath: string,
+export const getUniqueFileExportName = (
+    collectionExportPath: string,
     filename: string,
     fileID: number
 ) => {
     if (!exportService.checkAllElectronAPIsExists()) {
-        return getOldFileSaveName(filename, fileID);
+        return getOldFileExportName(filename, fileID);
     }
-    let fileSaveName = sanitizeName(filename);
+    let fileExportName = sanitizeName(filename);
     let count = 1;
     while (
-        exportService.exists(getFileSavePath(collectionPath, fileSaveName))
+        exportService.exists(
+            getFileExportPath(collectionExportPath, fileExportName)
+        )
     ) {
         const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
         if (filenameParts[1]) {
-            fileSaveName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
+            fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
         } else {
-            fileSaveName = `${filenameParts[0]}(${count})`;
+            fileExportName = `${filenameParts[0]}(${count})`;
         }
         count++;
     }
-    return fileSaveName;
+    return fileExportName;
 };
 
-export const getOldFileSaveName = (filename: string, fileID: number) =>
+export const getOldFileExportName = (filename: string, fileID: number) =>
     `${fileID}_${oldSanitizeName(filename)}`;
 
-export const getFileMetadataSavePath = (
-    collectionFolderPath: string,
-    fileSaveName: string
-) => `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${fileSaveName}.json`;
+export const getFileMetadataExportPath = (
+    collectionExportPath: string,
+    fileExportName: string
+) => `${collectionExportPath}/${ENTE_METADATA_FOLDER}/${fileExportName}.json`;
 
-export const getFileSavePath = (
-    collectionFolderPath: string,
-    fileSaveName: string
-) => `${collectionFolderPath}/${fileSaveName}`;
+export const getCollectionExportPath = (
+    exportFolder: string,
+    collectionExportName: string
+) => `${exportFolder}/${collectionExportName}`;
 
-export const getOldCollectionFolderPath = (
+export const getFileExportPath = (
+    collectionExportPath: string,
+    fileExportName: string
+) => `${collectionExportPath}/${fileExportName}`;
+
+export const getOldCollectionExportPath = (
     dir: string,
     collectionID: number,
     collectionName: string
 ) => `${dir}/${collectionID}_${oldSanitizeName(collectionName)}`;
 
-export const getOldFileSavePath = (
-    collectionFolderPath: string,
+export const getOldfileExportPath = (
+    collectionExportPath: string,
     file: EnteFile
 ) =>
-    `${collectionFolderPath}/${file.id}_${oldSanitizeName(
+    `${collectionExportPath}/${file.id}_${oldSanitizeName(
         file.metadata.title
     )}`;
 
-export const getOldFileMetadataSavePath = (
-    collectionFolderPath: string,
+export const getOldFileMetadataexportPath = (
+    collectionExportPath: string,
     file: EnteFile
 ) =>
-    `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${
+    `${collectionExportPath}/${ENTE_METADATA_FOLDER}/${
         file.id
     }_${oldSanitizeName(file.metadata.title)}.json`;
 
-export const getUniqueFileSaveNameForMigration = (
+export const getUniqueFileExportNameForMigration = (
     collectionPath: string,
     filename: string,
     usedFilePaths: Set<string>
 ) => {
-    let fileSaveName = sanitizeName(filename);
+    let fileExportName = sanitizeName(filename);
     let count = 1;
-    while (usedFilePaths.has(getFileSavePath(collectionPath, fileSaveName))) {
+    while (
+        usedFilePaths.has(getFileExportPath(collectionPath, fileExportName))
+    ) {
         const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
         if (filenameParts[1]) {
-            fileSaveName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
+            fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
         } else {
-            fileSaveName = `${filenameParts[0]}(${count})`;
+            fileExportName = `${filenameParts[0]}(${count})`;
         }
         count++;
     }
-    usedFilePaths.add(getFileSavePath(collectionPath, fileSaveName));
-    return fileSaveName;
+    usedFilePaths.add(getFileExportPath(collectionPath, fileExportName));
+    return fileExportName;
 };
 
-export const getTrashedFilePath = (exportDir: string, path: string) => {
+export const getTrashedFileExportPath = (exportDir: string, path: string) => {
     const fileRelativePath = path.replace(`${exportDir}/`, '');
     return `${exportDir}/${ENTE_TRASH_FOLDER}/${fileRelativePath}`;
 };
 
 // if filepath is /home/user/Ente/Export/Collection1/1.jpg
 // then metadata path is /home/user/Ente/Export/Collection1/ENTE_METADATA_FOLDER/1.jpg.json
-export const getMetadataFilePath = (filePath: string) => {
+export const getMetadataFileExportPath = (filePath: string) => {
     // extract filename and collection folder path
     const filename = filePath.split('/').pop();
-    const collectionFolderPath = filePath.replace(`/${filename}`, '');
-    return `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${filename}.json`;
+    const collectionExportPath = filePath.replace(`/${filename}`, '');
+    return `${collectionExportPath}/${ENTE_METADATA_FOLDER}/${filename}.json`;
 };
