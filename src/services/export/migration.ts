@@ -133,7 +133,6 @@ async function migrationV2ToV3(
     // and update the exportedFilePaths property of the exportRecord
     // This is based on the assumption new files have higher ids than the older ones
     await updateExportedFilesToExportedFilePathsProperty(
-        exportDir,
         exportRecord,
         updateExportRecord,
         getExportedFiles(personalFiles, exportRecord)
@@ -177,7 +176,6 @@ async function extractExportDirPathPrefix(
 }
 
 export async function updateExportedFilesToExportedFilePathsProperty(
-    exportDir: string,
     exportRecord: ExportRecordV2,
     updateExportRecord: UpdatedExportRecord,
     exportedFiles: EnteFile[]
