@@ -7,7 +7,7 @@ module.exports = {
         'plugin:@typescript-eslint/recommended-requiring-type-checking',
     ],
     parserOptions: {
-        project: './tsconfig.json',
+        // project: '@ente/tsconfig/ente.json',
     },
     rules: {
         '@next/next/no-html-link-for-pages': 'off',

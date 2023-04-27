@@ -1,31 +1,6 @@
 {
+    "extends": "@ente/tsconfig/ente.json",
     "compilerOptions": {
-        "target": "es5",
-        "lib": ["dom", "dom.iterable", "esnext", "webworker"],
-        "allowJs": true,
-        "skipLibCheck": true,
-        "strict": true,
-        "strictBindCallApply": false,
-        "strictNullChecks": false,
-        "strictPropertyInitialization": false,
-        "noImplicitAny": false,
-        "useUnknownInCatchVariables": false,
-        "forceConsistentCasingInFileNames": true,
-        "noEmit": true,
-        "esModuleInterop": true,
-        "module": "esnext",
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "jsx": "preserve",
-        "baseUrl": ".",
-        "paths": {
-            "*": ["src/*"]
-        },
-        "downlevelIteration": true,
-        "jsxImportSource": "@emotion/react",
-        "incremental": true
-    },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-    "exclude": ["node_modules"]
+        "baseUrl": "./src",
+    }
 }

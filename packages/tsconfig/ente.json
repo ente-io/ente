@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "strictBindCallApply": false,
+        "strictNullChecks": false,
+        "strictPropertyInitialization": false,
+        "noImplicitAny": false,
+        "useUnknownInCatchVariables": false,
+        "forceConsistentCasingInFileNames": true,
+        "noEmit": true,
+        "esModuleInterop": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "jsx": "preserve",
+        "baseUrl": "./src",
+        "downlevelIteration": true,
+        "jsxImportSource": "@emotion/react",
+        "incremental": true
+    },
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
+    "exclude": ["node_modules", "out", ".next", "thirdparty"]
+}

@@ -1,5 +1,5 @@
 module.exports = {
     root: true,
-    extends: ["ente"],
+    extends: ["@ente/eslint-config"],
   };
   

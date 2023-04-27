@@ -112,8 +112,8 @@
         "lint-staged": "^11.1.2",
         "prettier": "2.3.2",
         "typescript": "^4.1.3",
-        "tsconfig": "*",
-        "eslint-config": "*"
+        "@ente/tsconfig": "workspace:*",
+        "@ente/eslint-config": "*"
     },
     "standard": {
         "parser": "babel-eslint"

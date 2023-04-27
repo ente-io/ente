@@ -8,7 +8,8 @@
       "eslint-config-prettier": "latest",
       "eslint-plugin-react": "latest",
       "eslint-config-turbo": "latest",
-      "@typescript-eslint/eslint-plugin": "^5.43.0"
+      "@typescript-eslint/eslint-plugin": "^5.43.0",
+      "@ente/tsconfig": "*"
     },
     "standard": {
         "parser": "babel-eslint"
