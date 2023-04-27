@@ -1006,6 +1006,7 @@ class ExportService {
                 // which we can use to determine which file got which number suffix
                 // this can be used to determine the filepaths of the those already exported files
                 // and update the exportedFilePaths property of the exportRecord
+                // This is based on the assumption new files have higher ids than the older ones
                 await this.updateExportedFilesToExportedFilePathsProperty(
                     exportRecord as ExportRecordV2,
                     getExportedFiles(personalFiles, exportRecord)
