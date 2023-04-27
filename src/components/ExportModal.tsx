@@ -1,6 +1,6 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState, useContext } from 'react';
-import exportService from 'services/exportService';
+import exportService from 'services/export';
 import {
     ExportProgress,
     ExportRecord,

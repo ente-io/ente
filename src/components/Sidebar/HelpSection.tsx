@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { t } from 'i18next';
 
 import ExportModal from 'components/ExportModal';
-import exportService from 'services/exportService';
+import exportService from 'services/export';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import isElectron from 'is-electron';
