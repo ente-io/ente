@@ -26,7 +26,7 @@ import downloadManager from '../downloadManager';
 import { getLocalFiles } from '../fileService';
 import { EnteFile } from 'types/file';
 
-import { decodeMotionPhoto } from '../motionPhotoService';
+import { decodeLivePhoto } from '../livePhotoService';
 import {
     generateStreamFromArrayBuffer,
     getFileExtension,
@@ -915,7 +915,7 @@ class ExportService {
                 fileStream = updatedFileBlob.stream();
             }
             if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                return await this.exportMotionPhoto(
+                return await this.exportLivePhoto(
                     collectionExportPath,
                     fileStream,
                     file
@@ -943,17 +943,17 @@ class ExportService {
         }
     }
 
-    private async exportMotionPhoto(
+    private async exportLivePhoto(
         collectionExportPath: string,
         fileStream: ReadableStream<any>,
         file: EnteFile
     ) {
         const fileBlob = await new Response(fileStream).blob();
-        const motionPhoto = await decodeMotionPhoto(file, fileBlob);
-        const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
+        const livePhoto = await decodeLivePhoto(file, fileBlob);
+        const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
         const imageExportName = getUniqueFileExportName(
             collectionExportPath,
-            motionPhoto.imageNameTitle
+            livePhoto.imageNameTitle
         );
         await this.saveMediaFile(
             collectionExportPath,
@@ -966,10 +966,10 @@ class ExportService {
             file
         );
 
-        const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
+        const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
         const videoExportName = getUniqueFileExportName(
             collectionExportPath,
-            motionPhoto.videoNameTitle
+            livePhoto.videoNameTitle
         );
         await this.saveMediaFile(
             collectionExportPath,

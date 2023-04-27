@@ -38,7 +38,7 @@ import {
 } from './faceCrop';
 import { CACHES } from 'constants/cache';
 import { FILE_TYPE } from 'constants/file';
-import { decodeMotionPhoto } from 'services/motionPhotoService';
+import { decodeLivePhoto } from 'services/livePhotoService';
 import { addLogLine } from 'utils/logging';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
@@ -361,10 +361,10 @@ async function getOriginalConvertedFile(
     if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         return await getRenderableImage(file.metadata.title, fileBlob);
     } else {
-        const motionPhoto = await decodeMotionPhoto(file, fileBlob);
+        const livePhoto = await decodeLivePhoto(file, fileBlob);
         return await getRenderableImage(
-            motionPhoto.imageNameTitle,
-            new Blob([motionPhoto.image])
+            livePhoto.imageNameTitle,
+            new Blob([livePhoto.image])
         );
     }
 }

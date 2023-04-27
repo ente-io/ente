@@ -2,45 +2,41 @@ import JSZip from 'jszip';
 import { EnteFile } from 'types/file';
 import { fileExtensionWithDot, fileNameWithoutExtension } from 'utils/file';
 
-class MotionPhoto {
+class LivePhoto {
     image: Uint8Array;
     video: Uint8Array;
     imageNameTitle: string;
     videoNameTitle: string;
 }
 
-export const decodeMotionPhoto = async (file: EnteFile, zipBlob: Blob) => {
+export const decodeLivePhoto = async (file: EnteFile, zipBlob: Blob) => {
     const originalName = fileNameWithoutExtension(file.metadata.title);
     const zip = await JSZip.loadAsync(zipBlob, { createFolders: true });
 
-    const motionPhoto = new MotionPhoto();
+    const livePhoto = new LivePhoto();
     for (const zipFilename in zip.files) {
         if (zipFilename.startsWith('image')) {
-            motionPhoto.imageNameTitle =
+            livePhoto.imageNameTitle =
                 originalName + fileExtensionWithDot(zipFilename);
-            motionPhoto.image = await zip.files[zipFilename].async(
-                'uint8array'
-            );
+            livePhoto.image = await zip.files[zipFilename].async('uint8array');
         } else if (zipFilename.startsWith('video')) {
-            motionPhoto.videoNameTitle =
+            livePhoto.videoNameTitle =
                 originalName + fileExtensionWithDot(zipFilename);
-            motionPhoto.video = await zip.files[zipFilename].async(
-                'uint8array'
-            );
+            livePhoto.video = await zip.files[zipFilename].async('uint8array');
         }
     }
-    return motionPhoto;
+    return livePhoto;
 };
 
-export const encodeMotionPhoto = async (motionPhoto: MotionPhoto) => {
+export const encodeLivePhoto = async (livePhoto: LivePhoto) => {
     const zip = new JSZip();
     zip.file(
-        'image' + fileExtensionWithDot(motionPhoto.imageNameTitle),
-        motionPhoto.image
+        'image' + fileExtensionWithDot(livePhoto.imageNameTitle),
+        livePhoto.image
     );
     zip.file(
-        'video' + fileExtensionWithDot(motionPhoto.videoNameTitle),
-        motionPhoto.video
+        'video' + fileExtensionWithDot(livePhoto.videoNameTitle),
+        livePhoto.video
     );
     return await zip.generateAsync({ type: 'uint8array' });
 };
