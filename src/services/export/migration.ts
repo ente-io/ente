@@ -9,12 +9,7 @@ import {
 import { EnteFile } from 'types/file';
 import { User } from 'types/user';
 import { getNonEmptyPersonalCollections } from 'utils/collection';
-import {
-    getExportRecordFileUID,
-    getFileExportPath,
-    getCollectionExportPath,
-    getFileMetadataExportPath,
-} from 'utils/export';
+import { getExportRecordFileUID, getFileExportPath } from 'utils/export';
 import {
     getIDBasedSortedFiles,
     getPersonalFiles,
@@ -34,6 +29,8 @@ import {
     getUniqueFileSaveName,
     getOldFileSavePath,
     getOldFileMetadataSavePath,
+    getFileMetadataSavePath,
+    getFileSavePath,
 } from 'utils/export/migration';
 
 /*
@@ -99,13 +96,12 @@ async function migrationV0ToV1(
         personalFiles,
         user
     );
-    await migrateCollectionExports(
+    await migrateCollectionFolders(
         nonEmptyPersonalCollections,
         exportDir,
         collectionIDPathMap
     );
     await migrateFiles(
-        exportDir,
         getExportedFiles(personalFiles, exportRecord),
         collectionIDPathMap
     );
@@ -136,6 +132,89 @@ async function migrationV2ToV3(
         getExportedFiles(personalFiles, exportRecord)
     );
     await extractExportDirPathPrefix(exportDir, exportRecord);
+}
+
+/*
+    This updates the folder name of already exported folders from the earlier format of 
+    `collectionID_collectionName` to newer `collectionName(numbered)` format
+    */
+export async function migrateCollectionFolders(
+    collections: Collection[],
+    exportDir: string,
+    collectionIDPathMap: Map<number, string>
+) {
+    for (const collection of collections) {
+        const oldCollectionExportPath = getOldCollectionFolderPath(
+            exportDir,
+            collection.id,
+            collection.name
+        );
+        const newCollectionExportPath = getUniqueCollectionFolderPath(
+            exportDir,
+            collection.id,
+            collection.name
+        );
+        collectionIDPathMap.set(collection.id, newCollectionExportPath);
+        if (exportService.exists(oldCollectionExportPath)) {
+            await exportService.checkExistsAndRename(
+                oldCollectionExportPath,
+                newCollectionExportPath
+            );
+        } else {
+            await exportService.checkExistsAndCreateDir(
+                newCollectionExportPath
+            );
+        }
+        await exportService.addCollectionExportedRecord(
+            exportDir,
+            collection.id,
+            newCollectionExportPath
+        );
+    }
+}
+
+/*
+        This updates the file name of already exported files from the earlier format of 
+        `fileID_fileName` to newer `fileName(numbered)` format
+    */
+async function migrateFiles(
+    files: EnteFile[],
+    collectionIDPathMap: Map<number, string>
+) {
+    for (let file of files) {
+        const oldFileSavePath = getOldFileSavePath(
+            collectionIDPathMap.get(file.collectionID),
+            file
+        );
+        const oldFileMetadataSavePath = getOldFileMetadataSavePath(
+            collectionIDPathMap.get(file.collectionID),
+            file
+        );
+        file = mergeMetadata([file])[0];
+        const newFileSaveName = getUniqueFileSaveName(
+            collectionIDPathMap.get(file.collectionID),
+            file.metadata.title,
+            file.id
+        );
+
+        const newFileSavePath = getFileSavePath(
+            collectionIDPathMap.get(file.collectionID),
+            newFileSaveName
+        );
+
+        const newFileMetadataSavePath = getFileMetadataSavePath(
+            collectionIDPathMap.get(file.collectionID),
+            newFileSaveName
+        );
+        await exportService.checkExistsAndRename(
+            oldFileSavePath,
+            newFileSavePath
+        );
+        await exportService.checkExistsAndRename(
+            oldFileMetadataSavePath,
+            newFileMetadataSavePath
+        );
+    }
 }
 
 export async function removeDeprecatedExportRecordProperties(
@@ -215,92 +294,4 @@ export async function updateExportedFilesToExportedFilePathsProperty(
     };
 
     await exportService.updateExportRecord(updatedExportRecord);
-}
-
-/*
-    This updates the folder name of already exported folders from the earlier format of 
-    `collectionID_collectionName` to newer `collectionName(numbered)` format
-    */
-export async function migrateCollectionExports(
-    collections: Collection[],
-    exportDir: string,
-    collectionIDPathMap: Map<number, string>
-) {
-    for (const collection of collections) {
-        const oldCollectionExportPath = getOldCollectionFolderPath(
-            exportDir,
-            collection.id,
-            collection.name
-        );
-        const newCollectionExportPath = getUniqueCollectionFolderPath(
-            exportDir,
-            collection.id,
-            collection.name
-        );
-        collectionIDPathMap.set(collection.id, newCollectionExportPath);
-        if (exportService.exists(oldCollectionExportPath)) {
-            await exportService.checkExistsAndRename(
-                oldCollectionExportPath,
-                newCollectionExportPath
-            );
-        } else {
-            await exportService.checkExistsAndCreateDir(
-                newCollectionExportPath
-            );
-        }
-        await exportService.addCollectionExportedRecord(
-            exportDir,
-            collection.id,
-            newCollectionExportPath
-        );
-    }
-}
-
-/*
-    This updates the file name of already exported files from the earlier format of 
-    `fileID_fileName` to newer `fileName(numbered)` format
-    */
-export async function migrateFiles(
-    exportDir: string,
-    files: EnteFile[],
-    collectionIDExportNameMap: Map<number, string>
-) {
-    for (let file of files) {
-        const collectionExportPath = getCollectionExportPath(
-            exportDir,
-            collectionIDExportNameMap.get(file.collectionID)
-        );
-        const oldFileExportPath = getOldFileSavePath(
-            collectionExportPath,
-            file
-        );
-        const oldFileMetadataExportPath = getOldFileMetadataSavePath(
-            collectionExportPath,
-            file
-        );
-        file = mergeMetadata([file])[0];
-        const newFileExportName = getUniqueFileSaveName(
-            collectionExportPath,
-            file.metadata.title,
-            file.id
-        );
-
-        const newFileExportPath = getFileExportPath(
-            collectionExportPath,
-            newFileExportName
-        );
-
-        const newFileMetadataExportPath = getFileMetadataExportPath(
-            collectionExportPath,
-            newFileExportName
-        );
-        await exportService.checkExistsAndRename(
-            oldFileExportPath,
-            newFileExportPath
-        );
-        await exportService.checkExistsAndRename(
-            oldFileMetadataExportPath,
-            newFileMetadataExportPath
-        );
-    }
 }
