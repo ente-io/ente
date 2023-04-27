@@ -11,12 +11,13 @@ import { User } from 'types/user';
 import { getNonEmptyPersonalCollections } from 'utils/collection';
 import {
     getExportedFiles,
-    convertCollectionIDExportNameObjectToMap,
     getUniqueFileExportNameForMigration,
     getExportRecordFileUID,
+    getFileExportPath,
+    convertCollectionIDFolderPathObjectToMap,
 } from 'utils/export';
 import { getIDBasedSortedFiles, getPersonalFiles } from 'utils/file';
-import { addLogLine } from 'utils/logging';
+import { addLocalLog, addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import exportService from './index';
@@ -116,11 +117,13 @@ async function migrationV2ToV3(
     exportRecord: ExportRecordV2,
     updateExportRecord: UpdatedExportRecord
 ) {
+    addLocalLog(() => `migrationV2ToV3: ${JSON.stringify(exportRecord)}`);
     await extractExportDirPathPrefix(
         exportDir,
         exportRecord,
         updateExportRecord
     );
+    addLocalLog(() => `migrationV2ToV3: ${JSON.stringify(exportRecord)}`);
     const user: User = getData(LS_KEYS.USER);
     const localFiles = await getLocalFiles();
     const personalFiles = getIDBasedSortedFiles(
@@ -180,21 +183,32 @@ export async function updateExportedFilesToExportedFilePathsProperty(
     updateExportRecord: UpdatedExportRecord,
     exportedFiles: EnteFile[]
 ) {
+    addLocalLog(() => `${JSON.stringify(exportRecord)}}`);
     addLogLine(
         'updating exported files to exported file paths property',
         `got ${exportedFiles.length} files`
     );
     let exportedFileNames: FileExportNames;
-    const usedFilePaths = new Set<string>();
-    const exportedCollectionPaths = convertCollectionIDExportNameObjectToMap(
+    const usedFilePaths = new Map<string, Set<string>>();
+    const exportedCollectionPaths = convertCollectionIDFolderPathObjectToMap(
         exportRecord.exportedCollectionPaths
     );
     for (const file of exportedFiles) {
         const collectionPath = exportedCollectionPaths.get(file.collectionID);
+        addLocalLog(
+            () =>
+                `collection path for ${file.collectionID} is ${collectionPath}`
+        );
         const fileExportName = getUniqueFileExportNameForMigration(
             collectionPath,
             file.metadata.title,
             usedFilePaths
+        );
+        addLocalLog(
+            () =>
+                `file export path for ${
+                    file.metadata.title
+                } is ${getFileExportPath(collectionPath, fileExportName)}`
         );
         exportedFileNames = {
             ...exportedFileNames,

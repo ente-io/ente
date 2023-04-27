@@ -1047,10 +1047,13 @@ class ExportService {
                 collection.id,
                 collection.name
             );
-            const newCollectionExportPath = getUniqueCollectionExportName(
+            const newCollectionExportPath = getCollectionExportPath(
                 exportDir,
-                collection.id,
-                collection.name
+                getUniqueCollectionExportName(
+                    exportDir,
+                    collection.id,
+                    collection.name
+                )
             );
             collectionIDPathMap.set(collection.id, newCollectionExportPath);
             if (this.exists(oldCollectionExportPath)) {
@@ -1058,12 +1061,16 @@ class ExportService {
                     oldCollectionExportPath,
                     newCollectionExportPath
                 );
-                await this.addCollectionExportedRecord(
-                    exportDir,
-                    collection.id,
+            } else {
+                await this.electronAPIs.checkExistsAndCreateDir(
                     newCollectionExportPath
                 );
             }
+            await this.addCollectionExportedRecord(
+                exportDir,
+                collection.id,
+                newCollectionExportPath
+            );
         }
     }
 

@@ -6,6 +6,7 @@ import {
     ExportRecordV2,
     CollectionExportNames,
     FileExportNames,
+    ExportedCollectionPaths,
 } from 'types/export';
 
 import { EnteFile } from 'types/file';
@@ -18,6 +19,16 @@ import { formatDateTimeShort } from 'utils/time/format';
 
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
+
+export const convertCollectionIDFolderPathObjectToMap = (
+    exportedCollectionPaths: ExportedCollectionPaths
+): Map<number, string> => {
+    return new Map<number, string>(
+        Object.entries(exportedCollectionPaths ?? {}).map((e) => {
+            return [Number(e[0]), String(e[1])];
+        })
+    );
+};
 
 export const convertCollectionIDExportNameObjectToMap = (
     exportedCollectionNames: CollectionExportNames
@@ -308,12 +319,14 @@ export const getOldFileMetadataexportPath = (
 export const getUniqueFileExportNameForMigration = (
     collectionPath: string,
     filename: string,
-    usedFilePaths: Set<string>
+    usedFilePaths: Map<string, Set<string>>
 ) => {
     let fileExportName = sanitizeName(filename);
     let count = 1;
     while (
-        usedFilePaths.has(getFileExportPath(collectionPath, fileExportName))
+        usedFilePaths
+            .get(collectionPath)
+            ?.has(getFileExportPath(collectionPath, fileExportName))
     ) {
         const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
         if (filenameParts[1]) {
@@ -323,7 +336,12 @@ export const getUniqueFileExportNameForMigration = (
         }
         count++;
     }
-    usedFilePaths.add(getFileExportPath(collectionPath, fileExportName));
+    if (!usedFilePaths.has(collectionPath)) {
+        usedFilePaths.set(collectionPath, new Set());
+    }
+    usedFilePaths
+        .get(collectionPath)
+        .add(getFileExportPath(collectionPath, fileExportName));
     return fileExportName;
 };
 
