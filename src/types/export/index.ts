@@ -6,7 +6,7 @@ export interface ExportProgress {
     total: number;
 }
 export interface ExportedCollectionPaths {
-    [ID: number]: string;
+    [collectionID: number]: string;
 }
 
 export interface CollectionExportNames {

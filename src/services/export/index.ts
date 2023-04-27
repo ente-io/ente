@@ -92,11 +92,7 @@ class ExportService {
             }
             const exportRecord = await this.getExportRecord(exportDir);
             if (this.checkAllElectronAPIsExists()) {
-                await migrateExport(
-                    exportDir,
-                    exportRecord,
-                    this.updateExportRecord.bind(this)
-                );
+                await migrateExport(exportDir, exportRecord);
             }
         } catch (e) {
             logError(e, 'migrateExportJSON failed');

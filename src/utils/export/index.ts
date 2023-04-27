@@ -2,7 +2,6 @@ import { Collection } from 'types/collection';
 import exportService from 'services/export';
 import {
     ExportRecord,
-    ExportRecordV2,
     CollectionExportNames,
     FileExportNames,
 } from 'types/export';
@@ -176,16 +175,6 @@ export const getGoogleLikeMetadataFile = (
     );
 };
 
-export const getCollectionIDPathMapFromExportRecord = (
-    exportRecord: ExportRecordV2
-): Map<number, string> => {
-    return new Map<number, string>(
-        Object.entries(exportRecord.exportedCollectionPaths ?? {}).map((e) => {
-            return [Number(e[0]), String(e[1])];
-        })
-    );
-};
-
 export const sanitizeName = (name: string) =>
     sanitize(name, { replacement: '_' });
 
@@ -243,35 +232,6 @@ export const getFileExportPath = (
     collectionExportPath: string,
     fileExportName: string
 ) => `${collectionExportPath}/${fileExportName}`;
-
-export const getUniqueFileExportNameForMigration = (
-    collectionPath: string,
-    filename: string,
-    usedFilePaths: Map<string, Set<string>>
-) => {
-    let fileExportName = sanitizeName(filename);
-    let count = 1;
-    while (
-        usedFilePaths
-            .get(collectionPath)
-            ?.has(getFileExportPath(collectionPath, fileExportName))
-    ) {
-        const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
-        if (filenameParts[1]) {
-            fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
-        } else {
-            fileExportName = `${filenameParts[0]}(${count})`;
-        }
-        count++;
-    }
-    if (!usedFilePaths.has(collectionPath)) {
-        usedFilePaths.set(collectionPath, new Set());
-    }
-    usedFilePaths
-        .get(collectionPath)
-        .add(getFileExportPath(collectionPath, fileExportName));
-    return fileExportName;
-};
 
 export const getTrashedFileExportPath = (exportDir: string, path: string) => {
     const fileRelativePath = path.replace(`${exportDir}/`, '');

@@ -120,3 +120,32 @@ export const getOldFileMetadataSavePath = (
     `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${
         file.id
     }_${oldSanitizeName(file.metadata.title)}.json`;
+
+export const getUniqueFileExportNameForMigration = (
+    collectionPath: string,
+    filename: string,
+    usedFilePaths: Map<string, Set<string>>
+) => {
+    let fileExportName = sanitizeName(filename);
+    let count = 1;
+    while (
+        usedFilePaths
+            .get(collectionPath)
+            ?.has(getFileSavePath(collectionPath, fileExportName))
+    ) {
+        const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
+        if (filenameParts[1]) {
+            fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
+        } else {
+            fileExportName = `${filenameParts[0]}(${count})`;
+        }
+        count++;
+    }
+    if (!usedFilePaths.has(collectionPath)) {
+        usedFilePaths.set(collectionPath, new Set());
+    }
+    usedFilePaths
+        .get(collectionPath)
+        .add(getFileSavePath(collectionPath, fileExportName));
+    return fileExportName;
+};
