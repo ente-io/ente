@@ -818,6 +818,7 @@ class ExportService {
     }
 
     async getExportRecord(folder?: string): Promise<ExportRecord> {
+        let recordFile: string;
         try {
             if (!folder) {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
@@ -829,12 +830,12 @@ class ExportService {
             if (!exportFolderExists) {
                 return null;
             }
-            const recordFile = await this.electronAPIs.getExportRecord(
+            recordFile = await this.electronAPIs.getExportRecord(
                 `${folder}/${EXPORT_RECORD_FILE_NAME}`
             );
             return JSON.parse(recordFile);
         } catch (e) {
-            logError(e, 'export Record JSON parsing failed ');
+            logError(e, 'export Record JSON parsing failed ', { recordFile });
             throw e;
         }
     }
