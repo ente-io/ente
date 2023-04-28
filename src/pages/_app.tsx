@@ -73,10 +73,11 @@ import {
     CLIENT_PACKAGE_NAMES,
     getAppNameAndTitle,
 } from 'constants/apps';
+import { REDIRECTS } from 'constants/redirects';
 
 const redirectMap = new Map([
-    ['roadmap', getRoadmapRedirectURL],
-    ['families', getFamilyPortalRedirectURL],
+    [REDIRECTS.ROADMAP, getRoadmapRedirectURL],
+    [REDIRECTS.FAMILIES, getFamilyPortalRedirectURL],
 ]);
 
 export const MessageContainer = styled('div')`

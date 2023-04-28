@@ -3,8 +3,6 @@ import { t } from 'i18next';
 
 import ExportModal from 'components/ExportModal';
 import exportService from 'services/exportService';
-import { getEndpoint } from 'utils/common/apiUtil';
-import { getToken } from 'utils/common/key';
 import isElectron from 'is-electron';
 import { AppContext } from 'pages/_app';
 import EnteSpinner from 'components/EnteSpinner';
@@ -13,17 +11,16 @@ import { NoStyleAnchor } from 'components/pages/sharedAlbum/GoToEnte';
 import { openLink } from 'utils/common';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { Typography } from '@mui/material';
+import { REDIRECTS, getRedirectURL } from 'constants/redirects';
 
 export default function HelpSection() {
     const [exportModalView, setExportModalView] = useState(false);
 
     const { setDialogMessage } = useContext(AppContext);
 
-    function openFeedbackURL() {
-        const feedbackURL: string = `${getEndpoint()}/users/feedback?token=${encodeURIComponent(
-            getToken()
-        )}`;
-        openLink(feedbackURL, true);
+    async function openRoadmapURL() {
+        const roadmapRedirectURL = getRedirectURL(REDIRECTS.ROADMAP);
+        openLink(roadmapRedirectURL, true);
     }
 
     function openExportModal() {
@@ -37,7 +34,7 @@ export default function HelpSection() {
     return (
         <>
             <EnteMenuItem
-                onClick={openFeedbackURL}
+                onClick={openRoadmapURL}
                 label={t('REQUEST_FEATURE')}
                 variant="secondary"
             />
