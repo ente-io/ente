@@ -196,6 +196,8 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
       submitButtonLabel: "Done",
       textInputFormatter: [NumberWithDecimalInputFormatter(maxValue: 10000)],
       textInputType: const TextInputType.numberWithOptions(decimal: true),
+      message: "km",
+      alignMessage: Alignment.centerRight,
     );
     if (result is Exception) {
       await showGenericErrorDialog(context: context);
