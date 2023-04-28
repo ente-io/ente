@@ -45,7 +45,6 @@ export interface ExportRecord {
     version: number;
     stage: ExportStage;
     lastAttemptTimestamp: number;
-    exportFolderPath: string;
     collectionExportNames: CollectionExportNames;
     fileExportNames: FileExportNames;
 }

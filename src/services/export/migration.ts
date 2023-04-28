@@ -246,7 +246,6 @@ async function extractExportDirPathPrefix(
     const updatedExportRecord: Partial<ExportRecord> = {
         ...exportRecord,
         collectionExportNames: exportedCollectionNames,
-        exportFolderPath: exportDir,
     };
     return await exportService.updateExportRecord(updatedExportRecord);
 }
