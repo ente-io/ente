@@ -20,6 +20,7 @@ import {
     getLivePhotoExportName,
     isLivePhotoExportName,
     parseLivePhotoExportName,
+    getCollectionIDFromFileUID,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
@@ -613,7 +614,7 @@ class ExportService {
                 }
                 try {
                     const fileExportName = fileIDExportNameMap.get(fileUID);
-                    const collectionID = Number(fileUID.split('-')[1]);
+                    const collectionID = getCollectionIDFromFileUID(fileUID);
                     const collectionExportPath = getCollectionExportPath(
                         exportDir,
                         collectionIDExportNameMap.get(collectionID)
@@ -674,6 +675,10 @@ class ExportService {
                         const fileExportPath = getFileExportPath(
                             collectionExportPath,
                             fileExportName
+                        );
+                        addLocalLog(
+                            () =>
+                                `moving file ${fileExportPath} to trash folder`
                         );
                         await this.electronAPIs.moveFile(
                             fileExportPath,
@@ -928,11 +933,7 @@ class ExportService {
                     fileExportName,
                     file
                 );
-                const fileExportPath = getFileExportPath(
-                    collectionExportPath,
-                    fileExportName
-                );
-                return fileExportPath;
+                return fileExportName;
             }
         } catch (e) {
             logError(e, 'download and save failed');
@@ -979,16 +980,7 @@ class ExportService {
             file
         );
 
-        const imageExportPath = getFileExportPath(
-            collectionExportPath,
-            imageExportName
-        );
-        const videoExportPath = getFileExportPath(
-            collectionExportPath,
-            videoExportName
-        );
-
-        return getLivePhotoExportName(imageExportPath, videoExportPath);
+        return getLivePhotoExportName(imageExportName, videoExportName);
     }
 
     private async saveMediaFile(

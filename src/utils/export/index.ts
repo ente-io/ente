@@ -17,6 +17,9 @@ import { formatDateTimeShort } from 'utils/time/format';
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
 
+export const getCollectionIDFromFileUID = (fileUID: string) =>
+    Number(fileUID.split('_')[1]);
+
 export const convertCollectionIDExportNameObjectToMap = (
     collectionExportNames: CollectionExportNames
 ): Map<number, string> => {
