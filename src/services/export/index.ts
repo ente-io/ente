@@ -355,8 +355,8 @@ class ExportService {
                 }
 
                 if (removedFileUIDs?.length > 0) {
-                    addLogLine(`removing ${removedFileUIDs.length} files`);
-                    await this.fileRemover(
+                    addLogLine(`trashing ${removedFileUIDs.length} files`);
+                    await this.fileTrasher(
                         exportDir,
                         collectionIDExportNameMap,
                         removedFileUIDs,
@@ -595,7 +595,7 @@ class ExportService {
         }
     }
 
-    async fileRemover(
+    async fileTrasher(
         exportDir: string,
         collectionIDExportNameMap: Map<number, string>,
         removedFileUIDs: string[],
@@ -608,7 +608,7 @@ class ExportService {
                 exportRecord.fileExportNames
             );
             for (const fileUID of removedFileUIDs) {
-                addLocalLog(() => `removing file with id ${fileUID}`);
+                addLocalLog(() => `trashing file with id ${fileUID}`);
                 if (this.stopExport) {
                     break;
                 }
@@ -698,7 +698,7 @@ class ExportService {
                     incrementSuccess();
                 } catch (e) {
                     incrementFailed();
-                    logError(e, 'remove failed for a file');
+                    logError(e, 'trashing failed for a file');
                     if (
                         e.message ===
                         CustomError.ADD_FILE_EXPORTED_RECORD_FAILED
@@ -708,7 +708,7 @@ class ExportService {
                 }
             }
         } catch (e) {
-            logError(e, 'fileRemover failed');
+            logError(e, 'fileTrasher failed');
             throw e;
         }
     }
