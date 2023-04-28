@@ -76,7 +76,7 @@ export default function ExportModal(props: Props) {
         }
         const main = async () => {
             try {
-                exportService.setUIUpdaters({
+                await exportService.init({
                     updateExportStage: updateExportStage,
                     updateExportProgress: setExportProgress,
                     updateFileExportStats: setFileExportStats,

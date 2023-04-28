@@ -17,6 +17,9 @@ import {
     getCollectionExportedFiles,
     getCollectionExportPath,
     getMetadataFolderExportPath,
+    getLivePhotoExportName,
+    isLivePhotoExportName,
+    parseLivePhotoExportName,
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
@@ -53,7 +56,7 @@ import {
     getCollectionNameMap,
     getNonEmptyPersonalCollections,
 } from 'utils/collection';
-import { migrateExport } from './migration';
+import { migrateExportJSONHelper } from './migration';
 
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
@@ -74,29 +77,26 @@ class ExportService {
         success: 0,
         failed: 0,
     };
+    private exportJSONMigrator = new QueueProcessor<void>(1);
 
     constructor() {
         if (runningInBrowser()) {
             this.electronAPIs = window['ElectronAPIs'];
             this.allElectronAPIsExist = !!this.electronAPIs?.exists;
             this.fileReader = new FileReader();
-            void this.migrateExportJSON();
         }
     }
 
     async migrateExportJSON() {
-        try {
-            const exportDir = getData(LS_KEYS.EXPORT)?.folder;
-            if (!exportDir) {
-                return;
-            }
-            const exportRecord = await this.getExportRecord(exportDir);
-            if (this.checkAllElectronAPIsExists()) {
-                await migrateExport(exportDir, exportRecord);
-            }
-        } catch (e) {
-            logError(e, 'migrateExportJSON failed');
-        }
+        const response = this.exportJSONMigrator.queueUpRequest(() =>
+            migrateExportJSONHelper()
+        );
+        return response.promise;
+    }
+
+    async init(uiUpdater: ExportUIUpdaters) {
+        this.setUIUpdaters(uiUpdater);
+        await this.migrateExportJSON();
     }
 
     async setUIUpdaters(uiUpdater: ExportUIUpdaters) {
@@ -245,6 +245,8 @@ class ExportService {
             }
             try {
                 await this.preExport();
+                // checking if migration is needed
+                await this.migrateExportJSON();
                 addLogLine('export started');
                 await this.runExport();
                 addLogLine('export completed');
@@ -618,15 +620,11 @@ class ExportService {
                     );
                     // check if filepath is for live photo
                     // livePhoto has the path in format: `JSON.stringify({image,video})`
-                    const isLivePhoto =
-                        fileExportName.startsWith('{') &&
-                        fileExportName.endsWith('}');
-
-                    if (isLivePhoto) {
+                    if (isLivePhotoExportName(fileExportName)) {
                         const {
                             image: imageExportName,
                             video: videoExportName,
-                        } = JSON.parse(fileExportName);
+                        } = parseLivePhotoExportName(fileExportName);
                         const imageExportPath = getFileExportPath(
                             collectionExportPath,
                             imageExportName
@@ -672,7 +670,6 @@ class ExportService {
                                 videoMetadataFileExportPath
                             )
                         );
-                        await this.removeFileExportedRecord(exportDir, fileUID);
                     } else {
                         const fileExportPath = getFileExportPath(
                             collectionExportPath,
@@ -691,8 +688,8 @@ class ExportService {
                                 metadataFileExportPath
                             )
                         );
-                        await this.removeFileExportedRecord(exportDir, fileUID);
                     }
+                    await this.removeFileExportedRecord(exportDir, fileUID);
                     incrementSuccess();
                 } catch (e) {
                     incrementFailed();
@@ -991,10 +988,7 @@ class ExportService {
             videoExportName
         );
 
-        return JSON.stringify({
-            image: imageExportPath,
-            video: videoExportPath,
-        });
+        return getLivePhotoExportName(imageExportPath, videoExportPath);
     }
 
     private async saveMediaFile(

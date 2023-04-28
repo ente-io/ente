@@ -246,3 +246,28 @@ export const getMetadataFileExportPath = (filePath: string) => {
     const collectionExportPath = filePath.replace(`/${filename}`, '');
     return `${collectionExportPath}/${ENTE_METADATA_FOLDER}/${filename}.json`;
 };
+
+export const getLivePhotoExportName = (
+    imageExportName: string,
+    videoExportName: string
+) =>
+    JSON.stringify({
+        image: imageExportName,
+        video: videoExportName,
+    });
+
+export const isLivePhotoExportName = (exportName: string) => {
+    try {
+        JSON.parse(exportName);
+        return true;
+    } catch (e) {
+        return false;
+    }
+};
+
+export const parseLivePhotoExportName = (
+    livePhotoExportName: string
+): { image: string; video: string } => {
+    const { image, video } = JSON.parse(livePhotoExportName);
+    return { image, video };
+};
