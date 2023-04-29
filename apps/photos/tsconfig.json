@@ -1,7 +1,7 @@
 {
     "extends": "@ente/tsconfig/ente.json",
     "compilerOptions": {
-        "baseUrl": "./src",
+        "baseUrl": "./src"
     },
     "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
     "exclude": ["node_modules", "out", ".next", "thirdparty"]

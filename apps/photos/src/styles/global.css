@@ -3,39 +3,40 @@
     font-family: 'Inter';
     font-style: normal;
     font-weight: 400;
-    src: local(''),
-         url('/fonts/inter-v11-latin-500.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-         url('/fonts/inter-v11-latin-500.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+    src: local(''), url('/fonts/inter-v11-latin-500.woff2') format('woff2'),
+        /* Chrome 26+, Opera 23+, Firefox 39+ */
+            url('/fonts/inter-v11-latin-500.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
     font-display: swap; /*https://web.dev/font-display/?utm_source=lighthouse&utm_medium=devtools#how-to-avoid-showing-invisible-text*/
-  }
-  
-  /* inter-600 - latin */
-  @font-face {
+}
+
+/* inter-600 - latin */
+@font-face {
     font-family: 'Inter';
     font-style: normal;
     font-weight: 700;
-    src: local(''),
-         url('/fonts/inter-v11-latin-600.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-         url('/fonts/inter-v11-latin-600.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+    src: local(''), url('/fonts/inter-v11-latin-600.woff2') format('woff2'),
+        /* Chrome 26+, Opera 23+, Firefox 39+ */
+            url('/fonts/inter-v11-latin-600.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
     font-display: swap;
-  }
-  
-  /* inter-800 - latin */
-  @font-face {
+}
+
+/* inter-800 - latin */
+@font-face {
     font-family: 'Inter';
     font-style: normal;
     font-weight: 900;
-    src: local(''),
-         url('/fonts/inter-v11-latin-800.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-         url('/fonts/inter-v11-latin-800.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+    src: local(''), url('/fonts/inter-v11-latin-800.woff2') format('woff2'),
+        /* Chrome 26+, Opera 23+, Firefox 39+ */
+            url('/fonts/inter-v11-latin-800.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
     font-display: swap;
-  }
-  
-html, body {
+}
+
+html,
+body {
     height: 100%;
     flex: 1;
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
 }
 
 #__next {
@@ -44,10 +45,10 @@ html, body {
     flex-direction: column;
 }
 
-.pswp__button--custom{
-    background: none !important;    
-    background-image: none !important;    
-    color:#fff;
+.pswp__button--custom {
+    background: none !important;
+    background-image: none !important;
+    color: #fff;
 }
 
 .pswp__item video {
@@ -71,29 +72,29 @@ html, body {
     max-height: 100%;
 }
 
-.pswp-item-container > img{
+.pswp-item-container > img {
     opacity: 1;
 }
 
-.pswp-item-container > video{
+.pswp-item-container > video {
     opacity: 0;
 }
 
-.pswp-item-container > div.download-banner {      
-    width:100%;
+.pswp-item-container > div.download-banner {
+    width: 100%;
     height: 16vh;
-    padding:2vh 0;
+    padding: 2vh 0;
     background-color: #151414;
-    color:#ddd;
+    color: #ddd;
     display: flex;
-    flex-direction:column;
+    flex-direction: column;
     align-items: center;
     justify-content: space-around;
     opacity: 0.8;
-    font-size:20px;
+    font-size: 20px;
 }
 
-.download-banner > a{
+.download-banner > a {
     width: 130px;
 }
 
@@ -101,25 +102,26 @@ html, body {
     object-fit: contain;
 }
 
-.pswp__button--arrow--left, .pswp__button--arrow--right{
-    color:#fff;
-    background-color: #333333  !important;
+.pswp__button--arrow--left,
+.pswp__button--arrow--right {
+    color: #fff;
+    background-color: #333333 !important;
     border-radius: 50%;
     width: 56px;
     height: 56px;
 }
-.pswp__button--arrow--left::before, .pswp__button--arrow--right::before {
-     background: none !important; 
+.pswp__button--arrow--left::before,
+.pswp__button--arrow--right::before {
+    background: none !important;
 }
 
-.pswp__button--arrow--left{
+.pswp__button--arrow--left {
     margin-left: 20px;
 }
 
-.pswp__button--arrow--right{
+.pswp__button--arrow--right {
     margin-right: 20px;
 }
-
 
 .pswp-custom-caption-container {
     width: 100%;
@@ -129,7 +131,7 @@ html, body {
     background-color: transparent !important;
 }
 
-.pswp__caption--empty{
+.pswp__caption--empty {
     display: none;
 }
 
@@ -159,25 +161,25 @@ div.otp-input input {
 }
 
 div.otp-input input::placeholder {
-    opacity:0;
+    opacity: 0;
 }
 
-div.otp-input input:not(:placeholder-shown) , div.otp-input input:focus{
+div.otp-input input:not(:placeholder-shown),
+div.otp-input input:focus {
     border: 2px solid #51cd7c;
-    border-radius:1px; 
+    border-radius: 1px;
     -webkit-transition: 0.5s;
     transition: 0.5s;
     outline: none;
 }
 
-.flash-message{
-    padding:16px;
-    display:flex;
-    align-items:center;
+.flash-message {
+    padding: 16px;
+    display: flex;
+    align-items: center;
 }
 
-@-webkit-keyframes rotation 
-{
+@-webkit-keyframes rotation {
     from {
         -webkit-transform: rotate(0deg);
     }

@@ -11,7 +11,5 @@ const buildPrettierCommand = (filenames) =>
 module.exports = {
     'apps/**/*.{js,jsx,ts,tsx}': [buildEslintCommand, buildPrettierCommand],
     'packages/**/*.{js,jsx,ts,tsx}': [buildEslintCommand, buildPrettierCommand],
-    '**/*.{json,css,scss,md,html,yml,yaml}': [
-        buildPrettierCommand,
-    ],
+    '**/*.{json,css,scss,md,html,yml,yaml}': [buildPrettierCommand],
 };
