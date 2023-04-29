@@ -373,7 +373,7 @@ export default function App(props) {
     const somethingWentWrong = () =>
         setDialogMessage({
             title: t('ERROR'),
-            close: { variant: 'critical' },
+            close: { variant: 'error' },
             content: t('UNKNOWN_ERROR'),
         });
 
@@ -467,7 +467,6 @@ export default function App(props) {
                     )}
                 </AppContext.Provider>
             </ThemeProvider>
-            <p>test</p>
         </CacheProvider>
     );
 }

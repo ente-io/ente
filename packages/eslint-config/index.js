@@ -7,8 +7,11 @@ module.exports = {
         "prettier"
     ],
     parserOptions: {
-        "project": "./tsconfig.json"
+        "project": "./tsconfig.json",
     },
+    plugins: [
+        "@typescript-eslint",
+    ],
     rules: {
         "indent": "off",
         "class-methods-use-this": "off",

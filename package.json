@@ -11,11 +11,14 @@
         "export": "turbo run export",
         "build-analyze": "ANALYZE=true next build",
         "start": "turbo run start",
-        "prepare": "husky install"
+        "prepare": "husky install",
+        "tsc": "turbo run tsc"
     },
-    "dependencies": {
-    },
+    "dependencies": {},
     "devDependencies": {
+        "husky": "^7.0.1",
+        "lint-staged": "^11.1.2",
+        "prettier": "2.3.2"
     },
     "standard": {
         "parser": "babel-eslint"

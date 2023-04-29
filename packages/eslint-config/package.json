@@ -2,18 +2,17 @@
     "name": "@ente/eslint-config",
     "main": "index.js",
     "version": "1.0.0",
-    "dependencies": {
-      "eslint": "latest",
-      "eslint-config-next": "latest",
-      "eslint-config-prettier": "latest",
-      "eslint-plugin-react": "latest",
-      "eslint-config-turbo": "latest",
-      "@typescript-eslint/eslint-plugin": "^5.43.0",
-      "@ente/tsconfig": "*"
-    },
+    "dependencies": {},
     "standard": {
         "parser": "babel-eslint"
+    },
+    "devDependencies": {
+        "@ente/tsconfig": "*",
+        "@typescript-eslint/eslint-plugin": "^5.43.0",
+        "eslint": "latest",
+        "eslint-config-next": "latest",
+        "eslint-config-prettier": "latest",
+        "eslint-config-turbo": "latest",
+        "eslint-plugin-react": "latest"
     }
-
-  }
-  
+}
