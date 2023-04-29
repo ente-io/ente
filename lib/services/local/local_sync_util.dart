@@ -16,7 +16,6 @@ const assetFetchPageSize = 2000;
 Future<Tuple2<List<LocalPathAsset>, List<File>>> getLocalPathAssetsAndFiles(
   int fromTime,
   int toTime,
-  Computer computer,
 ) async {
   final pathEntities = await _getGalleryList(
     updateFromTime: fromTime,
@@ -31,7 +30,8 @@ Future<Tuple2<List<LocalPathAsset>, List<File>>> getLocalPathAssetsAndFiles(
   final List<File> uniqueFiles = [];
   for (AssetPathEntity pathEntity in pathEntities) {
     final List<AssetEntity> assetsInPath = await _getAllAssetLists(pathEntity);
-    final Tuple2<Set<String>, List<File>> result = await computer.compute(
+    final Tuple2<Set<String>, List<File>> result =
+        await Computer.shared().compute(
       _getLocalIDsAndFilesFromAssets,
       param: <String, dynamic>{
         "pathEntity": pathEntity,
@@ -120,14 +120,13 @@ Future<LocalDiffResult> getDiffWithLocal(
   Set<String> existingIDs, // localIDs of files already imported in app
   Map<String, Set<String>> pathToLocalIDs,
   Set<String> invalidIDs,
-  Computer computer,
 ) async {
   final Map<String, dynamic> args = <String, dynamic>{};
   args['assets'] = assets;
   args['existingIDs'] = existingIDs;
   args['invalidIDs'] = invalidIDs;
   args['pathToLocalIDs'] = pathToLocalIDs;
-  final LocalDiffResult diffResult = await computer.compute(
+  final LocalDiffResult diffResult = await Computer.shared().compute(
     _getLocalAssetsDiff,
     param: args,
     taskName: "getLocalAssetsDiff",

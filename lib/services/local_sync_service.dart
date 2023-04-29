@@ -24,7 +24,6 @@ import 'package:tuple/tuple.dart';
 class LocalSyncService {
   final _logger = Logger("LocalSyncService");
   final _db = FilesDB.instance;
-  final Computer _computer = Computer.shared();
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
 
@@ -299,7 +298,7 @@ class LocalSyncService {
     required int toTime,
   }) async {
     final Tuple2<List<LocalPathAsset>, List<File>> result =
-        await getLocalPathAssetsAndFiles(fromTime, toTime, _computer);
+        await getLocalPathAssetsAndFiles(fromTime, toTime);
 
     // Update the mapping for device path_id to local file id. Also, keep track
     // of newly discovered device paths
