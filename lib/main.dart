@@ -155,7 +155,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     AppLifecycleService.instance.onAppInForeground('init via: $via');
   }
   // Start workers asynchroniously. No need to wait for them to start
-  Computer.shared().turnOn(workersCount: 4);
+  Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode);
   CryptoUtil.init();
   await NotificationService.instance.init();
   await NetworkClient.instance.init();
