@@ -23,8 +23,10 @@ import 'package:photos/main.dart';
 import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import "package:photos/models/magic_metadata.dart";
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/file_magic_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -452,6 +454,18 @@ class FileUploader {
             CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
         final keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
+        MetadataRequest? pubMetadataRequest;
+        if ((mediaUploadData.height ?? 0) != 0 &&
+            (mediaUploadData.width ?? 0) != 0) {
+          pubMetadataRequest = await getPubMetadataRequest(
+            file,
+            {
+              publicMagicKeyHeight: mediaUploadData.height,
+              publicMagicKeyWidth: mediaUploadData.width
+            },
+            fileAttributes.key!,
+          );
+        }
         remoteFile = await _uploadFile(
           file,
           collectionID,
@@ -696,6 +710,7 @@ class FileUploader {
     int thumbnailSize,
     String encryptedMetadata,
     String metadataDecryptionHeader, {
+    MetadataRequest? pubMetadata,
     int attempt = 1,
   }) async {
     final request = {
@@ -717,6 +732,9 @@ class FileUploader {
         "decryptionHeader": metadataDecryptionHeader,
       }
     };
+    if (pubMetadata != null) {
+      request["pubMagicMetadata"] = pubMetadata;
+    }
     try {
       final response = await _enteDio.post("/files", data: request);
       final data = response.data;
@@ -753,6 +771,7 @@ class FileUploader {
           encryptedMetadata,
           metadataDecryptionHeader,
           attempt: attempt + 1,
+          pubMetadata: pubMetadata,
         );
       }
       rethrow;

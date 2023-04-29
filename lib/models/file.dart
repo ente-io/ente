@@ -285,6 +285,15 @@ class File extends EnteFile {
     return title ?? '';
   }
 
+  // return 0 if the height is not available
+  int get heigth {
+    return pubMagicMetadata?.h ?? 0;
+  }
+
+  int get width {
+    return pubMagicMetadata?.w ?? 0;
+  }
+
   // returns true if the file isn't available in the user's gallery
   bool get isRemoteFile {
     return localID == null && uploadedFileID != null;

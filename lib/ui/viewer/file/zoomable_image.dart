@@ -6,12 +6,15 @@ import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
+import "package:photos/models/magic_metadata.dart";
+import "package:photos/services/file_magic_service.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/image_util.dart';
@@ -49,6 +52,7 @@ class _ZoomableImageState extends State<ZoomableImage>
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
   int? _thumbnailWidth;
+  late int _currentUserID;
 
   @override
   void initState() {
@@ -63,6 +67,7 @@ class _ZoomableImageState extends State<ZoomableImage>
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
+    _currentUserID = Configuration.instance.getUserID()!;
     super.initState();
   }
 
@@ -259,6 +264,24 @@ class _ZoomableImageState extends State<ZoomableImage>
       initialPosition: newPosition,
       initialScale: scale,
     );
+    _updateAspectRatioIfNeeded(imageInfo).ignore();
+  }
+
+  // Fallback logic to finish back fill and update aspect
+  // ratio if needed.
+  Future<void> _updateAspectRatioIfNeeded(ImageInfo imageInfo) async {
+    if (_imageProvider != null &&
+        widget.photo.isUploaded &&
+        widget.photo.ownerID == _currentUserID) {
+      final int h = imageInfo.image.height, w = imageInfo.image.width;
+      if (h != 0 &&
+          w != 0 &&
+          (h != widget.photo.heigth || w != widget.photo.width)) {
+        _logger.info('Updating aspect ratio for ${widget.photo} to $h:$w');
+        await FileMagicService.instance.updatePublicMagicMetadata(
+            [widget.photo], {publicMagicKeyHeight: h, publicMagicKeyWidth: w});
+      }
+    }
   }
 
   bool _isGIF() => _photo.displayName.toLowerCase().endsWith(".gif");

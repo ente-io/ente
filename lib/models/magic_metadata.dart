@@ -17,6 +17,8 @@ const pubMagicKeyEditedTime = 'editedTime';
 const pubMagicKeyEditedName = 'editedName';
 const pubMagicKeyCaption = "caption";
 const pubMagicKeyUploaderName = "uploaderName";
+const publicMagicKeyWidth = 'w';
+const publicMagicKeyHeight = 'h';
 const pubMagicKeyLat = "lat";
 const pubMagicKeyLong = "long";
 
@@ -46,6 +48,8 @@ class PubMagicMetadata {
   String? editedName;
   String? caption;
   String? uploaderName;
+  int? w;
+  int? h;
   double? lat;
   double? long;
 
@@ -54,6 +58,8 @@ class PubMagicMetadata {
     this.editedName,
     this.caption,
     this.uploaderName,
+    this.w,
+    this.h,
     this.lat,
     this.long,
   });
@@ -71,6 +77,8 @@ class PubMagicMetadata {
       editedName: map[pubMagicKeyEditedName],
       caption: map[pubMagicKeyCaption],
       uploaderName: map[pubMagicKeyUploaderName],
+      w: map[publicMagicKeyWidth],
+      h: map[publicMagicKeyHeight],
       lat: map[pubMagicKeyLat],
       long: map[pubMagicKeyLong],
     );
