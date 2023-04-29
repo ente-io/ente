@@ -24,7 +24,7 @@ import 'package:tuple/tuple.dart';
 class LocalSyncService {
   final _logger = Logger("LocalSyncService");
   final _db = FilesDB.instance;
-  final Computer _computer = Computer();
+  final Computer _computer = Computer.shared();
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
 

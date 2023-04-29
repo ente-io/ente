@@ -166,7 +166,7 @@ Uint8List chachaDecryptData(Map<String, dynamic> args) {
 }
 
 class CryptoUtil {
-  static final Computer _computer = Computer();
+  static final Computer _computer = Computer.shared();
 
   static init() {
     _computer.turnOn(workersCount: 4);
@@ -391,7 +391,7 @@ class CryptoUtil {
     return DerivedKeyResult(key, memLimit, opsLimit);
   }
 
-  // Derives a key for a given password, salt, memLimit and opsLimit using 
+  // Derives a key for a given password, salt, memLimit and opsLimit using
   // Argon2id, v1.3.
   static Future<Uint8List> deriveKey(
     Uint8List password,

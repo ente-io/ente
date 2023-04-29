@@ -28,7 +28,7 @@ dependencies:
   chewie:
     path: thirdparty/chewie
   collection: # dart
-  computer: ^2.0.0
+  computer: ^3.2.1
   confetti: ^0.6.0
   connectivity_plus: ^3.0.3
   crypto: ^3.0.2
