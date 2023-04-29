@@ -7,16 +7,7 @@ module.exports = {
         "prettier"
     ],
     parserOptions: {
-        project: "../tsconfig/ente.json",
-        tsconfigRootDir: __dirname,
-        // project: '@ente/tsconfig/ente.json',
-        // "project": "./tsconfig.json",
-        // "project": [
-        //     // "./tsconfig.json",
-        //     {
-        //         "package": "@ente/tsconfig/ente.json",
-        //     }
-        // ]
+        "project": "./tsconfig.json"
     },
     rules: {
         "indent": "off",
