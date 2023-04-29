@@ -6,8 +6,7 @@ const buildEslintCommand = (filenames) =>
         .join(' --file ')} --`;
 
 const buildPrettierCommand = (filenames) =>
-    // `yarn prettier --write --ignore-unknown ${filenames.join(' ')}`;
-    `echo nothing`
+    `yarn prettier --write --ignore-unknown ${filenames.join(' ')}`;
 
 module.exports = {
     'apps/**/*.{js,jsx,ts,tsx}': [buildEslintCommand, buildPrettierCommand],
