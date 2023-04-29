@@ -198,9 +198,9 @@ class LocationService {
 }
 
 class GPSData {
-  String? latRef;
+  final String? latRef;
   final List<double>? lat;
-  String? longRef;
+  final String? longRef;
   final List<double>? long;
 
   GPSData(this.latRef, this.lat, this.longRef, this.long);
@@ -225,18 +225,15 @@ class GPSData {
         long![long!.indexOf(element)] = element.abs();
       }
     } else {
-      latRef = latRef!.toUpperCase();
-      longRef = longRef!.toUpperCase();
-
-      if (latRef!.startsWith("N")) {
+      if (latRef!.startsWith(RegExp(r'^[nN]$'))) {
         latSign = 1;
-      } else if (latRef!.startsWith("S")) {
+      } else if (latRef!.startsWith(RegExp(r'^[sS]$'))) {
         latSign = -1;
       }
 
-      if (longRef!.startsWith("E")) {
+      if (longRef!.startsWith(RegExp(r'^[eE]$'))) {
         longSign = 1;
-      } else if (longRef!.startsWith("W")) {
+      } else if (longRef!.startsWith(RegExp(r'^[wW]$'))) {
         longSign = -1;
       }
     }
