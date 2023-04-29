@@ -5,6 +5,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/gallery_type.dart";
@@ -82,7 +83,7 @@ class LocationScreenPopUpMenu extends StatelessWidget {
               PopupMenuItem(
                 value: "edit",
                 child: Text(
-                  "Edit",
+                  S.of(context).edit,
                   style: textTheme.bodyBold,
                 ),
               ),
@@ -90,7 +91,7 @@ class LocationScreenPopUpMenu extends StatelessWidget {
                 onTap: () {},
                 value: "delete",
                 child: Text(
-                  "Delete Location",
+                  S.of(context).deleteLocation,
                   style: textTheme.bodyBold.copyWith(color: warning500),
                 ),
               ),
@@ -135,7 +136,8 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
   void initState() {
     final collectionsToHide =
         CollectionsService.instance.collectionsHiddenFromTimeline();
-    fileLoadResult = FilesDB.instance.getAllUploadedAndSharedFiles(
+    fileLoadResult =
+        FilesDB.instance.fetchAllUploadedAndSharedFilesWithLocation(
       galleryLoadStartTime,
       galleryLoadEndTime,
       limit: null,
@@ -270,11 +272,17 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
               width: double.infinity,
               child: TitleBarTitleWidget(
                 title: locationName,
+                onTap: () {
+                  showEditLocationSheet(
+                    context,
+                    InheritedLocationScreenState.of(context).locationTagEntity,
+                  );
+                },
               ),
             ),
             ValueListenableBuilder(
               valueListenable: InheritedLocationScreenState.memoryCountNotifier,
-              builder: (context, value, _) {
+              builder: (context, int? value, _) {
                 if (value == null) {
                   return RepaintBoundary(
                     child: EnteLoadingWidget(
@@ -286,7 +294,7 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
                   );
                 } else {
                   return Text(
-                    value == 1 ? "1 memory" : "$value memories",
+                    S.of(context).memoryCount(value),
                     style: getEnteTextTheme(context).smallMuted,
                   );
                 }

@@ -116,7 +116,8 @@ class _ManageIndividualParticipantState
                         body: S
                             .of(context)
                             .cannotAddMorePhotosAfterBecomingViewer(
-                                widget.user.email),
+                              widget.user.email,
+                            ),
                         isCritical: true,
                       );
                       if (actionResult?.action != null) {

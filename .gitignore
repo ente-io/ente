@@ -17,6 +17,7 @@
 
 #Visual Studio Code related
 .vscode/launch.json
+.vscode/settings.json
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -28,7 +29,6 @@
 .pub/
 /build/
 
-lib/generated/*
 
 # Web related
 lib/generated_plugin_registrant.dart
@@ -39,3 +39,4 @@ lib/generated_plugin_registrant.dart
 android/key.properties
 android/app/.settings/*
 .env
+fastlane/report.xml

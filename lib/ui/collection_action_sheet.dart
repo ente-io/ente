@@ -139,7 +139,10 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                         BottomOfTitleBarWidget(
                           title: TitleBarTitleWidget(
                             title: _actionName(
-                                context, widget.actionType, filesCount),
+                              context,
+                              widget.actionType,
+                              filesCount,
+                            ),
                           ),
                           caption: widget.showOptionToCreateNewAlbum
                               ? S.of(context).createOrSelectAlbum

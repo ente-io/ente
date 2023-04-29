@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:confetti/confetti.dart';
 import "package:dio/dio.dart";
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/button_result.dart";
@@ -303,6 +304,9 @@ Future<dynamic> showTextInputDialog(
   TextCapitalization textCapitalization = TextCapitalization.none,
   bool alwaysShowSuccessState = false,
   bool isPasswordInput = false,
+  TextEditingController? textEditingController,
+  List<TextInputFormatter>? textInputFormatter,
+  TextInputType? textInputType,
 }) {
   return showDialog(
     barrierColor: backdropFaintDark,
@@ -330,6 +334,9 @@ Future<dynamic> showTextInputDialog(
             textCapitalization: textCapitalization,
             alwaysShowSuccessState: alwaysShowSuccessState,
             isPasswordInput: isPasswordInput,
+            textEditingController: textEditingController,
+            textInputFormatter: textInputFormatter,
+            textInputType: textInputType,
           ),
         ),
       );

@@ -2,8 +2,11 @@ import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
-import "package:photos/core/configuration.dart";
+import "package:photos/core/constants.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/local_photos_updated_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/local_entity_data.dart";
@@ -75,8 +78,8 @@ class PickCenterPointWidget extends StatelessWidget {
                     child: Column(
                       children: [
                         BottomOfTitleBarWidget(
-                          title: const TitleBarTitleWidget(
-                            title: "Pick center point",
+                          title: TitleBarTitleWidget(
+                            title: S.of(context).pickCenterPoint,
                           ),
                           caption: locationTagEntity.item.name,
                         ),
@@ -88,38 +91,20 @@ class PickCenterPointWidget extends StatelessWidget {
                               limit,
                               asc,
                             }) async {
-                              final ownerID =
-                                  Configuration.instance.getUserID();
-                              final hasSelectedAllForBackup = Configuration
-                                  .instance
-                                  .hasSelectedAllFoldersForBackup();
                               final collectionsToHide = CollectionsService
                                   .instance
                                   .collectionsHiddenFromTimeline();
                               FileLoadResult result;
-                              if (hasSelectedAllForBackup) {
-                                result = await FilesDB.instance
-                                    .getAllLocalAndUploadedFiles(
-                                  creationStartTime,
-                                  creationEndTime,
-                                  ownerID!,
-                                  limit: limit,
-                                  asc: asc,
-                                  ignoredCollectionIDs: collectionsToHide,
-                                );
-                              } else {
-                                result = await FilesDB.instance
-                                    .getAllPendingOrUploadedFiles(
-                                  creationStartTime,
-                                  creationEndTime,
-                                  ownerID!,
-                                  limit: limit,
-                                  asc: asc,
-                                  ignoredCollectionIDs: collectionsToHide,
-                                );
-                              }
+                              result = await FilesDB.instance
+                                  .fetchAllUploadedAndSharedFilesWithLocation(
+                                galleryLoadStartTime,
+                                galleryLoadEndTime,
+                                limit: null,
+                                asc: false,
+                                ignoredCollectionIDs: collectionsToHide,
+                              );
 
-                              // hide ignored files from home page UI
+                              // hide ignored files from UI
                               final ignoredIDs =
                                   await IgnoredFilesService.instance.ignoredIDs;
                               result.files.removeWhere(
@@ -130,6 +115,8 @@ class PickCenterPointWidget extends StatelessWidget {
                               );
                               return result;
                             },
+                            reloadEvent:
+                                Bus.instance.on<LocalPhotosUpdatedEvent>(),
                             tagPrefix: "pick_center_point_gallery",
                             selectedFiles: selectedFiles,
                             limitSelectionToOne: true,
@@ -162,7 +149,7 @@ class PickCenterPointWidget extends StatelessWidget {
                                   key: ValueKey(value),
                                   isDisabled: !value,
                                   buttonType: ButtonType.neutral,
-                                  labelText: "Use selected photo",
+                                  labelText: S.of(context).useSelectedPhoto,
                                   onTap: () async {
                                     final selectedFile =
                                         selectedFiles.files.first;
@@ -176,7 +163,7 @@ class PickCenterPointWidget extends StatelessWidget {
                           ButtonWidget(
                             buttonType: ButtonType.secondary,
                             buttonAction: ButtonAction.cancel,
-                            labelText: "Cancel",
+                            labelText: S.of(context).cancel,
                             onTap: () async {
                               Navigator.of(context).pop();
                             },

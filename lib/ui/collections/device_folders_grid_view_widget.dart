@@ -9,7 +9,6 @@ import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
-import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/collections/device_folder_icon_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
@@ -51,8 +50,6 @@ class _DeviceFoldersGridViewWidgetState
   Widget build(BuildContext context) {
     debugPrint("${(DeviceFoldersGridViewWidget).toString()} - $_loadReason");
     final logger = Logger((_DeviceFoldersGridViewWidgetState).toString());
-    final bool isMigrationDone =
-        LocalSyncService.instance.isDeviceFileMigrationDone();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: SizedBox(
@@ -65,13 +62,9 @@ class _DeviceFoldersGridViewWidgetState
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return snapshot.data!.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.all(22),
-                        child: (isMigrationDone
-                            ? const EmptyState()
-                            : EmptyState(
-                                text: S.of(context).importing,
-                              )),
+                    ? const Padding(
+                        padding: EdgeInsets.all(22),
+                        child: EmptyState(),
                       )
                     : ListView.builder(
                         shrinkWrap: true,

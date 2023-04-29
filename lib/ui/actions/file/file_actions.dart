@@ -135,7 +135,11 @@ Future<void> showDetailsSheet(BuildContext context, File file) async {
   final colorScheme = getEnteColorScheme(context);
   return showBarModalBottomSheet(
     topControl: const SizedBox.shrink(),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(5),
+      ),
+    ),
     backgroundColor: colorScheme.backgroundElevated,
     barrierColor: backdropFaintDark,
     context: context,

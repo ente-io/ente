@@ -19,6 +19,8 @@ const pubMagicKeyCaption = "caption";
 const pubMagicKeyUploaderName = "uploaderName";
 const publicMagicKeyWidth = 'w';
 const publicMagicKeyHeight = 'h';
+const pubMagicKeyLat = "lat";
+const pubMagicKeyLong = "long";
 
 class MagicMetadata {
   // 0 -> visible
@@ -48,6 +50,8 @@ class PubMagicMetadata {
   String? uploaderName;
   int? w;
   int? h;
+  double? lat;
+  double? long;
 
   PubMagicMetadata({
     this.editedTime,
@@ -56,6 +60,8 @@ class PubMagicMetadata {
     this.uploaderName,
     this.w,
     this.h,
+    this.lat,
+    this.long,
   });
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
@@ -73,6 +79,8 @@ class PubMagicMetadata {
       uploaderName: map[pubMagicKeyUploaderName],
       w: map[publicMagicKeyWidth],
       h: map[publicMagicKeyHeight],
+      lat: map[pubMagicKeyLat],
+      long: map[pubMagicKeyLong],
     );
   }
 }

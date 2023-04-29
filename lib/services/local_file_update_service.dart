@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:core';
 import 'dart:io';
 
+import "package:collection/collection.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -11,7 +12,11 @@ import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/file.dart' as ente;
+import "package:photos/models/location/location.dart";
+import "package:photos/models/magic_metadata.dart";
+import "package:photos/services/file_magic_service.dart";
 import 'package:photos/services/files_service.dart';
+import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,11 +27,16 @@ class LocalFileUpdateService {
   late FileUpdationDB _fileUpdationDB;
   late SharedPreferences _prefs;
   late Logger _logger;
-  static const isLocationMigrationComplete = "fm_isLocationMigrationComplete";
-  static const isLocalImportDone = "fm_IsLocalImportDone";
   static const isBadCreationTimeImportDone = 'fm_badCreationTime';
   static const isBadCreationTimeMigrationComplete =
       'fm_badCreationTimeCompleted';
+  static const isMissingLocationV2ImportDone = "fm_missingLocationV2ImportDone";
+  static const isMissingLocationV2MigrationDone =
+      "fm_missingLocationV2MigrationDone";
+
+  static const isBadLocationCordImportDone = "fm_badLocationImportDone";
+  static const isBadLocationCordMigrationDone = "fm_badLocationMigrationDone";
+
   Completer<void>? _existingMigration;
 
   LocalFileUpdateService._privateConstructor() {
@@ -55,6 +65,8 @@ class LocalFileUpdateService {
       await _markFilesWhichAreActuallyUpdated();
       if (Platform.isAndroid) {
         await _migrationForFixingBadCreationTime();
+        await _migrationFilesWithMissingLocationV2();
+        await _migrationFilesWithBadLocationCord();
       }
     } catch (e, s) {
       _logger.severe('failed to perform migration', e, s);
@@ -209,5 +221,184 @@ class LocalFileUpdateService {
     );
     watch.log("imported ${filesGeneratedID.length} files");
     _prefs.setBool(isBadCreationTimeImportDone, true);
+  }
+
+  Future<void> _migrationFilesWithMissingLocationV2() async {
+    if (_prefs.containsKey(isMissingLocationV2MigrationDone)) {
+      return;
+    }
+    await _importForMissingLocationV2();
+    const int singleRunLimit = 10;
+    final List<String> processedIDs = [];
+    try {
+      final localIDs = await _fileUpdationDB.getLocalIDsForPotentialReUpload(
+        singleRunLimit,
+        FileUpdationDB.missingLocationV2,
+      );
+      if (localIDs.isEmpty) {
+        // everything is done
+        await _prefs.setBool(isMissingLocationV2MigrationDone, true);
+        return;
+      }
+
+      final List<ente.File> enteFiles = await FilesDB.instance
+          .getFilesForLocalIDs(localIDs, Configuration.instance.getUserID()!);
+      // fine localIDs which are not present in enteFiles
+      final List<String> missingLocalIDs = [];
+      for (String localID in localIDs) {
+        if (enteFiles.firstWhereOrNull((e) => e.localID == localID) == null) {
+          missingLocalIDs.add(localID);
+        }
+      }
+      processedIDs.addAll(missingLocalIDs);
+
+      final List<ente.File> remoteFilesToUpdate = [];
+      final Map<int, Map<String, double>> fileIDToUpdateMetadata = {};
+
+      for (ente.File file in enteFiles) {
+        final Location? location = await tryLocationFromExif(file);
+        if (location != null &&
+            (location.latitude ?? 0) != 0.0 &&
+            (location.longitude ?? 0) != 0.0) {
+          remoteFilesToUpdate.add(file);
+          fileIDToUpdateMetadata[file.uploadedFileID!] = {
+            pubMagicKeyLat: location.latitude!,
+            pubMagicKeyLong: location.longitude!
+          };
+        } else if (file.localID != null) {
+          processedIDs.add(file.localID!);
+        }
+      }
+      if (remoteFilesToUpdate.isNotEmpty) {
+        await FileMagicService.instance.updatePublicMagicMetadata(
+          remoteFilesToUpdate,
+          null,
+          metadataUpdateMap: fileIDToUpdateMetadata,
+        );
+        for (ente.File file in remoteFilesToUpdate) {
+          if (file.localID != null) {
+            processedIDs.add(file.localID!);
+          }
+        }
+      }
+    } catch (e) {
+      _logger.severe("Failed to fix bad creationTime", e);
+    } finally {
+      await _fileUpdationDB.deleteByLocalIDs(
+        processedIDs,
+        FileUpdationDB.missingLocationV2,
+      );
+    }
+  }
+
+  Future<void> _importForMissingLocationV2() async {
+    if (_prefs.containsKey(isMissingLocationV2ImportDone)) {
+      return;
+    }
+    _logger.info('_importForMissingLocationV2');
+    final EnteWatch watch = EnteWatch("_importForMissingLocationV2");
+    final int ownerID = Configuration.instance.getUserID()!;
+    final List<String> localIDs =
+        await FilesDB.instance.getLocalIDsForFilesWithoutLocation(ownerID);
+
+    await _fileUpdationDB.insertMultiple(
+      localIDs,
+      FileUpdationDB.missingLocationV2,
+    );
+    watch.log("imported ${localIDs.length} files");
+    await _prefs.setBool(isMissingLocationV2ImportDone, true);
+  }
+
+  Future<void> _migrationFilesWithBadLocationCord() async {
+    if (_prefs.containsKey(isBadLocationCordMigrationDone)) {
+      return;
+    }
+    await _importForBadLocationCord();
+    const int singleRunLimit = 10;
+    final List<String> processedIDs = [];
+    try {
+      final localIDs = await _fileUpdationDB.getLocalIDsForPotentialReUpload(
+        singleRunLimit,
+        FileUpdationDB.badLocationCord,
+      );
+      if (localIDs.isEmpty) {
+        // everything is done
+        await _prefs.setBool(isBadLocationCordMigrationDone, true);
+        return;
+      }
+
+      final List<ente.File> enteFiles = await FilesDB.instance
+          .getFilesForLocalIDs(localIDs, Configuration.instance.getUserID()!);
+      // fine localIDs which are not present in enteFiles
+      final List<String> missingLocalIDs = [];
+      for (String localID in localIDs) {
+        if (enteFiles.firstWhereOrNull((e) => e.localID == localID) == null) {
+          missingLocalIDs.add(localID);
+        }
+      }
+      processedIDs.addAll(missingLocalIDs);
+
+      final List<ente.File> remoteFilesToUpdate = [];
+      final Map<int, Map<String, double>> fileIDToUpdateMetadata = {};
+
+      for (ente.File file in enteFiles) {
+        final Location? location = await tryLocationFromExif(file);
+        if (location != null &&
+            (location.latitude ?? 0) != 0.0 &&
+            (location.longitude ?? 0) != 0.0) {
+          // check if the location is already correct
+          if (file.location != null &&
+              file.location?.longitude == location.latitude &&
+              file.location?.longitude == location.longitude) {
+            processedIDs.add(file.localID!);
+          } else {
+            remoteFilesToUpdate.add(file);
+            fileIDToUpdateMetadata[file.uploadedFileID!] = {
+              pubMagicKeyLat: location.latitude!,
+              pubMagicKeyLong: location.longitude!
+            };
+          }
+        } else if (file.localID != null) {
+          processedIDs.add(file.localID!);
+        }
+      }
+      if (remoteFilesToUpdate.isNotEmpty) {
+        await FileMagicService.instance.updatePublicMagicMetadata(
+          remoteFilesToUpdate,
+          null,
+          metadataUpdateMap: fileIDToUpdateMetadata,
+        );
+        for (ente.File file in remoteFilesToUpdate) {
+          if (file.localID != null) {
+            processedIDs.add(file.localID!);
+          }
+        }
+      }
+    } catch (e) {
+      _logger.severe("Failed to fix bad location cord", e);
+    } finally {
+      await _fileUpdationDB.deleteByLocalIDs(
+        processedIDs,
+        FileUpdationDB.badLocationCord,
+      );
+    }
+  }
+
+  Future<void> _importForBadLocationCord() async {
+    if (_prefs.containsKey(isBadLocationCordImportDone)) {
+      return;
+    }
+    _logger.info('_importForBadLocationCord');
+    final EnteWatch watch = EnteWatch("_importForBadLocationCord");
+    final int ownerID = Configuration.instance.getUserID()!;
+    final List<String> localIDs = await FilesDB.instance
+        .getFilesWithLocationUploadedBtw20AprTo15May2023(ownerID);
+
+    await _fileUpdationDB.insertMultiple(
+      localIDs,
+      FileUpdationDB.badLocationCord,
+    );
+    watch.log("imported ${localIDs.length} files");
+    await _prefs.setBool(isBadLocationCordImportDone, true);
   }
 }

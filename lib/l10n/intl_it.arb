@@ -1,1 +1,6 @@
-{}
+{
+  "enterYourEmailAddress": "Inserisci il tuo indirizzo email",
+  "accountWelcomeBack": "Bentornato!",
+  "email": "Email",
+  "cancel": "Annulla"
+}

@@ -30,7 +30,6 @@ class LocalSyncService {
 
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
-  static const hasImportedDeviceCollections = "has_imported_device_collections";
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
   static const kPermissionStateKey = "permission_state";
 
@@ -111,9 +110,7 @@ class LocalSyncService {
     }
     if (!hasCompletedFirstImport()) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
-      // mark device collection has imported on first import
       await _refreshDeviceFolderCountAndCover(isFirstSync: true);
-      await _prefs.setBool(hasImportedDeviceCollections, true);
       _logger.fine("first gallery import finished");
       Bus.instance
           .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
@@ -139,35 +136,7 @@ class LocalSyncService {
     if (hasUpdated && !isFirstSync) {
       Bus.instance.fire(BackupFoldersUpdatedEvent());
     }
-    // migrate the backed up folder settings after first import is done remove
-    // after 6 months?
-    if (!_prefs.containsKey(hasImportedDeviceCollections) &&
-        _prefs.containsKey(kHasCompletedFirstImportKey)) {
-      await _migrateOldSettings(result);
-    }
     return hasUpdated;
-  }
-
-  Future<void> _migrateOldSettings(
-    List<Tuple2<AssetPathEntity, String>> result,
-  ) async {
-    final pathsToBackUp = Configuration.instance.getPathsToBackUp();
-    final entriesToBackUp = Map.fromEntries(
-      result
-          .where((element) => pathsToBackUp.contains(element.item1.name))
-          .map((e) => MapEntry(e.item1.id, true)),
-    );
-    if (entriesToBackUp.isNotEmpty) {
-      await _db.updateDevicePathSyncStatus(entriesToBackUp);
-      Bus.instance.fire(BackupFoldersUpdatedEvent());
-    }
-    await Configuration.instance
-        .setHasSelectedAnyBackupFolder(pathsToBackUp.isNotEmpty);
-    await _prefs.setBool(hasImportedDeviceCollections, true);
-  }
-
-  bool isDeviceFileMigrationDone() {
-    return _prefs.containsKey(hasImportedDeviceCollections);
   }
 
   Future<bool> syncAll() async {
@@ -285,7 +254,6 @@ class LocalSyncService {
     await FilesDB.instance.deleteDB();
     for (var element in [
       kHasCompletedFirstImportKey,
-      hasImportedDeviceCollections,
       kDbUpdationTimeKey,
       "has_synced_edit_time",
       "has_selected_all_folders_for_backup",
