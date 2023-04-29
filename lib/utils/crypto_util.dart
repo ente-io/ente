@@ -166,10 +166,10 @@ Uint8List chachaDecryptData(Map<String, dynamic> args) {
 }
 
 class CryptoUtil {
+  // Note: workers are turned on during app startup.
   static final Computer _computer = Computer.shared();
 
   static init() {
-    _computer.turnOn(workersCount: 4);
     Sodium.init();
   }
 

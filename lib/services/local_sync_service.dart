@@ -48,7 +48,6 @@ class LocalSyncService {
     if (!AppLifecycleService.instance.isForeground) {
       await PhotoManager.setIgnorePermissionCheck(true);
     }
-    await _computer.turnOn(workersCount: 1);
     if (hasGrantedPermissions()) {
       _registerChangeCallback();
     }
