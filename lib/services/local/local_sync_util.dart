@@ -16,7 +16,6 @@ const assetFetchPageSize = 2000;
 Future<Tuple2<List<LocalPathAsset>, List<File>>> getLocalPathAssetsAndFiles(
   int fromTime,
   int toTime,
-  Computer computer,
 ) async {
   final pathEntities = await _getGalleryList(
     updateFromTime: fromTime,
@@ -31,19 +30,24 @@ Future<Tuple2<List<LocalPathAsset>, List<File>>> getLocalPathAssetsAndFiles(
   final List<File> uniqueFiles = [];
   for (AssetPathEntity pathEntity in pathEntities) {
     final List<AssetEntity> assetsInPath = await _getAllAssetLists(pathEntity);
-    final Tuple2<Set<String>, List<File>> result = await computer.compute(
-      _getLocalIDsAndFilesFromAssets,
-      param: <String, dynamic>{
-        "pathEntity": pathEntity,
-        "fromTime": fromTime,
-        "alreadySeenLocalIDs": alreadySeenLocalIDs,
-        "assetList": assetsInPath,
-      },
-      taskName:
-          "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
-    );
-    alreadySeenLocalIDs.addAll(result.item1);
-    uniqueFiles.addAll(result.item2);
+    late Tuple2<Set<String>, List<File>> result;
+    if (assetsInPath.isEmpty) {
+      result = const Tuple2({}, []);
+    } else {
+      result = await Computer.shared().compute(
+        _getLocalIDsAndFilesFromAssets,
+        param: <String, dynamic>{
+          "pathEntity": pathEntity,
+          "fromTime": fromTime,
+          "alreadySeenLocalIDs": alreadySeenLocalIDs,
+          "assetList": assetsInPath,
+        },
+        taskName:
+            "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
+      );
+      alreadySeenLocalIDs.addAll(result.item1);
+      uniqueFiles.addAll(result.item2);
+    }
     localPathAssets.add(
       LocalPathAsset(
         localIDs: result.item1,
@@ -120,14 +124,13 @@ Future<LocalDiffResult> getDiffWithLocal(
   Set<String> existingIDs, // localIDs of files already imported in app
   Map<String, Set<String>> pathToLocalIDs,
   Set<String> invalidIDs,
-  Computer computer,
 ) async {
   final Map<String, dynamic> args = <String, dynamic>{};
   args['assets'] = assets;
   args['existingIDs'] = existingIDs;
   args['invalidIDs'] = invalidIDs;
   args['pathToLocalIDs'] = pathToLocalIDs;
-  final LocalDiffResult diffResult = await computer.compute(
+  final LocalDiffResult diffResult = await Computer.shared().compute(
     _getLocalAssetsDiff,
     param: args,
     taskName: "getLocalAssetsDiff",
