@@ -1,6 +1,5 @@
 {
     "extends": "@ente/tsconfig/ente.json",
     "compilerOptions": {
-        "baseUrl": "./src",
-    }
+    },
 }
