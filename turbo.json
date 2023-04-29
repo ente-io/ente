@@ -23,10 +23,6 @@
         "auth": {
             "cache": false,
             "persistent": true
-        },
-        "eslint": {
-            "cache": false,
-            "persistent": true
         }
     },
     "globalEnv": [

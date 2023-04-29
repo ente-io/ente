@@ -11,8 +11,7 @@
         "export": "turbo run export",
         "build-analyze": "ANALYZE=true next build",
         "start": "turbo run start",
-        "prepare": "husky install",
-        "eslint": "turbo run eslint"
+        "prepare": "husky install"
     },
     "dependencies": {},
     "devDependencies": {
