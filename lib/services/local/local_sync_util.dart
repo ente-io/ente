@@ -39,6 +39,8 @@ Future<Tuple2<List<LocalPathAsset>, List<File>>> getLocalPathAssetsAndFiles(
         "alreadySeenLocalIDs": alreadySeenLocalIDs,
         "assetList": assetsInPath,
       },
+      taskName:
+          "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
     );
     alreadySeenLocalIDs.addAll(result.item1);
     uniqueFiles.addAll(result.item2);
@@ -125,8 +127,11 @@ Future<LocalDiffResult> getDiffWithLocal(
   args['existingIDs'] = existingIDs;
   args['invalidIDs'] = invalidIDs;
   args['pathToLocalIDs'] = pathToLocalIDs;
-  final LocalDiffResult diffResult =
-      await computer.compute(_getLocalAssetsDiff, param: args);
+  final LocalDiffResult diffResult = await computer.compute(
+    _getLocalAssetsDiff,
+    param: args,
+    taskName: "getLocalAssetsDiff",
+  );
   if (diffResult.localPathAssets != null) {
     diffResult.uniqueLocalFiles =
         await _convertLocalAssetsToUniqueFiles(diffResult.localPathAssets!);
