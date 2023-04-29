@@ -10,9 +10,7 @@
         "build": "next build",
         "export": "next export",
         "build-analyze": "ANALYZE=true next build",
-        "start": "next start",
-        "prepare": "husky install",
-        "tsc": "tsc --noEmit"
+        "start": "next start"
     },
     "dependencies": {
         "@date-io/date-fns": "^2.14.0",
