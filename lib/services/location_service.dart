@@ -206,8 +206,8 @@ class GPSData {
   GPSData(this.latRef, this.lat, this.longRef, this.long);
 
   Location? toLocationObj() {
-    final int latSign;
-    final int longSign;
+    int? latSign;
+    int? longSign;
     if (lat == null || long == null) {
       return null;
     }
@@ -225,8 +225,22 @@ class GPSData {
         long![long!.indexOf(element)] = element.abs();
       }
     } else {
-      latSign = latRef == "N" ? 1 : -1;
-      longSign = longRef == "E" ? 1 : -1;
+      if (latRef!.toLowerCase().startsWith('n')) {
+        latSign = 1;
+      } else if (latRef!.toLowerCase().startsWith('s')) {
+        latSign = -1;
+      }
+      if (longRef!.toLowerCase().startsWith('e')) {
+        longSign = 1;
+      } else if (longRef!.toLowerCase().startsWith('w')) {
+        longSign = -1;
+      }
+    }
+
+    //At this point, latSign and longSign will only be null if latRef and longRef
+    //is of invalid format.
+    if (latSign == null || longSign == null) {
+      return null;
     }
 
     return Location(
