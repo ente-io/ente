@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:computer/computer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -193,7 +192,6 @@ class LocalSyncService {
       existingLocalFileIDs,
       pathToLocalIDs,
       invalidIDs,
-      _computer,
     );
     bool hasAnyMappingChanged = false;
     if (localDiffResult.newPathToLocalIDs?.isNotEmpty ?? false) {
@@ -300,15 +298,16 @@ class LocalSyncService {
     final Tuple2<List<LocalPathAsset>, List<File>> result =
         await getLocalPathAssetsAndFiles(fromTime, toTime);
 
-    // Update the mapping for device path_id to local file id. Also, keep track
-    // of newly discovered device paths
-    await FilesDB.instance.insertLocalAssets(
-      result.item1,
-      shouldAutoBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
-    );
-
     final List<File> files = result.item2;
     if (files.isNotEmpty) {
+      // Update the mapping for device path_id to local file id. Also, keep track
+      // of newly discovered device paths
+      await FilesDB.instance.insertLocalAssets(
+        result.item1,
+        shouldAutoBackup:
+            Configuration.instance.hasSelectedAllFoldersForBackup(),
+      );
+
       _logger.info(
         "Loaded ${files.length} photos from " +
             DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +

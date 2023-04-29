@@ -30,20 +30,24 @@ Future<Tuple2<List<LocalPathAsset>, List<File>>> getLocalPathAssetsAndFiles(
   final List<File> uniqueFiles = [];
   for (AssetPathEntity pathEntity in pathEntities) {
     final List<AssetEntity> assetsInPath = await _getAllAssetLists(pathEntity);
-    final Tuple2<Set<String>, List<File>> result =
-        await Computer.shared().compute(
-      _getLocalIDsAndFilesFromAssets,
-      param: <String, dynamic>{
-        "pathEntity": pathEntity,
-        "fromTime": fromTime,
-        "alreadySeenLocalIDs": alreadySeenLocalIDs,
-        "assetList": assetsInPath,
-      },
-      taskName:
-          "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
-    );
-    alreadySeenLocalIDs.addAll(result.item1);
-    uniqueFiles.addAll(result.item2);
+    late Tuple2<Set<String>, List<File>> result;
+    if (assetsInPath.isEmpty) {
+      result = const Tuple2({}, []);
+    } else {
+      result = await Computer.shared().compute(
+        _getLocalIDsAndFilesFromAssets,
+        param: <String, dynamic>{
+          "pathEntity": pathEntity,
+          "fromTime": fromTime,
+          "alreadySeenLocalIDs": alreadySeenLocalIDs,
+          "assetList": assetsInPath,
+        },
+        taskName:
+            "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
+      );
+      alreadySeenLocalIDs.addAll(result.item1);
+      uniqueFiles.addAll(result.item2);
+    }
     localPathAssets.add(
       LocalPathAsset(
         localIDs: result.item1,
