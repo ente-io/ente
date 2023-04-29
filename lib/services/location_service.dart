@@ -225,15 +225,14 @@ class GPSData {
         long![long!.indexOf(element)] = element.abs();
       }
     } else {
-      if (latRef!.startsWith(RegExp(r'^[nN]$'))) {
+      if (latRef!.toLowerCase().startsWith('n')) {
         latSign = 1;
-      } else if (latRef!.startsWith(RegExp(r'^[sS]$'))) {
+      } else if (latRef!.toLowerCase().startsWith('s')) {
         latSign = -1;
       }
-
-      if (longRef!.startsWith(RegExp(r'^[eE]$'))) {
+      if (longRef!.toLowerCase().startsWith('e')) {
         longSign = 1;
-      } else if (longRef!.startsWith(RegExp(r'^[wW]$'))) {
+      } else if (longRef!.toLowerCase().startsWith('w')) {
         longSign = -1;
       }
     }
