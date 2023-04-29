@@ -16,7 +16,9 @@
                 "!.next/cache/**"
             ]
         },
-        "lint": {},
+        "lint": {
+            
+        },
         "dev": {
             "cache": false,
             "persistent": true
@@ -31,6 +33,10 @@
             "persistent": true
         },
         "auth": {
+            "cache": false,
+            "persistent": true
+        },
+        "eslint": {
             "cache": false,
             "persistent": true
         }

@@ -12,13 +12,14 @@
         "build-analyze": "ANALYZE=true next build",
         "start": "turbo run start",
         "prepare": "husky install",
-        "tsc": "turbo run tsc"
+        "eslint": "turbo run eslint"
     },
     "dependencies": {},
     "devDependencies": {
         "husky": "^7.0.1",
         "lint-staged": "^11.1.2",
-        "prettier": "2.3.2"
+        "prettier": "2.3.2",
+        "eslint": "^8.28.0"
     },
     "standard": {
         "parser": "babel-eslint"
