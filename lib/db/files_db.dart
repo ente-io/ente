@@ -1399,7 +1399,8 @@ class FilesDB {
   // user and upload time is greater than 20 April 2023 epoch time and less than
   // 15 May 2023 epoch time
   Future<List<String>> getFilesWithLocationUploadedBtw20AprTo15May2023(
-      int ownerID) async {
+    int ownerID,
+  ) async {
     final db = await database;
     final result = await db.query(
       filesTable,

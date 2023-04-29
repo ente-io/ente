@@ -60,8 +60,8 @@ const publicLinkDeviceLimits = [50, 25, 10, 5, 2, 1];
 
 const kilometersPerDegree = 111.16;
 
-const radiusValues = <int>[1, 2, 10, 20, 40, 80, 200, 400, 1200];
+const defaultRadiusValues = <double>[1, 2, 10, 20, 40, 80, 200, 400, 1200];
 
-const defaultRadiusValueIndex = 4;
+const defaultRadiusValue = 40.0;
 
 const galleryGridSpacing = 2.0;

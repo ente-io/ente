@@ -17,8 +17,8 @@ class EditCenterPointTileWidget extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 48,
-          height: 48,
+          width: 52,
+          height: 52,
           color: colorScheme.fillFaint,
           child: Icon(
             Icons.location_on_outlined,

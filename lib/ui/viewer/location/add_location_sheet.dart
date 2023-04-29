@@ -51,14 +51,17 @@ class AddLocationSheet extends StatefulWidget {
 }
 
 class _AddLocationSheetState extends State<AddLocationSheet> {
-  //The value of these notifiers has no significance.
+  //The value of this notifier has no significance.
   //When memoriesCountNotifier is null, we show the loading widget in the
   //memories count section which also means the gallery is loading.
   final ValueNotifier<int?> _memoriesCountNotifier = ValueNotifier(null);
+
+  //The value of this notifier has no significance.
   final ValueNotifier<bool> _submitNotifer = ValueNotifier(false);
+
   final ValueNotifier<bool> _cancelNotifier = ValueNotifier(false);
-  final ValueNotifier<int> _selectedRadiusIndexNotifier =
-      ValueNotifier(defaultRadiusValueIndex);
+  final ValueNotifier<double> _selectedRadiusNotifier =
+      ValueNotifier(defaultRadiusValue);
   final _focusNode = FocusNode();
   final _textEditingController = TextEditingController();
   final _isEmptyNotifier = ValueNotifier(true);
@@ -67,7 +70,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   @override
   void initState() {
     _focusNode.addListener(_focusNodeListener);
-    _selectedRadiusIndexNotifier.addListener(_selectedRadiusIndexListener);
+    _selectedRadiusNotifier.addListener(_selectedRadiusListener);
     super.initState();
   }
 
@@ -76,7 +79,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
     _focusNode.removeListener(_focusNodeListener);
     _submitNotifer.dispose();
     _cancelNotifier.dispose();
-    _selectedRadiusIndexNotifier.dispose();
+    _selectedRadiusNotifier.dispose();
     super.dispose();
   }
 
@@ -149,9 +152,9 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                         ),
                         const SizedBox(height: 24),
                         RadiusPickerWidget(
-                          _selectedRadiusIndexNotifier,
+                          _selectedRadiusNotifier,
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
                         Text(
                           S.of(context).locationTagFeatureDescription,
                           style: textTheme.smallMuted,
@@ -230,7 +233,8 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   Future<void> _addLocationTag() async {
     final locationData = InheritedLocationTagData.of(context);
     final coordinates = locationData.centerPoint;
-    final radius = radiusValues[locationData.selectedRadiusIndex];
+    final radius = locationData.selectedRadius;
+
     await LocationService.instance.addLocation(
       _textEditingController.text.trim(),
       coordinates,
@@ -256,11 +260,11 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
     }
   }
 
-  void _selectedRadiusIndexListener() {
+  void _selectedRadiusListener() {
     InheritedLocationTagData.of(
       context,
-    ).updateSelectedIndex(
-      _selectedRadiusIndexNotifier.value,
+    ).updateSelectedRadius(
+      _selectedRadiusNotifier.value,
     );
     _memoriesCountNotifier.value = null;
   }
