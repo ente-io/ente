@@ -12,9 +12,12 @@ export function getBestPossibleUserLocale(): Language {
     for (const lc of userLocales) {
         if (lc.startsWith('en')) {
             return Language.en;
-        }
-        if (lc.startsWith('fr')) {
+        } else if (lc.startsWith('fr')) {
             return Language.fr;
+        } else if (lc.startsWith('zh')) {
+            return Language.zh;
+        } else if (lc.startsWith('nl')) {
+            return Language.nl;
         }
     }
     return Language.en;

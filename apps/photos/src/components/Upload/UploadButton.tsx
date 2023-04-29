@@ -51,6 +51,7 @@ function UploadButton({
                 cursor: !uploadManager.shouldAllowNewUpload() && 'not-allowed',
             }}>
             <Button
+                sx={{ whiteSpace: 'nowrap' }}
                 onClick={onClickHandler}
                 disabled={!uploadManager.shouldAllowNewUpload()}
                 className="desktop-button"

@@ -38,8 +38,6 @@ import {
     COLLECTION_SORT_ORDER,
     ALL_SECTION,
     CollectionSummaryType,
-    UNCATEGORIZED_COLLECTION_NAME,
-    FAVORITE_COLLECTION_NAME,
     DUMMY_UNCATEGORIZED_SECTION,
 } from 'constants/collection';
 import {
@@ -66,6 +64,9 @@ import { t } from 'i18next';
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
+
+const UNCATEGORIZED_COLLECTION_NAME = 'Uncategorized';
+const FAVORITE_COLLECTION_NAME = 'Favorites';
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>
     (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;

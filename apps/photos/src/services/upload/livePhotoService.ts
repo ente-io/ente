@@ -1,6 +1,6 @@
 import { FILE_TYPE } from 'constants/file';
 import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from 'constants/upload';
-import { encodeMotionPhoto } from 'services/motionPhotoService';
+import { encodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
 import {
     ElectronFile,
@@ -99,7 +99,7 @@ export async function readLivePhoto(
     const video = await getUint8ArrayView(livePhotoAssets.video);
 
     return {
-        filedata: await encodeMotionPhoto({
+        filedata: await encodeLivePhoto({
             image,
             video,
             imageNameTitle: livePhotoAssets.image.name,
