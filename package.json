@@ -6,11 +6,11 @@
         "build": "turbo run build && turbo run export",
         "dev": "turbo run dev --parallel",
         "lint": "turbo run lint",
-        "albums": "next dev -p 3002",
-        "auth": "next dev -p 3004",
-        "export": "next export",
+        "albums": "turbo run albums",
+        "auth": "turbo run auth",
+        "export": "turbo run export",
         "build-analyze": "ANALYZE=true next build",
-        "start": "next start",
+        "start": "turbo run start",
         "prepare": "husky install"
     },
     "dependencies": {

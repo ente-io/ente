@@ -20,6 +20,19 @@
         "dev": {
             "cache": false,
             "persistent": true
+        },
+        "start": {
+            "dependsOn": [
+                "^build"
+            ]
+        },
+        "albums": {
+            "cache": false,
+            "persistent": true
+        },
+        "auth": {
+            "cache": false,
+            "persistent": true
         }
     },
     "globalEnv": [
