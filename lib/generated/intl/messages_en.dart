@@ -166,9 +166,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m36(storageAmountInGB) =>
       "They also get ${storageAmountInGB} GB";
 
-  static String m58(nameValue, ageValue) =>
-      "This is my name: ${nameValue}, my age is ${ageValue}";
-
   static String m37(email) => "This is ${email}\'s Verification ID";
 
   static String m38(email) => "Verify ${email}";
@@ -1108,7 +1105,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "This email is already in use"),
         "thisImageHasNoExifData":
             MessageLookupByLibrary.simpleMessage("This image has no exif data"),
-        "thisIsMyName": m58,
         "thisIsPersonVerificationId": m37,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "This is your Verification ID"),

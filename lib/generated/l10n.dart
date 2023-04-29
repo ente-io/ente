@@ -2199,16 +2199,6 @@ class S {
     );
   }
 
-  /// `This is my name: {nameValue}, my age is {ageValue}`
-  String thisIsMyName(Object nameValue, Object ageValue) {
-    return Intl.message(
-      'This is my name: $nameValue, my age is $ageValue',
-      name: 'thisIsMyName',
-      desc: '',
-      args: [nameValue, ageValue],
-    );
-  }
-
   /// `FAQ`
   String get faq {
     return Intl.message(

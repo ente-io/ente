@@ -297,7 +297,6 @@
       }
     }
   },
-  "thisIsMyName" : "This is my name: {nameValue}, my age is {ageValue}",
   "faq": "FAQ",
   "oopsSomethingWentWrong": "Oops, something went wrong",
   "peopleUsingYourCode": "People using your code",
