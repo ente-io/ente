@@ -275,10 +275,11 @@ packages:
   computer:
     dependency: "direct main"
     description:
-      name: computer
-      sha256: "34176c612a02ebf3e5eaa3e9b40e2b1df495043c46614999639d19e66823232d"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "82e365fed8a1a76f6eea0220de98389eed7b0445"
+      url: "https://github.com/ente-io/computer.git"
+    source: git
     version: "3.2.1"
   confetti:
     dependency: "direct main"
