@@ -6,7 +6,7 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "Sécurisez vos codes 2FA",
-  "onBoardingGetStarted": "Premiers Pas",
+  "onBoardingGetStarted": "Premiers pas",
   "setupFirstAccount": "Configurez votre premier compte",
   "importScanQrCode": "Scannez un QR Code",
   "importEnterSetupKey": "Saisir une clé de configuration",
@@ -92,7 +92,7 @@
   "oops": "Oups",
   "somethingWentWrongMessage": "Quelque chose s'est mal passé, veuillez recommencer",
   "leaveFamily": "Quitter le plan familial",
-  "leaveFamilyMessage": "Êtes-vous certains de vouloir quitter le plan familial ?",
+  "leaveFamilyMessage": "Êtes-vous certains de vouloir quitter le plan familial?",
   "inFamilyPlanMessage": "Vous êtes sur un plan familial !",
   "swipeHint": "Glisser vers la gauche pour modifier ou supprimer des codes",
   "scan": "Analyser",
