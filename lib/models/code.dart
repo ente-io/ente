@@ -27,6 +27,43 @@ class Code {
     this.generatedID,
   });
 
+  Code copyWith({
+    String? account,
+    String? issuer,
+    int? digits,
+    int? period,
+    String? secret,
+    Algorithm? algorithm,
+    Type? type,
+  }) {
+    final String updateAccount = account ?? this.account;
+    final String updateIssuer = issuer ?? this.issuer;
+    final int updatedDigits = digits ?? this.digits;
+    final int updatePeriod = period ?? this.period;
+    final String updatedSecret = secret ?? this.secret;
+    final Algorithm updatedAlgo = algorithm ?? this.algorithm;
+    final Type updatedType = type ?? this.type;
+
+    return Code(
+      updateAccount,
+      updateIssuer,
+      updatedDigits,
+      updatePeriod,
+      updatedSecret,
+      updatedAlgo,
+      updatedType,
+      "otpauth://${updatedType.name}/" +
+          updateIssuer +
+          ":" +
+          updateAccount +
+          "?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=" +
+          updateIssuer +
+          "&period=$updatePeriod&secret=" +
+          updatedSecret,
+      generatedID: generatedID,
+    );
+  }
+
   static Code fromAccountAndSecret(
     String account,
     String issuer,

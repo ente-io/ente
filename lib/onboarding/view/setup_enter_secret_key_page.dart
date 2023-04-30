@@ -117,17 +117,24 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                         return;
                       }
                       try {
-                        final code = Code.fromAccountAndSecret(
-                          _accountController.text.trim(),
-                          _issuerController.text.trim(),
-                          _secretController.text.trim().replaceAll(' ', ''),
-                        );
+                        final account = _accountController.text.trim();
+                        final issuer = _issuerController.text.trim();
+                        final secret =
+                            _secretController.text.trim().replaceAll(' ', '');
+                        final Code newCode = widget.code == null
+                            ? Code.fromAccountAndSecret(
+                                account,
+                                issuer,
+                                secret,
+                              )
+                            : widget.code!.copyWith(
+                                account: account,
+                                issuer: issuer,
+                                secret: secret,
+                              );
                         // Verify the validity of the code
-                        getTotp(code);
-                        if (widget.code != null) {
-                          code.generatedID = widget.code!.generatedID;
-                        }
-                        Navigator.of(context).pop(code);
+                        getTotp(newCode);
+                        Navigator.of(context).pop(newCode);
                       } catch (e) {
                         _showIncorrectDetailsDialog(context);
                       }
