@@ -83,6 +83,8 @@ dependencies:
   lottie: ^1.2.2
   media_extension: ^1.0.1
   modal_bottom_sheet: ^3.0.0-pre
+  motion_photos:
+    git: "https://github.com/ente-io/motion_photo.git"
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2

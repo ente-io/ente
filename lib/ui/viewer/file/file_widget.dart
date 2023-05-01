@@ -3,7 +3,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/ui/viewer/file/video_widget.dart';
-import 'package:photos/ui/viewer/file/zoomable_image.dart';
 import 'package:photos/ui/viewer/file/zoomable_live_image.dart';
 
 class FileWidget extends StatelessWidget {
@@ -26,14 +25,16 @@ class FileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (file.fileType == FileType.image) {
-      return ZoomableImage(
-        file,
-        shouldDisableScroll: shouldDisableScroll,
-        tagPrefix: tagPrefix,
-        backgroundDecoration: backgroundDecoration,
-      );
-    } else if (file.fileType == FileType.livePhoto) {
+    // if (file.fileType == FileType.image) {
+    //   return ZoomableImage(
+    //     file,
+    //     shouldDisableScroll: shouldDisableScroll,
+    //     tagPrefix: tagPrefix,
+    //     backgroundDecoration: backgroundDecoration,
+    //   );
+    // }
+    if (file.fileType == FileType.livePhoto ||
+        file.fileType == FileType.image) {
       return ZoomableLiveImage(
         file,
         shouldDisableScroll: shouldDisableScroll,

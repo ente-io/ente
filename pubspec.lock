@@ -1180,6 +1180,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0-pre"
+  motion_photos:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: ceeaff6e16bd9e3c98e7da2b1109dc04a93098b9
+      url: "https://github.com/ente-io/motion_photo.git"
+    source: git
+    version: "0.0.1"
   motionphoto:
     dependency: "direct main"
     description:
@@ -1337,10 +1346,10 @@ packages:
     dependency: "direct main"
     description:
       name: path_provider
-      sha256: dcea5feb97d8abf90cab9e9030b497fb7c3cbf26b7a1fe9e3ef7dcb0a1ddec95
+      sha256: c7edf82217d4b2952b2129a61d3ad60f1075b9299e629e149a8d2e39c2e6aad4
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.12"
+    version: "2.0.14"
   path_provider_android:
     dependency: transitive
     description:
@@ -2169,5 +2178,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.19.0 <3.0.0"
+  dart: ">=2.19.2 <3.0.0"
   flutter: ">=3.7.0"
