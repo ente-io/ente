@@ -25,14 +25,6 @@ class FileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // if (file.fileType == FileType.image) {
-    //   return ZoomableImage(
-    //     file,
-    //     shouldDisableScroll: shouldDisableScroll,
-    //     tagPrefix: tagPrefix,
-    //     backgroundDecoration: backgroundDecoration,
-    //   );
-    // }
     if (file.fileType == FileType.livePhoto ||
         file.fileType == FileType.image) {
       return ZoomableLiveImage(
