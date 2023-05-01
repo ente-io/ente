@@ -3,6 +3,7 @@ import 'dart:io';
 
 import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
+import "package:computer/computer.dart";
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -153,6 +154,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   } else {
     AppLifecycleService.instance.onAppInForeground('init via: $via');
   }
+  // Start workers asynchronously. No need to wait for them to start
+  Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode);
   CryptoUtil.init();
   await NotificationService.instance.init();
   await NetworkClient.instance.init();
