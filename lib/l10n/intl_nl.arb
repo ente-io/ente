@@ -621,6 +621,11 @@
   "yourSubscriptionHasExpired": "Uw abonnement is verlopen",
   "storageLimitExceeded": "Opslaglimiet overschreden",
   "upgrade": "Upgraden",
+  "raiseTicket": "Meld probleem",
+  "@raiseTicket": {
+    "description": "Button text for raising a support tickets in case of unhandled errors during backup",
+    "type": "text"
+  },
   "backupFailed": "Back-up mislukt",
   "couldNotBackUpTryLater": "We konden uw gegevens niet back-uppen.\nWe zullen het later opnieuw proberen.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "ente kan bestanden alleen versleutelen en bewaren als u toegang tot ze geeft",
