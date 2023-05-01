@@ -1,6 +1,4 @@
-import React, { useContext } from 'react';
 import { Button, Stack, styled, Typography } from '@mui/material';
-import { DeduplicateContext } from 'pages/deduplicate';
 import VerticallyCentered, { FlexWrapper } from './Container';
 import { Box } from '@mui/material';
 import uploadManager from 'services/upload/uploadManager';
@@ -21,19 +19,8 @@ const NonDraggableImage = styled('img')`
     pointer-events: none;
 `;
 
-export default function EmptyScreen({ openUploader }) {
-    const deduplicateContext = useContext(DeduplicateContext);
-    return deduplicateContext.isOnDeduplicatePage ? (
-        <VerticallyCentered>
-            <div
-                style={{
-                    color: '#a6a6a6',
-                    fontSize: '18px',
-                }}>
-                {t('NO_DUPLICATES_FOUND')}
-            </div>
-        </VerticallyCentered>
-    ) : (
+export default function GalleryEmptyState({ openUploader }) {
+    return (
         <Wrapper>
             <Stack
                 sx={{

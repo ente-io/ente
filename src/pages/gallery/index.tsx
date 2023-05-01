@@ -109,6 +109,7 @@ import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
 import ElectronService from 'services/electron/common';
 import uploadManager from 'services/upload/uploadManager';
 import { getToken } from 'utils/common/key';
+import GalleryEmptyState from 'components/GalleryEmptyState';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -714,28 +715,32 @@ export default function Gallery() {
                     sidebarView={sidebarView}
                     closeSidebar={closeSidebar}
                 />
-                <PhotoFrame
-                    files={files}
-                    collections={collections}
-                    syncWithRemote={syncWithRemote}
-                    favItemIds={favItemIds}
-                    archivedCollections={archivedCollections}
-                    setSelected={setSelected}
-                    selected={selected}
-                    isFirstLoad={isFirstLoad}
-                    hasNoPersonalFiles={hasNoPersonalFiles}
-                    openUploader={openUploader}
-                    isInSearchMode={isInSearchMode}
-                    search={search}
-                    deletedFileIds={deletedFileIds}
-                    setDeletedFileIds={setDeletedFileIds}
-                    activeCollection={activeCollection}
-                    isIncomingSharedCollection={
-                        collectionSummaries.get(activeCollection)?.type ===
-                        CollectionSummaryType.incomingShare
-                    }
-                    enableDownload={true}
-                />
+                {!isInSearchMode &&
+                !isFirstLoad &&
+                hasNoPersonalFiles &&
+                activeCollection === ALL_SECTION ? (
+                    <GalleryEmptyState openUploader={openUploader} />
+                ) : (
+                    <PhotoFrame
+                        files={files}
+                        collections={collections}
+                        syncWithRemote={syncWithRemote}
+                        favItemIds={favItemIds}
+                        archivedCollections={archivedCollections}
+                        setSelected={setSelected}
+                        selected={selected}
+                        isInSearchMode={isInSearchMode}
+                        search={search}
+                        deletedFileIds={deletedFileIds}
+                        setDeletedFileIds={setDeletedFileIds}
+                        activeCollection={activeCollection}
+                        isIncomingSharedCollection={
+                            collectionSummaries.get(activeCollection)?.type ===
+                            CollectionSummaryType.incomingShare
+                        }
+                        enableDownload={true}
+                    />
+                )}
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (
                         <SelectedFileOptions
