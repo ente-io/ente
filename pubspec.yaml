@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.7.44+444
+version: 0.7.45+445
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
@@ -84,6 +84,8 @@ dependencies:
   lottie: ^1.2.2
   media_extension: ^1.0.1
   modal_bottom_sheet: ^3.0.0-pre
+  motion_photos:
+    git: "https://github.com/ente-io/motion_photo.git"
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
