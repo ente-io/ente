@@ -62,33 +62,29 @@ class GeneralSectionWidget extends StatelessWidget {
           },
         ),
         sectionOptionSpacing,
-        showLanguageChangeOption
-            ? MenuItemWidget(
-                captionedTextWidget:
-                    CaptionedTextWidget(title: S.of(context).language),
-                pressedColor: getEnteColorScheme(context).fillFaint,
-                trailingIcon: Icons.chevron_right_outlined,
-                trailingIconIsMuted: true,
-                onTap: () async {
-                  final locale = await getLocale();
-                  routeToPage(
-                    context,
-                    LanguageSelectorPage(
-                      appSupportedLocales,
-                      (locale) async {
-                        await setLocale(locale);
-                        EnteApp.setLocale(context, locale);
-                        S.load(locale);
-                      },
-                      locale,
-                    ),
-                  );
+        MenuItemWidget(
+          captionedTextWidget:
+              CaptionedTextWidget(title: S.of(context).language),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            final locale = await getLocale();
+            routeToPage(
+              context,
+              LanguageSelectorPage(
+                appSupportedLocales,
+                (locale) async {
+                  await setLocale(locale);
+                  EnteApp.setLocale(context, locale);
+                  S.load(locale);
                 },
-              )
-            : const SizedBox.shrink(),
-        showLanguageChangeOption
-            ? sectionOptionSpacing
-            : const SizedBox.shrink(),
+                locale,
+              ),
+            );
+          },
+        ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).advanced,
