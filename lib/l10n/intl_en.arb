@@ -219,6 +219,16 @@
   "after1Month": "After 1 month",
   "after1Year": "After 1 year",
   "manageParticipants": "Manage",
+  "albumParticipantsCount": "{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}",
+  "@albumParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    },
+    "description": "Number of participants in an album, including the album owner."
+  },
   "collabLinkSectionDescription": "Create a link to allow people to add and view photos in your shared album without needing an ente app or account. Great for collecting event photos.",
   "collectPhotos": "Collect photos",
   "collaborativeLink": "Collaborative link",
