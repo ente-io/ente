@@ -61,6 +61,6 @@ export default function useComponentScroll({
         onFarLeft,
         onFarRight,
         scrollComponent,
-        componentRef: componentRef,
+        componentRef,
     };
 }

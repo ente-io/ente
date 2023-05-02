@@ -23,11 +23,11 @@ interface Iprops {
     onClick: () => void;
 }
 
-const CollectionListBarCard = React.forwardRef((props: Iprops, ref: any) => {
+const CollectionListBarCard = (props: Iprops) => {
     const { active, collectionName, collectionType, ...others } = props;
 
     return (
-        <Box ref={ref}>
+        <Box>
             <CollectionCard collectionTile={CollectionBarTile} {...others}>
                 <CollectionCardText collectionName={collectionName} />
                 <CollectionCardIcon collectionType={collectionType} />
@@ -35,9 +35,7 @@ const CollectionListBarCard = React.forwardRef((props: Iprops, ref: any) => {
             {active && <ActiveIndicator />}
         </Box>
     );
-});
-
-export default CollectionListBarCard;
+};
 
 function CollectionCardText({ collectionName }) {
     return (
@@ -70,3 +68,5 @@ function CollectionCardIcon({ collectionType }) {
         </CollectionBarTileIcon>
     );
 }
+
+export default React.memo(CollectionListBarCard);
