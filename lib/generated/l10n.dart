@@ -6792,6 +6792,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Custom radius`
+  String get customRadius {
+    return Intl.message(
+      'Custom radius',
+      name: 'customRadius',
+      desc: 'Custom radius for location tag',
+      args: [],
+    );
+  }
+
+  /// `km`
+  String get distanceInKMUnit {
+    return Intl.message(
+      'km',
+      name: 'distanceInKMUnit',
+      desc: 'Unit for distance in km',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

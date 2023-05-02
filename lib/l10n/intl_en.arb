@@ -940,5 +940,13 @@
   "doYouWantToDiscardTheEditsYouHaveMade": "Do you want to discard the edits you have made?",
   "saving": "Saving...",
   "editsSaved": "Edits saved",
-  "oopsCouldNotSaveEdits": "Oops, could not save edits"
+  "oopsCouldNotSaveEdits": "Oops, could not save edits",
+  "customRadius": "Custom radius",
+  "@customRadius": {
+    "description": "Custom radius for location tag"
+  },
+  "distanceInKMUnit": "km",
+  "@distanceInKMUnit": {
+    "description": "Unit for distance in km"
+  }
 }

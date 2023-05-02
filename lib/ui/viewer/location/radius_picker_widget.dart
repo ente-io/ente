@@ -178,7 +178,7 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
   Future<void> _customRadiusOnTap() async {
     final result = await showTextInputDialog(
       context,
-      title: "Custom radius",
+      title: S.of(context).customRadius,
       onSubmit: (customRadius) async {
         final radius = double.tryParse(customRadius);
         if (radius != null) {
@@ -193,10 +193,10 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
           throw Exception("Radius is null");
         }
       },
-      submitButtonLabel: "Done",
+      submitButtonLabel: S.of(context).done,
       textInputFormatter: [NumberWithDecimalInputFormatter(maxValue: 10000)],
       textInputType: const TextInputType.numberWithOptions(decimal: true),
-      message: "km",
+      message: S.of(context).distanceInKMUnit,
       alignMessage: Alignment.centerRight,
     );
     if (result is Exception) {

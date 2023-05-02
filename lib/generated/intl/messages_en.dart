@@ -410,6 +410,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("Current usage is "),
         "custom": MessageLookupByLibrary.simpleMessage("Custom"),
+        "customRadius": MessageLookupByLibrary.simpleMessage("Custom radius"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("Dark"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Decrypting..."),
         "decryptingVideo":
@@ -485,6 +486,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Disabling two-factor authentication..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Dismiss"),
+        "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("Do this later"),
         "doYouWantToDiscardTheEditsYouHaveMade":
             MessageLookupByLibrary.simpleMessage(
