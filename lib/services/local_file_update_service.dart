@@ -257,9 +257,7 @@ class LocalFileUpdateService {
 
       for (ente.File file in enteFiles) {
         final Location? location = await tryLocationFromExif(file);
-        if (location != null &&
-            (location.latitude ?? 0) != 0.0 &&
-            (location.longitude ?? 0) != 0.0) {
+        if (location != null && Location.isValidLocation(location)) {
           remoteFilesToUpdate.add(file);
           fileIDToUpdateMetadata[file.uploadedFileID!] = {
             pubMagicKeyLat: location.latitude!,
