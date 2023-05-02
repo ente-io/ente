@@ -18,7 +18,6 @@ import { MergedSourceURL, SelectedState } from 'types/gallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
-import EmptyScreen from './EmptyScreen';
 import { AppContext } from 'pages/_app';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { IsArchived } from 'utils/magicMetadata';
@@ -57,9 +56,6 @@ interface Props {
         selected: SelectedState | ((selected: SelectedState) => SelectedState)
     ) => void;
     selected: SelectedState;
-    isFirstLoad?;
-    hasNoPersonalFiles?;
-    openUploader?;
     isInSearchMode?: boolean;
     search?: Search;
     deletedFileIds?: Set<number>;
@@ -79,9 +75,6 @@ const PhotoFrame = ({
     archivedCollections,
     setSelected,
     selected,
-    isFirstLoad,
-    hasNoPersonalFiles,
-    openUploader,
     isInSearchMode,
     search,
     deletedFileIds,
@@ -653,49 +646,40 @@ const PhotoFrame = ({
     };
 
     return (
-        <>
-            {!isFirstLoad &&
-            hasNoPersonalFiles &&
-            !isInSearchMode &&
-            activeCollection === ALL_SECTION ? (
-                <EmptyScreen openUploader={openUploader} />
-            ) : (
-                <Container>
-                    <AutoSizer>
-                        {({ height, width }) => (
-                            <PhotoList
-                                width={width}
-                                height={height}
-                                getThumbnail={getThumbnail}
-                                filteredData={filteredData}
-                                activeCollection={activeCollection}
-                                showAppDownloadBanner={
-                                    files.length < 30 &&
-                                    !isInSearchMode &&
-                                    !deduplicateContext.isOnDeduplicatePage
-                                }
-                            />
-                        )}
-                    </AutoSizer>
-                    <PhotoViewer
-                        isOpen={open}
-                        items={filteredData}
-                        currentIndex={currentIndex}
-                        onClose={handleClose}
-                        gettingData={getSlideData}
-                        favItemIds={favItemIds}
-                        deletedFileIds={deletedFileIds}
-                        setDeletedFileIds={setDeletedFileIds}
-                        isIncomingSharedCollection={isIncomingSharedCollection}
-                        isTrashCollection={activeCollection === TRASH_SECTION}
-                        enableDownload={enableDownload}
-                        isSourceLoaded={isSourceLoaded}
-                        fileToCollectionsMap={fileToCollectionsMap}
-                        collectionNameMap={collectionNameMap}
+        <Container>
+            <AutoSizer>
+                {({ height, width }) => (
+                    <PhotoList
+                        width={width}
+                        height={height}
+                        getThumbnail={getThumbnail}
+                        filteredData={filteredData}
+                        activeCollection={activeCollection}
+                        showAppDownloadBanner={
+                            files.length < 30 &&
+                            !isInSearchMode &&
+                            !deduplicateContext.isOnDeduplicatePage
+                        }
                     />
-                </Container>
-            )}
-        </>
+                )}
+            </AutoSizer>
+            <PhotoViewer
+                isOpen={open}
+                items={filteredData}
+                currentIndex={currentIndex}
+                onClose={handleClose}
+                gettingData={getSlideData}
+                favItemIds={favItemIds}
+                deletedFileIds={deletedFileIds}
+                setDeletedFileIds={setDeletedFileIds}
+                isIncomingSharedCollection={isIncomingSharedCollection}
+                isTrashCollection={activeCollection === TRASH_SECTION}
+                enableDownload={enableDownload}
+                isSourceLoaded={isSourceLoaded}
+                fileToCollectionsMap={fileToCollectionsMap}
+                collectionNameMap={collectionNameMap}
+            />
+        </Container>
     );
 };
 
