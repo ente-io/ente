@@ -16,6 +16,9 @@ import { AppContext } from 'pages/_app';
 import { CollectionSummary } from 'types/collection';
 import CollectionSort from '../AllCollections/CollectionSort';
 import { t } from 'i18next';
+import { FixedSizeList as List } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import memoize from 'memoize-one';
 
 interface IProps {
     activeCollection?: number;
@@ -27,6 +30,30 @@ interface IProps {
 }
 
 const CollectionListBarCardWidth = 98;
+
+const createItemData = memoize((items, activeCollection, clickHandler) => ({
+    items,
+    activeCollection,
+    clickHandler,
+}));
+
+const CollectionCardContainer = React.memo(({ data, index, style }: any) => {
+    const { items, activeCollection, clickHandler } = data;
+    const item = items[index];
+
+    return (
+        <div style={style}>
+            <CollectionListBarCard
+                key={item.id}
+                latestFile={item.latestFile}
+                active={activeCollection === item.id}
+                onClick={clickHandler(item.id)}
+                collectionType={item.type}
+                collectionName={item.name}
+            />
+        </div>
+    );
+});
 
 const CollectionListBar = (props: IProps) => {
     const {
@@ -78,6 +105,12 @@ const CollectionListBar = (props: IProps) => {
         setActiveCollection(collectionID ?? ALL_SECTION);
     };
 
+    const itemData = createItemData(
+        collectionSummaries,
+        activeCollection,
+        clickHandler
+    );
+
     return (
         <CollectionListBarWrapper>
             <SpaceBetweenFlex mb={1}>
@@ -104,16 +137,19 @@ const CollectionListBar = (props: IProps) => {
                         />
                     )}
                     <ScrollContainer ref={collectionScrollContainerRef}>
-                        {collectionSummaries.map((item) => (
-                            <CollectionListBarCard
-                                key={item.id}
-                                latestFile={item.latestFile}
-                                active={activeCollection === item.id}
-                                onClick={clickHandler(item.id)}
-                                collectionType={item.type}
-                                collectionName={item.name}
-                            />
-                        ))}
+                        <AutoSizer>
+                            {({ height, width }) => (
+                                <List
+                                    itemData={itemData}
+                                    layout="horizontal"
+                                    width={width}
+                                    height={height}
+                                    itemCount={collectionSummaries.length}
+                                    itemSize={CollectionListBarCardWidth}>
+                                    {CollectionCardContainer}
+                                </List>
+                            )}
+                        </AutoSizer>
                     </ScrollContainer>
                     {!onFarRight && (
                         <ScrollButton
