@@ -1,7 +1,6 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { t } from 'i18next';
 
-import ExportModal from 'components/ExportModal';
 import exportService from 'services/export';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
@@ -13,11 +12,11 @@ import { NoStyleAnchor } from 'components/pages/sharedAlbum/GoToEnte';
 import { openLink } from 'utils/common';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { Typography } from '@mui/material';
+import { GalleryContext } from 'pages/gallery';
 
 export default function HelpSection() {
-    const [exportModalView, setExportModalView] = useState(false);
-
     const { setDialogMessage } = useContext(AppContext);
+    const { openExportModal } = useContext(GalleryContext);
 
     function openFeedbackURL() {
         const feedbackURL: string = `${getEndpoint()}/users/feedback?token=${encodeURIComponent(
@@ -26,9 +25,9 @@ export default function HelpSection() {
         openLink(feedbackURL, true);
     }
 
-    function openExportModal() {
+    function handleExportOpen() {
         if (isElectron()) {
-            setExportModalView(true);
+            openExportModal();
         } else {
             setDialogMessage(getDownloadAppMessage());
         }
@@ -53,7 +52,7 @@ export default function HelpSection() {
                 variant="secondary"
             />
             <EnteMenuItem
-                onClick={openExportModal}
+                onClick={handleExportOpen}
                 label={t('EXPORT')}
                 endIcon={
                     exportService.isExportInProgress() && (
@@ -61,10 +60,6 @@ export default function HelpSection() {
                     )
                 }
                 variant="secondary"
-            />
-            <ExportModal
-                show={exportModalView}
-                onHide={() => setExportModalView(false)}
             />
         </>
     );
