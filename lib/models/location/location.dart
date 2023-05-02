@@ -12,4 +12,18 @@ class Location with _$Location {
 
   factory Location.fromJson(Map<String, Object?> json) =>
       _$LocationFromJson(json);
+
+  static isValidLocation(Location? location) {
+    if (location == null) return false;
+    if (location.latitude == null || location.longitude == null) return false;
+    final latValue = location.latitude!;
+    final longValue = location.longitude!;
+    if (latValue.isNaN || latValue.isInfinite || latValue == 0.0) {
+      return false;
+    }
+    if (longValue.isNaN || longValue.isInfinite || longValue == 0.0) {
+      return false;
+    }
+    return true;
+  }
 }

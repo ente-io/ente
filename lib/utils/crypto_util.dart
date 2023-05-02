@@ -305,8 +305,11 @@ class CryptoUtil {
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
     args["key"] = key;
-    return _computer.compute(chachaEncryptFile,
-        param: args, taskName: "encryptFile");
+    return _computer.compute(
+      chachaEncryptFile,
+      param: args,
+      taskName: "encryptFile",
+    );
   }
 
   // Decrypts the file at sourceFilePath, with the given key and header using
