@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { t } from 'i18next';
 
 import exportService from 'services/export';
