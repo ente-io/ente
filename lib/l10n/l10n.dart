@@ -11,9 +11,16 @@ extension AppLocalizationsX on BuildContext {
 // Add more language to the list only when at least 90% of the strings are
 // translated in the corresponding language.
 const List<Locale> appSupportedLocales = kDebugMode
-    ? <Locale>[Locale('en'), Locale('fr'), Locale("nl")]
+    ? <Locale>[
+        Locale('en'),
+        Locale('fr'),
+        Locale("nl"),
+        Locale("zh", "CN"),
+      ]
     : <Locale>[
         Locale('en'),
+        Locale("nl"),
+        Locale("zh", "CN"),
       ];
 
 Locale localResolutionCallBack(locales, supportedLocales) {
