@@ -56,6 +56,10 @@ export const getRenamedExportedCollections = (
                 collection.id
             );
 
+            // startsWith is used instead of === because the export name can have numbers appended to it
+            // startsWith solves the problem by checking if the export name starts with the collection name
+            // For Example: If the collection name is "My Collection" and the export name is "My Collection(1)"
+            // then startsWith will return true
             if (!currentExportName.startsWith(sanitizeName(collection.name))) {
                 return true;
             }
