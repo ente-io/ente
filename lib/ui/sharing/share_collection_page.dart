@@ -65,8 +65,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
 
     children.add(
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Add viewer",
+        captionedTextWidget: CaptionedTextWidget(
+          title: S.of(context).addViewer,
           makeTextBold: true,
         ),
         leadingIcon: Icons.add,
@@ -163,7 +163,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               showOnlyLoadingState: true,
               onTap: () async {
                 await Clipboard.setData(ClipboardData(text: url));
-                showShortToast(context, "Link copied to clipboard");
+                showShortToast(context, S.of(context).linkCopiedToClipboard);
               },
               isBottomBorderRadiusRemoved: true,
             ),
