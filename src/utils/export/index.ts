@@ -40,7 +40,7 @@ export const convertFileIDExportNameObjectToMap = (
     );
 };
 
-export const getRenamedCollections = (
+export const getRenamedExportedCollections = (
     collections: Collection[],
     exportRecord: ExportRecord
 ) => {

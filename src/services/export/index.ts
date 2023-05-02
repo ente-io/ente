@@ -7,7 +7,7 @@ import {
     getUniqueFileExportName,
     getFileMetadataExportPath,
     getFileExportPath,
-    getRenamedCollections,
+    getRenamedExportedCollections,
     getDeletedExportedFiles,
     convertCollectionIDExportNameObjectToMap,
     convertFileIDExportNameObjectToMap,
@@ -188,7 +188,7 @@ class ExportService {
                 userPersonalFiles,
                 exportRecord
             );
-            const renamedCollections = getRenamedCollections(
+            const renamedCollections = getRenamedExportedCollections(
                 userNonEmptyPersonalCollections,
                 exportRecord
             );
@@ -293,7 +293,7 @@ class ExportService {
                 nonEmptyPersonalCollections
             );
 
-            const renamedCollections = getRenamedCollections(
+            const renamedCollections = getRenamedExportedCollections(
                 nonEmptyPersonalCollections,
                 exportRecord
             );
