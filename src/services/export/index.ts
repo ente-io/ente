@@ -676,13 +676,17 @@ class ExportService {
                             collectionExportPath,
                             fileExportName
                         );
+                        const trashedFilePath = getTrashedFileExportPath(
+                            exportDir,
+                            fileExportPath
+                        );
                         addLocalLog(
                             () =>
-                                `moving file ${fileExportPath} to trash folder`
+                                `moving file ${fileExportPath} to ${trashedFilePath} trash folder`
                         );
                         await this.electronAPIs.moveFile(
                             fileExportPath,
-                            getTrashedFileExportPath(exportDir, fileExportPath)
+                            trashedFilePath
                         );
                         const metadataFileExportPath =
                             getMetadataFileExportPath(fileExportPath);

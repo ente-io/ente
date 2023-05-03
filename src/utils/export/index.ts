@@ -242,7 +242,18 @@ export const getFileExportPath = (
 
 export const getTrashedFileExportPath = (exportDir: string, path: string) => {
     const fileRelativePath = path.replace(`${exportDir}/`, '');
-    return `${exportDir}/${ENTE_TRASH_FOLDER}/${fileRelativePath}`;
+    let trashedFilePath = `${exportDir}/${ENTE_TRASH_FOLDER}/${fileRelativePath}`;
+    let count = 1;
+    while (exportService.exists(trashedFilePath)) {
+        const filenameParts = splitFilenameAndExtension(fileRelativePath);
+        if (filenameParts[1]) {
+            trashedFilePath = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
+        } else {
+            trashedFilePath = `${filenameParts[0]}(${count})`;
+        }
+        count++;
+    }
+    return trashedFilePath;
 };
 
 // if filepath is /home/user/Ente/Export/Collection1/1.jpg
