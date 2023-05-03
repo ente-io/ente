@@ -150,7 +150,10 @@ async function migrationV2ToV3(
         exportRecord,
         getExportedFiles(personalFiles, exportRecord)
     );
-    await extractExportDirPathPrefix(exportDir, exportRecord);
+    await updateExportedCollectionPathsToCollectionExportNames(
+        exportDir,
+        exportRecord
+    );
 }
 
 /*
@@ -245,7 +248,7 @@ export async function removeDeprecatedExportRecordProperties(
     await exportService.updateExportRecord(exportRecord);
 }
 
-async function extractExportDirPathPrefix(
+async function updateExportedCollectionPathsToCollectionExportNames(
     exportDir: string,
     exportRecord: ExportRecordV2
 ) {
