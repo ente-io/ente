@@ -37,7 +37,7 @@ import { decodeLivePhoto } from 'services/livePhotoService';
 import downloadManager from 'services/downloadManager';
 import { retryAsyncFunction } from 'utils/network';
 
-export async function migrateExportJSONHelper() {
+export async function migrateExportJSON() {
     try {
         const exportDir = getData(LS_KEYS.EXPORT)?.folder;
         if (!exportDir) {

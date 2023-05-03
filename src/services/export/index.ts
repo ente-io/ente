@@ -57,7 +57,7 @@ import {
     getCollectionNameMap,
     getNonEmptyPersonalCollections,
 } from 'utils/collection';
-import { migrateExportJSONHelper } from './migration';
+import { migrateExportJSON } from './migration';
 
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
@@ -78,7 +78,7 @@ class ExportService {
         success: 0,
         failed: 0,
     };
-    private exportJSONMigrator = new QueueProcessor<void>(1);
+    private migrationInProgress: Promise<void>;
 
     constructor() {
         if (runningInBrowser()) {
@@ -88,16 +88,9 @@ class ExportService {
         }
     }
 
-    async migrateExportJSON() {
-        const response = this.exportJSONMigrator.queueUpRequest(() =>
-            migrateExportJSONHelper()
-        );
-        return response.promise;
-    }
-
     async init(uiUpdater: ExportUIUpdaters) {
         this.setUIUpdaters(uiUpdater);
-        await this.migrateExportJSON();
+        this.migrationInProgress = migrateExportJSON();
     }
 
     async setUIUpdaters(uiUpdater: ExportUIUpdaters) {
@@ -212,7 +205,6 @@ class ExportService {
 
     async preExport() {
         this.stopExport = false;
-        this.exportInProgress = true;
         await this.uiUpdater.updateExportStage(ExportStage.INPROGRESS);
         this.updateExportProgress({
             success: 0,
@@ -239,15 +231,20 @@ class ExportService {
 
     scheduleExport = async () => {
         try {
+            addLogLine('scheduling export');
             if (this.exportInProgress) {
                 addLogLine('export in progress, scheduling re-run');
                 this.reRunNeeded = true;
                 return;
             }
+            this.exportInProgress = true;
+            if (this.migrationInProgress) {
+                addLogLine('migration in progress, waiting for it to complete');
+                await this.migrationInProgress;
+                this.migrationInProgress = null;
+            }
             try {
                 await this.preExport();
-                // checking if migration is needed
-                await this.migrateExportJSON();
                 addLogLine('export started');
                 await this.runExport();
                 addLogLine('export completed');
