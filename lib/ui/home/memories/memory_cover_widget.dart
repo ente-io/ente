@@ -32,7 +32,9 @@ class _MemoryCovertWidgetState extends State<MemoryCovertWidget> {
         );
         setState(() {});
       },
-      child: Expanded(
+      child: SizedBox(
+        height: 100,
+        width: 92,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -45,6 +47,7 @@ class _MemoryCovertWidgetState extends State<MemoryCovertWidget> {
                   type: MaterialType.transparency,
                   child: Text(
                     title,
+                    overflow: TextOverflow.ellipsis,
                     style: getEnteTextTheme(context).mini,
                     textAlign: TextAlign.center,
                   ),
