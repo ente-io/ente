@@ -245,14 +245,15 @@ export const getTrashedFileExportPath = (exportDir: string, path: string) => {
     let trashedFilePath = `${exportDir}/${ENTE_TRASH_FOLDER}/${fileRelativePath}`;
     let count = 1;
     while (exportService.exists(trashedFilePath)) {
-        const filenameParts = splitFilenameAndExtension(fileRelativePath);
-        if (filenameParts[1]) {
-            trashedFilePath = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
+        const trashedFilePathParts = splitFilenameAndExtension(trashedFilePath);
+        if (trashedFilePathParts[1]) {
+            trashedFilePath = `${trashedFilePathParts[0]}(${count}).${trashedFilePathParts[1]}`;
         } else {
-            trashedFilePath = `${filenameParts[0]}(${count})`;
+            trashedFilePath = `${trashedFilePathParts[0]}(${count})`;
         }
         count++;
     }
+    console.log('trashedFilePath', trashedFilePath);
     return trashedFilePath;
 };
 
