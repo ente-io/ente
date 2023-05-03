@@ -198,7 +198,7 @@ Future<MetadataRequest> getPubMetadataRequest(
     fileKey,
   );
   return MetadataRequest(
-    version: file.pubMmdVersion,
+    version: file.pubMmdVersion == 0 ? 1 : file.pubMmdVersion,
     count: jsonToUpdate.length,
     data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
     header: CryptoUtil.bin2base64(encryptedMMd.header!),
