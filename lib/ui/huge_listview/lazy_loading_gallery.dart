@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
 import 'package:media_extension/media_extension_action_types.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/clear_selections_event.dart';
@@ -350,11 +351,13 @@ class LazyLoadingGridView extends StatefulWidget {
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   bool? _shouldRender;
+  int? _currentUserID;
   late StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
 
   @override
   void initState() {
     _shouldRender = widget.shouldRender;
+    _currentUserID = Configuration.instance.getUserID();
     widget.selectedFiles?.addListener(_selectedFilesListener);
     _clearSelectionsEvent =
         Bus.instance.on<ClearSelectionsEvent>().listen((event) {
@@ -410,6 +413,8 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
               limitSelectionToOne: widget.limitSelectionToOne,
               tag: widget.tag,
               asyncLoader: widget.asyncLoader,
+              selectedFiles: widget.selectedFiles,
+              currentUserID: _currentUserID,
             )
           : PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize!),
     );
@@ -436,6 +441,8 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         limitSelectionToOne: widget.limitSelectionToOne,
         tag: widget.tag,
         asyncLoader: widget.asyncLoader,
+        selectedFiles: widget.selectedFiles,
+        currentUserID: _currentUserID,
       );
     }
   }
