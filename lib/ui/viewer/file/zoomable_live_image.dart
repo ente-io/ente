@@ -5,10 +5,13 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:motion_photos/motion_photos.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import "package:photos/models/file_type.dart";
+import "package:photos/models/magic_metadata.dart";
+import "package:photos/services/file_magic_service.dart";
 import 'package:photos/ui/viewer/file/zoomable_image.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -177,6 +180,13 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       final motionPhoto = MotionPhotos(imageFile.path);
       final index = motionPhoto.getMotionVideoIndex();
       if (index != null) {
+        if (widget.file.pubMagicMetadata?.mvi == null &&
+            (widget.file.ownerID ?? 0) == Configuration.instance.getUserID()!) {
+          FileMagicService.instance.updatePublicMagicMetadata(
+            [widget.file],
+            {pubMotionVideoIndex: index.start},
+          ).ignore();
+        }
         return motionPhoto.getMotionVideoFile(
           index: index,
         );
