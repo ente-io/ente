@@ -350,7 +350,7 @@ class LazyLoadingGridView extends StatefulWidget {
 }
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
-  bool? _shouldRender;
+  late bool _shouldRender;
   int? _currentUserID;
   late StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
 
@@ -389,53 +389,19 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   @override
   Widget build(BuildContext context) {
     if (widget.shouldRecycle) {
-      return _getRecyclableView();
-    } else {
-      return _getNonRecyclableView();
-    }
-  }
-
-  Widget _getRecyclableView() {
-    return VisibilityDetector(
-      key: Key("gallery" + widget.filesInDay.first.tag),
-      onVisibilityChanged: (visibility) {
-        final shouldRender = visibility.visibleFraction > 0;
-        if (mounted && shouldRender != _shouldRender) {
-          setState(() {
-            _shouldRender = shouldRender;
-          });
-        }
-      },
-      child: _shouldRender!
-          ? GalleryGridViewWidget(
-              filesInDay: widget.filesInDay,
-              photoGridSize: widget.photoGridSize!,
-              limitSelectionToOne: widget.limitSelectionToOne,
-              tag: widget.tag,
-              asyncLoader: widget.asyncLoader,
-              selectedFiles: widget.selectedFiles,
-              currentUserID: _currentUserID,
-            )
-          : PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize!),
-    );
-  }
-
-  Widget _getNonRecyclableView() {
-    if (!_shouldRender!) {
-      return VisibilityDetector(
-        key: Key("gallery" + widget.filesInDay.first.tag),
-        onVisibilityChanged: (visibility) {
-          if (mounted && visibility.visibleFraction > 0 && !_shouldRender!) {
-            setState(() {
-              _shouldRender = true;
-            });
-          }
-        },
-        child:
-            PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize!),
+      return RecyclableViewWidget(
+        shouldRender: _shouldRender,
+        filesInDay: widget.filesInDay,
+        photoGridSize: widget.photoGridSize!,
+        limitSelectionToOne: widget.limitSelectionToOne,
+        tag: widget.tag,
+        asyncLoader: widget.asyncLoader,
+        selectedFiles: widget.selectedFiles,
+        currentUserID: _currentUserID,
       );
     } else {
-      return GalleryGridViewWidget(
+      return NonRecyclableViewWidget(
+        shouldRender: _shouldRender,
         filesInDay: widget.filesInDay,
         photoGridSize: widget.photoGridSize!,
         limitSelectionToOne: widget.limitSelectionToOne,
@@ -671,5 +637,128 @@ class GalleryFileWidget extends StatelessWidget {
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);
+  }
+}
+
+class RecyclableViewWidget extends StatefulWidget {
+  final bool shouldRender;
+  final List<File> filesInDay;
+  final int photoGridSize;
+  final bool limitSelectionToOne;
+  final String tag;
+  final GalleryLoader asyncLoader;
+  final int? currentUserID;
+  final SelectedFiles? selectedFiles;
+  const RecyclableViewWidget({
+    required this.shouldRender,
+    required this.filesInDay,
+    required this.photoGridSize,
+    required this.limitSelectionToOne,
+    required this.tag,
+    required this.asyncLoader,
+    this.currentUserID,
+    this.selectedFiles,
+    super.key,
+  });
+
+  @override
+  State<RecyclableViewWidget> createState() => _RecyclableViewWidgetState();
+}
+
+class _RecyclableViewWidgetState extends State<RecyclableViewWidget> {
+  late bool _shouldRender;
+  @override
+  void initState() {
+    _shouldRender = widget.shouldRender;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: Key("gallery" + widget.filesInDay.first.tag),
+      onVisibilityChanged: (visibility) {
+        final shouldRender = visibility.visibleFraction > 0;
+        if (mounted && shouldRender != _shouldRender) {
+          setState(() {
+            _shouldRender = shouldRender;
+          });
+        }
+      },
+      child: _shouldRender
+          ? GalleryGridViewWidget(
+              filesInDay: widget.filesInDay,
+              photoGridSize: widget.photoGridSize,
+              limitSelectionToOne: widget.limitSelectionToOne,
+              tag: widget.tag,
+              asyncLoader: widget.asyncLoader,
+              selectedFiles: widget.selectedFiles,
+              currentUserID: widget.currentUserID,
+            )
+          : PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize),
+    );
+  }
+}
+
+class NonRecyclableViewWidget extends StatefulWidget {
+  final bool shouldRender;
+  final List<File> filesInDay;
+  final int photoGridSize;
+  final bool limitSelectionToOne;
+  final String tag;
+  final GalleryLoader asyncLoader;
+  final int? currentUserID;
+  final SelectedFiles? selectedFiles;
+  const NonRecyclableViewWidget({
+    required this.shouldRender,
+    required this.filesInDay,
+    required this.photoGridSize,
+    required this.limitSelectionToOne,
+    required this.tag,
+    required this.asyncLoader,
+    this.currentUserID,
+    this.selectedFiles,
+    super.key,
+  });
+
+  @override
+  State<NonRecyclableViewWidget> createState() =>
+      _NonRecyclableViewWidgetState();
+}
+
+class _NonRecyclableViewWidgetState extends State<NonRecyclableViewWidget> {
+  late bool _shouldRender;
+  @override
+  void initState() {
+    _shouldRender = widget.shouldRender;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_shouldRender!) {
+      return VisibilityDetector(
+        key: Key("gallery" + widget.filesInDay.first.tag),
+        onVisibilityChanged: (visibility) {
+          if (mounted && visibility.visibleFraction > 0 && !_shouldRender) {
+            setState(() {
+              _shouldRender = true;
+            });
+          }
+        },
+        child:
+            PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize),
+      );
+    } else {
+      return GalleryGridViewWidget(
+        filesInDay: widget.filesInDay,
+        photoGridSize: widget.photoGridSize,
+        limitSelectionToOne: widget.limitSelectionToOne,
+        tag: widget.tag,
+        asyncLoader: widget.asyncLoader,
+        selectedFiles: widget.selectedFiles,
+        currentUserID: widget.currentUserID,
+      );
+    }
   }
 }
