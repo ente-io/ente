@@ -193,8 +193,7 @@ class File extends EnteFile {
         if (Platform.isAndroid) {
           //Fix for missing location data in lower android versions.
           final Location? exifLocation = locationFromExif(exifData);
-          if (exifLocation?.latitude != null &&
-              exifLocation?.longitude != null) {
+          if (Location.isValidLocation(exifLocation)) {
             location = exifLocation;
           }
         }
