@@ -285,7 +285,7 @@ class File extends EnteFile {
   }
 
   // return 0 if the height is not available
-  int get heigth {
+  int get height {
     return pubMagicMetadata?.h ?? 0;
   }
 
