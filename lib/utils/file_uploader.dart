@@ -458,12 +458,17 @@ class FileUploader {
         MetadataRequest? pubMetadataRequest;
         if ((mediaUploadData.height ?? 0) != 0 &&
             (mediaUploadData.width ?? 0) != 0) {
+          final pubMetadata = {
+            publicMagicKeyHeight: mediaUploadData.height,
+            publicMagicKeyWidth: mediaUploadData.width
+          };
+          if (mediaUploadData.motionPhotoStartIndex != null) {
+            pubMetadata[pubMotionVideoIndex] =
+                mediaUploadData.motionPhotoStartIndex;
+          }
           pubMetadataRequest = await getPubMetadataRequest(
             file,
-            {
-              publicMagicKeyHeight: mediaUploadData.height,
-              publicMagicKeyWidth: mediaUploadData.width
-            },
+            pubMetadata,
             fileAttributes.key!,
           );
         }
