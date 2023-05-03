@@ -18,12 +18,13 @@ class Location with _$Location {
     if (location.latitude == null || location.longitude == null) return false;
     final latValue = location.latitude!;
     final longValue = location.longitude!;
-    if (latValue.isNaN || latValue.isInfinite || latValue == 0.0) {
+    if (latValue.isNaN || latValue.isInfinite) {
       return false;
     }
-    if (longValue.isNaN || longValue.isInfinite || longValue == 0.0) {
+    if (longValue.isNaN || longValue.isInfinite) {
       return false;
     }
+    if (latValue == 0.0 && longValue == 0.0) return false;
     return true;
   }
 }
