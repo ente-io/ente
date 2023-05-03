@@ -770,12 +770,17 @@ class FilesDB {
     return uploadedFileIDs;
   }
 
-  Future<File?> getUploadedFileInAnyCollection(int uploadedFileID) async {
+  Future<File?> getUploadedLocalFileInAnyCollection(
+    int uploadedFileID,
+    int userID,
+  ) async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
-      where: '$columnUploadedFileID = ?',
+      where: '$columnLocalID IS NOT NULL AND $columnOwnerID = ? AND '
+          '$columnUploadedFileID = ?',
       whereArgs: [
+        userID,
         uploadedFileID,
       ],
       limit: 1,
