@@ -79,12 +79,11 @@ class _GalleryState extends State<Gallery> {
   late Logger _logger;
   List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
-  ItemScrollController? _itemScroller;
+  late ItemScrollController _itemScroller;
   StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
-  String? _logTag;
-  late int _photoGridSize;
+  late String _logTag;
 
   @override
   void initState() {
@@ -112,7 +111,7 @@ class _GalleryState extends State<Gallery> {
       // todo: Assign ID to Gallery and fire generic event with ID &
       //  target index/date
       if (mounted && event.selectedIndex == 0) {
-        _itemScroller!.scrollTo(
+        _itemScroller.scrollTo(
           index: 0,
           duration: const Duration(milliseconds: 150),
         );
@@ -209,89 +208,24 @@ class _GalleryState extends State<Gallery> {
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
     }
-    _photoGridSize = LocalSettings.instance.getPhotoGridSize();
-    return _getListView();
-  }
-
-  Widget _getListView() {
-    return HugeListView<List<File>>(
-      key: _hugeListViewKey,
-      controller: _itemScroller,
-      startIndex: 0,
-      totalCount: _collatedFiles.length,
-      isDraggableScrollbarEnabled: _collatedFiles.length > 10,
+    return GalleryListView(
+      hugeListViewKey: _hugeListViewKey,
+      itemScroller: _itemScroller,
+      collatedFiles: _collatedFiles,
       disableScroll: widget.disableScroll,
-      waitBuilder: (_) {
-        return const EnteLoadingWidget();
-      },
-      emptyResultBuilder: (_) {
-        final List<Widget> children = [];
-        if (widget.header != null) {
-          children.add(widget.header!);
-        }
-        children.add(
-          Expanded(
-            child: widget.emptyState,
-          ),
-        );
-        if (widget.footer != null) {
-          children.add(widget.footer!);
-        }
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: children,
-        );
-      },
-      itemBuilder: (context, index) {
-        Widget gallery;
-        gallery = LazyLoadingGallery(
-          _collatedFiles[index],
-          index,
-          widget.reloadEvent,
-          widget.removalEventTypes,
-          widget.asyncLoader,
-          widget.selectedFiles,
-          widget.tagPrefix,
-          Bus.instance
-              .on<GalleryIndexUpdatedEvent>()
-              .where((event) => event.tag == widget.tagPrefix)
-              .map((event) => event.index),
-          widget.shouldCollateFilesByDay,
-          logTag: _logTag,
-          photoGirdSize: _photoGridSize,
-          limitSelectionToOne: widget.limitSelectionToOne,
-        );
-        if (widget.header != null && index == 0) {
-          gallery = Column(children: [widget.header!, gallery]);
-        }
-        if (widget.footer != null && index == _collatedFiles.length - 1) {
-          gallery = Column(children: [gallery, widget.footer!]);
-        }
-        return gallery;
-      },
-      labelTextBuilder: (int index) {
-        try {
-          return getMonthAndYear(
-            DateTime.fromMicrosecondsSinceEpoch(
-              _collatedFiles[index][0].creationTime!,
-            ),
-          );
-        } catch (e) {
-          _logger.severe("label text builder failed", e);
-          return "";
-        }
-      },
-      thumbBackgroundColor:
-          Theme.of(context).colorScheme.galleryThumbBackgroundColor,
-      thumbDrawColor: Theme.of(context).colorScheme.galleryThumbDrawColor,
-      thumbPadding: widget.header != null
-          ? const EdgeInsets.only(top: 60)
-          : const EdgeInsets.all(0),
-      bottomSafeArea: widget.scrollBottomSafeArea,
-      firstShown: (int firstIndex) {
-        Bus.instance
-            .fire(GalleryIndexUpdatedEvent(widget.tagPrefix, firstIndex));
-      },
+      emptyState: widget.emptyState,
+      asyncLoader: widget.asyncLoader,
+      removalEventTypes: widget.removalEventTypes,
+      tagPrefix: widget.tagPrefix,
+      scrollBottomSafeArea: widget.scrollBottomSafeArea,
+      limitSelectionToOne: widget.limitSelectionToOne,
+      shouldCollateFilesByDay: widget.shouldCollateFilesByDay,
+      logTag: _logTag,
+      logger: _logger,
+      reloadEvent: widget.reloadEvent,
+      header: widget.header,
+      footer: widget.footer,
+      selectedFiles: widget.selectedFiles,
     );
   }
 
@@ -325,4 +259,127 @@ class GalleryIndexUpdatedEvent {
   final int index;
 
   GalleryIndexUpdatedEvent(this.tag, this.index);
+}
+
+class GalleryListView extends StatelessWidget {
+  final GlobalKey<HugeListViewState<dynamic>> hugeListViewKey;
+  final ItemScrollController itemScroller;
+  final List<List<File>> collatedFiles;
+  final bool disableScroll;
+  final Widget? header;
+  final Widget? footer;
+  final Widget emptyState;
+  final GalleryLoader asyncLoader;
+  final Stream<FilesUpdatedEvent>? reloadEvent;
+  final Set<EventType> removalEventTypes;
+  final String tagPrefix;
+  final double scrollBottomSafeArea;
+  final bool limitSelectionToOne;
+  final SelectedFiles? selectedFiles;
+  final bool shouldCollateFilesByDay;
+  final String logTag;
+  final Logger logger;
+
+  const GalleryListView({
+    required this.hugeListViewKey,
+    required this.itemScroller,
+    required this.collatedFiles,
+    required this.disableScroll,
+    this.header,
+    this.footer,
+    required this.emptyState,
+    required this.asyncLoader,
+    this.reloadEvent,
+    required this.removalEventTypes,
+    required this.tagPrefix,
+    required this.scrollBottomSafeArea,
+    required this.limitSelectionToOne,
+    this.selectedFiles,
+    required this.shouldCollateFilesByDay,
+    required this.logTag,
+    required this.logger,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return HugeListView<List<File>>(
+      key: hugeListViewKey,
+      controller: itemScroller,
+      startIndex: 0,
+      totalCount: collatedFiles.length,
+      isDraggableScrollbarEnabled: collatedFiles.length > 10,
+      disableScroll: disableScroll,
+      waitBuilder: (_) {
+        return const EnteLoadingWidget();
+      },
+      emptyResultBuilder: (_) {
+        final List<Widget> children = [];
+        if (header != null) {
+          children.add(header!);
+        }
+        children.add(
+          Expanded(
+            child: emptyState,
+          ),
+        );
+        if (footer != null) {
+          children.add(footer!);
+        }
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: children,
+        );
+      },
+      itemBuilder: (context, index) {
+        Widget gallery;
+        gallery = LazyLoadingGallery(
+          collatedFiles[index],
+          index,
+          reloadEvent,
+          removalEventTypes,
+          asyncLoader,
+          selectedFiles,
+          tagPrefix,
+          Bus.instance
+              .on<GalleryIndexUpdatedEvent>()
+              .where((event) => event.tag == tagPrefix)
+              .map((event) => event.index),
+          shouldCollateFilesByDay,
+          logTag: logTag,
+          photoGirdSize: LocalSettings.instance.getPhotoGridSize(),
+          limitSelectionToOne: limitSelectionToOne,
+        );
+        if (header != null && index == 0) {
+          gallery = Column(children: [header!, gallery]);
+        }
+        if (footer != null && index == collatedFiles.length - 1) {
+          gallery = Column(children: [gallery, footer!]);
+        }
+        return gallery;
+      },
+      labelTextBuilder: (int index) {
+        try {
+          return getMonthAndYear(
+            DateTime.fromMicrosecondsSinceEpoch(
+              collatedFiles[index][0].creationTime!,
+            ),
+          );
+        } catch (e) {
+          logger.severe("label text builder failed", e);
+          return "";
+        }
+      },
+      thumbBackgroundColor:
+          Theme.of(context).colorScheme.galleryThumbBackgroundColor,
+      thumbDrawColor: Theme.of(context).colorScheme.galleryThumbDrawColor,
+      thumbPadding: header != null
+          ? const EdgeInsets.only(top: 60)
+          : const EdgeInsets.all(0),
+      bottomSafeArea: scrollBottomSafeArea,
+      firstShown: (int firstIndex) {
+        Bus.instance.fire(GalleryIndexUpdatedEvent(tagPrefix, firstIndex));
+      },
+    );
+  }
 }
