@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
 import 'package:media_extension/media_extension_action_types.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/clear_selections_event.dart';
@@ -351,13 +350,11 @@ class LazyLoadingGridView extends StatefulWidget {
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   bool? _shouldRender;
-  int? _currentUserID;
   late StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
 
   @override
   void initState() {
     _shouldRender = widget.shouldRender;
-    _currentUserID = Configuration.instance.getUserID();
     widget.selectedFiles?.addListener(_selectedFilesListener);
     _clearSelectionsEvent =
         Bus.instance.on<ClearSelectionsEvent>().listen((event) {
@@ -407,7 +404,13 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         }
       },
       child: _shouldRender!
-          ? _getGridView()
+          ? GalleryGridViewWidget(
+              filesInDay: widget.filesInDay,
+              photoGridSize: widget.photoGridSize!,
+              limitSelectionToOne: widget.limitSelectionToOne,
+              tag: widget.tag,
+              asyncLoader: widget.asyncLoader,
+            )
           : PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize!),
     );
   }
@@ -427,152 +430,14 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
             PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize!),
       );
     } else {
-      return _getGridView();
+      return GalleryGridViewWidget(
+        filesInDay: widget.filesInDay,
+        photoGridSize: widget.photoGridSize!,
+        limitSelectionToOne: widget.limitSelectionToOne,
+        tag: widget.tag,
+        asyncLoader: widget.asyncLoader,
+      );
     }
-  }
-
-  Widget _getGridView() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      // to disable GridView's scrolling
-      itemBuilder: (context, index) {
-        return _buildFile(context, widget.filesInDay[index]);
-      },
-      itemCount: widget.filesInDay.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisSpacing: 2,
-        mainAxisSpacing: 2,
-        crossAxisCount: widget.photoGridSize!,
-      ),
-      padding: const EdgeInsets.symmetric(vertical: (galleryGridSpacing / 2)),
-    );
-  }
-
-  Widget _buildFile(BuildContext context, File file) {
-    final isFileSelected = widget.selectedFiles?.isFileSelected(file) ?? false;
-    Color selectionColor = Colors.white;
-    if (isFileSelected &&
-        file.isUploaded &&
-        (file.ownerID != _currentUserID ||
-            file.pubMagicMetadata!.uploaderName != null)) {
-      final avatarColors = getEnteColorScheme(context).avatarColors;
-      final int randomID = file.ownerID != _currentUserID
-          ? file.ownerID!
-          : file.pubMagicMetadata!.uploaderName.sumAsciiValues;
-      selectionColor = avatarColors[(randomID).remainder(avatarColors.length)];
-    }
-    return GestureDetector(
-      onTap: () {
-        widget.limitSelectionToOne
-            ? _onTapWithSelectionLimit(file)
-            : _onTapNoSelectionLimit(file);
-      },
-      onLongPress: () {
-        widget.limitSelectionToOne
-            ? _onLongPressWithSelectionLimit(file)
-            : _onLongPressNoSelectionLimit(file);
-      },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(1),
-        child: Stack(
-          children: [
-            Hero(
-              tag: widget.tag + file.tag,
-              child: ColorFiltered(
-                colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(
-                    isFileSelected ? 0.4 : 0,
-                  ),
-                  BlendMode.darken,
-                ),
-                child: ThumbnailWidget(
-                  file,
-                  diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-                  serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
-                  shouldShowLivePhotoOverlay: true,
-                  key: Key(widget.tag + file.tag),
-                  thumbnailSize: widget.photoGridSize! < photoGridSizeDefault
-                      ? thumbnailLargeSize
-                      : thumbnailSmallSize,
-                  shouldShowOwnerAvatar: !isFileSelected,
-                ),
-              ),
-            ),
-            Visibility(
-              visible: isFileSelected,
-              child: Positioned(
-                right: 4,
-                top: 4,
-                child: Icon(
-                  Icons.check_circle_rounded,
-                  size: 20,
-                  color: selectionColor, //same for both themes
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _toggleFileSelection(File file) {
-    widget.selectedFiles!.toggleSelection(file);
-  }
-
-  void _onTapNoSelectionLimit(File file) async {
-    if (widget.selectedFiles?.files.isNotEmpty ?? false) {
-      _toggleFileSelection(file);
-    } else {
-      if (AppLifecycleService.instance.mediaExtensionAction.action ==
-          IntentAction.pick) {
-        final ioFile = await getFile(file);
-        MediaExtension().setResult("file://${ioFile!.path}");
-      } else {
-        _routeToDetailPage(file, context);
-      }
-    }
-  }
-
-  void _onTapWithSelectionLimit(File file) {
-    if (widget.selectedFiles!.files.isNotEmpty &&
-        widget.selectedFiles!.files.first != file) {
-      widget.selectedFiles!.clearAll();
-    }
-    _toggleFileSelection(file);
-  }
-
-  void _onLongPressNoSelectionLimit(File file) {
-    if (widget.selectedFiles!.files.isNotEmpty) {
-      _routeToDetailPage(file, context);
-    } else if (AppLifecycleService.instance.mediaExtensionAction.action ==
-        IntentAction.main) {
-      HapticFeedback.lightImpact();
-      _toggleFileSelection(file);
-    }
-  }
-
-  Future<void> _onLongPressWithSelectionLimit(File file) async {
-    if (AppLifecycleService.instance.mediaExtensionAction.action ==
-        IntentAction.pick) {
-      final ioFile = await getFile(file);
-      MediaExtension().setResult("file://${ioFile!.path}");
-    } else {
-      _routeToDetailPage(file, context);
-    }
-  }
-
-  void _routeToDetailPage(File file, BuildContext context) {
-    final page = DetailPage(
-      DetailPageConfiguration(
-        List.unmodifiable(widget.filesInDay),
-        widget.asyncLoader,
-        widget.filesInDay.indexOf(file),
-        widget.tag,
-      ),
-    );
-    routeToPage(context, page, forceCustomPageRoute: true);
   }
 
   void _selectedFilesListener() {
@@ -600,5 +465,204 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     } else {
       widget.selectedFiles!.selectAll(widget.filesInDay.toSet());
     }
+  }
+}
+
+class GalleryGridViewWidget extends StatelessWidget {
+  final List<File> filesInDay;
+  final int photoGridSize;
+  final SelectedFiles? selectedFiles;
+  final bool limitSelectionToOne;
+  final String tag;
+  final int? currentUserID;
+  final GalleryLoader asyncLoader;
+  const GalleryGridViewWidget({
+    required this.filesInDay,
+    required this.photoGridSize,
+    this.selectedFiles,
+    required this.limitSelectionToOne,
+    required this.tag,
+    super.key,
+    this.currentUserID,
+    required this.asyncLoader,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      // to disable GridView's scrolling
+      itemBuilder: (context, index) {
+        return GalleryFileWidget(
+          file: filesInDay[index],
+          selectedFiles: selectedFiles,
+          limitSelectionToOne: limitSelectionToOne,
+          tag: tag,
+          photoGridSize: photoGridSize,
+          currentUserID: currentUserID,
+          filesInDay: filesInDay,
+          asyncLoader: asyncLoader,
+        );
+      },
+      itemCount: filesInDay.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisSpacing: 2,
+        mainAxisSpacing: 2,
+        crossAxisCount: photoGridSize,
+      ),
+      padding: const EdgeInsets.symmetric(vertical: (galleryGridSpacing / 2)),
+    );
+  }
+}
+
+class GalleryFileWidget extends StatelessWidget {
+  final File file;
+  final SelectedFiles? selectedFiles;
+  final bool limitSelectionToOne;
+  final String tag;
+  final int photoGridSize;
+  final int? currentUserID;
+  final List<File> filesInDay;
+  final GalleryLoader asyncLoader;
+  const GalleryFileWidget({
+    required this.file,
+    required this.selectedFiles,
+    required this.limitSelectionToOne,
+    required this.tag,
+    required this.photoGridSize,
+    required this.currentUserID,
+    required this.filesInDay,
+    required this.asyncLoader,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isFileSelected = selectedFiles?.isFileSelected(file) ?? false;
+    Color selectionColor = Colors.white;
+    if (isFileSelected &&
+        file.isUploaded &&
+        (file.ownerID != currentUserID ||
+            file.pubMagicMetadata!.uploaderName != null)) {
+      final avatarColors = getEnteColorScheme(context).avatarColors;
+      final int randomID = file.ownerID != currentUserID
+          ? file.ownerID!
+          : file.pubMagicMetadata!.uploaderName.sumAsciiValues;
+      selectionColor = avatarColors[(randomID).remainder(avatarColors.length)];
+    }
+    return GestureDetector(
+      onTap: () {
+        limitSelectionToOne
+            ? _onTapWithSelectionLimit(file)
+            : _onTapNoSelectionLimit(context, file);
+      },
+      onLongPress: () {
+        limitSelectionToOne
+            ? _onLongPressWithSelectionLimit(context, file)
+            : _onLongPressNoSelectionLimit(context, file);
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(1),
+        child: Stack(
+          children: [
+            Hero(
+              tag: tag + file.tag,
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(
+                    isFileSelected ? 0.4 : 0,
+                  ),
+                  BlendMode.darken,
+                ),
+                child: ThumbnailWidget(
+                  file,
+                  diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
+                  serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
+                  shouldShowLivePhotoOverlay: true,
+                  key: Key(tag + file.tag),
+                  thumbnailSize: photoGridSize < photoGridSizeDefault
+                      ? thumbnailLargeSize
+                      : thumbnailSmallSize,
+                  shouldShowOwnerAvatar: !isFileSelected,
+                ),
+              ),
+            ),
+            Visibility(
+              visible: isFileSelected,
+              child: Positioned(
+                right: 4,
+                top: 4,
+                child: Icon(
+                  Icons.check_circle_rounded,
+                  size: 20,
+                  color: selectionColor, //same for both themes
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _toggleFileSelection(File file) {
+    selectedFiles!.toggleSelection(file);
+  }
+
+  void _onTapWithSelectionLimit(File file) {
+    if (selectedFiles!.files.isNotEmpty && selectedFiles!.files.first != file) {
+      selectedFiles!.clearAll();
+    }
+    _toggleFileSelection(file);
+  }
+
+  void _onTapNoSelectionLimit(BuildContext context, File file) async {
+    if (selectedFiles?.files.isNotEmpty ?? false) {
+      _toggleFileSelection(file);
+    } else {
+      if (AppLifecycleService.instance.mediaExtensionAction.action ==
+          IntentAction.pick) {
+        final ioFile = await getFile(file);
+        MediaExtension().setResult("file://${ioFile!.path}");
+      } else {
+        _routeToDetailPage(file, context);
+      }
+    }
+  }
+
+  void _onLongPressNoSelectionLimit(BuildContext context, File file) {
+    if (selectedFiles!.files.isNotEmpty) {
+      _routeToDetailPage(file, context);
+    } else if (AppLifecycleService.instance.mediaExtensionAction.action ==
+        IntentAction.main) {
+      HapticFeedback.lightImpact();
+      _toggleFileSelection(file);
+    }
+  }
+
+  Future<void> _onLongPressWithSelectionLimit(
+    BuildContext context,
+    File file,
+  ) async {
+    if (AppLifecycleService.instance.mediaExtensionAction.action ==
+        IntentAction.pick) {
+      final ioFile = await getFile(file);
+      MediaExtension().setResult("file://${ioFile!.path}");
+    } else {
+      _routeToDetailPage(file, context);
+    }
+  }
+
+  void _routeToDetailPage(File file, BuildContext context) {
+    final page = DetailPage(
+      DetailPageConfiguration(
+        List.unmodifiable(filesInDay),
+        asyncLoader,
+        filesInDay.indexOf(file),
+        tag,
+      ),
+    );
+    routeToPage(context, page, forceCustomPageRoute: true);
   }
 }
