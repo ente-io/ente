@@ -253,7 +253,6 @@ export const getTrashedFileExportPath = (exportDir: string, path: string) => {
         }
         count++;
     }
-    console.log('trashedFilePath', trashedFilePath);
     return trashedFilePath;
 };
 
