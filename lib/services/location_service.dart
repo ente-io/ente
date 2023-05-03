@@ -243,9 +243,14 @@ class GPSData {
       return null;
     }
 
-    return Location(
+    final result = Location(
       latitude: latSign * (lat![0] + lat![1] / 60 + lat![2] / 3600),
       longitude: longSign * (long![0] + long![1] / 60 + long![2] / 3600),
     );
+    if (Location.isValidLocation(result)) {
+      return result;
+    } else {
+      return null;
+    }
   }
 }
