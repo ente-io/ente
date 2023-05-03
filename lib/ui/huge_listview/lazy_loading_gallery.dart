@@ -36,7 +36,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final String tag;
   final String? logTag;
   final Stream<int> currentIndexStream;
-  final int photoGirdSize;
+  final int photoGridSize;
   final bool areFilesCollatedByDay;
   final bool limitSelectionToOne;
   LazyLoadingGallery(
@@ -50,7 +50,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.currentIndexStream,
     this.areFilesCollatedByDay, {
     this.logTag = "",
-    this.photoGirdSize = photoGridSizeDefault,
+    this.photoGridSize = photoGridSizeDefault,
     this.limitSelectionToOne = false,
     Key? key,
   }) : super(key: key ?? UniqueKey());
@@ -60,7 +60,6 @@ class LazyLoadingGallery extends StatefulWidget {
 }
 
 class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
-  static const kRecycleLimit = 400;
   static const kNumberOfDaysToRenderBeforeAndAfter = 8;
 
   late Logger _logger;
@@ -195,10 +194,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             if (widget.areFilesCollatedByDay)
-              getDayWidget(
-                context,
-                _files[0].creationTime!,
-                widget.photoGirdSize,
+              DayWidget(
+                timestamp: _files[0].creationTime!,
+                photoGridSize: widget.photoGridSize,
               ),
             widget.limitSelectionToOne
                 ? const SizedBox.shrink()
@@ -241,40 +239,21 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           ],
         ),
         _shouldRender!
-            ? _getGallery()
+            ? GetGallery(
+                photoGridSize: widget.photoGridSize,
+                files: _files,
+                tag: widget.tag,
+                asyncLoader: widget.asyncLoader,
+                selectedFiles: widget.selectedFiles,
+                toggleSelectAllFromDay: _toggleSelectAllFromDay,
+                areAllFromDaySelected: _areAllFromDaySelected,
+                limitSelectionToOne: widget.limitSelectionToOne,
+              )
             : PlaceHolderWidget(
                 _files.length,
-                widget.photoGirdSize,
+                widget.photoGridSize,
               ),
       ],
-    );
-  }
-
-  Widget _getGallery() {
-    final List<Widget> childGalleries = [];
-    final subGalleryItemLimit = widget.photoGirdSize * subGalleryMultiplier;
-    for (int index = 0; index < _files.length; index += subGalleryItemLimit) {
-      childGalleries.add(
-        LazyLoadingGridView(
-          widget.tag,
-          _files.sublist(
-            index,
-            min(index + subGalleryItemLimit, _files.length),
-          ),
-          widget.asyncLoader,
-          widget.selectedFiles,
-          index == 0,
-          _files.length > kRecycleLimit,
-          _toggleSelectAllFromDay,
-          _areAllFromDaySelected,
-          widget.photoGirdSize,
-          limitSelectionToOne: widget.limitSelectionToOne,
-        ),
-      );
-    }
-
-    return Column(
-      children: childGalleries,
     );
   }
 
@@ -284,6 +263,59 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     } else {
       _showSelectAllButton.value = true;
     }
+  }
+}
+
+class GetGallery extends StatelessWidget {
+  final int photoGridSize;
+  final List<File> files;
+  final String tag;
+  final GalleryLoader asyncLoader;
+  final SelectedFiles? selectedFiles;
+  final ValueNotifier<bool> toggleSelectAllFromDay;
+  final ValueNotifier<bool> areAllFromDaySelected;
+  final bool limitSelectionToOne;
+  const GetGallery({
+    required this.photoGridSize,
+    required this.files,
+    required this.tag,
+    required this.asyncLoader,
+    required this.selectedFiles,
+    required this.toggleSelectAllFromDay,
+    required this.areAllFromDaySelected,
+    required this.limitSelectionToOne,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const kRecycleLimit = 400;
+    final List<Widget> childGalleries = [];
+    final subGalleryItemLimit = photoGridSize * subGalleryMultiplier;
+
+    for (int index = 0; index < files.length; index += subGalleryItemLimit) {
+      childGalleries.add(
+        LazyLoadingGridView(
+          tag,
+          files.sublist(
+            index,
+            min(index + subGalleryItemLimit, files.length),
+          ),
+          asyncLoader,
+          selectedFiles,
+          index == 0,
+          files.length > kRecycleLimit,
+          toggleSelectAllFromDay,
+          areAllFromDaySelected,
+          photoGridSize,
+          limitSelectionToOne: limitSelectionToOne,
+        ),
+      );
+    }
+
+    return Column(
+      children: childGalleries,
+    );
   }
 }
 

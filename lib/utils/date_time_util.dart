@@ -233,33 +233,41 @@ bool isLeapYear(DateTime dateTime) {
   }
 }
 
-Widget getDayWidget(
-  BuildContext context,
-  int timestamp,
-  int photoGridSize,
-) {
-  final colorScheme = getEnteColorScheme(context);
-  final textTheme = getEnteTextTheme(context);
-  final textStyle =
-      photoGridSize < photoGridSizeMax ? textTheme.body : textTheme.small;
-  final double horizontalPadding =
-      photoGridSize < photoGridSizeMax ? 12.0 : 8.0;
-  final double verticalPadding = photoGridSize < photoGridSizeMax ? 12.0 : 14.0;
-  return Padding(
-    padding: EdgeInsets.symmetric(
-      horizontal: horizontalPadding,
-      vertical: verticalPadding,
-    ),
-    child: Container(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        getDayTitle(timestamp),
-        style: (getDayTitle(timestamp) == "Today")
-            ? textStyle
-            : textStyle.copyWith(color: colorScheme.textMuted),
+class DayWidget extends StatelessWidget {
+  final int timestamp;
+  final int photoGridSize;
+  const DayWidget({
+    required this.timestamp,
+    required this.photoGridSize,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final textStyle =
+        photoGridSize < photoGridSizeMax ? textTheme.body : textTheme.small;
+    final double horizontalPadding =
+        photoGridSize < photoGridSizeMax ? 12.0 : 8.0;
+    final double verticalPadding =
+        photoGridSize < photoGridSizeMax ? 12.0 : 14.0;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: verticalPadding,
       ),
-    ),
-  );
+      child: Container(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          getDayTitle(timestamp),
+          style: (getDayTitle(timestamp) == "Today")
+              ? textStyle
+              : textStyle.copyWith(color: colorScheme.textMuted),
+        ),
+      ),
+    );
+  }
 }
 
 String getDayTitle(int timestamp) {

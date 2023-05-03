@@ -89,7 +89,7 @@ class _GalleryState extends State<Gallery> {
   void initState() {
     _logTag =
         "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}";
-    _logger = Logger(_logTag!);
+    _logger = Logger(_logTag);
     _logger.finest("init Gallery");
     _itemScroller = ItemScrollController();
     if (widget.reloadEvent != null) {
@@ -347,7 +347,7 @@ class GalleryListView extends StatelessWidget {
               .map((event) => event.index),
           shouldCollateFilesByDay,
           logTag: logTag,
-          photoGirdSize: LocalSettings.instance.getPhotoGridSize(),
+          photoGridSize: LocalSettings.instance.getPhotoGridSize(),
           limitSelectionToOne: limitSelectionToOne,
         );
         if (header != null && index == 0) {
