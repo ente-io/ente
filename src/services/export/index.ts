@@ -1064,6 +1064,7 @@ class ExportService {
     exists = (path: string) => {
         return this.electronAPIs.exists(path);
     };
+
     checkExistsAndRename = (oldPath: string, newPath: string) => {
         return this.electronAPIs.checkExistsAndRename(oldPath, newPath);
     };
