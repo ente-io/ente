@@ -1,6 +1,7 @@
 import { ENTE_METADATA_FOLDER } from 'constants/export';
 import {
     ExportedCollectionPaths,
+    ExportRecordV0,
     ExportRecordV1,
     ExportRecordV2,
 } from 'types/export';
@@ -21,7 +22,7 @@ export const convertCollectionIDFolderPathObjectToMap = (
 
 export const getExportedFiles = (
     allFiles: EnteFile[],
-    exportRecord: ExportRecordV1 | ExportRecordV2
+    exportRecord: ExportRecordV0 | ExportRecordV1 | ExportRecordV2
 ) => {
     if (!exportRecord?.exportedFiles) {
         return [];

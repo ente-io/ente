@@ -75,7 +75,7 @@ async function migrateExport(
         addLogLine(`current export version: ${exportRecord.version}`);
         if (exportRecord.version === 0) {
             addLogLine('migrating export to version 1');
-            await migrationV0ToV1(exportDir, exportRecord);
+            await migrationV0ToV1(exportDir, exportRecord as ExportRecordV0);
             exportRecord = await exportService.updateExportRecord({
                 version: 1,
             });
@@ -83,7 +83,7 @@ async function migrateExport(
         }
         if (exportRecord.version === 1) {
             addLogLine('migrating export to version 2');
-            await migrationV1ToV2(exportRecord);
+            await migrationV1ToV2(exportRecord as ExportRecordV1);
             exportRecord = await exportService.updateExportRecord({
                 version: 2,
             });
@@ -357,7 +357,7 @@ async function addCollectionExportedRecordV1(
     try {
         const exportRecord = (await exportService.getExportRecord(
             folder
-        )) as ExportRecordV1;
+        )) as unknown as ExportRecordV1;
         if (!exportRecord?.exportedCollectionPaths) {
             exportRecord.exportedCollectionPaths = {};
         }

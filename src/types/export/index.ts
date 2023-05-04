@@ -23,23 +23,23 @@ export interface FileExportStats {
 }
 
 export interface ExportRecordV0 {
-    stage?: ExportStage;
-    lastAttemptTimestamp?: number;
-    progress?: ExportProgress;
-    queuedFiles?: string[];
-    exportedFiles?: string[];
-    failedFiles?: string[];
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    progress: ExportProgress;
+    queuedFiles: string[];
+    exportedFiles: string[];
+    failedFiles: string[];
 }
 
 export interface ExportRecordV1 {
-    version?: number;
-    stage?: ExportStage;
-    lastAttemptTimestamp?: number;
-    progress?: ExportProgress;
-    queuedFiles?: string[];
-    exportedFiles?: string[];
-    failedFiles?: string[];
-    exportedCollectionPaths?: ExportedCollectionPaths;
+    version: number;
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    progress: ExportProgress;
+    queuedFiles: string[];
+    exportedFiles: string[];
+    failedFiles: string[];
+    exportedCollectionPaths: ExportedCollectionPaths;
 }
 
 export interface ExportRecordV2 {
