@@ -80,7 +80,7 @@ export default function ExportModal(props: Props) {
                     updateExportStage: updateExportStage,
                     updateExportProgress: setExportProgress,
                     updateFileExportStats: setFileExportStats,
-                    updateLastExportTime: updateExportTime,
+                    updateLastExportTime: updateLastExportTime,
                 });
                 const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
                 setExportFolder(exportSettings?.folder);
@@ -134,7 +134,7 @@ export default function ExportModal(props: Props) {
         await exportService.updateExportRecord({ stage: newStage });
     };
 
-    const updateExportTime = async (newTime: number) => {
+    const updateLastExportTime = async (newTime: number) => {
         setLastExportTime(newTime);
         await exportService.updateExportRecord({
             lastAttemptTimestamp: newTime,
