@@ -124,7 +124,7 @@ class ExportService {
     }
 
     private async updateLastExportTime(exportTime: number) {
-        this.updateExportRecord({ lastAttemptTimestamp: exportTime });
+        await this.updateExportRecord({ lastAttemptTimestamp: exportTime });
         this.uiUpdater.setLastExportTime(exportTime);
     }
 
@@ -195,14 +195,16 @@ class ExportService {
         try {
             const user: User = getData(LS_KEYS.USER);
             const files = await getLocalFiles();
-            const collections = await getLocalCollections();
             const userPersonalFiles = getPersonalFiles(files, user);
+
+            const collections = await getLocalCollections();
             const userNonEmptyPersonalCollections =
                 getNonEmptyPersonalCollections(
                     collections,
                     userPersonalFiles,
                     user
                 );
+
             const unExportedFiles = getUnExportedFiles(
                 userPersonalFiles,
                 exportRecord
@@ -219,6 +221,7 @@ class ExportService {
                 userNonEmptyPersonalCollections,
                 exportRecord
             );
+
             return {
                 totalCount: userPersonalFiles.length,
                 pendingCount:
@@ -246,8 +249,10 @@ class ExportService {
     async postExport() {
         await this.updateExportStage(ExportStage.FINISHED);
         await this.updateLastExportTime(Date.now());
+
         const exportSettings = this.getExportSettings();
         const exportRecord = await this.getExportRecord(exportSettings?.folder);
+
         const fileExportStats = await this.getFileExportStats(exportRecord);
         this.uiUpdater.setFileExportStats(fileExportStats);
     }
