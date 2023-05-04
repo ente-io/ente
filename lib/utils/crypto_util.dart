@@ -325,8 +325,11 @@ class CryptoUtil {
     args["destinationFilePath"] = destinationFilePath;
     args["header"] = header;
     args["key"] = key;
-    return _computer.compute(chachaDecryptFile,
-        param: args, taskName: "decryptFile");
+    return _computer.compute(
+      chachaDecryptFile,
+      param: args,
+      taskName: "decryptFile",
+    );
   }
 
   // Generates and returns a 256-bit key.
