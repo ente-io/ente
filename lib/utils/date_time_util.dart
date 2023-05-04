@@ -65,15 +65,6 @@ bool areFromSameDay(int firstCreationTime, int secondCreationTime) {
       firstDate.day == secondDate.day;
 }
 
-//30 Jun, 2022
-String getDateAndMonthAndYear(DateTime dateTime) {
-  return dateTime.day.toString() +
-      " " +
-      _months[dateTime.month]! +
-      ", " +
-      dateTime.year.toString();
-}
-
 // Create link default names:
 // Same day: "Dec 19, 2022"
 // Same month: "Dec 19 - 22, 2022"
