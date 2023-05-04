@@ -261,7 +261,7 @@ export default function App(props) {
                 const exportRecord = await exportService.getExportRecord(
                     exportSettings?.folder
                 );
-                exportService.runMigration(
+                await exportService.runMigration(
                     exportSettings?.folder,
                     exportRecord
                 );

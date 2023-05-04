@@ -68,24 +68,21 @@ export default function ExportModal(props: Props) {
         if (!isElectron()) {
             return;
         }
-        const main = async () => {
-            try {
-                await exportService.init({
-                    setExportStage,
-                    setExportProgress,
-                    setFileExportStats,
-                    setLastExportTime,
-                });
-                const exportSettings: ExportSettings =
-                    exportService.getExportSettings();
-                setExportFolder(exportSettings?.folder);
-                setContinuousExport(exportSettings?.continuousExport);
-                syncExportRecord(exportSettings?.folder);
-            } catch (e) {
-                logError(e, 'export on mount useEffect failed');
-            }
-        };
-        void main();
+        try {
+            exportService.setUIUpdaters({
+                setExportStage,
+                setExportProgress,
+                setFileExportStats,
+                setLastExportTime,
+            });
+            const exportSettings: ExportSettings =
+                exportService.getExportSettings();
+            setExportFolder(exportSettings?.folder);
+            setContinuousExport(exportSettings?.continuousExport);
+            void syncExportRecord(exportSettings?.folder);
+        } catch (e) {
+            logError(e, 'export on mount useEffect failed');
+        }
     }, []);
 
     useEffect(() => {

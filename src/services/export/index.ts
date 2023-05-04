@@ -103,15 +103,13 @@ class ExportService {
         setData(LS_KEYS.EXPORT, newSettings);
     }
 
-    async init(uiUpdater: ExportUIUpdaters) {
-        this.setUIUpdaters(uiUpdater);
-    }
-
-    runMigration(exportDir: string, exportRecord: ExportRecord) {
+    async runMigration(exportDir: string, exportRecord: ExportRecord) {
         this.migrationInProgress = migrateExportJSON(exportDir, exportRecord);
+        await this.migrationInProgress;
+        this.migrationInProgress = null;
     }
 
-    async setUIUpdaters(uiUpdater: ExportUIUpdaters) {
+    setUIUpdaters(uiUpdater: ExportUIUpdaters) {
         this.uiUpdater = uiUpdater;
         this.uiUpdater.setExportProgress(this.currentExportProgress);
     }
