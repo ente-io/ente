@@ -296,7 +296,7 @@ class _GalleryState extends State<Gallery> {
   }
 
   List<List<File>> _collateFiles(List<File> files) {
-    final List<File> dailyFiles = [];
+    List<File> dailyFiles = [];
     final List<List<File>> collatedFiles = [];
     for (int index = 0; index < files.length; index++) {
       if (index > 0 &&
@@ -304,10 +304,8 @@ class _GalleryState extends State<Gallery> {
             files[index - 1].creationTime!,
             files[index].creationTime!,
           )) {
-        final List<File> collatedDailyFiles = [];
-        collatedDailyFiles.addAll(dailyFiles);
-        collatedFiles.add(collatedDailyFiles);
-        dailyFiles.clear();
+        collatedFiles.add(dailyFiles);
+        dailyFiles = [];
       }
       dailyFiles.add(files[index]);
     }
