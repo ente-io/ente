@@ -91,27 +91,32 @@ class _DynamicLocationGalleryWidgetState
       ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return SizedBox(
-            height: _galleryHeight(
-              min(
-                (widget.memoriesCountNotifier.value ?? 0),
-                galleryFilesLimit,
-              ),
-            ),
-            child: Gallery(
-              loadingWidget: const SizedBox.shrink(),
-              disableScroll: true,
-              asyncLoader: (
-                creationStartTime,
-                creationEndTime, {
-                limit,
-                asc,
-              }) async {
-                return snapshot.data as FileLoadResult;
-              },
-              tagPrefix: widget.tagPrefix,
-              shouldCollateFilesByDay: false,
-            ),
+          return LayoutBuilder(
+            builder: (context, constrains) {
+              return SizedBox(
+                height: _galleryHeight(
+                  min(
+                    (widget.memoriesCountNotifier.value ?? 0),
+                    galleryFilesLimit,
+                  ),
+                  constrains.maxWidth,
+                ),
+                child: Gallery(
+                  loadingWidget: const SizedBox.shrink(),
+                  disableScroll: true,
+                  asyncLoader: (
+                    creationStartTime,
+                    creationEndTime, {
+                    limit,
+                    asc,
+                  }) async {
+                    return snapshot.data as FileLoadResult;
+                  },
+                  tagPrefix: widget.tagPrefix,
+                  shouldCollateFilesByDay: false,
+                ),
+              );
+            },
           );
         } else {
           return const SizedBox.shrink();
@@ -121,14 +126,13 @@ class _DynamicLocationGalleryWidgetState
     );
   }
 
-  double _galleryHeight(int fileCount) {
+  double _galleryHeight(int fileCount, double widthOfGrid) {
     final photoGridSize = LocalSettings.instance.getPhotoGridSize();
     final totalWhiteSpaceBetweenPhotos =
         galleryGridSpacing * (photoGridSize - 1);
 
     final thumbnailHeight =
-        ((MediaQuery.of(context).size.width - totalWhiteSpaceBetweenPhotos) /
-            photoGridSize);
+        ((widthOfGrid - totalWhiteSpaceBetweenPhotos) / photoGridSize);
 
     final numberOfRows = (fileCount / photoGridSize).ceil();
 
