@@ -124,7 +124,6 @@ export default function ExportModal(props: Props) {
     };
 
     const verifyExportFolderExists = () => {
-        const exportFolder = exportService.getExportSettings()?.folder;
         if (!exportFolder || !exportService.exists(exportFolder)) {
             appContext.setDialogMessage(
                 getExportDirectoryDoesNotExistMessage()
