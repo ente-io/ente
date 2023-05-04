@@ -1,8 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:photos/core/constants.dart';
-import 'package:photos/theme/ente_theme.dart';
 
 const Set<int> monthWith31Days = {1, 3, 5, 7, 8, 10, 12};
 const Set<int> monthWith30Days = {4, 6, 9, 11};
@@ -231,35 +228,6 @@ bool isLeapYear(DateTime dateTime) {
   } else {
     return false;
   }
-}
-
-Widget getDayWidget(
-  BuildContext context,
-  int timestamp,
-  int photoGridSize,
-) {
-  final colorScheme = getEnteColorScheme(context);
-  final textTheme = getEnteTextTheme(context);
-  final textStyle =
-      photoGridSize < photoGridSizeMax ? textTheme.body : textTheme.small;
-  final double horizontalPadding =
-      photoGridSize < photoGridSizeMax ? 12.0 : 8.0;
-  final double verticalPadding = photoGridSize < photoGridSizeMax ? 12.0 : 14.0;
-  return Padding(
-    padding: EdgeInsets.symmetric(
-      horizontal: horizontalPadding,
-      vertical: verticalPadding,
-    ),
-    child: Container(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        getDayTitle(timestamp),
-        style: (getDayTitle(timestamp) == "Today")
-            ? textStyle
-            : textStyle.copyWith(color: colorScheme.textMuted),
-      ),
-    ),
-  );
 }
 
 String getDayTitle(int timestamp) {

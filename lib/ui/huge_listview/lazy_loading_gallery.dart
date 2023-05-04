@@ -20,6 +20,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import "package:photos/ui/viewer/gallery/component/day_widget.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -195,10 +196,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             if (widget.areFilesCollatedByDay)
-              getDayWidget(
-                context,
-                _files[0].creationTime!,
-                widget.photoGirdSize,
+              DayWidget(
+                timestamp: _files[0].creationTime!,
+                gridSize: widget.photoGirdSize,
               ),
             widget.limitSelectionToOne
                 ? const SizedBox.shrink()
