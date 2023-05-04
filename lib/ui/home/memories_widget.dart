@@ -48,7 +48,10 @@ class MemoriesWidget extends StatelessWidget {
     }
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Row(children: memoryWidgets),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: memoryWidgets,
+      ),
     );
   }
 
@@ -106,27 +109,32 @@ class _MemoryWidgetState extends State<MemoryWidget> {
         );
         setState(() {});
       },
-      child: Expanded(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              _buildMemoryItem(context, index),
-              const Padding(padding: EdgeInsets.all(4)),
-              Hero(
-                tag: title,
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: Text(
-                    title,
-                    style: getEnteTextTheme(context).mini,
-                    textAlign: TextAlign.center,
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                _buildMemoryItem(context, index),
+                const Padding(padding: EdgeInsets.all(4)),
+                Hero(
+                  tag: title,
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 84),
+                      child: Text(
+                        title,
+                        style: getEnteTextTheme(context).mini,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
