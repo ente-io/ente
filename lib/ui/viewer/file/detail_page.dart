@@ -117,6 +117,7 @@ class _DetailPageState extends State<DetailPage> {
         key: _appBarKey,
       ),
       extendBodyBehindAppBar: true,
+      resizeToAvoidBottomInset: false,
       body: Center(
         child: Stack(
           children: [
