@@ -73,7 +73,12 @@ class ExportService {
     private allElectronAPIsExist: boolean = false;
     private fileReader: FileReader = null;
     private continuousExportEventHandler: () => void;
-    private uiUpdater: ExportUIUpdaters;
+    private uiUpdater: ExportUIUpdaters = {
+        setExportProgress: () => {},
+        setExportStage: () => {},
+        setLastExportTime: () => {},
+        setFileExportStats: () => {},
+    };
     private currentExportProgress: ExportProgress = {
         total: 0,
         success: 0,
@@ -107,12 +112,22 @@ class ExportService {
 
     async setUIUpdaters(uiUpdater: ExportUIUpdaters) {
         this.uiUpdater = uiUpdater;
-        this.uiUpdater.updateExportProgress(this.currentExportProgress);
+        this.uiUpdater.setExportProgress(this.currentExportProgress);
     }
 
     private updateExportProgress(exportProgress: ExportProgress) {
         this.currentExportProgress = exportProgress;
-        this.uiUpdater.updateExportProgress(exportProgress);
+        this.uiUpdater.setExportProgress(exportProgress);
+    }
+
+    private async updateExportStage(stage: ExportStage) {
+        await this.updateExportRecord({ stage });
+        this.uiUpdater.setExportStage(stage);
+    }
+
+    private async updateLastExportTime(exportTime: number) {
+        this.updateExportRecord({ lastAttemptTimestamp: exportTime });
+        this.uiUpdater.setLastExportTime(exportTime);
     }
 
     async changeExportDirectory(callback: (newExportDir: string) => void) {
@@ -143,6 +158,7 @@ class ExportService {
                 addLogLine('continuous export already enabled');
                 return;
             }
+            addLogLine('enabling continuous export');
             this.continuousExportEventHandler = () => {
                 this.scheduleExport();
             };
@@ -163,6 +179,7 @@ class ExportService {
                 addLogLine('continuous export already disabled');
                 return;
             }
+            addLogLine('disabling continuous export');
             eventBus.removeListener(
                 Events.LOCAL_FILES_UPDATED,
                 this.continuousExportEventHandler
@@ -174,9 +191,10 @@ class ExportService {
         }
     }
 
-    getFileExportStats = async (): Promise<FileExportStats> => {
+    getFileExportStats = async (
+        exportRecord: ExportRecord
+    ): Promise<FileExportStats> => {
         try {
-            const exportRecord = await this.getExportRecord();
             const user: User = getData(LS_KEYS.USER);
             const files = await getLocalFiles();
             const collections = await getLocalCollections();
@@ -219,7 +237,7 @@ class ExportService {
 
     async preExport() {
         this.stopExport = false;
-        await this.uiUpdater.updateExportStage(ExportStage.INPROGRESS);
+        await this.updateExportStage(ExportStage.INPROGRESS);
         this.updateExportProgress({
             success: 0,
             failed: 0,
@@ -228,9 +246,12 @@ class ExportService {
     }
 
     async postExport() {
-        await this.uiUpdater.updateExportStage(ExportStage.FINISHED);
-        await this.uiUpdater.updateLastExportTime(Date.now());
-        this.uiUpdater.updateFileExportStats(await this.getFileExportStats());
+        await this.updateExportStage(ExportStage.FINISHED);
+        await this.updateLastExportTime(Date.now());
+        const exportSettings = this.getExportSettings();
+        const exportRecord = await this.getExportRecord(exportSettings?.folder);
+        const fileExportStats = await this.getFileExportStats(exportRecord);
+        this.uiUpdater.setFileExportStats(fileExportStats);
     }
 
     async stopRunningExport() {
@@ -249,6 +270,8 @@ class ExportService {
                 addLogLine('export in progress, scheduling re-run');
                 this.reRunNeeded = true;
                 return;
+            } else {
+                addLogLine('export not in progress, starting export');
             }
             this.exportInProgress = true;
             if (this.migrationInProgress) {
@@ -330,7 +353,7 @@ class ExportService {
             ) {
                 let success = 0;
                 let failed = 0;
-                this.uiUpdater.updateExportProgress({
+                this.uiUpdater.setExportProgress({
                     success: success,
                     failed: failed,
                     total: removedFileUIDs.length + filesToExport.length,
@@ -832,18 +855,10 @@ class ExportService {
         }
     }
 
-    async getExportRecord(folder?: string): Promise<ExportRecord> {
+    async getExportRecord(folder: string): Promise<ExportRecord> {
         let recordFile: string;
         try {
-            if (!folder) {
-                const exportSettings = this.getExportSettings();
-                folder = exportSettings?.folder;
-            }
-            if (!folder) {
-                return null;
-            }
-            const exportFolderExists = this.exists(folder);
-            if (!exportFolderExists) {
+            if (!folder || !this.exists(folder)) {
                 return null;
             }
             recordFile = await this.electronAPIs.getExportRecord(

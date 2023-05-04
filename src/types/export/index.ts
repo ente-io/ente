@@ -64,8 +64,8 @@ export interface ExportSettings {
 }
 
 export interface ExportUIUpdaters {
-    updateExportStage: (stage: ExportStage) => Promise<void>;
-    updateExportProgress: (progress: ExportProgress) => void;
-    updateFileExportStats: (fileExportStats: FileExportStats) => void;
-    updateLastExportTime: (exportTime: number) => Promise<void>;
+    setExportStage: (stage: ExportStage) => void;
+    setExportProgress: (progress: ExportProgress) => void;
+    setFileExportStats: (fileExportStats: FileExportStats) => void;
+    setLastExportTime: (exportTime: number) => void;
 }

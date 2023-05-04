@@ -71,31 +71,28 @@ export default function ExportModal(props: Props) {
         const main = async () => {
             try {
                 await exportService.init({
-                    updateExportStage: updateExportStage,
-                    updateExportProgress: setExportProgress,
-                    updateFileExportStats: setFileExportStats,
-                    updateLastExportTime: updateLastExportTime,
+                    setExportStage,
+                    setExportProgress,
+                    setFileExportStats,
+                    setLastExportTime,
                 });
                 const exportSettings: ExportSettings =
                     exportService.getExportSettings();
                 setExportFolder(exportSettings?.folder);
                 setContinuousExport(exportSettings?.continuousExport);
-                syncExportRecord(exportFolder);
+                syncExportRecord(exportSettings?.folder);
             } catch (e) {
                 logError(e, 'export on mount useEffect failed');
             }
         };
         void main();
-        return () => {
-            exportService.disableContinuousExport();
-        };
     }, []);
 
     useEffect(() => {
         if (!props.show) {
             return;
         }
-        void syncFileCounts();
+        void syncExportRecord(exportFolder);
     }, [props.show]);
 
     // =============
@@ -111,18 +108,6 @@ export default function ExportModal(props: Props) {
             continuousExport: updatedContinuousExport,
         });
         setContinuousExport(updatedContinuousExport);
-    };
-
-    const updateExportStage = async (newStage: ExportStage) => {
-        setExportStage(newStage);
-        await exportService.updateExportRecord({ stage: newStage });
-    };
-
-    const updateLastExportTime = async (newTime: number) => {
-        setLastExportTime(newTime);
-        await exportService.updateExportRecord({
-            lastAttemptTimestamp: newTime,
-        });
     };
 
     // ======================
@@ -153,25 +138,15 @@ export default function ExportModal(props: Props) {
             const exportRecord = await exportService.getExportRecord(
                 exportFolder
             );
-            if (!exportRecord?.stage) {
-                setExportStage(ExportStage.INIT);
-                return null;
-            }
-            setExportStage(exportRecord.stage);
-            setLastExportTime(exportRecord.lastAttemptTimestamp);
-            await syncFileCounts();
+            setExportStage(exportRecord?.stage ?? ExportStage.INIT);
+            setLastExportTime(exportRecord?.lastAttemptTimestamp ?? 0);
+            const fileExportStats = await exportService.getFileExportStats(
+                exportRecord
+            );
+            setFileExportStats(fileExportStats);
         } catch (e) {
             logError(e, 'syncExportRecord failed');
             throw e;
-        }
-    };
-
-    const syncFileCounts = async () => {
-        try {
-            const fileExportStats = await exportService.getFileExportStats();
-            setFileExportStats(fileExportStats);
-        } catch (e) {
-            logError(e, 'error updating file counts');
         }
     };
 

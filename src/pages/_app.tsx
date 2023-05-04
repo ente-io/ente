@@ -74,6 +74,7 @@ import {
     getAppNameAndTitle,
 } from 'constants/apps';
 import exportService from 'services/export';
+import { ExportStage } from 'constants/export';
 const redirectMap = new Map([
     ['roadmap', getRoadmapRedirectURL],
     ['families', getFamilyPortalRedirectURL],
@@ -250,14 +251,25 @@ export default function App(props) {
         if (!isElectron()) {
             return;
         }
-        try {
-            const exportSettings = exportService.getExportSettings();
-            if (exportSettings?.continuousExport) {
-                exportService.enableContinuousExport();
+        const initExport = async () => {
+            try {
+                addLogLine('init export');
+                const exportSettings = exportService.getExportSettings();
+                if (exportSettings?.continuousExport) {
+                    exportService.enableContinuousExport();
+                }
+                const exportRecord = await exportService.getExportRecord(
+                    exportSettings?.folder
+                );
+                if (exportRecord?.stage === ExportStage.INPROGRESS) {
+                    addLogLine('export was in progress, resuming');
+                    exportService.scheduleExport();
+                }
+            } catch (e) {
+                logError(e, 'init export failed');
             }
-        } catch (e) {
-            logError(e, 'init export failed');
-        }
+        };
+        initExport();
         try {
             eventBus.on(Events.LOGOUT, () => {
                 exportService.disableContinuousExport();
