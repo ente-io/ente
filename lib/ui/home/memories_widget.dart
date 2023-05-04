@@ -122,7 +122,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
                   child: Material(
                     type: MaterialType.transparency,
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 72),
+                      constraints: const BoxConstraints(maxWidth: 84),
                       child: Text(
                         title,
                         style: getEnteTextTheme(context).mini,
