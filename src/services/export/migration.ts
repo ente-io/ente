@@ -149,26 +149,23 @@ async function migrationV2ToV3(
     const personalFiles = getIDBasedSortedFiles(
         getPersonalFiles(localFiles, user)
     );
-    // earlier the file were sorted by id,
-    // which we can use to determine which file got which number suffix
-    // this can be used to determine the filepaths of the those already exported files
-    // and update the exportedFilePaths property of the exportRecord
-    // This is based on the assumption new files have higher ids than the older ones
-    await updateExportedFilesToExportedFilePathsProperty(
-        exportRecord,
-        getExportedFiles(personalFiles, exportRecord)
-    );
+
     await updateExportedCollectionPathsToCollectionExportNames(
         exportDir,
         exportRecord
+    );
+
+    await updateExportedFilesToExportedFilePathsProperty(
+        exportRecord,
+        getExportedFiles(personalFiles, exportRecord)
     );
 }
 
 /*
     This updates the folder name of already exported folders from the earlier format of 
     `collectionID_collectionName` to newer `collectionName(numbered)` format
-    */
-export async function migrateCollectionFolders(
+*/
+async function migrateCollectionFolders(
     collections: Collection[],
     exportDir: string,
     collectionIDPathMap: Map<number, string>
@@ -238,7 +235,7 @@ async function migrateFiles(
     }
 }
 
-export async function removeDeprecatedExportRecordProperties(
+async function removeDeprecatedExportRecordProperties(
     exportRecord: ExportRecordV1
 ) {
     if (exportRecord?.queuedFiles) {
@@ -274,7 +271,14 @@ async function updateExportedCollectionPathsToCollectionExportNames(
     return await exportService.updateExportRecord(updatedExportRecord);
 }
 
-export async function updateExportedFilesToExportedFilePathsProperty(
+/* 
+    Earlier the file were sorted by id,
+    which we can use to determine which file got which number suffix
+    this can be used to determine the filepaths of the those already exported files
+    and update the exportedFilePaths property of the exportRecord
+    This is based on the assumption new files have higher ids than the older ones
+*/
+async function updateExportedFilesToExportedFilePathsProperty(
     exportRecord: ExportRecordV2,
     exportedFiles: EnteFile[]
 ) {
@@ -297,6 +301,9 @@ export async function updateExportedFilesToExportedFilePathsProperty(
                 `collection path for ${file.collectionID} is ${collectionPath}`
         );
         let fileExportName: string;
+        /*
+            For Live Photos we need to download the file to get the image and video name
+        */
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             const fileStream = await retryAsyncFunction(() =>
                 downloadManager.downloadFile(file)
