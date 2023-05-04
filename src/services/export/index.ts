@@ -35,6 +35,7 @@ import {
     generateStreamFromArrayBuffer,
     getFileExtension,
     getPersonalFiles,
+    mergeMetadata,
 } from 'utils/file';
 
 import { updateFileCreationDateInEXIF } from '../upload/exifService';
@@ -328,7 +329,7 @@ class ExportService {
                 throw new Error(CustomError.NO_EXPORT_FOLDER_SELECTED);
             }
             const user: User = getData(LS_KEYS.USER);
-            const files = await getLocalFiles();
+            const files = mergeMetadata(await getLocalFiles());
             const personalFiles = getPersonalFiles(files, user);
 
             const collections = await getLocalCollections();
