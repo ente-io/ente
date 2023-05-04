@@ -73,22 +73,24 @@ class NotificationWidget extends StatelessWidget {
                   color: Colors.white,
                 ),
                 const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      text,
-                      style: darkTextTheme.bodyBold,
-                      textAlign: TextAlign.left,
-                    ),
-                    subText != null
-                        ? Text(
-                            subText!,
-                            style: darkTextTheme.mini
-                                .copyWith(color: textMutedDark),
-                          )
-                        : const SizedBox.shrink(),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        text,
+                        style: darkTextTheme.bodyBold,
+                        textAlign: TextAlign.left,
+                      ),
+                      subText != null
+                          ? Text(
+                              subText!,
+                              style: darkTextTheme.mini
+                                  .copyWith(color: textMutedDark),
+                            )
+                          : const SizedBox.shrink(),
+                    ],
+                  ),
                 ),
                 const SizedBox(width: 12),
                 IconButtonWidget(
