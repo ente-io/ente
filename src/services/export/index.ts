@@ -92,20 +92,38 @@ class ExportService {
     }
 
     getExportSettings(): ExportSettings {
-        const exportSettings = getData(LS_KEYS.EXPORT);
-        return exportSettings;
+        try {
+            const exportSettings = getData(LS_KEYS.EXPORT);
+            return exportSettings;
+        } catch (e) {
+            logError(e, 'getExportSettings failed');
+            throw e;
+        }
     }
 
     updateExportSettings(newData: Partial<ExportSettings>) {
-        const exportSettings = this.getExportSettings();
-        const newSettings = { ...exportSettings, ...newData };
-        setData(LS_KEYS.EXPORT, newSettings);
+        try {
+            const exportSettings = this.getExportSettings();
+            const newSettings = { ...exportSettings, ...newData };
+            setData(LS_KEYS.EXPORT, newSettings);
+        } catch (e) {
+            logError(e, 'updateExportSettings failed');
+            throw e;
+        }
     }
 
     async runMigration(exportDir: string, exportRecord: ExportRecord) {
-        this.migrationInProgress = migrateExportJSON(exportDir, exportRecord);
-        await this.migrationInProgress;
-        this.migrationInProgress = null;
+        try {
+            this.migrationInProgress = migrateExportJSON(
+                exportDir,
+                exportRecord
+            );
+            await this.migrationInProgress;
+            this.migrationInProgress = null;
+        } catch (e) {
+            logError(e, 'migration failed');
+            throw e;
+        }
     }
 
     setUIUpdaters(uiUpdater: ExportUIUpdaters) {
@@ -319,10 +337,10 @@ class ExportService {
                 personalFiles,
                 user
             );
+
             const exportRecord = await this.getExportRecord(
                 exportSettings.folder
             );
-
             const collectionIDExportNameMap =
                 convertCollectionIDExportNameObjectToMap(
                     exportRecord.collectionExportNames
@@ -349,78 +367,81 @@ class ExportService {
                 exportRecord
             );
 
-            if (
-                removedFileUIDs.length > 0 ||
-                filesToExport.length > 0 ||
-                renamedCollections.length > 0 ||
-                deletedExportedCollections.length > 0
-            ) {
-                let success = 0;
-                let failed = 0;
-                this.uiUpdater.setExportProgress({
-                    success: success,
+            let success = 0;
+            let failed = 0;
+            this.uiUpdater.setExportProgress({
+                success: success,
+                failed: failed,
+                total:
+                    removedFileUIDs.length +
+                    filesToExport.length +
+                    deletedExportedCollections.length +
+                    renamedCollections.length,
+            });
+            const incrementSuccess = () => {
+                this.updateExportProgress({
+                    success: ++success,
                     failed: failed,
-                    total: removedFileUIDs.length + filesToExport.length,
+                    total:
+                        removedFileUIDs.length +
+                        filesToExport.length +
+                        deletedExportedCollections.length +
+                        renamedCollections.length,
                 });
-                const incrementSuccess = () => {
-                    this.updateExportProgress({
-                        success: ++success,
-                        failed: failed,
-                        total: removedFileUIDs.length + filesToExport.length,
-                    });
-                };
-                const incrementFailed = () => {
-                    this.updateExportProgress({
-                        success: success,
-                        failed: ++failed,
-                        total: removedFileUIDs.length + filesToExport.length,
-                    });
-                };
-                if (renamedCollections?.length > 0) {
-                    addLogLine(
-                        `renaming ${renamedCollections.length} collections`
-                    );
-                    this.collectionRenamer(
-                        exportSettings.folder,
-                        collectionIDExportNameMap,
-                        renamedCollections,
-                        incrementSuccess,
-                        incrementFailed
-                    );
-                }
+            };
+            const incrementFailed = () => {
+                this.updateExportProgress({
+                    success: success,
+                    failed: ++failed,
+                    total:
+                        removedFileUIDs.length +
+                        filesToExport.length +
+                        deletedExportedCollections.length +
+                        renamedCollections.length,
+                });
+            };
+            if (renamedCollections?.length > 0) {
+                addLogLine(`renaming ${renamedCollections.length} collections`);
+                this.collectionRenamer(
+                    exportSettings.folder,
+                    collectionIDExportNameMap,
+                    renamedCollections,
+                    incrementSuccess,
+                    incrementFailed
+                );
+            }
 
-                if (removedFileUIDs?.length > 0) {
-                    addLogLine(`trashing ${removedFileUIDs.length} files`);
-                    await this.fileTrasher(
-                        exportSettings.folder,
-                        collectionIDExportNameMap,
-                        removedFileUIDs,
-                        incrementSuccess,
-                        incrementFailed
-                    );
-                }
-                if (filesToExport?.length > 0) {
-                    addLogLine(`exporting ${filesToExport.length} files`);
-                    await this.fileExporter(
-                        filesToExport,
-                        collectionIDNameMap,
-                        collectionIDExportNameMap,
-                        exportSettings.folder,
-                        incrementSuccess,
-                        incrementFailed
-                    );
-                }
-                if (deletedExportedCollections?.length > 0) {
-                    addLogLine(
-                        `removing ${deletedExportedCollections.length} collections`
-                    );
-                    await this.collectionRemover(
-                        deletedExportedCollections,
-                        exportSettings.folder,
-                        incrementSuccess,
-                        incrementFailed
-                    );
-                }
+            if (removedFileUIDs?.length > 0) {
+                addLogLine(`trashing ${removedFileUIDs.length} files`);
+                await this.fileTrasher(
+                    exportSettings.folder,
+                    collectionIDExportNameMap,
+                    removedFileUIDs,
+                    incrementSuccess,
+                    incrementFailed
+                );
+            }
+            if (filesToExport?.length > 0) {
+                addLogLine(`exporting ${filesToExport.length} files`);
+                await this.fileExporter(
+                    filesToExport,
+                    collectionIDNameMap,
+                    collectionIDExportNameMap,
+                    exportSettings.folder,
+                    incrementSuccess,
+                    incrementFailed
+                );
+            }
+            if (deletedExportedCollections?.length > 0) {
+                addLogLine(
+                    `removing ${deletedExportedCollections.length} collections`
+                );
+                await this.collectionRemover(
+                    deletedExportedCollections,
+                    exportSettings.folder,
+                    incrementSuccess,
+                    incrementFailed
+                );
             }
         } catch (e) {
             logError(e, 'runExport failed');
@@ -654,8 +675,7 @@ class ExportService {
                         exportDir,
                         collectionIDExportNameMap.get(collectionID)
                     );
-                    // check if filepath is for live photo
-                    // livePhoto has the path in format: `JSON.stringify({image,video})`
+
                     if (isLivePhotoExportName(fileExportName)) {
                         const {
                             image: imageExportName,
