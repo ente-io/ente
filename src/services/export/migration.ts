@@ -112,7 +112,7 @@ async function migrationV0ToV1(
     }
     const collectionIDPathMap = new Map<number, string>();
     const user: User = getData(LS_KEYS.USER);
-    const localFiles = await getLocalFiles();
+    const localFiles = mergeMetadata(await getLocalFiles());
     const localCollections = await getLocalCollections();
     const personalFiles = getIDBasedSortedFiles(
         getPersonalFiles(localFiles, user)
@@ -197,14 +197,14 @@ export async function migrateCollectionFolders(
 }
 
 /*
-        This updates the file name of already exported files from the earlier format of 
-        `fileID_fileName` to newer `fileName(numbered)` format
-    */
+    This updates the file name of already exported files from the earlier format of 
+    `fileID_fileName` to newer `fileName(numbered)` format
+*/
 async function migrateFiles(
     files: EnteFile[],
     collectionIDPathMap: Map<number, string>
 ) {
-    for (let file of files) {
+    for (const file of files) {
         const oldFileSavePath = getOldFileSavePath(
             collectionIDPathMap.get(file.collectionID),
             file
@@ -213,7 +213,6 @@ async function migrateFiles(
             collectionIDPathMap.get(file.collectionID),
             file
         );
-        file = mergeMetadata([file])[0];
         const newFileSaveName = getUniqueFileSaveName(
             collectionIDPathMap.get(file.collectionID),
             file.metadata.title
