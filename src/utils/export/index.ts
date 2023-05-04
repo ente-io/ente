@@ -192,9 +192,12 @@ export const getUniqueCollectionExportName = (
     let collectionExportName = sanitizeName(collectionName);
     let count = 1;
     while (
-        exportService.exists(getCollectionExportPath(dir, collectionExportName))
+        exportService.exists(
+            getCollectionExportPath(dir, collectionExportName)
+        ) ||
+        collectionExportName === ENTE_TRASH_FOLDER
     ) {
-        collectionExportName = `${collectionExportName}(${count})`;
+        collectionExportName = `${sanitizeName(collectionName)}(${count})`;
         count++;
     }
     return collectionExportName;
