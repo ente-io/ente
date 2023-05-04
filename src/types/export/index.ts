@@ -22,6 +22,15 @@ export interface FileExportStats {
     pendingCount: number;
 }
 
+export interface ExportRecordV0 {
+    stage?: ExportStage;
+    lastAttemptTimestamp?: number;
+    progress?: ExportProgress;
+    queuedFiles?: string[];
+    exportedFiles?: string[];
+    failedFiles?: string[];
+}
+
 export interface ExportRecordV1 {
     version?: number;
     stage?: ExportStage;

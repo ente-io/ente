@@ -5,6 +5,7 @@ import {
     ExportRecordV2,
     ExportRecord,
     FileExportNames,
+    ExportRecordV0,
 } from 'types/export';
 import { EnteFile } from 'types/file';
 import { User } from 'types/user';
@@ -36,6 +37,7 @@ import { FILE_TYPE } from 'constants/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import downloadManager from 'services/downloadManager';
 import { retryAsyncFunction } from 'utils/network';
+import { CustomError } from 'utils/error';
 
 export async function migrateExportJSON() {
     try {
@@ -103,8 +105,11 @@ async function migrateExport(
 
 async function migrationV0ToV1(
     exportDir: string,
-    exportRecord: ExportRecord | ExportRecordV1 | ExportRecordV2
+    exportRecord: ExportRecordV0
 ) {
+    if (!exportRecord?.exportedFiles) {
+        return;
+    }
     const collectionIDPathMap = new Map<number, string>();
     const user: User = getData(LS_KEYS.USER);
     const localFiles = await getLocalFiles();
@@ -136,6 +141,9 @@ async function migrationV2ToV3(
     exportDir: string,
     exportRecord: ExportRecordV2
 ) {
+    if (!exportRecord?.exportedFiles) {
+        return;
+    }
     const user: User = getData(LS_KEYS.USER);
     const localFiles = await getLocalFiles();
     const personalFiles = getIDBasedSortedFiles(
@@ -181,7 +189,7 @@ export async function migrateCollectionFolders(
             oldCollectionExportPath,
             newCollectionExportPath
         );
-        await exportService.addCollectionExportedRecord(
+        await addCollectionExportedRecordV1(
             exportDir,
             collection.id,
             newCollectionExportPath
@@ -252,8 +260,11 @@ async function updateExportedCollectionPathsToCollectionExportNames(
     exportDir: string,
     exportRecord: ExportRecordV2
 ) {
+    if (!exportRecord.exportedCollectionPaths) {
+        return;
+    }
     const exportedCollectionNames = Object.fromEntries(
-        Object.entries(exportRecord.exportedCollectionPaths ?? {}).map(
+        Object.entries(exportRecord.exportedCollectionPaths).map(
             ([key, value]) => [key, value.replace(exportDir, '').slice(1)]
         )
     );
@@ -332,4 +343,28 @@ export async function updateExportedFilesToExportedFilePathsProperty(
     };
 
     await exportService.updateExportRecord(updatedExportRecord);
+}
+
+async function addCollectionExportedRecordV1(
+    folder: string,
+    collectionID: number,
+    collectionExportPath: string
+) {
+    try {
+        const exportRecord = (await exportService.getExportRecord(
+            folder
+        )) as ExportRecordV1;
+        if (!exportRecord?.exportedCollectionPaths) {
+            exportRecord.exportedCollectionPaths = {};
+        }
+        exportRecord.exportedCollectionPaths = {
+            ...exportRecord.exportedCollectionPaths,
+            [collectionID]: collectionExportPath,
+        };
+
+        await exportService.updateExportRecord(exportRecord, folder);
+    } catch (e) {
+        logError(e, 'addCollectionExportedRecord failed');
+        throw Error(CustomError.ADD_FILE_EXPORTED_RECORD_FAILED);
+    }
 }
