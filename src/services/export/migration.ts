@@ -39,16 +39,18 @@ import downloadManager from 'services/downloadManager';
 import { retryAsyncFunction } from 'utils/network';
 import { CustomError } from 'utils/error';
 
-export async function migrateExportJSON() {
+export async function migrateExportJSON(
+    exportDir: string,
+    exportRecord: ExportRecord
+) {
     try {
-        const exportDir = getData(LS_KEYS.EXPORT)?.folder;
         if (!exportDir) {
             return;
         }
-        const exportRecord = await exportService.getExportRecord(exportDir);
         await migrateExport(exportDir, exportRecord);
     } catch (e) {
         logError(e, 'migrateExportJSON failed');
+        throw e;
     }
 }
 
@@ -58,7 +60,7 @@ export async function migrateExportJSON() {
     so there is just a if condition check, 
     later this will be converted to a loop which applies the migration one by one 
     till the files reaches the latest version 
-    */
+*/
 async function migrateExport(
     exportDir: string,
     exportRecord: ExportRecordV1 | ExportRecordV2 | ExportRecord

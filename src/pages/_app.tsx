@@ -261,6 +261,10 @@ export default function App(props) {
                 const exportRecord = await exportService.getExportRecord(
                     exportSettings?.folder
                 );
+                exportService.runMigration(
+                    exportSettings?.folder,
+                    exportRecord
+                );
                 if (exportRecord?.stage === ExportStage.INPROGRESS) {
                     addLogLine('export was in progress, resuming');
                     exportService.scheduleExport();

@@ -105,7 +105,10 @@ class ExportService {
 
     async init(uiUpdater: ExportUIUpdaters) {
         this.setUIUpdaters(uiUpdater);
-        this.migrationInProgress = migrateExportJSON();
+    }
+
+    runMigration(exportDir: string, exportRecord: ExportRecord) {
+        this.migrationInProgress = migrateExportJSON(exportDir, exportRecord);
     }
 
     async setUIUpdaters(uiUpdater: ExportUIUpdaters) {
@@ -851,17 +854,16 @@ class ExportService {
     }
 
     async getExportRecord(folder: string): Promise<ExportRecord> {
-        let recordFile: string;
         try {
             if (!folder || !this.exists(folder)) {
                 return null;
             }
-            recordFile = await this.electronAPIs.getExportRecord(
+            const recordFile = await this.electronAPIs.getExportRecord(
                 `${folder}/${EXPORT_RECORD_FILE_NAME}`
             );
             return JSON.parse(recordFile);
         } catch (e) {
-            logError(e, 'export Record JSON parsing failed ', { recordFile });
+            logError(e, 'export Record JSON parsing failed');
             throw e;
         }
     }
