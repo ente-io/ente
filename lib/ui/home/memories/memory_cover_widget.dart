@@ -32,30 +32,32 @@ class _MemoryCovertWidgetState extends State<MemoryCovertWidget> {
         );
         setState(() {});
       },
-      child: SizedBox(
-        height: 100,
-        width: 92,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              _buildMemoryItem(context, index),
-              const Padding(padding: EdgeInsets.all(4)),
-              Hero(
-                tag: title,
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: Text(
-                    title,
-                    overflow: TextOverflow.ellipsis,
-                    style: getEnteTextTheme(context).mini,
-                    textAlign: TextAlign.center,
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                _buildMemoryItem(context, index),
+                const Padding(padding: EdgeInsets.all(4)),
+                Hero(
+                  tag: title,
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 84),
+                      child: Text(
+                        title,
+                        style: getEnteTextTheme(context).mini,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

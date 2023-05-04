@@ -278,6 +278,7 @@ class _ZoomableImageState extends State<ZoomableImage>
           w != 0 &&
           (h != widget.photo.height || w != widget.photo.width)) {
         _logger.info('Updating aspect ratio for ${widget.photo} to $h:$w');
+
         await FileMagicService.instance.updatePublicMagicMetadata([
           widget.photo
         ], {

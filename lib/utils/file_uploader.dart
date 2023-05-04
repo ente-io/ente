@@ -117,6 +117,9 @@ class FileUploader {
   // upload future will return null as File when the file entry is deleted
   // locally because it's already present in the destination collection.
   Future<File> upload(File file, int collectionID) {
+    if (file.localID == null || file.localID!.isEmpty) {
+      return Future.error(Exception("file's localID can not be null or empty"));
+    }
     // If the file hasn't been queued yet, queue it
     _totalCountInUploadSession++;
     if (!_queue.containsKey(file.localID)) {

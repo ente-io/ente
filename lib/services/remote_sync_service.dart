@@ -519,7 +519,10 @@ class RemoteSyncService {
             .info("Skipping some updated files as we are throttling uploads");
         break;
       }
-      final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
+      final file = await _db.getUploadedLocalFileInAnyCollection(
+        uploadedFileID,
+        ownerID,
+      );
       if (file != null) {
         _uploadFile(file, file.collectionID!, futures);
       }

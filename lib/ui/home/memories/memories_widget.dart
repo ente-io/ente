@@ -34,7 +34,10 @@ class MemoriesWidget extends StatelessWidget {
     }
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Row(children: memoryWidgets),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: memoryWidgets,
+      ),
     );
   }
 
