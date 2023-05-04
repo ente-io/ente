@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:computer/computer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -24,7 +23,6 @@ import 'package:tuple/tuple.dart';
 class LocalSyncService {
   final _logger = Logger("LocalSyncService");
   final _db = FilesDB.instance;
-  final Computer _computer = Computer();
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
 
@@ -47,7 +45,6 @@ class LocalSyncService {
     if (!AppLifecycleService.instance.isForeground) {
       await PhotoManager.setIgnorePermissionCheck(true);
     }
-    await _computer.turnOn(workersCount: 1);
     if (hasGrantedPermissions()) {
       _registerChangeCallback();
     }
@@ -164,7 +161,6 @@ class LocalSyncService {
       existingLocalFileIDs,
       pathToLocalIDs,
       invalidIDs,
-      _computer,
     );
     bool hasAnyMappingChanged = false;
     if (localDiffResult.newPathToLocalIDs?.isNotEmpty ?? false) {
@@ -268,17 +264,18 @@ class LocalSyncService {
     required int toTime,
   }) async {
     final Tuple2<List<LocalPathAsset>, List<File>> result =
-        await getLocalPathAssetsAndFiles(fromTime, toTime, _computer);
-
-    // Update the mapping for device path_id to local file id. Also, keep track
-    // of newly discovered device paths
-    await FilesDB.instance.insertLocalAssets(
-      result.item1,
-      shouldAutoBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
-    );
+        await getLocalPathAssetsAndFiles(fromTime, toTime);
 
     final List<File> files = result.item2;
     if (files.isNotEmpty) {
+      // Update the mapping for device path_id to local file id. Also, keep track
+      // of newly discovered device paths
+      await FilesDB.instance.insertLocalAssets(
+        result.item1,
+        shouldAutoBackup:
+            Configuration.instance.hasSelectedAllFoldersForBackup(),
+      );
+
       _logger.info(
         "Loaded ${files.length} photos from " +
             DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +

@@ -117,6 +117,9 @@ class FileUploader {
   // upload future will return null as File when the file entry is deleted
   // locally because it's already present in the destination collection.
   Future<File> upload(File file, int collectionID) {
+    if (file.localID == null || file.localID!.isEmpty) {
+      return Future.error(Exception("file's localID can not be null or empty"));
+    }
     // If the file hasn't been queued yet, queue it
     _totalCountInUploadSession++;
     if (!_queue.containsKey(file.localID)) {
@@ -388,14 +391,15 @@ class FileUploader {
         await io.File(encryptedFilePath).delete();
       }
       final encryptedFile = io.File(encryptedFilePath);
-      final fileAttributes = await CryptoUtil.encryptFile(
+      final EncryptionResult fileAttributes = await CryptoUtil.encryptFile(
         mediaUploadData!.sourceFile!.path,
         encryptedFilePath,
         key: key,
       );
       final thumbnailData = mediaUploadData.thumbnail;
 
-      final encryptedThumbnailData = await CryptoUtil.encryptChaCha(
+      final EncryptionResult encryptedThumbnailData =
+          await CryptoUtil.encryptChaCha(
         thumbnailData!,
         fileAttributes.key!,
       );
@@ -457,12 +461,17 @@ class FileUploader {
         MetadataRequest? pubMetadataRequest;
         if ((mediaUploadData.height ?? 0) != 0 &&
             (mediaUploadData.width ?? 0) != 0) {
+          final pubMetadata = {
+            publicMagicKeyHeight: mediaUploadData.height,
+            publicMagicKeyWidth: mediaUploadData.width
+          };
+          if (mediaUploadData.motionPhotoStartIndex != null) {
+            pubMetadata[pubMotionVideoIndex] =
+                mediaUploadData.motionPhotoStartIndex;
+          }
           pubMetadataRequest = await getPubMetadataRequest(
             file,
-            {
-              publicMagicKeyHeight: mediaUploadData.height,
-              publicMagicKeyWidth: mediaUploadData.width
-            },
+            pubMetadata,
             fileAttributes.key!,
           );
         }
@@ -480,6 +489,7 @@ class FileUploader {
           await encryptedThumbnailFile.length(),
           encryptedMetadata,
           metadataDecryptionHeader,
+          pubMetadata: pubMetadataRequest,
         );
         if (mediaUploadData.isDeleted) {
           _logger.info("File found to be deleted");

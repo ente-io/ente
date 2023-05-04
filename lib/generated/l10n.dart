@@ -1720,6 +1720,19 @@ class S {
     );
   }
 
+  /// `{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}`
+  String albumParticipantsCount(int count) {
+    return Intl.plural(
+      count,
+      zero: 'No Participants',
+      one: '1 Participant',
+      other: '$count Participants',
+      name: 'albumParticipantsCount',
+      desc: 'Number of participants in an album, including the album owner.',
+      args: [count],
+    );
+  }
+
   /// `Create a link to allow people to add and view photos in your shared album without needing an ente app or account. Great for collecting event photos.`
   String get collabLinkSectionDescription {
     return Intl.message(
@@ -6776,6 +6789,26 @@ class S {
       'Oops, could not save edits',
       name: 'oopsCouldNotSaveEdits',
       desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom radius`
+  String get customRadius {
+    return Intl.message(
+      'Custom radius',
+      name: 'customRadius',
+      desc: 'Custom radius for location tag',
+      args: [],
+    );
+  }
+
+  /// `km`
+  String get distanceInKMUnit {
+    return Intl.message(
+      'km',
+      name: 'distanceInKMUnit',
+      desc: 'Unit for distance in km',
       args: [],
     );
   }

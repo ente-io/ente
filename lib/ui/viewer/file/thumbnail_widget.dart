@@ -111,8 +111,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       }
       if (widget.file!.fileType == FileType.video) {
         contentChildren.add(const VideoOverlayIcon());
-      } else if (widget.file!.fileType == FileType.livePhoto &&
-          widget.shouldShowLivePhotoOverlay) {
+      } else if (widget.shouldShowLivePhotoOverlay &&
+          (widget.file!.fileType == FileType.livePhoto ||
+              ((widget.file!.pubMagicMetadata?.mvi ?? 0) > 0))) {
         contentChildren.add(const LivePhotoOverlayIcon());
       }
       if (widget.shouldShowOwnerAvatar) {

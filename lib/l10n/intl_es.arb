@@ -219,6 +219,16 @@
   "after1Month": "Después de un mes",
   "after1Year": "Después de un año",
   "manageParticipants": "Administrar",
+  "albumParticipantsCount": "{count, plural, =0 {No hay Participantes} =1 {1 Participante} other {{count} Participantes}}",
+  "@albumParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    },
+    "description": "Number of participants in an album, including the album owner."
+  },
   "collabLinkSectionDescription": "Crea un enlace para que la gente pueda añadir y ver fotos en tu álbum compartido sin necesidad de la aplicación ente o una cuenta. Genial para recolectar fotos de eventos.",
   "collectPhotos": "Recolectar fotos",
   "collaborativeLink": "Enlace colaborativo",
@@ -929,5 +939,13 @@
   "doYouWantToDiscardTheEditsYouHaveMade": "¿Quieres descartar las ediciones que has hecho?",
   "saving": "Saving...",
   "editsSaved": "Ediciones guardadas",
-  "oopsCouldNotSaveEdits": "Ups, no se pudieron guardar las ediciónes"
+  "oopsCouldNotSaveEdits": "Ups, no se pudieron guardar las ediciónes",
+  "customRadius": "Radio personalizado",
+  "@customRadius": {
+    "description": "Custom radius for location tag"
+  },
+  "distanceInKMUnit": "km",
+  "@distanceInKMUnit": {
+    "description": "Unit for distance in km"
+  }
 }

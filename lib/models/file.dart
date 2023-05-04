@@ -193,8 +193,7 @@ class File extends EnteFile {
         if (Platform.isAndroid) {
           //Fix for missing location data in lower android versions.
           final Location? exifLocation = locationFromExif(exifData);
-          if (exifLocation?.latitude != null &&
-              exifLocation?.longitude != null) {
+          if (Location.isValidLocation(exifLocation)) {
             location = exifLocation;
           }
         }
@@ -286,7 +285,7 @@ class File extends EnteFile {
   }
 
   // return 0 if the height is not available
-  int get heigth {
+  int get height {
     return pubMagicMetadata?.h ?? 0;
   }
 

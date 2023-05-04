@@ -166,10 +166,10 @@ Uint8List chachaDecryptData(Map<String, dynamic> args) {
 }
 
 class CryptoUtil {
-  static final Computer _computer = Computer();
+  // Note: workers are turned on during app startup.
+  static final Computer _computer = Computer.shared();
 
   static init() {
-    _computer.turnOn(workersCount: 4);
     Sodium.init();
   }
 
@@ -231,7 +231,11 @@ class CryptoUtil {
     args["cipher"] = cipher;
     args["nonce"] = nonce;
     args["key"] = key;
-    return _computer.compute(cryptoSecretboxOpenEasy, param: args);
+    return _computer.compute(
+      cryptoSecretboxOpenEasy,
+      param: args,
+      taskName: "decrypt",
+    );
   }
 
   // Decrypts the given cipher, with the given key and nonce using XSalsa20
@@ -262,7 +266,11 @@ class CryptoUtil {
     final args = <String, dynamic>{};
     args["source"] = source;
     args["key"] = key;
-    return _computer.compute(chachaEncryptData, param: args);
+    return _computer.compute(
+      chachaEncryptData,
+      param: args,
+      taskName: "encryptChaCha",
+    );
   }
 
   // Decrypts the given source, with the given key and header using XChaCha20
@@ -277,7 +285,11 @@ class CryptoUtil {
     args["source"] = source;
     args["key"] = key;
     args["header"] = header;
-    return _computer.compute(chachaDecryptData, param: args);
+    return _computer.compute(
+      chachaDecryptData,
+      param: args,
+      taskName: "decryptChaCha",
+    );
   }
 
   // Encrypts the file at sourceFilePath, with the key (if provided) and a
@@ -293,7 +305,11 @@ class CryptoUtil {
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
     args["key"] = key;
-    return _computer.compute(chachaEncryptFile, param: args);
+    return _computer.compute(
+      chachaEncryptFile,
+      param: args,
+      taskName: "encryptFile",
+    );
   }
 
   // Decrypts the file at sourceFilePath, with the given key and header using
@@ -309,7 +325,8 @@ class CryptoUtil {
     args["destinationFilePath"] = destinationFilePath;
     args["header"] = header;
     args["key"] = key;
-    return _computer.compute(chachaDecryptFile, param: args);
+    return _computer.compute(chachaDecryptFile,
+        param: args, taskName: "decryptFile");
   }
 
   // Generates and returns a 256-bit key.
@@ -391,7 +408,7 @@ class CryptoUtil {
     return DerivedKeyResult(key, memLimit, opsLimit);
   }
 
-  // Derives a key for a given password, salt, memLimit and opsLimit using 
+  // Derives a key for a given password, salt, memLimit and opsLimit using
   // Argon2id, v1.3.
   static Future<Uint8List> deriveKey(
     Uint8List password,
@@ -407,6 +424,7 @@ class CryptoUtil {
         "memLimit": memLimit,
         "opsLimit": opsLimit,
       },
+      taskName: "deriveKey",
     );
   }
 
@@ -417,6 +435,7 @@ class CryptoUtil {
       param: {
         "sourceFilePath": source.path,
       },
+      taskName: "fileHash",
     );
   }
 }

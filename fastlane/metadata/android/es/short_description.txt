@@ -1,0 +1,1 @@
+ente es una aplicación de almacenamiento de fotos cifrado de extremo a extremo

@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:archive/archive_io.dart';
 import 'package:logging/logging.dart';
+import "package:motion_photos/motion_photos.dart";
 import 'package:motionphoto/motionphoto.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -33,6 +34,9 @@ class MediaUploadData {
   final FileHashData? hashData;
   final int? height;
   final int? width;
+  // For android motion photos, the startIndex is the index of the first frame
+  // For iOS, this value will be always null.
+  final int? motionPhotoStartIndex;
 
   MediaUploadData(
     this.sourceFile,
@@ -41,6 +45,7 @@ class MediaUploadData {
     this.hashData, {
     this.height,
     this.width,
+    this.motionPhotoStartIndex,
   });
 }
 
@@ -154,6 +159,15 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     h = asset.height;
     w = asset.width;
   }
+  int? motionPhotoStartingIndex;
+  if (io.Platform.isAndroid && asset.type == AssetType.image) {
+    try {
+      motionPhotoStartingIndex =
+          MotionPhotos(sourceFile.path).getMotionVideoIndex()?.start;
+    } catch (e) {
+      _logger.severe('error while detecthing motion photo start index', e);
+    }
+  }
   return MediaUploadData(
     sourceFile,
     thumbnailData,
@@ -161,6 +175,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     FileHashData(fileHash, zipHash: zipHash),
     height: h,
     width: w,
+    motionPhotoStartIndex: motionPhotoStartingIndex,
   );
 }
 
@@ -198,7 +213,7 @@ Future<MetadataRequest> getPubMetadataRequest(
     fileKey,
   );
   return MetadataRequest(
-    version: file.pubMmdVersion,
+    version: file.pubMmdVersion == 0 ? 1 : file.pubMmdVersion,
     count: jsonToUpdate.length,
     data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
     header: CryptoUtil.bin2base64(encryptedMMd.header!),
