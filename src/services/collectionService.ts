@@ -994,7 +994,16 @@ export async function getCollectionSummaries(
             DUMMY_UNCATEGORIZED_SECTION,
             getDummyUncategorizedCollectionSummaries()
         );
+    } else {
+        collectionSummaries.get(uncategorizedCollection.id).name =
+            t('UNCATEGORIZED');
     }
+
+    const favCollection = await getFavCollection();
+    if (favCollection) {
+        collectionSummaries.get(favCollection.id).name = t('FAVORITES');
+    }
+
     collectionSummaries.set(
         ALL_SECTION,
         getAllCollectionSummaries(collectionFilesCount, collectionLatestFiles)
