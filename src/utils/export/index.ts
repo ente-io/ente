@@ -1,5 +1,5 @@
 import { Collection } from 'types/collection';
-import exportService from 'services/exportService';
+import exportService from 'services/export';
 import { CollectionIDPathMap, ExportRecord } from 'types/export';
 
 import { EnteFile } from 'types/file';
