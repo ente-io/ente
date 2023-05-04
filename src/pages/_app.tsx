@@ -73,7 +73,7 @@ import {
     CLIENT_PACKAGE_NAMES,
     getAppNameAndTitle,
 } from 'constants/apps';
-
+import exportService from 'services/export';
 const redirectMap = new Map([
     ['roadmap', getRoadmapRedirectURL],
     ['families', getFamilyPortalRedirectURL],
@@ -240,6 +240,27 @@ export default function App(props) {
             eventBus.on(Events.LOGOUT, () => {
                 setMlSearchEnabled(false);
                 mlWorkManager.setMlSearchEnabled(false);
+            });
+        } catch (e) {
+            logError(e, 'Error while subscribing to logout event');
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!isElectron()) {
+            return;
+        }
+        try {
+            const exportSettings = exportService.getExportSettings();
+            if (exportSettings?.continuousExport) {
+                exportService.enableContinuousExport();
+            }
+        } catch (e) {
+            logError(e, 'init export failed');
+        }
+        try {
+            eventBus.on(Events.LOGOUT, () => {
+                exportService.disableContinuousExport();
             });
         } catch (e) {
             logError(e, 'Error while subscribing to logout event');

@@ -24,7 +24,7 @@ import {
 } from 'utils/export';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getLocalCollections } from '../collectionService';
 import downloadManager from '../downloadManager';
 import { getLocalFiles } from '../fileService';
@@ -43,6 +43,7 @@ import { Collection } from 'types/collection';
 import {
     ExportProgress,
     ExportRecord,
+    ExportSettings,
     ExportUIUpdaters,
     FileExportStats,
 } from 'types/export';
@@ -86,6 +87,17 @@ class ExportService {
             this.allElectronAPIsExist = !!this.electronAPIs?.exists;
             this.fileReader = new FileReader();
         }
+    }
+
+    getExportSettings(): ExportSettings {
+        const exportSettings = getData(LS_KEYS.EXPORT);
+        return exportSettings;
+    }
+
+    updateExportSettings(newData: Partial<ExportSettings>) {
+        const exportSettings = this.getExportSettings();
+        const newSettings = { ...exportSettings, ...newData };
+        setData(LS_KEYS.EXPORT, newSettings);
     }
 
     async init(uiUpdater: ExportUIUpdaters) {
@@ -267,10 +279,9 @@ class ExportService {
 
     private async runExport() {
         try {
-            const exportDir = getData(LS_KEYS.EXPORT)?.folder;
-            if (!exportDir) {
-                // no-export folder set
-                return;
+            const exportSettings = this.getExportSettings();
+            if (!exportSettings?.folder) {
+                throw new Error(CustomError.NO_EXPORT_FOLDER_SELECTED);
             }
             const user: User = getData(LS_KEYS.USER);
             const files = await getLocalFiles();
@@ -281,7 +292,9 @@ class ExportService {
                 personalFiles,
                 user
             );
-            const exportRecord = await this.getExportRecord(exportDir);
+            const exportRecord = await this.getExportRecord(
+                exportSettings.folder
+            );
 
             const collectionIDExportNameMap =
                 convertCollectionIDExportNameObjectToMap(
@@ -344,7 +357,7 @@ class ExportService {
                         `renaming ${renamedCollections.length} collections`
                     );
                     this.collectionRenamer(
-                        exportDir,
+                        exportSettings.folder,
                         collectionIDExportNameMap,
                         renamedCollections,
                         incrementSuccess,
@@ -355,7 +368,7 @@ class ExportService {
                 if (removedFileUIDs?.length > 0) {
                     addLogLine(`trashing ${removedFileUIDs.length} files`);
                     await this.fileTrasher(
-                        exportDir,
+                        exportSettings.folder,
                         collectionIDExportNameMap,
                         removedFileUIDs,
                         incrementSuccess,
@@ -368,7 +381,7 @@ class ExportService {
                         filesToExport,
                         collectionIDNameMap,
                         collectionIDExportNameMap,
-                        exportDir,
+                        exportSettings.folder,
                         incrementSuccess,
                         incrementFailed
                     );
@@ -379,7 +392,7 @@ class ExportService {
                     );
                     await this.collectionRemover(
                         deletedExportedCollections,
-                        exportDir,
+                        exportSettings.folder,
                         incrementSuccess,
                         incrementFailed
                     );
@@ -823,7 +836,8 @@ class ExportService {
         let recordFile: string;
         try {
             if (!folder) {
-                folder = getData(LS_KEYS.EXPORT)?.folder;
+                const exportSettings = this.getExportSettings();
+                folder = exportSettings?.folder;
             }
             if (!folder) {
                 return null;

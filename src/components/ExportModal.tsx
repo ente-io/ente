@@ -1,12 +1,7 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState, useContext } from 'react';
 import exportService from 'services/export';
-import {
-    ExportProgress,
-    ExportRecord,
-    ExportSettings,
-    FileExportStats,
-} from 'types/export';
+import { ExportProgress, ExportSettings, FileExportStats } from 'types/export';
 import {
     Box,
     Button,
@@ -19,7 +14,6 @@ import {
     Typography,
 } from '@mui/material';
 import { logError } from 'utils/sentry';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { SpaceBetweenFlex, VerticallyCenteredFlex } from './Container';
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
@@ -82,16 +76,11 @@ export default function ExportModal(props: Props) {
                     updateFileExportStats: setFileExportStats,
                     updateLastExportTime: updateLastExportTime,
                 });
-                const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
+                const exportSettings: ExportSettings =
+                    exportService.getExportSettings();
                 setExportFolder(exportSettings?.folder);
                 setContinuousExport(exportSettings?.continuousExport);
-                const exportRecord = await syncExportRecord(exportFolder);
-                if (exportRecord?.stage === ExportStage.INPROGRESS) {
-                    startExport();
-                }
-                if (exportSettings?.continuousExport) {
-                    exportService.enableContinuousExport();
-                }
+                syncExportRecord(exportFolder);
             } catch (e) {
                 logError(e, 'export on mount useEffect failed');
             }
@@ -113,22 +102,14 @@ export default function ExportModal(props: Props) {
     // STATE UPDATERS
     // ==============
     const updateExportFolder = (newFolder: string) => {
-        const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
-        const updatedExportSettings: ExportSettings = {
-            ...exportSettings,
-            folder: newFolder,
-        };
-        setData(LS_KEYS.EXPORT, updatedExportSettings);
+        exportService.updateExportSettings({ folder: newFolder });
         setExportFolder(newFolder);
     };
 
     const updateContinuousExport = (updatedContinuousExport: boolean) => {
-        const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
-        const updatedExportSettings: ExportSettings = {
-            ...exportSettings,
+        exportService.updateExportSettings({
             continuousExport: updatedContinuousExport,
-        };
-        setData(LS_KEYS.EXPORT, updatedExportSettings);
+        });
         setContinuousExport(updatedContinuousExport);
     };
 
@@ -151,17 +132,15 @@ export default function ExportModal(props: Props) {
     const onExportFolderChange = async (newFolder: string) => {
         try {
             updateExportFolder(newFolder);
-            syncExportRecord(newFolder);
+            await syncExportRecord(newFolder);
         } catch (e) {
             logError(e, 'onExportChange failed');
-            throw e;
         }
     };
 
     const verifyExportFolderExists = () => {
-        const exportFolder = getData(LS_KEYS.EXPORT)?.folder;
-        const exportFolderExists = exportService.exists(exportFolder);
-        if (!exportFolderExists) {
+        const exportFolder = exportService.getExportSettings()?.folder;
+        if (!exportFolder || exportService.exists(exportFolder)) {
             appContext.setDialogMessage(
                 getExportDirectoryDoesNotExistMessage()
             );
@@ -169,9 +148,7 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const syncExportRecord = async (
-        exportFolder: string
-    ): Promise<ExportRecord> => {
+    const syncExportRecord = async (exportFolder: string): Promise<void> => {
         try {
             const exportRecord = await exportService.getExportRecord(
                 exportFolder
@@ -182,8 +159,7 @@ export default function ExportModal(props: Props) {
             }
             setExportStage(exportRecord.stage);
             setLastExportTime(exportRecord.lastAttemptTimestamp);
-            void syncFileCounts();
-            return exportRecord;
+            await syncFileCounts();
         } catch (e) {
             logError(e, 'syncExportRecord failed');
             throw e;
