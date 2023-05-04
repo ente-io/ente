@@ -114,7 +114,7 @@ export default function setupIpcComs(
     });
 
     ipcMain.handle('open-dir', (_, dirPath) => {
-        shell.openPath(dirPath);
+        shell.openPath(path.normalize(dirPath));
     });
 
     ipcMain.on('update-and-restart', () => {
