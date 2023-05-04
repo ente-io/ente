@@ -16,6 +16,8 @@ const getLocaleDisplayName = (l: Language) => {
             return '中文';
         case Language.nl:
             return 'Nederlands';
+        case Language.es:
+            return 'Español';
     }
 };
 
