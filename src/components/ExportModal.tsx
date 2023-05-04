@@ -97,6 +97,9 @@ export default function ExportModal(props: Props) {
             }
         };
         void main();
+        return () => {
+            exportService.disableContinuousExport();
+        };
     }, []);
 
     useEffect(() => {
