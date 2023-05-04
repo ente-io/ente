@@ -236,7 +236,7 @@ export default function ExportModal(props: Props) {
                     <Typography color="text.muted">
                         {t('TOTAL_ITEMS')}
                     </Typography>
-                    <Typography color="text.muted">
+                    <Typography>
                         {formatNumber(fileExportStats.totalCount)}
                     </Typography>
                 </SpaceBetweenFlex>
