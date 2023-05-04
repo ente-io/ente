@@ -7,11 +7,11 @@ import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS } from '../storage/localStorage';
 import { logError } from '../sentry';
 import { SetDialogBoxAttributes } from 'types/dialogBox';
-import { getFamilyPortalRedirectURL } from 'services/userService';
 import { openLink } from 'utils/common';
 import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
 import { UserDetails } from 'types/user';
 import { getSubscriptionPurchaseSuccessMessage } from 'utils/ui';
+import { getRedirectURL, REDIRECTS } from 'constants/redirects';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
@@ -234,8 +234,8 @@ export async function manageFamilyMethod(
 ) {
     try {
         setLoading(true);
-        const url = await getFamilyPortalRedirectURL();
-        openLink(url, true);
+        const familyPortalRedirectURL = getRedirectURL(REDIRECTS.FAMILIES);
+        openLink(familyPortalRedirectURL, true);
     } catch (error) {
         logError(error, 'failed to redirect to family portal');
         setDialogMessage({

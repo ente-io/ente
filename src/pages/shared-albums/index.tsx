@@ -400,7 +400,6 @@ export default function PublicCollectionGallery() {
                     syncWithRemote={syncWithRemote}
                     setSelected={() => null}
                     selected={{ count: 0, collectionID: null, ownCount: 0 }}
-                    isFirstLoad={true}
                     activeCollection={ALL_SECTION}
                     isIncomingSharedCollection
                     enableDownload={

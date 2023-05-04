@@ -75,9 +75,11 @@ import {
 } from 'constants/apps';
 import exportService from 'services/export';
 import { ExportStage } from 'constants/export';
+import { REDIRECTS } from 'constants/redirects';
+
 const redirectMap = new Map([
-    ['roadmap', getRoadmapRedirectURL],
-    ['families', getFamilyPortalRedirectURL],
+    [REDIRECTS.ROADMAP, getRoadmapRedirectURL],
+    [REDIRECTS.FAMILIES, getFamilyPortalRedirectURL],
 ]);
 
 export const MessageContainer = styled('div')`
