@@ -145,16 +145,6 @@ String getFormattedDate(DateTime dateTime) {
       getAbbreviationOfYear(dateTime);
 }
 
-String getFullDate(DateTime dateTime) {
-  return getDay(dateTime) +
-      ", " +
-      getMonth(dateTime) +
-      " " +
-      dateTime.day.toString() +
-      " " +
-      dateTime.year.toString();
-}
-
 String daysLeft(int futureTime) {
   final int daysLeft = ((futureTime - DateTime.now().microsecondsSinceEpoch) /
           Duration.microsecondsPerDay)
