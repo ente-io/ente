@@ -88,7 +88,6 @@ class ExportService {
     constructor() {
         if (runningInBrowser()) {
             this.electronAPIs = window['ElectronAPIs'];
-            this.fileReader = new FileReader();
         }
     }
 
@@ -307,8 +306,9 @@ class ExportService {
             }
             const user: User = getData(LS_KEYS.USER);
             const files = await getLocalFiles();
-            const collections = await getLocalCollections();
             const personalFiles = getPersonalFiles(files, user);
+
+            const collections = await getLocalCollections();
             const nonEmptyPersonalCollections = getNonEmptyPersonalCollections(
                 collections,
                 personalFiles,
