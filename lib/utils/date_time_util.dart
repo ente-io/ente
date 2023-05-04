@@ -1,7 +1,5 @@
-import "package:flutter/cupertino.dart";
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-import "package:photos/generated/l10n.dart";
 
 const Set<int> monthWith31Days = {1, 3, 5, 7, 8, 10, 12};
 const Set<int> monthWith30Days = {4, 6, 9, 11};
@@ -65,15 +63,6 @@ bool areFromSameDay(int firstCreationTime, int secondCreationTime) {
   return firstDate.year == secondDate.year &&
       firstDate.month == secondDate.month &&
       firstDate.day == secondDate.day;
-}
-
-//Thu, 30 Jun
-String getDayAndMonth(DateTime dateTime) {
-  return _days[dateTime.weekday]! +
-      ", " +
-      dateTime.day.toString() +
-      " " +
-      _months[dateTime.month]!;
 }
 
 //30 Jun, 2022
@@ -230,23 +219,6 @@ bool isLeapYear(DateTime dateTime) {
   } else {
     return false;
   }
-}
-
-String getDayTitle(BuildContext context, int timestamp) {
-  final date = DateTime.fromMicrosecondsSinceEpoch(timestamp);
-  final now = DateTime.now();
-  var title = getDayAndMonth(date);
-  if (date.year == now.year && date.month == now.month) {
-    if (date.day == now.day) {
-      title = S.of(context).dayToday;
-    } else if (date.day == now.day - 1) {
-      title = S.of(context).dayYesterday;
-    }
-  }
-  if (date.year != DateTime.now().year) {
-    title += " " + date.year.toString();
-  }
-  return title;
 }
 
 String secondsToHHMMSS(int value) {
