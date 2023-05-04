@@ -27,6 +27,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m44(albumName) => "Añadido exitosamente a  ${albumName}";
 
+  static String m45(count) =>
+      "${Intl.plural(count, zero: 'No hay Participantes', one: '1 Participante', other: '${count} Participantes')}";
+
   static String m0(paymentProvider) =>
       "Por favor, cancele primero su suscripción existente de ${paymentProvider}";
 
@@ -221,6 +224,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Después de una semana"),
         "after1Year": MessageLookupByLibrary.simpleMessage("Después de un año"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Propietario"),
+        "albumParticipantsCount": m45,
         "albumTitle": MessageLookupByLibrary.simpleMessage("Título del álbum"),
         "albumUpdated":
             MessageLookupByLibrary.simpleMessage("Álbum actualizado"),
@@ -420,6 +424,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("El uso actual es "),
         "custom": MessageLookupByLibrary.simpleMessage("Personalizado"),
+        "customRadius":
+            MessageLookupByLibrary.simpleMessage("Radio personalizado"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("Oscuro"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Descifrando..."),
         "decryptingVideo":
@@ -498,6 +504,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Deshabilitando la autenticación de dos factores..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Descartar"),
+        "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
         "doThisLater":
             MessageLookupByLibrary.simpleMessage("Hacer esto más tarde"),
         "doYouWantToDiscardTheEditsYouHaveMade":
