@@ -111,10 +111,10 @@ export default function ExportModal(props: Props) {
     // HELPER FUNCTIONS
     // =======================
 
-    const onExportFolderChange = async (newFolder: string) => {
+    const onExportFolderChange = (newFolder: string) => {
         try {
             updateExportFolder(newFolder);
-            await syncExportRecord(newFolder);
+            void syncExportRecord(newFolder);
         } catch (e) {
             logError(e, 'onExportChange failed');
         }
@@ -142,7 +142,6 @@ export default function ExportModal(props: Props) {
             setFileExportStats(fileExportStats);
         } catch (e) {
             logError(e, 'syncExportRecord failed');
-            throw e;
         }
     };
 
