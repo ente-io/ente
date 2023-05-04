@@ -131,7 +131,9 @@ class ExportService {
                 addLogLine('continuous export already enabled');
                 return;
             }
-            this.continuousExportEventHandler = this.scheduleExport;
+            this.continuousExportEventHandler = () => {
+                this.scheduleExport();
+            };
             this.continuousExportEventHandler();
             eventBus.addListener(
                 Events.LOCAL_FILES_UPDATED,
@@ -231,7 +233,6 @@ class ExportService {
 
     scheduleExport = async () => {
         try {
-            addLogLine('scheduling export');
             if (this.exportInProgress) {
                 addLogLine('export in progress, scheduling re-run');
                 this.reRunNeeded = true;
@@ -253,7 +254,7 @@ class ExportService {
                 if (this.reRunNeeded) {
                     this.reRunNeeded = false;
                     addLogLine('re-running export');
-                    setTimeout(this.scheduleExport, 0);
+                    setTimeout(() => this.scheduleExport(), 0);
                 }
                 await this.postExport();
             }
