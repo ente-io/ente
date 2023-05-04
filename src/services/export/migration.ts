@@ -46,9 +46,7 @@ export async function migrateExportJSON() {
             return;
         }
         const exportRecord = await exportService.getExportRecord(exportDir);
-        if (exportService.checkAllElectronAPIsExists()) {
-            await migrateExport(exportDir, exportRecord);
-        }
+        await migrateExport(exportDir, exportRecord);
     } catch (e) {
         logError(e, 'migrateExportJSON failed');
     }
@@ -181,7 +179,6 @@ export async function migrateCollectionFolders(
         );
         const newCollectionExportPath = getUniqueCollectionFolderPath(
             exportDir,
-            collection.id,
             collection.name
         );
         collectionIDPathMap.set(collection.id, newCollectionExportPath);
@@ -217,8 +214,7 @@ async function migrateFiles(
         file = mergeMetadata([file])[0];
         const newFileSaveName = getUniqueFileSaveName(
             collectionIDPathMap.get(file.collectionID),
-            file.metadata.title,
-            file.id
+            file.metadata.title
         );
 
         const newFileSavePath = getFileSavePath(

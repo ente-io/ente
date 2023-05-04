@@ -70,7 +70,6 @@ class ExportService {
     private reRunNeeded = false;
     private exportRecordUpdater = new QueueProcessor<ExportRecord>(1);
     private stopExport: boolean = false;
-    private allElectronAPIsExist: boolean = false;
     private fileReader: FileReader = null;
     private continuousExportEventHandler: () => void;
     private uiUpdater: ExportUIUpdaters = {
@@ -89,7 +88,6 @@ class ExportService {
     constructor() {
         if (runningInBrowser()) {
             this.electronAPIs = window['ElectronAPIs'];
-            this.allElectronAPIsExist = !!this.electronAPIs?.exists;
             this.fileReader = new FileReader();
         }
     }
@@ -372,10 +370,7 @@ class ExportService {
                         total: removedFileUIDs.length + filesToExport.length,
                     });
                 };
-                if (
-                    renamedCollections?.length > 0 &&
-                    this.checkAllElectronAPIsExists()
-                ) {
+                if (renamedCollections?.length > 0) {
                     addLogLine(
                         `renaming ${renamedCollections.length} collections`
                     );
@@ -1050,7 +1045,5 @@ class ExportService {
     checkExistsAndCreateDir = (path: string) => {
         return this.electronAPIs.checkExistsAndCreateDir(path);
     };
-
-    checkAllElectronAPIsExists = () => this.allElectronAPIsExist;
 }
 export default new ExportService();
