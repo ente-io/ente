@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
+import "package:styled_text/styled_text.dart";
 
 class SectionTitle extends StatelessWidget {
   final String? title;
-  final RichText? titleWithBrand;
+  final Widget? titleWithBrand;
 
   const SectionTitle({
     this.title,
@@ -40,22 +42,21 @@ class SectionTitle extends StatelessWidget {
   }
 }
 
-RichText getOnEnteSection(BuildContext context) {
+Widget getOnEnteSection(BuildContext context) {
   final EnteTextTheme textTheme = getEnteTextTheme(context);
-  return RichText(
-    text: TextSpan(
-      children: [
-        TextSpan(
-          text: "On ",
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Inter',
-            fontSize: 21,
-            color: textTheme.brandSmall.color,
-          ),
-        ),
-        TextSpan(text: "ente", style: textTheme.brandSmall),
-      ],
+
+  return StyledText(
+    text: S.of(context).onEnte,
+    style: TextStyle(
+      fontWeight: FontWeight.w600,
+      fontFamily: 'Inter',
+      fontSize: 21,
+      color: textTheme.brandSmall.color,
     ),
+    tags: {
+      'branding': StyledTextTag(
+        style: textTheme.brandSmall,
+      ),
+    },
   );
 }

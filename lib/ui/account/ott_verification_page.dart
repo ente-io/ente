@@ -4,6 +4,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
+import "package:styled_text/styled_text.dart";
 
 class OTTVerificationPage extends StatefulWidget {
   final String email;
@@ -108,24 +109,21 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
-                          child: RichText(
-                            text: TextSpan(
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .subtitle1!
-                                  .copyWith(fontSize: 14),
-                              children: [
-                                TextSpan(text: S.of(context).weveSentAMailTo),
-                                TextSpan(
-                                  text: widget.email,
-                                  style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .greenAlternative,
-                                  ),
-                                )
-                              ],
-                            ),
+                          child: StyledText(
+                            text: S.of(context).weHaveSendEmailTo(widget.email),
+                            style: Theme.of(context)
+                                .textTheme
+                                .subtitle1!
+                                .copyWith(fontSize: 14),
+                            tags: {
+                              'green': StyledTextTag(
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .greenAlternative,
+                                ),
+                              ),
+                            },
                           ),
                         ),
                         Text(

@@ -162,9 +162,11 @@ class FadingAppBarState extends State<FadingAppBar> {
                     const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text(isArchived
-                        ? S.of(context).unarchive
-                        : S.of(context).archive),
+                    Text(
+                      isArchived
+                          ? S.of(context).unarchive
+                          : S.of(context).archive,
+                    ),
                   ],
                 ),
               ),

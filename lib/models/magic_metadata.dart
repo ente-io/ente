@@ -17,6 +17,11 @@ const pubMagicKeyEditedTime = 'editedTime';
 const pubMagicKeyEditedName = 'editedName';
 const pubMagicKeyCaption = "caption";
 const pubMagicKeyUploaderName = "uploaderName";
+const publicMagicKeyWidth = 'w';
+const publicMagicKeyHeight = 'h';
+const pubMagicKeyLat = "lat";
+const pubMagicKeyLong = "long";
+const pubMotionVideoIndex = "mvi";
 
 class MagicMetadata {
   // 0 -> visible
@@ -44,12 +49,24 @@ class PubMagicMetadata {
   String? editedName;
   String? caption;
   String? uploaderName;
+  int? w;
+  int? h;
+  double? lat;
+  double? long;
+  // Motion Video Index. Positive value indicates that the file is a motion
+  // photo
+  int? mvi;
 
   PubMagicMetadata({
     this.editedTime,
     this.editedName,
     this.caption,
     this.uploaderName,
+    this.w,
+    this.h,
+    this.lat,
+    this.long,
+    this.mvi,
   });
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
@@ -65,6 +82,11 @@ class PubMagicMetadata {
       editedName: map[pubMagicKeyEditedName],
       caption: map[pubMagicKeyCaption],
       uploaderName: map[pubMagicKeyUploaderName],
+      w: map[publicMagicKeyWidth],
+      h: map[publicMagicKeyHeight],
+      lat: map[pubMagicKeyLat],
+      long: map[pubMagicKeyLong],
+      mvi: map[pubMotionVideoIndex],
     );
   }
 }

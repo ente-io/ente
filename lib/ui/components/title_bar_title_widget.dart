@@ -5,10 +5,12 @@ class TitleBarTitleWidget extends StatelessWidget {
   final String? title;
   final bool isTitleH2;
   final IconData? icon;
+  final VoidCallback? onTap;
   const TitleBarTitleWidget({
     this.title,
     this.isTitleH2 = false,
     this.icon,
+    this.onTap,
     super.key,
   });
 
@@ -17,8 +19,9 @@ class TitleBarTitleWidget extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorTheme = getEnteColorScheme(context);
     if (title != null) {
+      late final Widget widget;
       if (icon != null) {
-        return Row(
+        widget = Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
@@ -34,20 +37,21 @@ class TitleBarTitleWidget extends StatelessWidget {
         );
       }
       if (isTitleH2) {
-        return Text(
+        widget = Text(
           title!,
           style: textTheme.h2Bold,
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
         );
       } else {
-        return Text(
+        widget = Text(
           title!,
           style: textTheme.h3Bold,
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
         );
       }
+      return GestureDetector(onTap: onTap, child: widget);
     }
 
     return const SizedBox.shrink();

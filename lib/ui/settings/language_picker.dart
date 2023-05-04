@@ -140,6 +140,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         return 'Suomi';
       case 'zh':
         return '中文';
+      case 'zh-CN':
+        return '中文';
       case 'ja':
         return '日本語';
       case 'ko':

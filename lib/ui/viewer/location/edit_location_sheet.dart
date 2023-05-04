@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/services/location_service.dart";
@@ -60,8 +61,8 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
   final ValueNotifier<int?> _memoriesCountNotifier = ValueNotifier(null);
   final ValueNotifier<bool> _submitNotifer = ValueNotifier(false);
   final ValueNotifier<bool> _cancelNotifier = ValueNotifier(false);
-  final ValueNotifier<int> _selectedRadiusIndexNotifier =
-      ValueNotifier(defaultRadiusValueIndex);
+  final ValueNotifier<double> _selectedRadiusNotifier =
+      ValueNotifier(defaultRadiusValue);
   final _focusNode = FocusNode();
   final _textEditingController = TextEditingController();
   final _isEmptyNotifier = ValueNotifier(false);
@@ -70,7 +71,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
   @override
   void initState() {
     _focusNode.addListener(_focusNodeListener);
-    _selectedRadiusIndexNotifier.addListener(_selectedRadiusIndexListener);
+    _selectedRadiusNotifier.addListener(_selectedRadiusListener);
     super.initState();
   }
 
@@ -79,7 +80,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
     _focusNode.removeListener(_focusNodeListener);
     _submitNotifer.dispose();
     _cancelNotifier.dispose();
-    _selectedRadiusIndexNotifier.dispose();
+    _selectedRadiusNotifier.dispose();
     super.dispose();
   }
 
@@ -115,7 +116,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                           children: [
                             Expanded(
                               child: TextInputWidget(
-                                hintText: "Location name",
+                                hintText: S.of(context).locationName,
                                 borderRadius: 2,
                                 focusNode: _focusNode,
                                 submitNotifier: _submitNotifer,
@@ -145,7 +146,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                                     key: ValueKey(value),
                                     buttonType: ButtonType.secondary,
                                     buttonSize: ButtonSize.small,
-                                    labelText: "Save",
+                                    labelText: S.of(context).save,
                                     isDisabled: value,
                                     onTap: () async {
                                       _focusNode.unfocus();
@@ -161,9 +162,9 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                         const EditCenterPointTileWidget(),
                         const SizedBox(height: 20),
                         RadiusPickerWidget(
-                          _selectedRadiusIndexNotifier,
+                          _selectedRadiusNotifier,
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
@@ -177,7 +178,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: ValueListenableBuilder(
                         valueListenable: _memoriesCountNotifier,
-                        builder: (context, value, _) {
+                        builder: (context, int? value, _) {
                           Widget widget;
                           if (value == null) {
                             widget = RepaintBoundary(
@@ -194,14 +195,14 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  value == 1 ? "1 memory" : "$value memories",
+                                  S.of(context).memoryCount(value),
                                   style: textTheme.body,
                                 ),
-                                if (value as int > 1000)
+                                if (value > 1000)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 2),
                                     child: Text(
-                                      "Up to 1000 memories shown in gallery",
+                                      S.of(context).galleryMemoryLimitInfo,
                                       style: textTheme.miniMuted,
                                     ),
                                   ),
@@ -239,7 +240,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
     final locationTagState = InheritedLocationTagData.of(context);
     await LocationService.instance.updateLocationTag(
       locationTagEntity: locationTagState.locationTagEntity!,
-      newRadius: radiusValues[locationTagState.selectedRadiusIndex],
+      newRadius: locationTagState.selectedRadius,
       newName: _textEditingController.text.trim(),
       newCenterPoint: InheritedLocationTagData.of(context).centerPoint,
     );
@@ -263,11 +264,11 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
     }
   }
 
-  void _selectedRadiusIndexListener() {
+  void _selectedRadiusListener() {
     InheritedLocationTagData.of(
       context,
-    ).updateSelectedIndex(
-      _selectedRadiusIndexNotifier.value,
+    ).updateSelectedRadius(
+      _selectedRadiusNotifier.value,
     );
     _memoriesCountNotifier.value = null;
   }

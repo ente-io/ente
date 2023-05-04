@@ -41,6 +41,8 @@ class TextInputWidget extends StatefulWidget {
   final VoidCallback? onCancel;
   final TextEditingController? textEditingController;
   final ValueNotifier? isEmptyNotifier;
+  final List<TextInputFormatter>? textInputFormatter;
+  final TextInputType? textInputType;
   const TextInputWidget({
     this.onSubmit,
     this.onChange,
@@ -67,6 +69,8 @@ class TextInputWidget extends StatefulWidget {
     this.onCancel,
     this.textEditingController,
     this.isEmptyNotifier,
+    this.textInputFormatter,
+    this.textInputType,
     super.key,
   });
 
@@ -90,12 +94,8 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     widget.cancelNotifier?.addListener(_onCancel);
     _textController = widget.textEditingController ?? TextEditingController();
 
-    if (widget.initialValue != null) {
-      _textController.value = TextEditingValue(
-        text: widget.initialValue!,
-        selection: TextSelection.collapsed(offset: widget.initialValue!.length),
-      );
-    }
+    _setInitialValue();
+
     if (widget.onChange != null) {
       _textController.addListener(() {
         widget.onChange!.call(_textController.text);
@@ -143,13 +143,15 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         borderRadius: BorderRadius.all(Radius.circular(widget.borderRadius)),
         child: Material(
           child: TextFormField(
+            keyboardType: widget.textInputType,
             textCapitalization: widget.textCapitalization!,
             autofocus: widget.autoFocus ?? false,
             controller: _textController,
             focusNode: widget.focusNode,
-            inputFormatters: widget.maxLength != null
-                ? [LengthLimitingTextInputFormatter(50)]
-                : null,
+            inputFormatters: widget.textInputFormatter ??
+                (widget.maxLength != null
+                    ? [LengthLimitingTextInputFormatter(50)]
+                    : null),
             obscureText: _obscureTextNotifier.value,
             decoration: InputDecoration(
               hintText: widget.hintText,
@@ -342,6 +344,42 @@ class _TextInputWidgetState extends State<TextInputWidget> {
 
   void _popNavigatorStack(BuildContext context, {Exception? e}) {
     Navigator.of(context).canPop() ? Navigator.of(context).pop(e) : null;
+  }
+
+  void _setInitialValue() {
+    if (widget.initialValue != null) {
+      final formattedInitialValue = _formatInitialValue(
+        widget.initialValue!,
+        widget.textInputFormatter,
+      );
+      _textController.value = TextEditingValue(
+        text: formattedInitialValue,
+        selection:
+            TextSelection.collapsed(offset: formattedInitialValue.length),
+      );
+    }
+  }
+
+  String _formatInitialValue(
+    String initialValue,
+    List<TextInputFormatter>? formatters,
+  ) {
+    if (formatters == null || formatters.isEmpty) {
+      return initialValue;
+    }
+
+    String formattedValue = initialValue;
+
+    for (final formatter in formatters) {
+      formattedValue = formatter
+          .formatEditUpdate(
+            TextEditingValue.empty,
+            TextEditingValue(text: formattedValue),
+          )
+          .text;
+    }
+
+    return formattedValue;
   }
 }
 

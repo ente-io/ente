@@ -9,13 +9,17 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/location_service.dart";
+import "package:photos/states/location_screen_state.dart";
+import "package:photos/ui/viewer/location/location_screen.dart";
 import 'package:photos/utils/date_time_util.dart';
+import "package:photos/utils/navigation_util.dart";
 import 'package:tuple/tuple.dart';
 
 class SearchService {
@@ -226,41 +230,82 @@ class SearchService {
   Future<List<GenericSearchResult>> getLocationResults(
     String query,
   ) async {
-    final locations =
-        (await LocationService.instance.getLocationTags()).map((e) => e.item);
-    final Map<LocationTag, List<File>> result = {};
+    final locationTagEntities =
+        (await LocationService.instance.getLocationTags());
+    final Map<LocalEntity<LocationTag>, List<File>> result = {};
+    final bool showNoLocationTag = query.length > 2 &&
+        "No Location Tag".toLowerCase().startsWith(query.toLowerCase());
 
     final List<GenericSearchResult> searchResults = [];
 
-    for (LocationTag tag in locations) {
-      if (tag.name.toLowerCase().contains(query.toLowerCase())) {
+    for (LocalEntity<LocationTag> tag in locationTagEntities) {
+      if (tag.item.name.toLowerCase().contains(query.toLowerCase())) {
         result[tag] = [];
       }
     }
-    if (result.isEmpty) {
+    if (result.isEmpty && !showNoLocationTag) {
       return searchResults;
     }
     final allFiles = await _getAllFiles();
     for (File file in allFiles) {
       if (file.hasLocation) {
-        for (LocationTag tag in result.keys) {
+        for (LocalEntity<LocationTag> tag in result.keys) {
           if (LocationService.instance.isFileInsideLocationTag(
-            tag.centerPoint,
+            tag.item.centerPoint,
             file.location!,
-            tag.radius,
+            tag.item.radius,
           )) {
             result[tag]!.add(file);
           }
         }
       }
     }
-    for (MapEntry<LocationTag, List<File>> entry in result.entries) {
+    if (showNoLocationTag) {
+      _logger.fine("finding photos with no location");
+      // find files that have location but the file's location is not inside
+      // any location tag
+      final noLocationTagFiles = allFiles.where((file) {
+        if (!file.hasLocation) {
+          return false;
+        }
+        for (LocalEntity<LocationTag> tag in locationTagEntities) {
+          if (LocationService.instance.isFileInsideLocationTag(
+            tag.item.centerPoint,
+            file.location!,
+            tag.item.radius,
+          )) {
+            return false;
+          }
+        }
+        return true;
+      }).toList();
+      if (noLocationTagFiles.isNotEmpty) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.fileType,
+            "No Location Tag",
+            noLocationTagFiles,
+          ),
+        );
+      }
+    }
+    for (MapEntry<LocalEntity<LocationTag>, List<File>> entry
+        in result.entries) {
       if (entry.value.isNotEmpty) {
         searchResults.add(
           GenericSearchResult(
             ResultType.location,
-            entry.key.name,
+            entry.key.item.name,
             entry.value,
+            onResultTap: (ctx) {
+              routeToPage(
+                ctx,
+                LocationScreenStateProvider(
+                  entry.key,
+                  const LocationScreen(),
+                ),
+              );
+            },
           ),
         );
       }

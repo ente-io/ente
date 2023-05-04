@@ -371,6 +371,7 @@ class FilesDB {
     await db.delete(filesTable);
     await db.delete("device_files");
     await db.delete("device_collections");
+    await db.delete("entities");
   }
 
   Future<void> deleteDB() async {
@@ -501,7 +502,6 @@ class FilesDB {
     bool? asc,
     int visibility = visibilityVisible,
     Set<int>? ignoredCollectionIDs,
-    bool onlyFilesWithLocation = false,
   }) async {
     final stopWatch = Stopwatch()..start();
 
@@ -509,12 +509,9 @@ class FilesDB {
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       filesTable,
-      where: onlyFilesWithLocation
-          ? '$columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0)'
-              'AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND  ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-              'AND $columnMMdVisibility = ?'
-          : '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-              ' AND $columnMMdVisibility = ?',
+      where:
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+          ' AND $columnMMdVisibility = ?',
       whereArgs: [startTime, endTime, ownerID, visibility],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -524,7 +521,8 @@ class FilesDB {
     final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     dev.log(
-        "getAllPendingOrUploadedFiles time taken: ${stopWatch.elapsedMilliseconds} ms");
+      "getAllPendingOrUploadedFiles time taken: ${stopWatch.elapsedMilliseconds} ms",
+    );
     stopWatch.stop();
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
@@ -536,19 +534,14 @@ class FilesDB {
     int? limit,
     bool? asc,
     Set<int>? ignoredCollectionIDs,
-    bool onlyFilesWithLocation = false,
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       filesTable,
-      where: onlyFilesWithLocation
-          ? '$columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0)'
-              ' AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND '
-              '($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
-              ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))'
-          : '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
-              ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
+      where:
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+          ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
       whereArgs: [startTime, endTime, ownerID, visibilityVisible],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -777,12 +770,17 @@ class FilesDB {
     return uploadedFileIDs;
   }
 
-  Future<File?> getUploadedFileInAnyCollection(int uploadedFileID) async {
+  Future<File?> getUploadedLocalFileInAnyCollection(
+    int uploadedFileID,
+    int userID,
+  ) async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
-      where: '$columnUploadedFileID = ?',
+      where: '$columnLocalID IS NOT NULL AND $columnOwnerID = ? AND '
+          '$columnUploadedFileID = ?',
       whereArgs: [
+        userID,
         uploadedFileID,
       ],
       limit: 1,
@@ -1382,9 +1380,73 @@ class FilesDB {
     return result;
   }
 
+  // For givenUserID, get List of unique LocalIDs for files which are
+  // uploaded by the given user and location is missing
+  Future<List<String>> getLocalIDsForFilesWithoutLocation(int ownerID) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      columns: [columnLocalID],
+      distinct: true,
+      where: '$columnOwnerID = ? AND $columnLocalID IS NOT NULL AND '
+          '($columnLatitude IS NULL OR '
+          '$columnLongitude IS NULL OR $columnLongitude = 0.0 or $columnLongitude = 0.0)',
+      whereArgs: [ownerID],
+    );
+    final result = <String>[];
+    for (final row in rows) {
+      result.add(row[columnLocalID].toString());
+    }
+    return result;
+  }
+
+  // returns the localID of all files which are uploaded and belong to the
+  // user and upload time is greater than 20 April 2023 epoch time and less than
+  // 15 May 2023 epoch time
+  Future<List<String>> getFilesWithLocationUploadedBtw20AprTo15May2023(
+    int ownerID,
+  ) async {
+    final db = await database;
+    final result = await db.query(
+      filesTable,
+      columns: [columnLocalID],
+      distinct: true,
+      where: ''
+          '($columnUploadedFileID IS NOT NULL'
+          ' AND $columnUploadedFileID IS NOT -1)'
+          ' AND $columnOwnerID = ?'
+          ' AND $columnUpdationTime > ? AND $columnUpdationTime < ? '
+          'AND ($columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL) '
+          'AND ($columnLongitude IS NOT 0.0 AND $columnLongitude IS NOT 0.0)',
+      whereArgs: [
+        ownerID,
+        1681952400000000,
+        1684112400000000,
+      ],
+    );
+    return result.map((row) => row[columnLocalID].toString()).toList();
+  }
+
+  // For given list of localIDs and ownerID, get a list of uploaded files
+  // owned by given user
+  Future<List<File>> getFilesForLocalIDs(
+    List<String> localIDs,
+    int ownerID,
+  ) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      where:
+          '$columnLocalID IN (${localIDs.map((e) => "'$e'").join(',')}) AND $columnOwnerID = ?',
+      whereArgs: [ownerID],
+    );
+    return _deduplicatedAndFilterIgnoredFiles(convertToFiles(rows), {});
+  }
+
   Future<List<File>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {
     final db = await instance.database;
-    final List<Map<String, dynamic>> result = await db.query(filesTable);
+    final List<Map<String, dynamic>> result =
+        await db.query(filesTable, orderBy: '$columnCreationTime DESC');
     final List<File> files = convertToFiles(result);
     final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, collectionsToIgnore);
@@ -1406,7 +1468,7 @@ class FilesDB {
     return filesCount;
   }
 
-  Future<FileLoadResult> getAllUploadedAndSharedFiles(
+  Future<FileLoadResult> fetchAllUploadedAndSharedFilesWithLocation(
     int startTime,
     int endTime, {
     int? limit,
@@ -1472,11 +1534,16 @@ class FilesDB {
     row[columnMMdVisibility] = file.magicMetadata.visibility;
     row[columnPubMMdVersion] = file.pubMmdVersion;
     row[columnPubMMdEncodedJson] = file.pubMmdEncodedJson ?? '{}';
-    if (file.pubMagicMetadata != null &&
-        file.pubMagicMetadata!.editedTime != null) {
-      // override existing creationTime to avoid re-writing all queries related
-      // to loading the gallery
-      row[columnCreationTime] = file.pubMagicMetadata!.editedTime;
+    // override existing fields to avoid re-writing all queries and logic
+    if (file.pubMagicMetadata != null) {
+      if (file.pubMagicMetadata!.editedTime != null) {
+        row[columnCreationTime] = file.pubMagicMetadata!.editedTime;
+      }
+      if (file.pubMagicMetadata!.lat != null &&
+          file.pubMagicMetadata!.long != null) {
+        row[columnLatitude] = file.pubMagicMetadata!.lat;
+        row[columnLongitude] = file.pubMagicMetadata!.long;
+      }
     }
     return row;
   }

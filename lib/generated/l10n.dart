@@ -570,13 +570,13 @@ class S {
     );
   }
 
-  /// `We've sent a mail to`
-  String get weveSentAMailTo {
+  /// `We have sent a mail to <green>{email}</green>`
+  String weHaveSendEmailTo(String email) {
     return Intl.message(
-      'We\'ve sent a mail to',
-      name: 'weveSentAMailTo',
-      desc: '',
-      args: [],
+      'We have sent a mail to <green>$email</green>',
+      name: 'weHaveSendEmailTo',
+      desc: 'Text to indicate that we have sent a mail to the user',
+      args: [email],
     );
   }
 
@@ -1717,6 +1717,19 @@ class S {
       name: 'manageParticipants',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}`
+  String albumParticipantsCount(int count) {
+    return Intl.plural(
+      count,
+      zero: 'No Participants',
+      one: '1 Participant',
+      other: '$count Participants',
+      name: 'albumParticipantsCount',
+      desc: 'Number of participants in an album, including the album owner.',
+      args: [count],
     );
   }
 
@@ -4495,7 +4508,8 @@ class S {
     return Intl.message(
       'Raise ticket',
       name: 'raiseTicket',
-      desc: '',
+      desc:
+          'Button text for raising a support tickets in case of unhandled errors during backup',
       args: [],
     );
   }
@@ -4626,6 +4640,26 @@ class S {
       'Logging out...',
       name: 'loggingOut',
       desc: '',
+      args: [],
+    );
+  }
+
+  /// `On device`
+  String get onDevice {
+    return Intl.message(
+      'On device',
+      name: 'onDevice',
+      desc: 'The text displayed above folders/albums stored on device',
+      args: [],
+    );
+  }
+
+  /// `On <branding>ente</branding>`
+  String get onEnte {
+    return Intl.message(
+      'On <branding>ente</branding>',
+      name: 'onEnte',
+      desc: 'The text displayed above albums backed up to ente',
       args: [],
     );
   }
@@ -6498,6 +6532,286 @@ class S {
       args: [],
     );
   }
+
+  /// `Location name`
+  String get locationName {
+    return Intl.message(
+      'Location name',
+      name: 'locationName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add location`
+  String get addLocation {
+    return Intl.message(
+      'Add location',
+      name: 'addLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Group nearby photos`
+  String get groupNearbyPhotos {
+    return Intl.message(
+      'Group nearby photos',
+      name: 'groupNearbyPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location`
+  String get location {
+    return Intl.message(
+      'Location',
+      name: 'location',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `km`
+  String get kiloMeterUnit {
+    return Intl.message(
+      'km',
+      name: 'kiloMeterUnit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add`
+  String get addLocationButton {
+    return Intl.message(
+      'Add',
+      name: 'addLocationButton',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Radius`
+  String get radius {
+    return Intl.message(
+      'Radius',
+      name: 'radius',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A location tag groups all photos that were taken within some radius of a photo`
+  String get locationTagFeatureDescription {
+    return Intl.message(
+      'A location tag groups all photos that were taken within some radius of a photo',
+      name: 'locationTagFeatureDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Up to 1000 memories shown in gallery`
+  String get galleryMemoryLimitInfo {
+    return Intl.message(
+      'Up to 1000 memories shown in gallery',
+      name: 'galleryMemoryLimitInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save`
+  String get save {
+    return Intl.message(
+      'Save',
+      name: 'save',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Center point`
+  String get centerPoint {
+    return Intl.message(
+      'Center point',
+      name: 'centerPoint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pick center point`
+  String get pickCenterPoint {
+    return Intl.message(
+      'Pick center point',
+      name: 'pickCenterPoint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use selected photo`
+  String get useSelectedPhoto {
+    return Intl.message(
+      'Use selected photo',
+      name: 'useSelectedPhoto',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit`
+  String get edit {
+    return Intl.message(
+      'Edit',
+      name: 'edit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete location`
+  String get deleteLocation {
+    return Intl.message(
+      'Delete location',
+      name: 'deleteLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rotate left`
+  String get rotateLeft {
+    return Intl.message(
+      'Rotate left',
+      name: 'rotateLeft',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Flip`
+  String get flip {
+    return Intl.message(
+      'Flip',
+      name: 'flip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rotate right`
+  String get rotateRight {
+    return Intl.message(
+      'Rotate right',
+      name: 'rotateRight',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save copy`
+  String get saveCopy {
+    return Intl.message(
+      'Save copy',
+      name: 'saveCopy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Light`
+  String get light {
+    return Intl.message(
+      'Light',
+      name: 'light',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Color`
+  String get color {
+    return Intl.message(
+      'Color',
+      name: 'color',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, discard changes`
+  String get yesDiscardChanges {
+    return Intl.message(
+      'Yes, discard changes',
+      name: 'yesDiscardChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do you want to discard the edits you have made?`
+  String get doYouWantToDiscardTheEditsYouHaveMade {
+    return Intl.message(
+      'Do you want to discard the edits you have made?',
+      name: 'doYouWantToDiscardTheEditsYouHaveMade',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Saving...`
+  String get saving {
+    return Intl.message(
+      'Saving...',
+      name: 'saving',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edits saved`
+  String get editsSaved {
+    return Intl.message(
+      'Edits saved',
+      name: 'editsSaved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Oops, could not save edits`
+  String get oopsCouldNotSaveEdits {
+    return Intl.message(
+      'Oops, could not save edits',
+      name: 'oopsCouldNotSaveEdits',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom radius`
+  String get customRadius {
+    return Intl.message(
+      'Custom radius',
+      name: 'customRadius',
+      desc: 'Custom radius for location tag',
+      args: [],
+    );
+  }
+
+  /// `km`
+  String get distanceInKMUnit {
+    return Intl.message(
+      'km',
+      name: 'distanceInKMUnit',
+      desc: 'Unit for distance in km',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -6513,8 +6827,10 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'it'),
       Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'nl'),
+      Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'pl'),
       Locale.fromSubtags(languageCode: 'pt'),
+      Locale.fromSubtags(languageCode: 'zh'),
     ];
   }
 

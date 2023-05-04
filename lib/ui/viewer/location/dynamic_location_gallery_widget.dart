@@ -39,7 +39,8 @@ class _DynamicLocationGalleryWidgetState
   void initState() {
     final collectionsToHide =
         CollectionsService.instance.collectionsHiddenFromTimeline();
-    fileLoadResult = FilesDB.instance.getAllUploadedAndSharedFiles(
+    fileLoadResult =
+        FilesDB.instance.fetchAllUploadedAndSharedFilesWithLocation(
       galleryLoadStartTime,
       galleryLoadEndTime,
       limit: null,
@@ -54,7 +55,7 @@ class _DynamicLocationGalleryWidgetState
   @override
   Widget build(BuildContext context) {
     const galleryFilesLimit = 1000;
-    final selectedRadius = _selectedRadius();
+    final selectedRadius = InheritedLocationTagData.of(context).selectedRadius;
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
       //wait for ignored files to be removed after init
@@ -118,11 +119,6 @@ class _DynamicLocationGalleryWidgetState
       },
       future: filterFiles(),
     );
-  }
-
-  int _selectedRadius() {
-    return radiusValues[
-        InheritedLocationTagData.of(context).selectedRadiusIndex];
   }
 
   double _galleryHeight(int fileCount) {

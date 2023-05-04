@@ -3,7 +3,6 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -24,8 +23,10 @@ import 'package:photos/main.dart';
 import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import "package:photos/models/magic_metadata.dart";
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/file_magic_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -116,6 +117,9 @@ class FileUploader {
   // upload future will return null as File when the file entry is deleted
   // locally because it's already present in the destination collection.
   Future<File> upload(File file, int collectionID) {
+    if (file.localID == null || file.localID!.isEmpty) {
+      return Future.error(Exception("file's localID can not be null or empty"));
+    }
     // If the file hasn't been queued yet, queue it
     _totalCountInUploadSession++;
     if (!_queue.containsKey(file.localID)) {
@@ -306,10 +310,16 @@ class FileUploader {
       debugPrint("File is already uploaded ${fileOnDisk.tag}");
       return fileOnDisk;
     }
+    if ((file.localID ?? '') == '') {
+      _logger.severe('Trying to upload file with missing localID');
+      return file;
+    }
+
+    final String lockKey = file.localID!;
 
     try {
       await _uploadLocks.acquireLock(
-        file.localID!,
+        lockKey,
         _processType.toString(),
         DateTime.now().microsecondsSinceEpoch,
       );
@@ -381,14 +391,15 @@ class FileUploader {
         await io.File(encryptedFilePath).delete();
       }
       final encryptedFile = io.File(encryptedFilePath);
-      final fileAttributes = await CryptoUtil.encryptFile(
+      final EncryptionResult fileAttributes = await CryptoUtil.encryptFile(
         mediaUploadData!.sourceFile!.path,
         encryptedFilePath,
         key: key,
       );
       final thumbnailData = mediaUploadData.thumbnail;
 
-      final encryptedThumbnailData = await CryptoUtil.encryptChaCha(
+      final EncryptionResult encryptedThumbnailData =
+          await CryptoUtil.encryptChaCha(
         thumbnailData!,
         fileAttributes.key!,
       );
@@ -447,6 +458,23 @@ class FileUploader {
             CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
         final keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
+        MetadataRequest? pubMetadataRequest;
+        if ((mediaUploadData.height ?? 0) != 0 &&
+            (mediaUploadData.width ?? 0) != 0) {
+          final pubMetadata = {
+            publicMagicKeyHeight: mediaUploadData.height,
+            publicMagicKeyWidth: mediaUploadData.width
+          };
+          if (mediaUploadData.motionPhotoStartIndex != null) {
+            pubMetadata[pubMotionVideoIndex] =
+                mediaUploadData.motionPhotoStartIndex;
+          }
+          pubMetadataRequest = await getPubMetadataRequest(
+            file,
+            pubMetadata,
+            fileAttributes.key!,
+          );
+        }
         remoteFile = await _uploadFile(
           file,
           collectionID,
@@ -461,6 +489,7 @@ class FileUploader {
           await encryptedThumbnailFile.length(),
           encryptedMetadata,
           metadataDecryptionHeader,
+          pubMetadata: pubMetadataRequest,
         );
         if (mediaUploadData.isDeleted) {
           _logger.info("File found to be deleted");
@@ -502,6 +531,7 @@ class FileUploader {
         file,
         encryptedFilePath,
         encryptedThumbnailPath,
+        lockKey: lockKey,
       );
     }
   }
@@ -642,8 +672,9 @@ class FileUploader {
     bool uploadHardFailure,
     File file,
     String encryptedFilePath,
-    String encryptedThumbnailPath,
-  ) async {
+    String encryptedThumbnailPath, {
+    required String lockKey,
+  }) async {
     if (mediaUploadData != null && mediaUploadData.sourceFile != null) {
       // delete the file from app's internal cache if it was copied to app
       // for upload. On iOS, only remove the file from photo_manager/app cache
@@ -661,7 +692,7 @@ class FileUploader {
     if (io.File(encryptedThumbnailPath).existsSync()) {
       await io.File(encryptedThumbnailPath).delete();
     }
-    await _uploadLocks.releaseLock(file.localID!, _processType.toString());
+    await _uploadLocks.releaseLock(lockKey, _processType.toString());
   }
 
   Future _onInvalidFileError(File file, InvalidFileError e) async {
@@ -689,6 +720,7 @@ class FileUploader {
     int thumbnailSize,
     String encryptedMetadata,
     String metadataDecryptionHeader, {
+    MetadataRequest? pubMetadata,
     int attempt = 1,
   }) async {
     final request = {
@@ -710,6 +742,9 @@ class FileUploader {
         "decryptionHeader": metadataDecryptionHeader,
       }
     };
+    if (pubMetadata != null) {
+      request["pubMagicMetadata"] = pubMetadata;
+    }
     try {
       final response = await _enteDio.post("/files", data: request);
       final data = response.data;
@@ -746,6 +781,7 @@ class FileUploader {
           encryptedMetadata,
           metadataDecryptionHeader,
           attempt: attempt + 1,
+          pubMetadata: pubMetadata,
         );
       }
       rethrow;

@@ -179,12 +179,24 @@ class File extends EnteFile {
       }
     }
     bool hasExifTime = false;
-    if (fileType == FileType.image && mediaUploadData.sourceFile != null) {
-      final exifTime =
-          await getCreationTimeFromEXIF(mediaUploadData.sourceFile!);
-      if (exifTime != null) {
-        hasExifTime = true;
-        creationTime = exifTime.microsecondsSinceEpoch;
+    if ((fileType == FileType.image || fileType == FileType.video) &&
+        mediaUploadData.sourceFile != null) {
+      final exifData = await getExifFromSourceFile(mediaUploadData.sourceFile!);
+      if (exifData != null) {
+        if (fileType == FileType.image) {
+          final exifTime = await getCreationTimeFromEXIF(null, exifData);
+          if (exifTime != null) {
+            hasExifTime = true;
+            creationTime = exifTime.microsecondsSinceEpoch;
+          }
+        }
+        if (Platform.isAndroid) {
+          //Fix for missing location data in lower android versions.
+          final Location? exifLocation = locationFromExif(exifData);
+          if (Location.isValidLocation(exifLocation)) {
+            location = exifLocation;
+          }
+        }
       }
     }
     // Try to get the timestamp from fileName. In case of iOS, file names are
@@ -272,6 +284,15 @@ class File extends EnteFile {
     return title ?? '';
   }
 
+  // return 0 if the height is not available
+  int get height {
+    return pubMagicMetadata?.h ?? 0;
+  }
+
+  int get width {
+    return pubMagicMetadata?.w ?? 0;
+  }
+
   // returns true if the file isn't available in the user's gallery
   bool get isRemoteFile {
     return localID == null && uploadedFileID != null;
@@ -289,7 +310,7 @@ class File extends EnteFile {
 
   bool get hasLocation {
     return location != null &&
-        (location!.longitude != 0 || location!.latitude != 0);
+        ((location!.longitude ?? 0) != 0 || (location!.latitude ?? 0) != 0);
   }
 
   @override

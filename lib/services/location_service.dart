@@ -38,7 +38,7 @@ class LocationService {
   Future<void> addLocation(
     String location,
     Location centerPoint,
-    int radius,
+    double radius,
   ) async {
     //The area enclosed by the location tag will be a circle on a 3D spherical
     //globe and an ellipse on a 2D Mercator projection (2D map)
@@ -46,19 +46,23 @@ class LocationService {
     //Converting the unit from kilometers to degrees for a and b as that is
     //the unit on the caritesian plane
 
-    final a =
-        (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
-    final b = radius / kilometersPerDegree;
-    final locationTag = LocationTag(
-      name: location,
-      radius: radius,
-      aSquare: a * a,
-      bSquare: b * b,
-      centerPoint: centerPoint,
-    );
-    await EntityService.instance
-        .addOrUpdate(EntityType.location, json.encode(locationTag.toJson()));
-    Bus.instance.fire(LocationTagUpdatedEvent(LocTagEventType.add));
+    try {
+      final a =
+          (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
+      final b = radius / kilometersPerDegree;
+      final locationTag = LocationTag(
+        name: location,
+        radius: radius,
+        aSquare: a * a,
+        bSquare: b * b,
+        centerPoint: centerPoint,
+      );
+      await EntityService.instance
+          .addOrUpdate(EntityType.location, json.encode(locationTag.toJson()));
+      Bus.instance.fire(LocationTagUpdatedEvent(LocTagEventType.add));
+    } catch (e, s) {
+      _logger.severe("Failed to add location tag", e, s);
+    }
   }
 
   ///The area bounded by the location tag becomes more elliptical with increase
@@ -97,7 +101,7 @@ class LocationService {
   bool isFileInsideLocationTag(
     Location centerPoint,
     Location fileCoordinates,
-    int radius,
+    double radius,
   ) {
     final a =
         (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
@@ -130,7 +134,7 @@ class LocationService {
   ///Will only update if there is a change in the locationTag's properties
   Future<void> updateLocationTag({
     required LocalEntity<LocationTag> locationTagEntity,
-    int? newRadius,
+    double? newRadius,
     Location? newCenterPoint,
     String? newName,
   }) async {
@@ -194,19 +198,59 @@ class LocationService {
 }
 
 class GPSData {
-  final String latRef;
-  final List<double> lat;
-  final String longRef;
-  final List<double> long;
+  final String? latRef;
+  final List<double>? lat;
+  final String? longRef;
+  final List<double>? long;
 
   GPSData(this.latRef, this.lat, this.longRef, this.long);
 
-  Location toLocationObj() {
-    final latSign = latRef == "N" ? 1 : -1;
-    final longSign = longRef == "E" ? 1 : -1;
-    return Location(
-      latitude: latSign * lat[0] + lat[1] / 60 + lat[2] / 3600,
-      longitude: longSign * long[0] + long[1] / 60 + long[2] / 3600,
+  Location? toLocationObj() {
+    int? latSign;
+    int? longSign;
+    if (lat == null || long == null) {
+      return null;
+    }
+    if (lat!.length < 3 || long!.length < 3) {
+      return null;
+    }
+    if (latRef == null && longRef == null) {
+      latSign = lat!.any((element) => element < 0) ? -1 : 1;
+      longSign = long!.any((element) => element < 0) ? -1 : 1;
+
+      for (var element in lat!) {
+        lat![lat!.indexOf(element)] = element.abs();
+      }
+      for (var element in long!) {
+        long![long!.indexOf(element)] = element.abs();
+      }
+    } else {
+      if (latRef!.toLowerCase().startsWith('n')) {
+        latSign = 1;
+      } else if (latRef!.toLowerCase().startsWith('s')) {
+        latSign = -1;
+      }
+      if (longRef!.toLowerCase().startsWith('e')) {
+        longSign = 1;
+      } else if (longRef!.toLowerCase().startsWith('w')) {
+        longSign = -1;
+      }
+    }
+
+    //At this point, latSign and longSign will only be null if latRef and longRef
+    //is of invalid format.
+    if (latSign == null || longSign == null) {
+      return null;
+    }
+
+    final result = Location(
+      latitude: latSign * (lat![0] + lat![1] / 60 + lat![2] / 3600),
+      longitude: longSign * (long![0] + long![1] / 60 + long![2] / 3600),
     );
+    if (Location.isValidLocation(result)) {
+      return result;
+    } else {
+      return null;
+    }
   }
 }

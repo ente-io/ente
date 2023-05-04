@@ -51,7 +51,17 @@
   "checkInboxAndSpamFolder": "Please check your inbox (and spam) to complete verification",
   "tapToEnterCode": "Tap to enter code",
   "resendEmail": "Resend email",
-  "weveSentAMailTo": "We've sent a mail to",
+  "weHaveSendEmailTo": "We have sent a mail to <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
   "setPasswordTitle": "Set password",
   "changePasswordTitle": "Change password",
   "resetPasswordTitle": "Reset password",
@@ -85,7 +95,7 @@
   "ackPasswordLostWarning": "I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.",
   "privacyPolicyTitle": "Privacy Policy",
   "termsOfServicesTitle": "Terms",
-  "signUpTerms" : "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
+  "signUpTerms": "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
   "logInLabel": "Log in",
   "loginTerms": "By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
   "changeEmail": "Change email",
@@ -209,6 +219,16 @@
   "after1Month": "After 1 month",
   "after1Year": "After 1 year",
   "manageParticipants": "Manage",
+  "albumParticipantsCount": "{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}",
+  "@albumParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    },
+    "description": "Number of participants in an album, including the album owner."
+  },
   "collabLinkSectionDescription": "Create a link to allow people to add and view photos in your shared album without needing an ente app or account. Great for collecting event photos.",
   "collectPhotos": "Collect photos",
   "collaborativeLink": "Collaborative link",
@@ -612,6 +632,11 @@
   "storageLimitExceeded": "Storage limit exceeded",
   "upgrade": "Upgrade",
   "raiseTicket": "Raise ticket",
+  "@raiseTicket": {
+    "description": "Button text for raising a support tickets in case of unhandled errors during backup",
+    "type": "text"
+  },
+
   "backupFailed": "Backup failed",
   "couldNotBackUpTryLater": "We could not backup your data.\nWe will retry later.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "ente can encrypt and preserve files only if you grant access to them",
@@ -625,6 +650,16 @@
   "collectEventPhotos": "Collect event photos",
   "sessionExpired": "Session expired",
   "loggingOut": "Logging out...",
+  "@onDevice": {
+    "description": "The text displayed above folders/albums stored on device",
+    "type": "text"
+  },
+  "onDevice": "On device",
+  "@onEnte": {
+    "description": "The text displayed above albums backed up to ente",
+    "type": "text"
+  },
+  "onEnte": "On <branding>ente</branding>",
   "name": "Name",
   "newest": "Newest",
   "lastUpdated": "Last updated",
@@ -720,7 +755,7 @@
   "calculating": "Calculating...",
   "pleaseWaitDeletingAlbum": "Please wait, deleting album",
   "searchHintText": "Albums, months, days, years, ...",
-  "searchByExamples": "\u2022 Album names (e.g. \"Camera\")\n\u2022 Types of files (e.g. \"Videos\", \".gif\")\n\u2022 Years and months (e.g. \"2022\", \"January\")\n\u2022 Holidays (e.g. \"Christmas\")\n\u2022 Photo descriptions (e.g. “#fun”)",
+  "searchByExamples": "• Album names (e.g. \"Camera\")\n• Types of files (e.g. \"Videos\", \".gif\")\n• Years and months (e.g. \"2022\", \"January\")\n• Holidays (e.g. \"Christmas\")\n• Photo descriptions (e.g. “#fun”)",
   "youCanTrySearchingForADifferentQuery": "You can try searching for a different query.",
   "noResultsFound": "No results found",
   "addedBy": "Added by {emailOrName}",
@@ -755,7 +790,7 @@
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
     "placeholders": {
-      "count" :{
+      "count": {
         "example": "1",
         "type": "int"
       },
@@ -770,7 +805,7 @@
   "@filesBackedUpFromDevice": {
     "description": "Text to tell user how many files have been backed up from this device",
     "placeholders": {
-      "count" :{
+      "count": {
         "example": "1",
         "type": "int"
       },
@@ -787,7 +822,7 @@
   "freeUpAccessPostDelete": "You can still access {count, plural, one {it} other {them}} on ente as long as you have an active subscription",
   "@freeUpAccessPostDelete": {
     "placeholders": {
-      "count" :{
+      "count": {
         "example": "1",
         "type": "int"
       }
@@ -820,7 +855,7 @@
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
     "placeholders": {
-      "completed" :{
+      "completed": {
         "type": "int"
       },
       "total": {
@@ -879,5 +914,39 @@
   "loadMessage8": "web.ente.io has a slick uploader",
   "loadMessage9": "We use Xchacha20Poly1305 to safely encrypt your data",
   "language": "Language",
-  "selectLanguage": "Select Language"
+  "selectLanguage": "Select Language",
+  "locationName": "Location name",
+  "addLocation": "Add location",
+  "groupNearbyPhotos": "Group nearby photos",
+  "location": "Location",
+  "kiloMeterUnit": "km",
+  "addLocationButton": "Add",
+  "radius": "Radius",
+  "locationTagFeatureDescription": "A location tag groups all photos that were taken within some radius of a photo",
+  "galleryMemoryLimitInfo": "Up to 1000 memories shown in gallery",
+  "save": "Save",
+  "centerPoint": "Center point",
+  "pickCenterPoint": "Pick center point",
+  "useSelectedPhoto": "Use selected photo", 
+  "edit": "Edit",
+  "deleteLocation": "Delete location",
+  "rotateLeft": "Rotate left",
+  "flip": "Flip",
+  "rotateRight": "Rotate right",
+  "saveCopy": "Save copy",
+  "light": "Light",
+  "color": "Color",
+  "yesDiscardChanges": "Yes, discard changes",
+  "doYouWantToDiscardTheEditsYouHaveMade": "Do you want to discard the edits you have made?",
+  "saving": "Saving...",
+  "editsSaved": "Edits saved",
+  "oopsCouldNotSaveEdits": "Oops, could not save edits",
+  "customRadius": "Custom radius",
+  "@customRadius": {
+    "description": "Custom radius for location tag"
+  },
+  "distanceInKMUnit": "km",
+  "@distanceInKMUnit": {
+    "description": "Unit for distance in km"
+  }
 }

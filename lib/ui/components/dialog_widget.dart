@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/button_result.dart";
@@ -174,6 +175,9 @@ class TextInputDialog extends StatefulWidget {
   final TextCapitalization? textCapitalization;
   final bool alwaysShowSuccessState;
   final bool isPasswordInput;
+  final TextEditingController? textEditingController;
+  final List<TextInputFormatter>? textInputFormatter;
+  final TextInputType? textInputType;
   const TextInputDialog({
     required this.title,
     this.body,
@@ -191,6 +195,9 @@ class TextInputDialog extends StatefulWidget {
     this.showOnlyLoadingState = false,
     this.alwaysShowSuccessState = false,
     this.isPasswordInput = false,
+    this.textEditingController,
+    this.textInputFormatter,
+    this.textInputType,
     super.key,
   });
 
@@ -201,10 +208,28 @@ class TextInputDialog extends StatefulWidget {
 class _TextInputDialogState extends State<TextInputDialog> {
   //the value of this ValueNotifier has no significance
   final _submitNotifier = ValueNotifier(false);
+  late final ValueNotifier<bool> _inputIsEmptyNotifier;
+  late final TextEditingController _textEditingController;
+
+  @override
+  void initState() {
+    _textEditingController =
+        widget.textEditingController ?? TextEditingController();
+    _inputIsEmptyNotifier = widget.initialValue?.isEmpty ?? true
+        ? ValueNotifier(true)
+        : ValueNotifier(false);
+    _textEditingController.addListener(() {
+      if (_textEditingController.text.isEmpty != _inputIsEmptyNotifier.value) {
+        _inputIsEmptyNotifier.value = _textEditingController.text.isEmpty;
+      }
+    });
+    super.initState();
+  }
 
   @override
   void dispose() {
     _submitNotifier.dispose();
+    _inputIsEmptyNotifier.dispose();
     super.dispose();
   }
 
@@ -251,6 +276,9 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 textCapitalization: widget.textCapitalization,
                 alwaysShowSuccessState: widget.alwaysShowSuccessState,
                 isPasswordInput: widget.isPasswordInput,
+                textEditingController: _textEditingController,
+                textInputFormatter: widget.textInputFormatter,
+                textInputType: widget.textInputType,
               ),
             ),
             const SizedBox(height: 36),
@@ -267,12 +295,18 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: ButtonWidget(
-                    buttonSize: ButtonSize.small,
-                    buttonType: ButtonType.neutral,
-                    labelText: widget.submitButtonLabel,
-                    onTap: () async {
-                      _submitNotifier.value = !_submitNotifier.value;
+                  child: ValueListenableBuilder(
+                    valueListenable: _inputIsEmptyNotifier,
+                    builder: (context, bool value, _) {
+                      return ButtonWidget(
+                        buttonSize: ButtonSize.small,
+                        buttonType: ButtonType.neutral,
+                        labelText: widget.submitButtonLabel,
+                        isDisabled: value,
+                        onTap: () async {
+                          _submitNotifier.value = !_submitNotifier.value;
+                        },
+                      );
                     },
                   ),
                 ),
