@@ -286,8 +286,8 @@ export function getNonEmptyPersonalCollections(
         collections,
         personalFiles
     );
-    const personalCollections = nonEmptyCollections
-        .filter((collection) => collection.owner.id === user?.id)
-        .sort((collectionA, collectionB) => collectionA.id - collectionB.id);
+    const personalCollections = nonEmptyCollections.filter(
+        (collection) => collection.owner.id === user?.id
+    );
     return personalCollections;
 }
