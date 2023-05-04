@@ -6812,6 +6812,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Today`
+  String get dayToday {
+    return Intl.message(
+      'Today',
+      name: 'dayToday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yesterday`
+  String get dayYesterday {
+    return Intl.message(
+      'Yesterday',
+      name: 'dayYesterday',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

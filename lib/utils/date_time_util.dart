@@ -1,5 +1,7 @@
+import "package:flutter/cupertino.dart";
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import "package:photos/generated/l10n.dart";
 
 const Set<int> monthWith31Days = {1, 3, 5, 7, 8, 10, 12};
 const Set<int> monthWith30Days = {4, 6, 9, 11};
@@ -230,15 +232,15 @@ bool isLeapYear(DateTime dateTime) {
   }
 }
 
-String getDayTitle(int timestamp) {
+String getDayTitle(BuildContext context, int timestamp) {
   final date = DateTime.fromMicrosecondsSinceEpoch(timestamp);
   final now = DateTime.now();
   var title = getDayAndMonth(date);
   if (date.year == now.year && date.month == now.month) {
     if (date.day == now.day) {
-      title = "Today";
+      title = S.of(context).dayToday;
     } else if (date.day == now.day - 1) {
-      title = "Yesterday";
+      title = S.of(context).dayYesterday;
     }
   }
   if (date.year != DateTime.now().year) {

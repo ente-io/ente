@@ -22,7 +22,6 @@ import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import "package:photos/ui/viewer/gallery/component/day_widget.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
-import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -114,7 +113,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         _logger.info(
           filesUpdatedThisDay.length.toString() +
               " files were updated due to ${event.reason} on " +
-              getDayTitle(galleryDate.microsecondsSinceEpoch),
+              DateTime.fromMicrosecondsSinceEpoch(
+                galleryDate.microsecondsSinceEpoch,
+              ).toIso8601String(),
         );
       }
       if (event.type == EventType.addedOrUpdated) {
