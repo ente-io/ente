@@ -27,7 +27,8 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
       leadingIcon: Icons.calendar_today_outlined,
       title: DateFormat.yMMMEd(Localizations.localeOf(context).languageCode)
           .format(
-              DateTime.fromMicrosecondsSinceEpoch(widget.file.creationTime!)),
+        DateTime.fromMicrosecondsSinceEpoch(widget.file.creationTime!),
+      ),
       subtitleSection: Future.value([
         Text(
           getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
