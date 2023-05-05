@@ -10,10 +10,6 @@ export interface AppUpdateInfo {
 export interface ElectronAPIs {
     exists: (path: string) => boolean;
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
-    checkExistsAndRename: (
-        oldDirPath: string,
-        newDirPath: string
-    ) => Promise<void>;
     saveStreamToDisk: (
         path: string,
         fileStream: ReadableStream<any>
@@ -92,4 +88,5 @@ export interface ElectronAPIs {
     openDirectory: (dirPath: string) => Promise<void>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
     deleteFolder: (path: string) => Promise<void>;
+    rename: (oldPath: string, newPath: string) => Promise<void>;
 }

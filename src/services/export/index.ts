@@ -464,10 +464,6 @@ class ExportService {
         try {
             for (const collection of renamedCollections) {
                 try {
-                    addLocalLog(
-                        () =>
-                            `renaming collection ${collection.name} with id ${collection.id}`
-                    );
                     const oldCollectionExportName =
                         collectionIDExportNameMap.get(collection.id);
                     const oldCollectionExportPath = getCollectionExportPath(
@@ -480,12 +476,17 @@ class ExportService {
                             exportFolder,
                             collection.name
                         );
+                    addLocalLog(
+                        () =>
+                            `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName}
+                         `
+                    );
                     const newCollectionExportPath = getCollectionExportPath(
                         exportFolder,
                         newCollectionExportName
                     );
 
-                    await this.electronAPIs.checkExistsAndRename(
+                    await this.electronAPIs.rename(
                         oldCollectionExportPath,
                         newCollectionExportPath
                     );
@@ -924,33 +925,6 @@ class ExportService {
 
         return collectionExportName;
     }
-    async renameCollectionExports(
-        renamedCollections: Collection[],
-        exportFolder: string,
-        collectionIDPathMap: Map<number, string>
-    ) {
-        for (const collection of renamedCollections) {
-            const oldCollectionExportPath = collectionIDPathMap.get(
-                collection.id
-            );
-
-            const newCollectionExportPath = getUniqueCollectionExportName(
-                exportFolder,
-                collection.name
-            );
-            await this.electronAPIs.checkExistsAndRename(
-                oldCollectionExportPath,
-                newCollectionExportPath
-            );
-
-            await this.addCollectionExportedRecord(
-                exportFolder,
-                collection.id,
-                newCollectionExportPath
-            );
-            collectionIDPathMap.set(collection.id, newCollectionExportPath);
-        }
-    }
 
     async downloadAndSave(
         collectionExportPath: string,
@@ -1076,8 +1050,8 @@ class ExportService {
         return this.electronAPIs.exists(path);
     };
 
-    checkExistsAndRename = (oldPath: string, newPath: string) => {
-        return this.electronAPIs.checkExistsAndRename(oldPath, newPath);
+    rename = (oldPath: string, newPath: string) => {
+        return this.electronAPIs.rename(oldPath, newPath);
     };
 
     checkExistsAndCreateDir = (path: string) => {

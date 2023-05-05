@@ -192,7 +192,10 @@ async function migrateCollectionFolders(
             collection.name
         );
         collectionIDPathMap.set(collection.id, newCollectionExportPath);
-        await exportService.checkExistsAndRename(
+        if (!exportService.exists(oldCollectionExportPath)) {
+            continue;
+        }
+        await exportService.rename(
             oldCollectionExportPath,
             newCollectionExportPath
         );
@@ -235,11 +238,11 @@ async function migrateFiles(
             collectionIDPathMap.get(file.collectionID),
             newFileSaveName
         );
-        await exportService.checkExistsAndRename(
-            oldFileSavePath,
-            newFileSavePath
-        );
-        await exportService.checkExistsAndRename(
+        if (!exportService.exists(oldFileSavePath)) {
+            continue;
+        }
+        await exportService.rename(oldFileSavePath, newFileSavePath);
+        await exportService.rename(
             oldFileMetadataSavePath,
             newFileMetadataSavePath
         );
