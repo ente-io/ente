@@ -76,8 +76,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m13(maxValue) =>
       "Lorsqu\'elle est définie au maximum (${maxValue}), la limite de l\'appareil sera assouplie pour permettre des pointes temporaires d\'un grand nombre de téléspectateurs.";
 
-  static String m14(count) =>
-      "${Intl.plural(count, one: '${count} mémoire', other: '${count} souvenirs')}";
+  static String m14(count, formattedCount) =>
+      "${Intl.plural(count, one: '${formattedCount} mémoire', other: '${formattedCount} souvenirs')}";
 
   static String m57(count) =>
       "${Intl.plural(count, one: 'Déplacez l\'objet', other: 'Déplacez des objets')}";

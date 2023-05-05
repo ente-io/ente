@@ -65,8 +65,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m13(maxValue) =>
       "Wenn auf den Höchstwert von ${maxValue} gesetzt, dann wird das Limit gelockert um potenzielle Höchstlasten unterstützen zu können.";
 
-  static String m14(count) =>
-      "${Intl.plural(count, zero: 'keine Erinnerungsstücke', one: '${count} Erinnerung', other: '${count} Erinnerungsstücke')}";
+  static String m14(count, formattedCount) =>
+      "${Intl.plural(count, zero: 'keine Erinnerungsstücke', one: '${formattedCount} Erinnerung', other: '${formattedCount} Erinnerungsstücke')}";
 
   static String m15(passwordStrengthValue) =>
       "Passwortstärke: ${passwordStrengthValue}";

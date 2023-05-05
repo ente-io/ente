@@ -89,8 +89,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m13(maxValue) =>
       "当设置为最大值 (${maxValue}) 时，设备限制将放宽以允许大量查看者查看的临时高峰。";
 
-  static String m14(count) =>
-      "${Intl.plural(count, zero: '没有回忆', one: '${count} 个回忆', other: '${count} 个回忆')}";
+  static String m14(count, formattedCount) =>
+      "${Intl.plural(count, zero: '没有回忆', one: '${formattedCount} 个回忆', other: '${formattedCount} 个回忆')}";
 
   static String m57(count) =>
       "${Intl.plural(count, one: '移动一个项目', other: '移动一些项目')}";

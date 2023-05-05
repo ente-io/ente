@@ -353,7 +353,7 @@
   "deleteFromBoth": "同时从两者中删除",
   "newAlbum": "新建相册",
   "albums": "相册",
-  "memoryCount": "{count, plural, zero{没有回忆} one{{count} 个回忆} other{{count} 个回忆}}",
+  "memoryCount": "{count, plural, zero{没有回忆} one{{formattedCount} 个回忆} other{{formattedCount} 个回忆}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",

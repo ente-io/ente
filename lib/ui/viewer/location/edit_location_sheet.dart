@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:intl/intl.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
@@ -195,7 +196,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  S.of(context).memoryCount(value),
+                                  S.of(context).memoryCount(value,  NumberFormat().format(value)),
                                   style: textTheme.body,
                                 ),
                                 if (value > 1000)

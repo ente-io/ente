@@ -101,8 +101,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m13(maxValue) =>
       "Cuando se establece al máximo (${maxValue}), el límite del dispositivo se relajará para permitir picos temporales de un gran número de espectadores.";
 
-  static String m14(count) =>
-      "${Intl.plural(count, zero: 'no recuerdos', one: '${count} recuerdo', other: '${count} recuerdos')}\n";
+  static String m14(count, formattedCount) =>
+      "${Intl.plural(count, zero: 'no recuerdos', one: '${formattedCount} recuerdo', other: '${formattedCount} recuerdos')}\n";
 
   static String m57(count) =>
       "${Intl.plural(count, one: 'Mover elemento', other: 'Mover elementos')}";

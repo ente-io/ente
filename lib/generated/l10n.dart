@@ -2772,16 +2772,16 @@ class S {
     );
   }
 
-  /// `{count, plural, zero{no memories} one{{count} memory} other{{count} memories}}`
-  String memoryCount(int count) {
+  /// `{count, plural, zero{no memories} one{{formattedCount} memory} other{{formattedCount} memories}}`
+  String memoryCount(int count, String formattedCount) {
     return Intl.plural(
       count,
       zero: 'no memories',
-      one: '$count memory',
-      other: '$count memories',
+      one: '$formattedCount memory',
+      other: '$formattedCount memories',
       name: 'memoryCount',
       desc: 'The text to display the number of memories',
-      args: [count],
+      args: [count, formattedCount],
     );
   }
 
