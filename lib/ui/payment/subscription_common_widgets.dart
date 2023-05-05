@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:intl/intl.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/subscription.dart';
@@ -7,7 +8,6 @@ import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import 'package:photos/ui/payment/billing_questions_widget.dart';
 import 'package:photos/utils/data_util.dart';
-import 'package:photos/utils/date_time_util.dart';
 
 class SubscriptionHeaderWidget extends StatefulWidget {
   final bool? isOnboarding;
@@ -94,9 +94,11 @@ class ValidityWidget extends StatelessWidget {
     if (currentSubscription == null) {
       return const SizedBox.shrink();
     }
-    final endDate = getDateAndMonthAndYear(
+    final endDate =
+        DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(
       DateTime.fromMicrosecondsSinceEpoch(currentSubscription!.expiryTime),
     );
+
     var message = S.of(context).renewsOn(endDate);
     if (currentSubscription!.productID == freeProductID) {
       message = S.of(context).freeTrialValidTill(endDate);

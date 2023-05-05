@@ -947,5 +947,7 @@
   "distanceInKMUnit": "km",
   "@distanceInKMUnit": {
     "description": "Unit for distance in km"
-  }
+  },
+  "dayToday": "Hoy",
+  "dayYesterday": "Ayer"
 }
