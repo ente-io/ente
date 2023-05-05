@@ -6894,6 +6894,16 @@ class S {
       args: [freeAmount, storageUnit],
     );
   }
+
+  /// `Version: {versionValue}`
+  String appVersion(Object versionValue) {
+    return Intl.message(
+      'Version: $versionValue',
+      name: 'appVersion',
+      desc: '',
+      args: [versionValue],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import "package:photos/generated/l10n.dart";
 
 class AppVersionWidget extends StatefulWidget {
   const AppVersionWidget({
@@ -40,7 +41,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
             return Padding(
               padding: const EdgeInsets.all(20),
               child: Text(
-                "Version: " + snapshot.data!,
+                S.of(context).appVersion(snapshot.data!),
                 style: Theme.of(context).textTheme.caption,
               ),
             );
