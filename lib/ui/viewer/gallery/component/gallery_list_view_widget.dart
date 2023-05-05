@@ -7,7 +7,7 @@ import "package:photos/models/file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/huge_listview/huge_listview.dart";
-import 'package:photos/ui/huge_listview/lazy_loading_gallery.dart';
+import "package:photos/ui/viewer/gallery/component/lazy_loading_gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/local_settings.dart";
