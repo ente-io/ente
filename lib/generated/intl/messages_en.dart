@@ -77,20 +77,23 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m9(storageAmountInGB) =>
       "${storageAmountInGB} GB each time someone signs up for a paid plan and applies your code";
 
+  static String m51(freeAmount, storageUnit) =>
+      "${freeAmount} ${storageUnit} free";
+
   static String m10(endDate) => "Free trial valid till ${endDate}";
 
-  static String m51(count) =>
+  static String m52(count) =>
       "You can still access ${Intl.plural(count, one: 'it', other: 'them')} on ente as long as you have an active subscription";
 
-  static String m52(sizeInMBorGB) => "Free up ${sizeInMBorGB}";
+  static String m53(sizeInMBorGB) => "Free up ${sizeInMBorGB}";
 
-  static String m53(count, formattedSize) =>
+  static String m54(count, formattedSize) =>
       "${Intl.plural(count, one: 'It can be deleted from the device to free up ${formattedSize}', other: 'They can be deleted from the device to free up ${formattedSize}')}";
 
   static String m11(count) =>
       "${Intl.plural(count, one: '${count} item', other: '${count} items')}";
 
-  static String m54(count) => "${count} selected";
+  static String m55(count) => "${count} selected";
 
   static String m12(expiryTime) => "Link will expire on ${expiryTime}";
 
@@ -100,10 +103,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m14(count) =>
       "${Intl.plural(count, zero: 'no memories', one: '${count} memory', other: '${count} memories')}";
 
-  static String m55(count) =>
+  static String m56(count) =>
       "${Intl.plural(count, one: 'Move item', other: 'Move items')}";
 
-  static String m56(albumName) => "Moved successfully to ${albumName}";
+  static String m57(albumName) => "Moved successfully to ${albumName}";
 
   static String m15(passwordStrengthValue) =>
       "Password strength: ${passwordStrengthValue}";
@@ -114,9 +117,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m17(reason) =>
       "Unfortunately your payment failed due to ${reason}";
 
-  static String m57(toEmail) => "Please email us at ${toEmail}";
+  static String m58(toEmail) => "Please email us at ${toEmail}";
 
-  static String m58(toEmail) => "Please send the logs to \n${toEmail}";
+  static String m59(toEmail) => "Please send the logs to \n${toEmail}";
 
   static String m18(storeName) => "Rate us on ${storeName}";
 
@@ -157,8 +160,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m32(storageAmountInGB) => "${storageAmountInGB} GB";
 
-  static String m59(usedAmount, userUnit, totalAmount, totalAmountUnit) =>
-      "${usedAmount} ${userUnit} of ${totalAmount} ${totalAmountUnit} used";
+  static String m60(
+          usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
+      "${usedAmount} ${usedStorageUnit} of ${totalAmount} ${totalStorageUnit} used";
 
   static String m33(id) =>
       "Your ${id} is already linked to another ente account.\nIf you would like to use your ${id} with this account, please contact our support\'\'";
@@ -596,16 +600,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeStorageClaimed":
             MessageLookupByLibrary.simpleMessage("Free storage claimed"),
         "freeStorageOnReferralSuccess": m9,
+        "freeStorageSpace": m51,
         "freeStorageUsable":
             MessageLookupByLibrary.simpleMessage("Free storage usable"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("Free trial"),
         "freeTrialValidTill": m10,
-        "freeUpAccessPostDelete": m51,
-        "freeUpAmount": m52,
+        "freeUpAccessPostDelete": m52,
+        "freeUpAmount": m53,
         "freeUpDeviceSpace":
             MessageLookupByLibrary.simpleMessage("Free up device space"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Free up space"),
-        "freeUpSpaceSaving": m53,
+        "freeUpSpaceSaving": m54,
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Up to 1000 memories shown in gallery"),
         "general": MessageLookupByLibrary.simpleMessage("General"),
@@ -650,7 +655,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team."),
         "itemCount": m11,
-        "itemSelectedCount": m54,
+        "itemSelectedCount": m55,
         "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion":
             MessageLookupByLibrary.simpleMessage(
                 "Items show the number of days remaining before permanent deletion"),
@@ -740,9 +745,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mobile, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
         "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
-        "moveItem": m55,
+        "moveItem": m56,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("Move to album"),
-        "movedSuccessfullyTo": m56,
+        "movedSuccessfullyTo": m57,
         "movedToTrash": MessageLookupByLibrary.simpleMessage("Moved to trash"),
         "movingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Moving files to album..."),
@@ -821,12 +826,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseContactSupportIfTheProblemPersists":
             MessageLookupByLibrary.simpleMessage(
                 "Please contact support if the problem persists"),
-        "pleaseEmailUsAt": m57,
+        "pleaseEmailUsAt": m58,
         "pleaseGrantPermissions":
             MessageLookupByLibrary.simpleMessage("Please grant permissions"),
         "pleaseLoginAgain":
             MessageLookupByLibrary.simpleMessage("Please login again"),
-        "pleaseSendTheLogsTo": m58,
+        "pleaseSendTheLogsTo": m59,
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Please try again"),
         "pleaseVerifyTheCodeYouHaveEntered":
@@ -1062,7 +1067,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageInGB": m32,
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("Storage limit exceeded"),
-        "storageUsageInfo": m59,
+        "storageUsageInfo": m60,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Strong"),
         "subAlreadyLinkedErrMessage": m33,
         "subWillBeCancelledOn": m34,

@@ -69,7 +69,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m11(count) =>
       "${Intl.plural(count, one: '${count} objet', other: '${count} objets')}";
 
-  static String m54(count) => "${count} sélectionné";
+  static String m55(count) => "${count} sélectionné";
 
   static String m12(expiryTime) => "Le lien expirera le ${expiryTime}";
 
@@ -79,17 +79,17 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m14(count) =>
       "${Intl.plural(count, one: '${count} mémoire', other: '${count} souvenirs')}";
 
-  static String m55(count) =>
+  static String m56(count) =>
       "${Intl.plural(count, one: 'Déplacez l\'objet', other: 'Déplacez des objets')}";
 
-  static String m56(albumName) => "Déplacé avec succès vers ${albumName}";
+  static String m57(albumName) => "Déplacé avec succès vers ${albumName}";
 
   static String m15(passwordStrengthValue) =>
       "Puissance du mot de passe : ${passwordStrengthValue}";
 
-  static String m57(toEmail) => "Merci de nous envoyer un e-mail à ${toEmail}";
+  static String m58(toEmail) => "Merci de nous envoyer un e-mail à ${toEmail}";
 
-  static String m58(toEmail) => "Envoyez les logs à ${toEmail}";
+  static String m59(toEmail) => "Envoyez les logs à ${toEmail}";
 
   static String m18(storeName) => "Notez-nous sur ${storeName}";
 
@@ -552,7 +552,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Il semble qu\'une erreur s\'est produite. Veuillez réessayer après un certain temps. Si l\'erreur persiste, veuillez contacter notre équipe d\'assistance."),
         "itemCount": m11,
-        "itemSelectedCount": m54,
+        "itemSelectedCount": m55,
         "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion":
             MessageLookupByLibrary.simpleMessage(
                 "Les éléments montrent le nombre de jours restants avant la suppression définitive"),
@@ -615,10 +615,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "merchandise": MessageLookupByLibrary.simpleMessage("Marchandise"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Modéré"),
         "monthly": MessageLookupByLibrary.simpleMessage("Mensuel"),
-        "moveItem": m55,
+        "moveItem": m56,
         "moveToAlbum":
             MessageLookupByLibrary.simpleMessage("Déplacer vers l\'album"),
-        "movedSuccessfullyTo": m56,
+        "movedSuccessfullyTo": m57,
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Déplacé dans la corbeille"),
         "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
@@ -672,8 +672,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Les photos ajoutées par vous seront retirées de l\'album"),
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("Abonnement au PlayStore"),
-        "pleaseEmailUsAt": m57,
-        "pleaseSendTheLogsTo": m58,
+        "pleaseEmailUsAt": m58,
+        "pleaseSendTheLogsTo": m59,
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Veuillez réessayer"),
         "pleaseWait":

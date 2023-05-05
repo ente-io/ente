@@ -78,18 +78,18 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(endDate) => "Gratis proefversie geldig tot ${endDate}";
 
-  static String m51(count) =>
+  static String m52(count) =>
       "U heeft nog steeds toegang tot ${Intl.plural(count, one: 'het', other: 'ze')} op ente zolang u een actief abonnement heeft";
 
-  static String m52(sizeInMBorGB) => "Maak ${sizeInMBorGB} vrij";
+  static String m53(sizeInMBorGB) => "Maak ${sizeInMBorGB} vrij";
 
-  static String m53(count, formattedSize) =>
+  static String m54(count, formattedSize) =>
       "${Intl.plural(count, one: 'Het kan verwijderd worden van het apparaat om ${formattedSize} vrij te maken', other: 'Ze kunnen verwijderd worden van het apparaat om ${formattedSize} vrij te maken')}";
 
   static String m11(count) =>
       "${Intl.plural(count, one: '${count} item', other: '${count} items')}";
 
-  static String m54(count) => "${count} geselecteerd";
+  static String m55(count) => "${count} geselecteerd";
 
   static String m12(expiryTime) => "Link vervalt op ${expiryTime}";
 
@@ -99,10 +99,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m14(count) =>
       "${Intl.plural(count, zero: 'geen herinneringen', one: '${count} herinnering', other: '${count} herinneringen')}";
 
-  static String m55(count) =>
+  static String m56(count) =>
       "${Intl.plural(count, one: 'Bestand verplaatsen', other: 'Bestanden verplaatsen')}";
 
-  static String m56(albumName) => "Succesvol verplaatst naar ${albumName}";
+  static String m57(albumName) => "Succesvol verplaatst naar ${albumName}";
 
   static String m15(passwordStrengthValue) =>
       "Wachtwoord sterkte: ${passwordStrengthValue}";
@@ -113,9 +113,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m17(reason) =>
       "Helaas is uw betaling mislukt vanwege ${reason}";
 
-  static String m57(toEmail) => "Stuur ons een e-mail op ${toEmail}";
+  static String m58(toEmail) => "Stuur ons een e-mail op ${toEmail}";
 
-  static String m58(toEmail) =>
+  static String m59(toEmail) =>
       "Verstuur de logboeken alstublieft naar ${toEmail}";
 
   static String m18(storeName) => "Beoordeel ons op ${storeName}";
@@ -613,12 +613,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Gratis opslag bruikbaar"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("Gratis proefversie"),
         "freeTrialValidTill": m10,
-        "freeUpAccessPostDelete": m51,
-        "freeUpAmount": m52,
+        "freeUpAccessPostDelete": m52,
+        "freeUpAmount": m53,
         "freeUpDeviceSpace":
             MessageLookupByLibrary.simpleMessage("Apparaatruimte vrijmaken"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Ruimte vrijmaken"),
-        "freeUpSpaceSaving": m53,
+        "freeUpSpaceSaving": m54,
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Tot 1000 herinneringen getoond in de galerij"),
         "general": MessageLookupByLibrary.simpleMessage("Algemeen"),
@@ -664,7 +664,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Het lijkt erop dat er iets fout is gegaan. Probeer het later opnieuw. Als de fout zich blijft voordoen, neem dan contact op met ons supportteam."),
         "itemCount": m11,
-        "itemSelectedCount": m54,
+        "itemSelectedCount": m55,
         "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion":
             MessageLookupByLibrary.simpleMessage(
                 "Bestanden tonen het aantal resterende dagen voordat ze permanent worden verwijderd"),
@@ -757,10 +757,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mobiel, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Matig"),
         "monthly": MessageLookupByLibrary.simpleMessage("Maandelijks"),
-        "moveItem": m55,
+        "moveItem": m56,
         "moveToAlbum":
             MessageLookupByLibrary.simpleMessage("Verplaats naar album"),
-        "movedSuccessfullyTo": m56,
+        "movedSuccessfullyTo": m57,
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Naar prullenbak verplaatst"),
         "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
@@ -844,12 +844,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseContactSupportIfTheProblemPersists":
             MessageLookupByLibrary.simpleMessage(
                 "Neem contact op met klantenservice als het probleem aanhoudt"),
-        "pleaseEmailUsAt": m57,
+        "pleaseEmailUsAt": m58,
         "pleaseGrantPermissions": MessageLookupByLibrary.simpleMessage(
             "Geef alstublieft toestemming"),
         "pleaseLoginAgain":
             MessageLookupByLibrary.simpleMessage("Log opnieuw in"),
-        "pleaseSendTheLogsTo": m58,
+        "pleaseSendTheLogsTo": m59,
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Probeer het nog eens"),
         "pleaseVerifyTheCodeYouHaveEntered":

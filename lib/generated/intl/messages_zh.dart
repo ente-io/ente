@@ -71,18 +71,18 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(endDate) => "免费试用有效期至 ${endDate}";
 
-  static String m51(count) =>
+  static String m52(count) =>
       "只要您有有效的订阅，您仍然可以在 ente 上访问 ${Intl.plural(count, one: 'it', other: 'them')}";
 
-  static String m52(sizeInMBorGB) => "释放 ${sizeInMBorGB}";
+  static String m53(sizeInMBorGB) => "释放 ${sizeInMBorGB}";
 
-  static String m53(count, formattedSize) =>
+  static String m54(count, formattedSize) =>
       "${Intl.plural(count, one: '它可以从设备中删除以释放 ${formattedSize}', other: '它们可以从设备中删除以释放 ${formattedSize}')}";
 
   static String m11(count) =>
       "${Intl.plural(count, one: '${count} 个项目', other: '${count} 个项目')}";
 
-  static String m54(count) => "已选择 ${count} 个";
+  static String m55(count) => "已选择 ${count} 个";
 
   static String m12(expiryTime) => "链接将在 ${expiryTime} 过期";
 
@@ -92,10 +92,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m14(count) =>
       "${Intl.plural(count, zero: '没有回忆', one: '${count} 个回忆', other: '${count} 个回忆')}";
 
-  static String m55(count) =>
+  static String m56(count) =>
       "${Intl.plural(count, one: '移动一个项目', other: '移动一些项目')}";
 
-  static String m56(albumName) => "成功移动到 ${albumName}";
+  static String m57(albumName) => "成功移动到 ${albumName}";
 
   static String m15(passwordStrengthValue) => "密码强度： ${passwordStrengthValue}";
 
@@ -103,9 +103,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m17(reason) => "很抱歉，您的支付因 ${reason} 而失败";
 
-  static String m57(toEmail) => "请给我们发送电子邮件至 ${toEmail}";
+  static String m58(toEmail) => "请给我们发送电子邮件至 ${toEmail}";
 
-  static String m58(toEmail) => "请将日志发送至 \n${toEmail}";
+  static String m59(toEmail) => "请将日志发送至 \n${toEmail}";
 
   static String m18(storeName) => "在 ${storeName} 上给我们评分";
 
@@ -496,11 +496,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeStorageUsable": MessageLookupByLibrary.simpleMessage("可用的免费存储"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("免费试用"),
         "freeTrialValidTill": m10,
-        "freeUpAccessPostDelete": m51,
-        "freeUpAmount": m52,
+        "freeUpAccessPostDelete": m52,
+        "freeUpAmount": m53,
         "freeUpDeviceSpace": MessageLookupByLibrary.simpleMessage("释放设备空间"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("释放空间"),
-        "freeUpSpaceSaving": m53,
+        "freeUpSpaceSaving": m54,
         "galleryMemoryLimitInfo":
             MessageLookupByLibrary.simpleMessage("在图库中显示最多1000个回忆"),
         "general": MessageLookupByLibrary.simpleMessage("通用"),
@@ -539,7 +539,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "看起来出了点问题。 请稍后重试。 如果错误仍然存在，请联系我们的支持团队。"),
         "itemCount": m11,
-        "itemSelectedCount": m54,
+        "itemSelectedCount": m55,
         "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion":
             MessageLookupByLibrary.simpleMessage("项目显示永久删除前剩余的天数"),
         "itemsWillBeRemovedFromAlbum":
@@ -619,9 +619,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("移动端, 网页端, 桌面端"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("中等"),
         "monthly": MessageLookupByLibrary.simpleMessage("每月"),
-        "moveItem": m55,
+        "moveItem": m56,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("移动到相册"),
-        "movedSuccessfullyTo": m56,
+        "movedSuccessfullyTo": m57,
         "movedToTrash": MessageLookupByLibrary.simpleMessage("已移至回收站"),
         "movingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("正在将文件移动到相册..."),
@@ -689,10 +689,10 @@ class MessageLookup extends MessageLookupByLibrary {
                 "请用英语联系 support@ente.io ，我们将乐意提供帮助！"),
         "pleaseContactSupportIfTheProblemPersists":
             MessageLookupByLibrary.simpleMessage("如果问题仍然存在，请联系支持"),
-        "pleaseEmailUsAt": m57,
+        "pleaseEmailUsAt": m58,
         "pleaseGrantPermissions": MessageLookupByLibrary.simpleMessage("请授予权限"),
         "pleaseLoginAgain": MessageLookupByLibrary.simpleMessage("请重新登录"),
-        "pleaseSendTheLogsTo": m58,
+        "pleaseSendTheLogsTo": m59,
         "pleaseTryAgain": MessageLookupByLibrary.simpleMessage("请重试"),
         "pleaseVerifyTheCodeYouHaveEntered":
             MessageLookupByLibrary.simpleMessage("请验证您输入的代码"),

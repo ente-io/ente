@@ -138,6 +138,21 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
 
     final usedStorageInTB = roundGBsToTBs(usedStorageInGB);
     final totalStorageInTB = roundGBsToTBs(totalStorageInGB);
+    late String freeSpace, freeSpaceUnit;
+
+// Determine the appropriate free space and units
+    if (shouldShowFreeSpaceInTBs) {
+      freeSpace =
+          _roundedFreeSpace(totalStorageInTB, usedStorageInTB).toString();
+      freeSpaceUnit = "TB";
+    } else if (shouldShowFreeSpaceInMBs) {
+      freeSpace = max(0, convertBytesToMBs(freeStorageInBytes)).toString();
+      freeSpaceUnit = "MB";
+    } else {
+      freeSpace =
+          _roundedFreeSpace(totalStorageInGB, usedStorageInGB).toString();
+      freeSpaceUnit = "GB";
+    }
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -254,25 +269,11 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                           ],
                         )
                       : const SizedBox.shrink(),
-                  RichText(
-                    text: TextSpan(
-                      style: getEnteTextTheme(context)
-                          .mini
-                          .copyWith(color: textFaintDark),
-                      children: [
-                        TextSpan(
-                          text:
-                              "${shouldShowFreeSpaceInMBs ? max(0, convertBytesToMBs(freeStorageInBytes)) : _roundedFreeSpace(totalStorageInGB, usedStorageInGB)}",
-                        ),
-                        TextSpan(
-                          text: shouldShowFreeSpaceInTBs
-                              ? " TB free"
-                              : shouldShowFreeSpaceInMBs
-                                  ? " MB free"
-                                  : " GB free",
-                        )
-                      ],
-                    ),
+                  Text(
+                    S.of(context).freeStorageSpace(freeSpace, freeSpaceUnit),
+                    style: getEnteTextTheme(context)
+                        .mini
+                        .copyWith(color: textFaintDark),
                   ),
                 ],
               ),

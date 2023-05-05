@@ -6874,14 +6874,24 @@ class S {
     );
   }
 
-  /// `{usedAmount} {userUnit} of {totalAmount} {totalAmountUnit} used`
-  String storageUsageInfo(Object usedAmount, Object userUnit,
-      Object totalAmount, Object totalAmountUnit) {
+  /// `{usedAmount} {usedStorageUnit} of {totalAmount} {totalStorageUnit} used`
+  String storageUsageInfo(Object usedAmount, Object usedStorageUnit,
+      Object totalAmount, Object totalStorageUnit) {
     return Intl.message(
-      '$usedAmount $userUnit of $totalAmount $totalAmountUnit used',
+      '$usedAmount $usedStorageUnit of $totalAmount $totalStorageUnit used',
       name: 'storageUsageInfo',
       desc: 'Example: 1.2 GB of 2 GB used or 100 GB or 2TB used',
-      args: [usedAmount, userUnit, totalAmount, totalAmountUnit],
+      args: [usedAmount, usedStorageUnit, totalAmount, totalStorageUnit],
+    );
+  }
+
+  /// `{freeAmount} {storageUnit} free`
+  String freeStorageSpace(Object freeAmount, Object storageUnit) {
+    return Intl.message(
+      '$freeAmount $storageUnit free',
+      name: 'freeStorageSpace',
+      desc: '',
+      args: [freeAmount, storageUnit],
     );
   }
 }
