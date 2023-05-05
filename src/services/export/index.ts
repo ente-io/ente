@@ -862,9 +862,7 @@ class ExportService {
         const response = this.exportRecordUpdater.queueUpRequest(() =>
             this.updateExportRecordHelper(folder, newData)
         );
-        const updatedExportRecord = await response.promise;
-        this.exportRecord = updatedExportRecord;
-        return updatedExportRecord;
+        return response.promise;
     }
 
     async updateExportRecordHelper(
@@ -881,6 +879,7 @@ class ExportService {
                 `${folder}/${EXPORT_RECORD_FILE_NAME}`,
                 JSON.stringify(newRecord, null, 2)
             );
+            this.exportRecord = newRecord;
             return newRecord;
         } catch (e) {
             logError(e, 'error updating Export Record');
