@@ -250,7 +250,6 @@ export async function moveFile(
         throw new Error('File does not exist');
     }
     if (existsSync(destinationPath)) {
-        // TODO: should we overwrite or ignore as no-op or throw error?
         throw new Error('Destination file already exists');
     }
     // check if destination folder exists
@@ -265,5 +264,10 @@ export async function deleteFolder(folderPath: string): Promise<void> {
     if (!existsSync(folderPath)) {
         return;
     }
-    fs.rmSync(folderPath, { force: true, recursive: true });
+    // check if folder is empty
+    const files = await fs.readdir(folderPath);
+    if (files.length > 0) {
+        throw new Error('Folder is not empty');
+    }
+    await fs.rmdir(folderPath);
 }
