@@ -6,7 +6,6 @@ import 'package:bip39/bip39.dart' as bip39;
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/core/event_bus.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:ente_auth/events/signed_in_event.dart';
 import 'package:ente_auth/events/signed_out_event.dart';
 import 'package:ente_auth/models/key_attributes.dart';

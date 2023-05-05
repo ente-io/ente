@@ -1,7 +1,6 @@
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
