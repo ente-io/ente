@@ -6,6 +6,7 @@ import {
     ExportRecord,
     FileExportNames,
     ExportRecordV0,
+    CollectionExportNames,
 } from 'types/export';
 import { EnteFile } from 'types/file';
 import { User } from 'types/user';
@@ -150,15 +151,25 @@ async function migrationV2ToV3(
         getPersonalFiles(localFiles, user)
     );
 
-    await updateExportedCollectionPathsToCollectionExportNames(
-        exportDir,
-        exportRecord
-    );
+    const collectionExportNames =
+        await getCollectionExportNamesFromExportedCollectionPaths(
+            exportDir,
+            exportRecord
+        );
 
-    await updateExportedFilesToExportedFilePathsProperty(
+    const fileExportNames = await getFileExportNamesFromExportedFiles(
         exportRecord,
         getExportedFiles(personalFiles, exportRecord)
     );
+
+    exportRecord.exportedCollectionPaths = undefined;
+    exportRecord.exportedFiles = undefined;
+    const updatedExportRecord: ExportRecord = {
+        ...exportRecord,
+        fileExportNames,
+        collectionExportNames,
+    };
+    await exportService.updateExportRecord(updatedExportRecord);
 }
 
 /*
@@ -250,10 +261,10 @@ async function removeDeprecatedExportRecordProperties(
     await exportService.updateExportRecord(exportRecord);
 }
 
-async function updateExportedCollectionPathsToCollectionExportNames(
+async function getCollectionExportNamesFromExportedCollectionPaths(
     exportDir: string,
     exportRecord: ExportRecordV2
-) {
+): Promise<CollectionExportNames> {
     if (!exportRecord.exportedCollectionPaths) {
         return;
     }
@@ -262,13 +273,7 @@ async function updateExportedCollectionPathsToCollectionExportNames(
             ([key, value]) => [key, value.replace(exportDir, '').slice(1)]
         )
     );
-    exportRecord.exportedCollectionPaths = undefined;
-
-    const updatedExportRecord: Partial<ExportRecord> = {
-        ...exportRecord,
-        collectionExportNames: exportedCollectionNames,
-    };
-    return await exportService.updateExportRecord(updatedExportRecord);
+    return exportedCollectionNames;
 }
 
 /* 
@@ -278,10 +283,10 @@ async function updateExportedCollectionPathsToCollectionExportNames(
     and update the exportedFilePaths property of the exportRecord
     This is based on the assumption new files have higher ids than the older ones
 */
-async function updateExportedFilesToExportedFilePathsProperty(
+async function getFileExportNamesFromExportedFiles(
     exportRecord: ExportRecordV2,
     exportedFiles: EnteFile[]
-) {
+): Promise<FileExportNames> {
     if (!exportedFiles.length) {
         return;
     }
@@ -340,13 +345,7 @@ async function updateExportedFilesToExportedFilePathsProperty(
             [getExportRecordFileUID(file)]: fileExportName,
         };
     }
-    exportRecord.exportedFiles = undefined;
-    const updatedExportRecord: Partial<ExportRecord> = {
-        ...exportRecord,
-        fileExportNames: exportedFileNames,
-    };
-
-    await exportService.updateExportRecord(updatedExportRecord);
+    return exportedFileNames;
 }
 
 async function addCollectionExportedRecordV1(

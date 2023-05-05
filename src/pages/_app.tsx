@@ -257,9 +257,6 @@ export default function App(props) {
             try {
                 addLogLine('init export');
                 const exportSettings = exportService.getExportSettings();
-                if (exportSettings?.continuousExport) {
-                    exportService.enableContinuousExport();
-                }
                 const exportRecord = await exportService.getExportRecord(
                     exportSettings?.folder
                 );
@@ -267,6 +264,9 @@ export default function App(props) {
                     exportSettings?.folder,
                     exportRecord
                 );
+                if (exportSettings?.continuousExport) {
+                    exportService.enableContinuousExport();
+                }
                 if (exportRecord?.stage === ExportStage.INPROGRESS) {
                     addLogLine('export was in progress, resuming');
                     exportService.scheduleExport();
