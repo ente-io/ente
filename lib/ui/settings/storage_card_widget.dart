@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
@@ -154,7 +155,9 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isMobileScreenSmall ? "Used space" : "Storage",
+                  isMobileScreenSmall
+                      ? S.of(context).usedSpace
+                      : S.of(context).storage,
                   style: getEnteTextTheme(context)
                       .small
                       .copyWith(color: textMutedDark),
@@ -227,7 +230,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              "You",
+                              S.of(context).storageBreakupYou,
                               style: getEnteTextTheme(context)
                                   .miniBold
                                   .copyWith(color: textBaseDark),
@@ -243,7 +246,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              "Family",
+                              S.of(context).storageBreakupFamily,
                               style: getEnteTextTheme(context)
                                   .miniBold
                                   .copyWith(color: textBaseDark),

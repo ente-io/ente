@@ -1053,6 +1053,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device."),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Success"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Start backup"),
+        "storage": MessageLookupByLibrary.simpleMessage("Storage"),
+        "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("Family"),
+        "storageBreakupYou": MessageLookupByLibrary.simpleMessage("You"),
         "storageInGB": m32,
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("Storage limit exceeded"),
@@ -1174,6 +1177,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Use recovery key"),
         "useSelectedPhoto":
             MessageLookupByLibrary.simpleMessage("Use selected photo"),
+        "usedSpace": MessageLookupByLibrary.simpleMessage("Used space"),
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Verification failed, please try again"),

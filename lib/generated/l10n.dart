@@ -6832,6 +6832,47 @@ class S {
       args: [],
     );
   }
+
+  /// `Storage`
+  String get storage {
+    return Intl.message(
+      'Storage',
+      name: 'storage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Used space`
+  String get usedSpace {
+    return Intl.message(
+      'Used space',
+      name: 'usedSpace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Family`
+  String get storageBreakupFamily {
+    return Intl.message(
+      'Family',
+      name: 'storageBreakupFamily',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You`
+  String get storageBreakupYou {
+    return Intl.message(
+      'You',
+      name: 'storageBreakupYou',
+      desc:
+          'Label to indicate how much storage you are using when you are part of a family plan',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
