@@ -968,5 +968,6 @@
   },
   "freeStorageSpace" : "{freeAmount} {storageUnit} free",
   "appVersion": "Version: {versionValue}",
-  "verifyIDLabel" : "Verify"
+  "verifyIDLabel" : "Verify",
+  "fileInfoAddDescHint": "Add a description..."
 }

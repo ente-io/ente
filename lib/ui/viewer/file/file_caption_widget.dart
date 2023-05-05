@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photos/core/constants.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/keyboard/keybiard_oveylay.dart';
@@ -65,7 +65,8 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
   String? editedCaption;
-  String hintText = fileCaptionDefaultHint;
+  late String defaultHintText = S.of(context).fileInfoAddDescHint;
+  String hintText = '';
   Widget? keyboardTopButtons;
 
   @override
@@ -90,6 +91,9 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (hintText.isEmpty) {
+      hintText = defaultHintText;
+    }
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return TextField(
@@ -121,7 +125,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
         filled: true,
         fillColor: colorScheme.fillFaint,
         hintText: hintText,
-        hintStyle: hintText == fileCaptionDefaultHint
+        hintStyle: hintText == defaultHintText
             ? textTheme.small.copyWith(color: colorScheme.textMuted)
             : textTheme.small,
       ),
@@ -134,7 +138,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       keyboardType: TextInputType.multiline,
       onChanged: (value) {
         setState(() {
-          hintText = fileCaptionDefaultHint;
+          hintText = defaultHintText;
           currentLength = value.length;
           editedCaption = value;
         });

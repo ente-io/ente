@@ -6914,6 +6914,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Add a description...`
+  String get fileInfoAddDescHint {
+    return Intl.message(
+      'Add a description...',
+      name: 'fileInfoAddDescHint',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
