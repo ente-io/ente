@@ -30,9 +30,11 @@ class LocationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final heightOfStatusBar = MediaQuery.of(context).viewPadding.top;
+    const heightOfAppBar = 48.0;
     return Scaffold(
       appBar: const PreferredSize(
-        preferredSize: Size(double.infinity, 48),
+        preferredSize: Size(double.infinity, heightOfAppBar),
         child: TitleBarWidget(
           isSliver: false,
           isFlexibleSpaceDisabled: true,
@@ -42,7 +44,8 @@ class LocationScreen extends StatelessWidget {
       body: Column(
         children: <Widget>[
           SizedBox(
-            height: MediaQuery.of(context).size.height - 102,
+            height: MediaQuery.of(context).size.height -
+                (heightOfAppBar + heightOfStatusBar),
             width: double.infinity,
             child: const LocationGalleryWidget(),
           ),
