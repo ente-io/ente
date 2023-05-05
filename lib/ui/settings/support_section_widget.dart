@@ -1,5 +1,3 @@
-
-
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/l10n/l10n.dart';

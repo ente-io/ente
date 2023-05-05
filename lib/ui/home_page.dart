@@ -1,9 +1,7 @@
-// ignore_for_file: import_of_legacy_library_into_null_safe
-
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
+import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
@@ -17,12 +15,19 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_widget.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
+import 'package:ente_auth/ui/home/coach_mark_widget.dart';
+import 'package:ente_auth/ui/home/home_empty_state.dart';
+import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
+import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
+import 'package:uni_links/uni_links.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -58,16 +63,15 @@ class _HomePageState extends State<HomePage> {
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       await autoLogoutAlert(context);
     });
+    _initDeepLinks();
     super.initState();
   }
 
   void _loadCodes() {
     CodeStore.instance.getAllCodes().then((codes) {
       _codes = codes;
-      _filteredCodes = codes;
-
       _hasLoaded = true;
-      setState(() {});
+      _applyFiltering();
     });
   }
 
@@ -207,7 +211,10 @@ class _HomePageState extends State<HomePage> {
     final l10n = context.l10n;
     if (_hasLoaded) {
       if (_filteredCodes.isEmpty && _searchText.isEmpty) {
-        return _getEmptyState();
+        return HomeEmptyStateWidget(
+          onScanTap: _redirectToManualEntryPage,
+          onManuallySetupTap: _redirectToManualEntryPage,
+        );
       } else {
         final list = ListView.builder(
           itemBuilder: ((context, index) {
@@ -219,7 +226,7 @@ class _HomePageState extends State<HomePage> {
           return Stack(
             children: [
               list,
-              _getCoachMarkWidget(),
+              const CoachMarkWidget(),
             ],
           );
         } else if (_showSearchBox) {
@@ -260,6 +267,57 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<bool> _initDeepLinks() async {
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      final String? initialLink = await getInitialLink();
+      // Parse the link and warn the user, if it is not correct,
+      // but keep in mind it could be `null`.
+      if (initialLink != null) {
+        _handleDeeplink(context, initialLink);
+        return true;
+      } else {
+        _logger.info("No initial link received.");
+      }
+    } on PlatformException {
+      // Handle exception by warning the user their action did not succeed
+      // return?
+      _logger.severe("PlatformException thrown while getting initial link");
+    }
+
+    // Attach a listener to the stream
+    linkStream.listen(
+      (String? link) {
+        _handleDeeplink(context, link);
+      },
+      onError: (err) {
+        _logger.severe(err);
+      },
+    );
+    return false;
+  }
+
+  void _handleDeeplink(BuildContext context, String? link) {
+    if (!Configuration.instance.hasConfiguredAccount() || link == null) {
+      return;
+    }
+    if (mounted && link.toLowerCase().startsWith("otpauth://")) {
+      try {
+        final newCode = Code.fromRawData(link);
+        getNextTotp(newCode);
+        CodeStore.instance.addCode(newCode);
+        _showSearchBox = true;
+        _textController.text = newCode.account;
+        _searchText = newCode.account;
+        _applyFiltering();
+        setState(() {});
+      } catch (e, s) {
+        showGenericErrorDialog(context: context);
+        _logger.severe("error while handling deeplink", e, s);
+      }
+    }
+  }
+
   Widget _getFab() {
     return SpeedDial(
       icon: Icons.add,
@@ -290,139 +348,6 @@ class _HomePageState extends State<HomePage> {
           onTap: _redirectToManualEntryPage,
         ),
       ],
-    );
-  }
-
-  Widget _getEmptyState() {
-    final l10n = context.l10n;
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints.tightFor(height: 800, width: 450),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                children: [
-                  Image.asset(
-                    "assets/wallet-front-gradient.png",
-                    width: 200,
-                    height: 200,
-                  ),
-                  Text(
-                    l10n.setupFirstAccount,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headline4,
-                  ),
-                  const SizedBox(height: 64),
-                  SizedBox(
-                    width: 400,
-                    child: OutlinedButton(
-                      onPressed: _redirectToScannerPage,
-                      child: Text(l10n.importScanQrCode),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  SizedBox(
-                    width: 400,
-                    child: OutlinedButton(
-                      onPressed: _redirectToManualEntryPage,
-                      child: Text(l10n.importEnterSetupKey),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _getCoachMarkWidget() {
-    final l10n = context.l10n;
-    return GestureDetector(
-      onTap: () async {
-        await PreferenceService.instance.setHasShownCoachMark(true);
-        setState(() {});
-      },
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              color: Theme.of(context).colorScheme.background.withOpacity(0.1),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.swipe_left,
-                          size: 42,
-                        ),
-                        const SizedBox(
-                          height: 24,
-                        ),
-                        Text(
-                          l10n.swipeHint,
-                          style: Theme.of(context).textTheme.headline6,
-                        ),
-                        const SizedBox(
-                          height: 36,
-                        ),
-                        SizedBox(
-                          width: 160,
-                          child: OutlinedButton(
-                            onPressed: () async {
-                              await PreferenceService.instance
-                                  .setHasShownCoachMark(true);
-                              setState(() {});
-                            },
-                            child: Text(l10n.ok),
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class SpeedDialLabelWidget extends StatelessWidget {
-  final String label;
-
-  const SpeedDialLabelWidget(
-    this.label, {
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(4),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Theme.of(context).colorScheme.fabBackgroundColor,
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.fabForegroundColor,
-        ),
-      ),
     );
   }
 }

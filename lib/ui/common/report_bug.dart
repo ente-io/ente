@@ -1,6 +1,5 @@
 import 'package:ente_auth/utils/email_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 PopupMenuButton<dynamic> reportBugPopupMenu(BuildContext context) {
   return PopupMenuButton(

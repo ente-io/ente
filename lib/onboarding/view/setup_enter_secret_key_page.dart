@@ -1,6 +1,5 @@
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import "package:flutter/material.dart";

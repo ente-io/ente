@@ -64,6 +64,7 @@ dependencies:
   sqflite: ^2.1.0
   step_progress_indicator: ^1.0.2
   styled_text: ^7.0.0
+  uni_links: ^0.5.1
   url_launcher: ^6.1.5
   uuid: ^3.0.4
 
