@@ -1198,6 +1198,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("Verify"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Verify email"),
         "verifyEmailID": m38,
+        "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Verify"),
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Verify password"),
         "verifying": MessageLookupByLibrary.simpleMessage("Verifying..."),

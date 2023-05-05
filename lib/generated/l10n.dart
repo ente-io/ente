@@ -6904,6 +6904,16 @@ class S {
       args: [versionValue],
     );
   }
+
+  /// `Verify`
+  String get verifyIDLabel {
+    return Intl.message(
+      'Verify',
+      name: 'verifyIDLabel',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
