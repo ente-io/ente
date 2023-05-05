@@ -67,6 +67,8 @@ export const ENTE_EXPORT_DIRECTORY = 'ente Photos';
 
 class ExportService {
     private electronAPIs: ElectronAPIs;
+    private exportRecord: ExportRecord;
+    private exportSettings: ExportSettings;
     private exportInProgress: boolean = false;
     private reRunNeeded = false;
     private exportRecordUpdater = new QueueProcessor<ExportRecord>(1);
@@ -94,7 +96,9 @@ class ExportService {
 
     getExportSettings(): ExportSettings {
         try {
+            if (this.exportSettings) return this.exportSettings;
             const exportSettings = getData(LS_KEYS.EXPORT);
+            this.exportSettings = exportSettings;
             return exportSettings;
         } catch (e) {
             logError(e, 'getExportSettings failed');
@@ -106,6 +110,7 @@ class ExportService {
         try {
             const exportSettings = this.getExportSettings();
             const newSettings = { ...exportSettings, ...newData };
+            this.exportSettings = newSettings;
             setData(LS_KEYS.EXPORT, newSettings);
         } catch (e) {
             logError(e, 'updateExportSettings failed');
@@ -852,11 +857,13 @@ class ExportService {
         }
     }
 
-    updateExportRecord(newData: Partial<ExportRecord>, folder?: string) {
+    async updateExportRecord(newData: Partial<ExportRecord>, folder?: string) {
         const response = this.exportRecordUpdater.queueUpRequest(() =>
             this.updateExportRecordHelper(folder, newData)
         );
-        return response.promise;
+        const updatedExportRecord = await response.promise;
+        this.exportRecord = updatedExportRecord;
+        return updatedExportRecord;
     }
 
     async updateExportRecordHelper(
@@ -882,6 +889,7 @@ class ExportService {
 
     async getExportRecord(folder: string): Promise<ExportRecord> {
         try {
+            if (this.exportRecord) return this.exportRecord;
             if (!folder || !this.exists(folder)) {
                 return null;
             }
