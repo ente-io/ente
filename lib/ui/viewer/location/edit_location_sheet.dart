@@ -95,10 +95,12 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
       padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
       child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 16),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
             child: BottomOfTitleBarWidget(
-              title: TitleBarTitleWidget(title: "Edit location"),
+              title: TitleBarTitleWidget(
+                title: S.of(context).editLocationTagTitle,
+              ),
             ),
           ),
           Expanded(
@@ -196,7 +198,10 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  S.of(context).memoryCount(value,  NumberFormat().format(value)),
+                                  S.of(context).memoryCount(
+                                        value,
+                                        NumberFormat().format(value),
+                                      ),
                                   style: textTheme.body,
                                 ),
                                 if (value > 1000)

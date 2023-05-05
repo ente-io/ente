@@ -513,6 +513,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "dropSupportEmail": m6,
         "duplicateFileCountWithStorageSaved": m7,
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+        "editLocationTagTitle":
+            MessageLookupByLibrary.simpleMessage("Edit location"),
         "editsSaved": MessageLookupByLibrary.simpleMessage("Edits saved"),
         "eligible": MessageLookupByLibrary.simpleMessage("eligible"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),

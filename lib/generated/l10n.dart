@@ -6924,6 +6924,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Edit location`
+  String get editLocationTagTitle {
+    return Intl.message(
+      'Edit location',
+      name: 'editLocationTagTitle',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
