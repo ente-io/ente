@@ -55,11 +55,14 @@ export const getRenamedExportedCollections = (
             const currentExportName = collectionIDExportNameMap.get(
                 collection.id
             );
-
+            if (currentExportName === collection.name) {
+                return false;
+            }
             const hasNumberedSuffix = currentExportName.match(/\(\d+\)$/);
             const currentExportNameWithoutNumberedSuffix = hasNumberedSuffix
                 ? currentExportName.replace(/\(\d+\)$/, '')
                 : currentExportName;
+
             return collection.name !== currentExportNameWithoutNumberedSuffix;
         }
         return false;
