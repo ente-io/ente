@@ -271,3 +271,10 @@ export async function deleteFolder(folderPath: string): Promise<void> {
     }
     await fs.rmdir(folderPath);
 }
+
+export async function rename(oldPath: string, newPath: string) {
+    if (!existsSync(oldPath)) {
+        throw new Error('Path does not exist');
+    }
+    await fs.rename(oldPath, newPath);
+}
