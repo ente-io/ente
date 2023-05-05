@@ -542,13 +542,16 @@ class ExportService {
                             "collection is not empty, can't remove"
                         );
                     }
-                    // delete the collection folder
-                    await this.electronAPIs.deleteFolder(
-                        getCollectionExportPath(
-                            exportFolder,
-                            collectionExportName
-                        )
+                    const collectionExportPath = getCollectionExportPath(
+                        exportFolder,
+                        collectionExportName
                     );
+                    // delete the collection metadata folder
+                    await this.electronAPIs.deleteFolder(
+                        getMetadataFolderExportPath(collectionExportPath)
+                    );
+                    // delete the collection folder
+                    await this.electronAPIs.deleteFolder(collectionExportPath);
                     await this.removeCollectionExportedRecord(
                         exportFolder,
                         collectionID
