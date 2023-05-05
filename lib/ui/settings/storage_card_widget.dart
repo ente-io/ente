@@ -317,24 +317,42 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   }) {
     if (isMobileScreenSmall) {
       return [
-        TextSpan(text: usedStorageInGB.toString() + "/"),
-        TextSpan(text: totalStorageInGB.toString() + " GB"),
+        TextSpan(text: '$usedStorageInGB/$totalStorageInGB GB'),
       ];
+    }
+    late num currentUsage, totalStorage;
+    late String currentUsageUnit, totalStorageUnit;
+
+// Determine the appropriate usage and units
+    if (shouldShowUsedStorageInTBs) {
+      currentUsage = usedStorageInTB;
+      currentUsageUnit = "TB";
+    } else if (shouldShowUsedStorageInMBs) {
+      currentUsage = convertBytesToMBs(usedStorageInBytes);
+      currentUsageUnit = "MB";
+    } else {
+      currentUsage = usedStorageInGB;
+      currentUsageUnit = "GB";
+    }
+
+// Determine the appropriate total storage and units
+    if (shouldShowTotalStorageInTBs) {
+      totalStorage = totalStorageInTB;
+      totalStorageUnit = "TB";
+    } else {
+      totalStorage = totalStorageInGB;
+      totalStorageUnit = "GB";
     }
 
     return [
       TextSpan(
-        text: shouldShowUsedStorageInTBs
-            ? usedStorageInTB.toString() + " TB of "
-            : shouldShowUsedStorageInMBs
-                ? convertBytesToMBs(usedStorageInBytes).toString() + " MB of "
-                : usedStorageInGB.toString() + " GB of ",
-      ),
-      TextSpan(
-        text: shouldShowTotalStorageInTBs
-            ? totalStorageInTB.toString() + " TB used"
-            : totalStorageInGB.toString() + " GB used",
-      ),
+        text: S.of(context).storageUsageInfo(
+              currentUsage,
+              currentUsageUnit,
+              totalStorage,
+              totalStorageUnit,
+            ),
+      )
     ];
   }
 }

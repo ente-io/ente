@@ -957,5 +957,10 @@
   "storageBreakupYou": "You",
   "@storageBreakupYou": {
     "description": "Label to indicate how much storage you are using when you are part of a family plan"
+  },
+  "storageUsageInfo" : "{usedAmount} {userUnit} of {totalAmount} {totalAmountUnit} used",
+  "@storageUsageInfo" :{
+    "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   }
+
 }

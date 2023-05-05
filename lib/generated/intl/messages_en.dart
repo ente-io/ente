@@ -157,6 +157,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m32(storageAmountInGB) => "${storageAmountInGB} GB";
 
+  static String m59(usedAmount, userUnit, totalAmount, totalAmountUnit) =>
+      "${usedAmount} ${userUnit} of ${totalAmount} ${totalAmountUnit} used";
+
   static String m33(id) =>
       "Your ${id} is already linked to another ente account.\nIf you would like to use your ${id} with this account, please contact our support\'\'";
 
@@ -1059,6 +1062,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageInGB": m32,
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("Storage limit exceeded"),
+        "storageUsageInfo": m59,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Strong"),
         "subAlreadyLinkedErrMessage": m33,
         "subWillBeCancelledOn": m34,

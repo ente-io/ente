@@ -6873,6 +6873,17 @@ class S {
       args: [],
     );
   }
+
+  /// `{usedAmount} {userUnit} of {totalAmount} {totalAmountUnit} used`
+  String storageUsageInfo(Object usedAmount, Object userUnit,
+      Object totalAmount, Object totalAmountUnit) {
+    return Intl.message(
+      '$usedAmount $userUnit of $totalAmount $totalAmountUnit used',
+      name: 'storageUsageInfo',
+      desc: 'Example: 1.2 GB of 2 GB used or 100 GB or 2TB used',
+      args: [usedAmount, userUnit, totalAmount, totalAmountUnit],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
