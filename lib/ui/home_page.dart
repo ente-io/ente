@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
@@ -15,6 +14,8 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_widget.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
+import 'package:ente_auth/ui/home/coach_mark_widget.dart';
+import 'package:ente_auth/ui/home/home_empty_state.dart';
 import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
@@ -206,7 +207,10 @@ class _HomePageState extends State<HomePage> {
     final l10n = context.l10n;
     if (_hasLoaded) {
       if (_filteredCodes.isEmpty && _searchText.isEmpty) {
-        return _getEmptyState();
+        return HomeEmptyStateWidget(
+          onScanTap: _redirectToManualEntryPage,
+          onManuallySetupTap: _redirectToManualEntryPage,
+        );
       } else {
         final list = ListView.builder(
           itemBuilder: ((context, index) {
@@ -218,7 +222,7 @@ class _HomePageState extends State<HomePage> {
           return Stack(
             children: [
               list,
-              _getCoachMarkWidget(),
+              const CoachMarkWidget(),
             ],
           );
         } else if (_showSearchBox) {
@@ -289,112 +293,6 @@ class _HomePageState extends State<HomePage> {
           onTap: _redirectToManualEntryPage,
         ),
       ],
-    );
-  }
-
-  Widget _getEmptyState() {
-    final l10n = context.l10n;
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints.tightFor(height: 800, width: 450),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                children: [
-                  Image.asset(
-                    "assets/wallet-front-gradient.png",
-                    width: 200,
-                    height: 200,
-                  ),
-                  Text(
-                    l10n.setupFirstAccount,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headline4,
-                  ),
-                  const SizedBox(height: 64),
-                  SizedBox(
-                    width: 400,
-                    child: OutlinedButton(
-                      onPressed: _redirectToScannerPage,
-                      child: Text(l10n.importScanQrCode),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  SizedBox(
-                    width: 400,
-                    child: OutlinedButton(
-                      onPressed: _redirectToManualEntryPage,
-                      child: Text(l10n.importEnterSetupKey),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _getCoachMarkWidget() {
-    final l10n = context.l10n;
-    return GestureDetector(
-      onTap: () async {
-        await PreferenceService.instance.setHasShownCoachMark(true);
-        setState(() {});
-      },
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              color: Theme.of(context).colorScheme.background.withOpacity(0.1),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.swipe_left,
-                          size: 42,
-                        ),
-                        const SizedBox(
-                          height: 24,
-                        ),
-                        Text(
-                          l10n.swipeHint,
-                          style: Theme.of(context).textTheme.headline6,
-                        ),
-                        const SizedBox(
-                          height: 36,
-                        ),
-                        SizedBox(
-                          width: 160,
-                          child: OutlinedButton(
-                            onPressed: () async {
-                              await PreferenceService.instance
-                                  .setHasShownCoachMark(true);
-                              setState(() {});
-                            },
-                            child: Text(l10n.ok),
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

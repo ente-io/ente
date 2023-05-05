@@ -7,7 +7,7 @@ class PreferenceService {
 
   late final SharedPreferences _prefs;
 
-  static const kHasShownCoachMarkKey = "has_shown_coach_mark";
+  static const kHasShownCoachMarkKey = "has_shown_coach_markx";
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
