@@ -125,7 +125,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       return;
     }
     _isLoadingVideoPlayer = true;
-    io.File? videoFile = _file.fileType == FileType.livePhoto
+    final io.File? videoFile = _file.fileType == FileType.livePhoto
         ? await _getLivePhotoVideo()
         : await _getMotionPhotoVideo();
 
@@ -178,7 +178,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     });
     if (imageFile != null) {
       final motionPhoto = MotionPhotos(imageFile.path);
-      final index = motionPhoto.getMotionVideoIndex();
+      final index = await motionPhoto.getMotionVideoIndex();
       if (index != null) {
         if (widget.file.pubMagicMetadata?.mvi == null &&
             (widget.file.ownerID ?? 0) == Configuration.instance.getUserID()!) {

@@ -427,6 +427,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "customRadius":
             MessageLookupByLibrary.simpleMessage("Radio personalizado"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("Oscuro"),
+        "dayToday": MessageLookupByLibrary.simpleMessage("Hoy"),
+        "dayYesterday": MessageLookupByLibrary.simpleMessage("Ayer"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Descifrando..."),
         "decryptingVideo":
             MessageLookupByLibrary.simpleMessage("Descifrando video..."),

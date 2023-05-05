@@ -163,7 +163,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   if (io.Platform.isAndroid && asset.type == AssetType.image) {
     try {
       motionPhotoStartingIndex =
-          MotionPhotos(sourceFile.path).getMotionVideoIndex()?.start;
+          (await MotionPhotos(sourceFile.path).getMotionVideoIndex())?.start;
     } catch (e) {
       _logger.severe('error while detecthing motion photo start index', e);
     }
