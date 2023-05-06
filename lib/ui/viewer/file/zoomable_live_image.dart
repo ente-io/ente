@@ -49,7 +49,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   @override
   void initState() {
     _file = widget.file;
-    _showLivePhotoToast();
+    Future.microtask(() => _showHintForMotionPhotoPlay).ignore();
     super.initState();
   }
 
@@ -125,7 +125,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       return;
     }
     _isLoadingVideoPlayer = true;
-    io.File? videoFile = _file.fileType == FileType.livePhoto
+    final io.File? videoFile = _file.fileType == FileType.livePhoto
         ? await _getLivePhotoVideo()
         : await _getMotionPhotoVideo();
 
@@ -178,7 +178,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     });
     if (imageFile != null) {
       final motionPhoto = MotionPhotos(imageFile.path);
-      final index = motionPhoto.getMotionVideoIndex();
+      final index = await motionPhoto.getMotionVideoIndex();
       if (index != null) {
         if (widget.file.pubMagicMetadata?.mvi == null &&
             (widget.file.ownerID ?? 0) == Configuration.instance.getUserID()!) {
@@ -208,11 +208,15 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       });
   }
 
-  void _showLivePhotoToast() async {
+  void _showHintForMotionPhotoPlay() async {
+    if (widget.file.fileType != FileType.livePhoto ||
+        widget.file.pubMagicMetadata?.mvi != null) {
+      return;
+    }
     final preferences = await SharedPreferences.getInstance();
     final int promptTillNow = preferences.getInt(livePhotoToastCounterKey) ?? 0;
     if (promptTillNow < maxLivePhotoToastCount && mounted) {
-      showToast(context, S.of(context).pressAndHoldToPlayVideo);
+      showShortToast(context, S.of(context).pressAndHoldToPlayVideo);
       preferences.setInt(livePhotoToastCounterKey, promptTillNow + 1);
     }
   }
