@@ -228,7 +228,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                       );
                     },
                     child: Text(
-                      "Verify",
+                      S.of(context).verifyIDLabel,
                       textAlign: TextAlign.center,
                       style: enteTextTheme.smallMuted.copyWith(
                         decoration: TextDecoration.underline,

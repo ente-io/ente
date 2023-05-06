@@ -363,7 +363,7 @@
   "deleteFromBoth": "Delete from both",
   "newAlbum": "New album",
   "albums": "Albums",
-  "memoryCount": "{count, plural, zero{no memories} one{{count} memory} other{{count} memories}}",
+  "memoryCount": "{count, plural, zero{no memories} one{{formattedCount} memory} other{{formattedCount} memories}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -371,6 +371,10 @@
       "count": {
         "example": "1",
         "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
       }
     }
   },
@@ -950,5 +954,21 @@
     "description": "Unit for distance in km"
   },
   "dayToday": "Today",
-  "dayYesterday": "Yesterday"
+  "dayYesterday": "Yesterday",
+  "storage": "Storage",
+  "usedSpace": "Used space",
+  "storageBreakupFamily": "Family",
+  "storageBreakupYou": "You",
+  "@storageBreakupYou": {
+    "description": "Label to indicate how much storage you are using when you are part of a family plan"
+  },
+  "storageUsageInfo" : "{usedAmount} {usedStorageUnit} of {totalAmount} {totalStorageUnit} used",
+  "@storageUsageInfo" :{
+    "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
+  },
+  "freeStorageSpace" : "{freeAmount} {storageUnit} free",
+  "appVersion": "Version: {versionValue}",
+  "verifyIDLabel" : "Verify",
+  "fileInfoAddDescHint": "Add a description...",
+  "editLocationTagTitle": "Edit location"
 }

@@ -44,7 +44,7 @@ int convertBytesToMBs(int bytes) {
 }
 
 //Eg: 1TB, 1.3TB, 4.9TB, 3TB
-roundGBsToTBs(sizeInGBs) {
+num roundGBsToTBs(sizeInGBs) {
   final num sizeInTBs = num.parse((sizeInGBs / 1000).toStringAsFixed(1));
   if (sizeInTBs % 1 == 0) {
     return sizeInTBs.truncate();

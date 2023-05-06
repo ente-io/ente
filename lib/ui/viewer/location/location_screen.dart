@@ -1,5 +1,7 @@
 import 'dart:developer' as dev;
+
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -297,7 +299,9 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
                   );
                 } else {
                   return Text(
-                    S.of(context).memoryCount(value),
+                    S
+                        .of(context)
+                        .memoryCount(value, NumberFormat().format(value)),
                     style: getEnteTextTheme(context).smallMuted,
                   );
                 }

@@ -2772,16 +2772,16 @@ class S {
     );
   }
 
-  /// `{count, plural, zero{no memories} one{{count} memory} other{{count} memories}}`
-  String memoryCount(int count) {
+  /// `{count, plural, zero{no memories} one{{formattedCount} memory} other{{formattedCount} memories}}`
+  String memoryCount(int count, String formattedCount) {
     return Intl.plural(
       count,
       zero: 'no memories',
-      one: '$count memory',
-      other: '$count memories',
+      one: '$formattedCount memory',
+      other: '$formattedCount memories',
       name: 'memoryCount',
       desc: 'The text to display the number of memories',
-      args: [count],
+      args: [count, formattedCount],
     );
   }
 
@@ -6828,6 +6828,108 @@ class S {
     return Intl.message(
       'Yesterday',
       name: 'dayYesterday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Storage`
+  String get storage {
+    return Intl.message(
+      'Storage',
+      name: 'storage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Used space`
+  String get usedSpace {
+    return Intl.message(
+      'Used space',
+      name: 'usedSpace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Family`
+  String get storageBreakupFamily {
+    return Intl.message(
+      'Family',
+      name: 'storageBreakupFamily',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You`
+  String get storageBreakupYou {
+    return Intl.message(
+      'You',
+      name: 'storageBreakupYou',
+      desc:
+          'Label to indicate how much storage you are using when you are part of a family plan',
+      args: [],
+    );
+  }
+
+  /// `{usedAmount} {usedStorageUnit} of {totalAmount} {totalStorageUnit} used`
+  String storageUsageInfo(Object usedAmount, Object usedStorageUnit,
+      Object totalAmount, Object totalStorageUnit) {
+    return Intl.message(
+      '$usedAmount $usedStorageUnit of $totalAmount $totalStorageUnit used',
+      name: 'storageUsageInfo',
+      desc: 'Example: 1.2 GB of 2 GB used or 100 GB or 2TB used',
+      args: [usedAmount, usedStorageUnit, totalAmount, totalStorageUnit],
+    );
+  }
+
+  /// `{freeAmount} {storageUnit} free`
+  String freeStorageSpace(Object freeAmount, Object storageUnit) {
+    return Intl.message(
+      '$freeAmount $storageUnit free',
+      name: 'freeStorageSpace',
+      desc: '',
+      args: [freeAmount, storageUnit],
+    );
+  }
+
+  /// `Version: {versionValue}`
+  String appVersion(Object versionValue) {
+    return Intl.message(
+      'Version: $versionValue',
+      name: 'appVersion',
+      desc: '',
+      args: [versionValue],
+    );
+  }
+
+  /// `Verify`
+  String get verifyIDLabel {
+    return Intl.message(
+      'Verify',
+      name: 'verifyIDLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a description...`
+  String get fileInfoAddDescHint {
+    return Intl.message(
+      'Add a description...',
+      name: 'fileInfoAddDescHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit location`
+  String get editLocationTagTitle {
+    return Intl.message(
+      'Edit location',
+      name: 'editLocationTagTitle',
       desc: '',
       args: [],
     );

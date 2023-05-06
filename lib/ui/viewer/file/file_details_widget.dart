@@ -2,6 +2,7 @@ import "package:exif/exif.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import "package:photos/models/magic_metadata.dart";
@@ -204,7 +205,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             slivers: <Widget>[
               TitleBarWidget(
                 isFlexibleSpaceDisabled: true,
-                title: "Details",
+                title: S.of(context).details,
                 isOnTopOfScreen: false,
                 backgroundColor: getEnteColorScheme(context).backgroundElevated,
                 leading: IconButtonWidget(

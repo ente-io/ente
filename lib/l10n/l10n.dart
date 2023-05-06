@@ -13,12 +13,14 @@ extension AppLocalizationsX on BuildContext {
 const List<Locale> appSupportedLocales = kDebugMode
     ? <Locale>[
         Locale('en'),
+        Locale('es'),
         Locale('fr'),
         Locale("nl"),
         Locale("zh", "CN"),
       ]
     : <Locale>[
         Locale('en'),
+        Locale('es'),
         Locale("nl"),
         Locale("zh", "CN"),
       ];

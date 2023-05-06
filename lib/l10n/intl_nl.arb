@@ -353,7 +353,7 @@
   "deleteFromBoth": "Verwijder van beide",
   "newAlbum": "Nieuw album",
   "albums": "Albums",
-  "memoryCount": "{count, plural, zero{geen herinneringen} one{{count} herinnering} other{{count} herinneringen}}",
+  "memoryCount": "{count, plural, zero{geen herinneringen} one{{formattedCount} herinnering} other{{formattedCount} herinneringen}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
