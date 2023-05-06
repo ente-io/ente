@@ -209,10 +209,14 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   }
 
   void _showLivePhotoToast() async {
+    if (widget.file.fileType != FileType.livePhoto ||
+        widget.file.pubMagicMetadata?.mvi != null) {
+      return;
+    }
     final preferences = await SharedPreferences.getInstance();
     final int promptTillNow = preferences.getInt(livePhotoToastCounterKey) ?? 0;
     if (promptTillNow < maxLivePhotoToastCount && mounted) {
-      showToast(context, S.of(context).pressAndHoldToPlayVideo);
+      showShortToast(context, S.of(context).pressAndHoldToPlayVideo);
       preferences.setInt(livePhotoToastCounterKey, promptTillNow + 1);
     }
   }
