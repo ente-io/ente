@@ -49,7 +49,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   @override
   void initState() {
     _file = widget.file;
-    _showLivePhotoToast();
+    Future.microtask(() => _showHintForMotionPhotoPlay).ignore();
     super.initState();
   }
 
@@ -208,7 +208,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       });
   }
 
-  void _showLivePhotoToast() async {
+  void _showHintForMotionPhotoPlay() async {
     if (widget.file.fileType != FileType.livePhoto ||
         widget.file.pubMagicMetadata?.mvi != null) {
       return;
