@@ -164,6 +164,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         return '한국어';
       case 'ar':
         return 'العربية';
+      case 'fa':
+        return 'فارسی';
       default:
         return locale.languageCode;
     }
