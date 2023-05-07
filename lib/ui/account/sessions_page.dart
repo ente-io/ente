@@ -1,5 +1,3 @@
-
-
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
@@ -25,7 +23,9 @@ class _SessionsPageState extends State<SessionsPage> {
 
   @override
   void initState() {
-    _fetchActiveSessions();
+    _fetchActiveSessions().onError((error, stackTrace) {
+      showToast(context, "Failed to fetch active sessions");
+    });
     super.initState();
   }
 
@@ -34,7 +34,7 @@ class _SessionsPageState extends State<SessionsPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text("Active sessions"),
+        title: Text(context.l10n.activeSessions),
       ),
       body: _getBody(),
     );
@@ -112,35 +112,36 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   Future<void> _terminateSession(Session session) async {
-    final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWait);
+    final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
       await UserService.instance.terminateSession(session.token);
       await _fetchActiveSessions();
       await dialog.hide();
-    } catch (e, s) {
+    } catch (e) {
       await dialog.hide();
-      _logger.severe('failed to terminate', e, s);
+      _logger.severe('failed to terminate');
       showErrorDialog(
         context,
-        l10n.oops,
-        l10n.somethingWentWrongMessage,
+        context.l10n.oops,
+        context.l10n.somethingWentWrongPleaseTryAgain,
       );
     }
   }
 
   Future<void> _fetchActiveSessions() async {
-    _sessions = await UserService.instance
-        .getActiveSessions()
-        .onError((dynamic error, stackTrace) {
-      showToast(context, "Failed to fetch active sessions");
-      throw error;
+    _sessions = await UserService.instance.getActiveSessions().onError((e, s) {
+      _logger.severe("failed to fetch active sessions", e, s);
+      throw e!;
     });
-    _sessions!.sessions.sort((first, second) {
-      return second.lastUsedTime.compareTo(first.lastUsedTime);
-    });
-    setState(() {});
+    if (_sessions != null) {
+      _sessions!.sessions.sort((first, second) {
+        return second.lastUsedTime.compareTo(first.lastUsedTime);
+      });
+      if (mounted) {
+        setState(() {});
+      }
+    }
   }
 
   void _showSessionTerminationDialog(Session session) {
@@ -148,15 +149,15 @@ class _SessionsPageState extends State<SessionsPage> {
         session.token == Configuration.instance.getToken();
     Widget text;
     if (isLoggingOutFromThisDevice) {
-      text = const Text(
-        "This will log you out of this device!",
+      text = Text(
+        context.l10n.thisWillLogYouOutOfThisDevice,
       );
     } else {
       text = SingleChildScrollView(
         child: Column(
           children: [
-            const Text(
-              "This will log you out of the following device:",
+            Text(
+              context.l10n.thisWillLogYouOutOfTheFollowingDevice,
             ),
             const Padding(padding: EdgeInsets.all(8)),
             Text(
@@ -168,13 +169,13 @@ class _SessionsPageState extends State<SessionsPage> {
       );
     }
     final AlertDialog alert = AlertDialog(
-      title: const Text("Terminate session?"),
+      title: Text(context.l10n.terminateSession),
       content: text,
       actions: [
         TextButton(
-          child: const Text(
-            "Terminate",
-            style: TextStyle(
+          child: Text(
+            context.l10n.terminate,
+            style: const TextStyle(
               color: Colors.red,
             ),
           ),
@@ -189,7 +190,7 @@ class _SessionsPageState extends State<SessionsPage> {
         ),
         TextButton(
           child: Text(
-            "Cancel",
+            context.l10n.cancel,
             style: TextStyle(
               color: isLoggingOutFromThisDevice
                   ? Theme.of(context).colorScheme.alternativeColor
@@ -214,7 +215,7 @@ class _SessionsPageState extends State<SessionsPage> {
   Widget _getUAWidget(Session session) {
     if (session.token == Configuration.instance.getToken()) {
       return Text(
-        "This device",
+        context.l10n.thisDevice,
         style: TextStyle(
           fontWeight: FontWeight.bold,
           color: Theme.of(context).colorScheme.alternativeColor,

@@ -257,5 +257,12 @@
         "example": "example@ente.io"
       }
     }
-  }
+  },
+  "activeSessions": "Active sessions",
+  "somethingWentWrongPleaseTryAgain": "Something went wrong, please try again",
+  "thisWillLogYouOutOfThisDevice": "This will log you out of this device!",
+  "thisWillLogYouOutOfTheFollowingDevice": "This will log you out of the following device:",
+  "terminateSession": "Terminate session?",
+  "terminate": "Terminate",
+  "thisDevice": "This device"
 }
