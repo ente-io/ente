@@ -49,12 +49,12 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           title: l10n.lockscreen,
         ),
         trailingWidget: ToggleSwitchWidget(
-          value: _config.shouldShowLockScreen(),
-          onChanged: (value) async {
+          value: () => _config.shouldShowLockScreen(),
+          onChanged: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthForLockScreen(
               context,
-              value,
+              !_config.shouldShowLockScreen(),
               context.l10n.authToChangeLockscreenSetting,
               context.l10n.lockScreenEnablePreSteps,
             );
