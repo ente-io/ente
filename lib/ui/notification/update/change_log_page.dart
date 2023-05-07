@@ -106,17 +106,16 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     items.add(
       ChangeLogEntry(
         "Motion photos",
-        "ente Mobile App now supports playing Motion photos. Long-press on "
-            "your Motion Photo to play the video.",
+        "We now support the playback of Motion Photos. Open a Motion Photo, and long press to play the video.",
       ),
     );
 
     items.add(
       ChangeLogEntry(
         "Language",
-        "ente Photos app now support changing language, starting with French,"
+        "Thanks to the help from our community, we can now speak French,"
             " Dutch, and Simplified Chinese.\n\nTo change language, go to "
-            "Settings -> General -> Languages",
+            "Settings -> General -> Language",
       ),
     );
     //You can now specify a custom radius while creating Location tags.
