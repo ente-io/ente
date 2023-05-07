@@ -105,27 +105,28 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
 
     items.add(
       ChangeLogEntry(
-        "Security Audit",
-        "It gives us immense joy to announce that ente's source code has been"
-            " successfully audited by Cure53, in collaboration with Symbolic "
-            "Software.\n\nTogether they have certified that ente's "
-            "architecture is sound and that our implementation across all "
-            "clients is cryptographically accurate.\n\nYou can find more "
-            "details at ente.io/blog.",
+        "Motion photos",
+        "ente Mobile App now supports playing Motion photos. Long-press on "
+            "your Motion Photo to play the video.",
       ),
     );
 
     items.add(
       ChangeLogEntry(
-        "Location tags",
-        "This release includes a fresh, beautiful, privacy-friendly way to "
-            "search through your photos by location!\n\nTag a photo with a "
-            "location, define a radius, and ente will automatically cluster "
-            "all photos clicked within that area.\n\nOpen a photo, and click on"
-            " the Info button to get started!",
+        "Language",
+        "ente Photos app now support changing language, starting with French,"
+            " Dutch, and Simplified Chinese.\n\nTo change language, go to "
+            "Settings -> General -> Languages",
       ),
     );
-
+    //You can now specify a custom radius while creating Location tags.
+    items.add(
+      ChangeLogEntry(
+        "Custom radius for Location tags",
+        "You can now specify a custom radius while creating Location tags.",
+        isFeature: false,
+      ),
+    );
     return Container(
       padding: const EdgeInsets.only(left: 16),
       child: Scrollbar(
