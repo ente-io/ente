@@ -1,10 +1,10 @@
-
-
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
+import 'package:styled_text/styled_text.dart';
 
 class OTTVerificationPage extends StatefulWidget {
   final String email;
@@ -27,6 +27,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
     FloatingActionButtonLocation? fabLocation() {
@@ -67,7 +68,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         isKeypadOpen: isKeypadOpen,
         isFormValid: !(_verificationCodeController.text == null ||
             _verificationCodeController.text.isEmpty),
-        buttonText: 'Verify',
+        buttonText: l10n.verify,
         onPressedFunction: () {
           if (widget.isChangeEmail) {
             UserService.instance.changeEmail(
@@ -88,6 +89,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   }
 
   Widget _getBody() {
+    final l10n = context.l10n;
     return ListView(
       children: [
         Column(
@@ -96,7 +98,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 30, 20, 15),
               child: Text(
-                'Verify email',
+                l10n.verifyEmail,
                 style: Theme.of(context).textTheme.headline4,
               ),
             ),
@@ -110,28 +112,25 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
-                          child: RichText(
-                            text: TextSpan(
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .subtitle1!
-                                  .copyWith(fontSize: 14),
-                              children: [
-                                const TextSpan(text: "We've sent a mail to "),
-                                TextSpan(
-                                  text: widget.email,
-                                  style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .alternativeColor,
-                                  ),
-                                )
-                              ],
-                            ),
+                          child: StyledText(
+                            text: l10n.weHaveSendEmailTo(widget.email),
+                            style: Theme.of(context)
+                                .textTheme
+                                .subtitle1!
+                                .copyWith(fontSize: 14),
+                            tags: {
+                              'green': StyledTextTag(
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .alternativeColor,
+                                ),
+                              ),
+                            },
                           ),
                         ),
                         Text(
-                          'Please check your inbox (and spam) to complete verification',
+                          l10n.checkInboxAndSpamFolder,
                           style: Theme.of(context)
                               .textTheme
                               .subtitle1!
@@ -153,7 +152,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 style: Theme.of(context).textTheme.subtitle1,
                 decoration: InputDecoration(
                   filled: true,
-                  hintText: 'Tap to enter code',
+                  hintText: l10n.tapToEnterCode,
                   contentPadding: const EdgeInsets.all(15),
                   border: UnderlineInputBorder(
                     borderSide: BorderSide.none,
@@ -186,7 +185,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                       );
                     },
                     child: Text(
-                      "Resend email",
+                      l10n.resendEmail,
                       style: Theme.of(context).textTheme.subtitle1!.copyWith(
                             fontSize: 14,
                             decoration: TextDecoration.underline,

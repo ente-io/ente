@@ -99,6 +99,7 @@
   "scan": "Scan",
   "scanACode": "Scan a code",
   "verify": "Verify",
+  "verifyEmail": "Verify email",
   "enterCodeHint": "Enter the 6-digit code from\nyour authenticator app",
   "lostDeviceTitle": "Lost device?",
   "twoFactorAuthTitle": "Two-factor authentication",
@@ -174,6 +175,19 @@
   "privacyPolicyTitle": "Privacy Policy",
   "termsOfServicesTitle": "Terms",
   "encryption": "Encryption",
+  "setPasswordTitle": "Set password",
+  "changePasswordTitle": "Change password",
+  "resetPasswordTitle": "Reset password",
+  "encryptionKeys": "Encryption keys",
+  "passwordWarning": "We don't store this password, so if you forget, <underline>we cannot decrypt your data</underline>",
+  "enterPasswordToEncrypt": "Enter a password we can use to encrypt your data",
+  "enterNewPasswordToEncrypt": "Enter a new password we can use to encrypt your data",
+  "passwordChangedSuccessfully": "Password changed successfully",
+  "generatingEncryptionKeys": "Generating encryption keys...",
+  "continueLabel": "Continue",
+  "insecureDevice": "Insecure device",
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.",
+  "howItWorks": "How it works",
   "ackPasswordLostWarning": "I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.",
   "loginTerms": "By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
   "logInLabel": "Log in",
@@ -229,5 +243,19 @@
   "sorry" : "Sorry",
   "importFailureDesc": "Could not parse the selected file.\nPlease write to support@ente.io if you need help!",
   "pendingSyncs" : "Warning",
-  "pendingSyncsWarningBody": "Some of your codes have not been backed up.\n\nPlease ensure that you have a backup for these codes before you logout."
+  "pendingSyncsWarningBody": "Some of your codes have not been backed up.\n\nPlease ensure that you have a backup for these codes before you logout.",
+  "checkInboxAndSpamFolder": "Please check your inbox (and spam) to complete verification",
+  "tapToEnterCode": "Tap to enter code",
+  "resendEmail": "Resend email",
+  "weHaveSendEmailTo": "We have sent a mail to <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  }
 }
