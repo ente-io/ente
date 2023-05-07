@@ -122,15 +122,27 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       case 'en':
         return 'English';
       case 'es':
-        return 'Español';
+        switch (locale.countryCode) {
+          case 'ES':
+            return 'Español (España)';
+          default:
+            return 'Español';
+        }
       case 'fr':
         return 'Français';
       case 'de':
         return 'Deutsch';
       case 'it':
         return 'Italiano';
+      case 'nl':
+        return 'Nederlands';
       case 'pt':
-        return 'Português';
+        switch (locale.countryCode) {
+          case 'BR':
+            return 'Português (Brasil)';
+          default:
+            return 'Português';
+        }
       case 'ru':
         return 'Русский';
       case 'tr':
@@ -138,7 +150,14 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       case 'fi':
         return 'Suomi';
       case 'zh':
-        return '中文';
+        switch (locale.scriptCode) {
+          case 'Hans':
+            return '中文 (简体)';
+          case 'Hant':
+            return '中文 (繁體)';
+          default:
+            return '中文';
+        }
       case 'ja':
         return '日本語';
       case 'ko':
