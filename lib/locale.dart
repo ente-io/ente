@@ -16,14 +16,25 @@ const List<Locale> appSupportedLocales = <Locale>[
 ];
 
 Locale localResolutionCallBack(locales, supportedLocales) {
-  // print call stacktrace to identify caller
+  Locale? languageCodeMatch;
+  final Map<String, Locale> languageCodeToLocale = {
+    for (Locale supportedLocale in appSupportedLocales)
+      supportedLocale.languageCode: supportedLocale
+  };
+
   for (Locale locale in locales) {
     if (appSupportedLocales.contains(locale)) {
       return locale;
     }
+
+    if (languageCodeMatch == null &&
+        languageCodeToLocale.containsKey(locale.languageCode)) {
+      languageCodeMatch = languageCodeToLocale[locale.languageCode];
+    }
   }
-  // if device language is not supported by the app, use en as default
-  return const Locale('en');
+
+  // Return the first language code match or default to 'en'
+  return languageCodeMatch ?? const Locale('en');
 }
 
 Future<Locale> getLocale() async {
