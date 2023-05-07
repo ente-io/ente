@@ -13,6 +13,9 @@ and preserve your data.
 ente will automatically sync the 2FA tokens you add to your account, across all
 your devices. Every new device you sign into will have access to these tokens.
 
+- Web access
+You can access your 2FA code from any web browser by visiting https://auth.ente.io .
+
 - Offline Mode
 ente generates 2FA tokens offline, so your network connectivity will not get in
 the way of your workflow.
@@ -23,7 +26,7 @@ You can add tokens to ente by one of the following methods:
 2. Manually entering (copy-pasting) a 2FA secret
 3. Bulk importing from a file that contains a list of codes in the following format:
 
-otpauth://totp/ACCOUNT?secret=SUPERSECRET&issuer=SERVICE
+otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET
 
 The codes maybe separated by new lines or commas.
 
