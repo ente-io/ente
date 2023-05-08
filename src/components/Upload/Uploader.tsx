@@ -219,7 +219,7 @@ export default function Uploader(props: Props) {
                     try {
                         addLogLine(`uploading dropped files from desktop app`);
                         // check and parse dropped files which are zip files
-                        const electronFiles = [] as ElectronFile[];
+                        let electronFiles = [] as ElectronFile[];
                         for (const file of props.dragAndDropFiles) {
                             if (file.name.endsWith('.zip')) {
                                 const zipFiles =
@@ -229,7 +229,7 @@ export default function Uploader(props: Props) {
                                 addLogLine(
                                     `zip file - ${file.name} contains ${zipFiles.length} files`
                                 );
-                                electronFiles.push(...zipFiles);
+                                electronFiles = [...electronFiles, ...zipFiles];
                             } else {
                                 // type cast to ElectronFile as the file is dropped from desktop app
                                 // type file and ElectronFile should be interchangeable, but currently they have some differences.
