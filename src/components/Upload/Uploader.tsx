@@ -219,24 +219,23 @@ export default function Uploader(props: Props) {
                     try {
                         addLogLine(`uploading dropped files from desktop app`);
                         // check and parse dropped files which are zip files
-                        const electronFiles = [
-                            ...(await Promise.all(
-                                props.dragAndDropFiles.map(async (file) => {
-                                    if (file.name.endsWith('.zip')) {
-                                        const zipFiles =
-                                            await importService.getElectronFilesFromGoogleZip(
-                                                (file as any).path
-                                            );
-                                        addLogLine(
-                                            `zip file - ${file.name} contains ${zipFiles.length} files`
-                                        );
-                                        return zipFiles;
-                                    } else {
-                                        return file as unknown as ElectronFile;
-                                    }
-                                })
-                            )),
-                        ].flat() as ElectronFile[];
+                        const electronFiles = [] as ElectronFile[];
+                        for (const file of props.dragAndDropFiles) {
+                            if (file.name.endsWith('.zip')) {
+                                const zipFiles =
+                                    await importService.getElectronFilesFromGoogleZip(
+                                        (file as any).path
+                                    );
+                                addLogLine(
+                                    `zip file - ${file.name} contains ${zipFiles.length} files`
+                                );
+                                electronFiles.push(...zipFiles);
+                            } else {
+                                electronFiles.push(
+                                    file as unknown as ElectronFile
+                                );
+                            }
+                        }
                         addLogLine(
                             `uploading dropped files from desktop app - ${electronFiles.length} files found`
                         );
