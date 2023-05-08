@@ -971,5 +971,5 @@
   "@setLabel": {
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
-  "setRadius": "Set radius",
+  "setRadius": "Set radius"
 }
