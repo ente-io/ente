@@ -234,9 +234,7 @@ export default function Uploader(props: Props) {
                                         );
                                         return zipFiles;
                                     } else {
-                                        electronFiles.push(
-                                            file as unknown as ElectronFile
-                                        );
+                                        return file as unknown as ElectronFile;
                                     }
                                 })
                             )),
