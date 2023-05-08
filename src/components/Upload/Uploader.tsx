@@ -214,8 +214,46 @@ export default function Uploader(props: Props) {
             addLogLine(`received file upload request`);
             setWebFiles(props.webFileSelectorFiles);
         } else if (props.dragAndDropFiles?.length > 0) {
-            addLogLine(`received drag and drop upload request`);
-            setWebFiles(props.dragAndDropFiles);
+            if (isElectron()) {
+                const main = async () => {
+                    try {
+                        addLogLine(`uploading dropped files from desktop app`);
+                        // check and parse dropped files which are zip files
+
+                        const electronFiles = [
+                            ...(await Promise.all(
+                                props.dragAndDropFiles.map(async (file) => {
+                                    addLogLine(`dropped file - ${file.name}`);
+                                    if (file.name.endsWith('.zip')) {
+                                        const zipFiles =
+                                            await importService.getElectronFilesFromGoogleZip(
+                                                (file as any).path
+                                            );
+                                        addLogLine(
+                                            `zip file - ${file.name} contains ${zipFiles.length} files`
+                                        );
+                                        return zipFiles;
+                                    } else {
+                                        electronFiles.push(
+                                            file as unknown as ElectronFile
+                                        );
+                                    }
+                                })
+                            )),
+                        ].flat() as ElectronFile[];
+                        addLogLine(
+                            `uploading dropped files from desktop app - ${electronFiles.length} files found`
+                        );
+                        setElectronFiles(electronFiles);
+                    } catch (e) {
+                        logError(e, 'failed to upload desktop dropped files');
+                    }
+                };
+                main();
+            } else {
+                addLogLine(`uploading dropped files from web app`);
+                setWebFiles(props.dragAndDropFiles);
+            }
         }
     }, [
         props.dragAndDropFiles,
