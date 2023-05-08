@@ -21,6 +21,7 @@ class ObjectDetectionService {
   late IsolateUtils _isolateUtils;
 
   ObjectDetectionService._privateConstructor();
+  bool inInitiated = false;
 
   Future<void> init() async {
     _isolateUtils = IsolateUtils();
@@ -40,6 +41,7 @@ class ObjectDetectionService {
     } catch (e, s) {
       _logger.severe("Could not initialize sceneclassifier", e, s);
     }
+    inInitiated = true;
   }
 
   static ObjectDetectionService instance =
@@ -47,6 +49,9 @@ class ObjectDetectionService {
 
   Future<List<String>> predict(Uint8List bytes) async {
     try {
+      if (!inInitiated) {
+        return Future.error("ObjectDetectionService init is not completed");
+      }
       final results = <String>{};
       results.addAll(await _getObjects(bytes));
       results.addAll(await _getMobileNetResults(bytes));
