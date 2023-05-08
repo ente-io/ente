@@ -6941,7 +6941,7 @@ class S {
     return Intl.message(
       'Set radius',
       name: 'setRadius',
-      desc: 'Custom radius for location tag',
+      desc: '',
       args: [],
     );
   }
