@@ -1,4 +1,3 @@
-import "package:flutter/foundation.dart";
 import "package:flutter/widgets.dart";
 import "package:photos/generated/l10n.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -10,20 +9,12 @@ extension AppLocalizationsX on BuildContext {
 // list of locales which are enabled for auth app.
 // Add more language to the list only when at least 90% of the strings are
 // translated in the corresponding language.
-const List<Locale> appSupportedLocales = kDebugMode
-    ? <Locale>[
-        Locale('en'),
-        Locale('es'),
-        Locale('fr'),
-        Locale("nl"),
-        Locale("zh", "CN"),
-      ]
-    : <Locale>[
-        Locale('en'),
-        Locale('es'),
-        Locale("nl"),
-        Locale("zh", "CN"),
-      ];
+const List<Locale> appSupportedLocales = <Locale>[
+  Locale('en'),
+  Locale('es'),
+  Locale("nl"),
+  Locale("zh", "CN"),
+];
 
 Locale localResolutionCallBack(locales, supportedLocales) {
   for (Locale locale in locales) {
