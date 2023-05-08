@@ -22,12 +22,12 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import {
     getLocalCollections,
     getNonEmptyCollections,
-} from './collectionService';
-import downloadManager from './downloadManager';
-import { getLocalFiles } from './fileService';
+} from '../collectionService';
+import downloadManager from '../downloadManager';
+import { getLocalFiles } from '../fileService';
 import { EnteFile } from 'types/file';
 
-import { decodeLivePhoto } from './livePhotoService';
+import { decodeLivePhoto } from '../livePhotoService';
 import {
     generateStreamFromArrayBuffer,
     getFileExtension,
@@ -35,8 +35,8 @@ import {
     mergeMetadata,
 } from 'utils/file';
 
-import { updateFileCreationDateInEXIF } from './upload/exifService';
-import QueueProcessor from './queueProcessor';
+import { updateFileCreationDateInEXIF } from '../upload/exifService';
+import QueueProcessor from '../queueProcessor';
 import { Collection } from 'types/collection';
 import {
     CollectionIDNameMap,
@@ -54,7 +54,7 @@ import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
 import { addLogLine } from 'utils/logging';
 import { t } from 'i18next';
-import { eventBus, Events } from './events';
+import { eventBus, Events } from '../events';
 import { getCollectionNameMap } from 'utils/collection';
 
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';

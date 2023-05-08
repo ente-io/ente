@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { t } from 'i18next';
 
 import ExportModal from 'components/ExportModal';
-import exportService from 'services/exportService';
+import exportService from 'services/export';
 import isElectron from 'is-electron';
 import { AppContext } from 'pages/_app';
 import EnteSpinner from 'components/EnteSpinner';
