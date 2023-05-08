@@ -219,11 +219,9 @@ export default function Uploader(props: Props) {
                     try {
                         addLogLine(`uploading dropped files from desktop app`);
                         // check and parse dropped files which are zip files
-
                         const electronFiles = [
                             ...(await Promise.all(
                                 props.dragAndDropFiles.map(async (file) => {
-                                    addLogLine(`dropped file - ${file.name}`);
                                     if (file.name.endsWith('.zip')) {
                                         const zipFiles =
                                             await importService.getElectronFilesFromGoogleZip(
