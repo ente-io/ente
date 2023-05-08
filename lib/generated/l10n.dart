@@ -6793,16 +6793,6 @@ class S {
     );
   }
 
-  /// `Custom radius`
-  String get customRadius {
-    return Intl.message(
-      'Custom radius',
-      name: 'customRadius',
-      desc: 'Custom radius for location tag',
-      args: [],
-    );
-  }
-
   /// `km`
   String get distanceInKMUnit {
     return Intl.message(
@@ -6931,6 +6921,27 @@ class S {
       'Edit location',
       name: 'editLocationTagTitle',
       desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set`
+  String get setLabel {
+    return Intl.message(
+      'Set',
+      name: 'setLabel',
+      desc:
+          'Label of confirm button to add a new custom radius to the radius selector of a location tag',
+      args: [],
+    );
+  }
+
+  /// `Set radius`
+  String get setRadius {
+    return Intl.message(
+      'Set radius',
+      name: 'setRadius',
+      desc: 'Custom radius for location tag',
       args: [],
     );
   }

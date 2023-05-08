@@ -420,7 +420,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("Current usage is "),
         "custom": MessageLookupByLibrary.simpleMessage("Custom"),
-        "customRadius": MessageLookupByLibrary.simpleMessage("Custom radius"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("Dark"),
         "dayToday": MessageLookupByLibrary.simpleMessage("Today"),
         "dayYesterday": MessageLookupByLibrary.simpleMessage("Yesterday"),
@@ -1003,8 +1002,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Session expired"),
         "setAPassword": MessageLookupByLibrary.simpleMessage("Set a password"),
         "setAs": MessageLookupByLibrary.simpleMessage("Set as"),
+        "setLabel": MessageLookupByLibrary.simpleMessage("Set"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Set password"),
+        "setRadius": MessageLookupByLibrary.simpleMessage("Set radius"),
         "setupComplete": MessageLookupByLibrary.simpleMessage("Setup complete"),
         "share": MessageLookupByLibrary.simpleMessage("Share"),
         "shareALink": MessageLookupByLibrary.simpleMessage("Share a link"),

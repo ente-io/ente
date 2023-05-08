@@ -424,8 +424,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("El uso actual es "),
         "custom": MessageLookupByLibrary.simpleMessage("Personalizado"),
-        "customRadius":
-            MessageLookupByLibrary.simpleMessage("Radio personalizado"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("Oscuro"),
         "dayToday": MessageLookupByLibrary.simpleMessage("Hoy"),
         "dayYesterday": MessageLookupByLibrary.simpleMessage("Ayer"),
