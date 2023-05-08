@@ -245,6 +245,7 @@ export default function Uploader(props: Props) {
                         setElectronFiles(electronFiles);
                     } catch (e) {
                         logError(e, 'failed to upload desktop dropped files');
+                        setWebFiles(props.dragAndDropFiles);
                     }
                 };
                 main();
