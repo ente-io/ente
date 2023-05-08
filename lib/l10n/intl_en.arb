@@ -945,10 +945,6 @@
   "saving": "Saving...",
   "editsSaved": "Edits saved",
   "oopsCouldNotSaveEdits": "Oops, could not save edits",
-  "customRadius": "Custom radius",
-  "@customRadius": {
-    "description": "Custom radius for location tag"
-  },
   "distanceInKMUnit": "km",
   "@distanceInKMUnit": {
     "description": "Unit for distance in km"
@@ -970,5 +966,10 @@
   "appVersion": "Version: {versionValue}",
   "verifyIDLabel" : "Verify",
   "fileInfoAddDescHint": "Add a description...",
-  "editLocationTagTitle": "Edit location"
+  "editLocationTagTitle": "Edit location",
+  "setLabel": "Set",
+  "@setLabel": {
+    "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
+  },
+  "setRadius": "Set radius",
 }
