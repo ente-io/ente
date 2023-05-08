@@ -112,10 +112,10 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
 
     items.add(
       ChangeLogEntry(
-        "Languages",
-        "Thanks to the help from our community, we can now speak French, "
-            "Dutch, and Simplified Chinese.\n\nTo change your preferred "
-            "language, go to  Settings -> General -> Language",
+        "Language",
+        "Thanks to the help from our community, we can now speak Spanish,"
+            " Dutch, and Simplified Chinese.\n\nTo change language, go to "
+            "Settings -> General -> Language",
       ),
     );
     //You can now specify a custom radius while creating Location tags.
