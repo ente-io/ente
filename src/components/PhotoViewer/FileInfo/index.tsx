@@ -99,7 +99,10 @@ export function FileInfo({
 
     const location = useMemo(() => {
         if (file && file.metadata) {
-            if (file.metadata.longitude || file.metadata.longitude === 0) {
+            if (
+                (file.metadata.latitude || file.metadata.latitude === 0) &&
+                !(file.metadata.longitude === 0 && file.metadata.latitude === 0)
+            ) {
                 return {
                     latitude: file.metadata.latitude,
                     longitude: file.metadata.longitude,
@@ -108,7 +111,10 @@ export function FileInfo({
         }
         if (exif) {
             const exifLocation = getEXIFLocation(exif);
-            if (exifLocation.latitude || exifLocation.latitude === 0) {
+            if (
+                (exifLocation.latitude || exifLocation.latitude === 0) &&
+                !(exifLocation.longitude === 0 && exifLocation.latitude === 0)
+            ) {
                 return exifLocation;
             }
         }
