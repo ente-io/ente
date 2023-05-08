@@ -1001,7 +1001,10 @@ export async function getCollectionSummaries(
 
     const favCollection = await getFavCollection();
     if (favCollection) {
-        collectionSummaries.get(favCollection.id).name = t('FAVORITES');
+        const favoriteEntry = collectionSummaries.get(favCollection.id);
+        if (favoriteEntry) {
+            collectionSummaries.get(favCollection.id).name = t('FAVORITES');
+        }
     }
 
     collectionSummaries.set(
