@@ -113,7 +113,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     items.add(
       ChangeLogEntry(
         "Language",
-        "Thanks to the help from our community, we can now speak French,"
+        "Thanks to the help from our community, we can now speak Spanish,"
             " Dutch, and Simplified Chinese.\n\nTo change language, go to "
             "Settings -> General -> Language",
       ),
