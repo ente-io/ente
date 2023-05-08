@@ -231,6 +231,14 @@ export default function Uploader(props: Props) {
                                 );
                                 electronFiles.push(...zipFiles);
                             } else {
+                                // type cast to ElectronFile as the file is dropped from desktop app
+                                // type file and ElectronFile should be interchangeable, but currently they have some differences.
+                                // Typescript is giving error
+                                // Conversion of type 'File' to type 'ElectronFile' may be a mistake because neither type sufficiently
+                                // overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+                                // Type 'File' is missing the following properties from type 'ElectronFile': path, blob
+                                // for now patching by type casting first to unknown and then to ElectronFile
+                                // TODO: fix types and remove type cast
                                 electronFiles.push(
                                     file as unknown as ElectronFile
                                 );
