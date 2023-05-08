@@ -1,4 +1,3 @@
-
 import "dart:async";
 
 import "package:flutter/foundation.dart";
@@ -8,7 +7,8 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_selections_event.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/selected_files.dart";
-import "package:photos/ui/viewer/gallery/component/lazy_loading_gallery.dart";
+import "package:photos/ui/viewer/gallery/component/non_recyclable_view_widget.dart";
+import "package:photos/ui/viewer/gallery/component/recyclable_view_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
 class LazyLoadingGridView extends StatefulWidget {
