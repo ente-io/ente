@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
@@ -14,10 +13,9 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/huge_listview/huge_listview.dart';
-import 'package:photos/ui/huge_listview/lazy_loading_gallery.dart';
+import "package:photos/ui/viewer/gallery/component/gallery_list_view_widget.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/date_time_util.dart';
-import 'package:photos/utils/local_settings.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 typedef GalleryLoader = Future<FileLoadResult> Function(
@@ -79,18 +77,17 @@ class _GalleryState extends State<Gallery> {
   late Logger _logger;
   List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
-  ItemScrollController? _itemScroller;
+  late ItemScrollController _itemScroller;
   StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
-  String? _logTag;
-  late int _photoGridSize;
+  late String _logTag;
 
   @override
   void initState() {
     _logTag =
         "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}";
-    _logger = Logger(_logTag!);
+    _logger = Logger(_logTag);
     _logger.finest("init Gallery");
     _itemScroller = ItemScrollController();
     if (widget.reloadEvent != null) {
@@ -112,7 +109,7 @@ class _GalleryState extends State<Gallery> {
       // todo: Assign ID to Gallery and fire generic event with ID &
       //  target index/date
       if (mounted && event.selectedIndex == 0) {
-        _itemScroller!.scrollTo(
+        _itemScroller.scrollTo(
           index: 0,
           duration: const Duration(milliseconds: 150),
         );
@@ -209,89 +206,24 @@ class _GalleryState extends State<Gallery> {
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
     }
-    _photoGridSize = LocalSettings.instance.getPhotoGridSize();
-    return _getListView();
-  }
-
-  Widget _getListView() {
-    return HugeListView<List<File>>(
-      key: _hugeListViewKey,
-      controller: _itemScroller,
-      startIndex: 0,
-      totalCount: _collatedFiles.length,
-      isDraggableScrollbarEnabled: _collatedFiles.length > 10,
+    return GalleryListView(
+      hugeListViewKey: _hugeListViewKey,
+      itemScroller: _itemScroller,
+      collatedFiles: _collatedFiles,
       disableScroll: widget.disableScroll,
-      waitBuilder: (_) {
-        return const EnteLoadingWidget();
-      },
-      emptyResultBuilder: (_) {
-        final List<Widget> children = [];
-        if (widget.header != null) {
-          children.add(widget.header!);
-        }
-        children.add(
-          Expanded(
-            child: widget.emptyState,
-          ),
-        );
-        if (widget.footer != null) {
-          children.add(widget.footer!);
-        }
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: children,
-        );
-      },
-      itemBuilder: (context, index) {
-        Widget gallery;
-        gallery = LazyLoadingGallery(
-          _collatedFiles[index],
-          index,
-          widget.reloadEvent,
-          widget.removalEventTypes,
-          widget.asyncLoader,
-          widget.selectedFiles,
-          widget.tagPrefix,
-          Bus.instance
-              .on<GalleryIndexUpdatedEvent>()
-              .where((event) => event.tag == widget.tagPrefix)
-              .map((event) => event.index),
-          widget.shouldCollateFilesByDay,
-          logTag: _logTag,
-          photoGirdSize: _photoGridSize,
-          limitSelectionToOne: widget.limitSelectionToOne,
-        );
-        if (widget.header != null && index == 0) {
-          gallery = Column(children: [widget.header!, gallery]);
-        }
-        if (widget.footer != null && index == _collatedFiles.length - 1) {
-          gallery = Column(children: [gallery, widget.footer!]);
-        }
-        return gallery;
-      },
-      labelTextBuilder: (int index) {
-        try {
-          return getMonthAndYear(
-            DateTime.fromMicrosecondsSinceEpoch(
-              _collatedFiles[index][0].creationTime!,
-            ),
-          );
-        } catch (e) {
-          _logger.severe("label text builder failed", e);
-          return "";
-        }
-      },
-      thumbBackgroundColor:
-          Theme.of(context).colorScheme.galleryThumbBackgroundColor,
-      thumbDrawColor: Theme.of(context).colorScheme.galleryThumbDrawColor,
-      thumbPadding: widget.header != null
-          ? const EdgeInsets.only(top: 60)
-          : const EdgeInsets.all(0),
-      bottomSafeArea: widget.scrollBottomSafeArea,
-      firstShown: (int firstIndex) {
-        Bus.instance
-            .fire(GalleryIndexUpdatedEvent(widget.tagPrefix, firstIndex));
-      },
+      emptyState: widget.emptyState,
+      asyncLoader: widget.asyncLoader,
+      removalEventTypes: widget.removalEventTypes,
+      tagPrefix: widget.tagPrefix,
+      scrollBottomSafeArea: widget.scrollBottomSafeArea,
+      limitSelectionToOne: widget.limitSelectionToOne,
+      shouldCollateFilesByDay: widget.shouldCollateFilesByDay,
+      logTag: _logTag,
+      logger: _logger,
+      reloadEvent: widget.reloadEvent,
+      header: widget.header,
+      footer: widget.footer,
+      selectedFiles: widget.selectedFiles,
     );
   }
 
