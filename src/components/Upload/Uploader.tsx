@@ -214,8 +214,50 @@ export default function Uploader(props: Props) {
             addLogLine(`received file upload request`);
             setWebFiles(props.webFileSelectorFiles);
         } else if (props.dragAndDropFiles?.length > 0) {
-            addLogLine(`received drag and drop upload request`);
-            setWebFiles(props.dragAndDropFiles);
+            if (isElectron()) {
+                const main = async () => {
+                    try {
+                        addLogLine(`uploading dropped files from desktop app`);
+                        // check and parse dropped files which are zip files
+                        let electronFiles = [] as ElectronFile[];
+                        for (const file of props.dragAndDropFiles) {
+                            if (file.name.endsWith('.zip')) {
+                                const zipFiles =
+                                    await importService.getElectronFilesFromGoogleZip(
+                                        (file as any).path
+                                    );
+                                addLogLine(
+                                    `zip file - ${file.name} contains ${zipFiles.length} files`
+                                );
+                                electronFiles = [...electronFiles, ...zipFiles];
+                            } else {
+                                // type cast to ElectronFile as the file is dropped from desktop app
+                                // type file and ElectronFile should be interchangeable, but currently they have some differences.
+                                // Typescript is giving error
+                                // Conversion of type 'File' to type 'ElectronFile' may be a mistake because neither type sufficiently
+                                // overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+                                // Type 'File' is missing the following properties from type 'ElectronFile': path, blob
+                                // for now patching by type casting first to unknown and then to ElectronFile
+                                // TODO: fix types and remove type cast
+                                electronFiles.push(
+                                    file as unknown as ElectronFile
+                                );
+                            }
+                        }
+                        addLogLine(
+                            `uploading dropped files from desktop app - ${electronFiles.length} files found`
+                        );
+                        setElectronFiles(electronFiles);
+                    } catch (e) {
+                        logError(e, 'failed to upload desktop dropped files');
+                        setWebFiles(props.dragAndDropFiles);
+                    }
+                };
+                main();
+            } else {
+                addLogLine(`uploading dropped files from web app`);
+                setWebFiles(props.dragAndDropFiles);
+            }
         }
     }, [
         props.dragAndDropFiles,
