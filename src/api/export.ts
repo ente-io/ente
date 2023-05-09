@@ -12,15 +12,6 @@ export const checkExistsAndCreateDir = async (dirPath: string) => {
     }
 };
 
-export const checkExistsAndRename = async (
-    oldDirPath: string,
-    newDirPath: string
-) => {
-    if (fs.existsSync(oldDirPath)) {
-        await fs.rename(oldDirPath, newDirPath);
-    }
-};
-
 export const saveStreamToDisk = async (
     filePath: string,
     fileStream: ReadableStream<Uint8Array>

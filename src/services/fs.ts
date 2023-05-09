@@ -241,3 +241,40 @@ export async function readTextFile(filePath: string) {
     }
     return await fs.readFile(filePath, 'utf-8');
 }
+
+export async function moveFile(
+    sourcePath: string,
+    destinationPath: string
+): Promise<void> {
+    if (!existsSync(sourcePath)) {
+        throw new Error('File does not exist');
+    }
+    if (existsSync(destinationPath)) {
+        throw new Error('Destination file already exists');
+    }
+    // check if destination folder exists
+    const destinationFolder = path.dirname(destinationPath);
+    if (!existsSync(destinationFolder)) {
+        await fs.mkdir(destinationFolder, { recursive: true });
+    }
+    await fs.rename(sourcePath, destinationPath);
+}
+
+export async function deleteFolder(folderPath: string): Promise<void> {
+    if (!existsSync(folderPath)) {
+        return;
+    }
+    // check if folder is empty
+    const files = await fs.readdir(folderPath);
+    if (files.length > 0) {
+        throw new Error('Folder is not empty');
+    }
+    await fs.rmdir(folderPath);
+}
+
+export async function rename(oldPath: string, newPath: string) {
+    if (!existsSync(oldPath)) {
+        throw new Error('Path does not exist');
+    }
+    await fs.rename(oldPath, newPath);
+}
