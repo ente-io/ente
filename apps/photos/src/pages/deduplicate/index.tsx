@@ -28,6 +28,7 @@ import { syncCollections } from 'services/collectionService';
 import EnteSpinner from 'components/EnteSpinner';
 import VerticallyCentered from 'components/Container';
 import { Collection } from 'types/collection';
+import Typography from '@mui/material/Typography';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
@@ -179,15 +180,23 @@ export default function Deduplicate() {
                     })}
                 </Info>
             )}
-            <PhotoFrame
-                files={duplicateFiles}
-                collections={collections}
-                syncWithRemote={syncWithRemote}
-                setSelected={setSelected}
-                selected={selected}
-                activeCollection={ALL_SECTION}
-                isDeduplicating
-            />
+            {duplicateFiles.length === 0 ? (
+                <VerticallyCentered>
+                    <Typography variant="large" color="text.muted">
+                        {t('NO_DUPLICATES_FOUND')}
+                    </Typography>
+                </VerticallyCentered>
+            ) : (
+                <PhotoFrame
+                    files={duplicateFiles}
+                    collections={collections}
+                    syncWithRemote={syncWithRemote}
+                    setSelected={setSelected}
+                    selected={selected}
+                    activeCollection={ALL_SECTION}
+                    isDeduplicating
+                />
+            )}
             <DeduplicateOptions
                 deleteFileHelper={deleteFileHelper}
                 count={selected.count}

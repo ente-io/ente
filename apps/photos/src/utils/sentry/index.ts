@@ -20,7 +20,7 @@ export const logError = async (
         );
     }
     Sentry.captureException(err, {
-        level: Sentry.Severity.Info,
+        level: 'info',
         user: { id: await getSentryUserID() },
         contexts: {
             ...(info && {

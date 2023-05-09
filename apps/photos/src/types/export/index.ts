@@ -1,7 +1,5 @@
 import { ExportStage } from 'constants/export';
 
-export type CollectionIDNameMap = Map<number, string>;
-export type CollectionIDPathMap = Map<number, string>;
 export interface ExportProgress {
     success: number;
     failed: number;
@@ -10,28 +8,54 @@ export interface ExportProgress {
 export interface ExportedCollectionPaths {
     [collectionID: number]: string;
 }
+
+export interface CollectionExportNames {
+    [ID: number]: string;
+}
+
+export interface FileExportNames {
+    [ID: string]: string;
+}
+
 export interface FileExportStats {
     totalCount: number;
     pendingCount: number;
 }
 
+export interface ExportRecordV0 {
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    progress: ExportProgress;
+    queuedFiles: string[];
+    exportedFiles: string[];
+    failedFiles: string[];
+}
+
 export interface ExportRecordV1 {
-    version?: number;
-    stage?: ExportStage;
-    lastAttemptTimestamp?: number;
-    progress?: ExportProgress;
-    queuedFiles?: string[];
-    exportedFiles?: string[];
-    failedFiles?: string[];
-    exportedCollectionPaths?: ExportedCollectionPaths;
+    version: number;
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    progress: ExportProgress;
+    queuedFiles: string[];
+    exportedFiles: string[];
+    failedFiles: string[];
+    exportedCollectionPaths: ExportedCollectionPaths;
+}
+
+export interface ExportRecordV2 {
+    version: number;
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    exportedFiles: string[];
+    exportedCollectionPaths: ExportedCollectionPaths;
 }
 
 export interface ExportRecord {
     version: number;
     stage: ExportStage;
     lastAttemptTimestamp: number;
-    exportedFiles: string[];
-    exportedCollectionPaths: ExportedCollectionPaths;
+    collectionExportNames: CollectionExportNames;
+    fileExportNames: FileExportNames;
 }
 
 export interface ExportSettings {
@@ -40,8 +64,8 @@ export interface ExportSettings {
 }
 
 export interface ExportUIUpdaters {
-    updateExportStage: (stage: ExportStage) => Promise<void>;
-    updateExportProgress: (progress: ExportProgress) => void;
-    updateFileExportStats: (fileExportStats: FileExportStats) => void;
-    updateLastExportTime: (exportTime: number) => Promise<void>;
+    setExportStage: (stage: ExportStage) => void;
+    setExportProgress: (progress: ExportProgress) => void;
+    setFileExportStats: (fileExportStats: FileExportStats) => void;
+    setLastExportTime: (exportTime: number) => void;
 }

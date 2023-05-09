@@ -1,12 +1,7 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState, useContext } from 'react';
-import exportService from 'services/exportService';
-import {
-    ExportProgress,
-    ExportRecord,
-    ExportSettings,
-    FileExportStats,
-} from 'types/export';
+import exportService from 'services/export';
+import { ExportProgress, ExportSettings, FileExportStats } from 'types/export';
 import {
     Box,
     Button,
@@ -19,7 +14,6 @@ import {
     Typography,
 } from '@mui/material';
 import { logError } from 'utils/sentry';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { SpaceBetweenFlex, VerticallyCenteredFlex } from './Container';
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
@@ -74,91 +68,60 @@ export default function ExportModal(props: Props) {
         if (!isElectron()) {
             return;
         }
-        const main = async () => {
-            try {
-                exportService.setUIUpdaters({
-                    updateExportStage: updateExportStage,
-                    updateExportProgress: setExportProgress,
-                    updateFileExportStats: setFileExportStats,
-                    updateLastExportTime: updateExportTime,
-                });
-                const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
-                setExportFolder(exportSettings?.folder);
-                setContinuousExport(exportSettings?.continuousExport);
-                const exportRecord = await syncExportRecord(exportFolder);
-                if (exportRecord?.stage === ExportStage.INPROGRESS) {
-                    startExport();
-                }
-                if (exportSettings?.continuousExport) {
-                    exportService.enableContinuousExport();
-                }
-            } catch (e) {
-                logError(e, 'export on mount useEffect failed');
-            }
-        };
-        void main();
+        try {
+            exportService.setUIUpdaters({
+                setExportStage,
+                setExportProgress,
+                setFileExportStats,
+                setLastExportTime,
+            });
+            const exportSettings: ExportSettings =
+                exportService.getExportSettings();
+            setExportFolder(exportSettings?.folder);
+            setContinuousExport(exportSettings?.continuousExport);
+            void syncExportRecord(exportSettings?.folder);
+        } catch (e) {
+            logError(e, 'export on mount useEffect failed');
+        }
     }, []);
 
     useEffect(() => {
         if (!props.show) {
             return;
         }
-        void syncFileCounts();
+        void syncExportRecord(exportFolder);
     }, [props.show]);
 
     // =============
     // STATE UPDATERS
     // ==============
     const updateExportFolder = (newFolder: string) => {
-        const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
-        const updatedExportSettings: ExportSettings = {
-            ...exportSettings,
-            folder: newFolder,
-        };
-        setData(LS_KEYS.EXPORT, updatedExportSettings);
+        exportService.updateExportSettings({ folder: newFolder });
         setExportFolder(newFolder);
     };
 
     const updateContinuousExport = (updatedContinuousExport: boolean) => {
-        const exportSettings: ExportSettings = getData(LS_KEYS.EXPORT);
-        const updatedExportSettings: ExportSettings = {
-            ...exportSettings,
+        exportService.updateExportSettings({
             continuousExport: updatedContinuousExport,
-        };
-        setData(LS_KEYS.EXPORT, updatedExportSettings);
-        setContinuousExport(updatedContinuousExport);
-    };
-
-    const updateExportStage = async (newStage: ExportStage) => {
-        setExportStage(newStage);
-        await exportService.updateExportRecord({ stage: newStage });
-    };
-
-    const updateExportTime = async (newTime: number) => {
-        setLastExportTime(newTime);
-        await exportService.updateExportRecord({
-            lastAttemptTimestamp: newTime,
         });
+        setContinuousExport(updatedContinuousExport);
     };
 
     // ======================
     // HELPER FUNCTIONS
     // =======================
 
-    const onExportFolderChange = async (newFolder: string) => {
+    const onExportFolderChange = (newFolder: string) => {
         try {
             updateExportFolder(newFolder);
-            syncExportRecord(newFolder);
+            void syncExportRecord(newFolder);
         } catch (e) {
             logError(e, 'onExportChange failed');
-            throw e;
         }
     };
 
     const verifyExportFolderExists = () => {
-        const exportFolder = getData(LS_KEYS.EXPORT)?.folder;
-        const exportFolderExists = exportService.exists(exportFolder);
-        if (!exportFolderExists) {
+        if (!exportFolder || !exportService.exists(exportFolder)) {
             appContext.setDialogMessage(
                 getExportDirectoryDoesNotExistMessage()
             );
@@ -166,33 +129,19 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const syncExportRecord = async (
-        exportFolder: string
-    ): Promise<ExportRecord> => {
+    const syncExportRecord = async (exportFolder: string): Promise<void> => {
         try {
             const exportRecord = await exportService.getExportRecord(
                 exportFolder
             );
-            if (!exportRecord) {
-                setExportStage(ExportStage.INIT);
-                return null;
-            }
-            setExportStage(exportRecord.stage);
-            setLastExportTime(exportRecord.lastAttemptTimestamp);
-            void syncFileCounts();
-            return exportRecord;
-        } catch (e) {
-            logError(e, 'syncExportRecord failed');
-            throw e;
-        }
-    };
-
-    const syncFileCounts = async () => {
-        try {
-            const fileExportStats = await exportService.getFileExportStats();
+            setExportStage(exportRecord?.stage ?? ExportStage.INIT);
+            setLastExportTime(exportRecord?.lastAttemptTimestamp ?? 0);
+            const fileExportStats = await exportService.getFileExportStats(
+                exportRecord
+            );
             setFileExportStats(fileExportStats);
         } catch (e) {
-            logError(e, 'error updating file counts');
+            logError(e, 'syncExportRecord failed');
         }
     };
 
@@ -225,7 +174,7 @@ export default function ExportModal(props: Props) {
     const startExport = () => {
         try {
             verifyExportFolderExists();
-            exportService.runExport();
+            exportService.scheduleExport();
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 logError(e, 'startExport failed');
@@ -257,7 +206,7 @@ export default function ExportModal(props: Props) {
                     <Typography color="text.muted">
                         {t('TOTAL_ITEMS')}
                     </Typography>
-                    <Typography color="text.muted">
+                    <Typography>
                         {formatNumber(fileExportStats.totalCount)}
                     </Typography>
                 </SpaceBetweenFlex>

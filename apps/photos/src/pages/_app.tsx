@@ -73,6 +73,8 @@ import {
     CLIENT_PACKAGE_NAMES,
     getAppNameAndTitle,
 } from 'constants/apps';
+import exportService from 'services/export';
+import { ExportStage } from 'constants/export';
 import { REDIRECTS } from 'constants/redirects';
 
 const redirectMap = new Map([
@@ -118,7 +120,6 @@ type AppContextType = {
     somethingWentWrong: () => void;
     setDialogBoxAttributesV2: (attributes: DialogBoxAttributesV2) => void;
 };
-// trigger build
 
 export const AppContext = createContext<AppContextType>(null);
 
@@ -242,6 +243,42 @@ export default function App(props) {
             eventBus.on(Events.LOGOUT, () => {
                 setMlSearchEnabled(false);
                 mlWorkManager.setMlSearchEnabled(false);
+            });
+        } catch (e) {
+            logError(e, 'Error while subscribing to logout event');
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!isElectron()) {
+            return;
+        }
+        const initExport = async () => {
+            try {
+                addLogLine('init export');
+                const exportSettings = exportService.getExportSettings();
+                const exportRecord = await exportService.getExportRecord(
+                    exportSettings?.folder
+                );
+                await exportService.runMigration(
+                    exportSettings?.folder,
+                    exportRecord
+                );
+                if (exportSettings?.continuousExport) {
+                    exportService.enableContinuousExport();
+                }
+                if (exportRecord?.stage === ExportStage.INPROGRESS) {
+                    addLogLine('export was in progress, resuming');
+                    exportService.scheduleExport();
+                }
+            } catch (e) {
+                logError(e, 'init export failed');
+            }
+        };
+        initExport();
+        try {
+            eventBus.on(Events.LOGOUT, () => {
+                exportService.disableContinuousExport();
             });
         } catch (e) {
             logError(e, 'Error while subscribing to logout event');
@@ -375,7 +412,7 @@ export default function App(props) {
     const somethingWentWrong = () =>
         setDialogMessage({
             title: t('ERROR'),
-            close: { variant: 'error' },
+            close: { variant: 'critical' },
             content: t('UNKNOWN_ERROR'),
         });
 

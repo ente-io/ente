@@ -1,8 +1,7 @@
-import React, { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { t } from 'i18next';
 
-import ExportModal from 'components/ExportModal';
-import exportService from 'services/exportService';
+import exportService from 'services/export';
 import isElectron from 'is-electron';
 import { AppContext } from 'pages/_app';
 import EnteSpinner from 'components/EnteSpinner';
@@ -11,21 +10,21 @@ import { NoStyleAnchor } from 'components/pages/sharedAlbum/GoToEnte';
 import { openLink } from 'utils/common';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { Typography } from '@mui/material';
+import { GalleryContext } from 'pages/gallery';
 import { REDIRECTS, getRedirectURL } from 'constants/redirects';
 
 export default function HelpSection() {
-    const [exportModalView, setExportModalView] = useState(false);
-
     const { setDialogMessage } = useContext(AppContext);
+    const { openExportModal } = useContext(GalleryContext);
 
     async function openRoadmapURL() {
         const roadmapRedirectURL = getRedirectURL(REDIRECTS.ROADMAP);
         openLink(roadmapRedirectURL, true);
     }
 
-    function openExportModal() {
+    function handleExportOpen() {
         if (isElectron()) {
-            setExportModalView(true);
+            openExportModal();
         } else {
             setDialogMessage(getDownloadAppMessage());
         }
@@ -50,7 +49,7 @@ export default function HelpSection() {
                 variant="secondary"
             />
             <EnteMenuItem
-                onClick={openExportModal}
+                onClick={handleExportOpen}
                 label={t('EXPORT')}
                 endIcon={
                     exportService.isExportInProgress() && (
@@ -58,10 +57,6 @@ export default function HelpSection() {
                     )
                 }
                 variant="secondary"
-            />
-            <ExportModal
-                show={exportModalView}
-                onHide={() => setExportModalView(false)}
             />
         </>
     );
