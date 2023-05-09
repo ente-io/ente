@@ -6945,6 +6945,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Family`
+  String get familyPlanPortalTitle {
+    return Intl.message(
+      'Family',
+      name: 'familyPlanPortalTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add 5 family members to your existing plan without paying extra.\n\nEach member gets their own private space, and cannot see each other's files unless they're shared.\n\nFamily plans are available to customers who have a paid ente subscription.\n\nSubscribe now to get started!`
+  String get familyPlanOverview {
+    return Intl.message(
+      'Add 5 family members to your existing plan without paying extra.\n\nEach member gets their own private space, and cannot see each other\'s files unless they\'re shared.\n\nFamily plans are available to customers who have a paid ente subscription.\n\nSubscribe now to get started!',
+      name: 'familyPlanOverview',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

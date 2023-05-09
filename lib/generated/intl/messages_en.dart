@@ -586,6 +586,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Failed to renew"),
         "failedToVerifyPaymentStatus": MessageLookupByLibrary.simpleMessage(
             "Failed to verify payment status"),
+        "familyPlanOverview": MessageLookupByLibrary.simpleMessage(
+            "Add 5 family members to your existing plan without paying extra.\n\nEach member gets their own private space, and cannot see each other\'s files unless they\'re shared.\n\nFamily plans are available to customers who have a paid ente subscription.\n\nSubscribe now to get started!"),
+        "familyPlanPortalTitle": MessageLookupByLibrary.simpleMessage("Family"),
         "familyPlans": MessageLookupByLibrary.simpleMessage("Family plans"),
         "faq": MessageLookupByLibrary.simpleMessage("FAQ"),
         "faqs": MessageLookupByLibrary.simpleMessage("FAQs"),
