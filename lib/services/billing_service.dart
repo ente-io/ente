@@ -8,6 +8,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
@@ -168,17 +169,13 @@ class BillingService {
     if (userDetails.subscription.productID == freeProductID) {
       await showErrorDialog(
         context,
-        "Family plans",
-        "Add 5 family members to your existing plan without paying extra.\n"
-            "\nEach member gets their own private space, and cannot see each "
-            "other's files unless they're shared.\n\nFamily plans are "
-            "available to customers who have a paid ente subscription.\n\n"
-            "Subscribe now to get started!",
+        S.of(context).familyPlans,
+        S.of(context).familyPlanOverview,
       );
       return;
     }
-    final dialog =
-        createProgressDialog(context, "Please wait...", isDismissible: true);
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait,
+        isDismissible: true);
     await dialog.show();
     try {
       final String jwtToken = await UserService.instance.getFamiliesToken();
@@ -187,7 +184,7 @@ class BillingService {
         MaterialPageRoute(
           builder: (BuildContext context) {
             return WebPage(
-              "Family",
+              S.of(context).familyPlanPortalTitle,
               '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist',
             );
           },
