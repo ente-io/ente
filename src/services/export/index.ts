@@ -75,6 +75,7 @@ export const NULL_EXPORT_RECORD: ExportRecord = {
 
 class ExportService {
     private electronAPIs: ElectronAPIs;
+    private exportSettings: ExportSettings;
     private exportInProgress: boolean = false;
     private reRunNeeded = false;
     private exportRecordUpdater = new QueueProcessor<ExportRecord>(1);
@@ -102,7 +103,11 @@ class ExportService {
 
     getExportSettings(): ExportSettings {
         try {
+            if (this.exportSettings) {
+                return this.exportSettings;
+            }
             const exportSettings = getData(LS_KEYS.EXPORT);
+            this.exportSettings = exportSettings;
             return exportSettings;
         } catch (e) {
             logError(e, 'getExportSettings failed');
@@ -114,6 +119,7 @@ class ExportService {
         try {
             const exportSettings = this.getExportSettings();
             const newSettings = { ...exportSettings, ...newData };
+            this.exportSettings = newSettings;
             setData(LS_KEYS.EXPORT, newSettings);
         } catch (e) {
             logError(e, 'updateExportSettings failed');
@@ -148,12 +154,17 @@ class ExportService {
     }
 
     private async updateExportStage(stage: ExportStage) {
-        await this.updateExportRecord({ stage });
+        const exportFolder = this.exportSettings?.folder;
+        await this.updateExportRecord({ stage }, exportFolder);
         this.uiUpdater.setExportStage(stage);
     }
 
     private async updateLastExportTime(exportTime: number) {
-        await this.updateExportRecord({ lastAttemptTimestamp: exportTime });
+        const exportFolder = this.exportSettings?.folder;
+        await this.updateExportRecord(
+            { lastAttemptTimestamp: exportTime },
+            exportFolder
+        );
         this.uiUpdater.setLastExportTime(exportTime);
     }
 
@@ -393,6 +404,10 @@ class ExportService {
                 exportRecord
             );
 
+            addLocalLog(
+                () =>
+                    `personal files:${personalFiles.length} unexported files: ${filesToExport.length}, deleted exported files: ${removedFileUIDs.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedExportedCollections.length}`
+            );
             let success = 0;
             let failed = 0;
             this.uiUpdater.setExportProgress({
@@ -900,7 +915,7 @@ class ExportService {
         }
     }
 
-    async updateExportRecord(newData: Partial<ExportRecord>, folder?: string) {
+    async updateExportRecord(newData: Partial<ExportRecord>, folder: string) {
         const response = this.exportRecordUpdater.queueUpRequest(() =>
             this.updateExportRecordHelper(folder, newData)
         );
@@ -912,9 +927,6 @@ class ExportService {
         newData: Partial<ExportRecord>
     ) {
         try {
-            if (!folder) {
-                folder = getData(LS_KEYS.EXPORT)?.folder;
-            }
             const exportRecord = await this.getExportRecord(folder);
             const newRecord: ExportRecord = { ...exportRecord, ...newData };
             await this.electronAPIs.saveFileToDisk(
@@ -936,7 +948,7 @@ class ExportService {
             this.verifyExportFolderExists(folder);
             const exportRecordJSONPath = `${folder}/${EXPORT_RECORD_FILE_NAME}`;
             if (!this.exists(exportRecordJSONPath)) {
-                return this.createEmptyExportRecord(folder);
+                return this.createEmptyExportRecord(exportRecordJSONPath);
             }
             const recordFile = await this.electronAPIs.readTextFile(
                 exportRecordJSONPath
@@ -1122,10 +1134,10 @@ class ExportService {
         }
     };
 
-    private createEmptyExportRecord = async (exportFolder: string) => {
+    private createEmptyExportRecord = async (exportRecordJSONPath: string) => {
         const exportRecord: ExportRecord = NULL_EXPORT_RECORD;
         await this.electronAPIs.saveFileToDisk(
-            `${exportFolder}/${EXPORT_RECORD_FILE_NAME}`,
+            exportRecordJSONPath,
             JSON.stringify(exportRecord, null, 2)
         );
         return exportRecord;
