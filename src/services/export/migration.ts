@@ -70,34 +70,25 @@ async function migrateExport(
         if (exportRecord.version === 0) {
             addLogLine('migrating export to version 1');
             await migrationV0ToV1(exportDir, exportRecord as ExportRecordV0);
-            exportRecord = await exportService.updateExportRecord(
-                {
-                    version: 1,
-                },
-                exportDir
-            );
+            exportRecord = await exportService.updateExportRecord(exportDir, {
+                version: 1,
+            });
             addLogLine('migration to version 1 complete');
         }
         if (exportRecord.version === 1) {
             addLogLine('migrating export to version 2');
             await migrationV1ToV2(exportRecord as ExportRecordV1, exportDir);
-            exportRecord = await exportService.updateExportRecord(
-                {
-                    version: 2,
-                },
-                exportDir
-            );
+            exportRecord = await exportService.updateExportRecord(exportDir, {
+                version: 2,
+            });
             addLogLine('migration to version 2 complete');
         }
         if (exportRecord.version === 2) {
             addLogLine('migrating export to version 3');
             await migrationV2ToV3(exportDir, exportRecord as ExportRecordV2);
-            exportRecord = await exportService.updateExportRecord(
-                {
-                    version: 3,
-                },
-                exportDir
-            );
+            exportRecord = await exportService.updateExportRecord(exportDir, {
+                version: 3,
+            });
             addLogLine('migration to version 3 complete');
         }
         addLogLine(`Record at latest version`);
@@ -174,7 +165,7 @@ async function migrationV2ToV3(
         fileExportNames,
         collectionExportNames,
     };
-    await exportService.updateExportRecord(updatedExportRecord, exportDir);
+    await exportService.updateExportRecord(exportDir, updatedExportRecord);
 }
 
 /*
@@ -267,7 +258,7 @@ async function removeDeprecatedExportRecordProperties(
     if (exportRecord?.failedFiles) {
         exportRecord.failedFiles = undefined;
     }
-    await exportService.updateExportRecord(exportRecord, exportDir);
+    await exportService.updateExportRecord(exportDir, exportRecord);
 }
 
 async function getCollectionExportNamesFromExportedCollectionPaths(
@@ -374,7 +365,7 @@ async function addCollectionExportedRecordV1(
             [collectionID]: collectionExportPath,
         };
 
-        await exportService.updateExportRecord(exportRecord, folder);
+        await exportService.updateExportRecord(folder, exportRecord);
     } catch (e) {
         logError(e, 'addCollectionExportedRecord failed');
         throw e;

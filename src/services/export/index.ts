@@ -155,16 +155,15 @@ class ExportService {
 
     private async updateExportStage(stage: ExportStage) {
         const exportFolder = this.getExportSettings()?.folder;
-        await this.updateExportRecord({ stage }, exportFolder);
+        await this.updateExportRecord(exportFolder, { stage });
         this.uiUpdater.setExportStage(stage);
     }
 
     private async updateLastExportTime(exportTime: number) {
         const exportFolder = this.getExportSettings()?.folder;
-        await this.updateExportRecord(
-            { lastAttemptTimestamp: exportTime },
-            exportFolder
-        );
+        await this.updateExportRecord(exportFolder, {
+            lastAttemptTimestamp: exportTime,
+        });
         this.uiUpdater.setLastExportTime(exportTime);
     }
 
@@ -843,7 +842,7 @@ class ExportService {
                 ...exportRecord.fileExportNames,
                 [fileUID]: fileExportName,
             };
-            await this.updateExportRecord(exportRecord, folder);
+            await this.updateExportRecord(folder, exportRecord);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 logError(e, 'addFileExportedRecord failed');
@@ -867,7 +866,7 @@ class ExportService {
                 [collectionID]: collectionExportName,
             };
 
-            await this.updateExportRecord(exportRecord, folder);
+            await this.updateExportRecord(folder, exportRecord);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 logError(e, 'addCollectionExportedRecord failed');
@@ -886,7 +885,7 @@ class ExportService {
                 )
             );
 
-            await this.updateExportRecord(exportRecord, folder);
+            await this.updateExportRecord(folder, exportRecord);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 logError(e, 'removeCollectionExportedRecord failed');
@@ -903,7 +902,7 @@ class ExportService {
                     ([key]) => key !== fileUID
                 )
             );
-            await this.updateExportRecord(exportRecord, folder);
+            await this.updateExportRecord(folder, exportRecord);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 logError(e, 'removeFileExportedRecord failed');
@@ -912,7 +911,7 @@ class ExportService {
         }
     }
 
-    async updateExportRecord(newData: Partial<ExportRecord>, folder: string) {
+    async updateExportRecord(folder: string, newData: Partial<ExportRecord>) {
         const response = this.exportRecordUpdater.queueUpRequest(() =>
             this.updateExportRecordHelper(folder, newData)
         );
