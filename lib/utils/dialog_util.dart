@@ -30,10 +30,10 @@ Future<ButtonResult?> showErrorDialog(
     title: title,
     body: body,
     isDismissible: isDismissable,
-    buttons: const [
+    buttons: [
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: "OK",
+        labelText: S.of(context).ok,
         isInAlert: true,
         buttonAction: ButtonAction.first,
       ),
