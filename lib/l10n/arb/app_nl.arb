@@ -98,6 +98,7 @@
   "scan": "Scannen",
   "scanACode": "Scan een code",
   "verify": "Verifiëren",
+  "verifyEmail": "Bevestig e-mail",
   "enterCodeHint": "Voer de 6-cijferige code van je verificatie-app in",
   "lostDeviceTitle": "Apparaat verloren?",
   "twoFactorAuthTitle": "Tweestapsverificatie",
@@ -173,6 +174,19 @@
   "privacyPolicyTitle": "Privacybeleid",
   "termsOfServicesTitle": "Voorwaarden",
   "encryption": "Encryptie",
+  "setPasswordTitle": "Wachtwoord instellen",
+  "changePasswordTitle": "Wachtwoord wijzigen",
+  "resetPasswordTitle": "Wachtwoord resetten",
+  "encryptionKeys": "Encryptiesleutels",
+  "passwordWarning": "Wij slaan dit wachtwoord niet op, dus als je het vergeet, <underline>kunnen we jouw gegevens niet ontsleutelen</underline>",
+  "enterPasswordToEncrypt": "Voer een wachtwoord in dat we kunnen gebruiken om je gegevens te versleutelen",
+  "enterNewPasswordToEncrypt": "Voer een nieuw wachtwoord in dat we kunnen gebruiken om je gegevens te versleutelen",
+  "passwordChangedSuccessfully": "Wachtwoord succesvol aangepast",
+  "generatingEncryptionKeys": "Encryptiesleutels worden gegenereerd...",
+  "continueLabel": "Doorgaan",
+  "insecureDevice": "Onveilig apparaat",
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Sorry, we konden geen beveiligde sleutels genereren op dit apparaat.\n\nMeld je aan vanaf een ander apparaat.",
+  "howItWorks": "Hoe het werkt",
   "ackPasswordLostWarning": "Ik begrijp dat als ik mijn wachtwoord verlies, ik mijn gegevens kan verliezen omdat mijn gegevens <underline>end-to-end versleuteld</underline> zijn.",
   "loginTerms": "Door op inloggen te klikken, ga ik akkoord met de <u-terms>gebruiksvoorwaarden</u-terms> en <u-policy>privacybeleid</u-policy>",
   "logInLabel": "Inloggen",
@@ -228,5 +242,26 @@
   "sorry": "Sorry",
   "importFailureDesc": "Kan het geselecteerde bestand niet analyseren.\nStuur een e-mail naar support@ente.io als u hulp nodig heeft!",
   "pendingSyncs": "Waarschuwing",
-  "pendingSyncsWarningBody": "Sommige van uw codes zijn niet geback-upt.\n\nZorg ervoor dat u een back-up voor deze codes heeft voordat u uitlogt."
+  "pendingSyncsWarningBody": "Sommige van uw codes zijn niet geback-upt.\n\nZorg ervoor dat u een back-up voor deze codes heeft voordat u uitlogt.",
+  "checkInboxAndSpamFolder": "Controleer je inbox (en spam) om verificatie te voltooien",
+  "tapToEnterCode": "Tik om code in te voeren",
+  "resendEmail": "E-mail opnieuw versturen",
+  "weHaveSendEmailTo": "We hebben een e-mail gestuurd naar <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "activeSessions": "Actieve sessies",
+  "somethingWentWrongPleaseTryAgain": "Er is iets fout gegaan, probeer het opnieuw",
+  "thisWillLogYouOutOfThisDevice": "Dit zal je uitloggen van dit apparaat!",
+  "thisWillLogYouOutOfTheFollowingDevice": "Dit zal je uitloggen van het volgende apparaat:",
+  "terminateSession": "Sessie beëindigen?",
+  "terminate": "Beëindigen",
+  "thisDevice": "Dit apparaat"
 }
