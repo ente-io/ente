@@ -65,6 +65,14 @@ const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
 export const ENTE_EXPORT_DIRECTORY = 'ente Photos';
 
+export const NULL_EXPORT_RECORD: ExportRecord = {
+    version: 3,
+    lastAttemptTimestamp: null,
+    stage: ExportStage.INIT,
+    fileExportNames: {},
+    collectionExportNames: {},
+};
+
 class ExportService {
     private electronAPIs: ElectronAPIs;
     private exportInProgress: boolean = false;
@@ -115,11 +123,13 @@ class ExportService {
 
     async runMigration(exportDir: string, exportRecord: ExportRecord) {
         try {
+            addLogLine('running migration');
             this.migrationInProgress = migrateExportJSON(
                 exportDir,
                 exportRecord
             );
             await this.migrationInProgress;
+            addLogLine('migration completed');
             this.migrationInProgress = null;
         } catch (e) {
             logError(e, 'migration failed');
@@ -263,7 +273,8 @@ class ExportService {
         }
     };
 
-    async preExport() {
+    async preExport(exportFolder: string) {
+        this.verifyExportFolderExists(exportFolder);
         this.stopExport = false;
         await this.updateExportStage(ExportStage.INPROGRESS);
         this.updateExportProgress({
@@ -274,14 +285,24 @@ class ExportService {
     }
 
     async postExport() {
-        await this.updateExportStage(ExportStage.FINISHED);
-        await this.updateLastExportTime(Date.now());
+        try {
+            const exportSettings = this.getExportSettings();
+            if (!this.exportFolderExists(exportSettings?.folder)) {
+                this.uiUpdater.setExportStage(ExportStage.INIT);
+                return;
+            }
+            await this.updateExportStage(ExportStage.FINISHED);
+            await this.updateLastExportTime(Date.now());
 
-        const exportSettings = this.getExportSettings();
-        const exportRecord = await this.getExportRecord(exportSettings?.folder);
+            const exportRecord = await this.getExportRecord(
+                exportSettings?.folder
+            );
 
-        const fileExportStats = await this.getFileExportStats(exportRecord);
-        this.uiUpdater.setFileExportStats(fileExportStats);
+            const fileExportStats = await this.getFileExportStats(exportRecord);
+            this.uiUpdater.setFileExportStats(fileExportStats);
+        } catch (e) {
+            logError(e, 'postExport failed');
+        }
     }
 
     async stopRunningExport() {
@@ -310,9 +331,11 @@ class ExportService {
                 this.migrationInProgress = null;
             }
             try {
-                await this.preExport();
+                const exportSettings = this.getExportSettings();
+                const exportFolder = exportSettings?.folder;
+                await this.preExport(exportFolder);
                 addLogLine('export started');
-                await this.runExport();
+                await this.runExport(exportFolder);
                 addLogLine('export completed');
             } finally {
                 this.exportInProgress = false;
@@ -330,12 +353,8 @@ class ExportService {
         }
     };
 
-    private async runExport() {
+    private async runExport(exportFolder: string) {
         try {
-            const exportSettings = this.getExportSettings();
-            if (!exportSettings?.folder) {
-                throw new Error(CustomError.NO_EXPORT_FOLDER_SELECTED);
-            }
             const user: User = getData(LS_KEYS.USER);
             const files = mergeMetadata(await getLocalFiles());
             const personalFiles = getPersonalFiles(files, user);
@@ -347,9 +366,7 @@ class ExportService {
                 user
             );
 
-            const exportRecord = await this.getExportRecord(
-                exportSettings.folder
-            );
+            const exportRecord = await this.getExportRecord(exportFolder);
             const collectionIDExportNameMap =
                 convertCollectionIDExportNameObjectToMap(
                     exportRecord.collectionExportNames
@@ -412,7 +429,7 @@ class ExportService {
             if (renamedCollections?.length > 0) {
                 addLogLine(`renaming ${renamedCollections.length} collections`);
                 this.collectionRenamer(
-                    exportSettings.folder,
+                    exportFolder,
                     collectionIDExportNameMap,
                     renamedCollections,
                     incrementSuccess,
@@ -423,7 +440,7 @@ class ExportService {
             if (removedFileUIDs?.length > 0) {
                 addLogLine(`trashing ${removedFileUIDs.length} files`);
                 await this.fileTrasher(
-                    exportSettings.folder,
+                    exportFolder,
                     collectionIDExportNameMap,
                     removedFileUIDs,
                     incrementSuccess,
@@ -436,7 +453,7 @@ class ExportService {
                     filesToExport,
                     collectionIDNameMap,
                     collectionIDExportNameMap,
-                    exportSettings.folder,
+                    exportFolder,
                     incrementSuccess,
                     incrementFailed
                 );
@@ -447,13 +464,16 @@ class ExportService {
                 );
                 await this.collectionRemover(
                     deletedExportedCollections,
-                    exportSettings.folder,
+                    exportFolder,
                     incrementSuccess,
                     incrementFailed
                 );
             }
         } catch (e) {
-            logError(e, 'runExport failed');
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'runExport failed');
+            }
+            throw e;
         }
     }
 
@@ -467,6 +487,7 @@ class ExportService {
         try {
             for (const collection of renamedCollections) {
                 try {
+                    this.verifyExportFolderExists(exportFolder);
                     const oldCollectionExportName =
                         collectionIDExportNameMap.get(collection.id);
                     const oldCollectionExportPath = getCollectionExportPath(
@@ -509,14 +530,17 @@ class ExportService {
                     logError(e, 'collectionRenamer failed a collection');
                     if (
                         e.message ===
-                        CustomError.ADD_FILE_EXPORTED_RECORD_FAILED
+                            CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
+                        e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST
                     ) {
                         throw e;
                     }
                 }
             }
         } catch (e) {
-            logError(e, 'collectionRenamer failed');
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'collectionRenamer failed');
+            }
             throw e;
         }
     }
@@ -535,6 +559,7 @@ class ExportService {
                 );
             for (const collectionID of deletedExportedCollectionIDs) {
                 try {
+                    this.verifyExportFolderExists(exportFolder);
                     addLocalLog(
                         () =>
                             `removing collection with id ${collectionID} from export folder`
@@ -571,14 +596,17 @@ class ExportService {
                     logError(e, 'collectionRemover failed a collection');
                     if (
                         e.message ===
-                        CustomError.ADD_FILE_EXPORTED_RECORD_FAILED
+                            CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
+                        e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST
                     ) {
                         throw e;
                     }
                 }
             }
         } catch (e) {
-            logError(e, 'collectionRemover failed');
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'collectionRemover failed');
+            }
             throw e;
         }
     }
@@ -605,6 +633,7 @@ class ExportService {
                     break;
                 }
                 try {
+                    this.verifyExportFolderExists(exportDir);
                     let collectionExportName = collectionIDFolderNameMap.get(
                         file.collectionID
                     );
@@ -624,18 +653,13 @@ class ExportService {
                             file.collectionID,
                             collectionExportName
                         );
-                    } else {
-                        const collectionExportPath = getCollectionExportPath(
-                            exportDir,
-                            collectionExportName
-                        );
-                        await this.electronAPIs.checkExistsAndCreateDir(
-                            collectionExportPath
-                        );
                     }
                     const collectionExportPath = getCollectionExportPath(
                         exportDir,
                         collectionExportName
+                    );
+                    await this.electronAPIs.checkExistsAndCreateDir(
+                        collectionExportPath
                     );
                     const fileExportName = await this.downloadAndSave(
                         collectionExportPath,
@@ -652,14 +676,17 @@ class ExportService {
                     logError(e, 'export failed for a file');
                     if (
                         e.message ===
-                        CustomError.ADD_FILE_EXPORTED_RECORD_FAILED
+                            CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
+                        e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST
                     ) {
                         throw e;
                     }
                 }
             }
         } catch (e) {
-            logError(e, 'fileExporter failed');
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'fileExporter failed');
+            }
             throw e;
         }
     }
@@ -677,6 +704,7 @@ class ExportService {
                 exportRecord.fileExportNames
             );
             for (const fileUID of removedFileUIDs) {
+                this.verifyExportFolderExists(exportDir);
                 addLocalLog(() => `trashing file with id ${fileUID}`);
                 if (this.stopExport) {
                     break;
@@ -773,14 +801,17 @@ class ExportService {
                     logError(e, 'trashing failed for a file');
                     if (
                         e.message ===
-                        CustomError.ADD_FILE_EXPORTED_RECORD_FAILED
+                            CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
+                        e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST
                     ) {
                         throw e;
                     }
                 }
             }
         } catch (e) {
-            logError(e, 'fileTrasher failed');
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'fileTrasher failed');
+            }
             throw e;
         }
     }
@@ -802,8 +833,10 @@ class ExportService {
             };
             await this.updateExportRecord(exportRecord, folder);
         } catch (e) {
-            logError(e, 'addFileExportedRecord failed');
-            throw Error(CustomError.ADD_FILE_EXPORTED_RECORD_FAILED);
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'addFileExportedRecord failed');
+            }
+            throw e;
         }
     }
 
@@ -824,8 +857,10 @@ class ExportService {
 
             await this.updateExportRecord(exportRecord, folder);
         } catch (e) {
-            logError(e, 'addCollectionExportedRecord failed');
-            throw Error(CustomError.ADD_FILE_EXPORTED_RECORD_FAILED);
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'addCollectionExportedRecord failed');
+            }
+            throw e;
         }
     }
 
@@ -841,8 +876,10 @@ class ExportService {
 
             await this.updateExportRecord(exportRecord, folder);
         } catch (e) {
-            logError(e, 'removeCollectionExportedRecord failed');
-            throw Error(CustomError.ADD_FILE_EXPORTED_RECORD_FAILED);
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'removeCollectionExportedRecord failed');
+            }
+            throw e;
         }
     }
 
@@ -856,8 +893,10 @@ class ExportService {
             );
             await this.updateExportRecord(exportRecord, folder);
         } catch (e) {
-            logError(e, 'removeFileExportedRecord failed');
-            throw Error(CustomError.ADD_FILE_EXPORTED_RECORD_FAILED);
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'removeFileExportedRecord failed');
+            }
+            throw e;
         }
     }
 
@@ -878,28 +917,35 @@ class ExportService {
             }
             const exportRecord = await this.getExportRecord(folder);
             const newRecord: ExportRecord = { ...exportRecord, ...newData };
-            await this.electronAPIs.setExportRecord(
+            await this.electronAPIs.saveFileToDisk(
                 `${folder}/${EXPORT_RECORD_FILE_NAME}`,
                 JSON.stringify(newRecord, null, 2)
             );
             return newRecord;
         } catch (e) {
+            if (e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                throw e;
+            }
             logError(e, 'error updating Export Record');
-            throw e;
+            throw Error(CustomError.UPDATE_EXPORTED_RECORD_FAILED);
         }
     }
 
     async getExportRecord(folder: string): Promise<ExportRecord> {
         try {
-            if (!folder || !this.exists(folder)) {
-                return null;
+            this.verifyExportFolderExists(folder);
+            const exportRecordJSONPath = `${folder}/${EXPORT_RECORD_FILE_NAME}`;
+            if (!this.exists(exportRecordJSONPath)) {
+                return this.createEmptyExportRecord(folder);
             }
-            const recordFile = await this.electronAPIs.getExportRecord(
-                `${folder}/${EXPORT_RECORD_FILE_NAME}`
+            const recordFile = await this.electronAPIs.readTextFile(
+                exportRecordJSONPath
             );
             return JSON.parse(recordFile);
         } catch (e) {
-            logError(e, 'export Record JSON parsing failed');
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'export Record JSON parsing failed');
+            }
             throw e;
         }
     }
@@ -909,6 +955,7 @@ class ExportService {
         collectionID: number,
         collectionIDNameMap: Map<number, string>
     ) {
+        this.verifyExportFolderExists(exportFolder);
         const collectionName = collectionIDNameMap.get(collectionID);
         const collectionExportName = getUniqueCollectionExportName(
             exportFolder,
@@ -1056,6 +1103,32 @@ class ExportService {
 
     checkExistsAndCreateDir = (path: string) => {
         return this.electronAPIs.checkExistsAndCreateDir(path);
+    };
+
+    exportFolderExists = (exportFolder: string) => {
+        return exportFolder && this.exists(exportFolder);
+    };
+
+    private verifyExportFolderExists = (exportFolder: string) => {
+        try {
+            if (!this.exportFolderExists(exportFolder)) {
+                throw Error(CustomError.EXPORT_FOLDER_DOES_NOT_EXIST);
+            }
+        } catch (e) {
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                logError(e, 'verifyExportFolderExists failed');
+            }
+            throw e;
+        }
+    };
+
+    private createEmptyExportRecord = async (exportFolder: string) => {
+        const exportRecord: ExportRecord = NULL_EXPORT_RECORD;
+        await this.electronAPIs.saveFileToDisk(
+            `${exportFolder}/${EXPORT_RECORD_FILE_NAME}`,
+            JSON.stringify(exportRecord, null, 2)
+        );
+        return exportRecord;
     };
 }
 export default new ExportService();

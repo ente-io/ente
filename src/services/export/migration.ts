@@ -38,7 +38,6 @@ import { FILE_TYPE } from 'constants/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import downloadManager from 'services/downloadManager';
 import { retryAsyncFunction } from 'utils/network';
-import { CustomError } from 'utils/error';
 
 export async function migrateExportJSON(
     exportDir: string,
@@ -67,12 +66,6 @@ async function migrateExport(
     exportRecord: ExportRecordV1 | ExportRecordV2 | ExportRecord
 ) {
     try {
-        if (!exportRecord?.version) {
-            exportRecord = {
-                ...exportRecord,
-                version: 0,
-            };
-        }
         addLogLine(`current export version: ${exportRecord.version}`);
         if (exportRecord.version === 0) {
             addLogLine('migrating export to version 1');
@@ -371,6 +364,6 @@ async function addCollectionExportedRecordV1(
         await exportService.updateExportRecord(exportRecord, folder);
     } catch (e) {
         logError(e, 'addCollectionExportedRecord failed');
-        throw Error(CustomError.ADD_FILE_EXPORTED_RECORD_FAILED);
+        throw e;
     }
 }

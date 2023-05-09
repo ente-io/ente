@@ -17,8 +17,7 @@ export interface ElectronAPIs {
     saveFileToDisk: (path: string, file: any) => Promise<void>;
     selectRootDirectory: () => Promise<string>;
     sendNotification: (content: string) => void;
-    getExportRecord: (filePath: string) => Promise<string>;
-    setExportRecord: (filePath: string, data: string) => Promise<void>;
+    readTextFile: (path: string) => Promise<string>;
     showUploadFilesDialog: () => Promise<ElectronFile[]>;
     showUploadDirsDialog: () => Promise<ElectronFile[]>;
     getPendingUploads: () => Promise<{
