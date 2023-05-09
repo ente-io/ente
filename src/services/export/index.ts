@@ -253,8 +253,9 @@ class ExportService {
                 exportRecord
             );
 
-            addLogLine(
-                `personal files:${userPersonalFiles.length} unexported files: ${unExportedFiles.length}, deleted exported files: ${deletedExportedFiles.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedCollections.length}`
+            addLocalLog(
+                () =>
+                    `personal files:${userPersonalFiles.length} unexported files: ${unExportedFiles.length}, deleted exported files: ${deletedExportedFiles.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedCollections.length}`
             );
 
             return {
