@@ -146,7 +146,6 @@ export default function ExportModal(props: Props) {
             const newFolder = await exportService.changeExportDirectory();
             addLogLine(`Export folder changed to ${newFolder}`);
             updateExportFolder(newFolder);
-            exportService.purgeInMemoryExportRecord();
             void syncExportRecord(newFolder);
         } catch (e) {
             if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
