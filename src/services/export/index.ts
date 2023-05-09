@@ -154,13 +154,13 @@ class ExportService {
     }
 
     private async updateExportStage(stage: ExportStage) {
-        const exportFolder = this.exportSettings?.folder;
+        const exportFolder = this.getExportSettings()?.folder;
         await this.updateExportRecord({ stage }, exportFolder);
         this.uiUpdater.setExportStage(stage);
     }
 
     private async updateLastExportTime(exportTime: number) {
-        const exportFolder = this.exportSettings?.folder;
+        const exportFolder = this.getExportSettings()?.folder;
         await this.updateExportRecord(
             { lastAttemptTimestamp: exportTime },
             exportFolder
@@ -297,17 +297,15 @@ class ExportService {
 
     async postExport() {
         try {
-            const exportSettings = this.getExportSettings();
-            if (!this.exportFolderExists(exportSettings?.folder)) {
+            const exportFolder = this.getExportSettings()?.folder;
+            if (!this.exportFolderExists(exportFolder)) {
                 this.uiUpdater.setExportStage(ExportStage.INIT);
                 return;
             }
             await this.updateExportStage(ExportStage.FINISHED);
             await this.updateLastExportTime(Date.now());
 
-            const exportRecord = await this.getExportRecord(
-                exportSettings?.folder
-            );
+            const exportRecord = await this.getExportRecord(exportFolder);
 
             const fileExportStats = await this.getFileExportStats(exportRecord);
             this.uiUpdater.setFileExportStats(fileExportStats);
@@ -342,8 +340,7 @@ class ExportService {
                 this.migrationInProgress = null;
             }
             try {
-                const exportSettings = this.getExportSettings();
-                const exportFolder = exportSettings?.folder;
+                const exportFolder = this.getExportSettings()?.folder;
                 await this.preExport(exportFolder);
                 addLogLine('export started');
                 await this.runExport(exportFolder);
