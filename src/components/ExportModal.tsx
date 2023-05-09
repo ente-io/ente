@@ -30,6 +30,7 @@ import { t } from 'i18next';
 import LinkButton from './pages/gallery/LinkButton';
 import { CustomError } from 'utils/error';
 import { formatNumber } from 'utils/number/format';
+import { addLogLine } from 'utils/logging';
 
 const ExportFolderPathContainer = styled(LinkButton)`
     width: 262px;
@@ -77,8 +78,8 @@ export default function ExportModal(props: Props) {
             });
             const exportSettings: ExportSettings =
                 exportService.getExportSettings();
-            setExportFolder(exportSettings?.folder);
-            setContinuousExport(exportSettings?.continuousExport);
+            setExportFolder(exportSettings?.folder ?? null);
+            setContinuousExport(exportSettings?.continuousExport ?? false);
             void syncExportRecord(exportSettings?.folder);
         } catch (e) {
             logError(e, 'export on mount useEffect failed');
@@ -111,15 +112,6 @@ export default function ExportModal(props: Props) {
     // HELPER FUNCTIONS
     // =======================
 
-    const onExportFolderChange = (newFolder: string) => {
-        try {
-            updateExportFolder(newFolder);
-            void syncExportRecord(newFolder);
-        } catch (e) {
-            logError(e, 'onExportChange failed');
-        }
-    };
-
     const verifyExportFolderExists = () => {
         if (!exportFolder || !exportService.exists(exportFolder)) {
             appContext.setDialogMessage(
@@ -149,8 +141,18 @@ export default function ExportModal(props: Props) {
     // UI functions
     // =============
 
-    const handleChangeExportDirectoryClick = () => {
-        void exportService.changeExportDirectory(onExportFolderChange);
+    const handleChangeExportDirectoryClick = async () => {
+        try {
+            const newFolder = await exportService.changeExportDirectory();
+            addLogLine(`Export folder changed to ${newFolder}`);
+            updateExportFolder(newFolder);
+            exportService.purgeInMemoryExportRecord();
+            void syncExportRecord(newFolder);
+        } catch (e) {
+            if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
+                logError(e, 'handleChangeExportDirectoryClick failed');
+            }
+        }
     };
 
     const handleOpenExportDirectoryClick = () => {
@@ -159,6 +161,7 @@ export default function ExportModal(props: Props) {
 
     const toggleContinuousExport = () => {
         try {
+            verifyExportFolderExists();
             const newContinuousExport = !continuousExport;
             if (newContinuousExport) {
                 exportService.enableContinuousExport();
@@ -171,13 +174,13 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const startExport = () => {
+    const startExport = async () => {
         try {
             verifyExportFolderExists();
-            exportService.scheduleExport();
+            await exportService.scheduleExport();
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                logError(e, 'startExport failed');
+                logError(e, 'scheduleExport failed');
             }
         }
     };

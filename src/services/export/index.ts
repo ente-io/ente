@@ -132,6 +132,10 @@ class ExportService {
         }
     }
 
+    purgeInMemoryExportRecord() {
+        this.exportRecord = null;
+    }
+
     setUIUpdaters(uiUpdater: ExportUIUpdaters) {
         this.uiUpdater = uiUpdater;
         this.uiUpdater.setExportProgress(this.currentExportProgress);
@@ -152,17 +156,20 @@ class ExportService {
         this.uiUpdater.setLastExportTime(exportTime);
     }
 
-    async changeExportDirectory(callback: (newExportDir: string) => void) {
+    async changeExportDirectory() {
         try {
             const newRootDir = await this.electronAPIs.selectRootDirectory();
             if (!newRootDir) {
-                return;
+                throw Error(CustomError.SELECT_FOLDER_ABORTED);
             }
             const newExportDir = `${newRootDir}/${ENTE_EXPORT_DIRECTORY}`;
             await this.electronAPIs.checkExistsAndCreateDir(newExportDir);
-            callback(newExportDir);
+            return newExportDir;
         } catch (e) {
-            logError(e, 'changeExportDirectory failed');
+            if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
+                logError(e, 'changeExportDirectory failed');
+            }
+            throw e;
         }
     }
 
@@ -244,6 +251,10 @@ class ExportService {
             const deletedCollections = getDeletedExportedCollections(
                 userNonEmptyPersonalCollections,
                 exportRecord
+            );
+
+            addLogLine(
+                `personal files:${userPersonalFiles.length} unexported files: ${unExportedFiles.length}, deleted exported files: ${deletedExportedFiles.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedCollections.length}`
             );
 
             return {

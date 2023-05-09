@@ -61,6 +61,7 @@ export const CustomError = {
     NO_INTERNET_CONNECTION: 'no internet connection',
     AUTH_KEY_NOT_FOUND: 'auth key not found',
     EXIF_DATA_NOT_FOUND: 'exif data not found',
+    SELECT_FOLDER_ABORTED: 'select folder aborted',
 };
 
 export function parseUploadErrorCodes(error) {
