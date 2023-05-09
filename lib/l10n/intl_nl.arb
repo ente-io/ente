@@ -101,7 +101,7 @@
   "changeEmail": "E-mail wijzigen",
   "enterYourPassword": "Voer je wachtwoord in",
   "welcomeBack": "Welkom terug!",
-  "contactSupport": "Contacteer ondersteuning",
+  "contactSupport": "Contacteer klantenservice",
   "incorrectPasswordTitle": "Onjuist wachtwoord",
   "pleaseTryAgain": "Probeer het nog eens",
   "recreatePasswordTitle": "Wachtwoord opnieuw instellen",
@@ -219,6 +219,16 @@
   "after1Month": "Na 1 maand",
   "after1Year": "Na 1 jaar",
   "manageParticipants": "Beheren",
+  "albumParticipantsCount": "{count, plural, one {}=0 {Geen deelnemers} =1 {1 deelnemer} other {{count} deelnemers}}",
+  "@albumParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    },
+    "description": "Number of participants in an album, including the album owner."
+  },
   "collabLinkSectionDescription": "Maak een link waarmee mensen foto's in jouw gedeelde album kunnen toevoegen en bekijken zonder dat ze daarvoor een ente app of account nodig hebben. Handig voor het verzamelen van foto's van evenementen.",
   "collectPhotos": "Foto's verzamelen",
   "collaborativeLink": "Gezamenlijke link",
@@ -361,6 +371,10 @@
       "count": {
         "example": "1",
         "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
       }
     }
   },
@@ -434,7 +448,7 @@
   "downloading": "Downloaden...",
   "theDownloadCouldNotBeCompleted": "De download kon niet worden voltooid",
   "retry": "Opnieuw",
-  "backedUpFolders": "Gebackupte mappen",
+  "backedUpFolders": "Back-up mappen",
   "backup": "Back-up",
   "freeUpDeviceSpace": "Apparaatruimte vrijmaken",
   "allClear": "✨ Alles in orde",
@@ -929,5 +943,34 @@
   "doYouWantToDiscardTheEditsYouHaveMade": "Wilt u de bewerkingen die u hebt gemaakt annuleren?",
   "saving": "Opslaan...",
   "editsSaved": "Bewerkingen opgeslagen",
-  "oopsCouldNotSaveEdits": "Oeps, kon bewerkingen niet opslaan"
+  "oopsCouldNotSaveEdits": "Oeps, kon bewerkingen niet opslaan",
+  "distanceInKMUnit": "km",
+  "@distanceInKMUnit": {
+    "description": "Unit for distance in km"
+  },
+  "dayToday": "Vandaag",
+  "dayYesterday": "Gisteren",
+  "storage": "Opslagruimte",
+  "usedSpace": "Gebruikte ruimte",
+  "storageBreakupFamily": "Familie",
+  "storageBreakupYou": "Jij",
+  "@storageBreakupYou": {
+    "description": "Label to indicate how much storage you are using when you are part of a family plan"
+  },
+  "storageUsageInfo": "{usedAmount} {usedStorageUnit} van {totalAmount} {totalStorageUnit} gebruikt",
+  "@storageUsageInfo": {
+    "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
+  },
+  "freeStorageSpace": "{freeAmount} {storageUnit} vrij",
+  "appVersion": "Versie: {versionValue}",
+  "verifyIDLabel": "Verifiëren",
+  "fileInfoAddDescHint": "Voeg een beschrijving toe...",
+  "editLocationTagTitle": "Locatie bewerken",
+  "setLabel": "Instellen",
+  "@setLabel": {
+    "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
+  },
+  "setRadius": "Radius instellen",
+  "familyPlanPortalTitle": "Familie",
+  "familyPlanOverview": "Voeg 5 gezinsleden toe aan uw bestaande abonnement zonder extra te betalen.\n\nElk lid krijgt zijn eigen privé ruimte en kan elkaars bestanden niet zien, tenzij ze zijn gedeeld.\n\nFamilieplannen zijn beschikbaar voor klanten die een betaald ente abonnement hebben.\n\nAbonneer u nu om aan de slag te gaan!"
 }
