@@ -148,13 +148,13 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m28(emailIDs) => "Gedeeld met ${emailIDs}";
 
   static String m29(fileType) =>
-      "Dit ${fileType} zal worden verwijderd van jouw apparaat.";
+      "Deze ${fileType} zal worden verwijderd van jouw apparaat.";
 
   static String m30(fileType) =>
-      "Dit ${fileType} staat zowel in ente als in jouw apparaat.";
+      "Deze ${fileType} staat zowel in ente als op jouw apparaat.";
 
   static String m31(fileType) =>
-      "Dit ${fileType} zal worden verwijderd uit ente.";
+      "Deze ${fileType} zal worden verwijderd uit ente.";
 
   static String m32(storageAmountInGB) => "${storageAmountInGB} GB";
 
