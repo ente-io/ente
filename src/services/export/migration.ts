@@ -70,25 +70,34 @@ async function migrateExport(
         if (exportRecord.version === 0) {
             addLogLine('migrating export to version 1');
             await migrationV0ToV1(exportDir, exportRecord as ExportRecordV0);
-            exportRecord = await exportService.updateExportRecord({
-                version: 1,
-            });
+            exportRecord = await exportService.updateExportRecord(
+                {
+                    version: 1,
+                },
+                exportDir
+            );
             addLogLine('migration to version 1 complete');
         }
         if (exportRecord.version === 1) {
             addLogLine('migrating export to version 2');
-            await migrationV1ToV2(exportRecord as ExportRecordV1);
-            exportRecord = await exportService.updateExportRecord({
-                version: 2,
-            });
+            await migrationV1ToV2(exportRecord as ExportRecordV1, exportDir);
+            exportRecord = await exportService.updateExportRecord(
+                {
+                    version: 2,
+                },
+                exportDir
+            );
             addLogLine('migration to version 2 complete');
         }
         if (exportRecord.version === 2) {
             addLogLine('migrating export to version 3');
             await migrationV2ToV3(exportDir, exportRecord as ExportRecordV2);
-            exportRecord = await exportService.updateExportRecord({
-                version: 3,
-            });
+            exportRecord = await exportService.updateExportRecord(
+                {
+                    version: 3,
+                },
+                exportDir
+            );
             addLogLine('migration to version 3 complete');
         }
         addLogLine(`Record at latest version`);
@@ -127,8 +136,11 @@ async function migrationV0ToV1(
     );
 }
 
-async function migrationV1ToV2(exportRecord: ExportRecordV1) {
-    await removeDeprecatedExportRecordProperties(exportRecord);
+async function migrationV1ToV2(
+    exportRecord: ExportRecordV1,
+    exportDir: string
+) {
+    await removeDeprecatedExportRecordProperties(exportRecord, exportDir);
 }
 
 async function migrationV2ToV3(
@@ -162,7 +174,7 @@ async function migrationV2ToV3(
         fileExportNames,
         collectionExportNames,
     };
-    await exportService.updateExportRecord(updatedExportRecord);
+    await exportService.updateExportRecord(updatedExportRecord, exportDir);
 }
 
 /*
@@ -243,7 +255,8 @@ async function migrateFiles(
 }
 
 async function removeDeprecatedExportRecordProperties(
-    exportRecord: ExportRecordV1
+    exportRecord: ExportRecordV1,
+    exportDir: string
 ) {
     if (exportRecord?.queuedFiles) {
         exportRecord.queuedFiles = undefined;
@@ -254,7 +267,7 @@ async function removeDeprecatedExportRecordProperties(
     if (exportRecord?.failedFiles) {
         exportRecord.failedFiles = undefined;
     }
-    await exportService.updateExportRecord(exportRecord);
+    await exportService.updateExportRecord(exportRecord, exportDir);
 }
 
 async function getCollectionExportNamesFromExportedCollectionPaths(
