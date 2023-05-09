@@ -1,5 +1,4 @@
-import { readTextFile, writeStream } from './../services/fs';
-import { logError } from '../services/logging';
+import { writeStream } from './../services/fs';
 import * as fs from 'promise-fs';
 
 export const exists = (path: string) => {
@@ -19,22 +18,6 @@ export const saveStreamToDisk = async (
     await writeStream(filePath, fileStream);
 };
 
-export const saveFileToDisk = async (path: string, fileData: any) => {
+export const saveFileToDisk = async (path: string, fileData: string) => {
     await fs.writeFile(path, fileData);
-};
-
-export const getExportRecord = async (filePath: string) => {
-    try {
-        if (!fs.existsSync(filePath)) {
-            return null;
-        }
-        const recordFile = await readTextFile(filePath);
-        return recordFile;
-    } catch (e) {
-        logError(e, 'error while selecting files');
-    }
-};
-
-export const setExportRecord = async (filePath: string, data: string) => {
-    await fs.writeFile(filePath, data);
 };
