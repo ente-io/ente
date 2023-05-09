@@ -109,6 +109,7 @@ import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
 import ElectronService from 'services/electron/common';
 import uploadManager from 'services/upload/uploadManager';
 import { getToken } from 'utils/common/key';
+import ExportModal from 'components/ExportModal';
 import GalleryEmptyState from 'components/GalleryEmptyState';
 
 export const DeadCenter = styled('div')`
@@ -128,6 +129,7 @@ const defaultGalleryContext: GalleryContextType = {
     syncWithRemote: () => null,
     setBlockingLoad: () => null,
     photoListHeader: null,
+    openExportModal: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -220,6 +222,8 @@ export default function Gallery() {
     const openSidebar = () => setSidebarView(true);
     const [photoListHeader, setPhotoListHeader] =
         useState<TimeStampListItem>(null);
+
+    const [exportModalView, setExportModalView] = useState(false);
 
     const showSessionExpiredMessage = () =>
         setDialogMessage({
@@ -602,6 +606,14 @@ export default function Gallery() {
         setCollectionSelectorView(false);
     };
 
+    const openExportModal = () => {
+        setExportModalView(true);
+    };
+
+    const closeExportModal = () => {
+        setExportModalView(false);
+    };
+
     return (
         <GalleryContext.Provider
             value={{
@@ -610,7 +622,8 @@ export default function Gallery() {
                 setActiveCollection,
                 syncWithRemote,
                 setBlockingLoad,
-                photoListHeader: photoListHeader,
+                photoListHeader,
+                openExportModal,
             }}>
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}>
@@ -801,6 +814,7 @@ export default function Gallery() {
                             isInSearchMode={isInSearchMode}
                         />
                     )}
+                <ExportModal show={exportModalView} onHide={closeExportModal} />
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );
