@@ -443,7 +443,7 @@ class ExportService {
             };
             if (renamedCollections?.length > 0) {
                 addLogLine(`renaming ${renamedCollections.length} collections`);
-                this.collectionRenamer(
+                await this.collectionRenamer(
                     exportFolder,
                     collectionIDExportNameMap,
                     renamedCollections,
