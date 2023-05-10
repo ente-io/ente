@@ -30,6 +30,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m45(count) =>
       "${Intl.plural(count, zero: 'No hay Participantes', one: '1 Participante', other: '${count} Participantes')}";
 
+  static String m46(versionValue) => "Versión: ${versionValue}";
+
   static String m0(paymentProvider) =>
       "Por favor, cancele primero su suscripción existente de ${paymentProvider}";
 
@@ -80,6 +82,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m9(storageAmountInGB) =>
       "${storageAmountInGB} GB cada vez que alguien se registra en un plan de pago y aplica tu código";
+
+  static String m52(freeAmount, storageUnit) =>
+      "${freeAmount} ${storageUnit} gratis";
 
   static String m10(endDate) => "Prueba gratuita válida hasta${endDate}";
 
@@ -162,6 +167,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m32(storageAmountInGB) => "${storageAmountInGB} GB";
 
+  static String m61(
+          usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
+      "${usedAmount} ${usedStorageUnit} de ${totalAmount} ${totalStorageUnit} usados";
+
   static String m33(id) =>
       "Su ${id} ya está vinculado a otra cuenta ente.\nSi desea utilizar su ${id} con esta cuenta, póngase en contacto con nuestro servicio de asistencia\'\'";
 
@@ -242,6 +251,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Permitir que la gente añada fotos"),
         "androidIosWebDesktop": MessageLookupByLibrary.simpleMessage(
             "Android, iOS, Web, Computadora"),
+        "appVersion": m46,
         "appleId": MessageLookupByLibrary.simpleMessage("ID de Apple"),
         "apply": MessageLookupByLibrary.simpleMessage("Aplicar"),
         "applyCodeTitle": MessageLookupByLibrary.simpleMessage("Usar código"),
@@ -520,6 +530,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "dropSupportEmail": m6,
         "duplicateFileCountWithStorageSaved": m7,
         "edit": MessageLookupByLibrary.simpleMessage("Editar"),
+        "editLocationTagTitle":
+            MessageLookupByLibrary.simpleMessage("Editar la ubicación"),
         "editsSaved":
             MessageLookupByLibrary.simpleMessage("Ediciones guardadas"),
         "eligible": MessageLookupByLibrary.simpleMessage("elegible"),
@@ -599,12 +611,18 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Renovación fallida"),
         "failedToVerifyPaymentStatus": MessageLookupByLibrary.simpleMessage(
             "Error al verificar el estado de su pago"),
+        "familyPlanOverview": MessageLookupByLibrary.simpleMessage(
+            "Añada 5 familiares a su plan existente sin pagar más.\n\nCada miembro tiene su propio espacio privado y no puede ver los archivos del otro a menos que sean compartidos.\n\nLos planes familiares están disponibles para los clientes que tienen una suscripción de ente pagada.\n\n¡Suscríbete ahora para empezar!"),
+        "familyPlanPortalTitle":
+            MessageLookupByLibrary.simpleMessage("Familia"),
         "familyPlans":
             MessageLookupByLibrary.simpleMessage("Planes familiares"),
         "faq": MessageLookupByLibrary.simpleMessage("Preguntas Frecuentes"),
         "faqs": MessageLookupByLibrary.simpleMessage("Preguntas frecuentes"),
         "favorite": MessageLookupByLibrary.simpleMessage("Favorito"),
         "feedback": MessageLookupByLibrary.simpleMessage("Sugerencias"),
+        "fileInfoAddDescHint":
+            MessageLookupByLibrary.simpleMessage("Añadir una descripción..."),
         "fileSavedToGallery": MessageLookupByLibrary.simpleMessage(
             "Archivo guardado en la galería"),
         "filesBackedUpFromDevice": m50,
@@ -619,6 +637,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
             "Almacenamiento gratuito reclamado"),
         "freeStorageOnReferralSuccess": m9,
+        "freeStorageSpace": m52,
         "freeStorageUsable": MessageLookupByLibrary.simpleMessage(
             "Almacenamiento libre disponible"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("Prueba gratuita"),
@@ -1043,8 +1062,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "setAPassword":
             MessageLookupByLibrary.simpleMessage("Establecer una contraseña"),
         "setAs": MessageLookupByLibrary.simpleMessage("Establecer como"),
+        "setLabel": MessageLookupByLibrary.simpleMessage("Establecer"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Establecer contraseña"),
+        "setRadius": MessageLookupByLibrary.simpleMessage("Establecer radio"),
         "setupComplete":
             MessageLookupByLibrary.simpleMessage("Configuración completa"),
         "share": MessageLookupByLibrary.simpleMessage("Compartir"),
@@ -1112,9 +1133,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Éxito"),
         "startBackup":
             MessageLookupByLibrary.simpleMessage("Iniciar copia de seguridad"),
+        "storage": MessageLookupByLibrary.simpleMessage("Almacenamiento"),
+        "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("Familia"),
+        "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Usted"),
         "storageInGB": m32,
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("Límite de datos excedido"),
+        "storageUsageInfo": m61,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Segura"),
         "subAlreadyLinkedErrMessage": m33,
         "subWillBeCancelledOn": m34,
@@ -1236,6 +1261,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Usar clave de recuperación"),
         "useSelectedPhoto":
             MessageLookupByLibrary.simpleMessage("Usar foto seleccionada"),
+        "usedSpace": MessageLookupByLibrary.simpleMessage("Espacio usado"),
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Verificación fallida, por favor intenta nuevamente"),
@@ -1245,6 +1271,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifyEmail": MessageLookupByLibrary.simpleMessage(
             "Verificar correo electrónico"),
         "verifyEmailID": m38,
+        "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Verificar"),
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Verificar contraseña"),
         "verifying": MessageLookupByLibrary.simpleMessage("Verificando..."),
