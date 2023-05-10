@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/ente_theme_data.dart";
@@ -9,7 +10,6 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/huge_listview/huge_listview.dart";
 import "package:photos/ui/viewer/gallery/component/lazy_loading_gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
-import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
@@ -112,7 +112,8 @@ class GalleryListView extends StatelessWidget {
       },
       labelTextBuilder: (int index) {
         try {
-          return getMonthAndYear(
+          return DateFormat.yMMM(Localizations.localeOf(context).languageCode)
+              .format(
             DateTime.fromMicrosecondsSinceEpoch(
               collatedFiles[index][0].creationTime!,
             ),
