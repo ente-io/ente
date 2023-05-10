@@ -83,9 +83,11 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                     if (executionState == ExecutionState.inProgress) {
                       executionState = ExecutionState.successful;
                       Future.delayed(const Duration(seconds: 2), () {
-                        setState(() {
-                          executionState = ExecutionState.idle;
-                        });
+                        if (mounted) {
+                          setState(() {
+                            executionState = ExecutionState.idle;
+                          });
+                        }
                       });
                     }
                   } else {
