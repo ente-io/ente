@@ -4,6 +4,7 @@ import { t } from 'i18next';
 import { GalleryContext } from 'pages/gallery';
 import {
     ARCHIVE_SECTION,
+    DUMMY_HIDDEN_SECTION,
     DUMMY_UNCATEGORIZED_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
@@ -11,8 +12,13 @@ import { CollectionSummaries } from 'types/collection';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 import CategoryIcon from '@mui/icons-material/Category';
-import { getUncategorizedCollection } from 'services/collectionService';
+import {
+    getHiddenCollection,
+    getUncategorizedCollection,
+} from 'services/collectionService';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import LockOutlined from '@mui/icons-material/LockOutlined';
 interface Iprops {
     closeSidebar: () => void;
     collectionSummaries: CollectionSummaries;
@@ -25,6 +31,8 @@ export default function ShortcutSection({
     const galleryContext = useContext(GalleryContext);
     const [uncategorizedCollectionId, setUncategorizedCollectionID] =
         useState<number>();
+
+    const [hiddenCollectionId, setHiddenCollectionId] = useState<number>();
     useEffect(() => {
         const main = async () => {
             const unCategorizedCollection = await getUncategorizedCollection();
@@ -32,6 +40,13 @@ export default function ShortcutSection({
                 setUncategorizedCollectionID(unCategorizedCollection.id);
             } else {
                 setUncategorizedCollectionID(DUMMY_UNCATEGORIZED_SECTION);
+            }
+            const hiddenCollection = await getHiddenCollection();
+
+            if (hiddenCollection) {
+                setHiddenCollectionId(hiddenCollection.id);
+            } else {
+                setHiddenCollectionId(DUMMY_HIDDEN_SECTION);
             }
         };
         main();
@@ -51,6 +66,11 @@ export default function ShortcutSection({
         galleryContext.setActiveCollection(ARCHIVE_SECTION);
         closeSidebar();
     };
+
+    const openHiddenSection = () => {
+        galleryContext.setActiveCollection(hiddenCollectionId);
+        closeSidebar();
+    };
     return (
         <>
             <EnteMenuItem
@@ -63,21 +83,28 @@ export default function ShortcutSection({
                     ?.fileCount.toString()}
             />
             <EnteMenuItem
-                startIcon={<DeleteOutline />}
-                onClick={openTrashSection}
-                variant="captioned"
-                label={t('TRASH')}
-                subText={collectionSummaries
-                    .get(TRASH_SECTION)
-                    ?.fileCount.toString()}
-            />
-            <EnteMenuItem
                 startIcon={<ArchiveOutlined />}
                 onClick={openArchiveSection}
                 variant="captioned"
                 label={t('ARCHIVE_SECTION_NAME')}
                 subText={collectionSummaries
                     .get(ARCHIVE_SECTION)
+                    ?.fileCount.toString()}
+            />
+            <EnteMenuItem
+                startIcon={<VisibilityOff />}
+                onClick={openHiddenSection}
+                variant="captioned"
+                label={t('HIDDEN')}
+                subIcon={<LockOutlined />}
+            />
+            <EnteMenuItem
+                startIcon={<DeleteOutline />}
+                onClick={openTrashSection}
+                variant="captioned"
+                label={t('TRASH')}
+                subText={collectionSummaries
+                    .get(TRASH_SECTION)
                     ?.fileCount.toString()}
             />
         </>

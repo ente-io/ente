@@ -63,6 +63,7 @@ import {
     ARCHIVE_SECTION,
     CollectionSummaryType,
     CollectionType,
+    DUMMY_HIDDEN_SECTION,
     DUMMY_UNCATEGORIZED_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
@@ -316,6 +317,8 @@ export default function Gallery() {
                 collectionURL += t('TRASH');
             } else if (activeCollection === DUMMY_UNCATEGORIZED_SECTION) {
                 collectionURL += t('UNCATEGORIZED');
+            } else if (activeCollection === DUMMY_HIDDEN_SECTION) {
+                collectionURL += t('HIDDEN');
             } else {
                 collectionURL += activeCollection;
             }

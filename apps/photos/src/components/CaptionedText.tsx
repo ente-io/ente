@@ -4,7 +4,7 @@ import { VerticallyCenteredFlex } from './Container';
 interface Iprops {
     mainText: string;
     subText?: string;
-    icon?: React.ReactNode;
+    subIcon?: React.ReactNode;
 }
 
 export const CaptionedText = (props: Iprops) => {
@@ -20,7 +20,7 @@ export const CaptionedText = (props: Iprops) => {
                 </Typography>
             ) : (
                 <Typography variant="small" color="text.faint">
-                    {props.icon}
+                    {props.subIcon}
                 </Typography>
             )}
         </VerticallyCenteredFlex>

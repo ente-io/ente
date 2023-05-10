@@ -19,6 +19,7 @@ interface Iprops {
     endIcon?: React.ReactNode;
     label?: string;
     subText?: string;
+    subIcon?: React.ReactNode;
     checked?: boolean;
     labelComponent?: React.ReactNode;
 }
@@ -29,6 +30,7 @@ export function EnteMenuItem({
     endIcon,
     label,
     subText,
+    subIcon,
     checked,
     variant = 'primary',
     fontWeight = 'bold',
@@ -64,7 +66,11 @@ export function EnteMenuItem({
                         {labelComponent ? (
                             labelComponent
                         ) : variant === 'captioned' ? (
-                            <CaptionedText mainText={label} subText={subText} />
+                            <CaptionedText
+                                mainText={label}
+                                subText={subText}
+                                subIcon={subIcon}
+                            />
                         ) : variant === 'mini' ? (
                             <Typography variant="mini" color="text.muted">
                                 {label}

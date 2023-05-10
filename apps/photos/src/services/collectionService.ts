@@ -39,6 +39,7 @@ import {
     ALL_SECTION,
     CollectionSummaryType,
     DUMMY_UNCATEGORIZED_SECTION,
+    DUMMY_HIDDEN_SECTION,
 } from 'constants/collection';
 import {
     NEW_COLLECTION_MAGIC_METADATA,
@@ -54,6 +55,7 @@ import {
     isIncomingShare,
     isSharedOnlyViaLink,
     isValidMoveTarget,
+    isCollectionHidden,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -999,6 +1001,18 @@ export async function getCollectionSummaries(
             t('UNCATEGORIZED');
     }
 
+    const hiddenCollection = await getHiddenCollection(collections);
+
+    if (!hiddenCollection) {
+        collectionSummaries.set(
+            DUMMY_HIDDEN_SECTION,
+            getDummyHiddenCollectionSummaries()
+        );
+    } else {
+        collectionSummaries.get(uncategorizedCollection.id).name =
+            t('UNCATEGORIZED');
+    }
+
     const favCollection = await getFavCollection();
     if (favCollection) {
         const favoriteEntry = collectionSummaries.get(favCollection.id);
@@ -1076,7 +1090,7 @@ function getAllCollectionSummaries(
 
 function getDummyUncategorizedCollectionSummaries(): CollectionSummary {
     return {
-        id: ALL_SECTION,
+        id: DUMMY_UNCATEGORIZED_SECTION,
         name: t('UNCATEGORIZED'),
         type: CollectionSummaryType.uncategorized,
         latestFile: null,
@@ -1085,6 +1099,16 @@ function getDummyUncategorizedCollectionSummaries(): CollectionSummary {
     };
 }
 
+function getDummyHiddenCollectionSummaries(): CollectionSummary {
+    return {
+        id: DUMMY_HIDDEN_SECTION,
+        name: t('HIDDEN'),
+        type: CollectionSummaryType.hidden,
+        latestFile: null,
+        fileCount: 0,
+        updationTime: 0,
+    };
+}
 function getArchivedCollectionSummaries(
     collectionFilesCount: CollectionFilesCount,
     collectionsLatestFile: CollectionLatestFiles
@@ -1131,4 +1155,17 @@ export async function createUnCategorizedCollection() {
         UNCATEGORIZED_COLLECTION_NAME,
         CollectionType.uncategorized
     );
+}
+
+export async function getHiddenCollection(
+    collections?: Collection[]
+): Promise<Collection> {
+    if (!collections) {
+        collections = await getLocalCollections();
+    }
+    const uncategorizedCollection = collections.find((collection) =>
+        isCollectionHidden(collection)
+    );
+
+    return uncategorizedCollection;
 }
