@@ -34,4 +34,5 @@ export type GalleryContextType = {
     setBlockingLoad: (value: boolean) => void;
     photoListHeader: TimeStampListItem;
     openExportModal: () => void;
+    authenticateUser: (callback: () => void) => void;
 };

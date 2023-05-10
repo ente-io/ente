@@ -112,6 +112,7 @@ import uploadManager from 'services/upload/uploadManager';
 import { getToken } from 'utils/common/key';
 import ExportModal from 'components/ExportModal';
 import GalleryEmptyState from 'components/GalleryEmptyState';
+import AuthenticateUserModal from 'components/AuthenticateUserModal';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -131,6 +132,7 @@ const defaultGalleryContext: GalleryContextType = {
     setBlockingLoad: () => null,
     photoListHeader: null,
     openExportModal: () => null,
+    authenticateUser: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -225,6 +227,18 @@ export default function Gallery() {
         useState<TimeStampListItem>(null);
 
     const [exportModalView, setExportModalView] = useState(false);
+
+    const [authenticateUserModalView, setAuthenticateUserModalView] =
+        useState(false);
+
+    const onAuthenticateCallback = useRef<() => void>();
+
+    const authenticateUser = (callback: () => void) => {
+        onAuthenticateCallback.current = callback;
+        setAuthenticateUserModalView(true);
+    };
+    const closeAuthenticateUserModal = () =>
+        setAuthenticateUserModalView(false);
 
     const showSessionExpiredMessage = () =>
         setDialogMessage({
@@ -627,6 +641,7 @@ export default function Gallery() {
                 setBlockingLoad,
                 photoListHeader,
                 openExportModal,
+                authenticateUser,
             }}>
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}>
@@ -818,6 +833,11 @@ export default function Gallery() {
                         />
                     )}
                 <ExportModal show={exportModalView} onHide={closeExportModal} />
+                <AuthenticateUserModal
+                    open={authenticateUserModalView}
+                    onClose={closeAuthenticateUserModal}
+                    onAuthenticate={onAuthenticateCallback.current}
+                />
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );
