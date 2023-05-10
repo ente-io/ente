@@ -127,22 +127,24 @@ const PhotoFrame = ({
                         return false;
                     }
 
-                    // trashed files can only be seen in trash section
-                    if (item.isTrashed && activeCollection !== TRASH_SECTION) {
-                        return false;
-                    }
-
-                    // only deleted marked files should be shown only in trash section
-                    if (
-                        deletedFileIds?.has(item.id) &&
-                        activeCollection !== TRASH_SECTION
-                    ) {
-                        return false;
+                    // Trashed files can only be seen in trash section
+                    if (item.isTrashed || deletedFileIds?.has(item.id)) {
+                        if (activeCollection === TRASH_SECTION) {
+                            idSet.add(item.id);
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
 
                     // hidden files can only be seen in hidden section
-                    if (item.isHidden && activeCollection !== HIDDEN_SECTION) {
-                        return false;
+                    if (item.isHidden) {
+                        if (activeCollection === HIDDEN_SECTION) {
+                            idSet.add(item.id);
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
 
                     // SEARCH MODE
@@ -191,43 +193,55 @@ const PhotoFrame = ({
                         ) {
                             return false;
                         }
+                        idSet.add(item.id);
                         return true;
                     }
 
                     // shared files can only be seen in their respective shared collection
-                    if (
-                        isSharedFile(user, item) &&
-                        activeCollection !== item.collectionID
-                    ) {
-                        return false;
+                    if (isSharedFile(user, item)) {
+                        if (activeCollection === item.collectionID) {
+                            idSet.add(item.id);
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
 
                     // DEDUPLICATE PAGE
                     if (isDeduplicating) {
+                        idSet.add(item.id);
                         return true;
                     }
 
-                    // Archived files/collection files can only be seen in archive section (except in search mode or deduplicate page)
+                    // Archived files/collection files can only be seen in archive section or their respective collection
                     if (
-                        (IsArchived(item) ||
-                            archivedCollections.has(item.collectionID)) &&
-                        activeCollection !== ARCHIVE_SECTION
+                        IsArchived(item) ||
+                        archivedCollections.has(item.collectionID)
                     ) {
-                        return false;
+                        if (
+                            activeCollection === ARCHIVE_SECTION ||
+                            activeCollection === item.collectionID
+                        ) {
+                            idSet.add(item.id);
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
 
-                    // ALL SECTION - show all files (except trashed files, deleted marked files, hidden files, shared files, archived files)
+                    // ALL SECTION - show all files
                     if (activeCollection === ALL_SECTION) {
+                        idSet.add(item.id);
                         return true;
                     }
 
                     // COLLECTION SECTION - show files in the active collection
-                    if (activeCollection !== item.collectionID) {
+                    if (activeCollection === item.collectionID) {
+                        idSet.add(item.id);
+                        return true;
+                    } else {
                         return false;
                     }
-
-                    idSet.add(item.id);
-                    return true;
                 })
                 .map((item) => {
                     const filteredItem = {
