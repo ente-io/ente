@@ -68,8 +68,10 @@ export default function ShortcutSection({
     };
 
     const openHiddenSection = () => {
-        galleryContext.setActiveCollection(hiddenCollectionId);
-        closeSidebar();
+        galleryContext.authenticateUser(() => {
+            galleryContext.setActiveCollection(hiddenCollectionId);
+            closeSidebar();
+        });
     };
     return (
         <>
