@@ -49,7 +49,6 @@ import {
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 import { User } from 'types/user';
 import {
-    getNonHiddenCollections,
     isQuickLinkCollection,
     isOutgoingShare,
     isIncomingShare,
@@ -178,7 +177,7 @@ const getCollections = async (
 export const getLocalCollections = async (): Promise<Collection[]> => {
     const collections: Collection[] =
         (await localForage.getItem(COLLECTION_TABLE)) ?? [];
-    return getNonHiddenCollections(collections);
+    return collections;
 };
 
 export const getCollectionUpdationTime = async (): Promise<number> =>
@@ -225,7 +224,7 @@ export const syncCollections = async () => {
 
     await localForage.setItem(COLLECTION_TABLE, collections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
-    return getNonHiddenCollections(collections);
+    return collections;
 };
 
 export const getCollection = async (
@@ -1163,9 +1162,9 @@ export async function getHiddenCollection(
     if (!collections) {
         collections = await getLocalCollections();
     }
-    const uncategorizedCollection = collections.find((collection) =>
+    const hiddenCollection = collections.find((collection) =>
         isCollectionHidden(collection)
     );
 
-    return uncategorizedCollection;
+    return hiddenCollection;
 }
