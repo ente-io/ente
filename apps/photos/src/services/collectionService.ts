@@ -39,7 +39,7 @@ import {
     ALL_SECTION,
     CollectionSummaryType,
     DUMMY_UNCATEGORIZED_SECTION,
-    DUMMY_HIDDEN_SECTION,
+    HIDDEN_SECTION,
 } from 'constants/collection';
 import {
     NEW_COLLECTION_MAGIC_METADATA,
@@ -1000,18 +1000,6 @@ export async function getCollectionSummaries(
             t('UNCATEGORIZED');
     }
 
-    const hiddenCollection = await getHiddenCollection(collections);
-
-    if (!hiddenCollection) {
-        collectionSummaries.set(
-            DUMMY_HIDDEN_SECTION,
-            getDummyHiddenCollectionSummaries()
-        );
-    } else {
-        collectionSummaries.get(uncategorizedCollection.id).name =
-            t('UNCATEGORIZED');
-    }
-
     const favCollection = await getFavCollection();
     if (favCollection) {
         const favoriteEntry = collectionSummaries.get(favCollection.id);
@@ -1034,6 +1022,14 @@ export async function getCollectionSummaries(
     collectionSummaries.set(
         TRASH_SECTION,
         getTrashedCollectionSummaries(
+            collectionFilesCount,
+            collectionLatestFiles
+        )
+    );
+
+    collectionSummaries.set(
+        HIDDEN_SECTION,
+        getHiddenCollectionSummaries(
             collectionFilesCount,
             collectionLatestFiles
         )
@@ -1098,14 +1094,17 @@ function getDummyUncategorizedCollectionSummaries(): CollectionSummary {
     };
 }
 
-function getDummyHiddenCollectionSummaries(): CollectionSummary {
+function getHiddenCollectionSummaries(
+    collectionFilesCount: CollectionFilesCount,
+    collectionsLatestFile: CollectionLatestFiles
+): CollectionSummary {
     return {
-        id: DUMMY_HIDDEN_SECTION,
+        id: HIDDEN_SECTION,
         name: t('HIDDEN'),
         type: CollectionSummaryType.hidden,
-        latestFile: null,
-        fileCount: 0,
-        updationTime: 0,
+        latestFile: collectionsLatestFile.get(HIDDEN_SECTION),
+        fileCount: collectionFilesCount.get(HIDDEN_SECTION) ?? 0,
+        updationTime: collectionsLatestFile.get(HIDDEN_SECTION)?.updationTime,
     };
 }
 function getArchivedCollectionSummaries(

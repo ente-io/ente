@@ -4,7 +4,7 @@ import { t } from 'i18next';
 import { GalleryContext } from 'pages/gallery';
 import {
     ARCHIVE_SECTION,
-    DUMMY_HIDDEN_SECTION,
+    HIDDEN_SECTION,
     DUMMY_UNCATEGORIZED_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
@@ -12,10 +12,7 @@ import { CollectionSummaries } from 'types/collection';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 import CategoryIcon from '@mui/icons-material/Category';
-import {
-    getHiddenCollection,
-    getUncategorizedCollection,
-} from 'services/collectionService';
+import { getUncategorizedCollection } from 'services/collectionService';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import LockOutlined from '@mui/icons-material/LockOutlined';
@@ -32,7 +29,6 @@ export default function ShortcutSection({
     const [uncategorizedCollectionId, setUncategorizedCollectionID] =
         useState<number>();
 
-    const [hiddenCollectionId, setHiddenCollectionId] = useState<number>();
     useEffect(() => {
         const main = async () => {
             const unCategorizedCollection = await getUncategorizedCollection();
@@ -40,13 +36,6 @@ export default function ShortcutSection({
                 setUncategorizedCollectionID(unCategorizedCollection.id);
             } else {
                 setUncategorizedCollectionID(DUMMY_UNCATEGORIZED_SECTION);
-            }
-            const hiddenCollection = await getHiddenCollection();
-
-            if (hiddenCollection) {
-                setHiddenCollectionId(hiddenCollection.id);
-            } else {
-                setHiddenCollectionId(DUMMY_HIDDEN_SECTION);
             }
         };
         main();
@@ -69,7 +58,7 @@ export default function ShortcutSection({
 
     const openHiddenSection = () => {
         galleryContext.authenticateUser(() => {
-            galleryContext.setActiveCollection(hiddenCollectionId);
+            galleryContext.setActiveCollection(HIDDEN_SECTION);
             closeSidebar();
         });
     };
