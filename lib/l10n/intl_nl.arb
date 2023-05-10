@@ -417,7 +417,7 @@
   "skip": "Overslaan",
   "updatingFolderSelection": "Map selectie bijwerken...",
   "itemCount": "{count, plural, one{{count} item} other{{count} items}}",
-  "yearsAgo": "{count, plural, one{{count} jaar geleden} other{{count} jaren geleden}}",
+  "yearsAgo": "{count, plural, one{{count} jaar geleden} other{{count} jaar geleden}}",
   "backupSettings": "Back-up instellingen",
   "backupOverMobileData": "Back-up maken via mobiele data",
   "backupVideos": "Back-up video's",
