@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import 'package:photos/utils/date_time_util.dart';
 
 class ThumbnailPlaceHolder extends StatelessWidget {
   const ThumbnailPlaceHolder({Key? key}) : super(key: key);
@@ -135,6 +135,10 @@ class TrashedFileOverlayText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final int daysLeft =
+        ((file.deleteBy - DateTime.now().microsecondsSinceEpoch) /
+                Duration.microsecondsPerDay)
+            .ceil();
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -146,7 +150,7 @@ class TrashedFileOverlayText extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       padding: const EdgeInsets.only(bottom: 5),
       child: Text(
-        daysLeft(file.deleteBy),
+        S.of(context).trashDaysLeft(daysLeft),
         style: Theme.of(context)
             .textTheme
             .subtitle2!

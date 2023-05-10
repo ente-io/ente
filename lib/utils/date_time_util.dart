@@ -71,13 +71,6 @@ String getFormattedTime(BuildContext context, DateTime dateTime) {
   );
 }
 
-String daysLeft(int futureTime) {
-  final int daysLeft = ((futureTime - DateTime.now().microsecondsSinceEpoch) /
-          Duration.microsecondsPerDay)
-      .ceil();
-  return '$daysLeft day' + (daysLeft <= 1 ? "" : "s");
-}
-
 String formatDuration(Duration position) {
   final ms = position.inMilliseconds;
 

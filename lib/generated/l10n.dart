@@ -5199,6 +5199,20 @@ class S {
     );
   }
 
+  /// `{count, plural, =0 {} =1 {1 day} other {{count} days}}`
+  String trashDaysLeft(int count) {
+    return Intl.plural(
+      count,
+      zero: '',
+      one: '1 day',
+      other: '$count days',
+      name: 'trashDaysLeft',
+      desc:
+          'Text to indicate number of days remaining before permanent deletion',
+      args: [count],
+    );
+  }
+
   /// `Delete All`
   String get deleteAll {
     return Intl.message(
