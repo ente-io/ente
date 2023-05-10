@@ -257,17 +257,20 @@ export default function App(props) {
             try {
                 addLogLine('init export');
                 const exportSettings = exportService.getExportSettings();
+                if (!exportService.exportFolderExists(exportSettings?.folder)) {
+                    return;
+                }
                 const exportRecord = await exportService.getExportRecord(
-                    exportSettings?.folder
+                    exportSettings.folder
                 );
                 await exportService.runMigration(
-                    exportSettings?.folder,
+                    exportSettings.folder,
                     exportRecord
                 );
-                if (exportSettings?.continuousExport) {
+                if (exportSettings.continuousExport) {
                     exportService.enableContinuousExport();
                 }
-                if (exportRecord?.stage === ExportStage.INPROGRESS) {
+                if (exportRecord.stage === ExportStage.INPROGRESS) {
                     addLogLine('export was in progress, resuming');
                     exportService.scheduleExport();
                 }

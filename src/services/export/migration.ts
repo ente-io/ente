@@ -38,7 +38,6 @@ import { FILE_TYPE } from 'constants/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import downloadManager from 'services/downloadManager';
 import { retryAsyncFunction } from 'utils/network';
-import { CustomError } from 'utils/error';
 
 export async function migrateExportJSON(
     exportDir: string,
@@ -67,25 +66,19 @@ async function migrateExport(
     exportRecord: ExportRecordV1 | ExportRecordV2 | ExportRecord
 ) {
     try {
-        if (!exportRecord?.version) {
-            exportRecord = {
-                ...exportRecord,
-                version: 0,
-            };
-        }
         addLogLine(`current export version: ${exportRecord.version}`);
         if (exportRecord.version === 0) {
             addLogLine('migrating export to version 1');
             await migrationV0ToV1(exportDir, exportRecord as ExportRecordV0);
-            exportRecord = await exportService.updateExportRecord({
+            exportRecord = await exportService.updateExportRecord(exportDir, {
                 version: 1,
             });
             addLogLine('migration to version 1 complete');
         }
         if (exportRecord.version === 1) {
             addLogLine('migrating export to version 2');
-            await migrationV1ToV2(exportRecord as ExportRecordV1);
-            exportRecord = await exportService.updateExportRecord({
+            await migrationV1ToV2(exportRecord as ExportRecordV1, exportDir);
+            exportRecord = await exportService.updateExportRecord(exportDir, {
                 version: 2,
             });
             addLogLine('migration to version 2 complete');
@@ -93,7 +86,7 @@ async function migrateExport(
         if (exportRecord.version === 2) {
             addLogLine('migrating export to version 3');
             await migrationV2ToV3(exportDir, exportRecord as ExportRecordV2);
-            exportRecord = await exportService.updateExportRecord({
+            exportRecord = await exportService.updateExportRecord(exportDir, {
                 version: 3,
             });
             addLogLine('migration to version 3 complete');
@@ -134,8 +127,11 @@ async function migrationV0ToV1(
     );
 }
 
-async function migrationV1ToV2(exportRecord: ExportRecordV1) {
-    await removeDeprecatedExportRecordProperties(exportRecord);
+async function migrationV1ToV2(
+    exportRecord: ExportRecordV1,
+    exportDir: string
+) {
+    await removeDeprecatedExportRecordProperties(exportRecord, exportDir);
 }
 
 async function migrationV2ToV3(
@@ -169,7 +165,7 @@ async function migrationV2ToV3(
         fileExportNames,
         collectionExportNames,
     };
-    await exportService.updateExportRecord(updatedExportRecord);
+    await exportService.updateExportRecord(exportDir, updatedExportRecord);
 }
 
 /*
@@ -250,7 +246,8 @@ async function migrateFiles(
 }
 
 async function removeDeprecatedExportRecordProperties(
-    exportRecord: ExportRecordV1
+    exportRecord: ExportRecordV1,
+    exportDir: string
 ) {
     if (exportRecord?.queuedFiles) {
         exportRecord.queuedFiles = undefined;
@@ -261,7 +258,7 @@ async function removeDeprecatedExportRecordProperties(
     if (exportRecord?.failedFiles) {
         exportRecord.failedFiles = undefined;
     }
-    await exportService.updateExportRecord(exportRecord);
+    await exportService.updateExportRecord(exportDir, exportRecord);
 }
 
 async function getCollectionExportNamesFromExportedCollectionPaths(
@@ -368,9 +365,9 @@ async function addCollectionExportedRecordV1(
             [collectionID]: collectionExportPath,
         };
 
-        await exportService.updateExportRecord(exportRecord, folder);
+        await exportService.updateExportRecord(folder, exportRecord);
     } catch (e) {
         logError(e, 'addCollectionExportedRecord failed');
-        throw Error(CustomError.ADD_FILE_EXPORTED_RECORD_FAILED);
+        throw e;
     }
 }
