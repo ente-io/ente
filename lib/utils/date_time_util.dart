@@ -1,3 +1,4 @@
+import "package:flutter/cupertino.dart";
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
@@ -119,16 +120,13 @@ String getTimeIn12hrFormat(DateTime dateTime) {
 }
 
 //Thu, Jun 30, 2022 - 14:32
-String getFormattedTime(DateTime dateTime) {
-  return getDay(dateTime) +
-      ", " +
-      getMonth(dateTime) +
-      " " +
-      dateTime.day.toString() +
-      ", " +
-      dateTime.year.toString() +
-      " - " +
-      getTime(dateTime);
+String getFormattedTime(BuildContext context, DateTime dateTime) {
+  return DateFormat(
+    'E, MMM d, y - HH:mm',
+    Localizations.localeOf(context).languageCode,
+  ).format(
+    dateTime,
+  );
 }
 
 String daysLeft(int futureTime) {
