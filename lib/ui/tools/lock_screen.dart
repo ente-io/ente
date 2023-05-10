@@ -42,7 +42,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                   child: Image.asset('assets/loading_photos_background.png'),
                 ),
                 SizedBox(
-                  width: 142,
+                  width: 180,
                   child: GradientButton(
                     text: S.of(context).unlock,
                     iconData: Icons.lock_open_outlined,
