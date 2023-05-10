@@ -2,13 +2,13 @@ import "dart:io";
 
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 import "package:photos/models/memory.dart";
 import "package:photos/services/memories_service.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/extents_page_view.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
-import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
 import "package:step_progress_indicator/step_progress_indicator.dart";
@@ -89,8 +89,11 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   ),
                 ),
                 Text(
-                  getFormattedDate(
-                    DateTime.fromMicrosecondsSinceEpoch(file.creationTime!),
+                  DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
+                      .format(
+                    DateTime.fromMicrosecondsSinceEpoch(
+                      file.creationTime!,
+                    ),
                   ),
                   style: Theme.of(context).textTheme.subtitle1!.copyWith(
                         fontSize: 14,
