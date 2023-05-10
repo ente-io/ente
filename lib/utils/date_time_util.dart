@@ -19,39 +19,8 @@ Map<int, String> _months = {
   12: "Dec",
 };
 
-Map<int, String> _fullMonths = {
-  1: "January",
-  2: "February",
-  3: "March",
-  4: "April",
-  5: "May",
-  6: "June",
-  7: "July",
-  8: "August",
-  9: "September",
-  10: "October",
-  11: "November",
-  12: "December",
-};
-
-Map<int, String> _days = {
-  1: "Mon",
-  2: "Tue",
-  3: "Wed",
-  4: "Thu",
-  5: "Fri",
-  6: "Sat",
-  7: "Sun",
-};
-
 final currentYear = DateTime.now().year;
 const searchStartYear = 1970;
-
-int daysBetween(DateTime from, DateTime to) {
-  from = DateTime(from.year, from.month, from.day);
-  to = DateTime(to.year, to.month, to.day);
-  return (to.difference(from).inHours / 24).round();
-}
 
 bool areFromSameDay(int firstCreationTime, int secondCreationTime) {
   final firstDate = DateTime.fromMicrosecondsSinceEpoch(firstCreationTime);
@@ -85,33 +54,6 @@ String getNameForDateRange(int firstCreationTime, int secondCreationTime) {
   }
   // same day
   return "${_months[endTime.month]!} ${endTime.day}, ${endTime.year}";
-}
-
-String getDay(DateTime dateTime) {
-  return _days[dateTime.weekday]!;
-}
-
-String getMonth(DateTime dateTime) {
-  return _months[dateTime.month]!;
-}
-
-String getFullMonth(DateTime dateTime) {
-  return _fullMonths[dateTime.month]!;
-}
-
-String getAbbreviationOfYear(DateTime dateTime) {
-  return (dateTime.year % 100).toString();
-}
-
-//14:32
-String getTime(DateTime dateTime) {
-  final hours = dateTime.hour > 9
-      ? dateTime.hour.toString()
-      : "0" + dateTime.hour.toString();
-  final minutes = dateTime.minute > 9
-      ? dateTime.minute.toString()
-      : "0" + dateTime.minute.toString();
-  return hours + ":" + minutes;
 }
 
 //11:22 AM
@@ -167,23 +109,6 @@ String formatDuration(Duration position) {
       '${hoursString == '00' ? '' : hoursString + ':'}$minutesString:$secondsString';
 
   return formattedTime;
-}
-
-bool isLeapYear(DateTime dateTime) {
-  final year = dateTime.year;
-  if (year % 4 == 0) {
-    if (year % 100 == 0) {
-      if (year % 400 == 0) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return true;
-    }
-  } else {
-    return false;
-  }
 }
 
 String secondsToHHMMSS(int value) {
