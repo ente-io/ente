@@ -7,6 +7,7 @@ import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import "package:photos/models/magic_metadata.dart";
 import "package:photos/services/file_magic_service.dart";
+import "package:photos/services/update_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
@@ -176,10 +177,12 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ]);
     }
 
-    fileDetailsTiles.addAll([
-      ObjectsItemWidget(file),
-      const FileDetailsDivider(),
-    ]);
+    if(!UpdateService.instance.isFdroidFlavor()) {
+      fileDetailsTiles.addAll([
+        ObjectsItemWidget(file),
+        const FileDetailsDivider(),
+      ]);
+    }
 
     if (file.uploadedFileID != null && file.updationTime != null) {
       fileDetailsTiles.addAll(

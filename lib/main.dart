@@ -188,7 +188,12 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   }
   FeatureFlagService.instance.init();
 
-  unawaited(ObjectDetectionService.instance.init());
+  // Can not including existing tf/ml binaries as they are not being built
+  // from source.
+  // See https://gitlab.com/fdroid/fdroiddata/-/merge_requests/12671#note_1294346819
+  if (!UpdateService.instance.isFdroidFlavor()) {
+    unawaited(ObjectDetectionService.instance.init());
+  }
 
   _logger.info("Initialization done");
 }
