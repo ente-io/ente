@@ -1,13 +1,15 @@
 const path = require('path');
 
 const buildEslintCommand = (filenames) =>
-    `next lint --fix --file ${filenames
+    `yarn lint --fix --file ${filenames
         .map((f) => path.relative(process.cwd(), f))
-        .join(' --file ')}`;
+        .join(' --file ')} --`;
 
 const buildPrettierCommand = (filenames) =>
     `yarn prettier --write --ignore-unknown ${filenames.join(' ')}`;
 
 module.exports = {
-    'src/**/*.{js,jsx,ts,tsx}': [buildEslintCommand, buildPrettierCommand],
+    'apps/**/*.{js,jsx,ts,tsx}': [buildEslintCommand, buildPrettierCommand],
+    'packages/**/*.{js,jsx,ts,tsx}': [buildEslintCommand, buildPrettierCommand],
+    '**/*.{json,css,scss,md,html,yml,yaml}': [buildPrettierCommand],
 };

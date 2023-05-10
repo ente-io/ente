@@ -1,19 +1,19 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
+node_modules/
+.pnp/
 .pnp.js
 
 # testing
-/coverage
+coverage/
 
 # next.js
-/.next/
-/out/
+.next/
+out/
 
 # production
-/build
+build/
 
 # misc
 .DS_Store
@@ -37,7 +37,7 @@ out_functions
 out_publish
 
 .env
-/.vscode/
+.vscode/
 .idea/
 
 # workbox
@@ -46,3 +46,4 @@ public/sw.js.map
 public/worker-*.js
 public/worker-*.js.map
 
+.turbo

@@ -1,0 +1,5 @@
+thirdparty/
+public/
+node_modules/
+*.md
+*.yml
