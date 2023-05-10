@@ -439,6 +439,13 @@ export function mergeMetadata(files: EnteFile[]): EnteFile[] {
     });
 }
 
+export function addIsHiddenProperty(files: EnteFile[]): EnteFile[] {
+    return files.map((file) => ({
+        ...file,
+        isHidden: true,
+    }));
+}
+
 export function updateExistingFilePubMetadata(
     existingFile: EnteFile,
     updatedFile: EnteFile

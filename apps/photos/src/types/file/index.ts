@@ -61,6 +61,7 @@ export interface EnteFile
     h?: number;
     title?: string;
     isTrashed?: boolean;
+    isHidden?: boolean;
     deleteBy?: number;
     isSourceLoaded?: boolean;
     originalVideoURL?: string;

@@ -13,6 +13,7 @@ import {
     updateFileMagicMetadata,
     trashFiles,
     deleteFromTrash,
+    getLocalHiddenFiles,
 } from 'services/fileService';
 import { styled, Typography } from '@mui/material';
 import {
@@ -41,6 +42,7 @@ import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
 import {
+    addIsHiddenProperty,
     changeFilesVisibility,
     downloadFiles,
     getNonTrashedFiles,
@@ -276,9 +278,14 @@ export default function Gallery() {
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
             let files = mergeMetadata(await getLocalFiles());
+            const hiddenFiles = await getLocalHiddenFiles();
             const collections = await getLocalCollections();
             const trash = await getLocalTrash();
-            files = [...files, ...getTrashedFiles(trash)];
+            files = [
+                ...files,
+                ...getTrashedFiles(trash),
+                ...addIsHiddenProperty(hiddenFiles),
+            ];
             setUser(user);
             setFiles(sortFiles(files));
             setCollections(collections);
