@@ -9,6 +9,7 @@ import PhotoViewer from 'components/PhotoViewer';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
+    HIDDEN_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
 import { isSharedFile } from 'utils/file';
@@ -121,105 +122,112 @@ const PhotoFrame = ({
 
             const filteredData = files
                 .filter((item) => {
+                    // only show single copy of a file
+                    if (idSet.has(item.id)) {
+                        return false;
+                    }
+
+                    // trashed files can only be seen in trash section
+                    if (item.isTrashed && activeCollection !== TRASH_SECTION) {
+                        return false;
+                    }
+
+                    // only deleted marked files should be shown only in trash section
                     if (
                         deletedFileIds?.has(item.id) &&
                         activeCollection !== TRASH_SECTION
                     ) {
                         return false;
                     }
-                    if (
-                        search?.date &&
-                        !isSameDayAnyYear(search.date)(
-                            new Date(item.metadata.creationTime / 1000)
-                        )
-                    ) {
+
+                    // hidden files can only be seen in hidden section
+                    if (item.isHidden && activeCollection !== HIDDEN_SECTION) {
                         return false;
                     }
-                    if (
-                        search?.location &&
-                        !isInsideBox(
-                            {
-                                latitude: item.metadata.latitude,
-                                longitude: item.metadata.longitude,
-                            },
-                            search.location
-                        )
-                    ) {
-                        return false;
+
+                    // SEARCH MODE
+                    if (isInSearchMode) {
+                        if (
+                            search?.date &&
+                            !isSameDayAnyYear(search.date)(
+                                new Date(item.metadata.creationTime / 1000)
+                            )
+                        ) {
+                            return false;
+                        }
+                        if (
+                            search?.location &&
+                            !isInsideBox(
+                                {
+                                    latitude: item.metadata.latitude,
+                                    longitude: item.metadata.longitude,
+                                },
+                                search.location
+                            )
+                        ) {
+                            return false;
+                        }
+                        if (
+                            search?.person &&
+                            search.person.files.indexOf(item.id) === -1
+                        ) {
+                            return false;
+                        }
+                        if (
+                            search?.thing &&
+                            search.thing.files.indexOf(item.id) === -1
+                        ) {
+                            return false;
+                        }
+                        if (
+                            search?.text &&
+                            search.text.files.indexOf(item.id) === -1
+                        ) {
+                            return false;
+                        }
+                        if (
+                            search?.files &&
+                            search.files.indexOf(item.id) === -1
+                        ) {
+                            return false;
+                        }
+                        return true;
                     }
+
+                    // shared files can only be seen in their respective shared collection
                     if (
-                        search?.person &&
-                        search.person.files.indexOf(item.id) === -1
-                    ) {
-                        return false;
-                    }
-                    if (
-                        search?.thing &&
-                        search.thing.files.indexOf(item.id) === -1
-                    ) {
-                        return false;
-                    }
-                    if (
-                        search?.text &&
-                        search.text.files.indexOf(item.id) === -1
-                    ) {
-                        return false;
-                    }
-                    if (search?.files && search.files.indexOf(item.id) === -1) {
-                        return false;
-                    }
-                    if (
-                        !isDeduplicating &&
-                        !isInSearchMode &&
-                        activeCollection === ALL_SECTION &&
-                        (IsArchived(item) ||
-                            archivedCollections?.has(item.collectionID))
-                    ) {
-                        return false;
-                    }
-                    if (
-                        !isInSearchMode &&
-                        activeCollection === ARCHIVE_SECTION &&
-                        !IsArchived(item)
+                        isSharedFile(user, item) &&
+                        activeCollection !== item.collectionID
                     ) {
                         return false;
                     }
 
+                    // DEDUPLICATE PAGE
+                    if (isDeduplicating) {
+                        return true;
+                    }
+
+                    // Archived files/collection files can only be seen in archive section (except in search mode or deduplicate page)
                     if (
-                        (isInSearchMode ||
-                            activeCollection !== item.collectionID) &&
-                        isSharedFile(user, item)
+                        (IsArchived(item) ||
+                            archivedCollections.has(item.collectionID)) &&
+                        activeCollection !== ARCHIVE_SECTION
                     ) {
                         return false;
                     }
-                    if (
-                        !isInSearchMode &&
-                        activeCollection === TRASH_SECTION &&
-                        !item.isTrashed
-                    ) {
+
+                    // ALL SECTION - show all files (except trashed files, deleted marked files, hidden files, shared files, archived files)
+                    if (activeCollection === ALL_SECTION) {
+                        return true;
+                    }
+
+                    // COLLECTION SECTION - show files in the active collection
+                    if (activeCollection !== item.collectionID) {
                         return false;
                     }
-                    if (
-                        (isInSearchMode ||
-                            activeCollection !== TRASH_SECTION) &&
-                        item.isTrashed
-                    ) {
-                        return false;
-                    }
-                    if (!idSet.has(item.id)) {
-                        if (
-                            activeCollection === ALL_SECTION ||
-                            activeCollection === ARCHIVE_SECTION ||
-                            activeCollection === TRASH_SECTION ||
-                            isInSearchMode ||
-                            activeCollection === item.collectionID
-                        ) {
-                            idSet.add(item.id);
-                            return true;
-                        }
-                        return false;
-                    }
-                    return false;
+
+                    idSet.add(item.id);
+                    return true;
                 })
                 .map((item) => {
                     const filteredItem = {
