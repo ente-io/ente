@@ -46,10 +46,6 @@ Map<int, String> _days = {
 final currentYear = DateTime.now().year;
 const searchStartYear = 1970;
 
-//Jun 2022
-String getMonthAndYear(DateTime dateTime) {
-  return _months[dateTime.month]! + " " + dateTime.year.toString();
-}
 
 int daysBetween(DateTime from, DateTime to) {
   from = DateTime(from.year, from.month, from.day);
