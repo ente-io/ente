@@ -1051,6 +1051,7 @@ function getCollectionsFileCount(
     const uniqueTrashedFileIDs = new Set<number>();
     const uniqueArchivedFileIDs = new Set<number>();
     const uniqueAllSectionFileIDs = new Set<number>();
+    const uniqueHiddenSectionFileIDs = new Set<number>();
     for (const file of files) {
         if (isSharedFile(user, file)) {
             continue;
@@ -1059,6 +1060,8 @@ function getCollectionsFileCount(
             uniqueTrashedFileIDs.add(file.id);
         } else if (IsArchived(file)) {
             uniqueArchivedFileIDs.add(file.id);
+        } else if (file.isHidden) {
+            uniqueHiddenSectionFileIDs.add(file.id);
         } else if (!archivedCollections.has(file.collectionID)) {
             uniqueAllSectionFileIDs.add(file.id);
         }
@@ -1066,6 +1069,7 @@ function getCollectionsFileCount(
     collectionFilesCount.set(TRASH_SECTION, uniqueTrashedFileIDs.size);
     collectionFilesCount.set(ARCHIVE_SECTION, uniqueArchivedFileIDs.size);
     collectionFilesCount.set(ALL_SECTION, uniqueAllSectionFileIDs.size);
+    collectionFilesCount.set(HIDDEN_SECTION, uniqueHiddenSectionFileIDs.size);
     return collectionFilesCount;
 }
 
