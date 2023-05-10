@@ -31,8 +31,6 @@ import {
     checkExistsAndCreateDir,
     saveStreamToDisk,
     saveFileToDisk,
-    getExportRecord,
-    setExportRecord,
     exists,
 } from './api/export';
 import {
@@ -50,6 +48,7 @@ import {
     moveFile,
     deleteFolder,
     rename,
+    readTextFile,
 } from './api/fs';
 import { convertHEIC, generateImageThumbnail } from './api/imageProcessor';
 import { setupLogging } from './utils/logging';
@@ -74,8 +73,7 @@ windowObject['ElectronAPIs'] = {
     clearElectronStore,
     sendNotification,
     reloadWindow,
-    getExportRecord,
-    setExportRecord,
+    readTextFile,
     showUploadFilesDialog,
     showUploadDirsDialog,
     getPendingUploads,
