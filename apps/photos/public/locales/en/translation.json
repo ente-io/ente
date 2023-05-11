@@ -349,7 +349,7 @@
     "LINK_EXPIRED": "Link expired",
     "LINK_EXPIRED_MESSAGE": "This link has either expired or been disabled!",
     "MANAGE_LINK": "Manage link",
-    "LINK_TOO_MANY_REQUESTS": "This album is too popular for us to handle!",
+    "LINK_TOO_MANY_REQUESTS": "Sorry, this album has been viewed on too many devices!",
     "FILE_DOWNLOAD": "Allow downloads",
     "LINK_PASSWORD_LOCK": "Password lock",
     "PUBLIC_COLLECT": "Allow adding photos",
