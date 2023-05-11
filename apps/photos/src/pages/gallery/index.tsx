@@ -324,7 +324,6 @@ export default function Gallery() {
         if (typeof activeCollection === 'undefined') {
             return;
         }
-        console.log('activeCollection', activeCollection);
         let collectionURL = '';
         if (activeCollection !== ALL_SECTION) {
             collectionURL += '?collection=';
