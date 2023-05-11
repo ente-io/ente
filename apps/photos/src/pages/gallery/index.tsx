@@ -460,12 +460,7 @@ export default function Gallery() {
                 if (toProcessFiles.length === 0) {
                     return;
                 }
-                await handleCollectionOps(
-                    ops,
-                    collection,
-                    toProcessFiles,
-                    selected.collectionID
-                );
+                await handleCollectionOps(ops, collection, toProcessFiles);
                 clearSelection();
                 await syncWithRemote(false, true);
                 setActiveCollection(collection.id);
