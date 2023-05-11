@@ -474,10 +474,8 @@ export function getUniqueFiles(files: EnteFile[]) {
 export function getSearchableFiles(files: EnteFile[]) {
     return files.filter(
         (file) =>
-            typeof file.isTrashed === 'undefined' ||
-            !file.isTrashed ||
-            typeof file.isHidden === 'undefined' ||
-            !file.isHidden
+            (typeof file.isTrashed === 'undefined' || !file.isTrashed) &&
+            (typeof file.isHidden === 'undefined' || !file.isHidden)
     );
 }
 
