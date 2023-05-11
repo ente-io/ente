@@ -59,7 +59,7 @@ import {
     getCollectionNameMap,
     getNonEmptyPersonalCollections,
 } from 'utils/collection';
-import { migrateExportJSON } from './migration';
+import { migrateExport } from './migration';
 
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
@@ -130,10 +130,7 @@ class ExportService {
     async runMigration(exportDir: string, exportRecord: ExportRecord) {
         try {
             addLogLine('running migration');
-            this.migrationInProgress = migrateExportJSON(
-                exportDir,
-                exportRecord
-            );
+            this.migrationInProgress = migrateExport(exportDir, exportRecord);
             await this.migrationInProgress;
             addLogLine('migration completed');
             this.migrationInProgress = null;
