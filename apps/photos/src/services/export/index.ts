@@ -292,6 +292,11 @@ class ExportService {
             failed: 0,
             total: 0,
         });
+        if (this.migrationInProgress) {
+            addLogLine('migration in progress, waiting for it to complete');
+            await this.migrationInProgress;
+            this.migrationInProgress = null;
+        }
     }
 
     async postExport() {
@@ -333,11 +338,6 @@ class ExportService {
                 addLogLine('export not in progress, starting export');
             }
             this.exportInProgress = true;
-            if (this.migrationInProgress) {
-                addLogLine('migration in progress, waiting for it to complete');
-                await this.migrationInProgress;
-                this.migrationInProgress = null;
-            }
             try {
                 const exportFolder = this.getExportSettings()?.folder;
                 await this.preExport(exportFolder);
