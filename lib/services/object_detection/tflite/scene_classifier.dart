@@ -1,3 +1,4 @@
+import "package:flutter/foundation.dart";
 import 'package:image/image.dart' as image_lib;
 import "package:logging/logging.dart";
 import 'package:photos/services/object_detection/models/predictions.dart';
@@ -10,7 +11,7 @@ import "package:tflite_flutter_helper/tflite_flutter_helper.dart";
 // Source: https://tfhub.dev/sayannath/lite-model/image-scene/1
 class SceneClassifier extends Classifier {
   static final _logger = Logger("SceneClassifier");
-  static const double threshold = 0.5;
+  static const double threshold = 0.35;
 
   @override
   String get modelPath => "models/scenes/model.tflite";
@@ -64,8 +65,13 @@ class SceneClassifier extends Classifier {
         recognitions.add(
           Recognition(i, label, score),
         );
+      } else if (kDebugMode && score > 0.2) {
+        debugPrint("scenePrediction score $label is below threshold: $score");
       }
     }
+    debugPrint(
+      "Total lables ${labels.length} + reccg ${recognitions.map((e) => e.label).toSet()}",
+    );
 
     final predictElapsedTime =
         DateTime.now().millisecondsSinceEpoch - predictStartTime;
