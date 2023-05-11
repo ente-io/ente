@@ -30,8 +30,14 @@ class CodeStore {
       code.hasSynced = entity.hasSynced;
       codes.add(code);
     }
-    codes.sort((c1, c2) {
-      return c1.issuer.toLowerCase().compareTo(c2.issuer.toLowerCase());
+
+    // sort codes by issuer,account
+    codes.sort((a, b) {
+      final issuerComparison = a.issuer.compareTo(b.issuer);
+      if (issuerComparison != 0) {
+        return issuerComparison;
+      }
+      return a.account.compareTo(b.account);
     });
     return codes;
   }
