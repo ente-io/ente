@@ -28,6 +28,8 @@ export const CustomError = {
     SIGNUP_FAILED: 'signup failed',
     FAV_COLLECTION_MISSING: 'favorite collection missing',
     INVALID_COLLECTION_OPERATION: 'invalid collection operation',
+    TO_MOVE_FILES_FROM_MULTIPLE_COLLECTIONS:
+        'to move files from multiple collections',
     WAIT_TIME_EXCEEDED: 'thumbnail generation wait time exceeded',
     REQUEST_CANCELLED: 'request canceled',
     REQUEST_FAILED: 'request failed',

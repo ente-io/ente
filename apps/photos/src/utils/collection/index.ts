@@ -45,19 +45,14 @@ export enum COLLECTION_OPS_TYPE {
 export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
     collection: Collection,
-    selectedFiles: EnteFile[],
-    selectedCollectionID: number
+    selectedFiles: EnteFile[]
 ) {
     switch (type) {
         case COLLECTION_OPS_TYPE.ADD:
             await addToCollection(collection, selectedFiles);
             break;
         case COLLECTION_OPS_TYPE.MOVE:
-            await moveToCollection(
-                collection,
-                selectedCollectionID,
-                selectedFiles
-            );
+            await moveToCollection(collection, selectedFiles);
             break;
         case COLLECTION_OPS_TYPE.REMOVE:
             await removeFromCollection(collection.id, selectedFiles);
