@@ -55,6 +55,7 @@ import {
     isSharedOnlyViaLink,
     isValidMoveTarget,
     isCollectionHidden,
+    isValidReplacementCollection,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -313,8 +314,16 @@ export const createCollection = async (
         if (!existingCollections) {
             existingCollections = await syncCollections();
         }
+        const user: User = getData(LS_KEYS.USER);
         for (const collection of existingCollections) {
-            if (collection.name === collectionName) {
+            if (
+                isValidReplacementCollection(
+                    collection,
+                    user,
+                    collectionName,
+                    type
+                )
+            ) {
                 return collection;
             }
         }

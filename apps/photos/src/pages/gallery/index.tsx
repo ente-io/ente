@@ -44,7 +44,7 @@ import PhotoFrame from 'components/PhotoFrame';
 import {
     changeFilesVisibility,
     downloadFiles,
-    getNonTrashedFiles,
+    getSearchableFiles,
     getSelectedFiles,
     mergeMetadata,
     sortFiles,
@@ -77,6 +77,7 @@ import {
     getSelectedCollection,
     getArchivedCollections,
     hasNonSystemCollections,
+    getSearchableCollections,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import {
@@ -716,8 +717,8 @@ export default function Gallery() {
                     setIsInSearchMode={setIsInSearchMode}
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
-                    collections={collections}
-                    files={getNonTrashedFiles(files)}
+                    collections={getSearchableCollections(collections)}
+                    files={getSearchableFiles(files)}
                     setActiveCollection={setActiveCollection}
                     updateSearch={updateSearch}
                 />

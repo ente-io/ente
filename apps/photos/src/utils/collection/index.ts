@@ -20,6 +20,7 @@ import {
 } from 'types/collection';
 import {
     CollectionSummaryType,
+    CollectionType,
     HIDE_FROM_COLLECTION_BAR_TYPES,
     OPTIONS_NOT_HAVING_COLLECTION_TYPES,
     SYSTEM_COLLECTION_TYPES,
@@ -257,6 +258,21 @@ export function isValidMoveTarget(
     );
 }
 
+export function isValidReplacementCollection(
+    collection: Collection,
+    user: User,
+    wantedCollectionName: string,
+    wantedCollectionType: CollectionType
+) {
+    return (
+        collection.name !== wantedCollectionName &&
+        collection.type === wantedCollectionType &&
+        !isCollectionHidden(collection) &&
+        !isQuickLinkCollection(collection) &&
+        !isIncomingShare(collection, user)
+    );
+}
+
 export function getCollectionNameMap(
     collections: Collection[]
 ): Map<number, string> {
@@ -281,4 +297,10 @@ export function getNonEmptyPersonalCollections(
         (collection) => collection.owner.id === user?.id
     );
     return personalCollections;
+}
+
+export function getSearchableCollections(
+    collections: Collection[]
+): Collection[] {
+    return collections.filter((collection) => !isCollectionHidden(collection));
 }
