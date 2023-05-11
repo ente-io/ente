@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import "package:flutter/foundation.dart";
 import 'package:image/image.dart' as image_lib;
 import "package:logging/logging.dart";
 import 'package:photos/services/object_detection/models/predictions.dart';

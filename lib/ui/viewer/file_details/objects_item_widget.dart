@@ -1,3 +1,4 @@
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
@@ -27,7 +28,7 @@ class ObjectsItemWidget extends StatelessWidget {
   ) async {
     try {
       final chipButtons = <ChipButtonWidget>[];
-      var objectTags = <String>[];
+      var objectTags = <String, double>{};
       final thumbnail = await getThumbnail(file);
       if (thumbnail != null) {
         objectTags = await ObjectDetectionService.instance.predict(thumbnail);
@@ -40,9 +41,23 @@ class ObjectsItemWidget extends StatelessWidget {
           )
         ];
       }
-      for (String objectTag in objectTags) {
-        chipButtons.add(ChipButtonWidget(objectTag));
+      // sort by values
+      objectTags = Map.fromEntries(
+        objectTags.entries.toList()
+          ..sort((e1, e2) => e2.value.compareTo(e1.value)),
+      );
+
+      for (MapEntry<String, double> entry in objectTags.entries) {
+        chipButtons.add(
+          ChipButtonWidget(
+            entry.key +
+                (kDebugMode
+                    ? "-" + (entry.value * 100).round().toString()
+                    : ""),
+          ),
+        );
       }
+
       return chipButtons;
     } catch (e, s) {
       Logger("ObjctsItemWidget").info(e, s);
