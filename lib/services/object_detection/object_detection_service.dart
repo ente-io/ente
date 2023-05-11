@@ -10,7 +10,7 @@ import "package:photos/services/object_detection/tflite/scene_classifier.dart";
 import "package:photos/services/object_detection/utils/isolate_utils.dart";
 
 class ObjectDetectionService {
-  static const scoreThreshold = 0.5;
+  static const scoreThreshold = 0.35;
 
   final _logger = Logger("ObjectDetectionService");
 

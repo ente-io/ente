@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import "package:flutter/foundation.dart";
 import 'package:image/image.dart' as image_lib;
 import "package:logging/logging.dart";
 import 'package:photos/services/object_detection/models/predictions.dart';
@@ -12,7 +13,7 @@ import "package:tflite_flutter_helper/tflite_flutter_helper.dart";
 /// Classifier
 class CocoSSDClassifier extends Classifier {
   static final _logger = Logger("CocoSSDClassifier");
-  static const double threshold = 0.5;
+  static const double threshold = 0.4;
 
   @override
   String get modelPath => "models/cocossd/model.tflite";
