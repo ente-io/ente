@@ -269,6 +269,11 @@ const SelectedFileOptions = ({
                                 </IconButton>
                             </Tooltip>
                         )}
+                        <Tooltip title={t('HIDE')}>
+                            <IconButton onClick={hideFilesHelper}>
+                                <VisibilityOffOutlined />
+                            </IconButton>
+                        </Tooltip>
                         {activeCollection !== ALL_SECTION &&
                             activeCollection !== ARCHIVE_SECTION &&
                             !isFavoriteCollection && (

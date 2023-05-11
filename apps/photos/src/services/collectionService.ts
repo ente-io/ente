@@ -1002,6 +1002,8 @@ export async function getCollectionSummaries(
                     ? CollectionSummaryType.sharedOnlyViaLink
                     : IsArchived(collection)
                     ? CollectionSummaryType.archived
+                    : isCollectionHidden(collection)
+                    ? CollectionSummaryType.hidden
                     : CollectionSummaryType[collection.type],
             });
         }
