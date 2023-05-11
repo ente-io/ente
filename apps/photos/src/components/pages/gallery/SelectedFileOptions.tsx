@@ -25,7 +25,8 @@ import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import { getTrashFilesMessage } from 'utils/ui';
 import { t } from 'i18next';
 import { formatNumber } from 'utils/number/format';
-import { VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
+import VisibilityOffOutlined from '@mui/icons-material/VisibilityOffOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
@@ -142,6 +143,15 @@ const SelectedFileOptions = ({
         });
     };
 
+    const unhideFileHelper = () => {
+        setCollectionSelectorAttributes({
+            callback: moveToCollectionHelper,
+            showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
+            title: t('UNHIDE_TO_COLLECTION'),
+            fromCollection: activeCollection,
+        });
+    };
+
     return (
         <SelectionBar>
             <FluidContainer>
@@ -228,7 +238,7 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={t('UNHIDE')}>
-                            <IconButton onClick={moveToCollection}>
+                            <IconButton onClick={unhideFileHelper}>
                                 <VisibilityOutlined />
                             </IconButton>
                         </Tooltip>
