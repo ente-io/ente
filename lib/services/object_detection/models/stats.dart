@@ -1,17 +1,17 @@
 /// Bundles different elapsed times
 class Stats {
   /// Total time taken in the isolate where the inference runs
-  int totalPredictTime;
+  final int totalPredictTime;
 
   /// [totalPredictTime] + communication overhead time
   /// between main isolate and another isolate
-  int totalElapsedTime;
+  final int totalElapsedTime;
 
   /// Time for which inference runs
-  int inferenceTime;
+  final int inferenceTime;
 
   /// Time taken to pre-process the image
-  int preProcessingTime;
+  final int preProcessingTime;
 
   Stats(
     this.totalPredictTime,
