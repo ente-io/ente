@@ -216,9 +216,11 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   Widget build(BuildContext context) {
     if (executionState == ExecutionState.successful) {
       Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
-        setState(() {
-          executionState = ExecutionState.idle;
-        });
+        if (mounted) {
+          setState(() {
+            executionState = ExecutionState.idle;
+          });
+        }
       });
     }
     return GestureDetector(
