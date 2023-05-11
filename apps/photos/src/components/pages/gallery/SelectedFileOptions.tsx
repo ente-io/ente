@@ -5,6 +5,7 @@ import { COLLECTION_OPS_TYPE } from 'utils/collection';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
+    HIDDEN_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
 import { Collection } from 'types/collection';
@@ -24,6 +25,7 @@ import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
 import { getTrashFilesMessage } from 'utils/ui';
 import { t } from 'i18next';
 import { formatNumber } from 'utils/number/format';
+import { VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
@@ -32,6 +34,7 @@ interface Props {
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: (permanent?: boolean) => void;
+    hideFilesHelper: () => void;
     removeFromCollectionHelper: () => void;
     fixTimeHelper: () => void;
     downloadHelper: () => void;
@@ -56,6 +59,7 @@ const SelectedFileOptions = ({
     fixTimeHelper,
     setCollectionSelectorAttributes,
     deleteFileHelper,
+    hideFilesHelper,
     downloadHelper,
     count,
     ownCount,
@@ -173,6 +177,11 @@ const SelectedFileOptions = ({
                                 <ArchiveIcon />
                             </IconButton>
                         </Tooltip>
+                        <Tooltip title={t('HIDE')}>
+                            <IconButton onClick={hideFilesHelper}>
+                                <VisibilityOffOutlined />
+                            </IconButton>
+                        </Tooltip>
                     </>
                 ) : activeCollection === TRASH_SECTION ? (
                     <>
@@ -211,6 +220,24 @@ const SelectedFileOptions = ({
                             <DownloadIcon />
                         </IconButton>
                     </Tooltip>
+                ) : activeCollection === HIDDEN_SECTION ? (
+                    <>
+                        <Tooltip title={t('DOWNLOAD')}>
+                            <IconButton onClick={downloadHelper}>
+                                <DownloadIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t('UNHIDE')}>
+                            <IconButton onClick={moveToCollection}>
+                                <VisibilityOutlined />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t('DELETE')}>
+                            <IconButton onClick={trashHandler}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </>
                 ) : (
                     <>
                         <Tooltip title={t('FIX_CREATION_TIME')}>

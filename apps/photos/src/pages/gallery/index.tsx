@@ -21,6 +21,7 @@ import {
     getLocalCollections,
     createCollection,
     getCollectionSummaries,
+    moveToHiddenCollection,
 } from 'services/collectionService';
 import { t } from 'i18next';
 
@@ -584,6 +585,34 @@ export default function Gallery() {
         }
     };
 
+    const hideFilesHelper = async () => {
+        startLoading();
+        try {
+            const selectedFiles = getSelectedFiles(selected, files);
+            await moveToHiddenCollection(selectedFiles);
+            clearSelection();
+        } catch (e) {
+            switch (e.status?.toString()) {
+                case ServerErrorCodes.FORBIDDEN:
+                    setDialogMessage({
+                        title: t('ERROR'),
+
+                        close: { variant: 'critical' },
+                        content: t('NOT_FILE_OWNER'),
+                    });
+            }
+            setDialogMessage({
+                title: t('ERROR'),
+
+                close: { variant: 'critical' },
+                content: t('UNKNOWN_ERROR'),
+            });
+        } finally {
+            await syncWithRemote(false, true);
+            finishLoading();
+        }
+    };
+
     const updateSearch: UpdateSearch = (newSearch, summary) => {
         if (newSearch?.collection) {
             setActiveCollection(newSearch?.collection);
@@ -802,6 +831,7 @@ export default function Gallery() {
                                 setCollectionSelectorAttributes
                             }
                             deleteFileHelper={deleteFileHelper}
+                            hideFilesHelper={hideFilesHelper}
                             removeFromCollectionHelper={() =>
                                 collectionOpsHelper(COLLECTION_OPS_TYPE.REMOVE)(
                                     getSelectedCollection(

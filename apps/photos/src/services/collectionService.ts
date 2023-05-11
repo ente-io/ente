@@ -61,12 +61,15 @@ import { getLocalFiles } from './fileService';
 import { REQUEST_BATCH_SIZE } from 'constants/api';
 import { batch } from 'utils/common';
 import { t } from 'i18next';
+import { EncryptedMagicMetadata } from 'types/magicMetadata';
+import { VISIBILITY_STATE } from 'types/magicMetadata';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
 
 const UNCATEGORIZED_COLLECTION_NAME = 'Uncategorized';
+const HIDDEN_COLLECTION_NAME = '.hidden';
 const FAVORITE_COLLECTION_NAME = 'Favorites';
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>
@@ -303,7 +306,8 @@ export const createAlbum = async (
 export const createCollection = async (
     collectionName: string,
     type: CollectionType,
-    existingCollections?: Collection[]
+    existingCollections?: Collection[],
+    magicMetadataProps?: CollectionMagicMetadataProps
 ): Promise<Collection> => {
     try {
         if (!existingCollections) {
@@ -322,6 +326,25 @@ export const createCollection = async (
             await cryptoWorker.encryptToB64(collectionKey, encryptionKey);
         const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
             await cryptoWorker.encryptUTF8(collectionName, collectionKey);
+        let encryptedMagicMetadata: EncryptedMagicMetadata;
+        if (magicMetadataProps) {
+            const magicMetadata = await updateMagicMetadataProps(
+                NEW_COLLECTION_MAGIC_METADATA,
+                null,
+                magicMetadataProps
+            );
+            const { file: encryptedMagicMetadataProps } =
+                await cryptoWorker.encryptMetadata(
+                    magicMetadataProps,
+                    collectionKey
+                );
+
+            encryptedMagicMetadata = {
+                ...magicMetadata,
+                data: encryptedMagicMetadataProps.encryptedData,
+                header: encryptedMagicMetadataProps.decryptionHeader,
+            };
+        }
         const newCollection: EncryptedCollection = {
             id: null,
             owner: null,
@@ -334,7 +357,7 @@ export const createCollection = async (
             sharees: null,
             updationTime: null,
             isDeleted: false,
-            magicMetadata: null,
+            magicMetadata: encryptedMagicMetadata,
         };
         const createdCollection = await postCollection(newCollection, token);
         const decryptedCreatedCollection = await getCollectionWithSecrets(
@@ -720,7 +743,7 @@ export const renameCollection = async (
     newCollectionName: string
 ) => {
     if (isQuickLinkCollection(collection)) {
-        // Convert quick link collction to normal collection on rename
+        // Convert quick link collection to normal collection on rename
         await updateCollectionSubType(collection, SUB_TYPE.DEFAULT);
     }
     const token = getToken();
@@ -1152,7 +1175,7 @@ export async function getUncategorizedCollection(
     return uncategorizedCollection;
 }
 
-export async function createUnCategorizedCollection() {
+export function createUnCategorizedCollection() {
     return createCollection(
         UNCATEGORIZED_COLLECTION_NAME,
         CollectionType.uncategorized
@@ -1170,4 +1193,27 @@ export async function getHiddenCollection(
     );
 
     return hiddenCollection;
+}
+
+export function createHiddenCollection() {
+    return createCollection(HIDDEN_COLLECTION_NAME, CollectionType.album, [], {
+        subType: SUB_TYPE.DEFAULT_HIDDEN,
+        visibility: VISIBILITY_STATE.HIDDEN,
+    });
+}
+
+export async function moveToHiddenCollection(files: EnteFile[]) {
+    try {
+        let hiddenCollection = await getHiddenCollection();
+        if (!hiddenCollection) {
+            hiddenCollection = await createHiddenCollection();
+        }
+        const groupedFiles = groupFilesBasedOnCollectionID(files);
+        for (const [sourceCollectionID, files] of groupedFiles.entries()) {
+            await moveToCollection(hiddenCollection, sourceCollectionID, files);
+        }
+    } catch (e) {
+        logError(e, 'move to hidden collection failed ');
+        throw e;
+    }
 }
