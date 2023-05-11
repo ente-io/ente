@@ -47,7 +47,7 @@
         "files": [
             "app/**/*",
             {
-                "from": "ui",
+                "from": "ui/apps/photos",
                 "to": "ui",
                 "filter": [
                     "!**/*",
