@@ -94,6 +94,7 @@ async function migrateExport(
         addLogLine(`Record at latest version`);
     } catch (e) {
         logError(e, 'export record migration failed');
+        throw e;
     }
 }
 
