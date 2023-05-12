@@ -1,85 +1,90 @@
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:integration_test/integration_test.dart";
-import 'package:photos/main.dart' as app;
+import "package:photos/main.dart" as app;
 import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
 void main() {
   group("App test", () {
     final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-    // binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+    binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
     testWidgets("Demo test", (tester) async {
       app.main();
-      try {
-        await tester.pumpAndSettle(const Duration(seconds: 5));
 
-        await dismissUpdateAppDialog(tester);
+      await tester.pumpAndSettle(const Duration(seconds: 5));
 
-        //Click the sign in button on the landing page
-        final signInButton = find.byKey(const ValueKey("signInButton"));
-        await tester.tap(signInButton);
-        await tester.pumpAndSettle();
+      await dismissUpdateAppDialog(tester);
 
-        //Enter the email address and click the login button
-        final emailInputField = find.byKey(const ValueKey("emailInputField"));
-        final logInButton = find.byKey(const ValueKey("logInButton"));
-        await tester.enterText(emailInputField, "enter email here");
-        await tester.pumpAndSettle(const Duration(seconds: 3));
-        await findAndTapFAB(tester, logInButton);
+      //Click the sign in button on the landing page
+      final signInButton = find.byKey(const ValueKey("signInButton"));
+      await tester.tap(signInButton);
+      await tester.pumpAndSettle();
 
-        //Enter OTT and click the verify button
-        final ottVerificationInputField =
-            find.byKey(const ValueKey("ottVerificationInputField"));
-        final verifyOttButton = find.byKey(const ValueKey("verifyOttButton"));
-        await tester.tap(ottVerificationInputField);
-        await tester.pumpAndSettle();
-        await tester.enterText(ottVerificationInputField, "enter otp here");
-        await tester.pumpAndSettle();
-        await findAndTapFAB(tester, verifyOttButton);
+      //Enter the email address and click the login button
+      final emailInputField = find.byKey(const ValueKey("emailInputField"));
+      final logInButton = find.byKey(const ValueKey("logInButton"));
+      // await tester.enterText(emailInputField, "enter email here");
+      await tester.tap(emailInputField);
+      await tester.pumpAndSettle(const Duration(seconds: 20));
+      await findAndTapFAB(tester, logInButton);
 
-        //Enter password and click the verify button
-        final passwordInputField =
-            find.byKey(const ValueKey("passwordInputField"));
-        final verifyPasswordButton =
-            find.byKey(const ValueKey("verifyPasswordButton"));
-        await tester.enterText(passwordInputField, "ente password here");
-        await tester.pumpAndSettle();
-        await findAndTapFAB(tester, verifyPasswordButton);
+      //Enter OTT and click the verify button
+      final ottVerificationInputField =
+          find.byKey(const ValueKey("ottVerificationInputField"));
+      final verifyOttButton = find.byKey(const ValueKey("verifyOttButton"));
+      await tester.pumpAndSettle();
+      // await tester.enterText(ottVerificationInputField, "enter ott here");
+      await tester.tap(ottVerificationInputField);
+      await tester.pumpAndSettle(const Duration(seconds: 10));
+      await findAndTapFAB(tester, verifyOttButton);
 
-        await tester.pumpAndSettle(const Duration(seconds: 2));
-        await dismissUpdateAppDialog(tester);
+      //Enter password and click the verify button
+      final passwordInputField =
+          find.byKey(const ValueKey("passwordInputField"));
+      final verifyPasswordButton =
+          find.byKey(const ValueKey("verifyPasswordButton"));
+      // await tester.enterText(passwordInputField, "enter password here");
+      await tester.tap(passwordInputField);
+      await tester.pumpAndSettle(const Duration(seconds: 20));
+      await findAndTapFAB(tester, verifyPasswordButton);
 
-        //Grant permission to access photos
-        final grantPermissionButton =
-            find.byKey(const ValueKey("grantPermissionButton"));
-        await tester.tap(grantPermissionButton);
-        await tester.pumpAndSettle(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      await dismissUpdateAppDialog(tester);
 
-        //Manually grant permission to access photos within 3 seconds
-        await tester.pumpAndSettle(const Duration(seconds: 3));
+      //Grant permission to access photos
+      final grantPermissionButton =
+          find.byKey(const ValueKey("grantPermissionButton"));
+      await tester.tap(grantPermissionButton);
+      await tester.pumpAndSettle(const Duration(seconds: 1));
 
-        //Skip backup
-        final skipBackupButton = find.byKey(const ValueKey("skipBackupButton"));
-        await tester.tap(skipBackupButton);
-        await tester.pumpAndSettle(const Duration(seconds: 3));
+      //Manually grant permission to access photos within 3 seconds
+      await tester.pumpAndSettle(const Duration(seconds: 3));
 
-        //scroll gallery
-        final scrollablePositionedList = find.byType(ScrollablePositionedList);
-        await tester.fling(
-          scrollablePositionedList,
-          const Offset(0, -4000),
-          4000,
-        );
-        await tester.pumpAndSettle();
-        await tester.fling(
-          scrollablePositionedList,
-          const Offset(0, 4000),
-          4000,
-        );
-        await tester.pumpAndSettle();
-      } catch (e) {
-        print("\n$e\n");
-      }
+      //Skip backup
+      final skipBackupButton = find.byKey(const ValueKey("skipBackupButton"));
+      await tester.tap(skipBackupButton);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      await binding.traceAction(
+        () async {
+          //scroll gallery
+          final scrollablePositionedList =
+              find.byType(ScrollablePositionedList);
+          await tester.fling(
+            scrollablePositionedList,
+            const Offset(0, -5000),
+            3800,
+          );
+          await tester.pumpAndSettle();
+          await tester.fling(
+            scrollablePositionedList,
+            const Offset(0, 5000),
+            3800,
+          );
+          await tester.pumpAndSettle();
+        },
+        reportKey: 'scrolling_summary',
+      );
     });
   });
 }
