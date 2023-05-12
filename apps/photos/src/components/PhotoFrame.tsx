@@ -9,6 +9,7 @@ import PhotoViewer from 'components/PhotoViewer';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
+    CollectionType,
     HIDDEN_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
@@ -313,6 +314,12 @@ const PhotoFrame = ({
                 collections.map((collection) => {
                     if (isHiddenCollection(collection)) {
                         return [collection.id, t('HIDDEN')];
+                    } else if (collection.type === CollectionType.favorites) {
+                        return [collection.id, t('FAVORITES')];
+                    } else if (
+                        collection.type === CollectionType.uncategorized
+                    ) {
+                        return [collection.id, t('UNCATEGORIZED')];
                     } else {
                         return [collection.id, collection.name];
                     }
