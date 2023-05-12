@@ -99,6 +99,8 @@ PODS:
   - in_app_purchase_storekit (0.0.1):
     - Flutter
     - FlutterMacOS
+  - integration_test (0.0.1):
+    - Flutter
   - libwebp (1.2.4):
     - libwebp/demux (= 1.2.4)
     - libwebp/mux (= 1.2.4)
@@ -195,6 +197,7 @@ DEPENDENCIES:
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_editor_common (from `.symlinks/plugins/image_editor_common/ios`)
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/ios`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
   - media_extension (from `.symlinks/plugins/media_extension/ios`)
   - motionphoto (from `.symlinks/plugins/motionphoto/ios`)
@@ -276,6 +279,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_editor_common/ios"
   in_app_purchase_storekit:
     :path: ".symlinks/plugins/in_app_purchase_storekit/ios"
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
   local_auth_ios:
     :path: ".symlinks/plugins/local_auth_ios/ios"
   media_extension:
@@ -345,6 +350,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: c2bdc4cf2ce786c4d2e6b3bcfd599a25ca78f06f
   image_editor_common: d6f6644ae4a6de80481e89fe6d0a8c49e30b4b43
   in_app_purchase_storekit: 6b297e2b5eab9fa3251a492d57301722e4132a71
+  integration_test: a1e7d09bd98eca2fc37aefd79d4f41ad37bdbbe5
   libwebp: f62cb61d0a484ba548448a4bd52aabf150ff6eef
   local_auth_ios: c6cf091ded637a88f24f86a8875d8b0f526e2605
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d

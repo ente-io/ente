@@ -58,9 +58,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   bool _isLoadingRemoteThumbnail = false;
   bool _errorLoadingRemoteThumbnail = false;
   ImageProvider? _imageProvider;
+  int? optimizedImageHeight;
+  int? optimizedImageWidth;
 
   @override
   void initState() {
+    changeSmallestSideToThumbnailSize();
     super.initState();
   }
 
@@ -83,6 +86,17 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
   }
 
+  void changeSmallestSideToThumbnailSize() {
+    if (widget.file!.width == 0 || widget.file!.height == 0) {
+      return;
+    }
+    if (widget.file!.width < widget.file!.height) {
+      optimizedImageWidth = widget.thumbnailSize;
+    } else {
+      optimizedImageHeight = widget.thumbnailSize;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.file!.isRemoteFile) {
@@ -93,7 +107,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     Widget? image;
     if (_imageProvider != null) {
       image = Image(
-        image: _imageProvider!,
+        image: optimizedImageHeight != null || optimizedImageWidth != null
+            ? ResizeImage(
+                _imageProvider!,
+                width: optimizedImageWidth,
+                height: optimizedImageHeight,
+              )
+            : _imageProvider!,
         fit: widget.fit,
       );
     }

@@ -66,6 +66,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       ),
       body: _getBody(),
       floatingActionButton: DynamicFAB(
+        key: const ValueKey("verifyPasswordButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
         buttonText: S.of(context).verifyPassword,
@@ -169,6 +170,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                   child: TextFormField(
+                    key: const ValueKey("passwordInputField"),
                     autofillHints: const [AutofillHints.password],
                     decoration: InputDecoration(
                       hintText: S.of(context).enterYourPassword,

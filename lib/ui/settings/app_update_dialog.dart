@@ -112,6 +112,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     return WillPopScope(
       onWillPop: () async => !shouldForceUpdate,
       child: AlertDialog(
+        key: const ValueKey("updateAppDialog"),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

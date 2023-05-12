@@ -116,6 +116,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               child: Hero(
                 tag: "log_in",
                 child: ElevatedButton(
+                  key: const ValueKey("signInButton"),
                   style:
                       Theme.of(context).colorScheme.optionalActionButtonStyle,
                   onPressed: _navigateToSignInPage,
