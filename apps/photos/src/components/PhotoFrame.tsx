@@ -31,6 +31,8 @@ import { useMemo } from 'react';
 import { Collection } from 'types/collection';
 import { addLogLine } from 'utils/logging';
 import PhotoSwipe from 'photoswipe';
+import { isHiddenCollection } from 'utils/collection';
+import { t } from 'i18next';
 
 const Container = styled('div')`
     display: block;
@@ -308,10 +310,13 @@ const PhotoFrame = ({
     const collectionNameMap = useMemo(() => {
         if (collections) {
             return new Map<number, string>(
-                collections.map((collection) => [
-                    collection.id,
-                    collection.name,
-                ])
+                collections.map((collection) => {
+                    if (isHiddenCollection(collection)) {
+                        return [collection.id, t('HIDDEN')];
+                    } else {
+                        return [collection.id, collection.name];
+                    }
+                })
             );
         } else {
             return new Map();
