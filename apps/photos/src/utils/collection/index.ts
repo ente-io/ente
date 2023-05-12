@@ -265,7 +265,7 @@ export function isValidReplacementCollection(
     wantedCollectionType: CollectionType
 ) {
     return (
-        collection.name !== wantedCollectionName &&
+        collection.name === wantedCollectionName &&
         collection.type === wantedCollectionType &&
         !isCollectionHidden(collection) &&
         !isQuickLinkCollection(collection) &&
