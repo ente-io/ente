@@ -212,7 +212,7 @@ class _HomePageState extends State<HomePage> {
     if (_hasLoaded) {
       if (_filteredCodes.isEmpty && _searchText.isEmpty) {
         return HomeEmptyStateWidget(
-          onScanTap: _redirectToManualEntryPage,
+          onScanTap: _redirectToScannerPage,
           onManuallySetupTap: _redirectToManualEntryPage,
         );
       } else {
