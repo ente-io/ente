@@ -259,15 +259,15 @@ export function isValidMoveTarget(
     );
 }
 
-export function isValidReplacementCollection(
+export function isValidReplacementAlbum(
     collection: Collection,
     user: User,
-    wantedCollectionName: string,
-    wantedCollectionType: CollectionType
+    wantedCollectionName: string
 ) {
     return (
         collection.name === wantedCollectionName &&
-        collection.type === wantedCollectionType &&
+        (collection.type === CollectionType.album ||
+            collection.type === CollectionType.folder) &&
         !isCollectionHidden(collection) &&
         !isQuickLinkCollection(collection) &&
         !isIncomingShare(collection, user)

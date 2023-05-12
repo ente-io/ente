@@ -19,7 +19,7 @@ import {
     syncCollections,
     getFavItemIds,
     getLocalCollections,
-    createCollection,
+    createAlbum,
     getCollectionSummaries,
     moveToHiddenCollection,
 } from 'services/collectionService';
@@ -63,7 +63,6 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     CollectionSummaryType,
-    CollectionType,
     HIDDEN_SECTION,
     DUMMY_UNCATEGORIZED_SECTION,
     TRASH_SECTION,
@@ -517,9 +516,8 @@ export default function Gallery() {
         const callback = async (collectionName: string) => {
             try {
                 startLoading();
-                const collection = await createCollection(
+                const collection = await createAlbum(
                     collectionName,
-                    CollectionType.album,
                     collections
                 );
                 await collectionOpsHelper(ops)(collection);

@@ -55,7 +55,7 @@ import {
     isSharedOnlyViaLink,
     isValidMoveTarget,
     isCollectionHidden,
-    isValidReplacementCollection,
+    isValidReplacementAlbum,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -301,32 +301,26 @@ export const getFavItemIds = async (
 
 export const createAlbum = async (
     albumName: string,
-    existingCollection?: Collection[]
-) => createCollection(albumName, CollectionType.album, existingCollection);
+    existingCollections?: Collection[]
+) => {
+    if (!existingCollections) {
+        existingCollections = await syncCollections();
+    }
+    const user: User = getData(LS_KEYS.USER);
+    for (const collection of existingCollections) {
+        if (isValidReplacementAlbum(collection, user, albumName)) {
+            return collection;
+        }
+    }
+    return createCollection(albumName, CollectionType.album);
+};
 
-export const createCollection = async (
+const createCollection = async (
     collectionName: string,
     type: CollectionType,
-    existingCollections?: Collection[],
     magicMetadataProps?: CollectionMagicMetadataProps
 ): Promise<Collection> => {
     try {
-        if (!existingCollections) {
-            existingCollections = await syncCollections();
-        }
-        const user: User = getData(LS_KEYS.USER);
-        for (const collection of existingCollections) {
-            if (
-                isValidReplacementCollection(
-                    collection,
-                    user,
-                    collectionName,
-                    type
-                )
-            ) {
-                return collection;
-            }
-        }
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
         const encryptionKey = await getActualKey();
         const token = getToken();
@@ -397,19 +391,15 @@ const postCollection = async (
     }
 };
 
+export const createFavoritesCollection = () => {
+    return createCollection(FAVORITE_COLLECTION_NAME, CollectionType.favorites);
+};
+
 export const addToFavorites = async (file: EnteFile) => {
     try {
         let favCollection = await getFavCollection();
         if (!favCollection) {
-            favCollection = await createCollection(
-                FAVORITE_COLLECTION_NAME,
-                CollectionType.favorites
-            );
-            const localCollections = await getLocalCollections();
-            await localForage.setItem(COLLECTION_TABLE, [
-                ...localCollections,
-                favCollection,
-            ]);
+            favCollection = await createFavoritesCollection();
         }
         await addToCollection(favCollection, [file]);
     } catch (e) {
@@ -915,7 +905,6 @@ export const getFavCollection = async () => {
             return collection;
         }
     }
-    return null;
 };
 
 export const getNonEmptyCollections = (
@@ -1188,12 +1177,8 @@ export function createUnCategorizedCollection() {
     );
 }
 
-export async function getHiddenCollection(
-    collections?: Collection[]
-): Promise<Collection> {
-    if (!collections) {
-        collections = await getLocalCollections();
-    }
+export async function getHiddenCollection(): Promise<Collection> {
+    const collections = await getLocalCollections();
     const hiddenCollection = collections.find((collection) =>
         isCollectionHidden(collection)
     );
@@ -1202,7 +1187,7 @@ export async function getHiddenCollection(
 }
 
 export function createHiddenCollection() {
-    return createCollection(HIDDEN_COLLECTION_NAME, CollectionType.album, [], {
+    return createCollection(HIDDEN_COLLECTION_NAME, CollectionType.album, {
         subType: SUB_TYPE.DEFAULT_HIDDEN,
         visibility: VISIBILITY_STATE.HIDDEN,
     });
