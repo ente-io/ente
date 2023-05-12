@@ -1201,7 +1201,10 @@ export async function moveToHiddenCollection(files: EnteFile[]) {
         }
         const groupiedFiles = groupFilesBasedOnCollectionID(files);
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (const [_, files] of groupiedFiles.entries()) {
+        for (const [collectionID, files] of groupiedFiles.entries()) {
+            if (collectionID === hiddenCollection.id) {
+                continue;
+            }
             await moveToCollection(hiddenCollection, files);
         }
     } catch (e) {
