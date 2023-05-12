@@ -3,7 +3,7 @@ name: Sync crowdin translation
 on:
   push:
     paths: # run action automatically when en/translation.json file is changed
-      - 'public/locales/en/translation.json'
+      - 'apps/photos/public/locales/en/translation.json'
     branches: [ main ]
   schedule:
     - cron: '0 */24 * * *' # Every 24 hours - https://crontab.guru/#0_*/12_*_*_*
