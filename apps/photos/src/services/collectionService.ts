@@ -1220,7 +1220,10 @@ export async function moveToHiddenCollection(files: EnteFile[]) {
             hiddenCollection = await createHiddenCollection();
         }
         console.log('hiddenCollection', hiddenCollection, files);
-        // await moveToCollection(hiddenCollection, files);
+        const groupiedFiles = groupFilesBasedOnCollectionID(files);
+        for (const [collectionID, files] of groupiedFiles.entries()) {
+            await moveToCollection(hiddenCollection, collectionID, files);
+        }
     } catch (e) {
         logError(e, 'move to hidden collection failed ');
         throw e;
