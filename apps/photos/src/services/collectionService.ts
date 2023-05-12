@@ -490,34 +490,29 @@ export const restoreToCollection = async (
 };
 export const moveToCollection = async (
     toCollection: Collection,
-    filesToMove: EnteFile[]
+    fromCollectionID: number,
+    files: EnteFile[]
 ) => {
     try {
         const token = getToken();
-        const groupedFiles = groupFilesBasedOnCollectionID(filesToMove);
-        if (groupedFiles.size > 1) {
-            throw Error(CustomError.TO_MOVE_FILES_FROM_MULTIPLE_COLLECTIONS);
-        }
-        for (const [fromCollectionID, files] of groupedFiles.entries()) {
-            const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
-            for (const batch of batchedFiles) {
-                const fileKeysEncryptedWithNewCollection =
-                    await encryptWithNewCollectionKey(toCollection, batch);
+        const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
+        for (const batch of batchedFiles) {
+            const fileKeysEncryptedWithNewCollection =
+                await encryptWithNewCollectionKey(toCollection, batch);
 
-                const requestBody: MoveToCollectionRequest = {
-                    fromCollectionID: fromCollectionID,
-                    toCollectionID: toCollection.id,
-                    files: fileKeysEncryptedWithNewCollection,
-                };
-                await HTTPService.post(
-                    `${ENDPOINT}/collections/move-files`,
-                    requestBody,
-                    null,
-                    {
-                        'X-Auth-Token': token,
-                    }
-                );
-            }
+            const requestBody: MoveToCollectionRequest = {
+                fromCollectionID: fromCollectionID,
+                toCollectionID: toCollection.id,
+                files: fileKeysEncryptedWithNewCollection,
+            };
+            await HTTPService.post(
+                `${ENDPOINT}/collections/move-files`,
+                requestBody,
+                null,
+                {
+                    'X-Auth-Token': token,
+                }
+            );
         }
     } catch (e) {
         logError(e, 'move to collection Failed ');
@@ -614,7 +609,11 @@ export const removeUserFiles = async (
             if (toMoveFiles.length === 0) {
                 continue;
             }
-            await moveToCollection(targetCollection, toMoveFiles);
+            await moveToCollection(
+                targetCollection,
+                sourceCollectionID,
+                toMoveFiles
+            );
         }
         const leftFiles = toRemoveFiles.filter((f) =>
             toRemoveFilesIds.has(f.id)
@@ -627,7 +626,11 @@ export const removeUserFiles = async (
         if (!uncategorizedCollection) {
             uncategorizedCollection = await createUnCategorizedCollection();
         }
-        await moveToCollection(uncategorizedCollection, leftFiles);
+        await moveToCollection(
+            uncategorizedCollection,
+            sourceCollectionID,
+            leftFiles
+        );
     } catch (e) {
         logError(e, 'remove user files failed ');
         throw e;
@@ -1216,7 +1219,8 @@ export async function moveToHiddenCollection(files: EnteFile[]) {
         if (!hiddenCollection) {
             hiddenCollection = await createHiddenCollection();
         }
-        await moveToCollection(hiddenCollection, files);
+        console.log('hiddenCollection', hiddenCollection, files);
+        // await moveToCollection(hiddenCollection, files);
     } catch (e) {
         logError(e, 'move to hidden collection failed ');
         throw e;
