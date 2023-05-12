@@ -229,7 +229,7 @@ export const getUserOwnedCollections = (collections: Collection[]) => {
     return collections.filter((collection) => collection.owner.id === user.id);
 };
 
-export const isCollectionHidden = (collection: Collection) =>
+export const isHiddenCollection = (collection: Collection) =>
     collection.magicMetadata?.data.visibility === VISIBILITY_STATE.HIDDEN ||
     collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
 
@@ -253,7 +253,7 @@ export function isValidMoveTarget(
 ) {
     return (
         sourceCollectionID !== targetCollection.id &&
-        !isCollectionHidden(targetCollection) &&
+        !isHiddenCollection(targetCollection) &&
         !isQuickLinkCollection(targetCollection) &&
         !isIncomingShare(targetCollection, user)
     );
@@ -268,7 +268,7 @@ export function isValidReplacementAlbum(
         collection.name === wantedCollectionName &&
         (collection.type === CollectionType.album ||
             collection.type === CollectionType.folder) &&
-        !isCollectionHidden(collection) &&
+        !isHiddenCollection(collection) &&
         !isQuickLinkCollection(collection) &&
         !isIncomingShare(collection, user)
     );
@@ -303,5 +303,5 @@ export function getNonEmptyPersonalCollections(
 export function getSearchableCollections(
     collections: Collection[]
 ): Collection[] {
-    return collections.filter((collection) => !isCollectionHidden(collection));
+    return collections.filter((collection) => !isHiddenCollection(collection));
 }

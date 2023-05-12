@@ -432,7 +432,7 @@ export default function Gallery() {
         );
         setCollectionSummaries(collectionSummaries);
         const hasNoPersonalFiles = files.every(
-            (file) => file.ownerID !== user.id
+            (file) => file.ownerID !== user.id && !file.isHidden
         );
         setHasNoPersonalFiles(hasNoPersonalFiles);
     };

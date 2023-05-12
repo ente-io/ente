@@ -54,7 +54,7 @@ import {
     isIncomingShare,
     isSharedOnlyViaLink,
     isValidMoveTarget,
-    isCollectionHidden,
+    isHiddenCollection,
     isValidReplacementAlbum,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
@@ -264,7 +264,11 @@ export const getCollectionLatestFiles = (
     const latestFiles = new Map<number, EnteFile>();
 
     files.forEach((file) => {
-        if (!latestFiles.has(file.collectionID) && !file.isTrashed) {
+        if (
+            !latestFiles.has(file.collectionID) &&
+            !file.isTrashed &&
+            !file.isHidden
+        ) {
             latestFiles.set(file.collectionID, file);
         }
         if (!latestFiles.has(ARCHIVE_SECTION) && IsArchived(file)) {
@@ -277,10 +281,14 @@ export const getCollectionLatestFiles = (
             !latestFiles.has(ALL_SECTION) &&
             !IsArchived(file) &&
             !file.isTrashed &&
+            !file.isHidden &&
             file.ownerID === user.id &&
             !archivedCollections.has(file.collectionID)
         ) {
             latestFiles.set(ALL_SECTION, file);
+        }
+        if (!latestFiles.has(HIDDEN_SECTION) && file.isHidden) {
+            latestFiles.set(HIDDEN_SECTION, file);
         }
     });
     return latestFiles;
@@ -998,7 +1006,7 @@ export async function getCollectionSummaries(
                     ? CollectionSummaryType.sharedOnlyViaLink
                     : IsArchived(collection)
                     ? CollectionSummaryType.archived
-                    : isCollectionHidden(collection)
+                    : isHiddenCollection(collection)
                     ? CollectionSummaryType.hidden
                     : CollectionSummaryType[collection.type],
             });
@@ -1180,7 +1188,7 @@ export function createUnCategorizedCollection() {
 export async function getHiddenCollection(): Promise<Collection> {
     const collections = await getLocalCollections();
     const hiddenCollection = collections.find((collection) =>
-        isCollectionHidden(collection)
+        isHiddenCollection(collection)
     );
 
     return hiddenCollection;

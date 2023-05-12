@@ -17,7 +17,7 @@ import { EnteFile, EncryptedEnteFile, TrashRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from 'utils/logging';
-import { isCollectionHidden } from 'utils/collection';
+import { isHiddenCollection } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import {
     getCollectionLastSyncTime,
@@ -81,7 +81,7 @@ export const syncFiles = async (
             collection,
             lastSyncTime,
             setFiles,
-            isCollectionHidden(collection)
+            isHiddenCollection(collection)
         );
         files = getLatestVersionFiles([...files, ...newFiles]);
         await setLocalFiles(files);
