@@ -287,6 +287,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         handleCollectionAction={handleCollectionAction}
                         downloadOptionText={t('DOWNLOAD_UNCATEGORIZED')}
                     />
+                ) : collectionSummaryType === CollectionSummaryType.hidden ? (
+                    <OnlyDownloadCollectionOption
+                        handleCollectionAction={handleCollectionAction}
+                        downloadOptionText={t('DOWNLOAD_HIDDEN')}
+                    />
                 ) : collectionSummaryType ===
                   CollectionSummaryType.incomingShare ? (
                     <SharedCollectionOption

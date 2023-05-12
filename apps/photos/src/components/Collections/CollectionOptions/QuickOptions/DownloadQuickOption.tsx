@@ -24,6 +24,8 @@ export function DownloadQuickOption({
                     : collectionSummaryType ===
                       CollectionSummaryType.uncategorized
                     ? t('DOWNLOAD_UNCATEGORIZED')
+                    : collectionSummaryType === CollectionSummaryType.hidden
+                    ? t('DOWNLOAD_HIDDEN')
                     : t('DOWNLOAD_COLLECTION')
             }>
             <IconButton

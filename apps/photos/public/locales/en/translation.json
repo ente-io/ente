@@ -77,6 +77,7 @@
     "DOWNLOAD_OPTION": "Download (D)",
     "DOWNLOAD_FAVORITES": "Download favorites",
     "DOWNLOAD_UNCATEGORIZED": "Download uncategorized",
+    "DOWNLOAD_HIDDEN": "Download hidden",
     "COPY_OPTION": "Copy as PNG (Ctrl/Cmd - C)",
     "TOGGLE_FULLSCREEN": "Toggle fullscreen (F)",
     "ZOOM_IN_OUT": "Zoom in/out",

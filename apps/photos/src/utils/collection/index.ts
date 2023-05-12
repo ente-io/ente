@@ -201,6 +201,7 @@ export const showDownloadQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.favorites ||
         type === CollectionSummaryType.album ||
         type === CollectionSummaryType.uncategorized ||
+        type === CollectionSummaryType.hidden ||
         type === CollectionSummaryType.incomingShare ||
         type === CollectionSummaryType.outgoingShare ||
         type === CollectionSummaryType.sharedOnlyViaLink ||
