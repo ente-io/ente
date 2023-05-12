@@ -156,18 +156,26 @@ export function getSelectedFiles(
     files: EnteFile[],
     includeAllCopies = false
 ): EnteFile[] {
-    const filesIDs = new Set(getSelectedFileIds(selected));
-    const selectedFiles: EnteFile[] = [];
+    const selectedFilesIDs = new Set(getSelectedFileIds(selected));
     const foundFiles = new Set<number>();
-    for (const file of files) {
-        if (
-            filesIDs.has(file.id) &&
-            (includeAllCopies || !foundFiles.has(file.id))
-        ) {
-            selectedFiles.push(file);
+    const selectedFiles = files.filter((file) => {
+        if (selectedFilesIDs.has(file.id)) {
+            if (includeAllCopies) {
+                return true;
+            }
+            if (foundFiles.has(file.id)) {
+                return false;
+            }
+            if (
+                selected.collectionID >= 0 &&
+                file.collectionID !== selected.collectionID
+            ) {
+                return false;
+            }
             foundFiles.add(file.id);
+            return true;
         }
-    }
+    });
     return selectedFiles;
 }
 

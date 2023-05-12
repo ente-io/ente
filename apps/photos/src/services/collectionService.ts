@@ -490,18 +490,21 @@ export const restoreToCollection = async (
 };
 export const moveToCollection = async (
     toCollection: Collection,
-    fromCollectionID: number,
     files: EnteFile[]
 ) => {
     try {
         const token = getToken();
+        const groupiedFiles = groupFilesBasedOnCollectionID(files);
+        if (groupiedFiles.size > 1) {
+            throw Error(CustomError.TO_MOVE_FILES_FROM_MULTIPLE_COLLECTIONS);
+        }
         const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
         for (const batch of batchedFiles) {
             const fileKeysEncryptedWithNewCollection =
                 await encryptWithNewCollectionKey(toCollection, batch);
 
             const requestBody: MoveToCollectionRequest = {
-                fromCollectionID: fromCollectionID,
+                fromCollectionID: batch[0].collectionID,
                 toCollectionID: toCollection.id,
                 files: fileKeysEncryptedWithNewCollection,
             };
@@ -609,11 +612,7 @@ export const removeUserFiles = async (
             if (toMoveFiles.length === 0) {
                 continue;
             }
-            await moveToCollection(
-                targetCollection,
-                sourceCollectionID,
-                toMoveFiles
-            );
+            await moveToCollection(targetCollection, toMoveFiles);
         }
         const leftFiles = toRemoveFiles.filter((f) =>
             toRemoveFilesIds.has(f.id)
@@ -626,11 +625,7 @@ export const removeUserFiles = async (
         if (!uncategorizedCollection) {
             uncategorizedCollection = await createUnCategorizedCollection();
         }
-        await moveToCollection(
-            uncategorizedCollection,
-            sourceCollectionID,
-            leftFiles
-        );
+        await moveToCollection(uncategorizedCollection, leftFiles);
     } catch (e) {
         logError(e, 'remove user files failed ');
         throw e;
@@ -1220,8 +1215,9 @@ export async function moveToHiddenCollection(files: EnteFile[]) {
             hiddenCollection = await createHiddenCollection();
         }
         const groupiedFiles = groupFilesBasedOnCollectionID(files);
-        for (const [collectionID, files] of groupiedFiles.entries()) {
-            await moveToCollection(hiddenCollection, collectionID, files);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for (const [_, files] of groupiedFiles.entries()) {
+            await moveToCollection(hiddenCollection, files);
         }
     } catch (e) {
         logError(e, 'move to hidden collection failed ');
