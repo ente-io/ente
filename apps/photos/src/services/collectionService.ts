@@ -487,22 +487,19 @@ export const restoreToCollection = async (
     }
 };
 export const moveToCollection = async (
+    fromCollectionID: number,
     toCollection: Collection,
     files: EnteFile[]
 ) => {
     try {
         const token = getToken();
-        const groupiedFiles = groupFilesBasedOnCollectionID(files);
-        if (groupiedFiles.size > 1) {
-            throw Error(CustomError.TO_MOVE_FILES_FROM_MULTIPLE_COLLECTIONS);
-        }
         const batchedFiles = batch(files, REQUEST_BATCH_SIZE);
         for (const batch of batchedFiles) {
             const fileKeysEncryptedWithNewCollection =
                 await encryptWithNewCollectionKey(toCollection, batch);
 
             const requestBody: MoveToCollectionRequest = {
-                fromCollectionID: batch[0].collectionID,
+                fromCollectionID: fromCollectionID,
                 toCollectionID: toCollection.id,
                 files: fileKeysEncryptedWithNewCollection,
             };
@@ -610,7 +607,11 @@ export const removeUserFiles = async (
             if (toMoveFiles.length === 0) {
                 continue;
             }
-            await moveToCollection(targetCollection, toMoveFiles);
+            await moveToCollection(
+                sourceCollectionID,
+                targetCollection,
+                toMoveFiles
+            );
         }
         const leftFiles = toRemoveFiles.filter((f) =>
             toRemoveFilesIds.has(f.id)
@@ -623,7 +624,11 @@ export const removeUserFiles = async (
         if (!uncategorizedCollection) {
             uncategorizedCollection = await createUnCategorizedCollection();
         }
-        await moveToCollection(uncategorizedCollection, leftFiles);
+        await moveToCollection(
+            sourceCollectionID,
+            uncategorizedCollection,
+            leftFiles
+        );
     } catch (e) {
         logError(e, 'remove user files failed ');
         throw e;
@@ -1213,7 +1218,7 @@ export async function moveToHiddenCollection(files: EnteFile[]) {
             if (collectionID === hiddenCollection.id) {
                 continue;
             }
-            await moveToCollection(hiddenCollection, files);
+            await moveToCollection(collectionID, hiddenCollection, files);
         }
     } catch (e) {
         logError(e, 'move to hidden collection failed ');

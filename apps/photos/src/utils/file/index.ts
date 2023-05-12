@@ -166,12 +166,6 @@ export function getSelectedFiles(
             if (foundFiles.has(file.id)) {
                 return false;
             }
-            if (
-                selected.collectionID >= 0 &&
-                file.collectionID !== selected.collectionID
-            ) {
-                return false;
-            }
             foundFiles.add(file.id);
             return true;
         }
