@@ -62,6 +62,7 @@ export default function ShortcutSection({
             closeSidebar();
         });
     };
+
     return (
         <>
             <EnteMenuItem

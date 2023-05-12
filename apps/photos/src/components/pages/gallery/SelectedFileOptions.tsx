@@ -232,16 +232,17 @@ const SelectedFileOptions = ({
                     </Tooltip>
                 ) : activeCollection === HIDDEN_SECTION ? (
                     <>
-                        <Tooltip title={t('DOWNLOAD')}>
-                            <IconButton onClick={downloadHelper}>
-                                <DownloadIcon />
-                            </IconButton>
-                        </Tooltip>
                         <Tooltip title={t('UNHIDE')}>
                             <IconButton onClick={unhideFileHelper}>
                                 <VisibilityOutlined />
                             </IconButton>
                         </Tooltip>
+                        <Tooltip title={t('DOWNLOAD')}>
+                            <IconButton onClick={downloadHelper}>
+                                <DownloadIcon />
+                            </IconButton>
+                        </Tooltip>
+
                         <Tooltip title={t('DELETE')}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
@@ -279,11 +280,6 @@ const SelectedFileOptions = ({
                                 </IconButton>
                             </Tooltip>
                         )}
-                        <Tooltip title={t('HIDE')}>
-                            <IconButton onClick={hideFilesHelper}>
-                                <VisibilityOffOutlined />
-                            </IconButton>
-                        </Tooltip>
                         {activeCollection !== ALL_SECTION &&
                             activeCollection !== ARCHIVE_SECTION &&
                             !isFavoriteCollection && (
@@ -304,6 +300,11 @@ const SelectedFileOptions = ({
                                     </Tooltip>
                                 </>
                             )}
+                        <Tooltip title={t('HIDE')}>
+                            <IconButton onClick={hideFilesHelper}>
+                                <VisibilityOffOutlined />
+                            </IconButton>
+                        </Tooltip>
                         <Tooltip title={t('DELETE')}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
