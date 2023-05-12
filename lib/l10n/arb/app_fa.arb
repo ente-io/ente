@@ -173,6 +173,8 @@
   "privacyPolicyTitle": "سیاست حفظ حریم خصوصی",
   "termsOfServicesTitle": "شرایط و ضوابط",
   "encryption": "رمزگذاری",
+  "changePasswordTitle": "تغییر رمز عبور",
+  "resetPasswordTitle": "بازنشانی رمز عبور",
   "ackPasswordLostWarning": "می‌دانم که اگر رمز عبور خود را گم کنم، از آنجایی که اطلاعات من <underline>رمزگذاری سرتاسری</underline> شده است، ممکن است اطلاعاتم را از دست بدهم.",
   "loginTerms": "با کلیک روی ورود، با <u-terms>شرایط استفاده از خدمات</u-terms> و <u-policy>سیاست حفظ حریم خصوصی</u-policy> موافقت می‌کنم",
   "logInLabel": "ورود",
@@ -228,5 +230,6 @@
   "sorry": "متاسفیم",
   "importFailureDesc": "نتوانستیم فایل انتخابی را تجزیه و تحلیل کنیم.\nاگر به کمک نیاز دارید، لطفا به support@ente.io ایمیل بزنید!",
   "pendingSyncs": "اخطار",
-  "pendingSyncsWarningBody": "برخی از کدهای شما پشتیبان گیری نشده اند.\n\nلطفا قبل از خروج، مطمئن شوید که یک نسخه پشتیبان برای این کدها دارید."
+  "pendingSyncsWarningBody": "برخی از کدهای شما پشتیبان گیری نشده اند.\n\nلطفا قبل از خروج، مطمئن شوید که یک نسخه پشتیبان برای این کدها دارید.",
+  "thisDevice": "این دستگاه"
 }
