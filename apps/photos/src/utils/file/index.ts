@@ -153,13 +153,17 @@ function getSelectedFileIds(selectedFiles: SelectedState) {
 }
 export function getSelectedFiles(
     selected: SelectedState,
-    files: EnteFile[]
+    files: EnteFile[],
+    includeAllCopies = false
 ): EnteFile[] {
     const filesIDs = new Set(getSelectedFileIds(selected));
     const selectedFiles: EnteFile[] = [];
     const foundFiles = new Set<number>();
     for (const file of files) {
-        if (filesIDs.has(file.id) && !foundFiles.has(file.id)) {
+        if (
+            filesIDs.has(file.id) &&
+            (includeAllCopies || !foundFiles.has(file.id))
+        ) {
             selectedFiles.push(file);
             foundFiles.add(file.id);
         }
