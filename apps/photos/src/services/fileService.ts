@@ -77,22 +77,12 @@ export const syncFiles = async (
             continue;
         }
 
-        let newFiles: EnteFile[] = [];
-        if (isCollectionHidden(collection)) {
-            const dummySetFiles = () => {};
-            newFiles = addIsHiddenProperty(
-                await getFiles(collection, lastSyncTime, dummySetFiles)
-            );
-            setFiles((files) =>
-                sortFiles(
-                    mergeMetadata(
-                        getLatestVersionFiles([...(files || []), ...newFiles])
-                    )
-                )
-            );
-        } else {
-            newFiles = await getFiles(collection, lastSyncTime, setFiles);
-        }
+        const newFiles = await getFiles(
+            collection,
+            lastSyncTime,
+            setFiles,
+            isCollectionHidden(collection)
+        );
         files = getLatestVersionFiles([...files, ...newFiles]);
         await setLocalFiles(files);
         setCollectionLastSyncTime(collection, collection.updationTime);
@@ -103,7 +93,8 @@ export const syncFiles = async (
 export const getFiles = async (
     collection: Collection,
     sinceTime: number,
-    setFiles: SetFiles
+    setFiles: SetFiles,
+    syncingHiddenCollection?: boolean
 ): Promise<EnteFile[]> => {
     try {
         let decryptedFiles: EnteFile[] = [];
@@ -125,7 +116,7 @@ export const getFiles = async (
                 }
             );
 
-            const newDecryptedFilesBatch = await Promise.all(
+            let newDecryptedFilesBatch = await Promise.all(
                 resp.data.diff.map(async (file: EncryptedEnteFile) => {
                     if (!file.isDeleted) {
                         return await decryptFile(file, collection.key);
@@ -134,6 +125,11 @@ export const getFiles = async (
                     }
                 }) as Promise<EnteFile>[]
             );
+            if (syncingHiddenCollection) {
+                newDecryptedFilesBatch = addIsHiddenProperty(
+                    newDecryptedFilesBatch
+                );
+            }
             decryptedFiles = [...decryptedFiles, ...newDecryptedFilesBatch];
 
             setFiles((files) =>
