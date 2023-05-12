@@ -601,3 +601,7 @@ export function getPersonalFiles(files: EnteFile[], user: User) {
 export function getIDBasedSortedFiles(files: EnteFile[]) {
     return files.sort((a, b) => a.id - b.id);
 }
+
+export function getNonHiddenFiles(files: EnteFile[]) {
+    return files.filter((file) => !file.isHidden);
+}
