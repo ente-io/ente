@@ -42,7 +42,7 @@ export const getAppNameAndTitle = () => {
     const albumsURL = new URL(getAlbumsURL());
     const authURL = new URL(getAuthURL());
     if (currentURL.origin === albumsURL.origin) {
-        return { name: APPS.ALBUMS, title: 'ente Albums' };
+        return { name: APPS.ALBUMS, title: 'ente Photos' };
     } else if (currentURL.origin === authURL.origin) {
         return { name: APPS.AUTH, title: 'ente Auth' };
     } else {
