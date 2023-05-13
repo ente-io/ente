@@ -1,0 +1,72 @@
+{
+  "account": "アカウント",
+  "recoveryKey": "回復キー",
+  "counterAppBarTitle": "カウンタ",
+  "@counterAppBarTitle": {
+    "description": "Text shown in the AppBar of the Counter Page"
+  },
+  "onBoardingBody": "2要素認証コードの保護",
+  "onBoardingGetStarted": "さあ、はじめよう",
+  "setupFirstAccount": "最初のアカウントを設定しましょう",
+  "importScanQrCode": "QRコードをスキャン",
+  "importEnterSetupKey": "セットアップキーを入力",
+  "importAccountPageTitle": "アカウントの詳細を入力",
+  "codeIssuerHint": "発行者",
+  "codeSecretKeyHint": "シークレットキー",
+  "codeAccountHint": "アカウント (you@domain.com)",
+  "accountKeyType": "キーの種類",
+  "sessionExpired": "セッションの有効期間超過",
+  "@sessionExpired": {
+    "description": "Title of the dialog when the users current session is invalid/expired"
+  },
+  "pleaseLoginAgain": "再度ログインしてください",
+  "loggingOut": "ログアウト中...",
+  "timeBasedKeyType": "時間ベース (TOTP)",
+  "counterBasedKeyType": "カウンタベース (HOTP)",
+  "saveAction": "保存",
+  "nextTotpTitle": "次へ",
+  "deleteCodeTitle": "コードを削除しますか?",
+  "deleteCodeMessage": "このコードを削除してもよろしいですか? このアクションは元に戻せません。",
+  "viewLogsAction": "ログの表示",
+  "sendLogsDescription": "問題のデバッグに役立つログが送信されます。機密情報が記録されないように予防措置を講じていますが、共有する前にこれらのログを確認することをお勧めします。",
+  "preparingLogsTitle": "ログを準備中...",
+  "emailLogsTitle": "ログをメール",
+  "emailLogsMessage": "{email} にログを送信してください",
+  "@emailLogsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "copyEmailAction": "メールをコピー",
+  "exportLogsAction": "ログのエクスポート",
+  "reportABug": "バグを報告",
+  "crashAndErrorReporting": "クラッシュとエラーの報告",
+  "reportBug": "バグを報告",
+  "emailUsMessage": "{email} にメールでご連絡ください",
+  "@emailUsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contactSupport": "サポートに問い合わせ",
+  "verifyPassword": "パスワードを確認",
+  "pleaseWait": "お待ちください...",
+  "generatingEncryptionKeysTitle": "暗号化キーを生成中...",
+  "recreatePassword": "パスワードを再設定",
+  "recreatePasswordMessage": "現在のデバイスは、パスワードを確認するのに十分ではありません。全てのデバイスで利用できるように再生成する必要があります。\n\nリカバリーキーを使用してログインし、パスワードを再生成してください (ご希望の場合は再度同じパスワードを使用できます)",
+  "useRecoveryKey": "回復キーを使用",
+  "incorrectPasswordTitle": "パスワードが正しくありません",
+  "welcomeBack": "おかえりなさい!",
+  "madeWithLoveAtPrefix": "made with ❤️ at ",
+  "supportDevs": "プロジェクト支援のために <bold-green>ente</bold-green> に登録",
+  "supportDiscount": "クーポンコード \"AUTH\" を使用すると、初年度が10%オフになります。",
+  "changeEmail": "メールアドレスを変更",
+  "changePassword": "パスワードを変更",
+  "data": "データ",
+  "importCodes": "コードをインポート",
+  "exportCodes": "コードをエクスポート"
+}
