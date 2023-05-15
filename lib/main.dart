@@ -61,6 +61,7 @@ const kBackgroundLockLatency = Duration(seconds: 3);
 
 void main() async {
   debugRepaintRainbowEnabled = false;
+  WidgetsFlutterBinding.ensureInitialized();
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
   BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);
