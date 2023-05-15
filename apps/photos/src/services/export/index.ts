@@ -39,7 +39,10 @@ import {
 } from 'utils/file';
 
 import { updateFileCreationDateInEXIF } from '../upload/exifService';
-import QueueProcessor from '../queueProcessor';
+import QueueProcessor, {
+    CancellationStatus,
+    RequestCanceller,
+} from '../queueProcessor';
 import { Collection } from 'types/collection';
 import {
     ExportProgress,
@@ -76,10 +79,9 @@ export const NULL_EXPORT_RECORD: ExportRecord = {
 class ExportService {
     private electronAPIs: ElectronAPIs;
     private exportSettings: ExportSettings;
-    private exportInProgress: boolean = false;
+    private exportInProgress: RequestCanceller = null;
     private reRunNeeded = false;
     private exportRecordUpdater = new QueueProcessor<ExportRecord>(1);
-    private stopExport: boolean = false;
     private fileReader: FileReader = null;
     private continuousExportEventHandler: () => void;
     private uiUpdater: ExportUIUpdaters = {
@@ -282,7 +284,6 @@ class ExportService {
 
     async preExport(exportFolder: string) {
         this.verifyExportFolderExists(exportFolder);
-        this.stopExport = false;
         await this.updateExportStage(ExportStage.INPROGRESS);
         this.updateExportProgress({
             success: 0,
@@ -317,8 +318,8 @@ class ExportService {
 
     async stopRunningExport() {
         try {
-            this.stopExport = true;
-            this.exportInProgress = false;
+            this.exportInProgress.exec();
+            this.exportInProgress = null;
             this.reRunNeeded = false;
             await this.postExport();
         } catch (e) {
@@ -335,31 +336,37 @@ class ExportService {
             } else {
                 addLogLine('export not in progress, starting export');
             }
-            this.exportInProgress = true;
+
+            const isCanceled: CancellationStatus = { status: false };
+            const canceller: RequestCanceller = {
+                exec: () => {
+                    isCanceled.status = true;
+                },
+            };
+            this.exportInProgress = canceller;
             try {
                 const exportFolder = this.getExportSettings()?.folder;
                 await this.preExport(exportFolder);
                 addLogLine('export started');
-                await this.runExport(exportFolder);
+                await this.runExport(exportFolder, isCanceled);
                 addLogLine('export completed');
                 await this.postExport();
-                this.exportInProgress = false;
+                this.exportInProgress = null;
                 if (this.reRunNeeded) {
                     this.reRunNeeded = false;
                     addLogLine('re-running export');
                     setTimeout(() => this.scheduleExport(), 0);
                 }
-            } catch (e) {
-                if (e.message !== CustomError.EXPORT_STOPPED) {
+            } finally {
+                if (!isCanceled.status || !this.exportInProgress) {
                     await this.postExport();
-                    this.exportInProgress = false;
+                    this.exportInProgress = null;
                     if (this.reRunNeeded) {
                         this.reRunNeeded = false;
                         addLogLine('re-running export');
                         setTimeout(() => this.scheduleExport(), 0);
                     }
                 }
-                throw e;
             }
         } catch (e) {
             if (
@@ -371,7 +378,10 @@ class ExportService {
         }
     };
 
-    private async runExport(exportFolder: string) {
+    private async runExport(
+        exportFolder: string,
+        isCanceled: CancellationStatus
+    ) {
         try {
             const user: User = getData(LS_KEYS.USER);
             const files = mergeMetadata(await getLocalFiles());
@@ -455,7 +465,8 @@ class ExportService {
                     collectionIDExportNameMap,
                     renamedCollections,
                     incrementSuccess,
-                    incrementFailed
+                    incrementFailed,
+                    isCanceled
                 );
             }
 
@@ -466,7 +477,8 @@ class ExportService {
                     collectionIDExportNameMap,
                     removedFileUIDs,
                     incrementSuccess,
-                    incrementFailed
+                    incrementFailed,
+                    isCanceled
                 );
             }
             if (filesToExport?.length > 0) {
@@ -477,7 +489,8 @@ class ExportService {
                     collectionIDExportNameMap,
                     exportFolder,
                     incrementSuccess,
-                    incrementFailed
+                    incrementFailed,
+                    isCanceled
                 );
             }
             if (deletedExportedCollections?.length > 0) {
@@ -488,7 +501,8 @@ class ExportService {
                     deletedExportedCollections,
                     exportFolder,
                     incrementSuccess,
-                    incrementFailed
+                    incrementFailed,
+                    isCanceled
                 );
             }
         } catch (e) {
@@ -507,12 +521,13 @@ class ExportService {
         collectionIDExportNameMap: Map<number, string>,
         renamedCollections: Collection[],
         incrementSuccess: () => void,
-        incrementFailed: () => void
+        incrementFailed: () => void,
+        isCanceled: CancellationStatus
     ) {
         try {
             for (const collection of renamedCollections) {
                 try {
-                    if (this.stopExport) {
+                    if (isCanceled.status) {
                         throw Error(CustomError.EXPORT_STOPPED);
                     }
                     this.verifyExportFolderExists(exportFolder);
@@ -582,7 +597,8 @@ class ExportService {
         deletedExportedCollectionIDs: number[],
         exportFolder: string,
         incrementSuccess: () => void,
-        incrementFailed: () => void
+        incrementFailed: () => void,
+        isCanceled: CancellationStatus
     ) {
         try {
             const exportRecord = await this.getExportRecord(exportFolder);
@@ -592,7 +608,7 @@ class ExportService {
                 );
             for (const collectionID of deletedExportedCollectionIDs) {
                 try {
-                    if (this.stopExport) {
+                    if (isCanceled.status) {
                         throw Error(CustomError.EXPORT_STOPPED);
                     }
                     this.verifyExportFolderExists(exportFolder);
@@ -658,7 +674,8 @@ class ExportService {
         collectionIDFolderNameMap: Map<number, string>,
         exportDir: string,
         incrementSuccess: () => void,
-        incrementFailed: () => void
+        incrementFailed: () => void,
+        isCanceled: CancellationStatus
     ): Promise<void> {
         try {
             for (const file of files) {
@@ -670,7 +687,7 @@ class ExportService {
                             file.collectionID
                         )}`
                 );
-                if (this.stopExport) {
+                if (isCanceled.status) {
                     throw Error(CustomError.EXPORT_STOPPED);
                 }
                 try {
@@ -742,7 +759,8 @@ class ExportService {
         collectionIDExportNameMap: Map<number, string>,
         removedFileUIDs: string[],
         incrementSuccess: () => void,
-        incrementFailed: () => void
+        incrementFailed: () => void,
+        isCanceled: CancellationStatus
     ): Promise<void> {
         try {
             const exportRecord = await this.getExportRecord(exportDir);
@@ -752,7 +770,7 @@ class ExportService {
             for (const fileUID of removedFileUIDs) {
                 this.verifyExportFolderExists(exportDir);
                 addLocalLog(() => `trashing file with id ${fileUID}`);
-                if (this.stopExport) {
+                if (isCanceled.status) {
                     throw Error(CustomError.EXPORT_STOPPED);
                 }
                 try {
