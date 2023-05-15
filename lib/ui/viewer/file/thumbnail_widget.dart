@@ -63,7 +63,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   @override
   void initState() {
-    changeSmallestSideToThumbnailSize();
+    assignOptimizedImageDimensions();
     super.initState();
   }
 
@@ -86,7 +86,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
   }
 
-  void changeSmallestSideToThumbnailSize() {
+  ///Assigned dimension will be the size of a grid item. The size will be
+  ///assigned to the side which is smaller in dimension.
+  void assignOptimizedImageDimensions() {
     if (widget.file!.width == 0 || widget.file!.height == 0) {
       return;
     }
