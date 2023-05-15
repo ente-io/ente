@@ -8,13 +8,26 @@ late DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 
 // https://gist.github.com/adamawolf/3048717
 late Set<String> iOSLowEndMachineCodes = <String>{
-  "iPhone5,2",
-  "iPhone5,3",
-  "iPhone5,4",
-  "iPhone6,1",
-  "iPhone6,2",
-  "iPhone7,2",
-  "iPhone7,1",
+  "iPhone5,1", //iPhone 5 (GSM)
+  "iPhone5,2", //iPhone 5 (GSM+CDMA)
+  "iPhone5,3", //iPhone 5C (GSM)
+  "iPhone5,4", //iPhone 5C (Global)
+  "iPhone6,1", //iPhone 5S (GSM)
+  "iPhone6,2", //iPhone 5S (Global)
+  "iPhone7,1", //iPhone 6 Plus
+  "iPhone7,2", //iPhone 6
+  "iPhone8,1", // iPhone 6s
+  "iPhone8,2", // iPhone 6s Plus
+  "iPhone8,4", // iPhone SE (GSM)
+  "iPhone9,1", // iPhone 7
+  "iPhone9,2", // iPhone 7 Plus
+  "iPhone9,3", // iPhone 7
+  "iPhone9,4", // iPhone 7 Plus
+  "iPhone10,1", // iPhone 8
+  "iPhone10,2", // iPhone 8 Plus
+  "iPhone10,3", // iPhone X Global
+  "iPhone10,4", // iPhone 8
+  "iPhone10,5" //  iPhone 8
 };
 
 Future<bool> isLowSpecDevice() async {
