@@ -56,6 +56,7 @@ export const CustomError = {
     NETWORK_ERROR: 'Network Error',
     NOT_FILE_OWNER: 'not file owner',
     UPDATE_EXPORTED_RECORD_FAILED: 'update file exported record failed',
+    EXPORT_STOPPED: 'export stopped',
     NO_EXPORT_FOLDER_SELECTED: 'no export folder selected',
     EXPORT_FOLDER_DOES_NOT_EXIST: 'export folder does not exist',
     NO_INTERNET_CONNECTION: 'no internet connection',

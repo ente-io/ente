@@ -352,7 +352,10 @@ class ExportService {
                 await this.postExport();
             }
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+            if (
+                e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
+                e.message !== CustomError.EXPORT_STOPPED
+            ) {
                 logError(e, 'scheduleExport failed');
             }
         }
@@ -479,7 +482,10 @@ class ExportService {
                 );
             }
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+            if (
+                e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
+                e.message !== CustomError.EXPORT_STOPPED
+            ) {
                 logError(e, 'runExport failed');
             }
             throw e;
@@ -496,6 +502,9 @@ class ExportService {
         try {
             for (const collection of renamedCollections) {
                 try {
+                    if (this.stopExport) {
+                        throw Error(CustomError.EXPORT_STOPPED);
+                    }
                     this.verifyExportFolderExists(exportFolder);
                     const oldCollectionExportName =
                         collectionIDExportNameMap.get(collection.id);
@@ -540,14 +549,19 @@ class ExportService {
                     if (
                         e.message ===
                             CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
-                        e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST
+                        e.message ===
+                            CustomError.EXPORT_FOLDER_DOES_NOT_EXIST ||
+                        e.message === CustomError.EXPORT_STOPPED
                     ) {
                         throw e;
                     }
                 }
             }
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+            if (
+                e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
+                e.message !== CustomError.EXPORT_STOPPED
+            ) {
                 logError(e, 'collectionRenamer failed');
             }
             throw e;
@@ -568,6 +582,9 @@ class ExportService {
                 );
             for (const collectionID of deletedExportedCollectionIDs) {
                 try {
+                    if (this.stopExport) {
+                        throw Error(CustomError.EXPORT_STOPPED);
+                    }
                     this.verifyExportFolderExists(exportFolder);
                     addLocalLog(
                         () =>
@@ -606,14 +623,19 @@ class ExportService {
                     if (
                         e.message ===
                             CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
-                        e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST
+                        e.message ===
+                            CustomError.EXPORT_FOLDER_DOES_NOT_EXIST ||
+                        e.message === CustomError.EXPORT_STOPPED
                     ) {
                         throw e;
                     }
                 }
             }
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+            if (
+                e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
+                e.message !== CustomError.EXPORT_STOPPED
+            ) {
                 logError(e, 'collectionRemover failed');
             }
             throw e;
@@ -639,7 +661,7 @@ class ExportService {
                         )}`
                 );
                 if (this.stopExport) {
-                    break;
+                    throw Error(CustomError.EXPORT_STOPPED);
                 }
                 try {
                     this.verifyExportFolderExists(exportDir);
@@ -686,14 +708,19 @@ class ExportService {
                     if (
                         e.message ===
                             CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
-                        e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST
+                        e.message ===
+                            CustomError.EXPORT_FOLDER_DOES_NOT_EXIST ||
+                        e.message === CustomError.EXPORT_STOPPED
                     ) {
                         throw e;
                     }
                 }
             }
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+            if (
+                e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
+                e.message !== CustomError.EXPORT_STOPPED
+            ) {
                 logError(e, 'fileExporter failed');
             }
             throw e;
@@ -716,7 +743,7 @@ class ExportService {
                 this.verifyExportFolderExists(exportDir);
                 addLocalLog(() => `trashing file with id ${fileUID}`);
                 if (this.stopExport) {
-                    break;
+                    throw Error(CustomError.EXPORT_STOPPED);
                 }
                 try {
                     const fileExportName = fileIDExportNameMap.get(fileUID);
@@ -811,14 +838,19 @@ class ExportService {
                     if (
                         e.message ===
                             CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
-                        e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST
+                        e.message ===
+                            CustomError.EXPORT_FOLDER_DOES_NOT_EXIST ||
+                        e.message === CustomError.EXPORT_STOPPED
                     ) {
                         throw e;
                     }
                 }
             }
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+            if (
+                e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
+                e.message !== CustomError.EXPORT_STOPPED
+            ) {
                 logError(e, 'fileTrasher failed');
             }
             throw e;
