@@ -96,8 +96,8 @@ export default function ExportModal(props: Props) {
     // =============
     // STATE UPDATERS
     // ==============
-    const updateExportFolder = (newFolder: string) => {
-        exportService.stopRunningExport();
+    const updateExportFolder = async (newFolder: string) => {
+        await exportService.stopRunningExport();
         exportService.updateExportSettings({ folder: newFolder });
         setExportFolder(newFolder);
     };
@@ -154,7 +154,7 @@ export default function ExportModal(props: Props) {
         try {
             const newFolder = await exportService.changeExportDirectory();
             addLogLine(`Export folder changed to ${newFolder}`);
-            updateExportFolder(newFolder);
+            await updateExportFolder(newFolder);
             void syncExportRecord(newFolder);
         } catch (e) {
             if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
