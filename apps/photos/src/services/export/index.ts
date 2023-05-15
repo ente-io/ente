@@ -342,14 +342,24 @@ class ExportService {
                 addLogLine('export started');
                 await this.runExport(exportFolder);
                 addLogLine('export completed');
-            } finally {
+                await this.postExport();
                 this.exportInProgress = false;
                 if (this.reRunNeeded) {
                     this.reRunNeeded = false;
                     addLogLine('re-running export');
                     setTimeout(() => this.scheduleExport(), 0);
                 }
-                await this.postExport();
+            } catch (e) {
+                if (e.message !== CustomError.EXPORT_STOPPED) {
+                    await this.postExport();
+                    this.exportInProgress = false;
+                    if (this.reRunNeeded) {
+                        this.reRunNeeded = false;
+                        addLogLine('re-running export');
+                        setTimeout(() => this.scheduleExport(), 0);
+                    }
+                }
+                throw e;
             }
         } catch (e) {
             if (
