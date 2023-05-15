@@ -318,6 +318,7 @@ class ExportService {
     async stopRunningExport() {
         try {
             this.stopExport = true;
+            this.exportInProgress = false;
             this.reRunNeeded = false;
             await this.postExport();
         } catch (e) {
