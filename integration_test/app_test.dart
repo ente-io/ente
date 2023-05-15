@@ -23,7 +23,6 @@ void main() {
       //Enter the email address and click the login button
       final emailInputField = find.byKey(const ValueKey("emailInputField"));
       final logInButton = find.byKey(const ValueKey("logInButton"));
-      // await tester.enterText(emailInputField, "enter email here");
       await tester.tap(emailInputField);
       await tester.pumpAndSettle(const Duration(seconds: 20));
       await findAndTapFAB(tester, logInButton);
@@ -32,10 +31,8 @@ void main() {
       final ottVerificationInputField =
           find.byKey(const ValueKey("ottVerificationInputField"));
       final verifyOttButton = find.byKey(const ValueKey("verifyOttButton"));
-      await tester.pumpAndSettle();
-      // await tester.enterText(ottVerificationInputField, "enter ott here");
       await tester.tap(ottVerificationInputField);
-      await tester.pumpAndSettle(const Duration(seconds: 10));
+      await tester.pumpAndSettle(const Duration(seconds: 6));
       await findAndTapFAB(tester, verifyOttButton);
 
       //Enter password and click the verify button
@@ -43,9 +40,8 @@ void main() {
           find.byKey(const ValueKey("passwordInputField"));
       final verifyPasswordButton =
           find.byKey(const ValueKey("verifyPasswordButton"));
-      // await tester.enterText(passwordInputField, "enter password here");
       await tester.tap(passwordInputField);
-      await tester.pumpAndSettle(const Duration(seconds: 20));
+      await tester.pumpAndSettle(const Duration(seconds: 10));
       await findAndTapFAB(tester, verifyPasswordButton);
 
       await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -73,13 +69,37 @@ void main() {
           await tester.fling(
             scrollablePositionedList,
             const Offset(0, -5000),
-            3800,
+            4500,
           );
           await tester.pumpAndSettle();
           await tester.fling(
             scrollablePositionedList,
             const Offset(0, 5000),
-            3800,
+            4500,
+          );
+
+          await tester.fling(
+            scrollablePositionedList,
+            const Offset(0, -7000),
+            4500,
+          );
+          await tester.pumpAndSettle();
+          await tester.fling(
+            scrollablePositionedList,
+            const Offset(0, 7000),
+            4500,
+          );
+
+          await tester.fling(
+            scrollablePositionedList,
+            const Offset(0, -9000),
+            4500,
+          );
+          await tester.pumpAndSettle();
+          await tester.fling(
+            scrollablePositionedList,
+            const Offset(0, 9000),
+            4500,
           );
           await tester.pumpAndSettle();
         },
