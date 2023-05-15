@@ -14,6 +14,7 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/sharing/add_partipant_page.dart';
 import 'package:photos/ui/sharing/album_participants_page.dart';
+import "package:photos/ui/sharing/manage_album_participant.dart";
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -35,10 +36,18 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
       CollectionActions(CollectionsService.instance);
 
   Future<void> _navigateToManageUser() async {
-    await routeToPage(
-      context,
-      AlbumParticipantsPage(widget.collection),
-    );
+    if (_sharees.length == 1) {
+      await routeToPage(
+        context,
+        ManageIndividualParticipant(
+            collection: widget.collection, user: _sharees.first!),
+      );
+    } else {
+      await routeToPage(
+        context,
+        AlbumParticipantsPage(widget.collection),
+      );
+    }
     if (mounted) {
       setState(() => {});
     }
