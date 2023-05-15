@@ -170,11 +170,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
     final List<Widget> viewChildren = [
       const ThumbnailPlaceHolder(),
-      AnimatedOpacity(
-        opacity: content == null ? 0 : 1.0,
-        duration: const Duration(milliseconds: 200),
-        child: content,
-      )
+      // AnimatedOpacity(
+      //   opacity: content == null ? 0 : 1.0,
+      //   duration: const Duration(milliseconds: 200),
+      //   child: content,
+      // )
+      content ?? const SizedBox(),
     ];
     if (widget.shouldShowSyncStatus && widget.file!.uploadedFileID == null) {
       viewChildren.add(const UnSyncedIcon());
