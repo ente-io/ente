@@ -15,19 +15,19 @@ void main() {
 
       await dismissUpdateAppDialog(tester);
 
-      //Click the sign in button on the landing page
+      //Automatically clicks the sign in button on the landing page
       final signInButton = find.byKey(const ValueKey("signInButton"));
       await tester.tap(signInButton);
       await tester.pumpAndSettle();
 
-      //Enter the email address and click the login button
+      //Need to enter email address manually and clicks the login button automatically
       final emailInputField = find.byKey(const ValueKey("emailInputField"));
       final logInButton = find.byKey(const ValueKey("logInButton"));
       await tester.tap(emailInputField);
       await tester.pumpAndSettle(const Duration(seconds: 20));
       await findAndTapFAB(tester, logInButton);
 
-      //Enter OTT and click the verify button
+      //Need to enter OTT manually and clicks the verify button automatically
       final ottVerificationInputField =
           find.byKey(const ValueKey("ottVerificationInputField"));
       final verifyOttButton = find.byKey(const ValueKey("verifyOttButton"));
@@ -35,7 +35,7 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 6));
       await findAndTapFAB(tester, verifyOttButton);
 
-      //Enter password and click the verify button
+      //Need to enter password manually and clicks the verify button automatically
       final passwordInputField =
           find.byKey(const ValueKey("passwordInputField"));
       final verifyPasswordButton =
@@ -47,16 +47,14 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
       await dismissUpdateAppDialog(tester);
 
-      //Grant permission to access photos
+      //Grant permission to access photos. Must manually click the system dialog.
       final grantPermissionButton =
           find.byKey(const ValueKey("grantPermissionButton"));
       await tester.tap(grantPermissionButton);
       await tester.pumpAndSettle(const Duration(seconds: 1));
-
-      //Manually grant permission to access photos within 3 seconds
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
-      //Skip backup
+      //Automatically skips backup
       final skipBackupButton = find.byKey(const ValueKey("skipBackupButton"));
       await tester.tap(skipBackupButton);
       await tester.pumpAndSettle(const Duration(seconds: 2));
