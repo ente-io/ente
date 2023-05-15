@@ -543,13 +543,11 @@ class FileUploader {
   It performs following checks:
     a) Uploaded file with same localID and destination collection. Delete the
      fileToUpload entry
-    b) Uploaded file in destination collection but with missing localID.
+    b) Uploaded file in any collection but with missing localID.
      Update the localID for uploadedFile and delete the fileToUpload entry
     c) A uploaded file exist with same localID but in a different collection.
-    or
-    d) Uploaded file in different collection but missing localID.
-    For both c and d, perform add to collection operation.
-    e) File already exists but different localID. Re-upload
+    Add a symlink in the destination collection and update the fileToUpload
+    d) File already exists but different localID. Re-upload
     In case the existing files already have local identifier, which is
     different from the {fileToUpload}, then most probably device has
     duplicate files.
@@ -604,40 +602,38 @@ class FileUploader {
     }
 
     // case b
-    final File? fileMissingLocalButSameCollection =
-        existingUploadedFiles.firstWhereOrNull(
-      (e) => e.collectionID == toCollectionID && e.localID == null,
+    final File? fileMissingLocal = existingUploadedFiles.firstWhereOrNull(
+      (e) => e.localID == null,
     );
-    if (fileMissingLocalButSameCollection != null) {
+    if (fileMissingLocal != null) {
       // update the local id of the existing file and delete the fileToUpload
       // entry
       _logger.fine(
-        "fileMissingLocalButSameCollection: \n toUpload  ${fileToUpload.tag} "
-        "\n existing: ${fileMissingLocalButSameCollection.tag}",
+        "fileMissingLocal: \n toUpload  ${fileToUpload.tag} "
+        "\n existing: ${fileMissingLocal.tag}",
       );
-      fileMissingLocalButSameCollection.localID = fileToUpload.localID;
+      fileMissingLocal.localID = fileToUpload.localID;
       // set localID for the given uploadedID across collections
       await FilesDB.instance.updateLocalIDForUploaded(
-        fileMissingLocalButSameCollection.uploadedFileID!,
+        fileMissingLocal.uploadedFileID!,
         fileToUpload.localID!,
       );
       await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
           [fileToUpload],
-          source: "alreadyUploadedInSameCollection",
+          source: "fileMissingLocal",
           type: EventType.deletedFromEverywhere, //
         ),
       );
-      return Tuple2(true, fileMissingLocalButSameCollection);
+      return Tuple2(true, fileMissingLocal);
     }
 
-    // case c and d
+    // case c
     final File? fileExistsButDifferentCollection =
         existingUploadedFiles.firstWhereOrNull(
       (e) =>
-          e.collectionID != toCollectionID &&
-          (e.localID == null || e.localID == fileToUpload.localID),
+          e.collectionID != toCollectionID && e.localID == fileToUpload.localID,
     );
     if (fileExistsButDifferentCollection != null) {
       _logger.fine(
@@ -662,7 +658,7 @@ class FileUploader {
       "Found hashMatch but probably with diff localIDs "
       "$matchLocalIDs",
     );
-    // case e
+    // case d
     return Tuple2(false, fileToUpload);
   }
 
