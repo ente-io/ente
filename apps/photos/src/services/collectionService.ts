@@ -56,6 +56,7 @@ import {
     isValidMoveTarget,
     isHiddenCollection,
     isValidReplacementAlbum,
+    getNonHiddenCollections,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -178,24 +179,28 @@ const getCollections = async (
     }
 };
 
-export const getLocalCollections = async (): Promise<Collection[]> => {
+export const getLocalCollections = async (
+    includeHidden = false
+): Promise<Collection[]> => {
     const collections: Collection[] =
         (await localForage.getItem(COLLECTION_TABLE)) ?? [];
-    return collections;
+    return includeHidden ? collections : getNonHiddenCollections(collections);
 };
 
 export const getCollectionUpdationTime = async (): Promise<number> =>
     (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
 
-export const syncCollections = async () => {
-    const localCollections = await getLocalCollections();
+export const syncCollections = async (includeHidden = false) => {
+    const localCollections = await getLocalCollections(includeHidden);
     const lastCollectionUpdationTime = await getCollectionUpdationTime();
     const token = getToken();
     const key = await getActualKey();
     const updatedCollections =
         (await getCollections(token, lastCollectionUpdationTime, key)) ?? [];
     if (updatedCollections.length === 0) {
-        return localCollections;
+        return includeHidden
+            ? localCollections
+            : getNonHiddenCollections(localCollections);
     }
     const allCollectionsInstances = [
         ...localCollections,
@@ -228,7 +233,7 @@ export const syncCollections = async () => {
 
     await localForage.setItem(COLLECTION_TABLE, collections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
-    return collections;
+    return includeHidden ? collections : getNonHiddenCollections(collections);
 };
 
 export const getCollection = async (
@@ -264,31 +269,19 @@ export const getCollectionLatestFiles = (
     const latestFiles = new Map<number, EnteFile>();
 
     files.forEach((file) => {
-        if (
-            !latestFiles.has(file.collectionID) &&
-            !file.isTrashed &&
-            !file.isHidden
-        ) {
+        if (!latestFiles.has(file.collectionID)) {
             latestFiles.set(file.collectionID, file);
         }
         if (!latestFiles.has(ARCHIVE_SECTION) && IsArchived(file)) {
             latestFiles.set(ARCHIVE_SECTION, file);
         }
-        if (!latestFiles.has(TRASH_SECTION) && file.isTrashed) {
-            latestFiles.set(TRASH_SECTION, file);
-        }
         if (
             !latestFiles.has(ALL_SECTION) &&
             !IsArchived(file) &&
-            !file.isTrashed &&
-            !file.isHidden &&
             file.ownerID === user.id &&
             !archivedCollections.has(file.collectionID)
         ) {
             latestFiles.set(ALL_SECTION, file);
-        }
-        if (!latestFiles.has(HIDDEN_SECTION) && file.isHidden) {
-            latestFiles.set(HIDDEN_SECTION, file);
         }
     });
     return latestFiles;
@@ -926,9 +919,7 @@ export const getNonEmptyCollections = (
 ) => {
     const nonEmptyCollectionsIds = new Set<number>();
     for (const file of files) {
-        if (!file.isTrashed) {
-            nonEmptyCollectionsIds.add(file.collectionID);
-        }
+        nonEmptyCollectionsIds.add(file.collectionID);
     }
     return collections.filter((collection) =>
         nonEmptyCollectionsIds.has(collection.id)
@@ -979,6 +970,8 @@ export async function getCollectionSummaries(
     user: User,
     collections: Collection[],
     files: EnteFile[],
+    trashedFiles: EnteFile[],
+    hiddenFiles: EnteFile[],
     archivedCollections: Set<number>
 ): Promise<CollectionSummaries> {
     const collectionSummaries: CollectionSummaries = new Map();
@@ -989,6 +982,8 @@ export async function getCollectionSummaries(
     );
     const collectionFilesCount = getCollectionsFileCount(
         files,
+        trashedFiles,
+        hiddenFiles,
         archivedCollections
     );
 
@@ -1071,6 +1066,8 @@ export async function getCollectionSummaries(
 
 function getCollectionsFileCount(
     files: EnteFile[],
+    trashedFiles: EnteFile[],
+    hiddenFiles: EnteFile[],
     archivedCollections: Set<number>
 ): CollectionFilesCount {
     const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
@@ -1079,28 +1076,21 @@ function getCollectionsFileCount(
         collectionFilesCount.set(id, files.length);
     }
     const user: User = getData(LS_KEYS.USER);
-    const uniqueTrashedFileIDs = new Set<number>();
     const uniqueArchivedFileIDs = new Set<number>();
     const uniqueAllSectionFileIDs = new Set<number>();
-    const uniqueHiddenSectionFileIDs = new Set<number>();
     for (const file of files) {
         if (isSharedFile(user, file)) {
             continue;
-        }
-        if (file.isTrashed) {
-            uniqueTrashedFileIDs.add(file.id);
         } else if (IsArchived(file)) {
             uniqueArchivedFileIDs.add(file.id);
-        } else if (file.isHidden) {
-            uniqueHiddenSectionFileIDs.add(file.id);
         } else if (!archivedCollections.has(file.collectionID)) {
             uniqueAllSectionFileIDs.add(file.id);
         }
     }
-    collectionFilesCount.set(TRASH_SECTION, uniqueTrashedFileIDs.size);
+    collectionFilesCount.set(TRASH_SECTION, trashedFiles.length ?? 0);
     collectionFilesCount.set(ARCHIVE_SECTION, uniqueArchivedFileIDs.size);
     collectionFilesCount.set(ALL_SECTION, uniqueAllSectionFileIDs.size);
-    collectionFilesCount.set(HIDDEN_SECTION, uniqueHiddenSectionFileIDs.size);
+    collectionFilesCount.set(HIDDEN_SECTION, hiddenFiles.length ?? 0);
     return collectionFilesCount;
 }
 
@@ -1191,7 +1181,7 @@ export function createUnCategorizedCollection() {
 }
 
 export async function getHiddenCollection(): Promise<Collection> {
-    const collections = await getLocalCollections();
+    const collections = await getLocalCollections(true);
     const hiddenCollection = collections.find((collection) =>
         isHiddenCollection(collection)
     );

@@ -2,6 +2,7 @@ import React, {
     createContext,
     useContext,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -13,6 +14,8 @@ import {
     updateFileMagicMetadata,
     trashFiles,
     deleteFromTrash,
+    getLocalHiddenFiles,
+    syncHiddenFiles,
 } from 'services/fileService';
 import { styled, Typography } from '@mui/material';
 import {
@@ -44,7 +47,6 @@ import PhotoFrame from 'components/PhotoFrame';
 import {
     changeFilesVisibility,
     downloadFiles,
-    getSearchableFiles,
     getSelectedFiles,
     mergeMetadata,
     sortFiles,
@@ -77,13 +79,10 @@ import {
     getArchivedCollections,
     hasNonSystemCollections,
     getSearchableCollections,
+    splitNormalAndHiddenCollections,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
-import {
-    getLocalTrash,
-    getTrashedFiles,
-    syncTrash,
-} from 'services/trashService';
+import { getLocalTrashedFiles, syncTrash } from 'services/trashService';
 
 import FixCreationTime, {
     FixCreationTimeAttributes,
@@ -145,6 +144,8 @@ export default function Gallery() {
     const [user, setUser] = useState(null);
     const [collections, setCollections] = useState<Collection[]>(null);
     const [files, setFiles] = useState<EnteFile[]>(null);
+    const [hiddenFiles, setHiddenFiles] = useState<EnteFile[]>(null);
+    const [trashedFiles, setTrashedFiles] = useState<EnteFile[]>(null);
 
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
 
@@ -254,6 +255,25 @@ export default function Gallery() {
             },
         });
 
+    const displayFiles = useMemo(() => {
+        if (!files || !hiddenFiles || !trashedFiles) {
+            return [];
+        }
+        if (activeCollection === HIDDEN_SECTION) {
+            return hiddenFiles;
+        } else if (activeCollection === TRASH_SECTION) {
+            const markedForDeletionFiles = files.filter((file) =>
+                deletedFileIds.has(file.id)
+            );
+            return [...markedForDeletionFiles, ...trashedFiles];
+        } else {
+            const nonMarkedForDeletion = files.filter(
+                (file) => !deletedFileIds.has(file.id)
+            );
+            return nonMarkedForDeletion;
+        }
+    }, [activeCollection, files, hiddenFiles, trashedFiles]);
+
     useEffect(() => {
         appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -276,12 +296,18 @@ export default function Gallery() {
             }
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
-            let files = mergeMetadata(await getLocalFiles());
+            const files = sortFiles(mergeMetadata(await getLocalFiles()));
+            const hiddenFiles = sortFiles(
+                mergeMetadata(await getLocalHiddenFiles())
+            );
             const collections = await getLocalCollections();
-            const trash = await getLocalTrash();
-            files = [...files, ...getTrashedFiles(trash)];
+            const trashedFiles = sortFiles(
+                mergeMetadata(await getLocalTrashedFiles())
+            );
             setUser(user);
-            setFiles(sortFiles(files));
+            setFiles(files);
+            setTrashedFiles(trashedFiles);
+            setHiddenFiles(hiddenFiles);
             setCollections(collections);
             await syncWithRemote(true);
             setIsFirstLoad(false);
@@ -384,10 +410,13 @@ export default function Gallery() {
                 throw new Error(ServerErrorCodes.SESSION_EXPIRED);
             }
             !silent && startLoading();
-            const collections = await syncCollections();
-            setCollections(collections);
-            const files = await syncFiles(collections, setFiles);
-            await syncTrash(collections, files, setFiles);
+            const collections = await syncCollections(true);
+            const { normalCollections, hiddenCollections } =
+                await splitNormalAndHiddenCollections(collections);
+            setCollections(normalCollections);
+            await syncFiles(normalCollections, setFiles);
+            await syncHiddenFiles(hiddenCollections, setHiddenFiles);
+            await syncTrash(collections, setTrashedFiles);
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
@@ -428,11 +457,13 @@ export default function Gallery() {
             user,
             collections,
             files,
+            trashedFiles,
+            hiddenFiles,
             archivedCollections
         );
         setCollectionSummaries(collectionSummaries);
         const hasNoPersonalFiles = files.every(
-            (file) => file.ownerID !== user.id && !file.isHidden
+            (file) => file.ownerID !== user.id
         );
         setHasNoPersonalFiles(hasNoPersonalFiles);
     };
@@ -659,6 +690,8 @@ export default function Gallery() {
         setExportModalView(false);
     };
 
+    console.log('rendering gallery', displayFiles);
+
     return (
         <GalleryContext.Provider
             value={{
@@ -720,7 +753,7 @@ export default function Gallery() {
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     collections={getSearchableCollections(collections)}
-                    files={getSearchableFiles(files)}
+                    files={files}
                     setActiveCollection={setActiveCollection}
                     updateSearch={updateSearch}
                 />
@@ -781,7 +814,7 @@ export default function Gallery() {
                     <GalleryEmptyState openUploader={openUploader} />
                 ) : (
                     <PhotoFrame
-                        files={files}
+                        files={displayFiles}
                         collections={collections}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}

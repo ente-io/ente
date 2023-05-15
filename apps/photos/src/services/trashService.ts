@@ -2,14 +2,13 @@ import { SetFiles } from 'types/gallery';
 import { Collection } from 'types/collection';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
-import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
+import { decryptFile, sortFiles } from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
 import { getCollection } from './collectionService';
 
 import HTTPService from './HTTPService';
 import { EncryptedTrashItem, Trash } from 'types/trash';
-import { EnteFile } from 'types/file';
 
 const TRASH = 'file-trash';
 const TRASH_TIME = 'trash-time';
@@ -17,9 +16,13 @@ const DELETED_COLLECTION = 'deleted-collection';
 
 const ENDPOINT = getEndpoint();
 
-export async function getLocalTrash() {
+async function getLocalTrash() {
     const trash = (await localForage.getItem<Trash>(TRASH)) || [];
     return trash;
+}
+
+export async function getLocalTrashedFiles() {
+    return getTrashedFiles(await getLocalTrash());
 }
 
 export async function getLocalDeletedCollections() {
@@ -50,7 +53,6 @@ async function getLastSyncTime() {
 }
 export async function syncTrash(
     collections: Collection[],
-    files: EnteFile[],
     setFiles: SetFiles
 ): Promise<void> {
     const trash = await getLocalTrash();
@@ -66,7 +68,6 @@ export async function syncTrash(
     const updatedTrash = await updateTrash(
         collectionMap,
         lastSyncTime,
-        files,
         setFiles,
         trash
     );
@@ -76,7 +77,6 @@ export async function syncTrash(
 export const updateTrash = async (
     collections: Map<number, Collection>,
     sinceTime: number,
-    files: EnteFile[],
     setFiles: SetFiles,
     currentTrash: Trash
 ): Promise<Trash> => {
@@ -127,9 +127,7 @@ export const updateTrash = async (
                 time = resp.data.diff.slice(-1)[0].updatedAt;
             }
 
-            setFiles(
-                sortFiles([...(files ?? []), ...getTrashedFiles(updatedTrash)])
-            );
+            setFiles(sortFiles(getTrashedFiles(updatedTrash)));
             await localForage.setItem(TRASH, updatedTrash);
             await localForage.setItem(TRASH_TIME, time);
         } while (resp.data.hasMore);
@@ -141,14 +139,12 @@ export const updateTrash = async (
 };
 
 export function getTrashedFiles(trash: Trash) {
-    return mergeMetadata(
-        trash.map((trashedFile) => ({
-            ...trashedFile.file,
-            updationTime: trashedFile.updatedAt,
-            isTrashed: true,
-            deleteBy: trashedFile.deleteBy,
-        }))
-    );
+    return trash.map((trashedFile) => ({
+        ...trashedFile.file,
+        updationTime: trashedFile.updatedAt,
+        isTrashed: true,
+        deleteBy: trashedFile.deleteBy,
+    }));
 }
 
 export const emptyTrash = async () => {

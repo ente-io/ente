@@ -1,10 +1,6 @@
 import { getLocalFiles } from '../fileService';
 import { SetFiles } from 'types/gallery';
-import {
-    sortFiles,
-    decryptFile,
-    getUserOwnedNonTrashedFiles,
-} from 'utils/file';
+import { sortFiles, decryptFile, getUserOwnedFiles } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
 import {
@@ -99,7 +95,7 @@ class UploadManager {
             this.userOwnedNonTrashedExistingFiles = this.existingFiles;
         } else {
             this.existingFiles = await getLocalFiles();
-            this.userOwnedNonTrashedExistingFiles = getUserOwnedNonTrashedFiles(
+            this.userOwnedNonTrashedExistingFiles = getUserOwnedFiles(
                 this.existingFiles
             );
         }

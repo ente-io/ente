@@ -310,3 +310,27 @@ export function getSearchableCollections(
 ): Collection[] {
     return collections.filter((collection) => !isHiddenCollection(collection));
 }
+
+export function getNonHiddenCollections(
+    collections: Collection[]
+): Collection[] {
+    return collections.filter((collection) => !isHiddenCollection(collection));
+}
+
+export async function splitNormalAndHiddenCollections(
+    collections: Collection[]
+): Promise<{
+    normalCollections: Collection[];
+    hiddenCollections: Collection[];
+}> {
+    const normalCollections = [];
+    const hiddenCollections = [];
+    for (const collection of collections) {
+        if (isHiddenCollection(collection)) {
+            hiddenCollections.push(collection);
+        } else {
+            normalCollections.push(collection);
+        }
+    }
+    return { normalCollections, hiddenCollections };
+}

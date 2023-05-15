@@ -13,7 +13,7 @@ import { EnteFile } from 'types/file';
 import { SelectedState } from 'types/gallery';
 
 import { ServerErrorCodes } from 'utils/error';
-import { getNonHiddenFiles, getSelectedFiles } from 'utils/file';
+import { getSelectedFiles } from 'utils/file';
 import {
     DeduplicateContextType,
     DefaultDeduplicateContext,
@@ -84,9 +84,7 @@ export default function Deduplicate() {
             collectionNameMap.set(collection.id, collection.name);
         }
         setCollectionNameMap(collectionNameMap);
-        const files = getNonHiddenFiles(
-            await syncFiles(collections, () => null)
-        );
+        const files = await syncFiles(collections, () => null);
         let duplicates = await getDuplicateFiles(files, collectionNameMap);
         if (clubSameTimeFilesOnly) {
             duplicates = clubDuplicatesByTime(duplicates);

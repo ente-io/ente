@@ -135,9 +135,7 @@ export function groupFilesBasedOnCollectionID(files: EnteFile[]) {
         if (!collectionWiseFiles.has(file.collectionID)) {
             collectionWiseFiles.set(file.collectionID, []);
         }
-        if (!file.isTrashed) {
-            collectionWiseFiles.get(file.collectionID).push(file);
-        }
+        collectionWiseFiles.get(file.collectionID).push(file);
     }
     return collectionWiseFiles;
 }
@@ -445,13 +443,6 @@ export function mergeMetadata(files: EnteFile[]): EnteFile[] {
     });
 }
 
-export function addIsHiddenProperty(files: EnteFile[]): EnteFile[] {
-    return files.map((file) => ({
-        ...file,
-        isHidden: true,
-    }));
-}
-
 export function updateExistingFilePubMetadata(
     existingFile: EnteFile,
     updatedFile: EnteFile
@@ -476,13 +467,6 @@ export function getUniqueFiles(files: EnteFile[]) {
             return false;
         }
     });
-}
-export function getSearchableFiles(files: EnteFile[]) {
-    return files.filter(
-        (file) =>
-            (typeof file.isTrashed === 'undefined' || !file.isTrashed) &&
-            (typeof file.isHidden === 'undefined' || !file.isHidden)
-    );
 }
 
 export async function downloadFiles(files: EnteFile[]) {
@@ -518,12 +502,12 @@ export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
     return URL.createObjectURL(new Blob([blob], { type: type.mimeType }));
 };
 
-export const getUserOwnedNonTrashedFiles = (files: EnteFile[]) => {
+export const getUserOwnedFiles = (files: EnteFile[]) => {
     const user: User = getData(LS_KEYS.USER);
     if (!user?.id) {
         throw Error('user missing');
     }
-    return files.filter((file) => file.isTrashed || file.ownerID === user.id);
+    return files.filter((file) => file.ownerID === user.id);
 };
 
 // doesn't work on firefox
@@ -594,8 +578,4 @@ export function getPersonalFiles(files: EnteFile[], user: User) {
 
 export function getIDBasedSortedFiles(files: EnteFile[]) {
     return files.sort((a, b) => a.id - b.id);
-}
-
-export function getNonHiddenFiles(files: EnteFile[]) {
-    return files.filter((file) => !file.isHidden);
 }

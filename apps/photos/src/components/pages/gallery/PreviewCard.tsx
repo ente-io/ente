@@ -351,7 +351,7 @@ export default function PreviewCard(props: IProps) {
                     </p>
                 </FileAndCollectionNameOverlay>
             )}
-            {props?.activeCollection === TRASH_SECTION && file.isTrashed && (
+            {props?.activeCollection === TRASH_SECTION && (
                 <FileAndCollectionNameOverlay>
                     <p>{formatDateRelative(file.deleteBy / 1000)}</p>
                 </FileAndCollectionNameOverlay>

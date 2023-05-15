@@ -10,7 +10,6 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     CollectionType,
-    HIDDEN_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
 import { isSharedFile } from 'utils/file';
@@ -130,24 +129,14 @@ const PhotoFrame = ({
                         return false;
                     }
 
-                    // Trashed files can only be seen in trash section
-                    if (item.isTrashed || deletedFileIds?.has(item.id)) {
-                        if (activeCollection === TRASH_SECTION) {
-                            idSet.add(item.id);
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-
-                    // hidden files can only be seen in hidden section
-                    if (item.isHidden) {
-                        if (activeCollection === HIDDEN_SECTION) {
-                            idSet.add(item.id);
-                            return true;
-                        } else {
-                            return false;
-                        }
+                    if (
+                        activeCollection === TRASH_SECTION ||
+                        isDeduplicating ||
+                        activeCollection === HIDDEN_SECTION ||
+                        isIncomingSharedCollection
+                    ) {
+                        idSet.add(item.id);
+                        return true;
                     }
 
                     // SEARCH MODE
@@ -208,12 +197,6 @@ const PhotoFrame = ({
                         } else {
                             return false;
                         }
-                    }
-
-                    // DEDUPLICATE PAGE
-                    if (isDeduplicating) {
-                        idSet.add(item.id);
-                        return true;
                     }
 
                     // Archived files/collection files can only be seen in archive section or their respective collection

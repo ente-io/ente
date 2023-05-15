@@ -6,7 +6,6 @@ import { Collection } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import {
-    addIsHiddenProperty,
     decryptFile,
     getLatestVersionFiles,
     mergeMetadata,
@@ -17,7 +16,6 @@ import { EnteFile, EncryptedEnteFile, TrashRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from 'utils/logging';
-import { isHiddenCollection } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import {
     getCollectionLastSyncTime,
@@ -28,10 +26,17 @@ import { batch } from 'utils/common';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
+const HIDDEN_FILES_TABLE = 'hidden-files';
 
 export const getLocalFiles = async () => {
     const files: Array<EnteFile> =
         (await localForage.getItem<EnteFile[]>(FILES_TABLE)) || [];
+    return files;
+};
+
+export const getLocalHiddenFiles = async () => {
+    const files: Array<EnteFile> =
+        (await localForage.getItem<EnteFile[]>(HIDDEN_FILES_TABLE)) || [];
     return files;
 };
 
@@ -58,14 +63,50 @@ const setLocalFiles = async (files: EnteFile[]) => {
     }
 };
 
+const setLocalHiddenFiles = async (files: EnteFile[]) => {
+    try {
+        await localForage.setItem(HIDDEN_FILES_TABLE, files);
+    } catch (e1) {
+        try {
+            const storageEstimate = await navigator.storage.estimate();
+            logError(e1, 'failed to save files to indexedDB', {
+                storageEstimate,
+            });
+            addLogLine(`storage estimate ${JSON.stringify(storageEstimate)}`);
+        } catch (e2) {
+            logError(e1, 'failed to save files to indexedDB');
+            logError(e2, 'failed to get storage stats');
+        }
+        throw e1;
+    }
+};
+
+export const syncHiddenFiles = async (
+    collections: Collection[],
+    setFiles: SetFiles
+) => {
+    return await syncFilesHelper(collections, setFiles, 'hidden');
+};
+
 export const syncFiles = async (
     collections: Collection[],
     setFiles: SetFiles
-): Promise<EnteFile[]> => {
-    const localFiles = await getLocalFiles();
+) => {
+    return await syncFilesHelper(collections, setFiles, 'normal');
+};
+
+const syncFilesHelper = async (
+    collections: Collection[],
+    setFiles: SetFiles,
+    type: 'normal' | 'hidden'
+) => {
+    const localFiles =
+        type === 'normal' ? await getLocalFiles() : await getLocalHiddenFiles();
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
-        await setLocalFiles(files);
+        type === 'normal'
+            ? await setLocalFiles(files)
+            : await setLocalHiddenFiles(files);
         setFiles(sortFiles(mergeMetadata(files)));
     }
     for (const collection of collections) {
@@ -77,14 +118,11 @@ export const syncFiles = async (
             continue;
         }
 
-        const newFiles = await getFiles(
-            collection,
-            lastSyncTime,
-            setFiles,
-            isHiddenCollection(collection)
-        );
+        const newFiles = await getFiles(collection, lastSyncTime, setFiles);
         files = getLatestVersionFiles([...files, ...newFiles]);
-        await setLocalFiles(files);
+        type === 'normal'
+            ? await setLocalFiles(files)
+            : await setLocalHiddenFiles(files);
         setCollectionLastSyncTime(collection, collection.updationTime);
     }
     return files;
@@ -93,8 +131,7 @@ export const syncFiles = async (
 export const getFiles = async (
     collection: Collection,
     sinceTime: number,
-    setFiles: SetFiles,
-    syncingHiddenCollection?: boolean
+    setFiles: SetFiles
 ): Promise<EnteFile[]> => {
     try {
         let decryptedFiles: EnteFile[] = [];
@@ -116,7 +153,7 @@ export const getFiles = async (
                 }
             );
 
-            let newDecryptedFilesBatch = await Promise.all(
+            const newDecryptedFilesBatch = await Promise.all(
                 resp.data.diff.map(async (file: EncryptedEnteFile) => {
                     if (!file.isDeleted) {
                         return await decryptFile(file, collection.key);
@@ -125,11 +162,6 @@ export const getFiles = async (
                     }
                 }) as Promise<EnteFile>[]
             );
-            if (syncingHiddenCollection) {
-                newDecryptedFilesBatch = addIsHiddenProperty(
-                    newDecryptedFilesBatch
-                );
-            }
             decryptedFiles = [...decryptedFiles, ...newDecryptedFilesBatch];
 
             setFiles((files) =>
