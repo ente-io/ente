@@ -63,8 +63,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   @override
   void initState() {
-    assignOptimizedImageDimensions();
     super.initState();
+    assignOptimizedImageDimensions();
   }
 
   @override
