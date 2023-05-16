@@ -9,6 +9,7 @@ import { getCollection } from './collectionService';
 
 import HTTPService from './HTTPService';
 import { EncryptedTrashItem, Trash } from 'types/trash';
+import { EnteFile } from 'types/file';
 
 const TRASH = 'file-trash';
 const TRASH_TIME = 'trash-time';
@@ -138,13 +139,15 @@ export const updateTrash = async (
     return currentTrash;
 };
 
-export function getTrashedFiles(trash: Trash) {
-    return trash.map((trashedFile) => ({
-        ...trashedFile.file,
-        updationTime: trashedFile.updatedAt,
-        isTrashed: true,
-        deleteBy: trashedFile.deleteBy,
-    }));
+export function getTrashedFiles(trash: Trash): EnteFile[] {
+    return trash.map(
+        (trashedFile): EnteFile => ({
+            ...trashedFile.file,
+            updationTime: trashedFile.updatedAt,
+            isTrashed: true,
+            deleteBy: trashedFile.deleteBy,
+        })
+    );
 }
 
 export const emptyTrash = async () => {
