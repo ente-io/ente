@@ -9,6 +9,7 @@ import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/extents_page_view.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
+import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
 import "package:step_progress_indicator/step_progress_indicator.dart";
@@ -182,7 +183,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     final file = widget.memories[_index].file;
     return SafeArea(
       child: Container(
-        alignment: Alignment.bottomRight,
+        alignment: Alignment.bottomCenter,
         padding: const EdgeInsets.fromLTRB(26, 0, 26, 20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -210,6 +211,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   onFileRemoved: (file) => {onFileDeleted()},
                 );
               },
+            ),
+            SizedBox(
+              height: 32,
+              child: FavoriteWidget(file),
             ),
             IconButton(
               icon: Icon(

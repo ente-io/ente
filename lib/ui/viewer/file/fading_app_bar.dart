@@ -3,7 +3,6 @@ import 'dart:io' as io;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
 import 'package:path/path.dart' as file_path;
@@ -19,13 +18,12 @@ import "package:photos/models/magic_metadata.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/collection_action_sheet.dart';
-import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
+import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -120,7 +118,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     }
     // only show fav option for files owned by the user
     if (isOwnedByUser && !isFileHidden && isFileUploaded) {
-      actions.add(_getFavoriteButton());
+      actions.add(FavoriteWidget(widget.file));
     }
     if (!isFileUploaded) {
       actions.add(
@@ -287,66 +285,6 @@ class FadingAppBarState extends State<FadingAppBar> {
       context,
       selectedFiles: selectedFiles,
       actionType: CollectionActionType.unHide,
-    );
-  }
-
-  Widget _getFavoriteButton() {
-    return FutureBuilder<bool>(
-      future: FavoritesService.instance.isFavorite(widget.file),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return _getLikeButton(widget.file, snapshot.data);
-        } else {
-          return _getLikeButton(widget.file, false);
-        }
-      },
-    );
-  }
-
-  Widget _getLikeButton(File file, bool? isLiked) {
-    return LikeButton(
-      isLiked: isLiked,
-      onTap: (oldValue) async {
-        final isLiked = !oldValue;
-        bool hasError = false;
-        if (isLiked) {
-          final shouldBlockUser = file.uploadedFileID == null;
-          late ProgressDialog dialog;
-          if (shouldBlockUser) {
-            dialog =
-                createProgressDialog(context, S.of(context).addingToFavorites);
-            await dialog.show();
-          }
-          try {
-            await FavoritesService.instance.addToFavorites(context, file);
-          } catch (e, s) {
-            _logger.severe(e, s);
-            hasError = true;
-            showToast(context, S.of(context).sorryCouldNotAddToFavorites);
-          } finally {
-            if (shouldBlockUser) {
-              await dialog.hide();
-            }
-          }
-        } else {
-          try {
-            await FavoritesService.instance.removeFromFavorites(context, file);
-          } catch (e, s) {
-            _logger.severe(e, s);
-            hasError = true;
-            showToast(context, S.of(context).sorryCouldNotRemoveFromFavorites);
-          }
-        }
-        return hasError ? oldValue : isLiked;
-      },
-      likeBuilder: (isLiked) {
-        return Icon(
-          isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-          color:
-              isLiked ? Colors.pinkAccent : Colors.white, //same for both themes
-          size: 24,
-        );
-      },
     );
   }
 
