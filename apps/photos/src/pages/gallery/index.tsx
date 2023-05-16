@@ -2,6 +2,7 @@ import React, {
     createContext,
     useContext,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -35,16 +36,18 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from 'utils/storage';
-import { isTokenValid, logoutUser, validateKey } from 'services/userService';
+import { isTokenValid, validateKey } from 'services/userService';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
 import {
     changeFilesVisibility,
+    constructFileToCollectionMap,
     downloadFiles,
     getNonTrashedFiles,
     getSelectedFiles,
+    isSharedFile,
     mergeMetadata,
     sortFiles,
 } from 'utils/file';
@@ -75,6 +78,7 @@ import {
     getSelectedCollection,
     getArchivedCollections,
     hasNonSystemCollections,
+    constructCollectionNameMap,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import {
@@ -111,6 +115,10 @@ import uploadManager from 'services/upload/uploadManager';
 import { getToken } from 'utils/common/key';
 import ExportModal from 'components/ExportModal';
 import GalleryEmptyState from 'components/GalleryEmptyState';
+import { IsArchived } from 'utils/magicMetadata';
+import { isSameDayAnyYear, isInsideBox } from 'utils/search';
+import { getSessionExpiredMessage } from 'utils/ui';
+import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -225,19 +233,6 @@ export default function Gallery() {
 
     const [exportModalView, setExportModalView] = useState(false);
 
-    const showSessionExpiredMessage = () =>
-        setDialogMessage({
-            title: t('SESSION_EXPIRED'),
-            content: t('SESSION_EXPIRED_MESSAGE'),
-
-            nonClosable: true,
-            proceed: {
-                text: t('LOGIN'),
-                action: logoutUser,
-                variant: 'accent',
-            },
-        });
-
     useEffect(() => {
         appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -348,6 +343,127 @@ export default function Gallery() {
             });
         }
     }, [isInSearchMode, searchResultSummary]);
+
+    const filteredData = useMemoSingleThreaded((): EnteFile[] => {
+        if (!files) {
+            return [];
+        }
+
+        const idSet = new Set();
+        const user: User = getData(LS_KEYS.USER);
+
+        return files.filter((item) => {
+            if (
+                deletedFileIds?.has(item.id) &&
+                activeCollection !== TRASH_SECTION
+            ) {
+                return false;
+            }
+            if (
+                search?.date &&
+                !isSameDayAnyYear(search.date)(
+                    new Date(item.metadata.creationTime / 1000)
+                )
+            ) {
+                return false;
+            }
+            if (
+                search?.location &&
+                !isInsideBox(
+                    {
+                        latitude: item.metadata.latitude,
+                        longitude: item.metadata.longitude,
+                    },
+                    search.location
+                )
+            ) {
+                return false;
+            }
+            if (search?.person && search.person.files.indexOf(item.id) === -1) {
+                return false;
+            }
+            if (search?.thing && search.thing.files.indexOf(item.id) === -1) {
+                return false;
+            }
+            if (search?.text && search.text.files.indexOf(item.id) === -1) {
+                return false;
+            }
+            if (search?.files && search.files.indexOf(item.id) === -1) {
+                return false;
+            }
+            if (
+                !isInSearchMode &&
+                activeCollection === ALL_SECTION &&
+                (IsArchived(item) ||
+                    archivedCollections?.has(item.collectionID))
+            ) {
+                return false;
+            }
+            if (
+                !isInSearchMode &&
+                activeCollection === ARCHIVE_SECTION &&
+                !IsArchived(item)
+            ) {
+                return false;
+            }
+
+            if (
+                (isInSearchMode || activeCollection !== item.collectionID) &&
+                isSharedFile(user, item)
+            ) {
+                return false;
+            }
+            if (
+                !isInSearchMode &&
+                activeCollection === TRASH_SECTION &&
+                !item.isTrashed
+            ) {
+                return false;
+            }
+            if (
+                (isInSearchMode || activeCollection !== TRASH_SECTION) &&
+                item.isTrashed
+            ) {
+                return false;
+            }
+            if (!idSet.has(item.id)) {
+                if (
+                    activeCollection === ALL_SECTION ||
+                    activeCollection === ARCHIVE_SECTION ||
+                    activeCollection === TRASH_SECTION ||
+                    isInSearchMode ||
+                    activeCollection === item.collectionID
+                ) {
+                    idSet.add(item.id);
+                    return true;
+                }
+                return false;
+            }
+            return false;
+        });
+    }, [
+        files,
+        deletedFileIds,
+        search?.date,
+        search?.files,
+        search?.location,
+        search?.person,
+        search?.thing,
+        search?.text,
+        activeCollection,
+    ]);
+
+    const fileToCollectionsMap = useMemoSingleThreaded(() => {
+        return constructFileToCollectionMap(files);
+    }, [files]);
+
+    const collectionNameMap = useMemo(() => {
+        return constructCollectionNameMap(collections);
+    }, [collections]);
+
+    const showSessionExpiredMessage = () => {
+        setDialogMessage(getSessionExpiredMessage());
+    };
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
@@ -735,15 +851,11 @@ export default function Gallery() {
                     <GalleryEmptyState openUploader={openUploader} />
                 ) : (
                     <PhotoFrame
-                        files={files}
-                        collections={collections}
+                        files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
-                        archivedCollections={archivedCollections}
                         setSelected={setSelected}
                         selected={selected}
-                        isInSearchMode={isInSearchMode}
-                        search={search}
                         deletedFileIds={deletedFileIds}
                         setDeletedFileIds={setDeletedFileIds}
                         activeCollection={activeCollection}
@@ -752,6 +864,11 @@ export default function Gallery() {
                             CollectionSummaryType.incomingShare
                         }
                         enableDownload={true}
+                        fileToCollectionsMap={fileToCollectionsMap}
+                        collectionNameMap={collectionNameMap}
+                        showAppDownloadBanner={
+                            files.length < 30 && !isInSearchMode
+                        }
                     />
                 )}
                 {selected.count > 0 &&
