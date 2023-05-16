@@ -85,7 +85,6 @@ export default function Collections(props: Iprops) {
                         activeCollectionID
                     )}
                     activeCollection={activeCollection.current}
-                    activeCollectionID={activeCollectionID}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
                     showCollectionShareModal={() =>
