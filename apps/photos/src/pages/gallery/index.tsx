@@ -856,7 +856,7 @@ export default function Gallery() {
                     <GalleryEmptyState openUploader={openUploader} />
                 ) : (
                     <PhotoFrame
-                        displayFiles={filteredData}
+                        files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
                         setSelected={setSelected}
