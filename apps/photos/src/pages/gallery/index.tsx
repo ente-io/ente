@@ -303,11 +303,11 @@ export default function Gallery() {
     }, []);
 
     useEffect(() => {
-        if (!user || !files || !collections) {
+        if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
             return;
         }
-        setDerivativeState(user, collections, files);
-    }, [collections, files]);
+        setDerivativeState(user, collections, files, trashedFiles, hiddenFiles);
+    }, [collections, files, hiddenFiles, trashedFiles, user]);
 
     useEffect(() => {
         collectionSelectorAttributes && setCollectionSelectorView(true);
@@ -556,7 +556,9 @@ export default function Gallery() {
     const setDerivativeState = async (
         user: User,
         collections: Collection[],
-        files: EnteFile[]
+        files: EnteFile[],
+        trashedFiles: EnteFile[],
+        hiddenFiles: EnteFile[]
     ) => {
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
