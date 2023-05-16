@@ -291,3 +291,14 @@ export function getNonEmptyPersonalCollections(
     );
     return personalCollections;
 }
+
+export function constructCollectionNameMap(
+    collections: Collection[]
+): Map<number, string> {
+    return new Map<number, string>(
+        (collections ?? []).map((collection) => [
+            collection.id,
+            collection.name,
+        ])
+    );
+}
