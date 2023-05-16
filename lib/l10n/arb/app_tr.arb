@@ -98,6 +98,7 @@
   "scan": "Tara",
   "scanACode": "Bir kodu tarayın",
   "verify": "Doğrula",
+  "verifyEmail": "E-posta adresini doğrulayın",
   "enterCodeHint": "Kimlik doğrulayıcı uygulamanızdaki 6 haneli doğrulama kodunu girin",
   "lostDeviceTitle": "Cihazınızı mı kaybettiniz?",
   "twoFactorAuthTitle": "İki faktörlü kimlik doğrulama",
@@ -173,6 +174,19 @@
   "privacyPolicyTitle": "Gizlilik Politikası",
   "termsOfServicesTitle": "Şartlar",
   "encryption": "Şifreleme",
+  "setPasswordTitle": "Şifre belirleyin",
+  "changePasswordTitle": "Şifreyi değiştirin",
+  "resetPasswordTitle": "Şifreyi sıfırlayın",
+  "encryptionKeys": "Şifreleme anahtarları",
+  "passwordWarning": "Bu şifreyi saklamıyoruz, bu nedenle unutursanız, <underline>verilerinizin şifresini çözemeyiz</underline>",
+  "enterPasswordToEncrypt": "Verilerinizi şifrelemek için kullanabileceğimiz bir şifre girin",
+  "enterNewPasswordToEncrypt": "Verilerinizi şifrelemek için kullanabileceğimiz yeni bir şifre girin",
+  "passwordChangedSuccessfully": "Şifre başarıyla değiştirildi",
+  "generatingEncryptionKeys": "Şifreleme anahtarları oluşturuluyor...",
+  "continueLabel": "Devam et",
+  "insecureDevice": "Güvenli olmayan cihaz",
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Üzgünüz, bu cihazda güvenli anahtarlar oluşturamadık.\n\nlütfen farklı bir cihazdan kaydolun.",
+  "howItWorks": "Nasıl çalışır",
   "ackPasswordLostWarning": "Eğer şifremi kaybedersem, verilerim <underline>uçtan uca şifrelendiğinden</underline> verilerimi kaybedebileceğimi anladım.",
   "loginTerms": "Giriş yaparak, <u-terms>kullanım şartları</u-terms>nı ve <u-policy>gizlilik politikası</u-policy>nı onaylıyorum",
   "logInLabel": "Giriş yapın",
@@ -184,5 +198,66 @@
   "recoveryKeyVerified": "Kurtarma anahtarı doğrulandı",
   "recoveryKeySuccessBody": "Güzel! Kurtarma anahtarınız geçerli. Doğruladığınız için teşekkürler.\n\nLütfen kurtarma anahtarınızı güvenli bir şekilde yedeklemeyi unutmayın.",
   "invalidRecoveryKey": "Girdiğiniz kurtarma kodu geçersiz. Lütfen 24 kelime içerdiğinden ve her birinin yazılışını kontrol ettiğinizden emin olun.\n\nEğer eski bir kurtarma kodu girdiyseniz, Lütfen 64 kelime içerdiğinden ve her birinin yazılışını kontrol ettiğinizden emin olun.",
-  "recreatePasswordTitle": "Şifreyi yeniden oluştur"
+  "recreatePasswordTitle": "Şifreyi yeniden oluştur",
+  "recreatePasswordBody": "Mevcut cihaz şifrenizi doğrulayacak kadar güçlü değil, ancak tüm cihazlarla çalışacak şekilde yeniden oluşturabiliriz.\n\nLütfen kurtarma anahtarınızı kullanarak giriş yapın ve şifrenizi yeniden oluşturun (isterseniz aynı şifreyi tekrar kullanabilirsiniz).",
+  "invalidKey": "Geçersiz anahtar",
+  "tryAgain": "Tekrar deneyin",
+  "viewRecoveryKey": "Kurtarma anahtarını görün",
+  "confirmRecoveryKey": "Kurtarma anahtarını doğrulayın",
+  "recoveryKeyVerifyReason": "Kurtarma anahtarınız, şifrenizi unutmanız durumunda fotoğraflarınızı kurtarmanın tek yoludur. Kurtarma anahtarınızı Ayarlar > Hesap bölümünde bulabilirsiniz.\n\nDoğru kaydettiğinizi doğrulamak için lütfen kurtarma anahtarınızı buraya girin.",
+  "confirmYourRecoveryKey": "Kurtarma anahtarınızı doğrulayın",
+  "confirm": "Doğrula",
+  "emailYourLogs": "Günlüklerinizi e-postayla gönderin",
+  "pleaseSendTheLogsTo": "Lütfen günlükleri şu adrese gönderin\n{toEmail}",
+  "copyEmailAddress": "E-posta adresini kopyala",
+  "exportLogs": "Günlüğü dışa aktar",
+  "enterYourRecoveryKey": "Kurtarma anahtarınızı girin",
+  "tempErrorContactSupportIfPersists": "Bir şeyler ters gitmiş gibi görünüyor. Lütfen bir süre sonra tekrar deneyin. Hata devam ederse, lütfen destek ekibimizle iletişime geçin.",
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Bir şeyler ters gitmiş gibi görünüyor. Lütfen bir süre sonra tekrar deneyin. Hata devam ederse, lütfen destek ekibimizle iletişime geçin.",
+  "weAreOpenSource": "Biz açık kaynağız!",
+  "privacy": "Gizlilik",
+  "terms": "Şartlar",
+  "checkForUpdates": "Güncellemeleri denetleyin",
+  "checking": "Denetleniyor...",
+  "youAreOnTheLatestVersion": "En son sürümdesiniz",
+  "warning": "Uyarı",
+  "exportWarningDesc": "Dışa aktarılan dosya hassas bilgiler içeriyor. Lütfen bunu güvenli bir şekilde saklayın.",
+  "iUnderStand": "Anlıyorum",
+  "@iUnderStand": {
+    "description": "Text for the button to confirm the user understands the warning"
+  },
+  "authToExportCodes": "Kodlarınızı dışa aktarmak için lütfen kimlik doğrulaması yapın",
+  "importSuccessTitle": "Oley!",
+  "importSuccessDesc": "İçeri {count} kod aktardınız!",
+  "@importSuccessDesc": {
+    "placeholders": {
+      "count": {
+        "description": "The number of codes imported",
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "importFailureDesc": "Seçilen dosya ayrıştırılamadı.\nYardıma ihtiyacınız varsa lütfen support@ente.io adresine yazın!",
+  "pendingSyncs": "Uyarı",
+  "pendingSyncsWarningBody": "Kodlarınızdan bazıları yedeklenmemiş.\n\nLütfen oturumu kapatmadan önce bu kodların yedeğini aldığınızdan emin olun.",
+  "checkInboxAndSpamFolder": "Doğrulamayı tamamlamak için lütfen gelen kutunuzu (ve spam kutunuzu) kontrol edin",
+  "tapToEnterCode": "Kodu girmek için dokunun",
+  "resendEmail": "E-postayı yeniden gönder",
+  "weHaveSendEmailTo": "<green>{email}</green> adresine bir posta gönderdik",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "activeSessions": "Aktif oturumlar",
+  "somethingWentWrongPleaseTryAgain": "Bir şeyler ters gitti, lütfen tekrar deneyin",
+  "terminateSession": "Oturumu sonlandır?",
+  "terminate": "Sonlandır",
+  "thisDevice": "Bu cihaz"
 }
