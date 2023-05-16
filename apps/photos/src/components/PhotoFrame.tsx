@@ -1,6 +1,6 @@
 import { GalleryContext } from 'pages/gallery';
 import PreviewCard from './pages/gallery/PreviewCard';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import DownloadManager from 'services/downloadManager';
@@ -19,6 +19,7 @@ import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { addLogLine } from 'utils/logging';
 import PhotoSwipe from 'photoswipe';
+import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
 
 const Container = styled('div')`
     display: block;
@@ -83,59 +84,37 @@ const PhotoFrame = ({
     const router = useRouter();
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
 
-    const updateInProgress = useRef(false);
-    const updateRequired = useRef(false);
-
-    const [displayFiles, setDisplayFiles] = useState<EnteFile[]>([]);
-
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
         setUser(user);
     }, []);
 
-    useEffect(() => {
-        const main = () => {
-            if (updateInProgress.current) {
-                updateRequired.current = true;
-                return;
-            }
-            updateInProgress.current = true;
-
-            const displayFiles = files.map((item) => {
-                const filteredItem = {
-                    ...item,
-                    w: window.innerWidth,
-                    h: window.innerHeight,
-                    title: item.pubMagicMetadata?.data.caption,
-                };
-                try {
-                    if (galleryContext.thumbs.has(item.id)) {
-                        updateFileMsrcProps(
-                            filteredItem,
-                            galleryContext.thumbs.get(item.id)
-                        );
-                    }
-                    if (galleryContext.files.has(item.id)) {
-                        updateFileSrcProps(
-                            filteredItem,
-                            galleryContext.files.get(item.id)
-                        );
-                    }
-                } catch (e) {
-                    logError(e, 'PhotoFrame url prefill failed');
+    const displayFiles = useMemoSingleThreaded(() => {
+        return files.map((item) => {
+            const filteredItem = {
+                ...item,
+                w: window.innerWidth,
+                h: window.innerHeight,
+                title: item.pubMagicMetadata?.data.caption,
+            };
+            try {
+                if (galleryContext.thumbs.has(item.id)) {
+                    updateFileMsrcProps(
+                        filteredItem,
+                        galleryContext.thumbs.get(item.id)
+                    );
                 }
-                return filteredItem;
-            });
-            setDisplayFiles(displayFiles);
-            updateInProgress.current = false;
-            if (updateRequired.current) {
-                updateRequired.current = false;
-                setTimeout(() => {
-                    main();
-                }, 0);
+                if (galleryContext.files.has(item.id)) {
+                    updateFileSrcProps(
+                        filteredItem,
+                        galleryContext.files.get(item.id)
+                    );
+                }
+            } catch (e) {
+                logError(e, 'PhotoFrame url prefill failed');
             }
-        };
-        main();
+            return filteredItem;
+        });
     }, [files]);
 
     useEffect(() => {
