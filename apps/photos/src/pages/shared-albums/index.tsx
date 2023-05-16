@@ -406,6 +406,8 @@ export default function PublicCollectionGallery() {
                         publicCollection?.publicURLs?.[0]?.enableDownload ??
                         true
                     }
+                    fileToCollectionsMap={null}
+                    collectionNameMap={null}
                 />
                 {blockingLoad && (
                     <LoadingOverlay>
