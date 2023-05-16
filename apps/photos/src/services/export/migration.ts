@@ -39,29 +39,7 @@ import { decodeLivePhoto } from 'services/livePhotoService';
 import downloadManager from 'services/downloadManager';
 import { retryAsyncFunction } from 'utils/network';
 
-export async function migrateExportJSON(
-    exportDir: string,
-    exportRecord: ExportRecord
-) {
-    try {
-        if (!exportDir) {
-            return;
-        }
-        await migrateExport(exportDir, exportRecord);
-    } catch (e) {
-        logError(e, 'migrateExportJSON failed');
-        throw e;
-    }
-}
-
-/*
-    this function migrates the exportRecord file to apply any schema changes.
-    currently we apply only a single migration to update file and collection name to newer format
-    so there is just a if condition check, 
-    later this will be converted to a loop which applies the migration one by one 
-    till the files reaches the latest version 
-*/
-async function migrateExport(
+export async function migrateExport(
     exportDir: string,
     exportRecord: ExportRecordV1 | ExportRecordV2 | ExportRecord
 ) {
@@ -94,6 +72,7 @@ async function migrateExport(
         addLogLine(`Record at latest version`);
     } catch (e) {
         logError(e, 'export record migration failed');
+        throw e;
     }
 }
 

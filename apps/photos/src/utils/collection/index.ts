@@ -305,12 +305,6 @@ export function getNonEmptyPersonalCollections(
     return personalCollections;
 }
 
-export function getSearchableCollections(
-    collections: Collection[]
-): Collection[] {
-    return collections.filter((collection) => !isHiddenCollection(collection));
-}
-
 export function getNonHiddenCollections(
     collections: Collection[]
 ): Collection[] {
@@ -333,4 +327,15 @@ export async function splitNormalAndHiddenCollections(
         }
     }
     return { normalCollections, hiddenCollections };
+}
+
+export function constructCollectionNameMap(
+    collections: Collection[]
+): Map<number, string> {
+    return new Map<number, string>(
+        (collections ?? []).map((collection) => [
+            collection.id,
+            collection.name,
+        ])
+    );
 }

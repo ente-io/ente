@@ -59,7 +59,7 @@ import {
     getCollectionNameMap,
     getNonEmptyPersonalCollections,
 } from 'utils/collection';
-import { migrateExportJSON } from './migration';
+import { migrateExport } from './migration';
 
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
@@ -130,10 +130,7 @@ class ExportService {
     async runMigration(exportDir: string, exportRecord: ExportRecord) {
         try {
             addLogLine('running migration');
-            this.migrationInProgress = migrateExportJSON(
-                exportDir,
-                exportRecord
-            );
+            this.migrationInProgress = migrateExport(exportDir, exportRecord);
             await this.migrationInProgress;
             addLogLine('migration completed');
             this.migrationInProgress = null;
@@ -292,6 +289,11 @@ class ExportService {
             failed: 0,
             total: 0,
         });
+        if (this.migrationInProgress) {
+            addLogLine('migration in progress, waiting for it to complete');
+            await this.migrationInProgress;
+            this.migrationInProgress = null;
+        }
     }
 
     async postExport() {
@@ -333,11 +335,6 @@ class ExportService {
                 addLogLine('export not in progress, starting export');
             }
             this.exportInProgress = true;
-            if (this.migrationInProgress) {
-                addLogLine('migration in progress, waiting for it to complete');
-                await this.migrationInProgress;
-                this.migrationInProgress = null;
-            }
             try {
                 const exportFolder = this.getExportSettings()?.folder;
                 await this.preExport(exportFolder);

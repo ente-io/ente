@@ -4,8 +4,7 @@ export enum REDIRECTS {
 }
 
 export const getRedirectURL = (redirect: REDIRECTS) => {
-    // open current app with query param of redirect = roadmap
-    const url = new URL(window.location.href);
+    const url = new URL('https://web.ente.io');
     url.searchParams.set('redirect', redirect);
     return url.href;
 };

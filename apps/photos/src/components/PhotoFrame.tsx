@@ -1,18 +1,12 @@
 import { GalleryContext } from 'pages/gallery';
 import PreviewCard from './pages/gallery/PreviewCard';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import DownloadManager from 'services/downloadManager';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoViewer from 'components/PhotoViewer';
-import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
-    CollectionType,
-    TRASH_SECTION,
-} from 'constants/collection';
-import { isSharedFile } from 'utils/file';
+import { TRASH_SECTION } from 'constants/collection';
 import { updateFileMsrcProps, updateFileSrcProps } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
 import { MergedSourceURL, SelectedState } from 'types/gallery';
@@ -20,19 +14,11 @@ import PublicCollectionDownloadManager from 'services/publicCollectionDownloadMa
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
-import { DeduplicateContext } from 'pages/deduplicate';
-import { IsArchived } from 'utils/magicMetadata';
-import { isSameDayAnyYear, isInsideBox } from 'utils/search';
-import { Search } from 'types/search';
 import { logError } from 'utils/sentry';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { useMemo } from 'react';
-import { Collection } from 'types/collection';
 import { addLogLine } from 'utils/logging';
 import PhotoSwipe from 'photoswipe';
-import { isHiddenCollection } from 'utils/collection';
-import { t } from 'i18next';
 
 const Container = styled('div')`
     display: block;
@@ -51,41 +37,36 @@ const PHOTOSWIPE_HASH_SUFFIX = '&opened';
 
 interface Props {
     files: EnteFile[];
-    collections?: Collection[];
     syncWithRemote: () => Promise<void>;
     favItemIds?: Set<number>;
-    archivedCollections?: Set<number>;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState)
     ) => void;
     selected: SelectedState;
-    isInSearchMode?: boolean;
-    search?: Search;
     deletedFileIds?: Set<number>;
     setDeletedFileIds?: (value: Set<number>) => void;
     activeCollection: number;
     isIncomingSharedCollection?: boolean;
     enableDownload?: boolean;
-    isDeduplicating?: boolean;
-    resetSearch?: () => void;
+    fileToCollectionsMap: Map<number, number[]>;
+    collectionNameMap: Map<number, string>;
+    showAppDownloadBanner?: boolean;
 }
 
 const PhotoFrame = ({
     files,
-    collections,
     syncWithRemote,
     favItemIds,
-    archivedCollections,
     setSelected,
     selected,
-    isInSearchMode,
-    search,
     deletedFileIds,
     setDeletedFileIds,
     activeCollection,
     isIncomingSharedCollection,
     enableDownload,
-    isDeduplicating,
+    fileToCollectionsMap,
+    collectionNameMap,
+    showAppDownloadBanner,
 }: Props) => {
     const [user, setUser] = useState<User>(null);
     const [open, setOpen] = useState(false);
@@ -93,7 +74,6 @@ const PhotoFrame = ({
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
-    const deduplicateContext = useContext(DeduplicateContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
@@ -106,7 +86,8 @@ const PhotoFrame = ({
     const updateInProgress = useRef(false);
     const updateRequired = useRef(false);
 
-    const [filteredData, setFilteredData] = useState<EnteFile[]>([]);
+    const [displayFiles, setDisplayFiles] = useState<EnteFile[]>([]);
+
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
         setUser(user);
@@ -119,142 +100,33 @@ const PhotoFrame = ({
                 return;
             }
             updateInProgress.current = true;
-            const idSet = new Set();
-            const user: User = getData(LS_KEYS.USER);
 
-            const filteredData = files
-                .filter((item) => {
-                    // only show single copy of a file
-                    if (idSet.has(item.id)) {
-                        return false;
+            const displayFiles = files.map((item) => {
+                const filteredItem = {
+                    ...item,
+                    w: window.innerWidth,
+                    h: window.innerHeight,
+                    title: item.pubMagicMetadata?.data.caption,
+                };
+                try {
+                    if (galleryContext.thumbs.has(item.id)) {
+                        updateFileMsrcProps(
+                            filteredItem,
+                            galleryContext.thumbs.get(item.id)
+                        );
                     }
-
-                    if (
-                        activeCollection === TRASH_SECTION ||
-                        isDeduplicating ||
-                        activeCollection === HIDDEN_SECTION ||
-                        isIncomingSharedCollection
-                    ) {
-                        idSet.add(item.id);
-                        return true;
+                    if (galleryContext.files.has(item.id)) {
+                        updateFileSrcProps(
+                            filteredItem,
+                            galleryContext.files.get(item.id)
+                        );
                     }
-
-                    // SEARCH MODE
-                    if (isInSearchMode) {
-                        if (
-                            search?.date &&
-                            !isSameDayAnyYear(search.date)(
-                                new Date(item.metadata.creationTime / 1000)
-                            )
-                        ) {
-                            return false;
-                        }
-                        if (
-                            search?.location &&
-                            !isInsideBox(
-                                {
-                                    latitude: item.metadata.latitude,
-                                    longitude: item.metadata.longitude,
-                                },
-                                search.location
-                            )
-                        ) {
-                            return false;
-                        }
-                        if (
-                            search?.person &&
-                            search.person.files.indexOf(item.id) === -1
-                        ) {
-                            return false;
-                        }
-                        if (
-                            search?.thing &&
-                            search.thing.files.indexOf(item.id) === -1
-                        ) {
-                            return false;
-                        }
-                        if (
-                            search?.text &&
-                            search.text.files.indexOf(item.id) === -1
-                        ) {
-                            return false;
-                        }
-                        if (
-                            search?.files &&
-                            search.files.indexOf(item.id) === -1
-                        ) {
-                            return false;
-                        }
-                        idSet.add(item.id);
-                        return true;
-                    }
-
-                    // shared files can only be seen in their respective shared collection
-                    if (isSharedFile(user, item)) {
-                        if (activeCollection === item.collectionID) {
-                            idSet.add(item.id);
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-
-                    // Archived files/collection files can only be seen in archive section or their respective collection
-                    if (
-                        IsArchived(item) ||
-                        archivedCollections.has(item.collectionID)
-                    ) {
-                        if (
-                            activeCollection === ARCHIVE_SECTION ||
-                            activeCollection === item.collectionID
-                        ) {
-                            idSet.add(item.id);
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-
-                    // ALL SECTION - show all files
-                    if (activeCollection === ALL_SECTION) {
-                        idSet.add(item.id);
-                        return true;
-                    }
-
-                    // COLLECTION SECTION - show files in the active collection
-                    if (activeCollection === item.collectionID) {
-                        idSet.add(item.id);
-                        return true;
-                    } else {
-                        return false;
-                    }
-                })
-                .map((item) => {
-                    const filteredItem = {
-                        ...item,
-                        w: window.innerWidth,
-                        h: window.innerHeight,
-                        title: item.pubMagicMetadata?.data.caption,
-                    };
-                    try {
-                        if (galleryContext.thumbs.has(item.id)) {
-                            updateFileMsrcProps(
-                                filteredItem,
-                                galleryContext.thumbs.get(item.id)
-                            );
-                        }
-                        if (galleryContext.files.has(item.id)) {
-                            updateFileSrcProps(
-                                filteredItem,
-                                galleryContext.files.get(item.id)
-                            );
-                        }
-                    } catch (e) {
-                        logError(e, 'PhotoFrame url prefill failed');
-                    }
-                    return filteredItem;
-                });
-            setFilteredData(filteredData);
+                } catch (e) {
+                    logError(e, 'PhotoFrame url prefill failed');
+                }
+                return filteredItem;
+            });
+            setDisplayFiles(displayFiles);
             updateInProgress.current = false;
             if (updateRequired.current) {
                 updateRequired.current = false;
@@ -264,54 +136,11 @@ const PhotoFrame = ({
             }
         };
         main();
-    }, [
-        files,
-        deletedFileIds,
-        search?.date,
-        search?.files,
-        search?.location,
-        search?.person,
-        search?.thing,
-        search?.text,
-        activeCollection,
-    ]);
+    }, [files]);
 
     useEffect(() => {
         setFetching({});
-    }, [filteredData]);
-
-    const fileToCollectionsMap = useMemo(() => {
-        const fileToCollectionsMap = new Map<number, number[]>();
-        files.forEach((file) => {
-            if (!fileToCollectionsMap.get(file.id)) {
-                fileToCollectionsMap.set(file.id, []);
-            }
-            fileToCollectionsMap.get(file.id).push(file.collectionID);
-        });
-        return fileToCollectionsMap;
-    }, [files]);
-
-    const collectionNameMap = useMemo(() => {
-        if (collections) {
-            return new Map<number, string>(
-                collections.map((collection) => {
-                    if (isHiddenCollection(collection)) {
-                        return [collection.id, t('HIDDEN')];
-                    } else if (collection.type === CollectionType.favorites) {
-                        return [collection.id, t('FAVORITES')];
-                    } else if (
-                        collection.type === CollectionType.uncategorized
-                    ) {
-                        return [collection.id, t('UNCATEGORIZED')];
-                    } else {
-                        return [collection.id, collection.name];
-                    }
-                })
-            );
-        } else {
-            return new Map();
-        }
-    }, [collections]);
+    }, [displayFiles]);
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -368,7 +197,7 @@ const PhotoFrame = ({
     }, [selected]);
 
     const updateURL = (index: number) => (id: number, url: string) => {
-        const file = filteredData[index];
+        const file = displayFiles[index];
         // this is to prevent outdated updateURL call from updating the wrong file
         if (file.id !== id) {
             addLogLine(
@@ -394,7 +223,7 @@ const PhotoFrame = ({
         id: number,
         mergedSrcURL: MergedSourceURL
     ) => {
-        const file = filteredData[index];
+        const file = displayFiles[index];
         // this is to prevent outdate updateSrcURL call from updating the wrong file
         if (file.id !== id) {
             addLogLine(
@@ -488,7 +317,7 @@ const PhotoFrame = ({
                 (index - i) * direction >= 0;
                 i += direction
             ) {
-                checked = checked && !!selected[filteredData[i].id];
+                checked = checked && !!selected[displayFiles[i].id];
             }
             for (
                 let i = rangeStart;
@@ -496,13 +325,13 @@ const PhotoFrame = ({
                 i += direction
             ) {
                 handleSelect(
-                    filteredData[i].id,
-                    filteredData[i].ownerID === user?.id
+                    displayFiles[i].id,
+                    displayFiles[i].ownerID === user?.id
                 )(!checked);
             }
             handleSelect(
-                filteredData[index].id,
-                filteredData[index].ownerID === user?.id,
+                displayFiles[index].id,
+                displayFiles[index].ownerID === user?.id,
                 index
             )(!checked);
         }
@@ -670,19 +499,15 @@ const PhotoFrame = ({
                         width={width}
                         height={height}
                         getThumbnail={getThumbnail}
-                        filteredData={filteredData}
+                        displayFiles={displayFiles}
                         activeCollection={activeCollection}
-                        showAppDownloadBanner={
-                            files.length < 30 &&
-                            !isInSearchMode &&
-                            !deduplicateContext.isOnDeduplicatePage
-                        }
+                        showAppDownloadBanner={showAppDownloadBanner}
                     />
                 )}
             </AutoSizer>
             <PhotoViewer
                 isOpen={open}
-                items={filteredData}
+                items={displayFiles}
                 currentIndex={currentIndex}
                 onClose={handleClose}
                 gettingData={getSlideData}

@@ -43,7 +43,7 @@ export const FileInfoSidebar = styled((props: DialogProps) => (
 });
 
 interface Iprops {
-    shouldDisableEdits: boolean;
+    shouldDisableEdits?: boolean;
     showInfo: boolean;
     handleCloseInfo: () => void;
     file: EnteFile;

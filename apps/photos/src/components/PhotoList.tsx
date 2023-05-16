@@ -163,7 +163,7 @@ const NothingContainer = styled(ListItemContainer)`
 interface Props {
     height: number;
     width: number;
-    filteredData: EnteFile[];
+    displayFiles: EnteFile[];
     showAppDownloadBanner: boolean;
     getThumbnail: (
         file: EnteFile,
@@ -176,7 +176,7 @@ interface Props {
 export function PhotoList({
     height,
     width,
-    filteredData,
+    displayFiles,
     showAppDownloadBanner,
     getThumbnail,
     activeCollection,
@@ -266,7 +266,7 @@ export function PhotoList({
     }, [
         width,
         height,
-        filteredData,
+        displayFiles,
         deduplicateContext.isOnDeduplicatePage,
         deduplicateContext.fileSizeMap,
     ]);
@@ -340,19 +340,19 @@ export function PhotoList({
 
     const groupByFileSize = (timeStampList: TimeStampListItem[]) => {
         let index = 0;
-        while (index < filteredData.length) {
-            const file = filteredData[index];
+        while (index < displayFiles.length) {
+            const file = displayFiles[index];
             const currentFileSize = deduplicateContext.fileSizeMap.get(file.id);
             const currentCreationTime = file.metadata.creationTime;
             let lastFileIndex = index;
 
-            while (lastFileIndex < filteredData.length) {
+            while (lastFileIndex < displayFiles.length) {
                 if (
                     deduplicateContext.fileSizeMap.get(
-                        filteredData[lastFileIndex].id
+                        displayFiles[lastFileIndex].id
                     ) !== currentFileSize ||
                     (deduplicateContext.clubSameTimeFilesOnly &&
-                        filteredData[lastFileIndex].metadata.creationTime !==
+                        displayFiles[lastFileIndex].metadata.creationTime !==
                             currentCreationTime)
                 ) {
                     break;
@@ -370,7 +370,7 @@ export function PhotoList({
                 const tileSize = Math.min(columns, lastFileIndex - index + 1);
                 timeStampList.push({
                     itemType: ITEM_TYPE.FILE,
-                    items: filteredData.slice(index, index + tileSize),
+                    items: displayFiles.slice(index, index + tileSize),
                     itemStartIndex: index,
                 });
                 index += tileSize;
@@ -381,7 +381,7 @@ export function PhotoList({
     const groupByTime = (t, timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;
         let currentDate;
-        filteredData.forEach((item, index) => {
+        displayFiles.forEach((item, index) => {
             if (
                 !currentDate ||
                 !isSameDay(

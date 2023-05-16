@@ -39,15 +39,17 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from 'utils/storage';
-import { isTokenValid, logoutUser, validateKey } from 'services/userService';
+import { isTokenValid, validateKey } from 'services/userService';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
 import {
     changeFilesVisibility,
+    constructFileToCollectionMap,
     downloadFiles,
     getSelectedFiles,
+    isSharedFile,
     mergeMetadata,
     sortFiles,
 } from 'utils/file';
@@ -78,8 +80,8 @@ import {
     getSelectedCollection,
     getArchivedCollections,
     hasNonSystemCollections,
-    getSearchableCollections,
     splitNormalAndHiddenCollections,
+    constructCollectionNameMap,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import { getLocalTrashedFiles, syncTrash } from 'services/trashService';
@@ -113,6 +115,10 @@ import { getToken } from 'utils/common/key';
 import ExportModal from 'components/ExportModal';
 import GalleryEmptyState from 'components/GalleryEmptyState';
 import AuthenticateUserModal from 'components/AuthenticateUserModal';
+import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
+import { IsArchived } from 'utils/magicMetadata';
+import { isSameDayAnyYear, isInsideBox } from 'utils/search';
+import { getSessionExpiredMessage } from 'utils/ui';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -242,38 +248,6 @@ export default function Gallery() {
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
 
-    const showSessionExpiredMessage = () =>
-        setDialogMessage({
-            title: t('SESSION_EXPIRED'),
-            content: t('SESSION_EXPIRED_MESSAGE'),
-
-            nonClosable: true,
-            proceed: {
-                text: t('LOGIN'),
-                action: logoutUser,
-                variant: 'accent',
-            },
-        });
-
-    const displayFiles = useMemo(() => {
-        if (!files || !hiddenFiles || !trashedFiles) {
-            return [];
-        }
-        if (activeCollection === HIDDEN_SECTION) {
-            return hiddenFiles;
-        } else if (activeCollection === TRASH_SECTION) {
-            const markedForDeletionFiles = files.filter((file) =>
-                deletedFileIds.has(file.id)
-            );
-            return [...markedForDeletionFiles, ...trashedFiles];
-        } else {
-            const nonMarkedForDeletion = files.filter(
-                (file) => !deletedFileIds.has(file.id)
-            );
-            return nonMarkedForDeletion;
-        }
-    }, [activeCollection, files, hiddenFiles, trashedFiles]);
-
     useEffect(() => {
         appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -392,6 +366,146 @@ export default function Gallery() {
             });
         }
     }, [isInSearchMode, searchResultSummary]);
+
+    const displayFiles = useMemoSingleThreaded((): EnteFile[] => {
+        if (!files || !hiddenFiles || !trashedFiles) {
+            return [];
+        }
+
+        let displayFiles: EnteFile[] = [];
+        if (activeCollection === HIDDEN_SECTION) {
+            displayFiles = hiddenFiles;
+        } else if (activeCollection === TRASH_SECTION) {
+            const markedForDeletionFiles = files.filter((file) =>
+                deletedFileIds.has(file.id)
+            );
+            displayFiles = [...markedForDeletionFiles, ...trashedFiles];
+        } else {
+            displayFiles = files.filter((item) => {
+                // SEARCH MODE
+                if (isInSearchMode) {
+                    if (
+                        search?.date &&
+                        !isSameDayAnyYear(search.date)(
+                            new Date(item.metadata.creationTime / 1000)
+                        )
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.location &&
+                        !isInsideBox(
+                            {
+                                latitude: item.metadata.latitude,
+                                longitude: item.metadata.longitude,
+                            },
+                            search.location
+                        )
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.person &&
+                        search.person.files.indexOf(item.id) === -1
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.thing &&
+                        search.thing.files.indexOf(item.id) === -1
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.text &&
+                        search.text.files.indexOf(item.id) === -1
+                    ) {
+                        return false;
+                    }
+                    if (search?.files && search.files.indexOf(item.id) === -1) {
+                        return false;
+                    }
+                    idSet.add(item.id);
+                    return true;
+                }
+
+                // shared files can only be seen in their respective shared collection
+                if (isSharedFile(user, item)) {
+                    if (activeCollection === item.collectionID) {
+                        idSet.add(item.id);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                // Archived files/collection files can only be seen in archive section or their respective collection
+                if (
+                    IsArchived(item) ||
+                    archivedCollections.has(item.collectionID)
+                ) {
+                    if (
+                        activeCollection === ARCHIVE_SECTION ||
+                        activeCollection === item.collectionID
+                    ) {
+                        idSet.add(item.id);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                // ALL SECTION - show all files
+                if (activeCollection === ALL_SECTION) {
+                    idSet.add(item.id);
+                    return true;
+                }
+
+                // COLLECTION SECTION - show files in the active collection
+                if (activeCollection === item.collectionID) {
+                    idSet.add(item.id);
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+        }
+
+        const idSet = new Set();
+        const user: User = getData(LS_KEYS.USER);
+
+        const uniqueFiles = displayFiles.filter((item) => {
+            if (idSet.has(item.id)) {
+                return false;
+            }
+            idSet.add(item.id);
+            return true;
+        });
+
+        return uniqueFiles;
+    }, [
+        files,
+        deletedFileIds,
+        search?.date,
+        search?.files,
+        search?.location,
+        search?.person,
+        search?.thing,
+        search?.text,
+        activeCollection,
+    ]);
+
+    const fileToCollectionsMap = useMemoSingleThreaded(() => {
+        return constructFileToCollectionMap(files);
+    }, [files]);
+
+    const collectionNameMap = useMemo(() => {
+        return constructCollectionNameMap(collections);
+    }, [collections]);
+
+    const showSessionExpiredMessage = () => {
+        setDialogMessage(getSessionExpiredMessage());
+    };
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (syncInProgress.current && !force) {
@@ -690,8 +804,6 @@ export default function Gallery() {
         setExportModalView(false);
     };
 
-    console.log('rendering gallery', displayFiles);
-
     return (
         <GalleryContext.Provider
             value={{
@@ -752,7 +864,7 @@ export default function Gallery() {
                     setIsInSearchMode={setIsInSearchMode}
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
-                    collections={getSearchableCollections(collections)}
+                    collections={collections}
                     files={files}
                     setActiveCollection={setActiveCollection}
                     updateSearch={updateSearch}
@@ -815,14 +927,10 @@ export default function Gallery() {
                 ) : (
                     <PhotoFrame
                         files={displayFiles}
-                        collections={collections}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
-                        archivedCollections={archivedCollections}
                         setSelected={setSelected}
                         selected={selected}
-                        isInSearchMode={isInSearchMode}
-                        search={search}
                         deletedFileIds={deletedFileIds}
                         setDeletedFileIds={setDeletedFileIds}
                         activeCollection={activeCollection}
@@ -831,6 +939,11 @@ export default function Gallery() {
                             CollectionSummaryType.incomingShare
                         }
                         enableDownload={true}
+                        fileToCollectionsMap={fileToCollectionsMap}
+                        collectionNameMap={collectionNameMap}
+                        showAppDownloadBanner={
+                            files.length < 30 && !isInSearchMode
+                        }
                     />
                 )}
                 {selected.count > 0 &&
