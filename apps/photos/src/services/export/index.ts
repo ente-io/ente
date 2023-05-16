@@ -135,10 +135,11 @@ class ExportService {
             this.migrationInProgress = migrateExport(exportDir, exportRecord);
             await this.migrationInProgress;
             addLogLine('migration completed');
-            this.migrationInProgress = null;
         } catch (e) {
             logError(e, 'migration failed');
             throw e;
+        } finally {
+            this.migrationInProgress = null;
         }
     }
 
@@ -293,7 +294,10 @@ class ExportService {
         if (this.migrationInProgress) {
             addLogLine('migration in progress, waiting for it to complete');
             await this.migrationInProgress;
-            this.migrationInProgress = null;
+        } else {
+            addLogLine('no migration in progress');
+            const exportRecord = await this.getExportRecord(exportFolder);
+            await this.runMigration(exportFolder, exportRecord);
         }
     }
 
@@ -320,6 +324,7 @@ class ExportService {
         try {
             this.exportInProgress.exec();
             this.exportInProgress = null;
+            this.migrationInProgress = null;
             this.reRunNeeded = false;
             await this.postExport();
         } catch (e) {
