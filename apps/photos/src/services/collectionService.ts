@@ -272,9 +272,6 @@ export const getCollectionLatestFiles = (
         if (!latestFiles.has(file.collectionID)) {
             latestFiles.set(file.collectionID, file);
         }
-        if (!latestFiles.has(ARCHIVE_SECTION) && IsArchived(file)) {
-            latestFiles.set(ARCHIVE_SECTION, file);
-        }
         if (
             !latestFiles.has(ALL_SECTION) &&
             !IsArchived(file) &&
@@ -1087,10 +1084,10 @@ function getCollectionsFileCount(
             uniqueAllSectionFileIDs.add(file.id);
         }
     }
-    collectionFilesCount.set(TRASH_SECTION, trashedFiles.length ?? 0);
+    collectionFilesCount.set(TRASH_SECTION, trashedFiles?.length ?? 0);
     collectionFilesCount.set(ARCHIVE_SECTION, uniqueArchivedFileIDs.size);
     collectionFilesCount.set(ALL_SECTION, uniqueAllSectionFileIDs.size);
-    collectionFilesCount.set(HIDDEN_SECTION, hiddenFiles.length ?? 0);
+    collectionFilesCount.set(HIDDEN_SECTION, hiddenFiles?.length ?? 0);
     return collectionFilesCount;
 }
 

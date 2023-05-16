@@ -10,6 +10,7 @@ import { getCollection } from './collectionService';
 import HTTPService from './HTTPService';
 import { EncryptedTrashItem, Trash } from 'types/trash';
 import { EnteFile } from 'types/file';
+import { mergeMetadata } from 'utils/file';
 
 const TRASH = 'file-trash';
 const TRASH_TIME = 'trash-time';
@@ -54,7 +55,7 @@ async function getLastSyncTime() {
 }
 export async function syncTrash(
     collections: Collection[],
-    setFiles: SetFiles
+    setTrashedFiles: SetFiles
 ): Promise<void> {
     const trash = await getLocalTrash();
     collections = [...collections, ...(await getLocalDeletedCollections())];
@@ -69,7 +70,7 @@ export async function syncTrash(
     const updatedTrash = await updateTrash(
         collectionMap,
         lastSyncTime,
-        setFiles,
+        setTrashedFiles,
         trash
     );
     cleanTrashCollections(updatedTrash);
@@ -78,7 +79,7 @@ export async function syncTrash(
 export const updateTrash = async (
     collections: Map<number, Collection>,
     sinceTime: number,
-    setFiles: SetFiles,
+    setTrashedFiles: SetFiles,
     currentTrash: Trash
 ): Promise<Trash> => {
     try {
@@ -128,7 +129,7 @@ export const updateTrash = async (
                 time = resp.data.diff.slice(-1)[0].updatedAt;
             }
 
-            setFiles(sortFiles(getTrashedFiles(updatedTrash)));
+            setTrashedFiles(getTrashedFiles(updatedTrash));
             await localForage.setItem(TRASH, updatedTrash);
             await localForage.setItem(TRASH_TIME, time);
         } while (resp.data.hasMore);
@@ -140,13 +141,15 @@ export const updateTrash = async (
 };
 
 export function getTrashedFiles(trash: Trash): EnteFile[] {
-    return trash.map(
-        (trashedFile): EnteFile => ({
-            ...trashedFile.file,
-            updationTime: trashedFile.updatedAt,
-            isTrashed: true,
-            deleteBy: trashedFile.deleteBy,
-        })
+    return sortFiles(
+        mergeMetadata(
+            trash.map((trashedFile) => ({
+                ...trashedFile.file,
+                updationTime: trashedFile.updatedAt,
+                deleteBy: trashedFile.deleteBy,
+                isTrashed: true,
+            }))
+        )
     );
 }
 

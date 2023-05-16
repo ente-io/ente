@@ -1,4 +1,4 @@
-import React, {
+import {
     createContext,
     useContext,
     useEffect,
@@ -49,6 +49,7 @@ import {
     constructFileToCollectionMap,
     downloadFiles,
     getSelectedFiles,
+    getUniqueFiles,
     isSharedFile,
     mergeMetadata,
     sortFiles,
@@ -276,9 +277,8 @@ export default function Gallery() {
                 mergeMetadata(await getLocalHiddenFiles())
             );
             const collections = await getLocalCollections();
-            const trashedFiles = sortFiles(
-                mergeMetadata(await getLocalTrashedFiles())
-            );
+            const trashedFiles = await getLocalTrashedFiles();
+
             setUser(user);
             setFiles(files);
             setTrashedFiles(trashedFiles);
@@ -368,21 +368,37 @@ export default function Gallery() {
         }
     }, [isInSearchMode, searchResultSummary]);
 
-    const displayFiles = useMemoSingleThreaded((): EnteFile[] => {
+    const filteredData = useMemoSingleThreaded((): EnteFile[] => {
         if (!files || !hiddenFiles || !trashedFiles || !user) {
             return [];
         }
 
-        let displayFiles: EnteFile[] = [];
-        if (activeCollection === HIDDEN_SECTION) {
-            displayFiles = hiddenFiles;
-        } else if (activeCollection === TRASH_SECTION) {
-            const markedForDeletionFiles = files.filter((file) =>
-                deletedFileIds.has(file.id)
-            );
-            displayFiles = [...markedForDeletionFiles, ...trashedFiles];
-        } else {
-            displayFiles = files.filter((item) => {
+        if (activeCollection === HIDDEN_SECTION && !isInSearchMode) {
+            return hiddenFiles;
+        }
+
+        if (activeCollection === TRASH_SECTION && !isInSearchMode) {
+            return getUniqueFiles([
+                ...trashedFiles,
+                ...files.filter((file) => deletedFileIds?.has(file.id)),
+            ]);
+        }
+
+        return getUniqueFiles(
+            files.filter((item) => {
+                if (deletedFileIds?.has(item.id)) {
+                    return false;
+                }
+
+                // shared files can only be seen in their respective collection and not searchable
+                if (isSharedFile(user, item)) {
+                    if (activeCollection === item.collectionID) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
                 // SEARCH MODE
                 if (isInSearchMode) {
                     if (
@@ -429,8 +445,8 @@ export default function Gallery() {
                     return true;
                 }
 
-                // shared files can only be seen in their respective shared collection
-                if (isSharedFile(user, item)) {
+                // archived collections files can only be seen in their respective collection
+                if (archivedCollections?.has(item.id)) {
                     if (activeCollection === item.collectionID) {
                         return true;
                     } else {
@@ -438,11 +454,8 @@ export default function Gallery() {
                     }
                 }
 
-                // Archived files/collection files can only be seen in archive section or their respective collection
-                if (
-                    IsArchived(item) ||
-                    archivedCollections?.has(item.collectionID)
-                ) {
+                // Archived files can only be seen in archive section or their respective collection
+                if (IsArchived(item)) {
                     if (
                         activeCollection === ARCHIVE_SECTION ||
                         activeCollection === item.collectionID
@@ -464,20 +477,8 @@ export default function Gallery() {
                 } else {
                     return false;
                 }
-            });
-        }
-
-        const idSet = new Set();
-
-        const uniqueFiles = displayFiles.filter((item) => {
-            if (idSet.has(item.id)) {
-                return false;
-            }
-            idSet.add(item.id);
-            return true;
-        });
-
-        return uniqueFiles;
+            })
+        );
     }, [
         files,
         deletedFileIds,
@@ -581,9 +582,10 @@ export default function Gallery() {
         setSelected({ ownCount: 0, count: 0, collectionID: 0 });
     };
 
-    if (!files || !collectionSummaries) {
+    if (!files || !collectionSummaries || !filteredData) {
         return <div />;
     }
+
     const collectionOpsHelper =
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
             startLoading();
@@ -922,7 +924,7 @@ export default function Gallery() {
                     <GalleryEmptyState openUploader={openUploader} />
                 ) : (
                     <PhotoFrame
-                        files={displayFiles}
+                        files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
                         setSelected={setSelected}
