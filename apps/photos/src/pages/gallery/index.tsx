@@ -345,102 +345,103 @@ export default function Gallery() {
     }, [isInSearchMode, searchResultSummary]);
 
     const filteredData = useMemoSingleThreaded((): EnteFile[] => {
-        if (!files) {
+        if (!files || !user) {
             return [];
         }
 
-        const idSet = new Set();
-        const user: User = getData(LS_KEYS.USER);
-
-        return files.filter((item) => {
-            if (
-                deletedFileIds?.has(item.id) &&
-                activeCollection !== TRASH_SECTION
-            ) {
-                return false;
+        const filteredFiles = files.filter((item) => {
+            if (item.isTrashed || deletedFileIds?.has(item.id)) {
+                return activeCollection === TRASH_SECTION;
             }
-            if (
-                search?.date &&
-                !isSameDayAnyYear(search.date)(
-                    new Date(item.metadata.creationTime / 1000)
-                )
-            ) {
-                return false;
-            }
-            if (
-                search?.location &&
-                !isInsideBox(
-                    {
-                        latitude: item.metadata.latitude,
-                        longitude: item.metadata.longitude,
-                    },
-                    search.location
-                )
-            ) {
-                return false;
-            }
-            if (search?.person && search.person.files.indexOf(item.id) === -1) {
-                return false;
-            }
-            if (search?.thing && search.thing.files.indexOf(item.id) === -1) {
-                return false;
-            }
-            if (search?.text && search.text.files.indexOf(item.id) === -1) {
-                return false;
-            }
-            if (search?.files && search.files.indexOf(item.id) === -1) {
-                return false;
-            }
-            if (
-                !isInSearchMode &&
-                activeCollection === ALL_SECTION &&
-                (IsArchived(item) ||
-                    archivedCollections?.has(item.collectionID))
-            ) {
-                return false;
-            }
-            if (
-                !isInSearchMode &&
-                activeCollection === ARCHIVE_SECTION &&
-                !IsArchived(item)
-            ) {
-                return false;
-            }
-
-            if (
-                (isInSearchMode || activeCollection !== item.collectionID) &&
-                isSharedFile(user, item)
-            ) {
-                return false;
-            }
-            if (
-                !isInSearchMode &&
-                activeCollection === TRASH_SECTION &&
-                !item.isTrashed
-            ) {
-                return false;
-            }
-            if (
-                (isInSearchMode || activeCollection !== TRASH_SECTION) &&
-                item.isTrashed
-            ) {
-                return false;
-            }
-            if (!idSet.has(item.id)) {
+            // SEARCH MODE
+            if (isInSearchMode) {
                 if (
-                    activeCollection === ALL_SECTION ||
+                    search?.date &&
+                    !isSameDayAnyYear(search.date)(
+                        new Date(item.metadata.creationTime / 1000)
+                    )
+                ) {
+                    return false;
+                }
+                if (
+                    search?.location &&
+                    !isInsideBox(
+                        {
+                            latitude: item.metadata.latitude,
+                            longitude: item.metadata.longitude,
+                        },
+                        search.location
+                    )
+                ) {
+                    return false;
+                }
+                if (
+                    search?.person &&
+                    search.person.files.indexOf(item.id) === -1
+                ) {
+                    return false;
+                }
+                if (
+                    search?.thing &&
+                    search.thing.files.indexOf(item.id) === -1
+                ) {
+                    return false;
+                }
+                if (search?.text && search.text.files.indexOf(item.id) === -1) {
+                    return false;
+                }
+                if (search?.files && search.files.indexOf(item.id) === -1) {
+                    return false;
+                }
+                return true;
+            }
+
+            // shared files can only be seen in their respective shared collection
+            if (isSharedFile(user, item)) {
+                if (activeCollection === item.collectionID) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            // Archived files/collection files can only be seen in archive section or their respective collection
+            if (
+                IsArchived(item) ||
+                archivedCollections?.has(item.collectionID)
+            ) {
+                if (
                     activeCollection === ARCHIVE_SECTION ||
-                    activeCollection === TRASH_SECTION ||
-                    isInSearchMode ||
                     activeCollection === item.collectionID
                 ) {
-                    idSet.add(item.id);
                     return true;
+                } else {
+                    return false;
                 }
+            }
+
+            // ALL SECTION - show all files
+            if (activeCollection === ALL_SECTION) {
+                return true;
+            }
+
+            // COLLECTION SECTION - show files in the active collection
+            if (activeCollection === item.collectionID) {
+                return true;
+            } else {
                 return false;
             }
-            return false;
         });
+        const idSet = new Set();
+
+        const uniqueFiles = filteredFiles.filter((item) => {
+            if (idSet.has(item.id)) {
+                return false;
+            }
+            idSet.add(item.id);
+            return true;
+        });
+        return uniqueFiles;
     }, [
         files,
         deletedFileIds,
