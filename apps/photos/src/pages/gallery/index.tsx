@@ -415,13 +415,14 @@ export default function Gallery() {
                     }
                 }
 
-                // Archived files/collection files can only be seen in archive section or their respective collection
+                // Archived files can only be seen in archive section or their respective collection
                 if (
                     IsArchived(item) ||
                     archivedCollections?.has(item.collectionID)
                 ) {
                     if (
-                        activeCollection === ARCHIVE_SECTION ||
+                        (activeCollection === ARCHIVE_SECTION &&
+                            IsArchived(item)) ||
                         activeCollection === item.collectionID
                     ) {
                         return true;
@@ -528,6 +529,7 @@ export default function Gallery() {
             user,
             collections,
             files,
+            trashedFiles,
             archivedCollections
         );
         setCollectionSummaries(collectionSummaries);
@@ -854,7 +856,7 @@ export default function Gallery() {
                     <GalleryEmptyState openUploader={openUploader} />
                 ) : (
                     <PhotoFrame
-                        files={filteredData}
+                        displayFiles={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
                         setSelected={setSelected}
