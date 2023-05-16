@@ -95,7 +95,6 @@ class ExportService {
         success: 0,
         failed: 0,
     };
-    private migrationInProgress: Promise<void>;
 
     constructor() {
         if (runningInBrowser()) {
@@ -132,14 +131,11 @@ class ExportService {
     async runMigration(exportDir: string, exportRecord: ExportRecord) {
         try {
             addLogLine('running migration');
-            this.migrationInProgress = migrateExport(exportDir, exportRecord);
-            await this.migrationInProgress;
+            await migrateExport(exportDir, exportRecord);
             addLogLine('migration completed');
         } catch (e) {
             logError(e, 'migration failed');
             throw e;
-        } finally {
-            this.migrationInProgress = null;
         }
     }
 
@@ -291,14 +287,8 @@ class ExportService {
             failed: 0,
             total: 0,
         });
-        if (this.migrationInProgress) {
-            addLogLine('migration in progress, waiting for it to complete');
-            await this.migrationInProgress;
-        } else {
-            addLogLine('no migration in progress');
-            const exportRecord = await this.getExportRecord(exportFolder);
-            await this.runMigration(exportFolder, exportRecord);
-        }
+        const exportRecord = await this.getExportRecord(exportFolder);
+        await this.runMigration(exportFolder, exportRecord);
     }
 
     async postExport() {
@@ -324,7 +314,6 @@ class ExportService {
         try {
             this.exportInProgress.exec();
             this.exportInProgress = null;
-            this.migrationInProgress = null;
             this.reRunNeeded = false;
             await this.postExport();
         } catch (e) {
