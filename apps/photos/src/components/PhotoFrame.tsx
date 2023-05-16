@@ -15,8 +15,6 @@ import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
-import { User } from 'types/user';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { addLogLine } from 'utils/logging';
 import PhotoSwipe from 'photoswipe';
 import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
@@ -69,7 +67,6 @@ const PhotoFrame = ({
     collectionNameMap,
     showAppDownloadBanner,
 }: Props) => {
-    const [user, setUser] = useState<User>(null);
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
@@ -84,10 +81,7 @@ const PhotoFrame = ({
     const router = useRouter();
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
 
-    useEffect(() => {
-        const user: User = getData(LS_KEYS.USER);
-        setUser(user);
-    }, []);
+    useEffect(() => {}, []);
 
     const displayFiles = useMemoSingleThreaded(() => {
         return files.map((item) => {
@@ -305,12 +299,12 @@ const PhotoFrame = ({
             ) {
                 handleSelect(
                     displayFiles[i].id,
-                    displayFiles[i].ownerID === user?.id
+                    displayFiles[i].ownerID === galleryContext.user?.id
                 )(!checked);
             }
             handleSelect(
                 displayFiles[index].id,
-                displayFiles[index].ownerID === user?.id,
+                displayFiles[index].ownerID === galleryContext.user?.id,
                 index
             )(!checked);
         }
@@ -328,7 +322,11 @@ const PhotoFrame = ({
             selectable={
                 !publicCollectionGalleryContext?.accessedThroughSharedURL
             }
-            onSelect={handleSelect(item.id, item.ownerID === user?.id, index)}
+            onSelect={handleSelect(
+                item.id,
+                item.ownerID === galleryContext.user?.id,
+                index
+            )}
             selected={
                 selected.collectionID === activeCollection && selected[item.id]
             }

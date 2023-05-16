@@ -139,6 +139,7 @@ const defaultGalleryContext: GalleryContextType = {
     photoListHeader: null,
     openExportModal: () => null,
     authenticateUser: () => null,
+    user: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -368,7 +369,7 @@ export default function Gallery() {
     }, [isInSearchMode, searchResultSummary]);
 
     const displayFiles = useMemoSingleThreaded((): EnteFile[] => {
-        if (!files || !hiddenFiles || !trashedFiles) {
+        if (!files || !hiddenFiles || !trashedFiles || !user) {
             return [];
         }
 
@@ -425,14 +426,12 @@ export default function Gallery() {
                     if (search?.files && search.files.indexOf(item.id) === -1) {
                         return false;
                     }
-                    idSet.add(item.id);
                     return true;
                 }
 
                 // shared files can only be seen in their respective shared collection
                 if (isSharedFile(user, item)) {
                     if (activeCollection === item.collectionID) {
-                        idSet.add(item.id);
                         return true;
                     } else {
                         return false;
@@ -442,13 +441,12 @@ export default function Gallery() {
                 // Archived files/collection files can only be seen in archive section or their respective collection
                 if (
                     IsArchived(item) ||
-                    archivedCollections.has(item.collectionID)
+                    archivedCollections?.has(item.collectionID)
                 ) {
                     if (
                         activeCollection === ARCHIVE_SECTION ||
                         activeCollection === item.collectionID
                     ) {
-                        idSet.add(item.id);
                         return true;
                     } else {
                         return false;
@@ -457,13 +455,11 @@ export default function Gallery() {
 
                 // ALL SECTION - show all files
                 if (activeCollection === ALL_SECTION) {
-                    idSet.add(item.id);
                     return true;
                 }
 
                 // COLLECTION SECTION - show files in the active collection
                 if (activeCollection === item.collectionID) {
-                    idSet.add(item.id);
                     return true;
                 } else {
                     return false;
@@ -472,7 +468,6 @@ export default function Gallery() {
         }
 
         const idSet = new Set();
-        const user: User = getData(LS_KEYS.USER);
 
         const uniqueFiles = displayFiles.filter((item) => {
             if (idSet.has(item.id)) {
@@ -815,6 +810,7 @@ export default function Gallery() {
                 photoListHeader,
                 openExportModal,
                 authenticateUser,
+                user,
             }}>
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}>
