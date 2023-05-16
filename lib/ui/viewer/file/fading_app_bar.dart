@@ -26,6 +26,7 @@ import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/collection_action_sheet.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
+import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
@@ -120,6 +121,14 @@ class FadingAppBarState extends State<FadingAppBar> {
     // only show fav option for files owned by the user
     if (isOwnedByUser && !isFileHidden && isFileUploaded) {
       actions.add(_getFavoriteButton());
+    }
+    if (!isFileUploaded) {
+      actions.add(
+        UploadIconWidget(
+          file: widget.file,
+          key: ValueKey(widget.file.tag),
+        ),
+      );
     }
     actions.add(
       PopupMenuButton(
