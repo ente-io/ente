@@ -97,7 +97,6 @@ export default function ExportModal(props: Props) {
     // STATE UPDATERS
     // ==============
     const updateExportFolder = async (newFolder: string) => {
-        await exportService.stopRunningExport();
         exportService.updateExportSettings({ folder: newFolder });
         setExportFolder(newFolder);
     };
