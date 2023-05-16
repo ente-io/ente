@@ -348,7 +348,7 @@ export default function Gallery() {
             return [];
         }
 
-        if (activeCollection === TRASH_SECTION) {
+        if (activeCollection === TRASH_SECTION && !isInSearchMode) {
             return getUniqueFiles([
                 ...trashedFiles,
                 ...files.filter((file) => deletedFileIds?.has(file.id)),
