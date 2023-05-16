@@ -416,11 +416,8 @@ export default function Gallery() {
                     return true;
                 }
 
-                // archived collections can only be seen in their respective collection
-                if (
-                    isSharedFile(user, item) ||
-                    archivedCollections?.has(item.id)
-                ) {
+                // archived collections files can only be seen in their respective collection
+                if (archivedCollections?.has(item.id)) {
                     if (activeCollection === item.collectionID) {
                         return true;
                     } else {
