@@ -140,12 +140,16 @@ dependency_overrides:
 
 dev_dependencies:
   build_runner: ^2.3.3
+  flutter_driver:
+    sdk: flutter
   flutter_lints: ^2.0.1
   flutter_test:
     sdk: flutter
   freezed: ^2.3.2
+  integration_test:
+    sdk: flutter
   json_serializable: ^6.6.1
-  test:
+  test: ^1.22.0
 
 flutter_icons:
   android: "launcher_icon"

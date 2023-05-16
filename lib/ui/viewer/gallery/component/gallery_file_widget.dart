@@ -60,46 +60,58 @@ class GalleryFileWidget extends StatelessWidget {
             ? _onLongPressWithSelectionLimit(context, file)
             : _onLongPressNoSelectionLimit(context, file);
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(1),
-        child: Stack(
-          children: [
-            Hero(
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(1),
+            child: Hero(
               tag: tag + file.tag,
-              child: ColorFiltered(
-                colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(
-                    isFileSelected ? 0.4 : 0,
-                  ),
-                  BlendMode.darken,
-                ),
-                child: ThumbnailWidget(
-                  file,
-                  diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-                  serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
-                  shouldShowLivePhotoOverlay: true,
-                  key: Key(tag + file.tag),
-                  thumbnailSize: photoGridSize < photoGridSizeDefault
-                      ? thumbnailLargeSize
-                      : thumbnailSmallSize,
-                  shouldShowOwnerAvatar: !isFileSelected,
-                ),
-              ),
+              child: isFileSelected
+                  ? ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(
+                          0.4,
+                        ),
+                        BlendMode.darken,
+                      ),
+                      child: ThumbnailWidget(
+                        file,
+                        diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
+                        serverLoadDeferDuration:
+                            thumbnailServerLoadDeferDuration,
+                        shouldShowLivePhotoOverlay: true,
+                        key: Key(tag + file.tag),
+                        thumbnailSize: photoGridSize < photoGridSizeDefault
+                            ? thumbnailLargeSize
+                            : thumbnailSmallSize,
+                        shouldShowOwnerAvatar: !isFileSelected,
+                      ),
+                    )
+                  : ThumbnailWidget(
+                      file,
+                      diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
+                      serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
+                      shouldShowLivePhotoOverlay: true,
+                      key: Key(tag + file.tag),
+                      thumbnailSize: photoGridSize < photoGridSizeDefault
+                          ? thumbnailLargeSize
+                          : thumbnailSmallSize,
+                      shouldShowOwnerAvatar: !isFileSelected,
+                    ),
             ),
-            Visibility(
-              visible: isFileSelected,
-              child: Positioned(
-                right: 4,
-                top: 4,
-                child: Icon(
-                  Icons.check_circle_rounded,
-                  size: 20,
-                  color: selectionColor, //same for both themes
-                ),
-              ),
-            )
-          ],
-        ),
+          ),
+          isFileSelected
+              ? Positioned(
+                  right: 4,
+                  top: 4,
+                  child: Icon(
+                    Icons.check_circle_rounded,
+                    size: 20,
+                    color: selectionColor, //same for both themes
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ],
       ),
     );
   }

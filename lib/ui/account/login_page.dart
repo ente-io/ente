@@ -53,6 +53,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: _getBody(),
       floatingActionButton: DynamicFAB(
+        key: const ValueKey("logInButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _emailIsValid,
         buttonText: S.of(context).logInLabel,
@@ -87,6 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                   child: TextFormField(
+                    key: const ValueKey("emailInputField"),
                     autofillHints: const [AutofillHints.email],
                     decoration: InputDecoration(
                       fillColor: _emailInputFieldColor,
@@ -186,9 +188,9 @@ class _LoginPageState extends State<LoginPage> {
                           },
                         ),
                       ),
-                      Expanded(
+                      const Expanded(
                         flex: 1,
-                        child: Container(),
+                        child: SizedBox.shrink(),
                       )
                     ],
                   ),

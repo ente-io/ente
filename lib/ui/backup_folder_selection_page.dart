@@ -185,6 +185,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                         bottom: Platform.isIOS ? 48 : 32,
                       ),
                       child: GestureDetector(
+                        key: const ValueKey("skipBackupButton"),
                         onTap: () {
                           Navigator.of(context).pop();
                         },

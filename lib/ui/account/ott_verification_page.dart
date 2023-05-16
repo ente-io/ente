@@ -64,6 +64,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
       ),
       body: _getBody(),
       floatingActionButton: DynamicFAB(
+        key: const ValueKey("verifyOttButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _verificationCodeController.text.isNotEmpty,
         buttonText: S.of(context).verify,
@@ -146,6 +147,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               child: TextFormField(
+                key: const ValueKey("ottVerificationInputField"),
                 style: Theme.of(context).textTheme.subtitle1,
                 decoration: InputDecoration(
                   filled: true,
