@@ -19,7 +19,6 @@ import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { addLogLine } from 'utils/logging';
 import PhotoSwipe from 'photoswipe';
-import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
 
 const Container = styled('div')`
     display: block;
@@ -37,7 +36,7 @@ const Container = styled('div')`
 const PHOTOSWIPE_HASH_SUFFIX = '&opened';
 
 interface Props {
-    files: EnteFile[];
+    displayFiles: EnteFile[];
     syncWithRemote: () => Promise<void>;
     favItemIds?: Set<number>;
     setSelected: (
@@ -55,7 +54,7 @@ interface Props {
 }
 
 const PhotoFrame = ({
-    files,
+    displayFiles,
     syncWithRemote,
     favItemIds,
     setSelected,
@@ -88,34 +87,6 @@ const PhotoFrame = ({
         const user: User = getData(LS_KEYS.USER);
         setUser(user);
     }, []);
-
-    const displayFiles = useMemoSingleThreaded(() => {
-        return files.map((item) => {
-            const filteredItem = {
-                ...item,
-                w: window.innerWidth,
-                h: window.innerHeight,
-                title: item.pubMagicMetadata?.data.caption,
-            };
-            try {
-                if (galleryContext.thumbs.has(item.id)) {
-                    updateFileMsrcProps(
-                        filteredItem,
-                        galleryContext.thumbs.get(item.id)
-                    );
-                }
-                if (galleryContext.files.has(item.id)) {
-                    updateFileSrcProps(
-                        filteredItem,
-                        galleryContext.files.get(item.id)
-                    );
-                }
-            } catch (e) {
-                logError(e, 'PhotoFrame url prefill failed');
-            }
-            return filteredItem;
-        });
-    }, [files]);
 
     useEffect(() => {
         setFetching({});
