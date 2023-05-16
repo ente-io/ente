@@ -53,7 +53,7 @@ export interface EnteFile
     metadata: Metadata;
     magicMetadata: FileMagicMetadata;
     pubMagicMetadata: FilePublicMagicMetadata;
-    isTrashed: boolean;
+    isTrashed?: boolean;
     key: string;
     src?: string;
     msrc?: string;
