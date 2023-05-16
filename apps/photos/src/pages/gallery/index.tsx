@@ -360,6 +360,16 @@ export default function Gallery() {
                 if (deletedFileIds?.has(item.id)) {
                     return false;
                 }
+
+                // shared files can only be seen in their respective collection and not searchable
+                if (isSharedFile(user, item)) {
+                    if (activeCollection === item.collectionID) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
                 // SEARCH MODE
                 if (isInSearchMode) {
                     if (
@@ -406,8 +416,11 @@ export default function Gallery() {
                     return true;
                 }
 
-                // shared files can only be seen in their respective shared collection
-                if (isSharedFile(user, item)) {
+                // archived collections can only be seen in their respective collection
+                if (
+                    isSharedFile(user, item) ||
+                    archivedCollections?.has(item.id)
+                ) {
                     if (activeCollection === item.collectionID) {
                         return true;
                     } else {
@@ -416,13 +429,9 @@ export default function Gallery() {
                 }
 
                 // Archived files can only be seen in archive section or their respective collection
-                if (
-                    IsArchived(item) ||
-                    archivedCollections?.has(item.collectionID)
-                ) {
+                if (IsArchived(item)) {
                     if (
-                        (activeCollection === ARCHIVE_SECTION &&
-                            IsArchived(item)) ||
+                        activeCollection === ARCHIVE_SECTION ||
                         activeCollection === item.collectionID
                     ) {
                         return true;
