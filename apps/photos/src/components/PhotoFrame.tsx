@@ -175,6 +175,10 @@ const PhotoFrame = ({
         }
     }, [selected]);
 
+    if (!displayFiles) {
+        return <div />;
+    }
+
     const updateURL = (index: number) => (id: number, url: string) => {
         const file = displayFiles[index];
         // this is to prevent outdated updateURL call from updating the wrong file

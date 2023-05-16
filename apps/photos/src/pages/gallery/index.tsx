@@ -1,4 +1,4 @@
-import React, {
+import {
     createContext,
     useContext,
     useEffect,
@@ -47,6 +47,7 @@ import {
     downloadFiles,
     getNonTrashedFiles,
     getSelectedFiles,
+    getUniqueFiles,
     isSharedFile,
     mergeMetadata,
     sortFiles,
@@ -81,11 +82,7 @@ import {
     constructCollectionNameMap,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
-import {
-    getLocalTrash,
-    getTrashedFiles,
-    syncTrash,
-} from 'services/trashService';
+import { getLocalTrashedFiles, syncTrash } from 'services/trashService';
 
 import FixCreationTime, {
     FixCreationTimeAttributes,
@@ -149,6 +146,7 @@ export default function Gallery() {
     const [user, setUser] = useState(null);
     const [collections, setCollections] = useState<Collection[]>(null);
     const [files, setFiles] = useState<EnteFile[]>(null);
+    const [trashedFiles, setTrashedFiles] = useState<EnteFile[]>(null);
 
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
 
@@ -255,12 +253,13 @@ export default function Gallery() {
             }
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
-            let files = mergeMetadata(await getLocalFiles());
+            const files = sortFiles(mergeMetadata(await getLocalFiles()));
             const collections = await getLocalCollections();
-            const trash = await getLocalTrash();
-            files = [...files, ...getTrashedFiles(trash)];
+            const trashedFiles = await getLocalTrashedFiles();
+
             setUser(user);
-            setFiles(sortFiles(files));
+            setFiles(files);
+            setTrashedFiles(trashedFiles);
             setCollections(collections);
             await syncWithRemote(true);
             setIsFirstLoad(false);
@@ -345,103 +344,105 @@ export default function Gallery() {
     }, [isInSearchMode, searchResultSummary]);
 
     const filteredData = useMemoSingleThreaded((): EnteFile[] => {
-        if (!files || !user) {
+        if (!files || !user || !trashedFiles) {
             return [];
         }
 
-        const filteredFiles = files.filter((item) => {
-            if (item.isTrashed || deletedFileIds?.has(item.id)) {
-                return activeCollection === TRASH_SECTION;
-            }
-            // SEARCH MODE
-            if (isInSearchMode) {
-                if (
-                    search?.date &&
-                    !isSameDayAnyYear(search.date)(
-                        new Date(item.metadata.creationTime / 1000)
-                    )
-                ) {
-                    return false;
-                }
-                if (
-                    search?.location &&
-                    !isInsideBox(
-                        {
-                            latitude: item.metadata.latitude,
-                            longitude: item.metadata.longitude,
-                        },
-                        search.location
-                    )
-                ) {
-                    return false;
-                }
-                if (
-                    search?.person &&
-                    search.person.files.indexOf(item.id) === -1
-                ) {
-                    return false;
-                }
-                if (
-                    search?.thing &&
-                    search.thing.files.indexOf(item.id) === -1
-                ) {
-                    return false;
-                }
-                if (search?.text && search.text.files.indexOf(item.id) === -1) {
-                    return false;
-                }
-                if (search?.files && search.files.indexOf(item.id) === -1) {
-                    return false;
-                }
-                return true;
-            }
+        if (activeCollection === TRASH_SECTION) {
+            return getUniqueFiles([
+                ...trashedFiles,
+                ...files.filter((file) => deletedFileIds?.has(file.id)),
+            ]);
+        }
 
-            // shared files can only be seen in their respective shared collection
-            if (isSharedFile(user, item)) {
+        return getUniqueFiles(
+            files.filter((item) => {
+                if (deletedFileIds?.has(item.id)) {
+                    return false;
+                }
+                // SEARCH MODE
+                if (isInSearchMode) {
+                    if (
+                        search?.date &&
+                        !isSameDayAnyYear(search.date)(
+                            new Date(item.metadata.creationTime / 1000)
+                        )
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.location &&
+                        !isInsideBox(
+                            {
+                                latitude: item.metadata.latitude,
+                                longitude: item.metadata.longitude,
+                            },
+                            search.location
+                        )
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.person &&
+                        search.person.files.indexOf(item.id) === -1
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.thing &&
+                        search.thing.files.indexOf(item.id) === -1
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.text &&
+                        search.text.files.indexOf(item.id) === -1
+                    ) {
+                        return false;
+                    }
+                    if (search?.files && search.files.indexOf(item.id) === -1) {
+                        return false;
+                    }
+                    return true;
+                }
+
+                // shared files can only be seen in their respective shared collection
+                if (isSharedFile(user, item)) {
+                    if (activeCollection === item.collectionID) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                // Archived files/collection files can only be seen in archive section or their respective collection
+                if (
+                    IsArchived(item) ||
+                    archivedCollections?.has(item.collectionID)
+                ) {
+                    if (
+                        activeCollection === ARCHIVE_SECTION ||
+                        activeCollection === item.collectionID
+                    ) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                // ALL SECTION - show all files
+                if (activeCollection === ALL_SECTION) {
+                    return true;
+                }
+
+                // COLLECTION SECTION - show files in the active collection
                 if (activeCollection === item.collectionID) {
                     return true;
                 } else {
                     return false;
                 }
-            }
-
-            // Archived files/collection files can only be seen in archive section or their respective collection
-            if (
-                IsArchived(item) ||
-                archivedCollections?.has(item.collectionID)
-            ) {
-                if (
-                    activeCollection === ARCHIVE_SECTION ||
-                    activeCollection === item.collectionID
-                ) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-            // ALL SECTION - show all files
-            if (activeCollection === ALL_SECTION) {
-                return true;
-            }
-
-            // COLLECTION SECTION - show files in the active collection
-            if (activeCollection === item.collectionID) {
-                return true;
-            } else {
-                return false;
-            }
-        });
-        const idSet = new Set();
-
-        const uniqueFiles = filteredFiles.filter((item) => {
-            if (idSet.has(item.id)) {
-                return false;
-            }
-            idSet.add(item.id);
-            return true;
-        });
-        return uniqueFiles;
+            })
+        );
     }, [
         files,
         deletedFileIds,
@@ -485,8 +486,8 @@ export default function Gallery() {
             !silent && startLoading();
             const collections = await syncCollections();
             setCollections(collections);
-            const files = await syncFiles(collections, setFiles);
-            await syncTrash(collections, files, setFiles);
+            await syncFiles(collections, setFiles);
+            await syncTrash(collections, setTrashedFiles);
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
@@ -540,9 +541,10 @@ export default function Gallery() {
         setSelected({ ownCount: 0, count: 0, collectionID: 0 });
     };
 
-    if (!files || !collectionSummaries) {
+    if (!files || !collectionSummaries || !filteredData) {
         return <div />;
     }
+
     const collectionOpsHelper =
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
             startLoading();
