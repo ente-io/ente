@@ -133,7 +133,7 @@ function PhotoViewer(props: Iprops) {
             switch (event.key) {
                 case 'i':
                 case 'I':
-                    setShowInfo(true);
+                    !props.isIncomingSharedCollection && setShowInfo(true);
                     break;
                 case 'Backspace':
                 case 'Delete':
@@ -663,18 +663,19 @@ function PhotoViewer(props: Iprops) {
                     </div>
                 </div>
             </div>
-            <FileInfo
-                isTrashCollection={props.isTrashCollection}
-                shouldDisableEdits={props.isIncomingSharedCollection}
-                showInfo={showInfo}
-                handleCloseInfo={handleCloseInfo}
-                file={photoSwipe?.currItem as EnteFile}
-                exif={exif?.value}
-                scheduleUpdate={scheduleUpdate}
-                refreshPhotoswipe={refreshPhotoswipe}
-                fileToCollectionsMap={props.fileToCollectionsMap}
-                collectionNameMap={props.collectionNameMap}
-            />
+            {!props.isIncomingSharedCollection && (
+                <FileInfo
+                    isTrashCollection={props.isTrashCollection}
+                    showInfo={showInfo}
+                    handleCloseInfo={handleCloseInfo}
+                    file={photoSwipe?.currItem as EnteFile}
+                    exif={exif?.value}
+                    scheduleUpdate={scheduleUpdate}
+                    refreshPhotoswipe={refreshPhotoswipe}
+                    fileToCollectionsMap={props.fileToCollectionsMap}
+                    collectionNameMap={props.collectionNameMap}
+                />
+            )}
         </>
     );
 }
