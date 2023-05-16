@@ -190,7 +190,7 @@ export default function Deduplicate() {
                 </VerticallyCentered>
             ) : (
                 <PhotoFrame
-                    files={duplicateFiles}
+                    displayFiles={duplicateFiles}
                     syncWithRemote={syncWithRemote}
                     setSelected={setSelected}
                     selected={selected}

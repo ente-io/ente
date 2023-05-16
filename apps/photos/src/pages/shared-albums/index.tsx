@@ -396,7 +396,7 @@ export default function PublicCollectionGallery() {
                     openUploader={openUploader}
                 />
                 <PhotoFrame
-                    files={publicFiles}
+                    displayFiles={publicFiles}
                     syncWithRemote={syncWithRemote}
                     setSelected={() => null}
                     selected={{ count: 0, collectionID: null, ownCount: 0 }}
