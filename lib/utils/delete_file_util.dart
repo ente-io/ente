@@ -3,7 +3,6 @@ import 'dart:io' as io;
 import 'dart:io';
 import 'dart:math';
 
-import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -25,6 +24,7 @@ import 'package:photos/ui/common/linear_progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import "package:photos/utils/device_info.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -330,15 +330,10 @@ Future<bool> deleteLocalFiles(
   }
   deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
 
-  if (Platform.isAndroid) {
-    final androidInfo = await DeviceInfoPlugin().androidInfo;
-    if (androidInfo.version.sdkInt < android11SDKINT) {
-      deletedIDs
-          .addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
-    } else {
-      deletedIDs
-          .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
-    }
+  final bool shouldDeleteInBatches =
+      await isAndroidSDKVersionLowerThan(android11SDKINT);
+  if (shouldDeleteInBatches) {
+    deletedIDs.addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
   } else {
     deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
   }

@@ -42,3 +42,12 @@ Future<bool> isLowSpecDevice() async {
   }
   return false;
 }
+
+Future<bool> isAndroidSDKVersionLowerThan(int inputSDK) async {
+  if (Platform.isAndroid) {
+    final AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+    return androidInfo.version.sdkInt < inputSDK;
+  } else {
+    return false;
+  }
+}
