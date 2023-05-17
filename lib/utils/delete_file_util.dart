@@ -337,6 +337,15 @@ Future<bool> deleteLocalFiles(
   } else {
     deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
   }
+  // In IOS, the library returns no error and fail to delete any file is
+  // there's any shared file. As a stop-gap solution, we initiate deletion in
+  // batches
+  if (Platform.isIOS && deletedIDs.isEmpty) {
+    deletedIDs.addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
+    _logger
+        .severe("iOS free-space fallback, deleted ${deletedIDs.length} files "
+            "in batches}");
+  }
   if (deletedIDs.isNotEmpty) {
     final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
     await FilesDB.instance.deleteLocalFiles(deletedIDs);
