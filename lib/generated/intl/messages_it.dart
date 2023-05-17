@@ -180,6 +180,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m37(email) => "Questo è l\'ID di verifica di ${email}";
 
+  static String m62(count) =>
+      "${Intl.plural(count, zero: '', one: '1 giorno', other: '${count} giorni')}";
+
   static String m38(email) => "Verifica ${email}";
 
   static String m39(email) =>
@@ -1194,6 +1197,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "total": MessageLookupByLibrary.simpleMessage("totale"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Dimensioni totali"),
         "trash": MessageLookupByLibrary.simpleMessage("Cestino"),
+        "trashDaysLeft": m62,
         "tryAgain": MessageLookupByLibrary.simpleMessage("Riprova"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "Attiva il backup per caricare automaticamente i file aggiunti in questa cartella del dispositivo su ente."),
