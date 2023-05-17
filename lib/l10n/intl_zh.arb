@@ -219,6 +219,16 @@
   "after1Month": "1个月后",
   "after1Year": "1 年后",
   "manageParticipants": "管理",
+  "albumParticipantsCount": "{count, plural, =0 {无参与者} =1 {1个参与者} other {{count} 个参与者}}",
+  "@albumParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    },
+    "description": "Number of participants in an album, including the album owner."
+  },
   "collabLinkSectionDescription": "创建一个链接以允许人们在您的共享相册中添加和查看照片，而无需应用程序或账户。 非常适合收集活动照片。",
   "collectPhotos": "收集照片",
   "collaborativeLink": "协作链接",
@@ -361,6 +371,10 @@
       "count": {
         "example": "1",
         "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
       }
     }
   },
@@ -721,6 +735,16 @@
   "referFriendsAnd2xYourPlan": "推荐朋友和 2 倍您的计划",
   "shareAlbumHint": "打开相册并点击右上角的分享按钮进行分享",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "项目显示永久删除前剩余的天数",
+  "trashDaysLeft": "{count, plural, =0 {} =1 {1天} other {{count} 天}}",
+  "@trashDaysLeft": {
+    "description": "Text to indicate number of days remaining before permanent deletion",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
   "deleteAll": "全部删除",
   "renameAlbum": "重命名相册",
   "rename": "重命名",
@@ -929,5 +953,34 @@
   "doYouWantToDiscardTheEditsYouHaveMade": "您想要放弃您所做的编辑吗？",
   "saving": "正在保存...",
   "editsSaved": "已保存编辑",
-  "oopsCouldNotSaveEdits": "糟糕，无法保存编辑"
+  "oopsCouldNotSaveEdits": "糟糕，无法保存编辑",
+  "distanceInKMUnit": "公里",
+  "@distanceInKMUnit": {
+    "description": "Unit for distance in km"
+  },
+  "dayToday": "今天",
+  "dayYesterday": "昨天",
+  "storage": "存储空间",
+  "usedSpace": "已用空间",
+  "storageBreakupFamily": "家庭",
+  "storageBreakupYou": "您",
+  "@storageBreakupYou": {
+    "description": "Label to indicate how much storage you are using when you are part of a family plan"
+  },
+  "storageUsageInfo": "已使用 {usedAmount} {usedStorageUnit} / {totalAmount} {totalStorageUnit}",
+  "@storageUsageInfo": {
+    "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
+  },
+  "freeStorageSpace": "{freeAmount} {storageUnit} 空闲",
+  "appVersion": "版本: {versionValue}",
+  "verifyIDLabel": "验证",
+  "fileInfoAddDescHint": "添加说明...",
+  "editLocationTagTitle": "编辑位置",
+  "setLabel": "设置",
+  "@setLabel": {
+    "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
+  },
+  "setRadius": "设定半径",
+  "familyPlanPortalTitle": "家庭",
+  "familyPlanOverview": "在您现有的计划中添加 5 名家庭成员，无需支付额外费用。\n\n每个成员都有自己的私人空间，除非共享，否则无法看到彼此的文件。\n\n家庭计划适用于付费订阅的客户。\n\n立即订阅以开始使用！"
 }
