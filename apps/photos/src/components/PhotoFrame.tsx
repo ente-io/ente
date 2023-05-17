@@ -6,7 +6,7 @@ import { styled } from '@mui/material';
 import DownloadManager from 'services/downloadManager';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoViewer from 'components/PhotoViewer';
-import { TRASH_SECTION } from 'constants/collection';
+import { HIDDEN_SECTION, TRASH_SECTION } from 'constants/collection';
 import { updateFileMsrcProps, updateFileSrcProps } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
 import { MergedSourceURL, SelectedState } from 'types/gallery';
@@ -497,6 +497,7 @@ const PhotoFrame = ({
                 setDeletedFileIds={setDeletedFileIds}
                 isIncomingSharedCollection={isIncomingSharedCollection}
                 isTrashCollection={activeCollection === TRASH_SECTION}
+                isHiddenCollection={activeCollection === HIDDEN_SECTION}
                 enableDownload={enableDownload}
                 isSourceLoaded={isSourceLoaded}
                 fileToCollectionsMap={fileToCollectionsMap}
