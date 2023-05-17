@@ -373,7 +373,7 @@ export default function Gallery() {
             !files ||
             !user ||
             !trashedFiles ||
-            hiddenFiles ||
+            !hiddenFiles ||
             !archivedCollections
         ) {
             return [];
