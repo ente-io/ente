@@ -114,7 +114,6 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                             backgroundColor:
                                 getEnteColorScheme(context).fillMuted,
                             mainAxisAlignment: MainAxisAlignment.center,
-                            rippleColor: Colors.white.withOpacity(0.1),
                             activeColor: Theme.of(context)
                                 .colorScheme
                                 .gNavBarActiveColor,

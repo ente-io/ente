@@ -78,7 +78,7 @@ class _GNavState extends State<GNav> {
     selectedIndex = widget.selectedIndex;
 
     return Container(
-      color: widget.backgroundColor ?? Colors.transparent,
+      color: widget.backgroundColor,
       child: Row(
         mainAxisAlignment: widget.mainAxisAlignment,
         children: widget.tabs!
@@ -101,10 +101,8 @@ class _GNavState extends State<GNav> {
                 iconColor: t.iconColor ?? widget.color,
                 iconSize: t.iconSize ?? widget.iconSize,
                 textColor: t.textColor ?? widget.activeColor,
-                rippleColor:
-                    t.rippleColor ?? widget.rippleColor ?? Colors.transparent,
-                hoverColor:
-                    t.hoverColor ?? widget.hoverColor ?? Colors.transparent,
+                rippleColor: t.rippleColor ?? widget.rippleColor,
+                hoverColor: t.hoverColor ?? widget.hoverColor,
                 padding: t.padding ?? widget.padding,
                 icon: t.icon,
                 haptic: widget.haptic ?? true,
@@ -112,9 +110,7 @@ class _GNavState extends State<GNav> {
                 curve: widget.curve ?? Curves.easeInCubic,
                 backgroundGradient:
                     t.backgroundGradient ?? widget.tabBackgroundGradient,
-                backgroundColor: t.backgroundColor ??
-                    widget.tabBackgroundColor ??
-                    Colors.transparent,
+                backgroundColor: t.backgroundColor ?? widget.tabBackgroundColor,
                 duration: widget.duration ?? const Duration(milliseconds: 500),
                 onPressed: () {
                   widget.onTabChange!(widget.tabs!.indexOf(t));

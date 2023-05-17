@@ -40,7 +40,9 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
       await routeToPage(
         context,
         ManageIndividualParticipant(
-            collection: widget.collection, user: _sharees.first!),
+          collection: widget.collection,
+          user: _sharees.first!,
+        ),
       );
     } else {
       await routeToPage(
