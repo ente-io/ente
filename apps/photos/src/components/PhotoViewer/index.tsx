@@ -617,14 +617,12 @@ function PhotoViewer(props: Iprops) {
                                 title={t('TOGGLE_FULLSCREEN')}
                             />
 
-                            {!props.isIncomingSharedCollection && (
-                                <button
-                                    className="pswp__button pswp__button--custom"
-                                    title={t('INFO_OPTION')}
-                                    onClick={handleOpenInfo}>
-                                    <InfoIcon fontSize="small" />
-                                </button>
-                            )}
+                            <button
+                                className="pswp__button pswp__button--custom"
+                                title={t('INFO_OPTION')}
+                                onClick={handleOpenInfo}>
+                                <InfoIcon fontSize="small" />
+                            </button>
                             {!props.isIncomingSharedCollection &&
                                 !props.isTrashCollection &&
                                 !props.isHiddenCollection && (
