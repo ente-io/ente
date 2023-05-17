@@ -54,16 +54,16 @@ export const getUpdateReadyToInstallMessage = (
     icon: <AutoAwesomeOutlinedIcon />,
     title: t('UPDATE_AVAILABLE'),
     content: t('UPDATE_INSTALLABLE_MESSAGE'),
+    proceed: {
+        action: () => ElectronUpdateService.updateAndRestart(),
+        text: t('INSTALL_NOW'),
+        variant: 'accent',
+    },
     close: {
         text: t('INSTALL_ON_NEXT_LAUNCH'),
         variant: 'secondary',
-        action: () => ElectronUpdateService.updateAndRestart(),
-    },
-    proceed: {
         action: () =>
             ElectronUpdateService.muteUpdateNotification(updateInfo.version),
-        text: t('INSTALL_NOW'),
-        variant: 'accent',
     },
 });
 
