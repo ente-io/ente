@@ -344,7 +344,7 @@ export default function Gallery() {
     }, [isInSearchMode, searchResultSummary]);
 
     const filteredData = useMemoSingleThreaded((): EnteFile[] => {
-        if (!files || !user || !trashedFiles) {
+        if (!files || !user || !trashedFiles || !archivedCollections) {
             return [];
         }
 
@@ -417,7 +417,7 @@ export default function Gallery() {
                 }
 
                 // archived collections files can only be seen in their respective collection
-                if (archivedCollections?.has(item.id)) {
+                if (archivedCollections.has(item.collectionID)) {
                     if (activeCollection === item.collectionID) {
                         return true;
                     } else {
@@ -460,6 +460,7 @@ export default function Gallery() {
         search?.thing,
         search?.text,
         activeCollection,
+        archivedCollections,
     ]);
 
     const fileToCollectionsMap = useMemoSingleThreaded(() => {
