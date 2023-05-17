@@ -735,6 +735,16 @@
   "referFriendsAnd2xYourPlan": "Verwijs vrienden en 2x uw abonnement",
   "shareAlbumHint": "Open een album en tik op de deelknop rechts bovenaan om te delen.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Bestanden tonen het aantal resterende dagen voordat ze permanent worden verwijderd",
+  "trashDaysLeft": "{count, plural, one {}=0 {} =1 {1 dag} other {{count} dagen}}",
+  "@trashDaysLeft": {
+    "description": "Text to indicate number of days remaining before permanent deletion",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
   "deleteAll": "Alles Verwijderen",
   "renameAlbum": "Albumnaam wijzigen",
   "rename": "Naam wijzigen",
