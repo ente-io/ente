@@ -50,8 +50,8 @@ interface Iprops {
     exif: any;
     scheduleUpdate: () => void;
     refreshPhotoswipe: () => void;
-    fileToCollectionsMap: Map<number, number[]>;
-    collectionNameMap: Map<number, string>;
+    fileToCollectionsMap?: Map<number, number[]>;
+    collectionNameMap?: Map<number, string>;
     isTrashCollection: boolean;
 }
 
@@ -259,7 +259,7 @@ export function FileInfo({
                             justifyContent={'flex-start'}
                             alignItems={'flex-start'}>
                             {fileToCollectionsMap
-                                .get(file.id)
+                                ?.get(file.id)
                                 ?.filter((collectionID) =>
                                     collectionNameMap.has(collectionID)
                                 )
