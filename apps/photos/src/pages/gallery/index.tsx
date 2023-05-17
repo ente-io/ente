@@ -369,7 +369,13 @@ export default function Gallery() {
     }, [isInSearchMode, searchResultSummary]);
 
     const filteredData = useMemoSingleThreaded((): EnteFile[] => {
-        if (!files || !user || !trashedFiles || !archivedCollections) {
+        if (
+            !files ||
+            !user ||
+            !trashedFiles ||
+            hiddenFiles ||
+            !archivedCollections
+        ) {
             return [];
         }
 
@@ -482,6 +488,7 @@ export default function Gallery() {
     }, [
         files,
         trashedFiles,
+        hiddenFiles,
         deletedFileIds,
         search,
         activeCollection,
