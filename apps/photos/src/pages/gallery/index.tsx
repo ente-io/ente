@@ -452,13 +452,9 @@ export default function Gallery() {
         );
     }, [
         files,
+        trashedFiles,
         deletedFileIds,
-        search?.date,
-        search?.files,
-        search?.location,
-        search?.person,
-        search?.thing,
-        search?.text,
+        search,
         activeCollection,
         archivedCollections,
     ]);
