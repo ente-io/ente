@@ -98,6 +98,7 @@
   "scan": "Сканировать",
   "scanACode": "Сканировать QR-код",
   "verify": "Подтвердить",
+  "verifyEmail": "Подтвердить электронную почту",
   "enterCodeHint": "Введите 6-значный код из\nвашего приложения-аутентификатора",
   "lostDeviceTitle": "Потеряно устройство?",
   "twoFactorAuthTitle": "Двухфакторная аутентификация",
@@ -173,6 +174,19 @@
   "privacyPolicyTitle": "Политика конфиденциальности",
   "termsOfServicesTitle": "Условия использования",
   "encryption": "Шифрование",
+  "setPasswordTitle": "Поставить пароль",
+  "changePasswordTitle": "Изменить пароль",
+  "resetPasswordTitle": "Сбросить пароль",
+  "encryptionKeys": "Ключи шифрования",
+  "passwordWarning": "Мы не храним этот пароль, поэтому если вы забудете его, <underline>мы не сможем расшифровать ваши данные</underline>",
+  "enterPasswordToEncrypt": "Введите пароль, который мы можем использовать для шифрования ваших данных",
+  "enterNewPasswordToEncrypt": "Введите новый пароль, который мы можем использовать для шифрования ваших данных",
+  "passwordChangedSuccessfully": "Пароль успешно изменён",
+  "generatingEncryptionKeys": "Генерируем ключи шифрования...",
+  "continueLabel": "Далее",
+  "insecureDevice": "Небезопасное устройство",
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "К сожалению, мы не смогли сгенерировать безопасные ключи на этом устройстве.\n\nПожалуйста, зарегистрируйтесь с другого устройства.",
+  "howItWorks": "Как это работает",
   "ackPasswordLostWarning": "Я понимаю, что если я потеряю свой пароль, я могу потерять свои данные, так как мои данные в <underline>сквозном шифровании</underline>.",
   "loginTerms": "Нажимая на логин, я принимаю <u-terms>условия использования</u-terms> и <u-policy>политику конфиденциальности</u-policy>",
   "logInLabel": "Войти",
@@ -228,5 +242,26 @@
   "sorry": "Извините",
   "importFailureDesc": "Не удалось разобрать выбранный файл.\nПожалуйста, напишите на support@ente.io, если вам нужна помощь!",
   "pendingSyncs": "Предупреждение",
-  "pendingSyncsWarningBody": "Некоторые из ваших кодов не были сохранены.\n\nПожалуйста, убедитесь, что у вас есть резервная копия для этих кодов перед выходом."
+  "pendingSyncsWarningBody": "Некоторые из ваших кодов не были сохранены.\n\nПожалуйста, убедитесь, что у вас есть резервная копия для этих кодов перед выходом.",
+  "checkInboxAndSpamFolder": "Пожалуйста, проверьте свой почтовый ящик (и спам) для завершения верификации",
+  "tapToEnterCode": "Нажмите, чтобы ввести код",
+  "resendEmail": "Отправить письмо еще раз",
+  "weHaveSendEmailTo": "Мы отправили письмо на <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "activeSessions": "Активные сеансы",
+  "somethingWentWrongPleaseTryAgain": "Что-то пошло не так. Попробуйте еще раз",
+  "thisWillLogYouOutOfThisDevice": "Вы выйдете из этого устройства!",
+  "thisWillLogYouOutOfTheFollowingDevice": "Вы выйдете из списка следующих устройств:",
+  "terminateSession": "Завершить сеанс?",
+  "terminate": "Завершить",
+  "thisDevice": "Это устройство"
 }
