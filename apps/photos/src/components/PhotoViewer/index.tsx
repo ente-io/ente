@@ -133,7 +133,7 @@ function PhotoViewer(props: Iprops) {
             switch (event.key) {
                 case 'i':
                 case 'I':
-                    !props.isIncomingSharedCollection && setShowInfo(true);
+                    setShowInfo(true);
                     break;
                 case 'Backspace':
                 case 'Delete':
@@ -371,18 +371,24 @@ function PhotoViewer(props: Iprops) {
     };
 
     const onFavClick = async (file: EnteFile) => {
-        if (!file) return;
-        const { favItemIds } = props;
-        if (!isInFav(file)) {
-            favItemIds.add(file.id);
-            addToFavorites(file);
-            setIsFav(true);
-        } else {
-            favItemIds.delete(file.id);
-            removeFromFavorites(file);
-            setIsFav(false);
+        try {
+            if (props.isTrashCollection || props.isIncomingSharedCollection) {
+                return;
+            }
+            const { favItemIds } = props;
+            if (!isInFav(file)) {
+                favItemIds.add(file.id);
+                addToFavorites(file);
+                setIsFav(true);
+            } else {
+                favItemIds.delete(file.id);
+                removeFromFavorites(file);
+                setIsFav(false);
+            }
+            needUpdate.current = true;
+        } catch (e) {
+            logError(e, 'onFavClick failed');
         }
-        needUpdate.current = true;
     };
 
     const trashFile = async (file: EnteFile) => {
@@ -663,19 +669,18 @@ function PhotoViewer(props: Iprops) {
                     </div>
                 </div>
             </div>
-            {!props.isIncomingSharedCollection && (
-                <FileInfo
-                    isTrashCollection={props.isTrashCollection}
-                    showInfo={showInfo}
-                    handleCloseInfo={handleCloseInfo}
-                    file={photoSwipe?.currItem as EnteFile}
-                    exif={exif?.value}
-                    scheduleUpdate={scheduleUpdate}
-                    refreshPhotoswipe={refreshPhotoswipe}
-                    fileToCollectionsMap={props.fileToCollectionsMap}
-                    collectionNameMap={props.collectionNameMap}
-                />
-            )}
+            <FileInfo
+                shouldDisableEdits={props.isIncomingSharedCollection}
+                isTrashCollection={props.isTrashCollection}
+                showInfo={showInfo}
+                handleCloseInfo={handleCloseInfo}
+                file={photoSwipe?.currItem as EnteFile}
+                exif={exif?.value}
+                scheduleUpdate={scheduleUpdate}
+                refreshPhotoswipe={refreshPhotoswipe}
+                fileToCollectionsMap={props.fileToCollectionsMap}
+                collectionNameMap={props.collectionNameMap}
+            />
         </>
     );
 }
