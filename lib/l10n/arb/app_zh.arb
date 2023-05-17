@@ -98,6 +98,7 @@
   "scan": "扫描",
   "scanACode": "扫描代码",
   "verify": "验证",
+  "verifyEmail": "验证电子邮件",
   "enterCodeHint": "从你的身份验证器应用中\n输入6位数字代码",
   "lostDeviceTitle": "丢失了设备吗？",
   "twoFactorAuthTitle": "双因素认证",
@@ -173,6 +174,19 @@
   "privacyPolicyTitle": "隐私政策",
   "termsOfServicesTitle": "使用条款",
   "encryption": "加密",
+  "setPasswordTitle": "设置密码",
+  "changePasswordTitle": "修改密码",
+  "resetPasswordTitle": "重置密码",
+  "encryptionKeys": "加密密钥",
+  "passwordWarning": "我们不储存这个密码，所以如果忘记， <underline>我们不能解密您的数据</underline>",
+  "enterPasswordToEncrypt": "输入我们可以用来加密您的数据的密码",
+  "enterNewPasswordToEncrypt": "输入我们可以用来加密您的数据的新密码",
+  "passwordChangedSuccessfully": "密码修改成功",
+  "generatingEncryptionKeys": "正在生成加密密钥...",
+  "continueLabel": "继续",
+  "insecureDevice": "设备不安全",
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "抱歉，我们无法在此设备上生成安全密钥。\n\n请使用其他设备注册。",
+  "howItWorks": "工作原理",
   "ackPasswordLostWarning": "我明白，如果我丢失密码，我可能会丢失我的数据，因为我的数据是 <underline>端到端加密的</underline>。",
   "loginTerms": "点击登录后，我同意 <u-terms>服务条款</u-terms> 和 <u-policy>隐私政策</u-policy>",
   "logInLabel": "登录",
@@ -228,5 +242,26 @@
   "sorry": "抱歉",
   "importFailureDesc": "无法解析选定的文件。\n如果您需要帮助，请写入support@ente.io！",
   "pendingSyncs": "警告",
-  "pendingSyncsWarningBody": "您的一些代码尚未备份。\n\n请确保您在退出登录之前备份这些代码。"
+  "pendingSyncsWarningBody": "您的一些代码尚未备份。\n\n请确保您在退出登录之前备份这些代码。",
+  "checkInboxAndSpamFolder": "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证",
+  "tapToEnterCode": "点击以输入代码",
+  "resendEmail": "重新发送电子邮件",
+  "weHaveSendEmailTo": "我们已经发送邮件到 <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "activeSessions": "已登录的设备",
+  "somethingWentWrongPleaseTryAgain": "出了点问题，请重试",
+  "thisWillLogYouOutOfThisDevice": "这将使您在此设备上退出登录！",
+  "thisWillLogYouOutOfTheFollowingDevice": "这将使您在以下设备中退出登录：",
+  "terminateSession": "是否终止会话？",
+  "terminate": "终止",
+  "thisDevice": "此设备"
 }
