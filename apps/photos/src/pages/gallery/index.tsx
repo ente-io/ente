@@ -209,6 +209,9 @@ export default function Gallery() {
     const [deletedFileIds, setDeletedFileIds] = useState<Set<number>>(
         new Set<number>()
     );
+    const [hiddenFileIds, setHiddenFileIds] = useState<Set<number>>(
+        new Set<number>()
+    );
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
         useContext(AppContext);
     const [collectionSummaries, setCollectionSummaries] =
@@ -380,7 +383,10 @@ export default function Gallery() {
         }
 
         if (activeCollection === HIDDEN_SECTION && !isInSearchMode) {
-            return hiddenFiles;
+            return getUniqueFiles([
+                ...hiddenFiles,
+                ...files.filter((file) => hiddenFileIds?.has(file.id)),
+            ]);
         }
 
         if (activeCollection === TRASH_SECTION && !isInSearchMode) {
@@ -393,6 +399,10 @@ export default function Gallery() {
         return getUniqueFiles(
             files.filter((item) => {
                 if (deletedFileIds?.has(item.id)) {
+                    return false;
+                }
+
+                if (hiddenFileIds?.has(item.id)) {
                     return false;
                 }
 
@@ -490,6 +500,7 @@ export default function Gallery() {
         trashedFiles,
         hiddenFiles,
         deletedFileIds,
+        hiddenFileIds,
         search,
         activeCollection,
         archivedCollections,
@@ -547,6 +558,7 @@ export default function Gallery() {
             }
         } finally {
             setDeletedFileIds(new Set());
+            setHiddenFileIds(new Set());
             !silent && finishLoading();
         }
         syncInProgress.current = false;
@@ -736,6 +748,10 @@ export default function Gallery() {
         try {
             // passing files here instead of filteredData because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(selected, files);
+            setHiddenFileIds((hiddenFileIds) => {
+                selectedFiles.forEach((file) => hiddenFileIds.add(file.id));
+                return new Set(hiddenFileIds);
+            });
             await moveToHiddenCollection(selectedFiles);
             clearSelection();
         } catch (e) {
