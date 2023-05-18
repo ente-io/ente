@@ -283,7 +283,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           return;
         }
         final screenWidth = MediaQuery.of(context).size.width;
-        final edgeWidth = screenWidth * 0.15; // 15% of screen width
+        final edgeWidth = screenWidth * 0.20; // 20% of screen width
         if (details.localPosition.dx < edgeWidth) {
           if (_index > 0) {
             _pageController!.previousPage(
