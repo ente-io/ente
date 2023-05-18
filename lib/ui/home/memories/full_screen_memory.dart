@@ -57,6 +57,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   @override
   Widget build(BuildContext context) {
+    _pageController ??= PageController(initialPage: _index);
     final file = widget.memories[_index].file;
     return Scaffold(
       appBar: AppBar(
@@ -139,6 +140,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _pageController?.dispose();
+    super.dispose();
   }
 
   Future<void> onFileDeleted(Memory removedMemory) async {
@@ -269,7 +276,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   Widget _buildSwiper() {
-    _pageController = PageController(initialPage: _index);
     return ExtentsPageView.extents(
       itemBuilder: (BuildContext context, int index) {
         if (index < widget.memories.length - 1) {
