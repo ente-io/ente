@@ -1212,3 +1212,22 @@ export async function moveToHiddenCollection(files: EnteFile[]) {
         throw e;
     }
 }
+
+export async function unhideToCollection(
+    collection: Collection,
+    files: EnteFile[]
+) {
+    try {
+        const groupiedFiles = groupFilesBasedOnCollectionID(files);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for (const [collectionID, files] of groupiedFiles.entries()) {
+            if (collectionID === collection.id) {
+                continue;
+            }
+            await moveToCollection(collectionID, collection, files);
+        }
+    } catch (e) {
+        logError(e, 'unhide to collection failed ');
+        throw e;
+    }
+}

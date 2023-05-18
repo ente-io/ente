@@ -991,6 +991,9 @@ export default function Gallery() {
                             restoreToCollectionHelper={collectionOpsHelper(
                                 COLLECTION_OPS_TYPE.RESTORE
                             )}
+                            unhideToCollectionHelper={collectionOpsHelper(
+                                COLLECTION_OPS_TYPE.UNHIDE
+                            )}
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }

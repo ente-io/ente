@@ -4,6 +4,7 @@ import {
     moveToCollection,
     removeFromCollection,
     restoreToCollection,
+    unhideToCollection,
     updateCollectionMagicMetadata,
 } from 'services/collectionService';
 import { downloadFiles } from 'utils/file';
@@ -42,6 +43,7 @@ export enum COLLECTION_OPS_TYPE {
     MOVE,
     REMOVE,
     RESTORE,
+    UNHIDE,
 }
 export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
@@ -65,6 +67,9 @@ export async function handleCollectionOps(
             break;
         case COLLECTION_OPS_TYPE.RESTORE:
             await restoreToCollection(collection, selectedFiles);
+            break;
+        case COLLECTION_OPS_TYPE.UNHIDE:
+            await unhideToCollection(collection, selectedFiles);
             break;
         default:
             throw Error(CustomError.INVALID_COLLECTION_OPERATION);

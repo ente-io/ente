@@ -32,6 +32,7 @@ interface Props {
     addToCollectionHelper: (collection: Collection) => void;
     moveToCollectionHelper: (collection: Collection) => void;
     restoreToCollectionHelper: (collection: Collection) => void;
+    unhideToCollectionHelper: (collection: Collection) => void;
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: (permanent?: boolean) => void;
@@ -57,6 +58,7 @@ const SelectedFileOptions = ({
     restoreToCollectionHelper,
     showCreateCollectionModal,
     removeFromCollectionHelper,
+    unhideToCollectionHelper,
     fixTimeHelper,
     setCollectionSelectorAttributes,
     deleteFileHelper,
@@ -143,10 +145,12 @@ const SelectedFileOptions = ({
         });
     };
 
-    const unhideFileHelper = () => {
+    const unhideToCollection = () => {
         setCollectionSelectorAttributes({
-            callback: moveToCollectionHelper,
-            showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
+            callback: unhideToCollectionHelper,
+            showNextModal: showCreateCollectionModal(
+                COLLECTION_OPS_TYPE.UNHIDE
+            ),
             title: t('UNHIDE_TO_COLLECTION'),
             fromCollection: activeCollection,
         });
@@ -233,7 +237,7 @@ const SelectedFileOptions = ({
                 ) : activeCollection === HIDDEN_SECTION ? (
                     <>
                         <Tooltip title={t('UNHIDE')}>
-                            <IconButton onClick={unhideFileHelper}>
+                            <IconButton onClick={unhideToCollection}>
                                 <VisibilityOutlined />
                             </IconButton>
                         </Tooltip>
