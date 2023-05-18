@@ -114,8 +114,6 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                         iconColor: enteColorScheme.tabIcon,
                         iconActiveColor: strokeBaseLight,
                         text: '',
-                        rippleColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
                         onPressed: () {
                           _onTabChange(
                             0,
@@ -129,8 +127,6 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                         iconColor: enteColorScheme.tabIcon,
                         iconActiveColor: strokeBaseLight,
                         text: '',
-                        rippleColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
                         onPressed: () {
                           _onTabChange(
                             1,
@@ -145,8 +141,6 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                         iconColor: enteColorScheme.tabIcon,
                         iconActiveColor: strokeBaseLight,
                         text: '',
-                        rippleColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
                         onPressed: () {
                           _onTabChange(
                             2,

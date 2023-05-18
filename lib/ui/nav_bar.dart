@@ -106,8 +106,10 @@ class _GNavState extends State<GNav> {
                 iconColor: t.iconColor ?? widget.color,
                 iconSize: t.iconSize ?? widget.iconSize,
                 textColor: t.textColor ?? widget.activeColor,
-                rippleColor: t.rippleColor ?? widget.rippleColor,
-                hoverColor: t.hoverColor ?? widget.hoverColor,
+                rippleColor:
+                    t.rippleColor ?? widget.rippleColor ?? Colors.transparent,
+                hoverColor:
+                    t.hoverColor ?? widget.hoverColor ?? Colors.transparent,
                 padding: t.padding ?? widget.padding,
                 icon: t.icon,
                 haptic: widget.haptic ?? true,
