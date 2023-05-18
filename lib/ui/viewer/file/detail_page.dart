@@ -87,6 +87,7 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void dispose() {
+    _pageController?.dispose();
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
@@ -140,6 +141,8 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget _buildPageView() {
     _logger.info("Building with " + _selectedIndex.toString());
+    // todo: perf.. fix this
+    _pageController?.dispose();
     _pageController = PageController(initialPage: _selectedIndex);
     return PageView.builder(
       itemBuilder: (context, index) {
