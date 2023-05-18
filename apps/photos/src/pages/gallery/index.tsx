@@ -734,7 +734,8 @@ export default function Gallery() {
     const hideFilesHelper = async () => {
         startLoading();
         try {
-            const selectedFiles = getSelectedFiles(selected, files, true);
+            // passing files here instead of filteredData because we want to move all files copies to hidden collection
+            const selectedFiles = getSelectedFiles(selected, files);
             await moveToHiddenCollection(selectedFiles);
             clearSelection();
         } catch (e) {

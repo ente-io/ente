@@ -147,28 +147,14 @@ function getSelectedFileIds(selectedFiles: SelectedState) {
             filesIDs.push(Number(key));
         }
     }
-    return filesIDs;
+    return new Set(filesIDs);
 }
 export function getSelectedFiles(
     selected: SelectedState,
-    files: EnteFile[],
-    includeAllCopies = false
+    files: EnteFile[]
 ): EnteFile[] {
-    const selectedFilesIDs = new Set(getSelectedFileIds(selected));
-    const foundFiles = new Set<number>();
-    const selectedFiles = files.filter((file) => {
-        if (selectedFilesIDs.has(file.id)) {
-            if (includeAllCopies) {
-                return true;
-            }
-            if (foundFiles.has(file.id)) {
-                return false;
-            }
-            foundFiles.add(file.id);
-            return true;
-        }
-    });
-    return selectedFiles;
+    const selectedFilesIDs = getSelectedFileIds(selected);
+    return files.filter((file) => selectedFilesIDs.has(file.id));
 }
 
 export function sortFiles(files: EnteFile[]) {
