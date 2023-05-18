@@ -384,7 +384,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
         const Align(
           alignment: Alignment.bottomCenter,
-          child: BottomShadowWidget(),
+          child: BottomShadowWidget(
+            offsetDy: 36,
+          ),
         ),
         Align(
           alignment: Alignment.bottomCenter,
