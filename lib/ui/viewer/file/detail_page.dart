@@ -77,16 +77,17 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void initState() {
+    super.initState();
     _files = [
       ...widget.config.files
     ]; // Make a copy since we append preceding and succeeding entries to this
     _selectedIndex = widget.config.selectedIndex;
     _preloadEntries();
-    super.initState();
   }
 
   @override
   void dispose() {
+    _pageController?.dispose();
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
@@ -140,6 +141,8 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget _buildPageView() {
     _logger.info("Building with " + _selectedIndex.toString());
+    // todo: perf.. fix this
+    _pageController?.dispose();
     _pageController = PageController(initialPage: _selectedIndex);
     return PageView.builder(
       itemBuilder: (context, index) {
