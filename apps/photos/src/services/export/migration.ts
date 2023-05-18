@@ -121,7 +121,7 @@ async function migrationV2ToV3(
         return;
     }
     const user: User = getData(LS_KEYS.USER);
-    const localFiles = await getLocalFiles();
+    const localFiles = mergeMetadata(await getLocalFiles());
     const personalFiles = getIDBasedSortedFiles(
         getPersonalFiles(localFiles, user)
     );
