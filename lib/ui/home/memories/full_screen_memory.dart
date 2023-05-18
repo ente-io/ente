@@ -3,6 +3,7 @@ import "dart:io";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import 'package:photos/models/file.dart';
 import "package:photos/models/memory.dart";
 import "package:photos/services/memories_service.dart";
 import "package:photos/theme/text_style.dart";
@@ -124,6 +125,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       ),
       extendBodyBehindAppBar: true,
       body: Container(
+        key: ValueKey(widget.memories.length),
         color: Colors.black,
         child: Stack(
           alignment: Alignment.bottomCenter,
@@ -138,18 +140,33 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     );
   }
 
-  void onFileDeleted() {
-    if (widget.memories.length == 1) {
-      Navigator.pop(context);
-    } else {
+  Future<void> onFileDeleted(Memory removedMemory) async {
+    if (!mounted) {
+      return;
+    }
+    final totalFiles = widget.memories.length;
+    if (totalFiles == 1) {
+      // Deleted the only file
+      Navigator.of(context).pop(); // Close pageview
+      return;
+    }
+    if (_index == totalFiles - 1) {
+      // Deleted the last file
+      await _pageController!.previousPage(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+      );
       setState(() {
-        if (_index != 0) {
-          _pageController?.jumpToPage(_index - 1);
-        }
-        widget.memories.removeAt(_index);
-        if (_index != 0) {
-          _index--;
-        }
+        widget.memories.remove(removedMemory);
+      });
+    } else {
+      await _pageController!.nextPage(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+      );
+      setState(() {
+        _index--;
+        widget.memories.remove(removedMemory);
       });
     }
   }
@@ -180,7 +197,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   Widget _buildBottomIcons() {
-    final file = widget.memories[_index].file;
+    final File currentFile = widget.memories[_index].file;
     return SafeArea(
       child: Container(
         alignment: Alignment.bottomCenter,
@@ -194,7 +211,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 color: Colors.white, //same for both themes
               ),
               onPressed: () {
-                showDetailsSheet(context, file);
+                showDetailsSheet(context, currentFile);
               },
             ),
             IconButton(
@@ -207,14 +224,15 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               onPressed: () async {
                 await showSingleFileDeleteSheet(
                   context,
-                  file,
-                  onFileRemoved: (file) => {onFileDeleted()},
+                  currentFile,
+                  onFileRemoved: (file) =>
+                      {onFileDeleted(widget.memories[_index])},
                 );
               },
             ),
             SizedBox(
               height: 32,
-              child: FavoriteWidget(file),
+              child: FavoriteWidget(currentFile),
             ),
             IconButton(
               icon: Icon(
@@ -222,7 +240,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 color: Colors.white, //same for both themes
               ),
               onPressed: () {
-                share(context, [file]);
+                share(context, [currentFile]);
               },
             ),
           ],
