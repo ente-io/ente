@@ -356,12 +356,10 @@ export function isExactTypeHEIC(exactType: string) {
 
 export async function changeFilesVisibility(
     files: EnteFile[],
-    selected: SelectedState,
     visibility: VISIBILITY_STATE
 ) {
-    const selectedFiles = getSelectedFiles(selected, files);
     const updatedFiles: EnteFile[] = [];
-    for (const file of selectedFiles) {
+    for (const file of files) {
         const updatedMagicMetadataProps: FileMagicMetadataProps = {
             visibility,
         };

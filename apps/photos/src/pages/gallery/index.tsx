@@ -345,7 +345,7 @@ export default function Gallery() {
 
     const filteredData = useMemoSingleThreaded((): EnteFile[] => {
         if (!files || !user || !trashedFiles || !archivedCollections) {
-            return [];
+            return;
         }
 
         if (activeCollection === TRASH_SECTION && !isInSearchMode) {
@@ -546,7 +546,7 @@ export default function Gallery() {
         setSelected({ ownCount: 0, count: 0, collectionID: 0 });
     };
 
-    if (!files || !collectionSummaries || !filteredData) {
+    if (!collectionSummaries || !filteredData) {
         return <div />;
     }
 
@@ -555,7 +555,7 @@ export default function Gallery() {
             startLoading();
             try {
                 setCollectionSelectorView(false);
-                const selectedFiles = getSelectedFiles(selected, files);
+                const selectedFiles = getSelectedFiles(selected, filteredData);
                 const toProcessFiles =
                     ops === COLLECTION_OPS_TYPE.REMOVE
                         ? selectedFiles
@@ -592,9 +592,9 @@ export default function Gallery() {
     ) => {
         startLoading();
         try {
+            const selectedFiles = getSelectedFiles(selected, filteredData);
             const updatedFiles = await changeFilesVisibility(
-                files,
-                selected,
+                selectedFiles,
                 visibility
             );
             await updateFileMagicMetadata(updatedFiles);
@@ -657,7 +657,7 @@ export default function Gallery() {
     const deleteFileHelper = async (permanent?: boolean) => {
         startLoading();
         try {
-            const selectedFiles = getSelectedFiles(selected, files);
+            const selectedFiles = getSelectedFiles(selected, filteredData);
             setDeletedFileIds((deletedFileIds) => {
                 selectedFiles.forEach((file) => deletedFileIds.add(file.id));
                 return new Set(deletedFileIds);
@@ -705,13 +705,13 @@ export default function Gallery() {
     };
 
     const fixTimeHelper = async () => {
-        const selectedFiles = getSelectedFiles(selected, files);
+        const selectedFiles = getSelectedFiles(selected, filteredData);
         setFixCreationTimeAttributes({ files: selectedFiles });
         clearSelection();
     };
 
     const downloadHelper = async () => {
-        const selectedFiles = getSelectedFiles(selected, files);
+        const selectedFiles = getSelectedFiles(selected, filteredData);
         clearSelection();
         startLoading();
         await downloadFiles(selectedFiles);
