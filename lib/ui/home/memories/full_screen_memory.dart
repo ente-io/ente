@@ -279,6 +279,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTapDown: (TapDownDetails details) {
+        if (_shouldDisableScroll) {
+          return;
+        }
         final screenWidth = MediaQuery.of(context).size.width;
         final edgeWidth = screenWidth * 0.15; // 15% of screen width
         if (details.localPosition.dx < edgeWidth) {
