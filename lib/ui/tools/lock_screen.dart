@@ -95,6 +95,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     try {
       _isShowingLockScreen = true;
       final result = await requestAuthentication(
+        context,
         S.of(context).authToViewYourMemories,
       );
       _isShowingLockScreen = false;

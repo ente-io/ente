@@ -183,6 +183,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m37(email) => "Dit is de verificatie-ID van ${email}";
 
+  static String m62(count) =>
+      "${Intl.plural(count, zero: '', one: '1 dag', other: '${count} dagen')}";
+
   static String m38(email) => "Verifieer ${email}";
 
   static String m39(email) =>
@@ -1196,6 +1199,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "total": MessageLookupByLibrary.simpleMessage("totaal"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Totale grootte"),
         "trash": MessageLookupByLibrary.simpleMessage("Prullenbak"),
+        "trashDaysLeft": m62,
         "tryAgain": MessageLookupByLibrary.simpleMessage("Probeer opnieuw"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "Schakel back-up in om bestanden die toegevoegd zijn aan deze map op dit apparaat automatisch te uploaden."),

@@ -17,7 +17,7 @@ class LocalAuthenticationService {
   ) async {
     if (await _isLocalAuthSupportedOnDevice()) {
       AppLock.of(context)!.setEnabled(false);
-      final result = await requestAuthentication(infoMessage);
+      final result = await requestAuthentication(context, infoMessage);
       AppLock.of(context)!.setEnabled(
         Configuration.instance.shouldShowLockScreen(),
       );
@@ -41,6 +41,7 @@ class LocalAuthenticationService {
     if (await _isLocalAuthSupportedOnDevice()) {
       AppLock.of(context)!.disable();
       final result = await requestAuthentication(
+        context,
         infoMessage,
       );
       if (result) {
