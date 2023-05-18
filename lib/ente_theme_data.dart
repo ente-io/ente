@@ -293,10 +293,6 @@ extension CustomColorScheme on ColorScheme {
       ? const Color.fromRGBO(196, 196, 196, 0.6)
       : const Color.fromRGBO(255, 255, 255, 0.7);
 
-  Color get gNavBarActiveColor => brightness == Brightness.light
-      ? const Color.fromRGBO(255, 255, 255, 0.6)
-      : const Color.fromRGBO(255, 255, 255, 0.9);
-
   Color get galleryThumbBackgroundColor => brightness == Brightness.light
       ? const Color.fromRGBO(240, 240, 240, 1)
       : const Color.fromRGBO(20, 20, 20, 1);

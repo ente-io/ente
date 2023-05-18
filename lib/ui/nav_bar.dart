@@ -2,6 +2,7 @@ library google_nav_bar;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:photos/theme/effects.dart";
 
 class GNav extends StatefulWidget {
   const GNav({
@@ -78,7 +79,11 @@ class _GNavState extends State<GNav> {
     selectedIndex = widget.selectedIndex;
 
     return Container(
-      color: widget.backgroundColor,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32),
+        color: widget.backgroundColor,
+        boxShadow: shadowMenuLight,
+      ),
       child: Row(
         mainAxisAlignment: widget.mainAxisAlignment,
         children: widget.tabs!
