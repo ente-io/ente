@@ -22,6 +22,7 @@ class EnteColorScheme {
   // Fill Colors
   final Color fillBase;
   final Color fillBasePressed;
+  final Color fillStrong;
   final Color fillMuted;
   final Color fillFaint;
   final Color fillFaintPressed;
@@ -69,6 +70,7 @@ class EnteColorScheme {
     this.blurTextBase,
     this.fillBase,
     this.fillBasePressed,
+    this.fillStrong,
     this.fillMuted,
     this.fillFaint,
     this.fillFaintPressed,
@@ -108,6 +110,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   blurTextBaseLight,
   fillBaseLight,
   fillBasePressedLight,
+  fillStrongLight,
   fillMutedLight,
   fillFaintLight,
   fillFaintPressedLight,
@@ -135,6 +138,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   blurTextBaseDark,
   fillBaseDark,
   fillBasePressedDark,
+  fillStrongDark,
   fillMutedDark,
   fillFaintDark,
   fillFaintPressedDark,
@@ -181,12 +185,14 @@ const Color blurTextBaseDark = Color.fromRGBO(255, 255, 255, 0.95);
 // Fill Colors
 const Color fillBaseLight = Color.fromRGBO(0, 0, 0, 1);
 const Color fillBasePressedLight = Color.fromRGBO(0, 0, 0, 0.87);
+const Color fillStrongLight = Color.fromRGBO(0, 0, 0, 0.48);
 const Color fillMutedLight = Color.fromRGBO(0, 0, 0, 0.12);
 const Color fillFaintLight = Color.fromRGBO(0, 0, 0, 0.04);
 const Color fillFaintPressedLight = Color.fromRGBO(0, 0, 0, 0.08);
 
 const Color fillBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color fillBasePressedDark = Color.fromRGBO(255, 255, 255, 0.9);
+const Color fillStrongDark = Color.fromRGBO(225, 225, 225, 0.64);
 const Color fillMutedDark = Color.fromRGBO(255, 255, 255, 0.16);
 const Color fillFaintDark = Color.fromRGBO(255, 255, 255, 0.12);
 const Color fillFaintPressedDark = Color.fromRGBO(255, 255, 255, 0.06);
@@ -217,6 +223,7 @@ const Color tabIconDark = Color.fromRGBO(255, 255, 255, 0.80);
 
 const Color fixedStrokeMutedWhite = Color.fromRGBO(255, 255, 255, 0.50);
 const Color strokeSolidMutedLight = Color.fromRGBO(147, 147, 147, 1);
+const Color strokeSolidFaintLight = Color.fromRGBO(221, 221, 221, 1);
 
 const Color _primary700 = Color.fromRGBO(0, 179, 60, 1);
 const Color _primary500 = Color.fromRGBO(29, 185, 84, 1);
