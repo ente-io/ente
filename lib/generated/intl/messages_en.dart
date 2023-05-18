@@ -243,8 +243,25 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Allow downloads"),
         "allowPeopleToAddPhotos":
             MessageLookupByLibrary.simpleMessage("Allow people to add photos"),
+        "androidBiometricHint":
+            MessageLookupByLibrary.simpleMessage("Verify identity"),
+        "androidBiometricNotRecognized":
+            MessageLookupByLibrary.simpleMessage("Not recognized. Try again."),
+        "androidBiometricRequiredTitle":
+            MessageLookupByLibrary.simpleMessage("Biometric required"),
+        "androidBiometricSuccess":
+            MessageLookupByLibrary.simpleMessage("Success"),
+        "androidCancelButton": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "androidDeviceCredentialsRequiredTitle":
+            MessageLookupByLibrary.simpleMessage("Device credentials required"),
+        "androidDeviceCredentialsSetupDescription":
+            MessageLookupByLibrary.simpleMessage("Device credentials required"),
+        "androidGoToSettingsDescription": MessageLookupByLibrary.simpleMessage(
+            "Biometric authentication is not set up on your device. Go to \'Settings > Security\' to add biometric authentication."),
         "androidIosWebDesktop":
             MessageLookupByLibrary.simpleMessage("Android, iOS, Web, Desktop"),
+        "androidSignInTitle":
+            MessageLookupByLibrary.simpleMessage("Authentication required"),
         "appVersion": m46,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Apply"),
@@ -628,6 +645,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "general": MessageLookupByLibrary.simpleMessage("General"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generating encryption keys..."),
+        "goToSettings": MessageLookupByLibrary.simpleMessage("Go to settings"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "grantPermission":
             MessageLookupByLibrary.simpleMessage("Grant permission"),
@@ -638,6 +656,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "howItWorks": MessageLookupByLibrary.simpleMessage("How it works"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
             "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match."),
+        "iOSGoToSettingsDescription": MessageLookupByLibrary.simpleMessage(
+            "Biometric authentication is not set up on your device. Please either enable Touch ID or Face ID on your phone."),
+        "iOSLockOut": MessageLookupByLibrary.simpleMessage(
+            "Biometric authentication is disabled. Please lock and unlock your screen to enable it."),
+        "iOSOkButton": MessageLookupByLibrary.simpleMessage("OK"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Some files in this album are ignored from upload because they had previously been deleted from ente."),
         "importing": MessageLookupByLibrary.simpleMessage("Importing...."),
