@@ -171,6 +171,15 @@ export const getComponents = (
             },
         },
     },
+    MuiModal: {
+        styleOverrides: {
+            root: {
+                '&:has(> div[style*="opacity: 0"])': {
+                    pointerEvents: 'none',
+                },
+            },
+        },
+    },
 });
 
 const getDropShadowStyle = (shadows: Shadow[]) => {
