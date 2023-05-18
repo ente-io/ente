@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:io";
 
 import "package:flutter/cupertino.dart";
@@ -294,7 +295,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       itemCount: widget.memories.length,
       controller: _pageController,
       onPageChanged: (index) async {
-        await MemoriesService.instance.markMemoryAsSeen(widget.memories[index]);
+        unawaited(
+          MemoriesService.instance.markMemoryAsSeen(widget.memories[index]),
+        );
         if (mounted) {
           setState(() {
             _index = index;
