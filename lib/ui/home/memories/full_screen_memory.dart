@@ -276,43 +276,68 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   Widget _buildSwiper() {
-    return ExtentsPageView.extents(
-      itemBuilder: (BuildContext context, int index) {
-        if (index < widget.memories.length - 1) {
-          final nextFile = widget.memories[index + 1].file;
-          preloadThumbnail(nextFile);
-          preloadFile(nextFile);
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTapDown: (TapDownDetails details) {
+        if (_shouldDisableScroll) {
+          return;
         }
-        final file = widget.memories[index].file;
-        return FileWidget(
-          file,
-          autoPlay: false,
-          tagPrefix: "memories",
-          shouldDisableScroll: (value) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        final edgeWidth = screenWidth * 0.20; // 20% of screen width
+        if (details.localPosition.dx < edgeWidth) {
+          if (_index > 0) {
+            _pageController!.previousPage(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.ease,
+            );
+          }
+        } else if (details.localPosition.dx > screenWidth - edgeWidth) {
+          if (_index < (widget.memories.length - 1)) {
+            _pageController!.nextPage(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.ease,
+            );
+          }
+        }
+      },
+      child: ExtentsPageView.extents(
+        itemBuilder: (BuildContext context, int index) {
+          if (index < widget.memories.length - 1) {
+            final nextFile = widget.memories[index + 1].file;
+            preloadThumbnail(nextFile);
+            preloadFile(nextFile);
+          }
+          final file = widget.memories[index].file;
+          return FileWidget(
+            file,
+            autoPlay: false,
+            tagPrefix: "memories",
+            shouldDisableScroll: (value) {
+              setState(() {
+                _shouldDisableScroll = value;
+              });
+            },
+            backgroundDecoration: const BoxDecoration(
+              color: Colors.transparent,
+            ),
+          );
+        },
+        itemCount: widget.memories.length,
+        controller: _pageController,
+        onPageChanged: (index) async {
+          unawaited(
+            MemoriesService.instance.markMemoryAsSeen(widget.memories[index]),
+          );
+          if (mounted) {
             setState(() {
-              _shouldDisableScroll = value;
+              _index = index;
             });
-          },
-          backgroundDecoration: const BoxDecoration(
-            color: Colors.transparent,
-          ),
-        );
-      },
-      itemCount: widget.memories.length,
-      controller: _pageController,
-      onPageChanged: (index) async {
-        unawaited(
-          MemoriesService.instance.markMemoryAsSeen(widget.memories[index]),
-        );
-        if (mounted) {
-          setState(() {
-            _index = index;
-          });
-        }
-      },
-      physics: _shouldDisableScroll
-          ? const NeverScrollableScrollPhysics()
-          : const PageScrollPhysics(),
+          }
+        },
+        physics: _shouldDisableScroll
+            ? const NeverScrollableScrollPhysics()
+            : const PageScrollPhysics(),
+      ),
     );
   }
 }
