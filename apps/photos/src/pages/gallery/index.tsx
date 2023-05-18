@@ -722,6 +722,7 @@ export default function Gallery() {
             }
             clearSelection();
         } catch (e) {
+            setDeletedFileIds(new Set());
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
@@ -755,6 +756,7 @@ export default function Gallery() {
             await moveToHiddenCollection(selectedFiles);
             clearSelection();
         } catch (e) {
+            setHiddenFileIds(new Set());
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
