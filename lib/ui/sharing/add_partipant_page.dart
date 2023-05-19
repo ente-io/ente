@@ -309,6 +309,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     final List<User> suggestedUsers = [];
     final Set<String> existingEmails = {};
     final int ownerID = Configuration.instance.getUserID()!;
+    existingEmails.add(Configuration.instance.getEmail()!);
     for (final User? u in widget.collection.sharees ?? []) {
       if (u != null && u.id != null && u.email.isNotEmpty) {
         existingEmails.add(u.email);
