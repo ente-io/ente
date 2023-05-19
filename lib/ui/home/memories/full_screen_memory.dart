@@ -144,7 +144,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   @override
   void dispose() {
-    _pageController?.dispose();
+    debugPrint("FullScreenMemoryDisposed");
+    // _pageController?.dispose();
+    _pageController = null;
     super.dispose();
   }
 
@@ -160,22 +162,19 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     }
     if (_index == totalFiles - 1) {
       // Deleted the last file
+      widget.memories.remove(removedMemory);
       await _pageController!.previousPage(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       );
-      setState(() {
-        widget.memories.remove(removedMemory);
-      });
+      setState(() {});
     } else {
+      widget.memories.remove(removedMemory);
       await _pageController!.nextPage(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       );
-      setState(() {
-        _index--;
-        widget.memories.remove(removedMemory);
-      });
+      setState(() {});
     }
   }
 
@@ -276,6 +275,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   Widget _buildSwiper() {
+    debugPrint(
+      "FullScreenbuildSwiper: $_index and total ${widget.memories.length}",
+    );
+    _pageController = PageController(initialPage: _index);
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTapDown: (TapDownDetails details) {
@@ -313,6 +316,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
             autoPlay: false,
             tagPrefix: "memories",
             shouldDisableScroll: (value) {
+              if (value == _shouldDisableScroll) {
+                return;
+              }
               setState(() {
                 _shouldDisableScroll = value;
               });
@@ -329,6 +335,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
             MemoriesService.instance.markMemoryAsSeen(widget.memories[index]),
           );
           if (mounted) {
+            debugPrint(
+              "FullScreenonPageChanged: $index and total ${widget.memories.length}",
+            );
             setState(() {
               _index = index;
             });
