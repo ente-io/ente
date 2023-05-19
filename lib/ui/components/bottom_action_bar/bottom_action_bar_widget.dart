@@ -6,7 +6,7 @@ import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/theme/effects.dart';
+import "package:photos/theme/effects.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/bottom_action_bar/action_bar_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -42,63 +42,61 @@ class BottomActionBarWidget extends StatelessWidget {
     final double leftRightPadding = widthOfScreen > restrictedMaxWidth
         ? (widthOfScreen - restrictedMaxWidth) / 2
         : 0;
-    return ClipRRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blurFaint, sigmaY: blurFaint),
-        child: Container(
-          color: colorScheme.backdropBase,
-          padding: EdgeInsets.only(
-            top: 4,
-            bottom: hasSmallerBottomPadding ? 24 : 36,
-            right: leftRightPadding,
-            left: leftRightPadding,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ExpandableNotifier(
-                controller: _expandableController,
-                child: ExpandablePanel(
-                  theme: _getExpandableTheme(),
-                  header: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: text == null ? 12 : 0,
-                    ),
-                    child: ActionBarWidget(
-                      selectedFiles: selectedFiles,
-                      galleryType: type,
-                      text: text,
-                      iconButtons: _iconButtons(context),
-                    ),
-                  ),
-                  expanded: expandedMenu,
-                  collapsed: const SizedBox.shrink(),
-                  controller: _expandableController,
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated,
+        boxShadow: shadowFloatFaintLight,
+      ),
+      padding: EdgeInsets.only(
+        top: 4,
+        bottom: hasSmallerBottomPadding ? 24 : 36,
+        right: leftRightPadding,
+        left: leftRightPadding,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ExpandableNotifier(
+            controller: _expandableController,
+            child: ExpandablePanel(
+              theme: _getExpandableTheme(),
+              header: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: text == null ? 12 : 0,
+                ),
+                child: ActionBarWidget(
+                  selectedFiles: selectedFiles,
+                  galleryType: type,
+                  text: text,
+                  iconButtons: _iconButtons(context),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    onCancel?.call();
-                    _expandableController.value = false;
-                  },
-                  child: Center(
-                    child: Text(
-                      S.of(context).cancel,
-                      style: textTheme.bodyBold
-                          .copyWith(color: colorScheme.blurTextBase),
-                    ),
-                  ),
-                ),
-              )
-            ],
+              expanded: expandedMenu,
+              collapsed: const SizedBox.shrink(),
+              controller: _expandableController,
+            ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                onCancel?.call();
+                _expandableController.value = false;
+              },
+              child: Center(
+                child: Text(
+                  S.of(context).cancel,
+                  style: textTheme.bodyBold
+                      .copyWith(color: colorScheme.blurTextBase),
+                ),
+              ),
+            ),
+          )
+        ],
       ),
     );
   }
