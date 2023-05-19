@@ -1,4 +1,4 @@
-Ente è una semplice app per il backup e la condivisione di foto e video.
+Ente è una app per il backup e la condivisione di foto e video.
 
 Se siete alla ricerca di un'alternativa rispettosa della privacy a Google Photos, siete nel posto giusto. Con ente, sono memorizzati con crittografia end-to-end (e2ee). Questo significa che solo tu puoi vederli.
 
