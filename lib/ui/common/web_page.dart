@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import "package:logging/logging.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import "package:url_launcher/url_launcher_string.dart";
 
 class WebPage extends StatefulWidget {
   final String title;
   final String url;
 
-  const WebPage(this.title, this.url, {Key? key}) : super(key: key);
+  // if true, show open in browser  icon in appBar
+  final bool canOpenInBrowser;
+
+  const WebPage(
+    this.title,
+    this.url, {
+    Key? key,
+    this.canOpenInBrowser = false,
+  }) : super(key: key);
 
   @override
   State<WebPage> createState() => _WebPageState();
@@ -14,6 +24,7 @@ class WebPage extends StatefulWidget {
 
 class _WebPageState extends State<WebPage> {
   bool _hasLoadedPage = false;
+  final Logger _logger = Logger('_WebPageState');
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +35,29 @@ class _WebPageState extends State<WebPage> {
         foregroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(widget.title),
-        actions: [_hasLoadedPage ? Container() : const EnteLoadingWidget()],
+        actions: [
+          _hasLoadedPage
+              ? (widget.canOpenInBrowser
+                  ? IconButton(
+                      icon: const Icon(Icons.open_in_browser_outlined),
+                      color: Colors.white,
+                      onPressed: () {
+                        try {
+                          launchUrlString(
+                            widget.url,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        } catch (e) {
+                          _logger.severe("Failed to pop web page", e);
+                        }
+                      },
+                    )
+                  : const SizedBox.shrink())
+              : const EnteLoadingWidget(
+                  color: Colors.white,
+                  padding: 12,
+                )
+        ],
       ),
       backgroundColor: Colors.black,
       body: InAppWebView(
