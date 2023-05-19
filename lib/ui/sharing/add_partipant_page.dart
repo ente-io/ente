@@ -307,25 +307,29 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   List<User> _getSuggestedUser() {
     final List<User> suggestedUsers = [];
-    final Set<int> existingUserIDs = {};
+    final Set<String> existingEmails = {};
     final int ownerID = Configuration.instance.getUserID()!;
     for (final User? u in widget.collection.sharees ?? []) {
-      if (u != null && u.id != null) {
-        existingUserIDs.add(u.id!);
+      if (u != null && u.id != null && u.email.isNotEmpty) {
+        existingEmails.add(u.email);
       }
     }
     for (final c in CollectionsService.instance.getActiveCollections()) {
       if (c.owner?.id == ownerID) {
         for (final User? u in c.sharees ?? []) {
-          if (u != null && u.id != null && !existingUserIDs.contains(u.id)) {
-            existingUserIDs.add(u.id!);
+          if (u != null &&
+              u.id != null &&
+              u.email.isNotEmpty &&
+              !existingEmails.contains(u.email)) {
+            existingEmails.add(u.email);
             suggestedUsers.add(u);
           }
         }
       } else if (c.owner != null &&
           c.owner!.id != null &&
-          !existingUserIDs.contains(c.owner!.id!)) {
-        existingUserIDs.add(c.owner!.id!);
+          c.owner!.email.isNotEmpty &&
+          !existingEmails.contains(c.owner!.email)) {
+        existingEmails.add(c.owner!.email);
         suggestedUsers.add(c.owner!);
       }
     }
