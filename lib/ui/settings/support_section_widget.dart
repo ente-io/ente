@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -59,14 +58,10 @@ class SupportSectionWidget extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  final endpoint = Configuration.instance.getHttpEndpoint() +
-                      "/users/roadmap";
-                  final url = Configuration.instance.isLoggedIn()
-                      ? endpoint +
-                          "?token=" +
-                          Configuration.instance.getToken()!
-                      : roadmapURL;
-                  return WebPage(S.of(context).suggestFeatures, url);
+                  return WebPage(
+                    S.of(context).suggestFeatures,
+                    githubIssuesUrl,
+                  );
                 },
               ),
             );
