@@ -4,6 +4,7 @@ import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/user_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -307,26 +308,41 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   List<User> _getSuggestedUser() {
     final List<User> suggestedUsers = [];
-    final Set<int> existingUserIDs = {};
+    final Set<String> existingEmails = {};
     final int ownerID = Configuration.instance.getUserID()!;
+    existingEmails.add(Configuration.instance.getEmail()!);
     for (final User? u in widget.collection.sharees ?? []) {
-      if (u != null && u.id != null) {
-        existingUserIDs.add(u.id!);
+      if (u != null && u.id != null && u.email.isNotEmpty) {
+        existingEmails.add(u.email);
       }
     }
     for (final c in CollectionsService.instance.getActiveCollections()) {
       if (c.owner?.id == ownerID) {
         for (final User? u in c.sharees ?? []) {
-          if (u != null && u.id != null && !existingUserIDs.contains(u.id)) {
-            existingUserIDs.add(u.id!);
+          if (u != null &&
+              u.id != null &&
+              u.email.isNotEmpty &&
+              !existingEmails.contains(u.email)) {
+            existingEmails.add(u.email);
             suggestedUsers.add(u);
           }
         }
       } else if (c.owner != null &&
           c.owner!.id != null &&
-          !existingUserIDs.contains(c.owner!.id!)) {
-        existingUserIDs.add(c.owner!.id!);
+          c.owner!.email.isNotEmpty &&
+          !existingEmails.contains(c.owner!.email)) {
+        existingEmails.add(c.owner!.email);
         suggestedUsers.add(c.owner!);
+      }
+    }
+    final cachedUserDetails = UserService.instance.getCachedUserDetails();
+    if (cachedUserDetails != null &&
+        (cachedUserDetails.familyData?.members?.isNotEmpty ?? false)) {
+      for (final member in cachedUserDetails.familyData!.members!) {
+        if (!existingEmails.contains(member.email)) {
+          existingEmails.add(member.email);
+          suggestedUsers.add(User(email: member.email));
+        }
       }
     }
     if (_textController.text.trim().isNotEmpty) {
