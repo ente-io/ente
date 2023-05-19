@@ -4,6 +4,7 @@ import "dart:io";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
+import "package:photos/core/configuration.dart";
 import 'package:photos/models/file.dart';
 import "package:photos/models/memory.dart";
 import "package:photos/services/memories_service.dart";
@@ -37,12 +38,14 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   bool _showStepIndicator = true;
   PageController? _pageController;
   bool _shouldDisableScroll = false;
+  late int currentUserID;
   final GlobalKey shareButtonKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     _index = widget.index;
+    currentUserID = Configuration.instance.getUserID() ?? 0;
     _showStepIndicator = widget.memories.length <= 60;
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
@@ -205,52 +208,61 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   Widget _buildBottomIcons() {
     final File currentFile = widget.memories[_index].file;
+    final List<Widget> rowChildren = [
+      IconButton(
+        icon: Icon(
+          Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
+          color: Colors.white, //same for both themes
+        ),
+        onPressed: () {
+          showDetailsSheet(context, currentFile);
+        },
+      ),
+    ];
+    if (currentFile.ownerID == null || currentUserID == currentFile.ownerID) {
+      rowChildren.addAll(
+        [
+          IconButton(
+            icon: Icon(
+              Platform.isAndroid ? Icons.delete_outline : CupertinoIcons.delete,
+              color: Colors.white, //same for both themes
+            ),
+            onPressed: () async {
+              await showSingleFileDeleteSheet(
+                context,
+                currentFile,
+                onFileRemoved: (file) =>
+                    {onFileDeleted(widget.memories[_index])},
+              );
+            },
+          ),
+          SizedBox(
+            height: 32,
+            child: FavoriteWidget(currentFile),
+          ),
+        ],
+      );
+    }
+
+    rowChildren.add(
+      IconButton(
+        icon: Icon(
+          Icons.adaptive.share,
+          color: Colors.white, //same for both themes
+        ),
+        onPressed: () {
+          share(context, [currentFile]);
+        },
+      ),
+    );
+
     return SafeArea(
       child: Container(
         alignment: Alignment.bottomCenter,
-        padding: const EdgeInsets.fromLTRB(26, 0, 26, 20),
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: Icon(
-                Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
-                color: Colors.white, //same for both themes
-              ),
-              onPressed: () {
-                showDetailsSheet(context, currentFile);
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Platform.isAndroid
-                    ? Icons.delete_outline
-                    : CupertinoIcons.delete,
-                color: Colors.white, //same for both themes
-              ),
-              onPressed: () async {
-                await showSingleFileDeleteSheet(
-                  context,
-                  currentFile,
-                  onFileRemoved: (file) =>
-                      {onFileDeleted(widget.memories[_index])},
-                );
-              },
-            ),
-            SizedBox(
-              height: 32,
-              child: FavoriteWidget(currentFile),
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.adaptive.share,
-                color: Colors.white, //same for both themes
-              ),
-              onPressed: () {
-                share(context, [currentFile]);
-              },
-            ),
-          ],
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: rowChildren,
         ),
       ),
     );
