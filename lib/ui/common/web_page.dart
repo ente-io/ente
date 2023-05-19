@@ -53,7 +53,10 @@ class _WebPageState extends State<WebPage> {
                       },
                     )
                   : const SizedBox.shrink())
-              : const EnteLoadingWidget()
+              : const EnteLoadingWidget(
+                  color: Colors.white,
+                  padding: 12,
+                )
         ],
       ),
       backgroundColor: Colors.black,
