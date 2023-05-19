@@ -837,14 +837,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_typeahead:
-    dependency: "direct main"
-    description:
-      name: flutter_typeahead
-      sha256: "73eb76fa640ea630e2d957e7b469ab2b91e4da6c4950d6032fab7009275637b7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.3.3"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
