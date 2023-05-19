@@ -23,7 +23,7 @@ This repository contains the code for our mobile apps, built with a lot of ‚ù§Ô∏
 - Image editor
 - EXIF viewer
 - Ability to free up disk space by deleting backed up photos
-- Support for Live Photos
+- Support for Live & Motion photos
 - Recycle bin
 - 2FA
 - Lockscreen
