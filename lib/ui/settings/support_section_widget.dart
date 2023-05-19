@@ -61,6 +61,7 @@ class SupportSectionWidget extends StatelessWidget {
                   return WebPage(
                     S.of(context).suggestFeatures,
                     githubIssuesUrl,
+                    canOpenInBrowser: true,
                   );
                 },
               ),
