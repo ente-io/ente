@@ -126,21 +126,22 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                       "Toggling device folder sync status to "
                       "${!shouldBackup.value}",
                     );
-                    await RemoteSyncService.instance
-                        .updateDeviceFolderSyncStatus(
-                      {widget.deviceCollection.id: !shouldBackup.value},
-                    ).then(
-                      (val) {
+                    try {
+                      await RemoteSyncService.instance
+                          .updateDeviceFolderSyncStatus(
+                        {widget.deviceCollection.id: !shouldBackup.value},
+                      );
+                      if (mounted) {
                         setState(() {
                           shouldBackup.value = !shouldBackup.value;
                         });
-                      },
-                      onError: (e) {
-                        Logger("BackupHeaderWidget").severe(
-                          "Could not update device folder sync status",
-                        );
-                      },
-                    );
+                      }
+                    } catch (e) {
+                      _logger.severe(
+                        "Could not update device folder sync status",
+                        e,
+                      );
+                    }
                   },
                 ),
               ),
