@@ -92,6 +92,7 @@ class BackupHeaderWidget extends StatefulWidget {
 class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   late Future<List<File>> filesInDeviceCollection;
   late ValueNotifier<bool> shouldBackup;
+  final Logger _logger = Logger("_BackupHeaderWidgetState");
   @override
   void initState() {
     shouldBackup = ValueNotifier(widget.deviceCollection.shouldBackup);
@@ -121,6 +122,10 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                 trailingWidget: ToggleSwitchWidget(
                   value: () => shouldBackup.value,
                   onChanged: () async {
+                    _logger.fine(
+                      "Toggling device folder sync status to "
+                      "${!shouldBackup.value}",
+                    );
                     await RemoteSyncService.instance
                         .updateDeviceFolderSyncStatus(
                       {widget.deviceCollection.id: !shouldBackup.value},
