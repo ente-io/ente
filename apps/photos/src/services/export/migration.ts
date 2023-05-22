@@ -315,9 +315,8 @@ async function getFileExportNamesFromExportedFiles(
                 usedFilePaths
             );
         }
-        addLocalLog(
-            () =>
-                `file export name for ${file.metadata.title} is ${fileExportName}`
+        addLogLine(
+            `file export name for ${file.metadata.title} is ${fileExportName}`
         );
         exportedFileNames = {
             ...exportedFileNames,
