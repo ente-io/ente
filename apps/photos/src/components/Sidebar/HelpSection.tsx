@@ -17,7 +17,7 @@ export default function HelpSection() {
     const { setDialogMessage } = useContext(AppContext);
     const { openExportModal } = useContext(GalleryContext);
 
-    async function openRoadmapURL() {
+    async function openRoadmap() {
         let roadmapURL: string;
         if (isElectron()) {
             roadmapURL = DESKTOP_ROADMAP_URL;
@@ -38,7 +38,7 @@ export default function HelpSection() {
     return (
         <>
             <EnteMenuItem
-                onClick={openRoadmapURL}
+                onClick={openRoadmap}
                 label={t('REQUEST_FEATURE')}
                 variant="secondary"
             />
