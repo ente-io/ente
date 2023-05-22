@@ -170,11 +170,12 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                         bottom: Platform.isIOS ? 60 : 32,
                       ),
                 child: OutlinedButton(
-                  onPressed: _selectedDevicePathIDs.isEmpty
-                      ? null
-                      : () async {
-                          await updateFolderSettings();
-                        },
+                  onPressed:
+                      widget.isOnboarding && _selectedDevicePathIDs.isEmpty
+                          ? null
+                          : () async {
+                              await updateFolderSettings();
+                            },
                   child: Text(widget.buttonText),
                 ),
               ),
