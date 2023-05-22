@@ -38,6 +38,7 @@ import { FILE_TYPE } from 'constants/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import downloadManager from 'services/downloadManager';
 import { retryAsyncFunction } from 'utils/network';
+import { sleep } from 'utils/common';
 
 export async function migrateExport(
     exportDir: string,
@@ -279,6 +280,7 @@ async function getFileExportNamesFromExportedFiles(
         exportRecord.exportedCollectionPaths
     );
     for (const file of exportedFiles) {
+        await sleep(0);
         const collectionPath = exportedCollectionPaths.get(file.collectionID);
         addLocalLog(
             () =>
