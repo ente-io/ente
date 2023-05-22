@@ -72,90 +72,92 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
+    final isBottomInsetPresent = MediaQuery.of(context).viewPadding.bottom != 0;
+    final bottomPadding = isBottomInsetPresent ? 32.0 : 8.0;
     final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
     final enteColorScheme = getEnteColorScheme(context);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      height: filesAreSelected ? 0 : 56,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 100),
-        opacity: filesAreSelected ? 0.0 : 1.0,
-        curve: Curves.easeIn,
+    return RepaintBoundary(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 3000),
+        curve: Curves.easeInOut,
+        height: filesAreSelected ? 0 : (56 + bottomPadding),
         child: IgnorePointer(
           ignoring: filesAreSelected,
-          child: ListView(
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  GNav(
-                    curve: Curves.easeOutExpo,
-                    backgroundColor:
-                        getEnteColorScheme(context).backgroundElevated2,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    iconSize: 24,
-                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                    duration: const Duration(milliseconds: 200),
-                    gap: 0,
-                    tabBorderRadius: 32,
-                    tabBackgroundColor:
-                        MediaQuery.of(context).platformBrightness ==
-                                Brightness.light
-                            ? strokeFainterLight
-                            : strokeSolidFaintLight,
-                    haptic: false,
-                    tabs: [
-                      GButton(
-                        margin: const EdgeInsets.fromLTRB(8, 6, 10, 6),
-                        icon: Icons.home_rounded,
-                        iconColor: enteColorScheme.tabIcon,
-                        iconActiveColor: strokeBaseLight,
-                        text: '',
-                        onPressed: () {
-                          _onTabChange(
-                            0,
-                            mode: "OnPressed",
-                          ); // To take care of occasional missing events
-                        },
-                      ),
-                      GButton(
-                        margin: const EdgeInsets.fromLTRB(10, 6, 10, 6),
-                        icon: Icons.collections_rounded,
-                        iconColor: enteColorScheme.tabIcon,
-                        iconActiveColor: strokeBaseLight,
-                        text: '',
-                        onPressed: () {
-                          _onTabChange(
-                            1,
-                            mode: "OnPressed",
-                          ); // To take care of occasional missing
-                          // events
-                        },
-                      ),
-                      GButton(
-                        margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
-                        icon: Icons.people_outlined,
-                        iconColor: enteColorScheme.tabIcon,
-                        iconActiveColor: strokeBaseLight,
-                        text: '',
-                        onPressed: () {
-                          _onTabChange(
-                            2,
-                            mode: "OnPressed",
-                          ); // To take care
-                          // of occasional missing events
-                        },
-                      ),
-                    ],
-                    selectedIndex: currentTabIndex,
-                    onTabChange: _onTabChange,
-                  ),
-                ],
-              ),
-            ],
+          child: Padding(
+            padding: EdgeInsets.only(bottom: bottomPadding),
+            child: ListView(
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GNav(
+                      curve: Curves.easeOutExpo,
+                      backgroundColor:
+                          getEnteColorScheme(context).backgroundElevated2,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      iconSize: 24,
+                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+                      duration: const Duration(milliseconds: 200),
+                      gap: 0,
+                      tabBorderRadius: 32,
+                      tabBackgroundColor:
+                          MediaQuery.of(context).platformBrightness ==
+                                  Brightness.light
+                              ? strokeFainterLight
+                              : strokeSolidFaintLight,
+                      haptic: false,
+                      tabs: [
+                        GButton(
+                          margin: const EdgeInsets.fromLTRB(8, 6, 10, 6),
+                          icon: Icons.home_rounded,
+                          iconColor: enteColorScheme.tabIcon,
+                          iconActiveColor: strokeBaseLight,
+                          text: '',
+                          onPressed: () {
+                            _onTabChange(
+                              0,
+                              mode: "OnPressed",
+                            ); // To take care of occasional missing events
+                          },
+                        ),
+                        GButton(
+                          margin: const EdgeInsets.fromLTRB(10, 6, 10, 6),
+                          icon: Icons.collections_rounded,
+                          iconColor: enteColorScheme.tabIcon,
+                          iconActiveColor: strokeBaseLight,
+                          text: '',
+                          onPressed: () {
+                            _onTabChange(
+                              1,
+                              mode: "OnPressed",
+                            ); // To take care of occasional missing
+                            // events
+                          },
+                        ),
+                        GButton(
+                          margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
+                          icon: Icons.people_outlined,
+                          iconColor: enteColorScheme.tabIcon,
+                          iconActiveColor: strokeBaseLight,
+                          text: '',
+                          onPressed: () {
+                            _onTabChange(
+                              2,
+                              mode: "OnPressed",
+                            ); // To take care
+                            // of occasional missing events
+                          },
+                        ),
+                      ],
+                      selectedIndex: currentTabIndex,
+                      onTabChange: _onTabChange,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
