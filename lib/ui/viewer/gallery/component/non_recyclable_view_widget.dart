@@ -42,7 +42,7 @@ class _NonRecyclableViewWidgetState extends State<NonRecyclableViewWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_shouldRender!) {
+    if (!_shouldRender) {
       return VisibilityDetector(
         key: Key("gallery" + widget.filesInDay.first.tag),
         onVisibilityChanged: (visibility) {

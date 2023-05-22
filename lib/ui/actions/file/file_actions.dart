@@ -26,7 +26,7 @@ Future<void> showSingleFileDeleteSheet(
       file.uploadedFileID != null && file.localID != null;
   final bool isLocalOnly = file.uploadedFileID == null && file.localID != null;
   final bool isRemoteOnly = file.uploadedFileID != null && file.localID == null;
-  String bodyHighlight = S.of(context).singleFileDeleteHighlight;
+  final String bodyHighlight = S.of(context).singleFileDeleteHighlight;
   String body = "";
   if (isBothLocalAndRemote) {
     body = S.of(context).singleFileInBothLocalAndRemote(fileType);
