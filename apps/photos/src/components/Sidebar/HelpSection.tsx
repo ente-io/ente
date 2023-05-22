@@ -11,15 +11,20 @@ import { openLink } from 'utils/common';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
-import { REDIRECTS, getRedirectURL } from 'constants/redirects';
+import { DESKTOP_ROADMAP_URL, WEB_ROADMAP_URL } from 'constants/urls';
 
 export default function HelpSection() {
     const { setDialogMessage } = useContext(AppContext);
     const { openExportModal } = useContext(GalleryContext);
 
     async function openRoadmapURL() {
-        const roadmapRedirectURL = getRedirectURL(REDIRECTS.ROADMAP);
-        openLink(roadmapRedirectURL, true);
+        let roadmapURL: string;
+        if (isElectron()) {
+            roadmapURL = DESKTOP_ROADMAP_URL;
+        } else {
+            roadmapURL = WEB_ROADMAP_URL;
+        }
+        openLink(roadmapURL, true);
     }
 
     function handleExportOpen() {
