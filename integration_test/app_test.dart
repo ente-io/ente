@@ -24,7 +24,7 @@ void main() {
       final emailInputField = find.byKey(const ValueKey("emailInputField"));
       final logInButton = find.byKey(const ValueKey("logInButton"));
       await tester.tap(emailInputField);
-      await tester.pumpAndSettle(const Duration(seconds: 20));
+      await tester.pumpAndSettle(const Duration(seconds: 12));
       await findAndTapFAB(tester, logInButton);
 
       //Need to enter OTT manually and clicks the verify button automatically
