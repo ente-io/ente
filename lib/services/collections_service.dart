@@ -92,7 +92,7 @@ class CollectionsService {
 
   // sync method fetches just sync the collections, not the individual files
   // within the collection.
-  Future<List<Collection>> sync() async {
+  Future<void> sync() async {
     _logger.info("Syncing collections");
     final EnteWatch watch = EnteWatch("syncCollection")..start();
     final lastCollectionUpdationTime =
@@ -152,7 +152,6 @@ class CollectionsService {
         ),
       );
     }
-    return collections;
   }
 
   void clearCache() {
