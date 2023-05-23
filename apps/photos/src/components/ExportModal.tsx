@@ -29,7 +29,6 @@ import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
 import LinkButton from './pages/gallery/LinkButton';
 import { CustomError } from 'utils/error';
-import { formatNumber } from 'utils/number/format';
 import { addLogLine } from 'utils/logging';
 
 const ExportFolderPathContainer = styled(LinkButton)`
@@ -212,14 +211,6 @@ export default function ExportModal(props: Props) {
                     continuousExport={continuousExport}
                     toggleContinuousExport={toggleContinuousExport}
                 />
-                <SpaceBetweenFlex minHeight={'48px'} pr={'16px'}>
-                    <Typography color="text.muted">
-                        {t('TOTAL_ITEMS')}
-                    </Typography>
-                    <Typography>
-                        {formatNumber(fileExportStats.totalCount)}
-                    </Typography>
-                </SpaceBetweenFlex>
             </DialogContent>
             <Divider />
             <ExportDynamicContent
