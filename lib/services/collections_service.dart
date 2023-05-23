@@ -23,6 +23,7 @@ import 'package:photos/extensions/list.dart';
 import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/public_url.dart";
+import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
 import 'package:photos/models/collection_items.dart';

@@ -3,6 +3,7 @@ import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';

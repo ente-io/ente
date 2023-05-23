@@ -6,6 +6,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';
+import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/files_split.dart';

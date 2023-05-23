@@ -1,8 +1,8 @@
-import 'dart:convert';
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
 import "package:photos/models/api/collection/public_url.dart";
+import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/magic_metadata.dart';
 
 class Collection {
@@ -278,42 +278,4 @@ class CollectionAttributes {
       version: map['version'] ?? 0,
     );
   }
-}
-
-class User {
-  int? id;
-  String email;
-  String? name;
-  String? role;
-
-  User({
-    this.id,
-    required this.email,
-    this.name,
-    this.role,
-  });
-
-  bool get isViewer => role == null || role?.toUpperCase() == 'VIEWER';
-
-  bool get isCollaborator =>
-      role != null && role?.toUpperCase() == 'COLLABORATOR';
-
-  Map<String, dynamic> toMap() {
-    return {'id': id, 'email': email, 'name': name, 'role': role};
-  }
-
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
-
-    return User(
-      id: map['id'],
-      email: map['email'],
-      name: map['name'],
-      role: map['role'] ?? 'VIEWER',
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory User.fromJson(String source) => User.fromMap(json.decode(source));
 }

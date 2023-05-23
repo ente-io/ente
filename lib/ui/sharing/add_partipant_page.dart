@@ -2,6 +2,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/user_service.dart";
