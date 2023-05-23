@@ -794,8 +794,7 @@ class CollectionsService {
       final Collection? cachedCollection =
           _collectionIDToCollections[_localPathToCollectionID[path]];
       if (cachedCollection != null &&
-          !cachedCollection.isDeleted &&
-          cachedCollection.owner?.id == _config.getUserID()) {
+          cachedCollection.canLinkToDevicePath(_config.getUserID()!)) {
         return cachedCollection;
       }
     }
@@ -1130,9 +1129,7 @@ class CollectionsService {
     final String decryptedName = _getDecryptedCollectionName(collection);
     collection.name = decryptedName;
     collection.decryptedName = decryptedName;
-    if (collection.attributes.encryptedPath != null &&
-        !collection.isDeleted &&
-        collection.owner?.id == _config.getUserID()) {
+    if (collection.canLinkToDevicePath(_config.getUserID()!)) {
       _localPathToCollectionID[_decryptCollectionPath(collection)] =
           collection.id;
     }

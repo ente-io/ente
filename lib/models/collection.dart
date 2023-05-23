@@ -101,6 +101,13 @@ class Collection {
     return (owner?.id ?? 0) == userID;
   }
 
+  // canLinkToDevicePath returns true if the collection can be linked to local
+  // device album based on path. The path is nothing but the name of the device
+  // album.
+  bool canLinkToDevicePath(int userID) {
+    return isOwner(userID) && !isDeleted && attributes.encryptedPath != null;
+  }
+
   void updateSharees(List<User> newSharees) {
     sharees?.clear();
     sharees?.addAll(newSharees);
