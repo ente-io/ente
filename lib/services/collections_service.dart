@@ -390,18 +390,18 @@ class CollectionsService {
 
   Future<void> _turnOffDeviceFolderSync(Collection collection) async {
     final deviceCollections = await _filesDB.getDeviceCollections();
-    final Map<String, bool> deivcePathIDsToUnsync = Map.fromEntries(
+    final Map<String, bool> devicePathIDsToUnSync = Map.fromEntries(
       deviceCollections
           .where((e) => e.shouldBackup && e.collectionID == collection.id)
           .map((e) => MapEntry(e.id, false)),
     );
 
-    if (deivcePathIDsToUnsync.isNotEmpty) {
+    if (devicePathIDsToUnSync.isNotEmpty) {
       _logger.info(
-        'turning off backup status for folders $deivcePathIDsToUnsync',
+        'turning off backup status for folders $devicePathIDsToUnSync',
       );
       await RemoteSyncService.instance
-          .updateDeviceFolderSyncStatus(deivcePathIDsToUnsync);
+          .updateDeviceFolderSyncStatus(devicePathIDsToUnSync);
     }
   }
 
