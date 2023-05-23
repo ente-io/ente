@@ -30,7 +30,6 @@ const createItemData = memoize((items, clickHandler) => ({
 // Consider using React.memo or shouldComponentUpdate to avoid unnecessary re-renders.
 // https://reactjs.org/docs/react-api.html#reactmemo
 // https://reactjs.org/docs/react-api.html#reactpurecomponent
-
 const AllCollectionRow = React.memo(
     ({ data, index, style, isScrolling }: any) => {
         const { items, onCollectionClick } = data;
@@ -60,7 +59,7 @@ export default function AllCollectionContent({
     const refreshInProgress = useRef(false);
     const shouldRefresh = useRef(false);
 
-    const [allCollectionListItem, setAllCollectionListItem] = useState([]);
+    const [collectionRowList, setCollectionRowList] = useState([]);
 
     const windowSize = useWindowSize();
 
@@ -75,29 +74,24 @@ export default function AllCollectionContent({
             }
             refreshInProgress.current = true;
 
-            const allCollectionListItem: CollectionSummary[][] = [];
+            const collectionRowList: CollectionSummary[][] = [];
             let index = 0;
             const columns =
                 windowSize.width > AllCollectionMobileBreakpoint
                     ? DesktopColumns
                     : MobileColumns;
             while (index < collectionSummaries.length) {
-                const collectionSummariesRow: CollectionSummary[] = [];
-
+                const collectionRow: CollectionSummary[] = [];
                 for (
                     let i = 0;
                     i < columns && index < collectionSummaries.length;
                     i++
                 ) {
-                    const collectionSummary = collectionSummaries[index];
-                    if (collectionSummary) {
-                        collectionSummariesRow.push(collectionSummary);
-                        index++;
-                    }
+                    collectionRow.push(collectionSummaries[index++]);
                 }
-                allCollectionListItem.push(collectionSummariesRow);
+                collectionRowList.push(collectionRow);
             }
-            setAllCollectionListItem(allCollectionListItem);
+            setCollectionRowList(collectionRowList);
             refreshInProgress.current = false;
             if (shouldRefresh.current) {
                 shouldRefresh.current = false;
@@ -110,14 +104,14 @@ export default function AllCollectionContent({
     // Bundle additional data to list items using the "itemData" prop.
     // It will be accessible to item renderers as props.data.
     // Memoize this data to avoid bypassing shouldComponentUpdate().
-    const itemData = createItemData(allCollectionListItem, onCollectionClick);
+    const itemData = createItemData(collectionRowList, onCollectionClick);
 
     return (
         <DialogContent>
             <List
                 height={windowSize.height ?? 0}
                 width={'100%'}
-                itemCount={allCollectionListItem.length}
+                itemCount={collectionRowList.length}
                 itemSize={154}
                 itemData={itemData}>
                 {AllCollectionRow}
