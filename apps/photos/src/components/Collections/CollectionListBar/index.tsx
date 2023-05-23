@@ -12,7 +12,11 @@ import { AppContext } from 'pages/_app';
 import { CollectionSummary } from 'types/collection';
 import CollectionSort from '../AllCollections/CollectionSort';
 import { t } from 'i18next';
-import { FixedSizeList as List, areEqual } from 'react-window';
+import {
+    FixedSizeList as List,
+    ListChildComponentProps,
+    areEqual,
+} from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import memoize from 'memoize-one';
 import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
@@ -28,29 +32,42 @@ interface IProps {
     setCollectionSortBy: (v: COLLECTION_SORT_BY) => void;
 }
 
+interface ItemData {
+    collectionSummaries: CollectionSummary[];
+    activeCollection?: number;
+    onCollectionClick: (id?: number) => void;
+}
+
 const CollectionListBarCardWidth = 94;
 
-const createItemData = memoize((items, activeCollection, clickHandler) => ({
-    items,
-    activeCollection,
-    clickHandler,
-}));
+const createItemData = memoize(
+    (collectionSummaries, activeCollection, onCollectionClick) => ({
+        collectionSummaries,
+        activeCollection,
+        onCollectionClick,
+    })
+);
 
 const CollectionCardContainer = React.memo(
-    ({ data, index, style, isScrolling }: any) => {
-        const { items, activeCollection, clickHandler } = data;
-        const item = items[index];
+    ({
+        data,
+        index,
+        style,
+        isScrolling,
+    }: ListChildComponentProps<ItemData>) => {
+        const { collectionSummaries, activeCollection, onCollectionClick } =
+            data;
+
+        const collectionSummary = collectionSummaries[index];
 
         return (
             <div style={style}>
                 <CollectionListBarCard
+                    key={collectionSummary.id}
+                    activeCollection={activeCollection}
                     isScrolling={isScrolling}
-                    key={item.id}
-                    latestFile={item.latestFile}
-                    active={activeCollection === item.id}
-                    onClick={clickHandler(item.id)}
-                    collectionType={item.type}
-                    collectionName={item.name}
+                    collectionSummary={collectionSummary}
+                    onCollectionClick={onCollectionClick}
                 />
             </div>
         );
@@ -92,14 +109,14 @@ const CollectionListBar = (props: IProps) => {
         collectionListRef.current.scrollToItem(activeCollectionIndex, 'smart');
     }, [activeCollection]);
 
-    const clickHandler = (collectionID?: number) => () => {
+    const onCollectionClick = (collectionID?: number) => {
         setActiveCollection(collectionID ?? ALL_SECTION);
     };
 
     const itemData = createItemData(
         collectionSummaries,
         activeCollection,
-        clickHandler
+        onCollectionClick
     );
 
     return (

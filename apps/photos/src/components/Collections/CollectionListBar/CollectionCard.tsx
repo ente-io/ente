@@ -1,5 +1,4 @@
 import React from 'react';
-import { EnteFile } from 'types/file';
 import {
     ActiveIndicator,
     CollectionBarTile,
@@ -14,26 +13,30 @@ import Favorite from '@mui/icons-material/FavoriteRounded';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import PeopleIcon from '@mui/icons-material/People';
 import LinkIcon from '@mui/icons-material/Link';
+import { CollectionSummary } from 'types/collection';
 
 interface Iprops {
-    active: boolean;
-    latestFile: EnteFile;
-    collectionName: string;
-    collectionType: CollectionSummaryType;
-    onClick: () => void;
+    collectionSummary: CollectionSummary;
+    activeCollection: number;
+    onCollectionClick: (collectionID: number) => void;
     isScrolling?: boolean;
 }
 
 const CollectionListBarCard = (props: Iprops) => {
-    const { active, collectionName, collectionType, ...others } = props;
+    const { activeCollection, collectionSummary, onCollectionClick } = props;
 
     return (
         <Box>
-            <CollectionCard collectionTile={CollectionBarTile} {...others}>
-                <CollectionCardText collectionName={collectionName} />
-                <CollectionCardIcon collectionType={collectionType} />
+            <CollectionCard
+                collectionTile={CollectionBarTile}
+                latestFile={collectionSummary.latestFile}
+                onClick={() => {
+                    onCollectionClick(collectionSummary.id);
+                }}>
+                <CollectionCardText collectionName={collectionSummary.name} />
+                <CollectionCardIcon collectionType={collectionSummary.type} />
             </CollectionCard>
-            {active && <ActiveIndicator />}
+            {activeCollection === collectionSummary.id && <ActiveIndicator />}
         </Box>
     );
 };

@@ -3,7 +3,11 @@ import { DialogContent } from '@mui/material';
 import { FlexWrapper } from 'components/Container';
 import AllCollectionCard from './collectionCard';
 import { CollectionSummary } from 'types/collection';
-import { FixedSizeList as List, areEqual } from 'react-window';
+import {
+    FixedSizeList as List,
+    ListChildComponentProps,
+    areEqual,
+} from 'react-window';
 import memoize from 'memoize-one';
 import useWindowSize from 'hooks/useWindowSize';
 import { AllCollectionMobileBreakpoint } from './dialog';
@@ -16,14 +20,19 @@ interface Iprops {
     onCollectionClick: (id?: number) => void;
 }
 
+interface ItemData {
+    collectionRowList: CollectionSummary[][];
+    onCollectionClick: (id?: number) => void;
+}
+
 // This helper function memoizes incoming props,
 // To avoid causing unnecessary re-renders pure Row components.
 // This is only needed since we are passing multiple props with a wrapper object.
 // If we were only passing a single, stable value (e.g. items),
 // We could just pass the value directly.
-const createItemData = memoize((items, clickHandler) => ({
-    items,
-    clickHandler,
+const createItemData = memoize((collectionRowList, onCollectionClick) => ({
+    collectionRowList,
+    onCollectionClick,
 }));
 
 //If list items are expensive to render,
@@ -31,13 +40,18 @@ const createItemData = memoize((items, clickHandler) => ({
 // https://reactjs.org/docs/react-api.html#reactmemo
 // https://reactjs.org/docs/react-api.html#reactpurecomponent
 const AllCollectionRow = React.memo(
-    ({ data, index, style, isScrolling }: any) => {
-        const { items, onCollectionClick } = data;
-        const item = items[index];
+    ({
+        data,
+        index,
+        style,
+        isScrolling,
+    }: ListChildComponentProps<ItemData>) => {
+        const { collectionRowList, onCollectionClick } = data;
+        const collectionRow = collectionRowList[index];
         return (
             <div style={style}>
                 <FlexWrapper gap={0.5}>
-                    {item.map((item: any) => (
+                    {collectionRow.map((item: any) => (
                         <AllCollectionCard
                             isScrolling={isScrolling}
                             onCollectionClick={onCollectionClick}
