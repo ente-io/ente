@@ -9,7 +9,6 @@ import { EnteFile } from 'types/file';
 import { splitFilenameAndExtension } from 'utils/ffmpeg';
 import { getExportRecordFileUID, sanitizeName } from '.';
 import exportService from 'services/export';
-import { addLogLine } from 'utils/logging';
 
 export const convertCollectionIDFolderPathObjectToMap = (
     exportedCollectionPaths: ExportedCollectionPaths
@@ -127,9 +126,6 @@ export const getUniqueFileExportNameForMigration = (
             .get(collectionPath)
             ?.has(getFileSavePath(collectionPath, fileExportName))
     ) {
-        addLogLine(
-            `File with name ${fileExportName} already exists in collection ${collectionPath}.`
-        );
         const filenameParts = splitFilenameAndExtension(sanitizeName(filename));
         if (filenameParts[1]) {
             fileExportName = `${filenameParts[0]}(${count}).${filenameParts[1]}`;
