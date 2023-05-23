@@ -734,6 +734,10 @@ class CollectionsService {
         collection.mMdEncodedJson ?? '{}',
       );
     }
+    collection.setName(_getDecryptedCollectionName(collection));
+    if (collection.canLinkToDevicePath(_config.getUserID()!)) {
+      collection.decryptedPath = (_decryptCollectionPath(collection));
+    }
     return collection;
   }
 
@@ -772,7 +776,7 @@ class CollectionsService {
       final collectionData = response.data["collection"];
       final collection = await _fromRemoteCollection(collectionData);
       await _db.insert(List.from([collection]));
-      _cacheCollectionAttributes(collection);
+      _cacheLocalPathAndCollection(collection);
       return collection;
     } catch (e) {
       if (e is DioError && e.response?.statusCode == 401) {
@@ -1101,7 +1105,7 @@ class CollectionsService {
         .then((response) async {
       final collectionData = response.data["collection"];
       final collection = await _fromRemoteCollection(collectionData);
-      return _cacheCollectionAttributes(collection);
+      return _cacheLocalPathAndCollection(collection);
     });
   }
 
