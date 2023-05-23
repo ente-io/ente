@@ -69,4 +69,4 @@ function CollectionCardIcon({ collectionType }) {
     );
 }
 
-export default React.memo(CollectionListBarCard);
+export default CollectionListBarCard;

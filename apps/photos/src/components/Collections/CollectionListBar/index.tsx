@@ -1,5 +1,5 @@
 import ScrollButton from 'components/Collections/CollectionListBar/ScrollButton';
-import React, { memo, useContext, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
 import { Box, IconButton, Typography } from '@mui/material';
 import {
@@ -178,4 +178,4 @@ const CollectionListBar = (props: IProps) => {
     );
 };
 
-export default memo(CollectionListBar);
+export default CollectionListBar;
