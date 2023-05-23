@@ -37,7 +37,7 @@ const createItemData = memoize((items, activeCollection, clickHandler) => ({
     clickHandler,
 }));
 
-const CollectionCardContainer = React.memo(({ data, index, style }: any) => {
+const CollectionCardContainer = ({ data, index, style }: any) => {
     const { items, activeCollection, clickHandler } = data;
     const item = items[index];
 
@@ -53,7 +53,7 @@ const CollectionCardContainer = React.memo(({ data, index, style }: any) => {
             />
         </div>
     );
-});
+};
 
 const CollectionListBar = (props: IProps) => {
     const {
