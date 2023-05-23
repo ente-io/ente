@@ -128,10 +128,14 @@ class ExportService {
         }
     }
 
-    async runMigration(exportDir: string, exportRecord: ExportRecord) {
+    async runMigration(
+        exportDir: string,
+        exportRecord: ExportRecord,
+        updateProgress: (progress: ExportProgress) => void
+    ) {
         try {
             addLogLine('running migration');
-            await migrateExport(exportDir, exportRecord);
+            await migrateExport(exportDir, exportRecord, updateProgress);
             addLogLine('migration completed');
         } catch (e) {
             logError(e, 'migration failed');
@@ -281,14 +285,24 @@ class ExportService {
 
     async preExport(exportFolder: string) {
         this.verifyExportFolderExists(exportFolder);
+        const exportRecord = await this.getExportRecord(exportFolder);
+        await this.updateExportStage(ExportStage.MIGRATION);
+        this.updateExportProgress({
+            success: 0,
+            failed: 0,
+            total: 0,
+        });
+        await this.runMigration(
+            exportFolder,
+            exportRecord,
+            this.updateExportProgress.bind(this)
+        );
         await this.updateExportStage(ExportStage.INPROGRESS);
         this.updateExportProgress({
             success: 0,
             failed: 0,
             total: 0,
         });
-        const exportRecord = await this.getExportRecord(exportFolder);
-        await this.runMigration(exportFolder, exportRecord);
     }
 
     async postExport() {
