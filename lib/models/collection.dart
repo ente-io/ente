@@ -42,6 +42,12 @@ class Collection {
 
   String get displayName => decryptedName ?? name ?? "Unnamed Album";
 
+  // set the value for both name and decryptedName till we finish migration
+  void setName(String newName) {
+    name = newName;
+    decryptedName = newName;
+  }
+
   Collection(
     this.id,
     this.owner,

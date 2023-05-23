@@ -534,7 +534,7 @@ class CollectionsService {
           "nameDecryptionNonce": CryptoUtil.bin2base64(encryptedName.nonce!)
         },
       );
-      // trigger sync to fetch the latest name from server
+      collection.setName(newName);
       sync().ignore();
     } catch (e, s) {
       _logger.severe("failed to rename collection", e, s);
@@ -1105,13 +1105,26 @@ class CollectionsService {
     });
   }
 
+  @Deprecated("Use _cacheLocalPathAndCollection instead")
   Collection _cacheCollectionAttributes(Collection collection) {
     final String decryptedName = _getDecryptedCollectionName(collection);
-    collection.name = decryptedName;
-    collection.decryptedName = decryptedName;
+    collection.setName(decryptedName);
     if (collection.canLinkToDevicePath(_config.getUserID()!)) {
       _localPathToCollectionID[_decryptCollectionPath(collection)] =
           collection.id;
+    }
+    _collectionIDToCollections[collection.id] = collection;
+    return collection;
+  }
+
+  Collection _cacheLocalPathAndCollection(Collection collection) {
+    assert(
+      collection.decryptedName != null,
+      "decryptedName should be already set",
+    );
+    if (collection.canLinkToDevicePath(_config.getUserID()!) &&
+        (collection.decryptedPath ?? '').isNotEmpty) {
+      _localPathToCollectionID[collection.decryptedPath!] = collection.id;
     }
     _collectionIDToCollections[collection.id] = collection;
     return collection;
@@ -1145,11 +1158,6 @@ class CollectionsService {
   }
 
   String _getDecryptedCollectionName(Collection collection) {
-    if (collection.decryptedName != null &&
-        collection.decryptedName!.isNotEmpty) {
-      return collection.decryptedName!;
-    }
-
     if (collection.isDeleted) {
       return "Deleted Album";
     }
