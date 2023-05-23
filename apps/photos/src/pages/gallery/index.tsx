@@ -412,16 +412,7 @@ export default function Gallery() {
             files,
             archivedCollections
         );
-
-        const csa = collectionSummaries.entries();
-        const csad = [];
-        for (const [key, value] of csa) {
-            for (let i = 0; i < 60; i++) {
-                csad.push([key + i * 1000, { ...value, id: key + i * 1000 }]);
-            }
-        }
-        const csadMap = new Map(csad);
-        setCollectionSummaries(csadMap);
+        setCollectionSummaries(collectionSummaries);
         const hasNoPersonalFiles = files.every(
             (file) => file.ownerID !== user.id
         );
