@@ -16,10 +16,20 @@ interface Iprops {
     onCollectionClick: (id?: number) => void;
 }
 
+// This helper function memoizes incoming props,
+// To avoid causing unnecessary re-renders pure Row components.
+// This is only needed since we are passing multiple props with a wrapper object.
+// If we were only passing a single, stable value (e.g. items),
+// We could just pass the value directly.
 const createItemData = memoize((items, clickHandler) => ({
     items,
     clickHandler,
 }));
+
+//If list items are expensive to render,
+// Consider using React.memo or shouldComponentUpdate to avoid unnecessary re-renders.
+// https://reactjs.org/docs/react-api.html#reactmemo
+// https://reactjs.org/docs/react-api.html#reactpurecomponent
 
 const AllCollectionRow = React.memo(
     ({ data, index, style, isScrolling }: any) => {
@@ -97,6 +107,9 @@ export default function AllCollectionContent({
         main();
     }, [collectionSummaries, windowSize]);
 
+    // Bundle additional data to list items using the "itemData" prop.
+    // It will be accessible to item renderers as props.data.
+    // Memoize this data to avoid bypassing shouldComponentUpdate().
     const itemData = createItemData(allCollectionListItem, onCollectionClick);
 
     return (
