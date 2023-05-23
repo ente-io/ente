@@ -61,7 +61,7 @@ class LinkExpiryPickerPage extends StatelessWidget {
 
 class ItemsWidget extends StatefulWidget {
   final Collection collection;
-  ItemsWidget(this.collection, {super.key});
+  const ItemsWidget(this.collection, {super.key});
 
   @override
   State<ItemsWidget> createState() => _ItemsWidgetState();

@@ -107,7 +107,7 @@ class HeaderErrorWidget extends StatelessWidget {
             const Padding(padding: EdgeInsets.all(4)),
             Text(
               S.of(context).couldNotBackUpTryLater,
-              style: TextStyle(height: 1.4),
+              style: const TextStyle(height: 1.4),
               textAlign: TextAlign.center,
             ),
             const Padding(padding: EdgeInsets.all(8)),

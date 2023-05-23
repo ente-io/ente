@@ -73,9 +73,6 @@ class ActionSheetWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final isTitleAndBodyNull =
         title == null && bodyWidget == null && body == null;
-    final blur = MediaQuery.of(context).platformBrightness == Brightness.light
-        ? blurMuted
-        : blurBase;
     final extraWidth = MediaQuery.of(context).size.width - restrictedMaxWidth;
     final double? horizontalPadding = extraWidth > 0 ? extraWidth / 2 : null;
     return Padding(
@@ -89,38 +86,35 @@ class ActionSheetWidget extends StatelessWidget {
         decoration: BoxDecoration(boxShadow: shadowMenuLight),
         child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(8)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-            child: Container(
-              color: backdropMutedDark,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  24,
-                  24,
-                  24,
-                  isTitleAndBodyNull ? 24 : 28,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    isTitleAndBodyNull
-                        ? const SizedBox.shrink()
-                        : Padding(
-                            padding: const EdgeInsets.only(bottom: 36),
-                            child: ContentContainerWidget(
-                              title: title,
-                              bodyWidget: bodyWidget,
-                              body: body,
-                              bodyHighlight: bodyHighlight,
-                              actionSheetType: actionSheetType,
-                              isCheckIconGreen: isCheckIconGreen,
-                            ),
+          child: Container(
+            color: backgroundElevated2Dark,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                24,
+                24,
+                isTitleAndBodyNull ? 24 : 28,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  isTitleAndBodyNull
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.only(bottom: 36),
+                          child: ContentContainerWidget(
+                            title: title,
+                            bodyWidget: bodyWidget,
+                            body: body,
+                            bodyHighlight: bodyHighlight,
+                            actionSheetType: actionSheetType,
+                            isCheckIconGreen: isCheckIconGreen,
                           ),
-                    ActionButtons(
-                      actionButtons,
-                    ),
-                  ],
-                ),
+                        ),
+                  ActionButtons(
+                    actionButtons,
+                  ),
+                ],
               ),
             ),
           ),

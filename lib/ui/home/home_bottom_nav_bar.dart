@@ -72,17 +72,16 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
+    final isBottomInsetPresent = MediaQuery.of(context).viewPadding.bottom != 0;
+    final bottomPadding = isBottomInsetPresent ? 32.0 : 8.0;
     final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
     final enteColorScheme = getEnteColorScheme(context);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      height: filesAreSelected ? 0 : 56,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 100),
-        opacity: filesAreSelected ? 0.0 : 1.0,
-        curve: Curves.easeIn,
+    return RepaintBoundary(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        height: filesAreSelected ? 0 : (56 + bottomPadding),
         child: IgnorePointer(
           ignoring: filesAreSelected,
           child: ListView(

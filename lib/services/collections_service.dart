@@ -103,7 +103,10 @@ class CollectionsService {
     // Might not have synced the collection fully
     final fetchedCollections =
         await _fetchCollections(lastCollectionUpdationTime);
-    watch.log("remote fetch");
+    watch.log("remote fetch collections ${fetchedCollections.length}");
+    if (fetchedCollections.isEmpty) {
+      return;
+    }
     final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
     final ownerID = _config.getUserID();
