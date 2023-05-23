@@ -101,6 +101,7 @@
         "@types/react-collapse": "^5.0.1",
         "@types/react-datepicker": "^4.1.7",
         "@types/react-select": "^4.0.15",
+        "@types/react-virtualized-auto-sizer": "^1.0.1",
         "@types/react-window": "^1.8.2",
         "@types/react-window-infinite-loader": "^1.0.3",
         "@types/wicg-file-system-access": "^2020.9.5",
