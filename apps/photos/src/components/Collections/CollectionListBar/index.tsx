@@ -75,7 +75,7 @@ const CollectionListBar = (props: IProps) => {
         const activeCollectionIndex = collectionSummaries.findIndex(
             (item) => item.id === activeCollection
         );
-        collectionListRef.current.scrollToItem(activeCollectionIndex, 'center');
+        collectionListRef.current.scrollToItem(activeCollectionIndex, 'smart');
     }, [activeCollection]);
 
     const clickHandler = (collectionID?: number) => () => {
