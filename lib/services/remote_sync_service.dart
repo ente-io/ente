@@ -221,24 +221,7 @@ class RemoteSyncService {
     final diff =
         await _diffFetcher.getEncryptedFilesDiff(collectionID, sinceTime);
     if (diff.deletedFiles.isNotEmpty) {
-      final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID!).toList();
-      final deletedFiles = (await _db.getFilesFromIDs(fileIDs)).values.toList();
-      await _db.deleteFilesFromCollection(collectionID, fileIDs);
-      Bus.instance.fire(
-        CollectionUpdatedEvent(
-          collectionID,
-          deletedFiles,
-          "syncDeleteFromRemote",
-          type: EventType.deletedFromRemote,
-        ),
-      );
-      Bus.instance.fire(
-        LocalPhotosUpdatedEvent(
-          deletedFiles,
-          type: EventType.deletedFromRemote,
-          source: "syncDeleteFromRemote",
-        ),
-      );
+      await _syncCollectionDiffDelete(diff, collectionID);
     }
     if (diff.updatedFiles.isNotEmpty) {
       await _storeDiff(diff.updatedFiles, collectionID);
@@ -276,6 +259,30 @@ class RemoteSyncService {
       );
     } else {
       _logger.info("Collection #" + collectionID.toString() + " synced");
+    }
+  }
+
+  Future<void> _syncCollectionDiffDelete(Diff diff, int collectionID) async {
+    final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID!).toList();
+    final deletedFiles = (await _db.getFilesFromIDs(fileIDs)).values.toList();
+    final localDeleteCount =
+        await _db.deleteFilesFromCollection(collectionID, fileIDs);
+    if (localDeleteCount > 0) {
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          collectionID,
+          deletedFiles,
+          "syncDeleteFromRemote",
+          type: EventType.deletedFromRemote,
+        ),
+      );
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          deletedFiles,
+          type: EventType.deletedFromRemote,
+          source: "syncDeleteFromRemote",
+        ),
+      );
     }
   }
 
