@@ -1198,5 +1198,3 @@ class CollectionsService {
     }
   }
 }
-
-class SharingNotPermittedForFreeAccountsError extends Error {}

@@ -51,3 +51,5 @@ class InvalidStateError extends AssertionError {
 }
 
 class KeyDerivationError extends Error {}
+
+class SharingNotPermittedForFreeAccountsError extends Error {}
