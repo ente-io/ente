@@ -37,13 +37,14 @@ const createItemData = memoize((items, activeCollection, clickHandler) => ({
     clickHandler,
 }));
 
-const CollectionCardContainer = ({ data, index, style }: any) => {
+const CollectionCardContainer = ({ data, index, style, isScrolling }: any) => {
     const { items, activeCollection, clickHandler } = data;
     const item = items[index];
 
     return (
         <div style={style}>
             <CollectionListBarCard
+                isScrolling={isScrolling}
                 key={item.id}
                 latestFile={item.latestFile}
                 active={activeCollection === item.id}
@@ -145,7 +146,8 @@ const CollectionListBar = (props: IProps) => {
                                     width={width}
                                     height={height}
                                     itemCount={collectionSummaries.length}
-                                    itemSize={CollectionListBarCardWidth}>
+                                    itemSize={CollectionListBarCardWidth}
+                                    useIsScrolling>
                                     {CollectionCardContainer}
                                 </List>
                             )}

@@ -21,6 +21,7 @@ interface Iprops {
     collectionName: string;
     collectionType: CollectionSummaryType;
     onClick: () => void;
+    isScrolling?: boolean;
 }
 
 const CollectionListBarCard = (props: Iprops) => {
