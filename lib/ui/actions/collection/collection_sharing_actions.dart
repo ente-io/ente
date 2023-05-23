@@ -81,7 +81,7 @@ class CollectionActions {
       title: S.of(context).removePublicLink,
       body:
           //'This will remove the public link for accessing "${collection.name}".',
-          S.of(context).disableLinkMessage(collection.collectionName),
+          S.of(context).disableLinkMessage(collection.displayName),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {

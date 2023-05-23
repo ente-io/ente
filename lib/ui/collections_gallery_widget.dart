@@ -107,8 +107,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       (first, second) {
         if (sortKey == AlbumSortKey.albumName) {
           return compareAsciiLowerCaseNatural(
-            first.collection.name!,
-            second.collection.name!,
+            first.collection.displayName,
+            second.collection.displayName,
           );
         } else if (sortKey == AlbumSortKey.newestPhoto) {
           return (second.thumbnail?.creationTime ?? -1 * intMaxValue)

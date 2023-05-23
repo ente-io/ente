@@ -83,7 +83,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: "${widget.collection.name}",
+              title: widget.collection.displayName,
             ),
             flexibleSpaceCaption:
                 S.of(context).albumParticipantsCount(participants),

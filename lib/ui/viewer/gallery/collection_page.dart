@@ -73,14 +73,14 @@ class CollectionPage extends StatelessWidget {
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
-      albumName: c.collection.name,
+      albumName: c.collection.displayName,
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarTypeValue,
-          c.collection.name,
+          c.collection.displayName,
           _selectedFiles,
           collection: c.collection,
         ),

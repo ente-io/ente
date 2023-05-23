@@ -480,7 +480,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             child: Text(
               CollectionsService.instance
                   .getCollectionByID(file.collectionID!)!
-                  .name!,
+                  .displayName,
               style:
                   Theme.of(context).textTheme.caption!.copyWith(fontSize: 12),
               overflow: TextOverflow.ellipsis,

@@ -52,7 +52,7 @@ class AlbumListItemWidget extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.collection.collectionName),
+                      Text(item.collection.displayName),
                       FutureBuilder<int>(
                         future: FilesDB.instance.collectionFileCount(
                           item.collection.id,

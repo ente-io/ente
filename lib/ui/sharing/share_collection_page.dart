@@ -288,7 +288,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.collection.name ?? "Unnamed",
+          widget.collection.displayName,
           style: Theme.of(context).textTheme.headline5?.copyWith(fontSize: 16),
         ),
         elevation: 0,

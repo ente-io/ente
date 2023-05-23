@@ -9,6 +9,7 @@ class Collection {
   final User? owner;
   final String encryptedKey;
   final String? keyDecryptionNonce;
+  @Deprecated("Use collectionName instead")
   final String? name;
   // encryptedName & nameDecryptionNonce will be null for collections
   // created before we started encrypting collection name
@@ -37,6 +38,8 @@ class Collection {
       _mmd ?? CollectionMagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
 
   set magicMetadata(val) => _mmd = val;
+
+  String get displayName => decryptedName ?? name ?? "Unnamed collection";
 
   Collection(
     this.id,
@@ -96,8 +99,6 @@ class Collection {
   bool isOwner(int userID) {
     return (owner?.id ?? 0) == userID;
   }
-
-  String get collectionName => name ?? "Unnamed collection";
 
   void updateSharees(List<User> newSharees) {
     sharees?.clear();
