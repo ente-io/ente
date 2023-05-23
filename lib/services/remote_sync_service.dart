@@ -264,21 +264,23 @@ class RemoteSyncService {
 
   Future<void> _syncCollectionDiffDelete(Diff diff, int collectionID) async {
     final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID!).toList();
-    final deletedFiles = (await _db.getFilesFromIDs(fileIDs)).values.toList();
     final localDeleteCount =
         await _db.deleteFilesFromCollection(collectionID, fileIDs);
     if (localDeleteCount > 0) {
+      final collectionFiles =
+          (await _db.getFilesFromIDs(fileIDs)).values.toList();
+      collectionFiles.removeWhere((f) => f.collectionID != collectionID);
       Bus.instance.fire(
         CollectionUpdatedEvent(
           collectionID,
-          deletedFiles,
+          collectionFiles,
           "syncDeleteFromRemote",
           type: EventType.deletedFromRemote,
         ),
       );
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
-          deletedFiles,
+          collectionFiles,
           type: EventType.deletedFromRemote,
           source: "syncDeleteFromRemote",
         ),
