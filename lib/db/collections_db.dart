@@ -186,6 +186,24 @@ class CollectionsDB {
     return collections;
   }
 
+  // getActiveCollectionIDsAndUpdationTime returns map of collectionID to
+  // updationTime for non-deleted collections
+  Future<Map<int, int>> getActiveIDsAndRemoteUpdateTime() async {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      where: '($columnIsDeleted = ? OR $columnIsDeleted IS NULL)',
+      whereArgs: [_sqlBoolFalse],
+      columns: [columnID, columnUpdationTime],
+    );
+    final collectionIDsAndUpdationTime = <int, int>{};
+    for (final row in rows) {
+      collectionIDsAndUpdationTime[row[columnID] as int] =
+          int.parse(row[columnUpdationTime] as String);
+    }
+    return collectionIDsAndUpdationTime;
+  }
+
   Future<int> deleteCollection(int collectionID) async {
     final db = await instance.database;
     return db.delete(

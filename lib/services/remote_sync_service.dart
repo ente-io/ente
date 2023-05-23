@@ -181,14 +181,19 @@ class RemoteSyncService {
   }
 
   Future<void> _syncUpdatedCollections() async {
-    final updatedCollections =
-        await _collectionsService.getCollectionsToBeSynced();
-    for (final c in updatedCollections) {
+    final idsToRemoteUpdationTimeMap =
+        await _collectionsService.getCollectionIDsToBeSynced();
+    for (final cid in idsToRemoteUpdationTimeMap.keys) {
       await _syncCollectionDiff(
-        c.id,
-        _collectionsService.getCollectionSyncTime(c.id),
+        cid,
+        _collectionsService.getCollectionSyncTime(cid),
       );
-      await _collectionsService.setCollectionSyncTime(c.id, c.updationTime);
+      // update syncTime for the collection in sharedPrefs. Note: the
+      // syncTime can change on remote but we might not get a diff for the
+      // collection if there are not changes in the file, but the collection
+      // metadata (name, archive status, sharing etc) has changed.
+      final remoteUpdateTime = idsToRemoteUpdationTimeMap[cid];
+      await _collectionsService.setCollectionSyncTime(cid, remoteUpdateTime);
     }
     _logger.info("All updated collections synced");
   }
@@ -216,24 +221,7 @@ class RemoteSyncService {
     final diff =
         await _diffFetcher.getEncryptedFilesDiff(collectionID, sinceTime);
     if (diff.deletedFiles.isNotEmpty) {
-      final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID!).toList();
-      final deletedFiles = (await _db.getFilesFromIDs(fileIDs)).values.toList();
-      await _db.deleteFilesFromCollection(collectionID, fileIDs);
-      Bus.instance.fire(
-        CollectionUpdatedEvent(
-          collectionID,
-          deletedFiles,
-          "syncDeleteFromRemote",
-          type: EventType.deletedFromRemote,
-        ),
-      );
-      Bus.instance.fire(
-        LocalPhotosUpdatedEvent(
-          deletedFiles,
-          type: EventType.deletedFromRemote,
-          source: "syncDeleteFromRemote",
-        ),
-      );
+      await _syncCollectionDiffDelete(diff, collectionID);
     }
     if (diff.updatedFiles.isNotEmpty) {
       await _storeDiff(diff.updatedFiles, collectionID);
@@ -271,6 +259,32 @@ class RemoteSyncService {
       );
     } else {
       _logger.info("Collection #" + collectionID.toString() + " synced");
+    }
+  }
+
+  Future<void> _syncCollectionDiffDelete(Diff diff, int collectionID) async {
+    final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID!).toList();
+    final localDeleteCount =
+        await _db.deleteFilesFromCollection(collectionID, fileIDs);
+    if (localDeleteCount > 0) {
+      final collectionFiles =
+          (await _db.getFilesFromIDs(fileIDs)).values.toList();
+      collectionFiles.removeWhere((f) => f.collectionID != collectionID);
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          collectionID,
+          collectionFiles,
+          "syncDeleteFromRemote",
+          type: EventType.deletedFromRemote,
+        ),
+      );
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          collectionFiles,
+          type: EventType.deletedFromRemote,
+          source: "syncDeleteFromRemote",
+        ),
+      );
     }
   }
 
