@@ -20,6 +20,15 @@ class Collection {
   final List<PublicURL?>? publicURLs;
   final int updationTime;
   final bool isDeleted;
+
+  // In early days before public launch, we used to store collection name
+  // un-encrypted. decryptName will be value either decrypted value for
+  // encryptedName or name itself.
+  String? decryptedName;
+  // decryptedPath will be null for collections now owned by user, deleted
+  // collections, && collections which don't have a path. The path is used
+  // to map local on-device album on mobile to remote collection on ente.
+  String? decryptedPath;
   String? mMdEncodedJson;
   int mMdVersion = 0;
   CollectionMagicMetadata? _mmd;
@@ -143,6 +152,8 @@ class Collection {
     bool? isDeleted,
     String? mMdEncodedJson,
     int? mMdVersion,
+    String? decryptedName,
+    String? decryptedPath,
   }) {
     final Collection result = Collection(
       id ?? this.id,
@@ -161,6 +172,8 @@ class Collection {
     );
     result.mMdVersion = mMdVersion ?? this.mMdVersion;
     result.mMdEncodedJson = mMdEncodedJson ?? this.mMdEncodedJson;
+    result.decryptedName = decryptedName ?? this.decryptedName;
+    result.decryptedPath = decryptedPath ?? this.decryptedPath;
     return result;
   }
 
