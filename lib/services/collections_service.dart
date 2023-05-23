@@ -1126,14 +1126,14 @@ class CollectionsService {
     if (collection.attributes.encryptedPath != null &&
         !collection.isDeleted &&
         collection.owner?.id == _config.getUserID()) {
-      _localPathToCollectionID[decryptCollectionPath(collection)] =
+      _localPathToCollectionID[_decryptCollectionPath(collection)] =
           collection.id;
     }
     _collectionIDToCollections[collection.id] = collectionWithDecryptedName;
     return collectionWithDecryptedName;
   }
 
-  String decryptCollectionPath(Collection collection) {
+  String _decryptCollectionPath(Collection collection) {
     final key = collection.attributes.version! >= 1
         ? getCollectionKey(collection.id)
         : _config.getKey();
