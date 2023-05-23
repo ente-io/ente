@@ -165,15 +165,18 @@ class CollectionsService {
     _cachedKeys.clear();
   }
 
-  Future<List<Collection>> getCollectionsToBeSynced() async {
-    final collections = await _db.getAllCollections();
-    final updatedCollections = <Collection>[];
-    for (final c in collections) {
-      if (c.updationTime > getCollectionSyncTime(c.id) && !c.isDeleted) {
-        updatedCollections.add(c);
+  Future<Map<int, int>> getCollectionIDsToBeSynced() async {
+    final idsToRemoveUpdateTimeMap =
+        await _db.getActiveIDsAndRemoteUpdateTime();
+    final result = <int, int>{};
+    for (final MapEntry<int, int> e in idsToRemoveUpdateTimeMap.entries) {
+      final int cid = e.key;
+      final int remoteUpdateTime = e.value;
+      if (remoteUpdateTime > getCollectionSyncTime(cid)) {
+        result[cid] = remoteUpdateTime;
       }
     }
-    return updatedCollections;
+    return result;
   }
 
   Set<int> getArchivedCollections() {
