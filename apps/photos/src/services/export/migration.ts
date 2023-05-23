@@ -7,6 +7,7 @@ import {
     FileExportNames,
     ExportRecordV0,
     CollectionExportNames,
+    ExportProgress,
 } from 'types/export';
 import { EnteFile } from 'types/file';
 import { User } from 'types/user';
@@ -38,10 +39,12 @@ import { FILE_TYPE } from 'constants/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import downloadManager from 'services/downloadManager';
 import { retryAsyncFunction } from 'utils/network';
+import { sleep } from 'utils/common';
 
 export async function migrateExport(
     exportDir: string,
-    exportRecord: ExportRecordV1 | ExportRecordV2 | ExportRecord
+    exportRecord: ExportRecordV1 | ExportRecordV2 | ExportRecord,
+    updateProgress: (progress: ExportProgress) => void
 ) {
     try {
         addLogLine(`current export version: ${exportRecord.version}`);
@@ -63,7 +66,11 @@ export async function migrateExport(
         }
         if (exportRecord.version === 2) {
             addLogLine('migrating export to version 3');
-            await migrationV2ToV3(exportDir, exportRecord as ExportRecordV2);
+            await migrationV2ToV3(
+                exportDir,
+                exportRecord as ExportRecordV2,
+                updateProgress
+            );
             exportRecord = await exportService.updateExportRecord(exportDir, {
                 version: 3,
             });
@@ -115,7 +122,8 @@ async function migrationV1ToV2(
 
 async function migrationV2ToV3(
     exportDir: string,
-    exportRecord: ExportRecordV2
+    exportRecord: ExportRecordV2,
+    updateProgress: (progress: ExportProgress) => void
 ) {
     if (!exportRecord?.exportedFiles) {
         return;
@@ -134,7 +142,8 @@ async function migrationV2ToV3(
 
     const fileExportNames = await getFileExportNamesFromExportedFiles(
         exportRecord,
-        getExportedFiles(personalFiles, exportRecord)
+        getExportedFiles(personalFiles, exportRecord),
+        updateProgress
     );
 
     exportRecord.exportedCollectionPaths = undefined;
@@ -264,7 +273,8 @@ async function getCollectionExportNamesFromExportedCollectionPaths(
 */
 async function getFileExportNamesFromExportedFiles(
     exportRecord: ExportRecordV2,
-    exportedFiles: EnteFile[]
+    exportedFiles: EnteFile[],
+    updateProgress: (progress: ExportProgress) => void
 ): Promise<FileExportNames> {
     if (!exportedFiles.length) {
         return;
@@ -278,7 +288,9 @@ async function getFileExportNamesFromExportedFiles(
     const exportedCollectionPaths = convertCollectionIDFolderPathObjectToMap(
         exportRecord.exportedCollectionPaths
     );
+    let success = 0;
     for (const file of exportedFiles) {
+        await sleep(0);
         const collectionPath = exportedCollectionPaths.get(file.collectionID);
         addLocalLog(
             () =>
@@ -323,6 +335,11 @@ async function getFileExportNamesFromExportedFiles(
             ...exportedFileNames,
             [getExportRecordFileUID(file)]: fileExportName,
         };
+        updateProgress({
+            total: exportedFiles.length,
+            success: success++,
+            failed: 0,
+        });
     }
     return exportedFileNames;
 }
