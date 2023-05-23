@@ -1,22 +1,18 @@
-import ScrollButton from 'components/Collections/CollectionListBar/ScrollButton';
 import React, { useContext, useEffect } from 'react';
 import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
 import { Box, IconButton, Typography } from '@mui/material';
 import {
     CollectionListBarWrapper,
-    ScrollContainer,
     CollectionListWrapper,
 } from 'components/Collections/styledComponents';
 import CollectionListBarCard from 'components/Collections/CollectionListBar/CollectionCard';
-import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
-import useWindowSize from 'hooks/useWindowSize';
 import { IconButtonWithBG, SpaceBetweenFlex } from 'components/Container';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { AppContext } from 'pages/_app';
 import { CollectionSummary } from 'types/collection';
 import CollectionSort from '../AllCollections/CollectionSort';
 import { t } from 'i18next';
-import { FixedSizeList as List } from 'react-window';
+import { FixedSizeList as List, areEqual } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import memoize from 'memoize-one';
 
@@ -37,24 +33,27 @@ const createItemData = memoize((items, activeCollection, clickHandler) => ({
     clickHandler,
 }));
 
-const CollectionCardContainer = ({ data, index, style, isScrolling }: any) => {
-    const { items, activeCollection, clickHandler } = data;
-    const item = items[index];
+const CollectionCardContainer = React.memo(
+    ({ data, index, style, isScrolling }: any) => {
+        const { items, activeCollection, clickHandler } = data;
+        const item = items[index];
 
-    return (
-        <div style={style}>
-            <CollectionListBarCard
-                isScrolling={isScrolling}
-                key={item.id}
-                latestFile={item.latestFile}
-                active={activeCollection === item.id}
-                onClick={clickHandler(item.id)}
-                collectionType={item.type}
-                collectionName={item.name}
-            />
-        </div>
-    );
-};
+        return (
+            <div style={style}>
+                <CollectionListBarCard
+                    isScrolling={isScrolling}
+                    key={item.id}
+                    latestFile={item.latestFile}
+                    active={activeCollection === item.id}
+                    onClick={clickHandler(item.id)}
+                    collectionType={item.type}
+                    collectionName={item.name}
+                />
+            </div>
+        );
+    },
+    areEqual
+);
 
 const CollectionListBar = (props: IProps) => {
     const {
@@ -66,40 +65,17 @@ const CollectionListBar = (props: IProps) => {
 
     const appContext = useContext(AppContext);
 
-    const windowSize = useWindowSize();
-
-    const {
-        componentRef: collectionScrollContainerRef,
-        scrollComponent,
-        onFarLeft,
-        onFarRight,
-    } = useComponentScroll({
-        dependencies: [windowSize, collectionSummaries],
-    });
+    const collectionListRef = React.useRef(null);
 
     useEffect(() => {
-        if (!collectionScrollContainerRef?.current) {
+        if (!collectionListRef.current) {
             return;
         }
         // scroll the active collection into view
         const activeCollectionIndex = collectionSummaries.findIndex(
             (item) => item.id === activeCollection
         );
-        const desiredXPositionToKeepCollectionCardInCenterOfScreen =
-            activeCollectionIndex * CollectionListBarCardWidth -
-            collectionScrollContainerRef.current.clientWidth / 2;
-        const isAlreadyInView =
-            Math.abs(
-                desiredXPositionToKeepCollectionCardInCenterOfScreen -
-                    collectionScrollContainerRef.current.scrollLeft
-            ) <=
-            collectionScrollContainerRef.current.clientWidth / 2;
-
-        if (isAlreadyInView) {
-            return;
-        }
-        collectionScrollContainerRef.current.scrollLeft =
-            desiredXPositionToKeepCollectionCardInCenterOfScreen;
+        collectionListRef.current.scrollToItem(activeCollectionIndex, 'center');
     }, [activeCollection]);
 
     const clickHandler = (collectionID?: number) => () => {
@@ -131,34 +107,33 @@ const CollectionListBar = (props: IProps) => {
             </SpaceBetweenFlex>
             <Box display="flex" alignItems="flex-start" gap={2}>
                 <CollectionListWrapper>
-                    {!onFarLeft && (
+                    {/* {!onFarLeft && (
                         <ScrollButton
                             scrollDirection={SCROLL_DIRECTION.LEFT}
                             onClick={scrollComponent(SCROLL_DIRECTION.LEFT)}
                         />
-                    )}
-                    <ScrollContainer ref={collectionScrollContainerRef}>
-                        <AutoSizer>
-                            {({ height, width }) => (
-                                <List
-                                    itemData={itemData}
-                                    layout="horizontal"
-                                    width={width}
-                                    height={height}
-                                    itemCount={collectionSummaries.length}
-                                    itemSize={CollectionListBarCardWidth}
-                                    useIsScrolling>
-                                    {CollectionCardContainer}
-                                </List>
-                            )}
-                        </AutoSizer>
-                    </ScrollContainer>
-                    {!onFarRight && (
+                    )} */}
+                    <AutoSizer disableHeight>
+                        {({ width }) => (
+                            <List
+                                ref={collectionListRef}
+                                itemData={itemData}
+                                layout="horizontal"
+                                width={width}
+                                height={110}
+                                itemCount={collectionSummaries.length}
+                                itemSize={CollectionListBarCardWidth}
+                                useIsScrolling>
+                                {CollectionCardContainer}
+                            </List>
+                        )}
+                    </AutoSizer>
+                    {/* {!onFarRight && (
                         <ScrollButton
                             scrollDirection={SCROLL_DIRECTION.RIGHT}
                             onClick={scrollComponent(SCROLL_DIRECTION.RIGHT)}
                         />
-                    )}
+                    )} */}
                 </CollectionListWrapper>
                 {!appContext.isMobile && (
                     <Box
