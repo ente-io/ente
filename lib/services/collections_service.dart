@@ -597,7 +597,8 @@ class CollectionsService {
       collection.mMdEncodedJson = jsonEncode(jsonToUpdate);
       collection.magicMetadata = CollectionMagicMetadata.fromJson(jsonToUpdate);
       collection.mMdVersion = currentVersion + 1;
-      _cacheCollectionAttributes(collection);
+      _collectionIDToCollections[collection.id] = collection;
+
       // trigger sync to fetch the latest collection state from server
       sync().ignore();
     } on DioError catch (e) {
@@ -626,7 +627,7 @@ class CollectionsService {
       );
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
-      _cacheCollectionAttributes(collection);
+      _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
         CollectionUpdatedEvent(collection.id, <File>[], "shareUrL"),
       );
@@ -655,7 +656,7 @@ class CollectionsService {
       collection.publicURLs?.clear();
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
-      _cacheCollectionAttributes(collection);
+      _collectionIDToCollections[collection.id] = collection;
       Bus.instance
           .fire(CollectionUpdatedEvent(collection.id, <File>[], "updateUrl"));
     } on DioError catch (e) {
@@ -676,7 +677,7 @@ class CollectionsService {
       );
       collection.publicURLs?.clear();
       await _db.insert(List.from([collection]));
-      _cacheCollectionAttributes(collection);
+      _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
         CollectionUpdatedEvent(
           collection.id,
