@@ -11,7 +11,7 @@ class Collection {
   final String encryptedKey;
   final String? keyDecryptionNonce;
   @Deprecated("Use collectionName instead")
-  final String? name;
+  String? name;
   // encryptedName & nameDecryptionNonce will be null for collections
   // created before we started encrypting collection name
   final String? encryptedName;
@@ -40,7 +40,7 @@ class Collection {
 
   set magicMetadata(val) => _mmd = val;
 
-  String get displayName => decryptedName ?? name ?? "Unnamed collection";
+  String get displayName => decryptedName ?? name ?? "Unnamed Album";
 
   Collection(
     this.id,

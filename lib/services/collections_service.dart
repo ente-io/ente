@@ -1123,16 +1123,17 @@ class CollectionsService {
   }
 
   Collection _cacheCollectionAttributes(Collection collection) {
-    final collectionWithDecryptedName =
-        _getCollectionWithDecryptedName(collection);
+    final String decryptedName = _getDecryptedCollectionName(collection);
+    collection.name = decryptedName;
+    collection.decryptedName = decryptedName;
     if (collection.attributes.encryptedPath != null &&
         !collection.isDeleted &&
         collection.owner?.id == _config.getUserID()) {
       _localPathToCollectionID[_decryptCollectionPath(collection)] =
           collection.id;
     }
-    _collectionIDToCollections[collection.id] = collectionWithDecryptedName;
-    return collectionWithDecryptedName;
+    _collectionIDToCollections[collection.id] = collection;
+    return collection;
   }
 
   String _decryptCollectionPath(Collection collection) {
@@ -1152,13 +1153,16 @@ class CollectionsService {
     return _prefs.containsKey(_collectionsSyncTimeKey);
   }
 
-  Collection _getCollectionWithDecryptedName(Collection collection) {
+  String _getDecryptedCollectionName(Collection collection) {
+    if (collection.decryptedName != null) {
+      return collection.decryptedName!;
+    }
+
     if (collection.isDeleted) {
-      return collection.copyWith(name: "Deleted Album");
+      return "Deleted Album";
     }
     if (collection.encryptedName != null &&
         collection.encryptedName!.isNotEmpty) {
-      String name;
       try {
         final collectionKey = _getAndCacheDecryptedKey(
           collection,
@@ -1169,19 +1173,16 @@ class CollectionsService {
           collectionKey,
           CryptoUtil.base642bin(collection.nameDecryptionNonce!),
         );
-        name = utf8.decode(result);
+        return utf8.decode(result);
       } catch (e, s) {
         _logger.severe(
           "failed to decrypt collection name: ${collection.id}",
           e,
           s,
         );
-        name = "Unknown Album";
       }
-      return collection.copyWith(name: name);
-    } else {
-      return collection;
     }
+    return collection.displayName;
   }
 
   Future _updateDB(List<Collection> collections, {int attempt = 1}) async {
