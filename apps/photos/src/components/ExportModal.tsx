@@ -331,6 +331,7 @@ const ExportDynamicContent = ({
             return <ExportInit startExport={startExport} />;
 
         case ExportStage.INPROGRESS:
+        case ExportStage.MIGRATION:
             return (
                 <ExportInProgress
                     exportStage={exportStage}
