@@ -567,10 +567,6 @@ class CollectionsService {
         jsonToUpdate[key] = value;
       });
 
-      // update the local information so that it's reflected on UI
-      collection.mMdEncodedJson = jsonEncode(jsonToUpdate);
-      collection.magicMetadata = CollectionMagicMetadata.fromJson(jsonToUpdate);
-
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
@@ -592,6 +588,9 @@ class CollectionsService {
         "/collections/magic-metadata",
         data: params,
       );
+      // update the local information so that it's reflected on UI
+      collection.mMdEncodedJson = jsonEncode(jsonToUpdate);
+      collection.magicMetadata = CollectionMagicMetadata.fromJson(jsonToUpdate);
       collection.mMdVersion = currentVersion + 1;
       _cacheCollectionAttributes(collection);
       // trigger sync to fetch the latest collection state from server
@@ -1154,7 +1153,8 @@ class CollectionsService {
   }
 
   String _getDecryptedCollectionName(Collection collection) {
-    if (collection.decryptedName != null) {
+    if (collection.decryptedName != null &&
+        collection.decryptedName!.isNotEmpty) {
       return collection.decryptedName!;
     }
 
