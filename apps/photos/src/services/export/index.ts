@@ -326,6 +326,7 @@ class ExportService {
 
     async stopRunningExport() {
         try {
+            addLogLine('user requested export cancellation');
             this.exportInProgress.exec();
             this.exportInProgress = null;
             this.reRunNeeded = false;
@@ -358,16 +359,15 @@ class ExportService {
                 addLogLine('export started');
                 await this.runExport(exportFolder, isCanceled);
                 addLogLine('export completed');
-                await this.postExport();
-                this.exportInProgress = null;
-                if (this.reRunNeeded) {
-                    this.reRunNeeded = false;
-                    addLogLine('re-running export');
-                    setTimeout(() => this.scheduleExport(), 0);
-                }
             } finally {
-                if (!isCanceled.status || !this.exportInProgress) {
+                if (isCanceled.status) {
+                    addLogLine('export cancellation done');
+                    if (!this.exportInProgress) {
+                        await this.postExport();
+                    }
+                } else {
                     await this.postExport();
+                    addLogLine('resetting export in progress after completion');
                     this.exportInProgress = null;
                     if (this.reRunNeeded) {
                         this.reRunNeeded = false;
