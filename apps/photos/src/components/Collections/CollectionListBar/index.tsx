@@ -29,7 +29,7 @@ interface IProps {
     setCollectionSortBy: (v: COLLECTION_SORT_BY) => void;
 }
 
-const CollectionListBarCardWidth = 98;
+const CollectionListBarCardWidth = 94;
 
 const createItemData = memoize((items, activeCollection, clickHandler) => ({
     items,
