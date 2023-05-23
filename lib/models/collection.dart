@@ -178,24 +178,6 @@ class Collection {
     return result;
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'owner': owner?.toMap(),
-      'encryptedKey': encryptedKey,
-      'keyDecryptionNonce': keyDecryptionNonce,
-      'name': name,
-      'encryptedName': encryptedName,
-      'nameDecryptionNonce': nameDecryptionNonce,
-      'type': typeToString(type),
-      'attributes': attributes.toMap(),
-      'sharees': sharees?.map((x) => x?.toMap()).toList(),
-      'publicURLs': publicURLs?.map((x) => x?.toMap()).toList(),
-      'updationTime': updationTime,
-      'isDeleted': isDeleted,
-    };
-  }
-
   static fromMap(Map<String, dynamic>? map) {
     if (map == null) return null;
     final sharees = (map['sharees'] == null || map['sharees'].length == 0)
