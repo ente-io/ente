@@ -6,6 +6,10 @@ import { CollectionSummary } from 'types/collection';
 import { FixedSizeList as List, areEqual } from 'react-window';
 import memoize from 'memoize-one';
 import useWindowSize from 'hooks/useWindowSize';
+import { AllCollectionMobileBreakpoint } from './dialog';
+
+const MobileColumns = 2;
+const DesktopColumns = 3;
 
 interface Iprops {
     collectionSummaries: CollectionSummary[];
@@ -63,8 +67,10 @@ export default function AllCollectionContent({
 
             const allCollectionListItem: CollectionSummary[][] = [];
             let index = 0;
-            const columns = windowSize.width > 559 ? 3 : 2;
-            console.log('windowSize', windowSize);
+            const columns =
+                windowSize.width > AllCollectionMobileBreakpoint
+                    ? DesktopColumns
+                    : MobileColumns;
             while (index < collectionSummaries.length) {
                 const collectionSummariesRow: CollectionSummary[] = [];
 
