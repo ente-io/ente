@@ -15,6 +15,9 @@ import { t } from 'i18next';
 import { FixedSizeList as List, areEqual } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import memoize from 'memoize-one';
+import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
+import useWindowSize from 'hooks/useWindowSize';
+import ScrollButton from './ScrollButton';
 
 interface IProps {
     activeCollection?: number;
@@ -65,6 +68,17 @@ const CollectionListBar = (props: IProps) => {
 
     const appContext = useContext(AppContext);
 
+    const windowSize = useWindowSize();
+
+    const {
+        componentRef: collectionListWrapperRef,
+        scrollComponent,
+        onFarLeft,
+        onFarRight,
+    } = useComponentScroll({
+        dependencies: [windowSize, collectionSummaries],
+    });
+
     const collectionListRef = React.useRef(null);
 
     useEffect(() => {
@@ -107,16 +121,17 @@ const CollectionListBar = (props: IProps) => {
             </SpaceBetweenFlex>
             <Box display="flex" alignItems="flex-start" gap={2}>
                 <CollectionListWrapper>
-                    {/* {!onFarLeft && (
+                    {!onFarLeft && (
                         <ScrollButton
                             scrollDirection={SCROLL_DIRECTION.LEFT}
                             onClick={scrollComponent(SCROLL_DIRECTION.LEFT)}
                         />
-                    )} */}
+                    )}
                     <AutoSizer disableHeight>
                         {({ width }) => (
                             <List
                                 ref={collectionListRef}
+                                outerRef={collectionListWrapperRef}
                                 itemData={itemData}
                                 layout="horizontal"
                                 width={width}
@@ -128,12 +143,12 @@ const CollectionListBar = (props: IProps) => {
                             </List>
                         )}
                     </AutoSizer>
-                    {/* {!onFarRight && (
+                    {!onFarRight && (
                         <ScrollButton
                             scrollDirection={SCROLL_DIRECTION.RIGHT}
                             onClick={scrollComponent(SCROLL_DIRECTION.RIGHT)}
                         />
-                    )} */}
+                    )}
                 </CollectionListWrapper>
                 {!appContext.isMobile && (
                     <Box
