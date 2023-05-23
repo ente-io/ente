@@ -703,21 +703,8 @@ class CollectionsService {
       final List<Collection> collections = [];
       final c = response.data["collections"];
       for (final collectionData in c) {
-        final collection = Collection.fromMap(collectionData);
-        if (collectionData['magicMetadata'] != null) {
-          final collectionKey =
-              _getAndCacheDecryptedKey(collection, source: "fetchCollection");
-          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-            CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
-            collectionKey,
-            CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
-          );
-          collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
-          collection.mMdVersion = collectionData['magicMetadata']['version'];
-          collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
-            collection.mMdEncodedJson,
-          );
-        }
+        final Collection collection =
+            await _fromRemoteCollection(collectionData);
         collections.add(collection);
       }
       return collections;
@@ -727,6 +714,27 @@ class CollectionsService {
       }
       rethrow;
     }
+  }
+
+  Future<Collection> _fromRemoteCollection(
+    Map<String, dynamic>? collectionData,
+  ) async {
+    final Collection collection = Collection.fromMap(collectionData);
+    if (collectionData != null && collectionData['magicMetadata'] != null) {
+      final collectionKey =
+          _getAndCacheDecryptedKey(collection, source: "fetchCollection");
+      final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+        CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
+        collectionKey,
+        CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
+      );
+      collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
+      collection.mMdVersion = collectionData['magicMetadata']['version'];
+      collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
+        collection.mMdEncodedJson ?? '{}',
+      );
+    }
+    return collection;
   }
 
   Collection? getCollectionByID(int collectionID) {
@@ -762,22 +770,7 @@ class CollectionsService {
       );
       assert(response.data != null);
       final collectionData = response.data["collection"];
-      final collection = Collection.fromMap(collectionData);
-      if (collectionData['magicMetadata'] != null) {
-        final collectionKey = _getAndCacheDecryptedKey(
-          collection,
-          source: "fetchCollectionByID",
-        );
-        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-          CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
-          collectionKey,
-          CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
-        );
-        collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
-        collection.mMdVersion = collectionData['magicMetadata']['version'];
-        collection.magicMetadata =
-            CollectionMagicMetadata.fromEncodedJson(collection.mMdEncodedJson);
-      }
+      final collection = await _fromRemoteCollection(collectionData);
       await _db.insert(List.from([collection]));
       _cacheCollectionAttributes(collection);
       return collection;
@@ -1107,21 +1100,7 @@ class CollectionsService {
     )
         .then((response) async {
       final collectionData = response.data["collection"];
-      final collection = Collection.fromMap(collectionData);
-      if (collectionData['magicMetadata'] != null) {
-        final collectionKey =
-            _getAndCacheDecryptedKey(collection, source: "create");
-        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-          CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
-          collectionKey,
-          CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
-        );
-        collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
-        collection.mMdVersion = collectionData['magicMetadata']['version'];
-        collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
-          collection.mMdEncodedJson,
-        );
-      }
+      final collection = await _fromRemoteCollection(collectionData);
       return _cacheCollectionAttributes(collection);
     });
   }
@@ -1139,6 +1118,16 @@ class CollectionsService {
   }
 
   String _decryptCollectionPath(Collection collection) {
+    if (collection.decryptedPath != null &&
+        collection.decryptedPath!.isNotEmpty) {
+      debugPrint("Using cached decrypted path for collection ${collection.id}");
+      return collection.decryptedPath!;
+    } else {
+      debugPrint(
+        "Decrypting path for collection ${collection.id} from "
+        "encryptedPath",
+      );
+    }
     final key = collection.attributes.version! >= 1
         ? getCollectionKey(collection.id)
         : _config.getKey();
