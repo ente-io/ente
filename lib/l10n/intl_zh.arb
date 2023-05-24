@@ -268,7 +268,7 @@
   "shareTextConfirmOthersVerificationID": "嘿，你能确认这是你的 ente.io 验证 ID：{verificationID}",
   "somethingWentWrong": "出了些问题",
   "sendInvite": "发送邀请",
-  "shareTextRecommendUsingEnte": "下载 ente，以便我们轻松分享原始质量的照片和视频\n\nhttps://ente.io/#download",
+  "shareTextRecommendUsingEnte": "下载 ente，以便我们轻松分享原始质量的照片和视频\n\nhttps://ente.io",
   "done": "已完成",
   "applyCodeTitle": "应用代码",
   "enterCodeDescription": "输入您的朋友提供的代码来为您申请免费存储",

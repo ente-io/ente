@@ -249,8 +249,27 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Consenti download"),
         "allowPeopleToAddPhotos": MessageLookupByLibrary.simpleMessage(
             "Permetti alle persone di aggiungere foto"),
+        "androidBiometricHint":
+            MessageLookupByLibrary.simpleMessage("Verifica l\'identità"),
+        "androidBiometricNotRecognized":
+            MessageLookupByLibrary.simpleMessage("Non riconosciuto. Riprova."),
+        "androidBiometricRequiredTitle":
+            MessageLookupByLibrary.simpleMessage("Autenticazione biometrica"),
+        "androidBiometricSuccess":
+            MessageLookupByLibrary.simpleMessage("Operazione riuscita"),
+        "androidCancelButton": MessageLookupByLibrary.simpleMessage("Annulla"),
+        "androidDeviceCredentialsRequiredTitle":
+            MessageLookupByLibrary.simpleMessage(
+                "Inserisci le credenziali del dispositivo"),
+        "androidDeviceCredentialsSetupDescription":
+            MessageLookupByLibrary.simpleMessage(
+                "Inserisci le credenziali del dispositivo"),
+        "androidGoToSettingsDescription": MessageLookupByLibrary.simpleMessage(
+            "L\'autenticazione biometrica non è impostata sul tuo dispositivo. Vai a \'Impostazioni > Sicurezza\' per impostarla."),
         "androidIosWebDesktop":
             MessageLookupByLibrary.simpleMessage("Android, iOS, Web, Desktop"),
+        "androidSignInTitle":
+            MessageLookupByLibrary.simpleMessage("Autenticazione necessaria"),
         "appVersion": m46,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Applica"),
@@ -643,6 +662,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "general": MessageLookupByLibrary.simpleMessage("Generali"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generazione delle chiavi di crittografia..."),
+        "goToSettings":
+            MessageLookupByLibrary.simpleMessage("Vai alle impostazioni"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "grantPermission":
             MessageLookupByLibrary.simpleMessage("Concedi il permesso"),
@@ -653,6 +674,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "howItWorks": MessageLookupByLibrary.simpleMessage("Come funziona"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
             "Chiedi di premere a lungo il loro indirizzo email nella schermata delle impostazioni e verificare che gli ID su entrambi i dispositivi corrispondano."),
+        "iOSGoToSettingsDescription": MessageLookupByLibrary.simpleMessage(
+            "L\'autenticazione biometrica non è impostata sul tuo dispositivo. Abilita Touch ID o Face ID sul tuo telefono."),
+        "iOSLockOut": MessageLookupByLibrary.simpleMessage(
+            "L\'autenticazione biometrica è disabilitata. Blocca e sblocca lo schermo per abilitarla."),
+        "iOSOkButton": MessageLookupByLibrary.simpleMessage("OK"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Alcuni file in questo album vengono ignorati dal caricamento perché erano stati precedentemente cancellati da ente."),
         "importing":
@@ -1060,7 +1086,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Condividi solo con le persone che vuoi"),
         "shareTextConfirmOthersVerificationID": m25,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
-            "Scarica ente in modo da poter facilmente condividere foto e video senza perdita di qualità\n\nhttps://ente.io/#download"),
+            "Scarica ente in modo da poter facilmente condividere foto e video senza perdita di qualità\n\nhttps://ente.io"),
         "shareTextReferralCode": m26,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Condividi con utenti che non hanno un account ente"),
