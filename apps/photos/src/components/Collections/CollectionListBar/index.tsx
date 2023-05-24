@@ -1,21 +1,27 @@
-import ScrollButton from 'components/Collections/CollectionListBar/ScrollButton';
 import React, { useContext, useEffect } from 'react';
 import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
 import { Box, IconButton, Typography } from '@mui/material';
 import {
     CollectionListBarWrapper,
-    ScrollContainer,
     CollectionListWrapper,
 } from 'components/Collections/styledComponents';
 import CollectionListBarCard from 'components/Collections/CollectionListBar/CollectionCard';
-import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
-import useWindowSize from 'hooks/useWindowSize';
 import { IconButtonWithBG, SpaceBetweenFlex } from 'components/Container';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { AppContext } from 'pages/_app';
 import { CollectionSummary } from 'types/collection';
 import CollectionSort from '../AllCollections/CollectionSort';
 import { t } from 'i18next';
+import {
+    FixedSizeList as List,
+    ListChildComponentProps,
+    areEqual,
+} from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import memoize from 'memoize-one';
+import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
+import useWindowSize from 'hooks/useWindowSize';
+import ScrollButton from './ScrollButton';
 
 interface IProps {
     activeCollection?: number;
@@ -26,7 +32,50 @@ interface IProps {
     setCollectionSortBy: (v: COLLECTION_SORT_BY) => void;
 }
 
-export default function CollectionListBar(props: IProps) {
+interface ItemData {
+    collectionSummaries: CollectionSummary[];
+    activeCollection?: number;
+    onCollectionClick: (id?: number) => void;
+}
+
+const CollectionListBarCardWidth = 94;
+
+const createItemData = memoize(
+    (collectionSummaries, activeCollection, onCollectionClick) => ({
+        collectionSummaries,
+        activeCollection,
+        onCollectionClick,
+    })
+);
+
+const CollectionCardContainer = React.memo(
+    ({
+        data,
+        index,
+        style,
+        isScrolling,
+    }: ListChildComponentProps<ItemData>) => {
+        const { collectionSummaries, activeCollection, onCollectionClick } =
+            data;
+
+        const collectionSummary = collectionSummaries[index];
+
+        return (
+            <div style={style}>
+                <CollectionListBarCard
+                    key={collectionSummary.id}
+                    activeCollection={activeCollection}
+                    isScrolling={isScrolling}
+                    collectionSummary={collectionSummary}
+                    onCollectionClick={onCollectionClick}
+                />
+            </div>
+        );
+    },
+    areEqual
+);
+
+const CollectionListBar = (props: IProps) => {
     const {
         activeCollection,
         setActiveCollection,
@@ -38,26 +87,37 @@ export default function CollectionListBar(props: IProps) {
 
     const windowSize = useWindowSize();
 
-    const { componentRef, scrollComponent, onFarLeft, onFarRight } =
-        useComponentScroll({
-            dependencies: [windowSize, collectionSummaries],
-        });
+    const {
+        componentRef: collectionListWrapperRef,
+        scrollComponent,
+        onFarLeft,
+        onFarRight,
+    } = useComponentScroll({
+        dependencies: [windowSize, collectionSummaries],
+    });
 
-    const collectionChipsRef = collectionSummaries.reduce(
-        (refMap, collectionSummary) => {
-            refMap[collectionSummary.id] = React.createRef();
-            return refMap;
-        },
-        {}
-    );
+    const collectionListRef = React.useRef(null);
 
     useEffect(() => {
-        collectionChipsRef[activeCollection]?.current.scrollIntoView();
+        if (!collectionListRef.current) {
+            return;
+        }
+        // scroll the active collection into view
+        const activeCollectionIndex = collectionSummaries.findIndex(
+            (item) => item.id === activeCollection
+        );
+        collectionListRef.current.scrollToItem(activeCollectionIndex, 'smart');
     }, [activeCollection]);
 
-    const clickHandler = (collectionID?: number) => () => {
+    const onCollectionClick = (collectionID?: number) => {
         setActiveCollection(collectionID ?? ALL_SECTION);
     };
+
+    const itemData = createItemData(
+        collectionSummaries,
+        activeCollection,
+        onCollectionClick
+    );
 
     return (
         <CollectionListBarWrapper>
@@ -84,19 +144,22 @@ export default function CollectionListBar(props: IProps) {
                             onClick={scrollComponent(SCROLL_DIRECTION.LEFT)}
                         />
                     )}
-                    <ScrollContainer ref={componentRef}>
-                        {collectionSummaries.map((item) => (
-                            <CollectionListBarCard
-                                key={item.id}
-                                latestFile={item.latestFile}
-                                ref={collectionChipsRef[item.id]}
-                                active={activeCollection === item.id}
-                                onClick={clickHandler(item.id)}
-                                collectionType={item.type}
-                                collectionName={item.name}
-                            />
-                        ))}
-                    </ScrollContainer>
+                    <AutoSizer disableHeight>
+                        {({ width }) => (
+                            <List
+                                ref={collectionListRef}
+                                outerRef={collectionListWrapperRef}
+                                itemData={itemData}
+                                layout="horizontal"
+                                width={width}
+                                height={110}
+                                itemCount={collectionSummaries.length}
+                                itemSize={CollectionListBarCardWidth}
+                                useIsScrolling>
+                                {CollectionCardContainer}
+                            </List>
+                        )}
+                    </AutoSizer>
                     {!onFarRight && (
                         <ScrollButton
                             scrollDirection={SCROLL_DIRECTION.RIGHT}
@@ -122,4 +185,6 @@ export default function CollectionListBar(props: IProps) {
             </Box>
         </CollectionListBarWrapper>
     );
-}
+};
+
+export default CollectionListBar;

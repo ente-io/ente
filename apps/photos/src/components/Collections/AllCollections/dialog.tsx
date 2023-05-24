@@ -2,6 +2,8 @@ import { Dialog, Slide, styled } from '@mui/material';
 import React from 'react';
 import PropTypes from 'prop-types';
 
+export const AllCollectionMobileBreakpoint = 559;
+
 export const AllCollectionDialog = styled(Dialog)<{
     position: 'flex-start' | 'center' | 'flex-end';
 }>(({ theme, position }) => ({
@@ -18,7 +20,7 @@ export const AllCollectionDialog = styled(Dialog)<{
     '& .MuiDialogContent-root': {
         padding: theme.spacing(2),
     },
-    [theme.breakpoints.down(559)]: {
+    [theme.breakpoints.down(AllCollectionMobileBreakpoint)]: {
         '& .MuiPaper-root': {
             width: '324px',
         },

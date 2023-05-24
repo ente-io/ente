@@ -490,6 +490,7 @@
     "PUBLIC_COLLECT_SUBTEXT": "",
     "STOP_EXPORT": "",
     "EXPORT_PROGRESS": "",
+    "MIGRATING_EXPORT": "",
     "EXPORT_NOTIFICATION": {
         "START": "",
         "IN_PROGRESS": "",

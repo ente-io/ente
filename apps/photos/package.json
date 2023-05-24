@@ -55,6 +55,7 @@
         "jszip": "3.8.0",
         "libsodium-wrappers": "^0.7.8",
         "localforage": "^1.9.0",
+        "memoize-one": "^6.0.0",
         "ml-matrix": "^6.8.2",
         "next": "^13.1.2",
         "next-transpile-modules": "^10.0.0",
@@ -88,6 +89,8 @@
         "zxcvbn": "^4.4.2"
     },
     "devDependencies": {
+        "@ente/eslint-config": "*",
+        "@ente/tsconfig": "*",
         "@next/bundle-analyzer": "^13.1.6",
         "@types/bs58": "^4.0.1",
         "@types/debounce-promise": "^3.1.3",
@@ -98,14 +101,13 @@
         "@types/react-collapse": "^5.0.1",
         "@types/react-datepicker": "^4.1.7",
         "@types/react-select": "^4.0.15",
+        "@types/react-virtualized-auto-sizer": "^1.0.1",
         "@types/react-window": "^1.8.2",
         "@types/react-window-infinite-loader": "^1.0.3",
         "@types/wicg-file-system-access": "^2020.9.5",
         "@types/yup": "^0.29.7",
         "@types/zxcvbn": "^4.4.1",
         "eslint": "^8.28.0",
-        "@ente/tsconfig": "*",
-        "@ente/eslint-config": "*",
         "typescript": "^4.1.3"
     },
     "standard": {

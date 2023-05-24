@@ -11,12 +11,14 @@ export default function CollectionCard(props: {
     latestFile: EnteFile;
     onClick: () => void;
     collectionTile: any;
+    isScrolling?: boolean;
 }) {
     const {
         latestFile: file,
         onClick,
         children,
         collectionTile: CustomCollectionTile,
+        isScrolling,
     } = props;
 
     const [coverImageURL, setCoverImageURL] = useState(null);
@@ -27,13 +29,16 @@ export default function CollectionCard(props: {
                 return;
             }
             if (!galleryContext.thumbs.has(file.id)) {
+                if (isScrolling) {
+                    return;
+                }
                 const url = await downloadManager.getThumbnail(file);
                 galleryContext.thumbs.set(file.id, url);
             }
             setCoverImageURL(galleryContext.thumbs.get(file.id));
         };
         main();
-    }, [file]);
+    }, [file, isScrolling]);
 
     return (
         <CustomCollectionTile onClick={onClick}>

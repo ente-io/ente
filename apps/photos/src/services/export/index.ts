@@ -39,7 +39,10 @@ import {
 } from 'utils/file';
 
 import { updateFileCreationDateInEXIF } from '../upload/exifService';
-import QueueProcessor from '../queueProcessor';
+import QueueProcessor, {
+    CancellationStatus,
+    RequestCanceller,
+} from '../queueProcessor';
 import { Collection } from 'types/collection';
 import {
     ExportProgress,
@@ -76,10 +79,9 @@ export const NULL_EXPORT_RECORD: ExportRecord = {
 class ExportService {
     private electronAPIs: ElectronAPIs;
     private exportSettings: ExportSettings;
-    private exportInProgress: boolean = false;
+    private exportInProgress: RequestCanceller = null;
     private reRunNeeded = false;
     private exportRecordUpdater = new QueueProcessor<ExportRecord>(1);
-    private stopExport: boolean = false;
     private fileReader: FileReader = null;
     private continuousExportEventHandler: () => void;
     private uiUpdater: ExportUIUpdaters = {
@@ -93,7 +95,6 @@ class ExportService {
         success: 0,
         failed: 0,
     };
-    private migrationInProgress: Promise<void>;
 
     constructor() {
         if (runningInBrowser()) {
@@ -127,13 +128,15 @@ class ExportService {
         }
     }
 
-    async runMigration(exportDir: string, exportRecord: ExportRecord) {
+    async runMigration(
+        exportDir: string,
+        exportRecord: ExportRecord,
+        updateProgress: (progress: ExportProgress) => void
+    ) {
         try {
             addLogLine('running migration');
-            this.migrationInProgress = migrateExport(exportDir, exportRecord);
-            await this.migrationInProgress;
+            await migrateExport(exportDir, exportRecord, updateProgress);
             addLogLine('migration completed');
-            this.migrationInProgress = null;
         } catch (e) {
             logError(e, 'migration failed');
             throw e;
@@ -282,18 +285,24 @@ class ExportService {
 
     async preExport(exportFolder: string) {
         this.verifyExportFolderExists(exportFolder);
-        this.stopExport = false;
+        const exportRecord = await this.getExportRecord(exportFolder);
+        await this.updateExportStage(ExportStage.MIGRATION);
+        this.updateExportProgress({
+            success: 0,
+            failed: 0,
+            total: 0,
+        });
+        await this.runMigration(
+            exportFolder,
+            exportRecord,
+            this.updateExportProgress.bind(this)
+        );
         await this.updateExportStage(ExportStage.INPROGRESS);
         this.updateExportProgress({
             success: 0,
             failed: 0,
             total: 0,
         });
-        if (this.migrationInProgress) {
-            addLogLine('migration in progress, waiting for it to complete');
-            await this.migrationInProgress;
-            this.migrationInProgress = null;
-        }
     }
 
     async postExport() {
@@ -317,7 +326,9 @@ class ExportService {
 
     async stopRunningExport() {
         try {
-            this.stopExport = true;
+            addLogLine('user requested export cancellation');
+            this.exportInProgress.exec();
+            this.exportInProgress = null;
             this.reRunNeeded = false;
             await this.postExport();
         } catch (e) {
@@ -334,30 +345,51 @@ class ExportService {
             } else {
                 addLogLine('export not in progress, starting export');
             }
-            this.exportInProgress = true;
+
+            const isCanceled: CancellationStatus = { status: false };
+            const canceller: RequestCanceller = {
+                exec: () => {
+                    isCanceled.status = true;
+                },
+            };
+            this.exportInProgress = canceller;
             try {
                 const exportFolder = this.getExportSettings()?.folder;
                 await this.preExport(exportFolder);
                 addLogLine('export started');
-                await this.runExport(exportFolder);
+                await this.runExport(exportFolder, isCanceled);
                 addLogLine('export completed');
             } finally {
-                this.exportInProgress = false;
-                if (this.reRunNeeded) {
-                    this.reRunNeeded = false;
-                    addLogLine('re-running export');
-                    setTimeout(() => this.scheduleExport(), 0);
+                if (isCanceled.status) {
+                    addLogLine('export cancellation done');
+                    if (!this.exportInProgress) {
+                        await this.postExport();
+                    }
+                } else {
+                    await this.postExport();
+                    addLogLine('resetting export in progress after completion');
+                    this.exportInProgress = null;
+                    if (this.reRunNeeded) {
+                        this.reRunNeeded = false;
+                        addLogLine('re-running export');
+                        setTimeout(() => this.scheduleExport(), 0);
+                    }
                 }
-                await this.postExport();
             }
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+            if (
+                e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
+                e.message !== CustomError.EXPORT_STOPPED
+            ) {
                 logError(e, 'scheduleExport failed');
             }
         }
     };
 
-    private async runExport(exportFolder: string) {
+    private async runExport(
+        exportFolder: string,
+        isCanceled: CancellationStatus
+    ) {
         try {
             const user: User = getData(LS_KEYS.USER);
             const files = mergeMetadata(await getLocalFiles());
@@ -441,7 +473,8 @@ class ExportService {
                     collectionIDExportNameMap,
                     renamedCollections,
                     incrementSuccess,
-                    incrementFailed
+                    incrementFailed,
+                    isCanceled
                 );
             }
 
@@ -452,7 +485,8 @@ class ExportService {
                     collectionIDExportNameMap,
                     removedFileUIDs,
                     incrementSuccess,
-                    incrementFailed
+                    incrementFailed,
+                    isCanceled
                 );
             }
             if (filesToExport?.length > 0) {
@@ -463,7 +497,8 @@ class ExportService {
                     collectionIDExportNameMap,
                     exportFolder,
                     incrementSuccess,
-                    incrementFailed
+                    incrementFailed,
+                    isCanceled
                 );
             }
             if (deletedExportedCollections?.length > 0) {
@@ -474,11 +509,15 @@ class ExportService {
                     deletedExportedCollections,
                     exportFolder,
                     incrementSuccess,
-                    incrementFailed
+                    incrementFailed,
+                    isCanceled
                 );
             }
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+            if (
+                e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
+                e.message !== CustomError.EXPORT_STOPPED
+            ) {
                 logError(e, 'runExport failed');
             }
             throw e;
@@ -490,11 +529,15 @@ class ExportService {
         collectionIDExportNameMap: Map<number, string>,
         renamedCollections: Collection[],
         incrementSuccess: () => void,
-        incrementFailed: () => void
+        incrementFailed: () => void,
+        isCanceled: CancellationStatus
     ) {
         try {
             for (const collection of renamedCollections) {
                 try {
+                    if (isCanceled.status) {
+                        throw Error(CustomError.EXPORT_STOPPED);
+                    }
                     this.verifyExportFolderExists(exportFolder);
                     const oldCollectionExportName =
                         collectionIDExportNameMap.get(collection.id);
@@ -539,14 +582,19 @@ class ExportService {
                     if (
                         e.message ===
                             CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
-                        e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST
+                        e.message ===
+                            CustomError.EXPORT_FOLDER_DOES_NOT_EXIST ||
+                        e.message === CustomError.EXPORT_STOPPED
                     ) {
                         throw e;
                     }
                 }
             }
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+            if (
+                e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
+                e.message !== CustomError.EXPORT_STOPPED
+            ) {
                 logError(e, 'collectionRenamer failed');
             }
             throw e;
@@ -557,7 +605,8 @@ class ExportService {
         deletedExportedCollectionIDs: number[],
         exportFolder: string,
         incrementSuccess: () => void,
-        incrementFailed: () => void
+        incrementFailed: () => void,
+        isCanceled: CancellationStatus
     ) {
         try {
             const exportRecord = await this.getExportRecord(exportFolder);
@@ -567,6 +616,9 @@ class ExportService {
                 );
             for (const collectionID of deletedExportedCollectionIDs) {
                 try {
+                    if (isCanceled.status) {
+                        throw Error(CustomError.EXPORT_STOPPED);
+                    }
                     this.verifyExportFolderExists(exportFolder);
                     addLocalLog(
                         () =>
@@ -605,14 +657,19 @@ class ExportService {
                     if (
                         e.message ===
                             CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
-                        e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST
+                        e.message ===
+                            CustomError.EXPORT_FOLDER_DOES_NOT_EXIST ||
+                        e.message === CustomError.EXPORT_STOPPED
                     ) {
                         throw e;
                     }
                 }
             }
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+            if (
+                e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
+                e.message !== CustomError.EXPORT_STOPPED
+            ) {
                 logError(e, 'collectionRemover failed');
             }
             throw e;
@@ -625,7 +682,8 @@ class ExportService {
         collectionIDFolderNameMap: Map<number, string>,
         exportDir: string,
         incrementSuccess: () => void,
-        incrementFailed: () => void
+        incrementFailed: () => void,
+        isCanceled: CancellationStatus
     ): Promise<void> {
         try {
             for (const file of files) {
@@ -637,8 +695,8 @@ class ExportService {
                             file.collectionID
                         )}`
                 );
-                if (this.stopExport) {
-                    break;
+                if (isCanceled.status) {
+                    throw Error(CustomError.EXPORT_STOPPED);
                 }
                 try {
                     this.verifyExportFolderExists(exportDir);
@@ -685,14 +743,19 @@ class ExportService {
                     if (
                         e.message ===
                             CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
-                        e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST
+                        e.message ===
+                            CustomError.EXPORT_FOLDER_DOES_NOT_EXIST ||
+                        e.message === CustomError.EXPORT_STOPPED
                     ) {
                         throw e;
                     }
                 }
             }
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+            if (
+                e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
+                e.message !== CustomError.EXPORT_STOPPED
+            ) {
                 logError(e, 'fileExporter failed');
             }
             throw e;
@@ -704,7 +767,8 @@ class ExportService {
         collectionIDExportNameMap: Map<number, string>,
         removedFileUIDs: string[],
         incrementSuccess: () => void,
-        incrementFailed: () => void
+        incrementFailed: () => void,
+        isCanceled: CancellationStatus
     ): Promise<void> {
         try {
             const exportRecord = await this.getExportRecord(exportDir);
@@ -714,8 +778,8 @@ class ExportService {
             for (const fileUID of removedFileUIDs) {
                 this.verifyExportFolderExists(exportDir);
                 addLocalLog(() => `trashing file with id ${fileUID}`);
-                if (this.stopExport) {
-                    break;
+                if (isCanceled.status) {
+                    throw Error(CustomError.EXPORT_STOPPED);
                 }
                 try {
                     const fileExportName = fileIDExportNameMap.get(fileUID);
@@ -810,14 +874,19 @@ class ExportService {
                     if (
                         e.message ===
                             CustomError.UPDATE_EXPORTED_RECORD_FAILED ||
-                        e.message === CustomError.EXPORT_FOLDER_DOES_NOT_EXIST
+                        e.message ===
+                            CustomError.EXPORT_FOLDER_DOES_NOT_EXIST ||
+                        e.message === CustomError.EXPORT_STOPPED
                     ) {
                         throw e;
                     }
                 }
             }
         } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+            if (
+                e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST &&
+                e.message !== CustomError.EXPORT_STOPPED
+            ) {
                 logError(e, 'fileTrasher failed');
             }
             throw e;

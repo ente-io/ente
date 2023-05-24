@@ -17,6 +17,10 @@ export interface RequestCanceller {
     exec: () => void;
 }
 
+export interface CancellationStatus {
+    status: boolean;
+}
+
 export default class QueueProcessor<T> {
     private requestQueue: RequestQueueItem[] = [];
 
@@ -30,7 +34,7 @@ export default class QueueProcessor<T> {
     public queueUpRequest(
         request: (canceller?: RequestCanceller) => Promise<T>
     ) {
-        const isCanceled = { status: false };
+        const isCanceled: CancellationStatus = { status: false };
         const canceller: RequestCanceller = {
             exec: () => {
                 isCanceled.status = true;

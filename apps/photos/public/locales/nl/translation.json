@@ -490,6 +490,7 @@
     "PUBLIC_COLLECT_SUBTEXT": "Sta toe dat mensen met de link ook foto's kunnen toevoegen aan het gedeelde album.",
     "STOP_EXPORT": "Stoppen",
     "EXPORT_PROGRESS": "<a>{{progress.success}} / {{progress.total}}</a> bestanden geëxporteerd",
+    "MIGRATING_EXPORT": "",
     "EXPORT_NOTIFICATION": {
         "START": "Exporteren begonnen",
         "IN_PROGRESS": "Exporteren is al bezig",
