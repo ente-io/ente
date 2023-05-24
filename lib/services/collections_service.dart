@@ -108,13 +108,13 @@ class CollectionsService {
     final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
     final ownerID = _config.getUserID();
-    bool fireEventForCollectionDeleted = false;
+    bool shouldFireDeleteEvent = false;
     for (final collection in fetchedCollections) {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
         if (_collectionIDToCollections.containsKey(collection.id)) {
-          fireEventForCollectionDeleted = true;
+          shouldFireDeleteEvent = true;
         }
       }
       // remove reference for incoming collections when unshared/deleted
@@ -129,7 +129,7 @@ class CollectionsService {
           ? collection.updationTime
           : maxUpdationTime;
     }
-    if (fireEventForCollectionDeleted) {
+    if (shouldFireDeleteEvent) {
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
           List<File>.empty(),
@@ -140,12 +140,11 @@ class CollectionsService {
     await _updateDB(updatedCollections);
     _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
     watch.logAndReset("till DB insertion ${updatedCollections.length}");
-    final collections = await _db.getAllCollections();
-    for (final collection in collections) {
+    for (final collection in fetchedCollections) {
       _cacheCollectionAttributes(collection);
     }
     _logger.info("Collections synced");
-    watch.log("collection cache refresh");
+    watch.log("${fetchedCollections.length} collection cached refreshed ");
     if (fetchedCollections.isNotEmpty) {
       Bus.instance.fire(
         CollectionUpdatedEvent(
