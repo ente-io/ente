@@ -220,8 +220,22 @@ class MessageLookup extends MessageLookupByLibrary {
         "allowDownloads": MessageLookupByLibrary.simpleMessage("允许下载"),
         "allowPeopleToAddPhotos":
             MessageLookupByLibrary.simpleMessage("允许人们添加照片"),
+        "androidBiometricHint": MessageLookupByLibrary.simpleMessage("验证身份"),
+        "androidBiometricNotRecognized":
+            MessageLookupByLibrary.simpleMessage("无法识别。请重试。"),
+        "androidBiometricRequiredTitle":
+            MessageLookupByLibrary.simpleMessage("需要生物量"),
+        "androidBiometricSuccess": MessageLookupByLibrary.simpleMessage("成功"),
+        "androidCancelButton": MessageLookupByLibrary.simpleMessage("取消"),
+        "androidDeviceCredentialsRequiredTitle":
+            MessageLookupByLibrary.simpleMessage("需要设备凭据"),
+        "androidDeviceCredentialsSetupDescription":
+            MessageLookupByLibrary.simpleMessage("需要设备凭据"),
+        "androidGoToSettingsDescription": MessageLookupByLibrary.simpleMessage(
+            "未在您的设备上设置生物鉴别身份验证。前往“设置>安全”添加生物鉴别身份验证。"),
         "androidIosWebDesktop":
             MessageLookupByLibrary.simpleMessage("安卓, iOS, 网页端, 桌面端"),
+        "androidSignInTitle": MessageLookupByLibrary.simpleMessage("需要身份验证"),
         "appVersion": m46,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("应用"),
@@ -532,6 +546,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "general": MessageLookupByLibrary.simpleMessage("通用"),
         "generatingEncryptionKeys":
             MessageLookupByLibrary.simpleMessage("正在生成加密密钥..."),
+        "goToSettings": MessageLookupByLibrary.simpleMessage("前往设置"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "grantPermission": MessageLookupByLibrary.simpleMessage("授予权限"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage("将附近的照片分组"),
@@ -540,6 +555,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "howItWorks": MessageLookupByLibrary.simpleMessage("工作原理"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
             "请让他们在设置屏幕上长按他们的电子邮件地址，并验证两台设备上的 ID 是否匹配。"),
+        "iOSGoToSettingsDescription": MessageLookupByLibrary.simpleMessage(
+            "未在您的设备上设置生物鉴别身份验证。请在您的手机上启用 Touch ID或Face ID。"),
+        "iOSLockOut":
+            MessageLookupByLibrary.simpleMessage("生物鉴别认证已禁用。请锁定并解锁您的屏幕以启用它。"),
+        "iOSOkButton": MessageLookupByLibrary.simpleMessage("好的"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "此相册中的某些文件在上传时被忽略，因为它们之前已从 ente 中删除。"),
         "importing": MessageLookupByLibrary.simpleMessage("正在导入..."),
