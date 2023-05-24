@@ -501,12 +501,12 @@ export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
     return URL.createObjectURL(new Blob([blob], { type: type.mimeType }));
 };
 
-export const getUserOwnedNonTrashedFiles = (files: EnteFile[]) => {
+export const getUserOwnedFiles = (files: EnteFile[]) => {
     const user: User = getData(LS_KEYS.USER);
     if (!user?.id) {
         throw Error('user missing');
     }
-    return files.filter((file) => file.isTrashed || file.ownerID === user.id);
+    return files.filter((file) => file.ownerID === user.id);
 };
 
 // doesn't work on firefox
