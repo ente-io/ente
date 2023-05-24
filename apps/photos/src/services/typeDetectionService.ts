@@ -52,11 +52,11 @@ export async function getFileType(
     } catch (e) {
         const fileFormat = getFileExtension(receivedFile.name);
         const fileSize = convertBytesToHumanReadable(getFileSize(receivedFile));
-        const formatMissedByTypeDetection = WHITELISTED_FILE_FORMATS.find(
+        const whiteListedFormat = WHITELISTED_FILE_FORMATS.find(
             (a) => a.exactType === fileFormat
         );
-        if (formatMissedByTypeDetection) {
-            return formatMissedByTypeDetection;
+        if (whiteListedFormat) {
+            return whiteListedFormat;
         }
         if (
             KNOWN_NON_MEDIA_FORMATS.includes(fileFormat) ||
