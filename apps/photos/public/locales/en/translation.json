@@ -491,6 +491,7 @@
     "PUBLIC_COLLECT_SUBTEXT": "Allow people with the link to also add photos to the shared album.",
     "STOP_EXPORT": "Stop",
     "EXPORT_PROGRESS": "<a>{{progress.success}} / {{progress.total}}</a> items synced",
+    "MIGRATING_EXPORT": "Preparing...",
     "EXPORT_NOTIFICATION": {
         "START": "Export started",
         "IN_PROGRESS": "Export already in progress",

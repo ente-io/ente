@@ -35,6 +35,8 @@ export default function ExportInProgress(props: Props) {
                     <Box mb={1.5}>
                         {isLoading ? (
                             t('EXPORT_STARTING')
+                        ) : props.exportStage === ExportStage.MIGRATION ? (
+                            t('MIGRATING_EXPORT')
                         ) : (
                             <Trans
                                 i18nKey={'EXPORT_PROGRESS'}

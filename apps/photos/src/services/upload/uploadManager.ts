@@ -49,7 +49,6 @@ class UploadManager {
     private remainingFiles: FileWithCollection[] = [];
     private failedFiles: FileWithCollection[];
     private existingFiles: EnteFile[];
-    private userOwnedNonTrashedExistingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
     private uploadInProgress: boolean;
@@ -92,12 +91,8 @@ class UploadManager {
             this.existingFiles = await getLocalPublicFiles(
                 getPublicCollectionUID(this.publicUploadProps.token)
             );
-            this.userOwnedNonTrashedExistingFiles = this.existingFiles;
         } else {
-            this.existingFiles = await getLocalFiles();
-            this.userOwnedNonTrashedExistingFiles = getUserOwnedFiles(
-                this.existingFiles
-            );
+            this.existingFiles = getUserOwnedFiles(await getLocalFiles());
         }
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection])
@@ -287,7 +282,7 @@ class UploadManager {
             fileWithCollection = { ...fileWithCollection, collection };
             const { fileUploadResult, uploadedFile } = await uploader(
                 worker,
-                this.userOwnedNonTrashedExistingFiles,
+                this.existingFiles,
                 fileWithCollection,
                 this.uploaderName
             );
@@ -408,13 +403,11 @@ class UploadManager {
         if (!decryptedFile) {
             throw Error("decrypted file can't be undefined");
         }
-        this.userOwnedNonTrashedExistingFiles.push(decryptedFile);
+        this.existingFiles.push(decryptedFile);
         this.updateUIFiles(decryptedFile);
     }
 
     private updateUIFiles(decryptedFile: EnteFile) {
-        this.existingFiles.push(decryptedFile);
-        this.existingFiles = sortFiles(this.existingFiles);
         this.setFiles((files) => sortFiles([...files, decryptedFile]));
     }
 

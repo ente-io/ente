@@ -12,3 +12,8 @@ export const APP_DOWNLOAD_URL = 'https://ente.io/download/desktop';
 export const FEEDBACK_EMAIL = 'feedback@ente.io';
 
 export const DELETE_ACCOUNT_EMAIL = 'account-deletion@ente.io';
+
+export const WEB_ROADMAP_URL = 'https://github.com/ente-io/photos-web/issues';
+
+export const DESKTOP_ROADMAP_URL =
+    'https://github.com/ente-io/photos-desktop/issues';
