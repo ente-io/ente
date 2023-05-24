@@ -42,6 +42,8 @@ class FilesService {
     }
   }
 
+  // Note: this method is not used anywhere, but it is kept for future
+  // reference when we add bulk EditTime feature
   Future<void> bulkEditTime(
     List<File> files,
     EditTimeSource source,
