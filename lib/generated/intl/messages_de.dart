@@ -31,7 +31,7 @@ class MessageLookup extends MessageLookupByLibrary {
             'true':
                 'Deine Familiengruppe hat bereits ${storageAmountInGb} GB erhalten',
             'false': 'Du hast bereits ${storageAmountInGb} GB erhalten',
-            'other': 'Du hast bereits ${storageAmountInGb} Gb erhalten!',
+            'other': 'Du hast bereits ${storageAmountInGb} GB erhalten!',
           })}";
 
   static String m3(familyAdminEmail) =>

@@ -27,8 +27,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.select(isFamilyMember, {
             'true':
                 'Sua família reeinvindicou ${storageAmountInGb} GB até agora',
-            'false': 'Você reeinvindicou ${storageAmountInGb} Gb até agora',
-            'other': 'Você reeinvindicou ${storageAmountInGb} Gb até agora',
+            'false': 'Você reeinvindicou ${storageAmountInGb} GB até agora',
+            'other': 'Você reeinvindicou ${storageAmountInGb} GB até agora',
           })}";
 
   static String m5(albumName) =>

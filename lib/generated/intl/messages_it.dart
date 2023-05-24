@@ -41,9 +41,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m2(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
             'true':
-                'Il tuo piano famiglia ha già richiesto ${storageAmountInGb} Gb finora',
-            'false': 'Hai già richiesto ${storageAmountInGb} Gb finora',
-            'other': 'Hai già richiesto ${storageAmountInGb} Gb finora!',
+                'Il tuo piano famiglia ha già richiesto ${storageAmountInGb} GB finora',
+            'false': 'Hai già richiesto ${storageAmountInGb} GB finora',
+            'other': 'Hai già richiesto ${storageAmountInGb} GB finora!',
           })}";
 
   static String m47(albumName) => "Link collaborativo creato per ${albumName}";

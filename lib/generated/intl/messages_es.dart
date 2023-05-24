@@ -41,11 +41,11 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m2(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
             'true':
-                'Su familia ha reclamado ${storageAmountInGb} Gb hasta el momento',
+                'Su familia ha reclamado ${storageAmountInGb} GB hasta el momento',
             'false':
-                'Tú has reclamado ${storageAmountInGb} Gb hasta el momento',
+                'Tú has reclamado ${storageAmountInGb} GB hasta el momento',
             'other':
-                '¡Tú has reclamado ${storageAmountInGb} Gb hasta el momento!',
+                '¡Tú has reclamado ${storageAmountInGb} GB hasta el momento!',
           })}";
 
   static String m47(albumName) =>

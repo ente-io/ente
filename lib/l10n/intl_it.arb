@@ -294,7 +294,7 @@
   "referralStep3": "3. Ottenete entrambi {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "I referral code sono attualmente in pausa",
   "youCanAtMaxDoubleYourStorage": "* Puoi al massimo raddoppiare il tuo spazio",
-  "claimedStorageSoFar": "{isFamilyMember, select, true {Il tuo piano famiglia ha già richiesto {storageAmountInGb} Gb finora} false {Hai già richiesto {storageAmountInGb} Gb finora} other {Hai già richiesto {storageAmountInGb} Gb finora!}}",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Il tuo piano famiglia ha già richiesto {storageAmountInGb} GB finora} false {Hai già richiesto {storageAmountInGb} GB finora} other {Hai già richiesto {storageAmountInGb} GB finora!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
       "isFamilyMember": {

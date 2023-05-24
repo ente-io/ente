@@ -2197,14 +2197,14 @@ class S {
     );
   }
 
-  /// `{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} Gb so far} false {You have claimed {storageAmountInGb} Gb so far} other {You have claimed {storageAmountInGb} Gb so far!}}`
+  /// `{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} GB so far} false {You have claimed {storageAmountInGb} GB so far} other {You have claimed {storageAmountInGb} GB so far!}}`
   String claimedStorageSoFar(String isFamilyMember, int storageAmountInGb) {
     return Intl.select(
       isFamilyMember,
       {
-        'true': 'Your family has claimed $storageAmountInGb Gb so far',
-        'false': 'You have claimed $storageAmountInGb Gb so far',
-        'other': 'You have claimed $storageAmountInGb Gb so far!',
+        'true': 'Your family has claimed $storageAmountInGb GB so far',
+        'false': 'You have claimed $storageAmountInGb GB so far',
+        'other': 'You have claimed $storageAmountInGb GB so far!',
       },
       name: 'claimedStorageSoFar',
       desc: '',
