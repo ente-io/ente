@@ -14,14 +14,17 @@ import {
     updateFileMagicMetadata,
     trashFiles,
     deleteFromTrash,
+    getLocalHiddenFiles,
+    syncHiddenFiles,
 } from 'services/fileService';
 import { styled, Typography } from '@mui/material';
 import {
     syncCollections,
     getFavItemIds,
     getLocalCollections,
-    createCollection,
+    createAlbum,
     getCollectionSummaries,
+    moveToHiddenCollection,
 } from 'services/collectionService';
 import { t } from 'i18next';
 
@@ -45,7 +48,6 @@ import {
     changeFilesVisibility,
     constructFileToCollectionMap,
     downloadFiles,
-    getNonTrashedFiles,
     getSelectedFiles,
     getUniqueFiles,
     isSharedFile,
@@ -66,7 +68,7 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     CollectionSummaryType,
-    CollectionType,
+    HIDDEN_SECTION,
     DUMMY_UNCATEGORIZED_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
@@ -79,6 +81,7 @@ import {
     getSelectedCollection,
     getArchivedCollections,
     hasNonSystemCollections,
+    splitNormalAndHiddenCollections,
     constructCollectionNameMap,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
@@ -112,10 +115,11 @@ import uploadManager from 'services/upload/uploadManager';
 import { getToken } from 'utils/common/key';
 import ExportModal from 'components/ExportModal';
 import GalleryEmptyState from 'components/GalleryEmptyState';
+import AuthenticateUserModal from 'components/AuthenticateUserModal';
+import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
 import { IsArchived } from 'utils/magicMetadata';
 import { isSameDayAnyYear, isInsideBox } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
-import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -135,6 +139,8 @@ const defaultGalleryContext: GalleryContextType = {
     setBlockingLoad: () => null,
     photoListHeader: null,
     openExportModal: () => null,
+    authenticateUser: () => null,
+    user: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -146,6 +152,7 @@ export default function Gallery() {
     const [user, setUser] = useState(null);
     const [collections, setCollections] = useState<Collection[]>(null);
     const [files, setFiles] = useState<EnteFile[]>(null);
+    const [hiddenFiles, setHiddenFiles] = useState<EnteFile[]>(null);
     const [trashedFiles, setTrashedFiles] = useState<EnteFile[]>(null);
 
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
@@ -202,6 +209,9 @@ export default function Gallery() {
     const [deletedFileIds, setDeletedFileIds] = useState<Set<number>>(
         new Set<number>()
     );
+    const [hiddenFileIds, setHiddenFileIds] = useState<Set<number>>(
+        new Set<number>()
+    );
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
         useContext(AppContext);
     const [collectionSummaries, setCollectionSummaries] =
@@ -231,6 +241,18 @@ export default function Gallery() {
 
     const [exportModalView, setExportModalView] = useState(false);
 
+    const [authenticateUserModalView, setAuthenticateUserModalView] =
+        useState(false);
+
+    const onAuthenticateCallback = useRef<() => void>();
+
+    const authenticateUser = (callback: () => void) => {
+        onAuthenticateCallback.current = callback;
+        setAuthenticateUserModalView(true);
+    };
+    const closeAuthenticateUserModal = () =>
+        setAuthenticateUserModalView(false);
+
     useEffect(() => {
         appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -254,12 +276,16 @@ export default function Gallery() {
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
             const files = sortFiles(mergeMetadata(await getLocalFiles()));
+            const hiddenFiles = sortFiles(
+                mergeMetadata(await getLocalHiddenFiles())
+            );
             const collections = await getLocalCollections();
             const trashedFiles = await getLocalTrashedFiles();
 
             setUser(user);
             setFiles(files);
             setTrashedFiles(trashedFiles);
+            setHiddenFiles(hiddenFiles);
             setCollections(collections);
             await syncWithRemote(true);
             setIsFirstLoad(false);
@@ -280,11 +306,11 @@ export default function Gallery() {
     }, []);
 
     useEffect(() => {
-        if (!user || !files || !collections) {
+        if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
             return;
         }
-        setDerivativeState(user, collections, files);
-    }, [collections, files]);
+        setDerivativeState(user, collections, files, trashedFiles, hiddenFiles);
+    }, [collections, files, hiddenFiles, trashedFiles, user]);
 
     useEffect(() => {
         collectionSelectorAttributes && setCollectionSelectorView(true);
@@ -310,6 +336,8 @@ export default function Gallery() {
                 collectionURL += t('TRASH');
             } else if (activeCollection === DUMMY_UNCATEGORIZED_SECTION) {
                 collectionURL += t('UNCATEGORIZED');
+            } else if (activeCollection === HIDDEN_SECTION) {
+                collectionURL += t('HIDDEN');
             } else {
                 collectionURL += activeCollection;
             }
@@ -344,8 +372,21 @@ export default function Gallery() {
     }, [isInSearchMode, searchResultSummary]);
 
     const filteredData = useMemoSingleThreaded((): EnteFile[] => {
-        if (!files || !user || !trashedFiles || !archivedCollections) {
+        if (
+            !files ||
+            !user ||
+            !trashedFiles ||
+            !hiddenFiles ||
+            !archivedCollections
+        ) {
             return;
+        }
+
+        if (activeCollection === HIDDEN_SECTION && !isInSearchMode) {
+            return getUniqueFiles([
+                ...hiddenFiles,
+                ...files.filter((file) => hiddenFileIds?.has(file.id)),
+            ]);
         }
 
         if (activeCollection === TRASH_SECTION && !isInSearchMode) {
@@ -358,6 +399,10 @@ export default function Gallery() {
         return getUniqueFiles(
             files.filter((item) => {
                 if (deletedFileIds?.has(item.id)) {
+                    return false;
+                }
+
+                if (hiddenFileIds?.has(item.id)) {
                     return false;
                 }
 
@@ -453,7 +498,9 @@ export default function Gallery() {
     }, [
         files,
         trashedFiles,
+        hiddenFiles,
         deletedFileIds,
+        hiddenFileIds,
         search,
         activeCollection,
         archivedCollections,
@@ -489,8 +536,11 @@ export default function Gallery() {
             }
             !silent && startLoading();
             const collections = await syncCollections();
-            setCollections(collections);
-            await syncFiles(collections, setFiles);
+            const { normalCollections, hiddenCollections } =
+                await splitNormalAndHiddenCollections(collections);
+            setCollections(normalCollections);
+            await syncFiles(normalCollections, setFiles);
+            await syncHiddenFiles(hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
         } catch (e) {
             switch (e.message) {
@@ -508,6 +558,7 @@ export default function Gallery() {
             }
         } finally {
             setDeletedFileIds(new Set());
+            setHiddenFileIds(new Set());
             !silent && finishLoading();
         }
         syncInProgress.current = false;
@@ -521,7 +572,9 @@ export default function Gallery() {
     const setDerivativeState = async (
         user: User,
         collections: Collection[],
-        files: EnteFile[]
+        files: EnteFile[],
+        trashedFiles: EnteFile[],
+        hiddenFiles: EnteFile[]
     ) => {
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
@@ -533,6 +586,7 @@ export default function Gallery() {
             collections,
             files,
             trashedFiles,
+            hiddenFiles,
             archivedCollections
         );
         setCollectionSummaries(collectionSummaries);
@@ -627,9 +681,8 @@ export default function Gallery() {
         const callback = async (collectionName: string) => {
             try {
                 startLoading();
-                const collection = await createCollection(
+                const collection = await createAlbum(
                     collectionName,
-                    CollectionType.album,
                     collections
                 );
                 await collectionOpsHelper(ops)(collection);
@@ -669,6 +722,41 @@ export default function Gallery() {
             }
             clearSelection();
         } catch (e) {
+            setDeletedFileIds(new Set());
+            switch (e.status?.toString()) {
+                case ServerErrorCodes.FORBIDDEN:
+                    setDialogMessage({
+                        title: t('ERROR'),
+
+                        close: { variant: 'critical' },
+                        content: t('NOT_FILE_OWNER'),
+                    });
+            }
+            setDialogMessage({
+                title: t('ERROR'),
+
+                close: { variant: 'critical' },
+                content: t('UNKNOWN_ERROR'),
+            });
+        } finally {
+            await syncWithRemote(false, true);
+            finishLoading();
+        }
+    };
+
+    const hideFilesHelper = async () => {
+        startLoading();
+        try {
+            // passing files here instead of filteredData because we want to move all files copies to hidden collection
+            const selectedFiles = getSelectedFiles(selected, files);
+            setHiddenFileIds((hiddenFileIds) => {
+                selectedFiles.forEach((file) => hiddenFileIds.add(file.id));
+                return new Set(hiddenFileIds);
+            });
+            await moveToHiddenCollection(selectedFiles);
+            clearSelection();
+        } catch (e) {
+            setHiddenFileIds(new Set());
             switch (e.status?.toString()) {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
@@ -748,6 +836,8 @@ export default function Gallery() {
                 setBlockingLoad,
                 photoListHeader,
                 openExportModal,
+                authenticateUser,
+                user,
             }}>
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}>
@@ -798,7 +888,7 @@ export default function Gallery() {
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     collections={collections}
-                    files={getNonTrashedFiles(files)}
+                    files={files}
                     setActiveCollection={setActiveCollection}
                     updateSearch={updateSearch}
                 />
@@ -901,6 +991,9 @@ export default function Gallery() {
                             restoreToCollectionHelper={collectionOpsHelper(
                                 COLLECTION_OPS_TYPE.RESTORE
                             )}
+                            unhideToCollectionHelper={collectionOpsHelper(
+                                COLLECTION_OPS_TYPE.UNHIDE
+                            )}
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }
@@ -908,6 +1001,7 @@ export default function Gallery() {
                                 setCollectionSelectorAttributes
                             }
                             deleteFileHelper={deleteFileHelper}
+                            hideFilesHelper={hideFilesHelper}
                             removeFromCollectionHelper={() =>
                                 collectionOpsHelper(COLLECTION_OPS_TYPE.REMOVE)(
                                     getSelectedCollection(
@@ -940,6 +1034,11 @@ export default function Gallery() {
                         />
                     )}
                 <ExportModal show={exportModalView} onHide={closeExportModal} />
+                <AuthenticateUserModal
+                    open={authenticateUserModalView}
+                    onClose={closeAuthenticateUserModal}
+                    onAuthenticate={onAuthenticateCallback.current}
+                />
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );

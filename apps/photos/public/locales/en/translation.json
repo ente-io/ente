@@ -77,6 +77,7 @@
     "DOWNLOAD_OPTION": "Download (D)",
     "DOWNLOAD_FAVORITES": "Download favorites",
     "DOWNLOAD_UNCATEGORIZED": "Download uncategorized",
+    "DOWNLOAD_HIDDEN": "Download hidden",
     "COPY_OPTION": "Copy as PNG (Ctrl/Cmd - C)",
     "TOGGLE_FULLSCREEN": "Toggle fullscreen (F)",
     "ZOOM_IN_OUT": "Zoom in/out",
@@ -518,5 +519,9 @@
     "RECOVER_TWO_FACTOR": "Recover two-factor",
     "at": "at",
     "AUTH_NEXT": "next",
-    "AUTH_DOWNLOAD_MOBILE_APP": "Download our mobile app to manage your secrets"
+    "AUTH_DOWNLOAD_MOBILE_APP": "Download our mobile app to manage your secrets",
+    "HIDDEN":"Hidden",
+    "HIDE":"Hide",
+    "UNHIDE":"Unhide",
+    "UNHIDE_TO_COLLECTION":"Unhide to album"
 }

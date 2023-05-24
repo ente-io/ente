@@ -2,7 +2,7 @@ import { SetFiles } from 'types/gallery';
 import { Collection } from 'types/collection';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
-import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
+import { decryptFile, sortFiles } from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
 import { getCollection } from './collectionService';
@@ -10,6 +10,7 @@ import { getCollection } from './collectionService';
 import HTTPService from './HTTPService';
 import { EncryptedTrashItem, Trash } from 'types/trash';
 import { EnteFile } from 'types/file';
+import { mergeMetadata } from 'utils/file';
 
 const TRASH = 'file-trash';
 const TRASH_TIME = 'trash-time';
@@ -23,8 +24,7 @@ async function getLocalTrash() {
 }
 
 export async function getLocalTrashedFiles() {
-    const trash = await getLocalTrash();
-    return getTrashedFiles(trash);
+    return getTrashedFiles(await getLocalTrash());
 }
 
 export async function getLocalDeletedCollections() {

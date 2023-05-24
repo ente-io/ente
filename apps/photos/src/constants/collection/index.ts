@@ -1,6 +1,7 @@
 export const ARCHIVE_SECTION = -1;
 export const TRASH_SECTION = -2;
 export const DUMMY_UNCATEGORIZED_SECTION = -3;
+export const HIDDEN_SECTION = -4;
 export const ALL_SECTION = 0;
 export enum CollectionType {
     folder = 'folder',
@@ -21,6 +22,7 @@ export enum CollectionSummaryType {
     incomingShare = 'incomingShare',
     sharedOnlyViaLink = 'sharedOnlyViaLink',
     archived = 'archived',
+    hidden = 'hidden',
 }
 export enum COLLECTION_SORT_BY {
     NAME,
@@ -44,6 +46,7 @@ export const COLLECTION_SORT_ORDER = new Map([
     [CollectionSummaryType.archive, 3],
     [CollectionSummaryType.trash, 4],
     [CollectionSummaryType.uncategorized, 4],
+    [CollectionSummaryType.hidden, 4],
 ]);
 
 export const SYSTEM_COLLECTION_TYPES = new Set([
@@ -51,6 +54,7 @@ export const SYSTEM_COLLECTION_TYPES = new Set([
     CollectionSummaryType.archive,
     CollectionSummaryType.trash,
     CollectionSummaryType.uncategorized,
+    CollectionSummaryType.hidden,
 ]);
 
 export const UPLOAD_NOT_ALLOWED_COLLECTION_TYPES = new Set([
@@ -59,6 +63,7 @@ export const UPLOAD_NOT_ALLOWED_COLLECTION_TYPES = new Set([
     CollectionSummaryType.incomingShare,
     CollectionSummaryType.trash,
     CollectionSummaryType.uncategorized,
+    CollectionSummaryType.hidden,
 ]);
 
 export const OPTIONS_NOT_HAVING_COLLECTION_TYPES = new Set([
@@ -70,4 +75,5 @@ export const HIDE_FROM_COLLECTION_BAR_TYPES = new Set([
     CollectionSummaryType.trash,
     CollectionSummaryType.archive,
     CollectionSummaryType.uncategorized,
+    CollectionSummaryType.hidden,
 ]);

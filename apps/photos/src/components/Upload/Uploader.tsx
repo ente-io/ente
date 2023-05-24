@@ -51,7 +51,6 @@ import {
     getImportSuggestion,
     groupFilesBasedOnParentFolder,
 } from 'utils/upload';
-import { getUserOwnedCollections } from 'utils/collection';
 import billingService from 'services/billingService';
 import { addLogLine } from 'utils/logging';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
@@ -428,9 +427,7 @@ export default function Uploader(props: Props) {
                 `upload collections - [${[...collectionNameToFilesMap.keys()]}]`
             );
             try {
-                const existingCollection = getUserOwnedCollections(
-                    await syncCollections()
-                );
+                const existingCollection = await syncCollections();
                 let index = 0;
                 for (const [
                     collectionName,

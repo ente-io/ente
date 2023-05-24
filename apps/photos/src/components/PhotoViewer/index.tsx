@@ -72,6 +72,7 @@ interface Iprops {
     setDeletedFileIds?: (value: Set<number>) => void;
     isIncomingSharedCollection: boolean;
     isTrashCollection: boolean;
+    isHiddenCollection: boolean;
     enableDownload: boolean;
     isSourceLoaded: boolean;
     fileToCollectionsMap: Map<number, number[]>;
@@ -372,7 +373,11 @@ function PhotoViewer(props: Iprops) {
 
     const onFavClick = async (file: EnteFile) => {
         try {
-            if (props.isTrashCollection || props.isIncomingSharedCollection) {
+            if (
+                props.isTrashCollection ||
+                props.isIncomingSharedCollection ||
+                props.isHiddenCollection
+            ) {
                 return;
             }
             const { favItemIds } = props;
@@ -619,7 +624,8 @@ function PhotoViewer(props: Iprops) {
                                 <InfoIcon fontSize="small" />
                             </button>
                             {!props.isIncomingSharedCollection &&
-                                !props.isTrashCollection && (
+                                !props.isTrashCollection &&
+                                !props.isHiddenCollection && (
                                     <button
                                         title={
                                             isFav
@@ -669,7 +675,11 @@ function PhotoViewer(props: Iprops) {
             </div>
             <FileInfo
                 shouldDisableEdits={props.isIncomingSharedCollection}
-                isTrashCollection={props.isTrashCollection}
+                showCollectionChips={
+                    !props.isTrashCollection &&
+                    !props.isIncomingSharedCollection &&
+                    !props.isHiddenCollection
+                }
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}

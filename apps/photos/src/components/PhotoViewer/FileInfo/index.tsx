@@ -52,7 +52,7 @@ interface Iprops {
     refreshPhotoswipe: () => void;
     fileToCollectionsMap?: Map<number, number[]>;
     collectionNameMap?: Map<number, string>;
-    isTrashCollection: boolean;
+    showCollectionChips: boolean;
 }
 
 function BasicDeviceCamera({
@@ -86,7 +86,7 @@ export function FileInfo({
     refreshPhotoswipe,
     fileToCollectionsMap,
     collectionNameMap,
-    isTrashCollection,
+    showCollectionChips,
 }: Iprops) {
     const appContext = useContext(AppContext);
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
@@ -250,7 +250,7 @@ export function FileInfo({
                     caption={formatTime(file.metadata.modificationTime / 1000)}
                     hideEditOption
                 />
-                {!isTrashCollection && (
+                {showCollectionChips && (
                     <InfoItem icon={<FolderOutlined />} hideEditOption>
                         <Box
                             display={'flex'}

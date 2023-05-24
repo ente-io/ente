@@ -135,9 +135,7 @@ export function groupFilesBasedOnCollectionID(files: EnteFile[]) {
         if (!collectionWiseFiles.has(file.collectionID)) {
             collectionWiseFiles.set(file.collectionID, []);
         }
-        if (!file.isTrashed) {
-            collectionWiseFiles.get(file.collectionID).push(file);
-        }
+        collectionWiseFiles.get(file.collectionID).push(file);
     }
     return collectionWiseFiles;
 }
@@ -149,22 +147,14 @@ function getSelectedFileIds(selectedFiles: SelectedState) {
             filesIDs.push(Number(key));
         }
     }
-    return filesIDs;
+    return new Set(filesIDs);
 }
 export function getSelectedFiles(
     selected: SelectedState,
     files: EnteFile[]
 ): EnteFile[] {
-    const filesIDs = new Set(getSelectedFileIds(selected));
-    const selectedFiles: EnteFile[] = [];
-    const foundFiles = new Set<number>();
-    for (const file of files) {
-        if (filesIDs.has(file.id) && !foundFiles.has(file.id)) {
-            selectedFiles.push(file);
-            foundFiles.add(file.id);
-        }
-    }
-    return selectedFiles;
+    const selectedFilesIDs = getSelectedFileIds(selected);
+    return files.filter((file) => selectedFilesIDs.has(file.id));
 }
 
 export function sortFiles(files: EnteFile[]) {
@@ -461,11 +451,6 @@ export function getUniqueFiles(files: EnteFile[]) {
             return false;
         }
     });
-}
-export function getNonTrashedFiles(files: EnteFile[]) {
-    return files.filter(
-        (file) => typeof file.isTrashed === 'undefined' || !file.isTrashed
-    );
 }
 
 export async function downloadFiles(files: EnteFile[]) {

@@ -5,6 +5,7 @@ import * as TrashService from 'services/trashService';
 import {
     changeCollectionVisibility,
     downloadAllCollectionFiles,
+    downloadHiddenFiles,
 } from 'utils/collection';
 import { SetCollectionNamerAttributes } from '../CollectionNamer';
 import { Collection } from 'types/collection';
@@ -167,7 +168,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const downloadCollection = () => {
-        downloadAllCollectionFiles(activeCollection.id);
+        if (collectionSummaryType === CollectionSummaryType.hidden) {
+            downloadHiddenFiles();
+        } else {
+            downloadAllCollectionFiles(activeCollection.id);
+        }
     };
 
     const emptyTrash = async () => {
@@ -286,6 +291,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
                         downloadOptionText={t('DOWNLOAD_UNCATEGORIZED')}
+                    />
+                ) : collectionSummaryType === CollectionSummaryType.hidden ? (
+                    <OnlyDownloadCollectionOption
+                        handleCollectionAction={handleCollectionAction}
+                        downloadOptionText={t('DOWNLOAD_HIDDEN')}
                     />
                 ) : collectionSummaryType ===
                   CollectionSummaryType.incomingShare ? (

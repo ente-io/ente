@@ -2,6 +2,7 @@ import { CollectionSelectorAttributes } from 'components/Collections/CollectionS
 import { TimeStampListItem } from 'components/PhotoList';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
+import { User } from 'types/user';
 
 export type SelectedState = {
     [k: number]: boolean;
@@ -34,4 +35,6 @@ export type GalleryContextType = {
     setBlockingLoad: (value: boolean) => void;
     photoListHeader: TimeStampListItem;
     openExportModal: () => void;
+    authenticateUser: (callback: () => void) => void;
+    user: User;
 };

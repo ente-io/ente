@@ -4,10 +4,11 @@ import {
     moveToCollection,
     removeFromCollection,
     restoreToCollection,
+    unhideToCollection,
     updateCollectionMagicMetadata,
 } from 'services/collectionService';
 import { downloadFiles } from 'utils/file';
-import { getLocalFiles } from 'services/fileService';
+import { getLocalFiles, getLocalHiddenFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { CustomError, ServerErrorCodes } from 'utils/error';
 import { User } from 'types/user';
@@ -20,6 +21,7 @@ import {
 } from 'types/collection';
 import {
     CollectionSummaryType,
+    CollectionType,
     HIDE_FROM_COLLECTION_BAR_TYPES,
     OPTIONS_NOT_HAVING_COLLECTION_TYPES,
     SYSTEM_COLLECTION_TYPES,
@@ -41,6 +43,7 @@ export enum COLLECTION_OPS_TYPE {
     MOVE,
     REMOVE,
     RESTORE,
+    UNHIDE,
 }
 export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
@@ -54,8 +57,8 @@ export async function handleCollectionOps(
             break;
         case COLLECTION_OPS_TYPE.MOVE:
             await moveToCollection(
-                collection,
                 selectedCollectionID,
+                collection,
                 selectedFiles
             );
             break;
@@ -64,6 +67,9 @@ export async function handleCollectionOps(
             break;
         case COLLECTION_OPS_TYPE.RESTORE:
             await restoreToCollection(collection, selectedFiles);
+            break;
+        case COLLECTION_OPS_TYPE.UNHIDE:
+            await unhideToCollection(collection, selectedFiles);
             break;
         default:
             throw Error(CustomError.INVALID_COLLECTION_OPERATION);
@@ -86,6 +92,15 @@ export async function downloadAllCollectionFiles(collectionID: number) {
         await downloadFiles(collectionFiles);
     } catch (e) {
         logError(e, 'download collection failed ');
+    }
+}
+
+export async function downloadHiddenFiles() {
+    try {
+        const hiddenFiles = await getLocalHiddenFiles();
+        await downloadFiles(hiddenFiles);
+    } catch (e) {
+        logError(e, 'download hidden files failed ');
     }
 }
 
@@ -205,6 +220,7 @@ export const showDownloadQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.favorites ||
         type === CollectionSummaryType.album ||
         type === CollectionSummaryType.uncategorized ||
+        type === CollectionSummaryType.hidden ||
         type === CollectionSummaryType.incomingShare ||
         type === CollectionSummaryType.outgoingShare ||
         type === CollectionSummaryType.sharedOnlyViaLink ||
@@ -232,11 +248,10 @@ export const getUserOwnedCollections = (collections: Collection[]) => {
     return collections.filter((collection) => collection.owner.id === user.id);
 };
 
-export const getNonHiddenCollections = (collections: Collection[]) => {
-    return collections.filter((collection) => !isCollectionHidden(collection));
-};
+export const isDefaultHiddenCollection = (collection: Collection) =>
+    collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
 
-export const isCollectionHidden = (collection: Collection) =>
+export const isHiddenCollection = (collection: Collection) =>
     collection.magicMetadata?.data.visibility === VISIBILITY_STATE.HIDDEN ||
     collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
 
@@ -260,9 +275,24 @@ export function isValidMoveTarget(
 ) {
     return (
         sourceCollectionID !== targetCollection.id &&
-        !isCollectionHidden(targetCollection) &&
+        !isHiddenCollection(targetCollection) &&
         !isQuickLinkCollection(targetCollection) &&
         !isIncomingShare(targetCollection, user)
+    );
+}
+
+export function isValidReplacementAlbum(
+    collection: Collection,
+    user: User,
+    wantedCollectionName: string
+) {
+    return (
+        collection.name === wantedCollectionName &&
+        (collection.type === CollectionType.album ||
+            collection.type === CollectionType.folder) &&
+        !isDefaultHiddenCollection(collection) &&
+        !isQuickLinkCollection(collection) &&
+        !isIncomingShare(collection, user)
     );
 }
 
@@ -290,6 +320,30 @@ export function getNonEmptyPersonalCollections(
         (collection) => collection.owner.id === user?.id
     );
     return personalCollections;
+}
+
+export function getNonHiddenCollections(
+    collections: Collection[]
+): Collection[] {
+    return collections.filter((collection) => !isHiddenCollection(collection));
+}
+
+export async function splitNormalAndHiddenCollections(
+    collections: Collection[]
+): Promise<{
+    normalCollections: Collection[];
+    hiddenCollections: Collection[];
+}> {
+    const normalCollections = [];
+    const hiddenCollections = [];
+    for (const collection of collections) {
+        if (isHiddenCollection(collection)) {
+            hiddenCollections.push(collection);
+        } else {
+            normalCollections.push(collection);
+        }
+    }
+    return { normalCollections, hiddenCollections };
 }
 
 export function constructCollectionNameMap(

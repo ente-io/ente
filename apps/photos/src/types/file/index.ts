@@ -53,6 +53,7 @@ export interface EnteFile
     metadata: Metadata;
     magicMetadata: FileMagicMetadata;
     pubMagicMetadata: FilePublicMagicMetadata;
+    isTrashed?: boolean;
     key: string;
     src?: string;
     msrc?: string;
@@ -60,7 +61,6 @@ export interface EnteFile
     w?: number;
     h?: number;
     title?: string;
-    isTrashed?: boolean;
     deleteBy?: number;
     isSourceLoaded?: boolean;
     originalVideoURL?: string;

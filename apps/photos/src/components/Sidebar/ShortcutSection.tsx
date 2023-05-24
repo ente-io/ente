@@ -4,6 +4,7 @@ import { t } from 'i18next';
 import { GalleryContext } from 'pages/gallery';
 import {
     ARCHIVE_SECTION,
+    HIDDEN_SECTION,
     DUMMY_UNCATEGORIZED_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
@@ -13,6 +14,8 @@ import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 import CategoryIcon from '@mui/icons-material/Category';
 import { getUncategorizedCollection } from 'services/collectionService';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import LockOutlined from '@mui/icons-material/LockOutlined';
 interface Iprops {
     closeSidebar: () => void;
     collectionSummaries: CollectionSummaries;
@@ -25,6 +28,7 @@ export default function ShortcutSection({
     const galleryContext = useContext(GalleryContext);
     const [uncategorizedCollectionId, setUncategorizedCollectionID] =
         useState<number>();
+
     useEffect(() => {
         const main = async () => {
             const unCategorizedCollection = await getUncategorizedCollection();
@@ -51,6 +55,14 @@ export default function ShortcutSection({
         galleryContext.setActiveCollection(ARCHIVE_SECTION);
         closeSidebar();
     };
+
+    const openHiddenSection = () => {
+        galleryContext.authenticateUser(() => {
+            galleryContext.setActiveCollection(HIDDEN_SECTION);
+            closeSidebar();
+        });
+    };
+
     return (
         <>
             <EnteMenuItem
@@ -63,21 +75,28 @@ export default function ShortcutSection({
                     ?.fileCount.toString()}
             />
             <EnteMenuItem
-                startIcon={<DeleteOutline />}
-                onClick={openTrashSection}
-                variant="captioned"
-                label={t('TRASH')}
-                subText={collectionSummaries
-                    .get(TRASH_SECTION)
-                    ?.fileCount.toString()}
-            />
-            <EnteMenuItem
                 startIcon={<ArchiveOutlined />}
                 onClick={openArchiveSection}
                 variant="captioned"
                 label={t('ARCHIVE_SECTION_NAME')}
                 subText={collectionSummaries
                     .get(ARCHIVE_SECTION)
+                    ?.fileCount.toString()}
+            />
+            <EnteMenuItem
+                startIcon={<VisibilityOff />}
+                onClick={openHiddenSection}
+                variant="captioned"
+                label={t('HIDDEN')}
+                subIcon={<LockOutlined />}
+            />
+            <EnteMenuItem
+                startIcon={<DeleteOutline />}
+                onClick={openTrashSection}
+                variant="captioned"
+                label={t('TRASH')}
+                subText={collectionSummaries
+                    .get(TRASH_SECTION)
                     ?.fileCount.toString()}
             />
         </>

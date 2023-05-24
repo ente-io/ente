@@ -7,7 +7,6 @@ import {
     getAccountDeleteChallenge,
     logoutUser,
 } from 'services/userService';
-import AuthenticateUserModal from './AuthenticateUserModal';
 import { logError } from 'utils/sentry';
 import { decryptDeleteAccountChallenge } from 'utils/crypto';
 import { Trans } from 'react-i18next';
@@ -20,6 +19,7 @@ import DropdownInput, { DropdownOption } from './DropdownInput';
 import MultilineInput from './MultilineInput';
 import { CheckboxInput } from './CheckboxInput';
 import EnteButton from './EnteButton';
+import { GalleryContext } from 'pages/gallery';
 
 interface Iprops {
     onClose: () => void;
@@ -47,14 +47,10 @@ const getReasonOptions = (): DropdownOption<DELETE_REASON>[] => {
 
 const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const { setDialogBoxAttributesV2, isMobile } = useContext(AppContext);
+    const { authenticateUser } = useContext(GalleryContext);
     const [loading, setLoading] = useState(false);
-    const [authenticateUserModalView, setAuthenticateUserModalView] =
-        useState(false);
     const deleteAccountChallenge = useRef<string>();
 
-    const openAuthenticateUserModal = () => setAuthenticateUserModalView(true);
-    const closeAuthenticateUserModal = () =>
-        setAuthenticateUserModalView(false);
     const [acceptDataDeletion, setAcceptDataDeletion] = useState(false);
     const reasonAndFeedbackRef = useRef<{ reason: string; feedback: string }>();
 
@@ -94,7 +90,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             deleteAccountChallenge.current =
                 deleteChallengeResponse.encryptedChallenge;
             if (deleteChallengeResponse.allowDelete) {
-                openAuthenticateUserModal();
+                authenticateUser(confirmAccountDeletion);
             } else {
                 askToMailForDeletion();
             }
@@ -244,11 +240,6 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                     )}
                 </Formik>
             </DialogBoxV2>
-            <AuthenticateUserModal
-                open={authenticateUserModalView}
-                onClose={closeAuthenticateUserModal}
-                onAuthenticate={confirmAccountDeletion}
-            />
         </>
     );
 };
