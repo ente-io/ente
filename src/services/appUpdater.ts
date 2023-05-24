@@ -5,6 +5,7 @@ import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
 import semVerCmp from 'semver-compare';
 import { AppUpdateInfo, GetFeatureFlagResponse } from '../types';
 import {
+    getMuteUpdateNotificationVersion,
     getSkipAppVersion,
     setMuteUpdateNotificationVersion,
     setSkipAppVersion,
@@ -68,6 +69,19 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
             let timeout: NodeJS.Timeout;
             log.debug('attempting auto update');
             autoUpdater.downloadUpdate();
+            const muteUpdateNotificationVersion =
+                getMuteUpdateNotificationVersion();
+            if (
+                muteUpdateNotificationVersion &&
+                updateCheckResult.updateInfo.version ===
+                    muteUpdateNotificationVersion
+            ) {
+                log.info(
+                    'user chose to mute update notification for version ',
+                    updateCheckResult.updateInfo.version
+                );
+                return;
+            }
             autoUpdater.on('update-downloaded', () => {
                 timeout = setTimeout(
                     () =>
