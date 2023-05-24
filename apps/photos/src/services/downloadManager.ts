@@ -13,7 +13,6 @@ import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
 import QueueProcessor, { PROCESSING_STRATEGY } from './queueProcessor';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
-import { addLogLine } from 'utils/logging';
 import { CacheStorageService } from './cache/cacheStorageService';
 import { CACHES } from 'constants/cache';
 import { Remote } from 'comlink';
@@ -40,15 +39,9 @@ class DownloadManager {
         timeout?: number
     ) {
         try {
-            addLogLine(`[${file.id}] [DownloadManager] getThumbnail called`);
             const token = tokenOverride || getToken();
             if (!token) {
                 return null;
-            }
-            if (this.thumbnailObjectURLPromise.has(file.id)) {
-                addLogLine(
-                    `[${file.id}] [DownloadManager] getThumbnail promise cache hit, returning existing promise`
-                );
             }
             if (!this.thumbnailObjectURLPromise.has(file.id)) {
                 const downloadPromise = async () => {
@@ -60,14 +53,8 @@ class DownloadManager {
                         file.id.toString()
                     );
                     if (cacheResp) {
-                        addLogLine(
-                            `[${file.id}] [DownloadManager] in memory cache hit, using localCache files`
-                        );
                         return URL.createObjectURL(await cacheResp.blob());
                     }
-                    addLogLine(
-                        `[${file.id}] [DownloadManager] in memory cache miss, DownloadManager getThumbnail download started`
-                    );
                     const thumb =
                         await this.thumbnailDownloadRequestsProcessor.queueUpRequest(
                             () =>
@@ -128,7 +115,6 @@ class DownloadManager {
         const fileKey = forPreview ? `${file.id}_preview` : `${file.id}`;
         try {
             const getFilePromise = async () => {
-                addLogLine(`[${file.id}] [DownloadManager] downloading file`);
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
                 if (forPreview) {
@@ -141,11 +127,6 @@ class DownloadManager {
                     return { converted: [fileURL], original: [fileURL] };
                 }
             };
-            if (this.fileObjectURLPromise.has(fileKey)) {
-                addLogLine(
-                    `[${file.id}] [DownloadManager] getFile promise cache hit, returning existing promise`
-                );
-            }
             if (!this.fileObjectURLPromise.get(fileKey)) {
                 this.fileObjectURLPromise.set(fileKey, getFilePromise());
             }
