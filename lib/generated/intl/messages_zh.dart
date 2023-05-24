@@ -38,9 +38,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
-            'true': '到目前为止，您的家庭已经领取了 ${storageAmountInGb} Gb',
-            'false': '到目前为止，您已经领取了 ${storageAmountInGb} Gb',
-            'other': '到目前为止，您已经领取了${storageAmountInGb} Gb',
+            'true': '到目前为止，您的家庭已经领取了 ${storageAmountInGb} GB',
+            'false': '到目前为止，您已经领取了 ${storageAmountInGb} GB',
+            'other': '到目前为止，您已经领取了${storageAmountInGb} GB',
           })}";
 
   static String m47(albumName) => "为 ${albumName} 创建了协作链接";

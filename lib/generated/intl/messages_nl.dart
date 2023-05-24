@@ -41,9 +41,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m2(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
             'true':
-                'Jouw familie heeft ${storageAmountInGb} Gb geclaimd tot nu toe',
-            'false': 'Je hebt ${storageAmountInGb} Gb geclaimd tot nu toe',
-            'other': 'Je hebt ${storageAmountInGb} Gb geclaimd tot nu toe!',
+                'Jouw familie heeft ${storageAmountInGb} GB geclaimd tot nu toe',
+            'false': 'Je hebt ${storageAmountInGb} GB geclaimd tot nu toe',
+            'other': 'Je hebt ${storageAmountInGb} GB geclaimd tot nu toe!',
           })}";
 
   static String m47(albumName) =>

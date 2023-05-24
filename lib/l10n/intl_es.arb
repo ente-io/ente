@@ -294,7 +294,7 @@
   "referralStep3": "3. Ambos obtienen {storageInGB} GB* gratis",
   "referralsAreCurrentlyPaused": "Las referencias están actualmente en pausa",
   "youCanAtMaxDoubleYourStorage": "* Puedes al máximo duplicar tu almacenamiento",
-  "claimedStorageSoFar": "{isFamilyMember, select, true {Su familia ha reclamado {storageAmountInGb} Gb hasta el momento} false {Tú has reclamado {storageAmountInGb} Gb hasta el momento} other {¡Tú has reclamado {storageAmountInGb} Gb hasta el momento!}}",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Su familia ha reclamado {storageAmountInGb} GB hasta el momento} false {Tú has reclamado {storageAmountInGb} GB hasta el momento} other {¡Tú has reclamado {storageAmountInGb} GB hasta el momento!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
       "isFamilyMember": {

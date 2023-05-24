@@ -294,7 +294,7 @@
   "referralStep3": "3. 你都可以免费获得 {storageInGB} GB*",
   "referralsAreCurrentlyPaused": "推荐已暂停",
   "youCanAtMaxDoubleYourStorage": "* 您最多可以将您的存储空间增加一倍",
-  "claimedStorageSoFar": "{isFamilyMember, select, true {到目前为止，您的家庭已经领取了 {storageAmountInGb} Gb} false {到目前为止，您已经领取了 {storageAmountInGb} Gb} other {到目前为止，您已经领取了{storageAmountInGb} Gb}}",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {到目前为止，您的家庭已经领取了 {storageAmountInGb} GB} false {到目前为止，您已经领取了 {storageAmountInGb} GB} other {到目前为止，您已经领取了{storageAmountInGb} GB}}",
   "@claimedStorageSoFar": {
     "placeholders": {
       "isFamilyMember": {
