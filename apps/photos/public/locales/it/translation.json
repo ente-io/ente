@@ -77,6 +77,7 @@
     "DOWNLOAD_OPTION": "Scarica (D)",
     "DOWNLOAD_FAVORITES": "Scarica i preferiti",
     "DOWNLOAD_UNCATEGORIZED": "Scarica i file senza categoria",
+    "DOWNLOAD_HIDDEN": "",
     "COPY_OPTION": "Copia come PNG (Ctrl/Cmd - C)",
     "TOGGLE_FULLSCREEN": "Attiva/disattiva schermo intero (F)",
     "ZOOM_IN_OUT": "Zoom in/out",
@@ -518,5 +519,9 @@
     "RECOVER_TWO_FACTOR": "",
     "at": "",
     "AUTH_NEXT": "",
-    "AUTH_DOWNLOAD_MOBILE_APP": ""
+    "AUTH_DOWNLOAD_MOBILE_APP": "",
+    "HIDDEN": "",
+    "HIDE": "",
+    "UNHIDE": "",
+    "UNHIDE_TO_COLLECTION": ""
 }

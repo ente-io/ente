@@ -77,6 +77,7 @@
     "DOWNLOAD_OPTION": "Descargar (D)",
     "DOWNLOAD_FAVORITES": "Descargar favoritos",
     "DOWNLOAD_UNCATEGORIZED": "Descargar no categorizados",
+    "DOWNLOAD_HIDDEN": "",
     "COPY_OPTION": "Copiar como PNG (Ctrl/Cmd - C)",
     "TOGGLE_FULLSCREEN": "Alternar pantalla completa (F)",
     "ZOOM_IN_OUT": "Acercar/alejar",
@@ -518,5 +519,9 @@
     "RECOVER_TWO_FACTOR": "Recuperar dos factores",
     "at": "a las",
     "AUTH_NEXT": "siguiente",
-    "AUTH_DOWNLOAD_MOBILE_APP": "Descarga nuestra aplicación móvil para administrar tus secretos"
+    "AUTH_DOWNLOAD_MOBILE_APP": "Descarga nuestra aplicación móvil para administrar tus secretos",
+    "HIDDEN": "",
+    "HIDE": "",
+    "UNHIDE": "",
+    "UNHIDE_TO_COLLECTION": ""
 }
