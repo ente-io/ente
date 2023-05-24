@@ -490,6 +490,7 @@
     "PUBLIC_COLLECT_SUBTEXT": "Permitir a las personas con el enlace añadir fotos al álbum compartido.",
     "STOP_EXPORT": "Stop",
     "EXPORT_PROGRESS": "<a>{{progress.success}} / {{progress.total}}</a> archivos exportados",
+    "MIGRATING_EXPORT": "",
     "EXPORT_NOTIFICATION": {
         "START": "Exportar iniciando",
         "IN_PROGRESS": "Exportación ya en curso",
