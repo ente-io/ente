@@ -51,9 +51,6 @@ export async function getFileType(
         };
     } catch (e) {
         const fileFormat = getFileExtension(receivedFile.name);
-        if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
-            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
-        }
         if (e.message === CustomError.NON_MEDIA_FILE) {
             const whiteListedFormat =
                 WHITELISTED_FILE_TYPE_WITH_APPLICATION_MIME_TYPE.find(
@@ -71,6 +68,9 @@ export async function getFileType(
         );
         if (formatMissedByTypeDetection) {
             return formatMissedByTypeDetection;
+        }
+        if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
+            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         logError(e, 'type detection failed', {
             fileFormat,
