@@ -190,17 +190,15 @@ export const getLocalCollections = async (
 export const getCollectionUpdationTime = async (): Promise<number> =>
     (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
 
-export const syncCollections = async (includeHidden = false) => {
-    const localCollections = await getLocalCollections(includeHidden);
+export const syncCollections = async () => {
+    const localCollections = await getLocalCollections();
     const lastCollectionUpdationTime = await getCollectionUpdationTime();
     const token = getToken();
     const key = await getActualKey();
     const updatedCollections =
         (await getCollections(token, lastCollectionUpdationTime, key)) ?? [];
     if (updatedCollections.length === 0) {
-        return includeHidden
-            ? localCollections
-            : getNonHiddenCollections(localCollections);
+        return localCollections;
     }
     const allCollectionsInstances = [
         ...localCollections,
@@ -233,7 +231,7 @@ export const syncCollections = async (includeHidden = false) => {
 
     await localForage.setItem(COLLECTION_TABLE, collections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
-    return includeHidden ? collections : getNonHiddenCollections(collections);
+    return collections;
 };
 
 export const getCollection = async (
