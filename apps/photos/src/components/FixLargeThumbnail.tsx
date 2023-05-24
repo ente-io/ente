@@ -9,7 +9,6 @@ import {
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { logError } from 'utils/sentry';
 import { t } from 'i18next';
-import { TFunction } from 'i18next';
 
 export type SetProgressTracker = React.Dispatch<
     React.SetStateAction<{
@@ -30,13 +29,7 @@ export enum FIX_STATE {
     COMPLETED,
     COMPLETED_WITH_ERRORS,
 }
-function Message({
-    fixState,
-    t,
-}: {
-    t: TFunction<'translation', undefined, 'translation'>;
-    fixState: FIX_STATE;
-}) {
+function Message({ fixState }: { fixState: FIX_STATE }) {
     let message = null;
     switch (fixState) {
         case FIX_STATE.NOT_STARTED:
@@ -157,7 +150,7 @@ export default function FixLargeThumbnails(props: Props) {
                     alignItems: 'center',
                     flexDirection: 'column',
                 }}>
-                <Message t={t} fixState={fixState} />
+                <Message fixState={fixState} />
 
                 {fixState === FIX_STATE.RUNNING && (
                     <>

@@ -232,14 +232,14 @@ export function PhotoList({
                 skipMerge = true;
                 groupByFileSize(timeStampList);
             } else {
-                groupByTime(t, timeStampList);
+                groupByTime(timeStampList);
             }
 
             if (!skipMerge) {
                 timeStampList = mergeTimeStampList(timeStampList, columns);
             }
             if (timeStampList.length === 1) {
-                timeStampList.push(getEmptyListItem(t));
+                timeStampList.push(getEmptyListItem());
             }
             timeStampList.push(getVacuumItem(timeStampList));
             if (publicCollectionGalleryContext.accessedThroughSharedURL) {
@@ -250,7 +250,7 @@ export function PhotoList({
                         )
                     );
                 }
-                timeStampList.push(getAlbumsFooter(t));
+                timeStampList.push(getAlbumsFooter());
             } else if (showAppDownloadBanner) {
                 timeStampList.push(getAppDownloadFooter());
             }
@@ -319,7 +319,7 @@ export function PhotoList({
                         getPhotoListFooter(
                             publicCollectionGalleryContext.photoListFooter
                         ),
-                        getAlbumsFooter(t),
+                        getAlbumsFooter(),
                     ];
                 }
             } else if (showAppDownloadBanner) {
@@ -378,7 +378,7 @@ export function PhotoList({
         }
     };
 
-    const groupByTime = (t, timeStampList: TimeStampListItem[]) => {
+    const groupByTime = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;
         let currentDate;
         displayFiles.forEach((item, index) => {
@@ -453,7 +453,7 @@ export function PhotoList({
         };
     };
 
-    const getEmptyListItem = (t) => {
+    const getEmptyListItem = () => {
         return {
             itemType: ITEM_TYPE.OTHER,
             item: (
@@ -521,7 +521,7 @@ export function PhotoList({
         };
     };
 
-    const getAlbumsFooter = (t) => {
+    const getAlbumsFooter = () => {
         return {
             itemType: ITEM_TYPE.MARKETING_FOOTER,
             height: ALBUM_FOOTER_HEIGHT,
@@ -645,7 +645,6 @@ export function PhotoList({
     };
 
     const renderListItem = (
-        t,
         listItem: TimeStampListItem,
         isScrolling: boolean
     ) => {
@@ -721,7 +720,7 @@ export function PhotoList({
                         columns={columns}
                         shrinkRatio={shrinkRatio}
                         groups={timeStampList[index].groups}>
-                        {renderListItem(t, timeStampList[index], isScrolling)}
+                        {renderListItem(timeStampList[index], isScrolling)}
                     </ListContainer>
                 </ListItem>
             )}
