@@ -17,6 +17,15 @@ export const FILE_TYPE_LIB_MISSED_FORMATS: FileTypeInfo[] = [
     { fileType: FILE_TYPE.IMAGE, exactType: 'gif', mimeType: 'image/gif' },
 ];
 
+export const WHITELISTED_FILE_TYPE_WITH_APPLICATION_MIME_TYPE: FileTypeInfo[] =
+    [
+        {
+            fileType: FILE_TYPE.VIDEO,
+            exactType: 'wmv',
+            mimeType: 'video/x-ms-asf',
+        },
+    ];
+
 export const KNOWN_NON_MEDIA_FORMATS = ['xmp', 'html', 'txt'];
 
 export const EXIFLESS_FORMATS = ['gif', 'bmp'];

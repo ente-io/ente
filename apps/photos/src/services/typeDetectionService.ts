@@ -1,6 +1,7 @@
 import { FILE_TYPE } from 'constants/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
 import {
+    WHITELISTED_FILE_TYPE_WITH_APPLICATION_MIME_TYPE,
     FILE_TYPE_LIB_MISSED_FORMATS,
     KNOWN_NON_MEDIA_FORMATS,
 } from 'constants/upload';
@@ -19,10 +20,8 @@ const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
 export async function getFileType(
     receivedFile: File | ElectronFile
 ): Promise<FileTypeInfo> {
+    let typeResult: FileTypeResult;
     try {
-        let fileType: FILE_TYPE;
-        let typeResult: FileTypeResult;
-
         if (receivedFile instanceof File) {
             typeResult = await extractFileType(receivedFile);
         } else {
@@ -34,6 +33,7 @@ export async function getFileType(
         if (mimTypeParts?.length !== 2) {
             throw Error(CustomError.INVALID_MIME_TYPE(typeResult.mime));
         }
+        let fileType: FILE_TYPE;
         switch (mimTypeParts[0]) {
             case TYPE_IMAGE:
                 fileType = FILE_TYPE.IMAGE;
@@ -42,7 +42,7 @@ export async function getFileType(
                 fileType = FILE_TYPE.VIDEO;
                 break;
             default:
-                throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+                throw Error(CustomError.NON_MEDIA_FILE);
         }
         return {
             fileType,
@@ -50,23 +50,27 @@ export async function getFileType(
             mimeType: typeResult.mime,
         };
     } catch (e) {
-        if (e.message === CustomError.UNSUPPORTED_FILE_FORMAT) {
-            throw e;
-        }
         const fileFormat = getFileExtension(receivedFile.name);
+        if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
+            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+        }
+        if (e.message === CustomError.NON_MEDIA_FILE) {
+            const whiteListedFormat =
+                WHITELISTED_FILE_TYPE_WITH_APPLICATION_MIME_TYPE.find(
+                    (a) => a.exactType === fileFormat
+                );
+            if (whiteListedFormat) {
+                return whiteListedFormat;
+            } else {
+                throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+            }
+        }
         const fileSize = convertBytesToHumanReadable(getFileSize(receivedFile));
         const formatMissedByTypeDetection = FILE_TYPE_LIB_MISSED_FORMATS.find(
             (a) => a.exactType === fileFormat
         );
         if (formatMissedByTypeDetection) {
-            logError(Error(), 'format missed by type detection', {
-                fileFormat,
-                fileSize,
-            });
             return formatMissedByTypeDetection;
-        }
-        if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
-            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         logError(e, 'type detection failed', {
             fileFormat,

@@ -63,6 +63,7 @@ export const CustomError = {
     AUTH_KEY_NOT_FOUND: 'auth key not found',
     EXIF_DATA_NOT_FOUND: 'exif data not found',
     SELECT_FOLDER_ABORTED: 'select folder aborted',
+    NON_MEDIA_FILE: 'non media file',
 };
 
 export function parseUploadErrorCodes(error) {
