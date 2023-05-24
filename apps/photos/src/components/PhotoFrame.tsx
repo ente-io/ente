@@ -81,8 +81,6 @@ const PhotoFrame = ({
     const router = useRouter();
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
 
-    useEffect(() => {}, []);
-
     const displayFiles = useMemoSingleThreaded(() => {
         return files.map((item) => {
             const filteredItem = {
