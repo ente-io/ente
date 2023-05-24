@@ -1966,10 +1966,10 @@ class S {
     );
   }
 
-  /// `Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io/#download`
+  /// `Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io`
   String get shareTextRecommendUsingEnte {
     return Intl.message(
-      'Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io/#download',
+      'Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io',
       name: 'shareTextRecommendUsingEnte',
       desc: '',
       args: [],

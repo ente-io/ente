@@ -1048,7 +1048,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Share only with the people you want"),
         "shareTextConfirmOthersVerificationID": m25,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
-            "Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io/#download"),
+            "Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io"),
         "shareTextReferralCode": m26,
         "shareWithNonenteUsers":
             MessageLookupByLibrary.simpleMessage("Share with non-ente users"),

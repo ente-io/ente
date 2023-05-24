@@ -268,7 +268,7 @@
   "shareTextConfirmOthersVerificationID": "Hey, puoi confermare che questo è il tuo ID di verifica: {verificationID} su ente.io",
   "somethingWentWrong": "Qualcosa è andato storto",
   "sendInvite": "Invita",
-  "shareTextRecommendUsingEnte": "Scarica ente in modo da poter facilmente condividere foto e video senza perdita di qualità\n\nhttps://ente.io/#download",
+  "shareTextRecommendUsingEnte": "Scarica ente in modo da poter facilmente condividere foto e video senza perdita di qualità\n\nhttps://ente.io",
   "done": "Completato",
   "applyCodeTitle": "Applica codice",
   "enterCodeDescription": "Inserisci il codice fornito dal tuo amico per richiedere spazio gratuito per entrambi",

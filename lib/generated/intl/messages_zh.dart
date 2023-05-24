@@ -862,7 +862,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("仅与您想要的人分享"),
         "shareTextConfirmOthersVerificationID": m25,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
-            "下载 ente，以便我们轻松分享原始质量的照片和视频\n\nhttps://ente.io/#download"),
+            "下载 ente，以便我们轻松分享原始质量的照片和视频\n\nhttps://ente.io"),
         "shareTextReferralCode": m26,
         "shareWithNonenteUsers":
             MessageLookupByLibrary.simpleMessage("与非ente 用户分享"),
