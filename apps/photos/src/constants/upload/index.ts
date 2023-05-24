@@ -15,6 +15,7 @@ export const FILE_TYPE_LIB_MISSED_FORMATS: FileTypeInfo[] = [
     { fileType: FILE_TYPE.VIDEO, exactType: 'mod', mimeType: 'video/mpeg' },
     { fileType: FILE_TYPE.VIDEO, exactType: 'mp4', mimeType: 'video/mp4' },
     { fileType: FILE_TYPE.IMAGE, exactType: 'gif', mimeType: 'image/gif' },
+    { fileType: FILE_TYPE.VIDEO, exactType: 'dv', mimeType: 'video/x-dv' },
 ];
 
 export const WHITELISTED_FILE_TYPE_WITH_APPLICATION_MIME_TYPE: FileTypeInfo[] =
