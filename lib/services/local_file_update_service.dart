@@ -50,7 +50,7 @@ class LocalFileUpdateService {
     try {
       await _markFilesWhichAreActuallyUpdated();
       if (Platform.isAndroid) {
-        _cleanUpOlderMigration();
+        _cleanUpOlderMigration().ignore();
       }
     } catch (e, s) {
       _logger.severe('failed to perform migration', e, s);
@@ -60,7 +60,7 @@ class LocalFileUpdateService {
     }
   }
 
-  void _cleanUpOlderMigration() {
+  Future<void> _cleanUpOlderMigration() async {
     // check if any old_migration_keys are present in shared preferences
     bool hasOldMigrationKey = false;
     for (String key in _oldMigrationKeys) {
@@ -73,6 +73,12 @@ class LocalFileUpdateService {
       for (var element in _oldMigrationKeys) {
         _prefs.remove(element);
       }
+      await _fileUpdationDB.deleteByReasons([
+        'missing_location',
+        'badCreationTime',
+        'missingLocationV2',
+        'badLocationCord',
+      ]);
     }
   }
 
