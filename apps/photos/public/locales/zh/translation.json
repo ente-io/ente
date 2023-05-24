@@ -490,6 +490,7 @@
     "PUBLIC_COLLECT_SUBTEXT": "允许具有链接的人也将照片添加到共享相册。",
     "STOP_EXPORT": "停止",
     "EXPORT_PROGRESS": "<a>{{progress.success}} / {{progress.total}}</a> 个文件已导出",
+    "MIGRATING_EXPORT": "",
     "EXPORT_NOTIFICATION": {
         "START": "导出已开始",
         "IN_PROGRESS": "导出已在进行中",
