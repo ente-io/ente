@@ -8,6 +8,7 @@ import { AppUpdateInfo } from 'types/electron';
 import InfoOutlined from '@mui/icons-material/InfoRounded';
 import { Trans } from 'react-i18next';
 import { Subscription } from 'types/billing';
+import { logoutUser } from 'services/userService';
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
         title: t('DOWNLOAD_APP'),
@@ -115,4 +116,16 @@ export const getSubscriptionPurchaseSuccessMessage = (
             values={{ date: subscription?.expiryTime }}
         />
     ),
+});
+
+export const getSessionExpiredMessage = (): DialogBoxAttributes => ({
+    title: t('SESSION_EXPIRED'),
+    content: t('SESSION_EXPIRED_MESSAGE'),
+
+    nonClosable: true,
+    proceed: {
+        text: t('LOGIN'),
+        action: logoutUser,
+        variant: 'accent',
+    },
 });

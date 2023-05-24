@@ -371,18 +371,24 @@ function PhotoViewer(props: Iprops) {
     };
 
     const onFavClick = async (file: EnteFile) => {
-        if (!file) return;
-        const { favItemIds } = props;
-        if (!isInFav(file)) {
-            favItemIds.add(file.id);
-            addToFavorites(file);
-            setIsFav(true);
-        } else {
-            favItemIds.delete(file.id);
-            removeFromFavorites(file);
-            setIsFav(false);
+        try {
+            if (props.isTrashCollection || props.isIncomingSharedCollection) {
+                return;
+            }
+            const { favItemIds } = props;
+            if (!isInFav(file)) {
+                favItemIds.add(file.id);
+                addToFavorites(file);
+                setIsFav(true);
+            } else {
+                favItemIds.delete(file.id);
+                removeFromFavorites(file);
+                setIsFav(false);
+            }
+            needUpdate.current = true;
+        } catch (e) {
+            logError(e, 'onFavClick failed');
         }
-        needUpdate.current = true;
     };
 
     const trashFile = async (file: EnteFile) => {
@@ -606,14 +612,12 @@ function PhotoViewer(props: Iprops) {
                                 title={t('TOGGLE_FULLSCREEN')}
                             />
 
-                            {!props.isIncomingSharedCollection && (
-                                <button
-                                    className="pswp__button pswp__button--custom"
-                                    title={t('INFO_OPTION')}
-                                    onClick={handleOpenInfo}>
-                                    <InfoIcon fontSize="small" />
-                                </button>
-                            )}
+                            <button
+                                className="pswp__button pswp__button--custom"
+                                title={t('INFO_OPTION')}
+                                onClick={handleOpenInfo}>
+                                <InfoIcon fontSize="small" />
+                            </button>
                             {!props.isIncomingSharedCollection &&
                                 !props.isTrashCollection && (
                                     <button
@@ -664,8 +668,8 @@ function PhotoViewer(props: Iprops) {
                 </div>
             </div>
             <FileInfo
-                isTrashCollection={props.isTrashCollection}
                 shouldDisableEdits={props.isIncomingSharedCollection}
+                isTrashCollection={props.isTrashCollection}
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}

@@ -259,19 +259,12 @@ export const getCollectionLatestFiles = (
     const latestFiles = new Map<number, EnteFile>();
 
     files.forEach((file) => {
-        if (!latestFiles.has(file.collectionID) && !file.isTrashed) {
+        if (!latestFiles.has(file.collectionID)) {
             latestFiles.set(file.collectionID, file);
-        }
-        if (!latestFiles.has(ARCHIVE_SECTION) && IsArchived(file)) {
-            latestFiles.set(ARCHIVE_SECTION, file);
-        }
-        if (!latestFiles.has(TRASH_SECTION) && file.isTrashed) {
-            latestFiles.set(TRASH_SECTION, file);
         }
         if (
             !latestFiles.has(ALL_SECTION) &&
             !IsArchived(file) &&
-            !file.isTrashed &&
             file.ownerID === user.id &&
             !archivedCollections.has(file.collectionID)
         ) {
@@ -896,9 +889,7 @@ export const getNonEmptyCollections = (
 ) => {
     const nonEmptyCollectionsIds = new Set<number>();
     for (const file of files) {
-        if (!file.isTrashed) {
-            nonEmptyCollectionsIds.add(file.collectionID);
-        }
+        nonEmptyCollectionsIds.add(file.collectionID);
     }
     return collections.filter((collection) =>
         nonEmptyCollectionsIds.has(collection.id)
@@ -949,6 +940,7 @@ export async function getCollectionSummaries(
     user: User,
     collections: Collection[],
     files: EnteFile[],
+    trashedFiles: EnteFile[],
     archivedCollections: Set<number>
 ): Promise<CollectionSummaries> {
     const collectionSummaries: CollectionSummaries = new Map();
@@ -959,6 +951,7 @@ export async function getCollectionSummaries(
     );
     const collectionFilesCount = getCollectionsFileCount(
         files,
+        trashedFiles,
         archivedCollections
     );
 
@@ -1031,6 +1024,7 @@ export async function getCollectionSummaries(
 
 function getCollectionsFileCount(
     files: EnteFile[],
+    trashedFiles: EnteFile[],
     archivedCollections: Set<number>
 ): CollectionFilesCount {
     const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
@@ -1039,22 +1033,18 @@ function getCollectionsFileCount(
         collectionFilesCount.set(id, files.length);
     }
     const user: User = getData(LS_KEYS.USER);
-    const uniqueTrashedFileIDs = new Set<number>();
     const uniqueArchivedFileIDs = new Set<number>();
     const uniqueAllSectionFileIDs = new Set<number>();
     for (const file of files) {
         if (isSharedFile(user, file)) {
             continue;
-        }
-        if (file.isTrashed) {
-            uniqueTrashedFileIDs.add(file.id);
         } else if (IsArchived(file)) {
             uniqueArchivedFileIDs.add(file.id);
         } else if (!archivedCollections.has(file.collectionID)) {
             uniqueAllSectionFileIDs.add(file.id);
         }
     }
-    collectionFilesCount.set(TRASH_SECTION, uniqueTrashedFileIDs.size);
+    collectionFilesCount.set(TRASH_SECTION, trashedFiles?.length ?? 0);
     collectionFilesCount.set(ARCHIVE_SECTION, uniqueArchivedFileIDs.size);
     collectionFilesCount.set(ALL_SECTION, uniqueAllSectionFileIDs.size);
     return collectionFilesCount;

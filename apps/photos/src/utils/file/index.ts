@@ -356,12 +356,10 @@ export function isExactTypeHEIC(exactType: string) {
 
 export async function changeFilesVisibility(
     files: EnteFile[],
-    selected: SelectedState,
     visibility: VISIBILITY_STATE
 ) {
-    const selectedFiles = getSelectedFiles(selected, files);
     const updatedFiles: EnteFile[] = [];
-    for (const file of selectedFiles) {
+    for (const file of files) {
         const updatedMagicMetadataProps: FileMagicMetadataProps = {
             visibility,
         };
@@ -503,12 +501,12 @@ export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
     return URL.createObjectURL(new Blob([blob], { type: type.mimeType }));
 };
 
-export const getUserOwnedNonTrashedFiles = (files: EnteFile[]) => {
+export const getUserOwnedFiles = (files: EnteFile[]) => {
     const user: User = getData(LS_KEYS.USER);
     if (!user?.id) {
         throw Error('user missing');
     }
-    return files.filter((file) => file.isTrashed || file.ownerID === user.id);
+    return files.filter((file) => file.ownerID === user.id);
 };
 
 // doesn't work on firefox
@@ -579,4 +577,15 @@ export function getPersonalFiles(files: EnteFile[], user: User) {
 
 export function getIDBasedSortedFiles(files: EnteFile[]) {
     return files.sort((a, b) => a.id - b.id);
+}
+
+export function constructFileToCollectionMap(files: EnteFile[]) {
+    const fileToCollectionsMap = new Map<number, number[]>();
+    (files ?? []).forEach((file) => {
+        if (!fileToCollectionsMap.get(file.id)) {
+            fileToCollectionsMap.set(file.id, []);
+        }
+        fileToCollectionsMap.get(file.id).push(file.collectionID);
+    });
+    return fileToCollectionsMap;
 }
