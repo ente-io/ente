@@ -201,7 +201,7 @@
     "SEARCH": "Search",
     "SEARCH_RESULTS": "Search results",
     "NO_RESULTS": "No results found",
-    "SEARCH_HINT": "Search for albums, dates ...",
+    "SEARCH_HINT": "Search for albums, dates, descriptions, ...",
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
         "LOCATION": "Location",
