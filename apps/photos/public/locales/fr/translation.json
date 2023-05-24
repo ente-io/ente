@@ -77,6 +77,7 @@
     "DOWNLOAD_OPTION": "Télécharger (D)",
     "DOWNLOAD_FAVORITES": "Télécharger les favoris",
     "DOWNLOAD_UNCATEGORIZED": "Télécharger les hors catégories",
+    "DOWNLOAD_HIDDEN": "",
     "COPY_OPTION": "Copier en PNG (Ctrl/Cmd - C)",
     "TOGGLE_FULLSCREEN": "Plein écran (F)",
     "ZOOM_IN_OUT": "Zoom +/-",
@@ -518,5 +519,9 @@
     "RECOVER_TWO_FACTOR": "Récupérer la double-authentification",
     "at": "à",
     "AUTH_NEXT": "suivant",
-    "AUTH_DOWNLOAD_MOBILE_APP": "Téléchargez notre application mobile pour gérer vos secrets"
+    "AUTH_DOWNLOAD_MOBILE_APP": "Téléchargez notre application mobile pour gérer vos secrets",
+    "HIDDEN": "",
+    "HIDE": "",
+    "UNHIDE": "",
+    "UNHIDE_TO_COLLECTION": ""
 }

@@ -77,6 +77,7 @@
     "DOWNLOAD_OPTION": "Downloaden (D)",
     "DOWNLOAD_FAVORITES": "Favorieten downloaden",
     "DOWNLOAD_UNCATEGORIZED": "Ongecategoriseerd downloaden",
+    "DOWNLOAD_HIDDEN": "",
     "COPY_OPTION": "Kopiëren als PNG (Ctrl/Cmd - C)",
     "TOGGLE_FULLSCREEN": "Schakelen volledig scherm modus (F)",
     "ZOOM_IN_OUT": "In/uitzoomen",
@@ -518,5 +519,9 @@
     "RECOVER_TWO_FACTOR": "Herstel tweestaps",
     "at": "om",
     "AUTH_NEXT": "volgende",
-    "AUTH_DOWNLOAD_MOBILE_APP": "Download onze mobiele app om uw geheimen te beheren"
+    "AUTH_DOWNLOAD_MOBILE_APP": "Download onze mobiele app om uw geheimen te beheren",
+    "HIDDEN": "",
+    "HIDE": "",
+    "UNHIDE": "",
+    "UNHIDE_TO_COLLECTION": ""
 }
