@@ -58,10 +58,14 @@ export async function getFileType(
         if (whiteListedFormat) {
             return whiteListedFormat;
         }
-        if (
-            KNOWN_NON_MEDIA_FORMATS.includes(fileFormat) ||
-            e.message === CustomError.NON_MEDIA_FILE
-        ) {
+        if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
+            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+        }
+        if (e.message === CustomError.NON_MEDIA_FILE) {
+            logError(e, 'unsupported file format', {
+                fileFormat,
+                fileSize,
+            });
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         logError(e, 'type detection failed', {
