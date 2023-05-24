@@ -1,7 +1,7 @@
 import { FILE_TYPE } from 'constants/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
 import {
-    FILE_TYPE_LIB_MISSED_FORMATS,
+    WHITELISTED_FILE_FORMATS,
     KNOWN_NON_MEDIA_FORMATS,
 } from 'constants/upload';
 import { CustomError } from 'utils/error';
@@ -42,7 +42,7 @@ export async function getFileType(
                 fileType = FILE_TYPE.VIDEO;
                 break;
             default:
-                throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+                throw Error(CustomError.NON_MEDIA_FILE);
         }
         return {
             fileType,
@@ -50,22 +50,22 @@ export async function getFileType(
             mimeType: typeResult.mime,
         };
     } catch (e) {
-        if (e.message === CustomError.UNSUPPORTED_FILE_FORMAT) {
-            throw e;
-        }
         const fileFormat = getFileExtension(receivedFile.name);
         const fileSize = convertBytesToHumanReadable(getFileSize(receivedFile));
-        const formatMissedByTypeDetection = FILE_TYPE_LIB_MISSED_FORMATS.find(
+        const whiteListedFormat = WHITELISTED_FILE_FORMATS.find(
             (a) => a.exactType === fileFormat
         );
-        if (formatMissedByTypeDetection) {
-            logError(Error(), 'format missed by type detection', {
+        if (whiteListedFormat) {
+            return whiteListedFormat;
+        }
+        if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
+            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+        }
+        if (e.message === CustomError.NON_MEDIA_FILE) {
+            logError(e, 'unsupported file format', {
                 fileFormat,
                 fileSize,
             });
-            return formatMissedByTypeDetection;
-        }
-        if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         logError(e, 'type detection failed', {

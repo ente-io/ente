@@ -8,13 +8,19 @@ import {
 } from 'types/upload';
 
 // list of format that were missed by type-detection for some files.
-export const FILE_TYPE_LIB_MISSED_FORMATS: FileTypeInfo[] = [
+export const WHITELISTED_FILE_FORMATS: FileTypeInfo[] = [
     { fileType: FILE_TYPE.IMAGE, exactType: 'jpeg', mimeType: 'image/jpeg' },
     { fileType: FILE_TYPE.IMAGE, exactType: 'jpg', mimeType: 'image/jpeg' },
     { fileType: FILE_TYPE.VIDEO, exactType: 'webm', mimeType: 'video/webm' },
     { fileType: FILE_TYPE.VIDEO, exactType: 'mod', mimeType: 'video/mpeg' },
     { fileType: FILE_TYPE.VIDEO, exactType: 'mp4', mimeType: 'video/mp4' },
     { fileType: FILE_TYPE.IMAGE, exactType: 'gif', mimeType: 'image/gif' },
+    { fileType: FILE_TYPE.VIDEO, exactType: 'dv', mimeType: 'video/x-dv' },
+    {
+        fileType: FILE_TYPE.VIDEO,
+        exactType: 'wmv',
+        mimeType: 'video/x-ms-asf',
+    },
 ];
 
 export const KNOWN_NON_MEDIA_FORMATS = ['xmp', 'html', 'txt'];
