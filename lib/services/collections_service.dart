@@ -181,14 +181,6 @@ class CollectionsService {
     return result;
   }
 
-  Set<int> getArchivedCollections() {
-    return _collectionIDToCollections.values
-        .toList()
-        .where((element) => element.isArchived())
-        .map((e) => e.id)
-        .toSet();
-  }
-
   Future<List<CollectionWithThumbnail>> getArchivedCollectionWithThumb() async {
     final allCollections = await getCollectionsWithThumbnails();
     return allCollections
