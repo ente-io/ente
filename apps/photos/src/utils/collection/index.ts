@@ -248,6 +248,9 @@ export const getUserOwnedCollections = (collections: Collection[]) => {
     return collections.filter((collection) => collection.owner.id === user.id);
 };
 
+export const isDefaultHiddenCollection = (collection: Collection) =>
+    collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
+
 export const isHiddenCollection = (collection: Collection) =>
     collection.magicMetadata?.data.visibility === VISIBILITY_STATE.HIDDEN ||
     collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
@@ -287,7 +290,7 @@ export function isValidReplacementAlbum(
         collection.name === wantedCollectionName &&
         (collection.type === CollectionType.album ||
             collection.type === CollectionType.folder) &&
-        !isHiddenCollection(collection) &&
+        !isDefaultHiddenCollection(collection) &&
         !isQuickLinkCollection(collection) &&
         !isIncomingShare(collection, user)
     );
