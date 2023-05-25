@@ -14,6 +14,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/remote_sync_service.dart";
 import 'package:photos/ui/collections/archived_collections_button_widget.dart';
 import 'package:photos/ui/collections/device_folders_grid_view_widget.dart';
 import 'package:photos/ui/collections/hidden_collections_button_widget.dart';
@@ -133,7 +134,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     List<CollectionWithThumbnail>? collections,
   ) {
     final bool showDeleteAlbumsButton =
-        collections!.where((c) => c.thumbnail == null).length >= 3;
+        RemoteSyncService.instance.isFirstRemoteSyncDone() &&
+            collections!.where((c) => c.thumbnail == null).length >= 3;
     final TextStyle trashAndHiddenTextStyle = Theme.of(context)
         .textTheme
         .subtitle1!

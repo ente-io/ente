@@ -34,11 +34,11 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m2(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
             'true':
-                'Votre famille a demandé ${storageAmountInGb} Gb jusqu\'à présent',
+                'Votre famille a demandé ${storageAmountInGb} GB jusqu\'à présent',
             'false':
-                'Vous avez réclamé ${storageAmountInGb} Gb jusqu\'à présent',
+                'Vous avez réclamé ${storageAmountInGb} GB jusqu\'à présent',
             'other':
-                'Vous avez réclamé ${storageAmountInGb} Gbjusqu\'à présent!',
+                'Vous avez réclamé ${storageAmountInGb} GB jusqu\'à présent!',
           })}";
 
   static String m47(albumName) => "Lien collaboratif créé pour ${albumName}";
@@ -838,7 +838,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareMyVerificationID": m24,
         "shareTextConfirmOthersVerificationID": m25,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
-            "Téléchargez ente pour que nous puissions facilement partager des photos et des vidéos de qualité originale\n\nhttps://ente.io/#download"),
+            "Téléchargez ente pour que nous puissions facilement partager des photos et des vidéos de qualité originale\n\nhttps://ente.io"),
         "shareTextReferralCode": m26,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Partager avec des utilisateurs non-ente"),

@@ -31,7 +31,7 @@ class MessageLookup extends MessageLookupByLibrary {
             'true':
                 'Deine Familiengruppe hat bereits ${storageAmountInGb} GB erhalten',
             'false': 'Du hast bereits ${storageAmountInGb} GB erhalten',
-            'other': 'Du hast bereits ${storageAmountInGb} Gb erhalten!',
+            'other': 'Du hast bereits ${storageAmountInGb} GB erhalten!',
           })}";
 
   static String m3(familyAdminEmail) =>
@@ -811,7 +811,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Teile mit ausgewählten Personen"),
         "shareTextConfirmOthersVerificationID": m25,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
-            "Lade ente herunter, damit wir einfach Fotos und Videos in höchster Qualität teilen können\n\nhttps://ente.io/#download"),
+            "Lade ente herunter, damit wir einfach Fotos und Videos in höchster Qualität teilen können\n\nhttps://ente.io"),
         "shareTextReferralCode": m26,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Mit Nicht-Ente-Benutzern teilen"),

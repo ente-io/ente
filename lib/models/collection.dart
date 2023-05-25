@@ -3,7 +3,8 @@ import 'dart:core';
 import 'package:flutter/foundation.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
-import 'package:photos/models/magic_metadata.dart';
+import "package:photos/models/metadata/collection_magic.dart";
+import "package:photos/models/metadata/common_keys.dart";
 
 class Collection {
   final int id;
@@ -65,7 +66,7 @@ class Collection {
   });
 
   bool isArchived() {
-    return mMdVersion > 0 && magicMetadata.visibility == visibilityArchive;
+    return mMdVersion > 0 && magicMetadata.visibility == archiveVisibility;
   }
 
   // hasLink returns true if there's any link attached to the collection
@@ -79,7 +80,7 @@ class Collection {
     if (isDefaultHidden()) {
       return true;
     }
-    return mMdVersion > 0 && (magicMetadata.visibility == visibilityHidden);
+    return mMdVersion > 0 && (magicMetadata.visibility == hiddenVisibility);
   }
 
   bool isDefaultHidden() {

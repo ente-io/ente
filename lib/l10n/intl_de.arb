@@ -258,7 +258,7 @@
   "shareTextConfirmOthersVerificationID": "Hey, kannst du bestätigen, dass dies deine ente.io Verifizierungs-ID ist: {verificationID}",
   "somethingWentWrong": "Irgendetwas ging schief",
   "sendInvite": "Einladung senden",
-  "shareTextRecommendUsingEnte": "Lade ente herunter, damit wir einfach Fotos und Videos in höchster Qualität teilen können\n\nhttps://ente.io/#download",
+  "shareTextRecommendUsingEnte": "Lade ente herunter, damit wir einfach Fotos und Videos in höchster Qualität teilen können\n\nhttps://ente.io",
   "done": "Fertig",
   "applyCodeTitle": "Code nutzen",
   "enterCodeDescription": "Gib den Code deines Freundes ein, damit sie beide kostenlosen Speicherplatz erhalten",
@@ -284,7 +284,7 @@
   "referralStep3": "3. Ihr beide erhaltet {storageInGB} GB* kostenlos",
   "referralsAreCurrentlyPaused": "Einlösungen sind derzeit pausiert",
   "youCanAtMaxDoubleYourStorage": "* Du kannst deinen Speicher maximal verdoppeln",
-  "claimedStorageSoFar": "{isFamilyMember, select, true {Deine Familiengruppe hat bereits {storageAmountInGb} GB erhalten} false {Du hast bereits {storageAmountInGb} GB erhalten} other {Du hast bereits {storageAmountInGb} Gb erhalten!}}",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Deine Familiengruppe hat bereits {storageAmountInGb} GB erhalten} false {Du hast bereits {storageAmountInGb} GB erhalten} other {Du hast bereits {storageAmountInGb} GB erhalten!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
       "isFamilyMember": {

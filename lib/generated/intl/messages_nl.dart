@@ -41,9 +41,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m2(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
             'true':
-                'Jouw familie heeft ${storageAmountInGb} Gb geclaimd tot nu toe',
-            'false': 'Je hebt ${storageAmountInGb} Gb geclaimd tot nu toe',
-            'other': 'Je hebt ${storageAmountInGb} Gb geclaimd tot nu toe!',
+                'Jouw familie heeft ${storageAmountInGb} GB geclaimd tot nu toe',
+            'false': 'Je hebt ${storageAmountInGb} GB geclaimd tot nu toe',
+            'other': 'Je hebt ${storageAmountInGb} GB geclaimd tot nu toe!',
           })}";
 
   static String m47(albumName) =>
@@ -1093,7 +1093,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Deel alleen met de mensen die u wilt"),
         "shareTextConfirmOthersVerificationID": m25,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
-            "Download ente zodat we gemakkelijk foto\'s en video\'s van originele kwaliteit kunnen delen\n\nhttps://ente.io/#download"),
+            "Download ente zodat we gemakkelijk foto\'s en video\'s van originele kwaliteit kunnen delen\n\nhttps://ente.io"),
         "shareTextReferralCode": m26,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Delen met niet-ente gebruikers"),

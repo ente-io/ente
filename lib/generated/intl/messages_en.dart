@@ -40,9 +40,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
-            'true': 'Your family has claimed ${storageAmountInGb} Gb so far',
-            'false': 'You have claimed ${storageAmountInGb} Gb so far',
-            'other': 'You have claimed ${storageAmountInGb} Gb so far!',
+            'true': 'Your family has claimed ${storageAmountInGb} GB so far',
+            'false': 'You have claimed ${storageAmountInGb} GB so far',
+            'other': 'You have claimed ${storageAmountInGb} GB so far!',
           })}";
 
   static String m47(albumName) => "Collaborative link created for ${albumName}";
@@ -1048,7 +1048,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Share only with the people you want"),
         "shareTextConfirmOthersVerificationID": m25,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
-            "Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io/#download"),
+            "Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io"),
         "shareTextReferralCode": m26,
         "shareWithNonenteUsers":
             MessageLookupByLibrary.simpleMessage("Share with non-ente users"),
