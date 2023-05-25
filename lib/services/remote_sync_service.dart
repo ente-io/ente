@@ -169,6 +169,9 @@ class RemoteSyncService {
   Future<void> _pullDiff() async {
     _logger.info("Pulling remote diff");
     final isFirstSync = !_collectionsService.hasSyncedCollections();
+    if (isFirstSync && !_isExistingSyncSilent) {
+        Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
+    }
     await _collectionsService.sync();
     // check and reset user's collection syncTime in past for older clients
     if (isFirstSync) {
