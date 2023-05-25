@@ -98,6 +98,7 @@
   "scan": "Scannen",
   "scanACode": "Scannen eines Codes",
   "verify": "Überprüfen Sie",
+  "verifyEmail": "E-Mail-Adresse verifizieren",
   "enterCodeHint": "Geben Sie den 6-stelligen Code \naus Ihrer Authentifikator-App ein.",
   "lostDeviceTitle": "Gerät verloren?",
   "twoFactorAuthTitle": "Zwei-Faktor-Authentifizierung",
@@ -173,6 +174,19 @@
   "privacyPolicyTitle": "Datenschutzbestimmungen",
   "termsOfServicesTitle": "Bedingungen",
   "encryption": "Verschlüsselung",
+  "setPasswordTitle": "Passwort setzen",
+  "changePasswordTitle": "Passwort ändern",
+  "resetPasswordTitle": "Passwort zurücksetzen",
+  "encryptionKeys": "Verschlüsselungsschlüssel",
+  "passwordWarning": "Wir speichern dieses Passwort nicht. Wenn du es vergisst, <underline>können wir deine Daten nicht entschlüsseln</underline>",
+  "enterPasswordToEncrypt": "Gib ein Passwort ein, mit dem wir deine Daten verschlüsseln können",
+  "enterNewPasswordToEncrypt": "Gib ein neues Passwort ein, mit dem wir deine Daten verschlüsseln können",
+  "passwordChangedSuccessfully": "Passwort erfolgreich geändert",
+  "generatingEncryptionKeys": "Generierung von Verschlüsselungsschlüsseln...",
+  "continueLabel": "Weiter",
+  "insecureDevice": "Unsicheres Gerät",
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Es tut uns leid, wir konnten keine sicheren Schlüssel auf diesem Gerät generieren.\n\nBitte registrieren Sie sich auf einem anderen Gerät.",
+  "howItWorks": "So funktioniert's",
   "ackPasswordLostWarning": "Ich verstehe, dass der Verlust meines Passworts zum Verlust meiner Daten führen kann, denn diese ist <underline>Ende-zu-Ende verschlüsselt</underline>.",
   "loginTerms": "Durch das Klicken auf den Login-Button, stimme ich <u-terms>den Nutzungsbedingungen</u-terms> und den <u-policy>Datenschutzbestimmungen</u-policy> zu",
   "logInLabel": "Einloggen",
@@ -228,5 +242,26 @@
   "sorry": "Entschuldigen sie",
   "importFailureDesc": "Ausgewählte Datei ließ sich nicht verarbeiten.\nBitte wenden sie sich an support@ente.io für Hilfe!",
   "pendingSyncs": "Warnung",
-  "pendingSyncsWarningBody": "Einige Codes wurden nicht gesichert.\n\nBitte gehen sie sicher, dass sie einen Backupcode für diese Codes haben bevor sie sich ausloggen."
+  "pendingSyncsWarningBody": "Einige Codes wurden nicht gesichert.\n\nBitte gehen sie sicher, dass sie einen Backupcode für diese Codes haben bevor sie sich ausloggen.",
+  "checkInboxAndSpamFolder": "Bitte überprüfe deinen E-Mail-Posteingang (und Spam), um die Verifizierung abzuschließen",
+  "tapToEnterCode": "Antippen, um den Code einzugeben",
+  "resendEmail": "E-Mail erneut senden",
+  "weHaveSendEmailTo": "Wir haben eine E-Mail an <green>{email}</green> gesendet",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "activeSessions": "Aktive Sitzungen",
+  "somethingWentWrongPleaseTryAgain": "Ein Fehler ist aufgetreten, bitte versuche es erneut",
+  "thisWillLogYouOutOfThisDevice": "Dadurch wirst du von diesem Gerät abgemeldet!",
+  "thisWillLogYouOutOfTheFollowingDevice": "Dadurch wirst du von folgendem Gerät abgemeldet:",
+  "terminateSession": "Sitzungen beenden?",
+  "terminate": "Beenden",
+  "thisDevice": "Dieses Gerät"
 }
