@@ -44,3 +44,35 @@ class CollectionMagicMetadata {
     );
   }
 }
+
+class CollectionPubMagicMetadata {
+  // sort order while showing collection
+  bool? asc;
+
+  // cover photo id for the collection
+  int? coverID;
+
+  CollectionPubMagicMetadata({this.asc, this.coverID});
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> result = {"asc": asc ?? false};
+    if (coverID != null) {
+      result["coverID"] = coverID!;
+    }
+    return result;
+  }
+
+  factory CollectionPubMagicMetadata.fromEncodedJson(String encodedJson) =>
+      CollectionPubMagicMetadata.fromJson(jsonDecode(encodedJson));
+
+  factory CollectionPubMagicMetadata.fromJson(dynamic json) =>
+      CollectionPubMagicMetadata.fromMap(json);
+
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
+    return CollectionPubMagicMetadata(
+      asc: map["asc"] ?? false,
+      coverID: map["coverID"],
+    );
+  }
+}
