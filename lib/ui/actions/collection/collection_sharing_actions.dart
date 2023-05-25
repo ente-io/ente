@@ -8,7 +8,8 @@ import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/files_split.dart';
-import 'package:photos/models/metadata/magic_metadata.dart';
+import "package:photos/models/metadata/collection_magic.dart";
+import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';
@@ -120,7 +121,7 @@ class CollectionActions {
       final CreateRequest req =
           await collectionsService.buildCollectionCreateRequest(
         dummyName,
-        visibility: visibilityVisible,
+        visibility: visibleVisibility,
         subType: subTypeSharedFilesCollection,
       );
       final collection = await collectionsService.createAndCacheCollection(

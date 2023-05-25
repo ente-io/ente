@@ -26,7 +26,7 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/models/metadata/magic_metadata.dart';
+import "package:photos/models/metadata/collection_magic.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/services/local_sync_service.dart';

@@ -5,7 +5,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
-import 'package:photos/models/metadata/magic_metadata.dart';
+import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
 import "package:photos/services/update_service.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -255,8 +255,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         await FileMagicService.instance.updatePublicMagicMetadata([
           widget.file
         ], {
-          pubMagicKeyLat: locationDataFromExif!.latitude,
-          pubMagicKeyLong: locationDataFromExif.longitude
+          latKey: locationDataFromExif!.latitude,
+          longKey: locationDataFromExif.longitude
         });
         hasLocationData.value = true;
       }

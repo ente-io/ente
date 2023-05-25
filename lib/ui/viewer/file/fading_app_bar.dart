@@ -14,7 +14,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/ignored_file.dart';
-import 'package:photos/models/metadata/magic_metadata.dart';
+import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/services/collections_service.dart';
@@ -156,7 +156,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           // options for files owned by the user
           if (isOwnedByUser && !isFileHidden) {
             final bool isArchived =
-                widget.file.magicMetadata.visibility == visibilityArchive;
+                widget.file.magicMetadata.visibility == archiveVisibility;
             items.add(
               PopupMenuItem(
                 value: 2,
@@ -290,11 +290,11 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   Future<void> _toggleFileArchiveStatus(File file) async {
     final bool isArchived =
-        widget.file.magicMetadata.visibility == visibilityArchive;
+        widget.file.magicMetadata.visibility == archiveVisibility;
     await changeVisibility(
       context,
       [widget.file],
-      isArchived ? visibilityVisible : visibilityArchive,
+      isArchived ? visibleVisibility : archiveVisibility,
     );
     if (mounted) {
       setState(() {});

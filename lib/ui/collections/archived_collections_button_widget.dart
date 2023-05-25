@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/metadata/magic_metadata.dart';
+import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/services/collections_service.dart";
 import 'package:photos/ui/viewer/gallery/archive_page.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -48,7 +48,7 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
                   const Padding(padding: EdgeInsets.all(6)),
                   FutureBuilder<int>(
                     future: FilesDB.instance.archivedFilesCount(
-                      visibilityArchive,
+                      archiveVisibility,
                       Configuration.instance.getUserID()!,
                       hiddenCollectionId,
                     ),

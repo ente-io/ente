@@ -10,7 +10,7 @@ import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import "package:photos/models/file_type.dart";
-import 'package:photos/models/metadata/magic_metadata.dart';
+import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/ui/viewer/file/zoomable_image.dart';
 import 'package:photos/utils/file_util.dart';
@@ -184,7 +184,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
             (widget.file.ownerID ?? 0) == Configuration.instance.getUserID()!) {
           FileMagicService.instance.updatePublicMagicMetadata(
             [widget.file],
-            {pubMotionVideoIndex: index.start},
+            {motionVideoIndexKey: index.start},
           ).ignore();
         }
         return motionPhoto.getMotionVideoFile(

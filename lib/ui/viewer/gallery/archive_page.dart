@@ -6,7 +6,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/gallery_type.dart';
-import 'package:photos/models/metadata/magic_metadata.dart';
+import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/ui/components/album_horizontal_list_widget.dart";
@@ -38,7 +38,7 @@ class ArchivePage extends StatelessWidget {
           creationStartTime,
           creationEndTime,
           Configuration.instance.getUserID()!,
-          visibility: visibilityArchive,
+          visibility: archiveVisibility,
           limit: limit,
           asc: asc,
           ignoredCollectionIDs: hiddenCollectionIDs,

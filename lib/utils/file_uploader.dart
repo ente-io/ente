@@ -23,7 +23,8 @@ import 'package:photos/main.dart';
 import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/models/metadata/magic_metadata.dart';
+import "package:photos/models/metadata/file_magic.dart";
+
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/file_magic_service.dart";
@@ -462,11 +463,11 @@ class FileUploader {
         if ((mediaUploadData.height ?? 0) != 0 &&
             (mediaUploadData.width ?? 0) != 0) {
           final pubMetadata = {
-            publicMagicKeyHeight: mediaUploadData.height,
-            publicMagicKeyWidth: mediaUploadData.width
+            heightKey: mediaUploadData.height,
+            widthKey: mediaUploadData.width
           };
           if (mediaUploadData.motionPhotoStartIndex != null) {
-            pubMetadata[pubMotionVideoIndex] =
+            pubMetadata[motionVideoIndexKey] =
                 mediaUploadData.motionPhotoStartIndex;
           }
           pubMetadataRequest = await getPubMetadataRequest(
