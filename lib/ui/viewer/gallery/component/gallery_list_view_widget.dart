@@ -31,6 +31,7 @@ class GalleryListView extends StatelessWidget {
   final bool shouldCollateFilesByDay;
   final String logTag;
   final Logger logger;
+  final bool sortOrderAsc;
 
   const GalleryListView({
     required this.hugeListViewKey,
@@ -50,6 +51,7 @@ class GalleryListView extends StatelessWidget {
     required this.shouldCollateFilesByDay,
     required this.logTag,
     required this.logger,
+    required this.sortOrderAsc,
     super.key,
   });
 
@@ -91,6 +93,7 @@ class GalleryListView extends StatelessWidget {
           reloadEvent,
           removalEventTypes,
           asyncLoader,
+          sortOrderAsc,
           selectedFiles,
           tagPrefix,
           Bus.instance
