@@ -74,6 +74,7 @@ class CollectionPage extends StatelessWidget {
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
       albumName: c.collection.name,
+      sortOrderAsc: false,
     );
     return Scaffold(
       appBar: PreferredSize(

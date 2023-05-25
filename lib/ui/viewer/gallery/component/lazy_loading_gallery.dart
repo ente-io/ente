@@ -21,6 +21,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final Stream<FilesUpdatedEvent>? reloadEvent;
   final Set<EventType> removalEventTypes;
   final GalleryLoader asyncLoader;
+  final bool sortOrderAsc;
   final SelectedFiles? selectedFiles;
   final String tag;
   final String? logTag;
@@ -34,6 +35,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.reloadEvent,
     this.removalEventTypes,
     this.asyncLoader,
+    this.sortOrderAsc,
     this.selectedFiles,
     this.tag,
     this.currentIndexStream,
@@ -112,6 +114,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         final result = await widget.asyncLoader(
           dayStartTime.microsecondsSinceEpoch,
           dayStartTime.microsecondsSinceEpoch + microSecondsInDay - 1,
+          asc: widget.sortOrderAsc,
         );
         if (mounted) {
           setState(() {
