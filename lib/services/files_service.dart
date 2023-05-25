@@ -7,7 +7,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/extensions/list.dart';
 import 'package:photos/models/file.dart';
 import "package:photos/models/file_load_result.dart";
-import 'package:photos/models/magic_metadata.dart';
+import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/services/file_magic_service.dart';
 import "package:photos/services/ignored_files_service.dart";
 import 'package:photos/utils/date_time_util.dart';
@@ -75,7 +75,7 @@ class FilesService {
       if (timeResult != null) {
         remoteFilesToUpdate.add(remoteFile);
         fileIDToUpdateMetadata[remoteFile.uploadedFileID!] = {
-          pubMagicKeyEditedTime: timeResult,
+          editTimeKey: timeResult,
         };
       }
     }

@@ -9,7 +9,8 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/models/ente_file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location/location.dart';
-import 'package:photos/models/magic_metadata.dart';
+import "package:photos/models/metadata/file_magic.dart";
+
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/exif_util.dart';

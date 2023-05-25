@@ -17,7 +17,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/file_type.dart';
 import "package:photos/models/location/location.dart";
-import "package:photos/models/magic_metadata.dart";
+import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';

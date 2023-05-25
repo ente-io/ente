@@ -10,7 +10,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location/location.dart';
-import 'package:photos/models/magic_metadata.dart';
+import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
@@ -264,7 +264,7 @@ class FilesDB {
         ALTER TABLE $filesTable ADD COLUMN $columnMMdVersion INTEGER DEFAULT 0;
       ''',
       '''
-        ALTER TABLE $filesTable ADD COLUMN $columnMMdVisibility INTEGER DEFAULT $visibilityVisible;
+        ALTER TABLE $filesTable ADD COLUMN $columnMMdVisibility INTEGER DEFAULT $visibleVisibility;
       '''
     ];
   }
@@ -500,7 +500,7 @@ class FilesDB {
     int ownerID, {
     int? limit,
     bool? asc,
-    int visibility = visibilityVisible,
+    int visibility = visibleVisibility,
     Set<int>? ignoredCollectionIDs,
   }) async {
     final stopWatch = Stopwatch()..start();
@@ -542,7 +542,7 @@ class FilesDB {
       where:
           '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
           ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime, ownerID, visibilityVisible],
+      whereArgs: [startTime, endTime, ownerID, visibleVisibility],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
@@ -613,7 +613,7 @@ class FilesDB {
     int endTime, {
     int? limit,
     bool? asc,
-    int visibility = visibilityVisible,
+    int visibility = visibleVisibility,
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -703,7 +703,7 @@ class FilesDB {
         whereClause += " OR ";
       }
     }
-    whereClause += ") AND $columnMMdVisibility = $visibilityVisible";
+    whereClause += ") AND $columnMMdVisibility = $visibleVisibility";
     final results = await db.query(
       filesTable,
       where: whereClause,
@@ -1484,7 +1484,7 @@ class FilesDB {
           ' AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND '
           '($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
           ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime, visibilityVisible],
+      whereArgs: [startTime, endTime, visibleVisibility],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
