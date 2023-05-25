@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    _textController.addListener(_applyFiltering);
+    _textController.addListener(_applyFilteringAndRefresh);
     _loadCodes();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
@@ -71,11 +71,11 @@ class _HomePageState extends State<HomePage> {
     CodeStore.instance.getAllCodes().then((codes) {
       _codes = codes;
       _hasLoaded = true;
-      _applyFiltering();
+      _applyFilteringAndRefresh();
     });
   }
 
-  void _applyFiltering() {
+  void _applyFilteringAndRefresh() {
     if (_searchText.isNotEmpty && _showSearchBox) {
       final String val = _searchText.toLowerCase();
       _filteredCodes = _codes
@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _streamSubscription?.cancel();
     _triggerLogoutEvent?.cancel();
-    _textController.removeListener(_applyFiltering);
+    _textController.removeListener(_applyFilteringAndRefresh);
     super.dispose();
   }
 
@@ -110,6 +110,10 @@ class _HomePageState extends State<HomePage> {
     );
     if (code != null) {
       CodeStore.instance.addCode(code);
+      // Focus the new code by searching
+      if (_codes.length > 2) {
+        _focusNewCode(code);
+      }
     }
   }
 
@@ -169,7 +173,7 @@ class _HomePageState extends State<HomePage> {
                   controller: _textController,
                   onChanged: (val) {
                     _searchText = val;
-                    _applyFiltering();
+                    _applyFilteringAndRefresh();
                   },
                   decoration: InputDecoration(
                     hintText: l10n.searchHint,
@@ -191,7 +195,7 @@ class _HomePageState extends State<HomePage> {
                     } else {
                       _searchText = _textController.text;
                     }
-                    _applyFiltering();
+                    _applyFilteringAndRefresh();
                   },
                 );
               },
@@ -306,16 +310,19 @@ class _HomePageState extends State<HomePage> {
         final newCode = Code.fromRawData(link);
         getNextTotp(newCode);
         CodeStore.instance.addCode(newCode);
-        _showSearchBox = true;
-        _textController.text = newCode.account;
-        _searchText = newCode.account;
-        _applyFiltering();
-        setState(() {});
+        _focusNewCode(newCode);
       } catch (e, s) {
         showGenericErrorDialog(context: context);
         _logger.severe("error while handling deeplink", e, s);
       }
     }
+  }
+
+  void _focusNewCode(Code newCode) {
+    _showSearchBox = true;
+    _textController.text = newCode.account;
+    _searchText = newCode.account;
+    _applyFilteringAndRefresh();
   }
 
   Widget _getFab() {
