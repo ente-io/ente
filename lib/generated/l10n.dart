@@ -5233,6 +5233,36 @@ class S {
     );
   }
 
+  /// `Sort by`
+  String get sortAlbumsBy {
+    return Intl.message(
+      'Sort by',
+      name: 'sortAlbumsBy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Newest first`
+  String get sortNewestFirst {
+    return Intl.message(
+      'Newest first',
+      name: 'sortNewestFirst',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Oldest first`
+  String get sortOldestFirst {
+    return Intl.message(
+      'Oldest first',
+      name: 'sortOldestFirst',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Rename`
   String get rename {
     return Intl.message(

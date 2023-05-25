@@ -305,6 +305,22 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (widget.collection!.type != CollectionType.favorites) {
         items.add(
           PopupMenuItem(
+            value: 6,
+            child: Row(
+              children: [
+                const Icon(Icons.sort_outlined),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(
+                  S.of(context).sortAlbumsBy,
+                ),
+              ],
+            ),
+          ),
+        );
+        items.add(
+          PopupMenuItem(
             value: 3,
             child: Row(
               children: [
@@ -375,6 +391,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               await _leaveAlbum(context);
             } else if (value == 5) {
               await _deleteBackedUpFiles(context);
+            } else if (value == 6) {
+              await _showSortOption(context);
             } else {
               showToast(context, S.of(context).somethingWentWrong);
             }
@@ -384,6 +402,31 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
 
     return actions;
+  }
+
+  Future<void> _showSortOption(BuildContext bContext) async {
+    final bool? sortByAsc = await showMenu<bool>(
+      context: bContext,
+      position: RelativeRect.fromLTRB(
+        MediaQuery.of(context).size.width,
+        kToolbarHeight + 12,
+        12,
+        0,
+      ),
+      items: [
+        PopupMenuItem(
+          value: false,
+          child: Text(S.of(context).sortNewestFirst),
+        ),
+        PopupMenuItem(
+          value: true,
+          child: Text(S.of(context).sortOldestFirst),
+        ),
+      ],
+    );
+    if (sortByAsc != null) {
+      showShortToast(context, "coming soon");
+    }
   }
 
   Future<void> _trashCollection() async {
