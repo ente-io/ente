@@ -162,6 +162,10 @@ class RemoteSyncService {
     }
   }
 
+  bool isFirstRemoteSyncDone() {
+    return _prefs.containsKey(_isFirstRemoteSyncDone);
+  }
+
   Future<void> _pullDiff() async {
     _logger.info("Pulling remote diff");
     final isFirstSync = !_collectionsService.hasSyncedCollections();
