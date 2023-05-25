@@ -42,6 +42,7 @@ class Gallery extends StatefulWidget {
   final Widget loadingWidget;
   final bool disableScroll;
   final bool limitSelectionToOne;
+  final bool sortOrderAsc;
 
   const Gallery({
     required this.asyncLoader,
@@ -60,6 +61,7 @@ class Gallery extends StatefulWidget {
     this.loadingWidget = const EnteLoadingWidget(),
     this.disableScroll = false,
     this.limitSelectionToOne = false,
+    this.sortOrderAsc = false,
     Key? key,
   }) : super(key: key);
 
@@ -126,7 +128,7 @@ class _GalleryState extends State<Gallery> {
         );
       }
     }
-    if (widget.initialFiles != null) {
+    if (widget.initialFiles != null && !widget.sortOrderAsc) {
       _onFilesLoaded(widget.initialFiles!);
     }
     _loadFiles(limit: kInitialLoadLimit).then((result) async {
@@ -154,6 +156,7 @@ class _GalleryState extends State<Gallery> {
         galleryLoadStartTime,
         galleryLoadEndTime,
         limit: limit,
+        asc: widget.sortOrderAsc,
       );
       final endTime = DateTime.now().microsecondsSinceEpoch;
       final duration = Duration(microseconds: endTime - startTime);
@@ -213,6 +216,7 @@ class _GalleryState extends State<Gallery> {
       disableScroll: widget.disableScroll,
       emptyState: widget.emptyState,
       asyncLoader: widget.asyncLoader,
+      sortOrderAsc: widget.sortOrderAsc,
       removalEventTypes: widget.removalEventTypes,
       tagPrefix: widget.tagPrefix,
       scrollBottomSafeArea: widget.scrollBottomSafeArea,
@@ -244,8 +248,13 @@ class _GalleryState extends State<Gallery> {
     if (dailyFiles.isNotEmpty) {
       collatedFiles.add(dailyFiles);
     }
-    collatedFiles
-        .sort((a, b) => b[0].creationTime!.compareTo(a[0].creationTime!));
+    if (widget.sortOrderAsc) {
+      collatedFiles
+          .sort((a, b) => a[0].creationTime!.compareTo(b[0].creationTime!));
+    } else {
+      collatedFiles
+          .sort((a, b) => b[0].creationTime!.compareTo(a[0].creationTime!));
+    }
     return collatedFiles;
   }
 }
