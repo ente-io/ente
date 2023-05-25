@@ -8,7 +8,7 @@ import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/files_split.dart';
-import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/models/metadata/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';

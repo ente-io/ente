@@ -13,7 +13,7 @@ import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/extensions/list.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/models/metadata/magic_metadata.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';

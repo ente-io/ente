@@ -14,7 +14,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/ignored_file.dart';
-import "package:photos/models/magic_metadata.dart";
+import 'package:photos/models/metadata/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/services/collections_service.dart';

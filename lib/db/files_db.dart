@@ -10,7 +10,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location/location.dart';
-import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/models/metadata/magic_metadata.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';

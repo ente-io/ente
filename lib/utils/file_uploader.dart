@@ -23,7 +23,7 @@ import 'package:photos/main.dart';
 import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
-import "package:photos/models/magic_metadata.dart";
+import 'package:photos/models/metadata/magic_metadata.dart';
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/file_magic_service.dart";

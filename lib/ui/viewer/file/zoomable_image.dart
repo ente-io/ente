@@ -13,7 +13,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
-import "package:photos/models/magic_metadata.dart";
+import 'package:photos/models/metadata/magic_metadata.dart';
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';

@@ -8,7 +8,7 @@ import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/files_split.dart';
 import 'package:photos/models/gallery_type.dart';
-import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/models/metadata/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';

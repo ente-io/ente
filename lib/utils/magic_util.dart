@@ -6,7 +6,7 @@ import 'package:photos/events/force_reload_home_gallery_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/models/metadata/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/ui/common/progress_dialog.dart';

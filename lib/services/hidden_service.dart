@@ -10,7 +10,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/models/metadata/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/utils/crypto_util.dart';

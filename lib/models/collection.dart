@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
-import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/models/metadata/magic_metadata.dart';
 
 class Collection {
   final int id;
