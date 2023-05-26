@@ -77,6 +77,22 @@ Future<void> changeCollectionVisibility(
   }
 }
 
+Future<void> changeSortOrder(
+  BuildContext context,
+  Collection collection,
+  bool sortedInAscOrder,
+) async {
+  try {
+    final Map<String, dynamic> update = {"asc": sortedInAscOrder};
+    await CollectionsService.instance
+        .updatePublicMagicMetadata(collection, update);
+  } catch (e, s) {
+    _logger.severe("failed to update collection visibility", e, s);
+    showShortToast(context, S.of(context).somethingWentWrong);
+    rethrow;
+  }
+}
+
 Future<bool> editTime(
   BuildContext context,
   List<File> files,

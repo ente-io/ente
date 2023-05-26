@@ -425,7 +425,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       ],
     );
     if (sortByAsc != null) {
-      showShortToast(context, "coming soon");
+      changeSortOrder(bContext, widget.collection!, sortByAsc);
     }
   }
 

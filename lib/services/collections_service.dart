@@ -610,6 +610,65 @@ class CollectionsService {
     }
   }
 
+  Future<void> updatePublicMagicMetadata(
+    Collection collection,
+    Map<String, dynamic> newMetadataUpdate,
+  ) async {
+    final int ownerID = Configuration.instance.getUserID()!;
+    try {
+      if (collection.owner?.id != ownerID) {
+        throw AssertionError("cannot modify albums not owned by you");
+      }
+      // read the existing magic metadata and apply new updates to existing data
+      // current update is simple replace. This will be enhanced in the future,
+      // as required.
+      final Map<String, dynamic> jsonToUpdate =
+          jsonDecode(collection.mMdPubEncodedJson ?? '{}');
+      newMetadataUpdate.forEach((key, value) {
+        jsonToUpdate[key] = value;
+      });
+
+      final key = getCollectionKey(collection.id);
+      final encryptedMMd = await CryptoUtil.encryptChaCha(
+        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        key,
+      );
+      // for required field, the json validator on golang doesn't treat 0 as valid
+      // value. Instead of changing version to ptr, decided to start version with 1.
+      final int currentVersion = max(collection.mMbPubVersion, 1);
+      final params = UpdateMagicMetadataRequest(
+        id: collection.id,
+        magicMetadata: MetadataRequest(
+          version: currentVersion,
+          count: jsonToUpdate.length,
+          data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+          header: CryptoUtil.bin2base64(encryptedMMd.header!),
+        ),
+      );
+      await _enteDio.put(
+        "/collections/public-magic-metadata",
+        data: params,
+      );
+      // update the local information so that it's reflected on UI
+      collection.mMdPubEncodedJson = jsonEncode(jsonToUpdate);
+      collection.pubMagicMetadata =
+          CollectionPubMagicMetadata.fromJson(jsonToUpdate);
+      collection.mMbPubVersion = currentVersion + 1;
+      _cacheCollectionAttributes(collection);
+      // trigger sync to fetch the latest collection state from server
+      sync().ignore();
+    } on DioError catch (e) {
+      if (e.response != null && e.response?.statusCode == 409) {
+        _logger.severe('collection magic data out of sync');
+        sync().ignore();
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to sync magic metadata", e, s);
+      rethrow;
+    }
+  }
+
   Future<void> createShareUrl(
     Collection collection, {
     bool enableCollect = false,

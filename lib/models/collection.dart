@@ -22,13 +22,22 @@ class Collection {
   final int updationTime;
   final bool isDeleted;
   String? mMdEncodedJson;
+  String? mMdPubEncodedJson;
   int mMdVersion = 0;
+  int mMbPubVersion = 0;
   CollectionMagicMetadata? _mmd;
+  CollectionPubMagicMetadata? _pubMmd;
 
   CollectionMagicMetadata get magicMetadata =>
       _mmd ?? CollectionMagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
 
+  CollectionPubMagicMetadata get pubMagicMetadata =>
+      _pubMmd ??
+      CollectionPubMagicMetadata.fromEncodedJson(mMdPubEncodedJson ?? '{}');
+
   set magicMetadata(val) => _mmd = val;
+
+  set pubMagicMetadata(val) => _pubMmd = val;
 
   Collection(
     this.id,
