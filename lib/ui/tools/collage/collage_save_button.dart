@@ -1,4 +1,6 @@
 import "package:flutter/widgets.dart";
+import "package:flutter_image_compress/flutter_image_compress.dart";
+import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -29,14 +31,21 @@ class SaveCollageButton extends StatelessWidget {
         labelText: S.of(context).saveCollage,
         onTap: () async {
           final bytes = await controller.capture();
+          Logger("Compress").info('Size before compression = ${bytes!.length}');
+          final compressedBytes = await FlutterImageCompress.compressWithList(
+            bytes!,
+            quality: 80,
+          );
+          Logger("Compress")
+              .info('Size after compression = ${compressedBytes.length}');
           final fileName = "ente_collage_" +
               DateTime.now().microsecondsSinceEpoch.toString() +
               ".jpeg";
           //Disabling notifications for assets changing to insert the file into
           //files db before triggering a sync.
           PhotoManager.stopChangeNotify();
-          final AssetEntity? newAsset =
-              await (PhotoManager.editor.saveImage(bytes!, title: fileName));
+          final AssetEntity? newAsset = await (PhotoManager.editor
+              .saveImage(compressedBytes, title: fileName));
           final newFile = await File.fromAsset('', newAsset!);
           newFile.generatedID = await FilesDB.instance.insert(newFile);
           Bus.instance
