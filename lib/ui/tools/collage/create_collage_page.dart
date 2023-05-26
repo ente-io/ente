@@ -10,6 +10,7 @@ import "package:photos/models/file.dart";
 import "package:photos/services/sync_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/tools/collage/three_image_collage_creator.dart";
 import 'package:photos/ui/tools/collage/two_image_collage_creator.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -40,18 +41,32 @@ class CreateCollagePage extends StatelessWidget {
 
   Widget _getBody(BuildContext context) {
     final count = files.length;
+    Widget collage;
+    switch (count) {
+      case 2:
+        collage = TwoImageCollageCreator(
+          files[0],
+          files[1],
+          _widgetsToImageController,
+        );
+        break;
+      case 3:
+        collage = ThreeImageCollageCreator(
+          files[0],
+          files[1],
+          files[2],
+          _widgetsToImageController,
+        );
+        break;
+      default:
+        collage = _getGrid();
+    }
 
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
         children: [
-          count == 2
-              ? TwoImageCollageCreator(
-                  files[0],
-                  files[1],
-                  _widgetsToImageController,
-                )
-              : _getGrid(),
+          collage,
           const SizedBox(
             height: 24,
           ),
