@@ -77,7 +77,7 @@
     "DOWNLOAD_OPTION": "下载 (D)",
     "DOWNLOAD_FAVORITES": "下载收藏",
     "DOWNLOAD_UNCATEGORIZED": "下载未分类的",
-    "DOWNLOAD_HIDDEN": "",
+    "DOWNLOAD_HIDDEN": "下载已隐藏的内容",
     "COPY_OPTION": "复制为 PNG (Ctrl/Cmd - C)",
     "TOGGLE_FULLSCREEN": "切换至全屏 (F)",
     "ZOOM_IN_OUT": "放大/缩小",
@@ -491,7 +491,7 @@
     "PUBLIC_COLLECT_SUBTEXT": "允许具有链接的人也将照片添加到共享相册。",
     "STOP_EXPORT": "停止",
     "EXPORT_PROGRESS": "<a>{{progress.success}} / {{progress.total}}</a> 个文件已导出",
-    "MIGRATING_EXPORT": "",
+    "MIGRATING_EXPORT": "准备中...",
     "EXPORT_NOTIFICATION": {
         "START": "导出已开始",
         "IN_PROGRESS": "导出已在进行中",
@@ -520,8 +520,8 @@
     "at": "在",
     "AUTH_NEXT": "下一个",
     "AUTH_DOWNLOAD_MOBILE_APP": "下载我们的移动应用程序来管理您的密钥",
-    "HIDDEN": "",
-    "HIDE": "",
-    "UNHIDE": "",
-    "UNHIDE_TO_COLLECTION": ""
+    "HIDDEN": "已隐藏",
+    "HIDE": "隐藏",
+    "UNHIDE": "取消隐藏",
+    "UNHIDE_TO_COLLECTION": "取消隐藏到相册"
 }
