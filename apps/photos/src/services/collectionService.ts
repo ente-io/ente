@@ -28,6 +28,7 @@ import {
     EncryptedCollection,
     CollectionMagicMetadata,
     CollectionMagicMetadataProps,
+    CollectionPublicMagicMetadata,
     RemoveFromCollectionRequest,
 } from 'types/collection';
 import {
@@ -130,11 +131,24 @@ const getCollectionWithSecrets = async (
             ),
         };
     }
+    let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
+    if (collection.pubMagicMetadata?.data) {
+        collectionPublicMagicMetadata = {
+            ...collection.pubMagicMetadata,
+            data: await cryptoWorker.decryptMetadata(
+                collection.pubMagicMetadata.data,
+                collection.pubMagicMetadata.header,
+                collectionKey
+            ),
+        };
+    }
+
     return {
         ...collection,
         name: collectionName,
         key: collectionKey,
         magicMetadata: collectionMagicMetadata,
+        pubMagicMetadata: collectionPublicMagicMetadata,
     };
 };
 
@@ -357,6 +371,7 @@ const createCollection = async (
             updationTime: null,
             isDeleted: false,
             magicMetadata: encryptedMagicMetadata,
+            pubMagicMetadata: null,
         };
         const createdCollection = await postCollection(newCollection, token);
         const decryptedCreatedCollection = await getCollectionWithSecrets(

@@ -24,6 +24,7 @@ export interface EncryptedCollection {
     updationTime: number;
     isDeleted: boolean;
     magicMetadata: EncryptedMagicMetadata;
+    pubMagicMetadata: EncryptedMagicMetadata;
 }
 
 export interface Collection
@@ -34,10 +35,12 @@ export interface Collection
         | 'encryptedName'
         | 'nameDecryptionNonce'
         | 'magicMetadata'
+        | 'pubMagicMetadata'
     > {
     key: string;
     name: string;
     magicMetadata: CollectionMagicMetadata;
+    pubMagicMetadata: CollectionPublicMagicMetadata;
 }
 
 export interface PublicURL {
@@ -108,6 +111,16 @@ export interface CollectionMagicMetadataProps {
 export interface CollectionMagicMetadata
     extends Omit<MagicMetadataCore, 'data'> {
     data: CollectionMagicMetadataProps;
+}
+
+export interface CollectionPublicMagicMetadataProps {
+    asc?: boolean;
+    coverID?: number;
+}
+
+export interface CollectionPublicMagicMetadata
+    extends Omit<MagicMetadataCore, 'data'> {
+    data: CollectionPublicMagicMetadataProps;
 }
 export interface CollectionSummary {
     id: number;

@@ -395,6 +395,16 @@ export default function Gallery() {
                 ...files.filter((file) => deletedFileIds?.has(file.id)),
             ]);
         }
+        let sortAsc = false;
+        if (activeCollection > 0) {
+            // find matching collection in collections
+            for (const collection of collections) {
+                if (collection.id === activeCollection) {
+                    sortAsc = collection?.pubMagicMetadata?.data?.asc ?? false;
+                    break;
+                }
+            }
+        }
 
         return getUniqueFiles(
             files.filter((item) => {
@@ -493,7 +503,8 @@ export default function Gallery() {
                 } else {
                     return false;
                 }
-            })
+            }),
+            sortAsc
         );
     }, [
         files,

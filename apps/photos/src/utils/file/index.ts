@@ -441,9 +441,9 @@ export async function getFileFromURL(fileURL: string) {
     return fileFile;
 }
 
-export function getUniqueFiles(files: EnteFile[]) {
+export function getUniqueFiles(files: EnteFile[], sortAsc = false) {
     const idSet = new Set<number>();
-    return files.filter((file) => {
+    const uniqueFiles = files.filter((file) => {
         if (!idSet.has(file.id)) {
             idSet.add(file.id);
             return true;
@@ -451,6 +451,13 @@ export function getUniqueFiles(files: EnteFile[]) {
             return false;
         }
     });
+
+    if (sortAsc === true) {
+        return uniqueFiles.sort(
+            (a, b) => a.metadata.creationTime - b.metadata.creationTime
+        );
+    }
+    return uniqueFiles;
 }
 
 export async function downloadFiles(files: EnteFile[]) {
