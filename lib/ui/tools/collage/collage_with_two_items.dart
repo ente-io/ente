@@ -1,3 +1,4 @@
+import "package:flutter/material.dart";
 import "package:flutter/widgets.dart";
 import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart";
 import "package:photos/models/file.dart";
@@ -97,32 +98,37 @@ class FirstVariant extends StatelessWidget {
     super.key,
     this.mainAxisSpacing = 4,
     this.crossAxisSpacing = 4,
+    this.color = Colors.white,
   });
 
   final Widget first, second;
   final double mainAxisSpacing, crossAxisSpacing;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(6),
-      child: StaggeredGrid.count(
-        crossAxisCount: 2,
-        mainAxisSpacing: mainAxisSpacing,
-        crossAxisSpacing: crossAxisSpacing,
-        axisDirection: AxisDirection.down,
-        children: [
-          StaggeredGridTile.count(
-            crossAxisCellCount: 1,
-            mainAxisCellCount: 2,
-            child: first,
-          ),
-          StaggeredGridTile.count(
-            crossAxisCellCount: 1,
-            mainAxisCellCount: 2,
-            child: second,
-          ),
-        ],
+    return Container(
+      color: color,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: StaggeredGrid.count(
+          crossAxisCount: 2,
+          mainAxisSpacing: mainAxisSpacing,
+          crossAxisSpacing: crossAxisSpacing,
+          axisDirection: AxisDirection.down,
+          children: [
+            StaggeredGridTile.count(
+              crossAxisCellCount: 1,
+              mainAxisCellCount: 2,
+              child: first,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 1,
+              mainAxisCellCount: 2,
+              child: second,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -135,32 +141,37 @@ class SecondVariant extends StatelessWidget {
     super.key,
     this.mainAxisSpacing = 4,
     this.crossAxisSpacing = 4,
+    this.color = Colors.white,
   });
 
   final Widget first, second;
   final double mainAxisSpacing, crossAxisSpacing;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(6),
-      child: StaggeredGrid.count(
-        crossAxisCount: 2,
-        mainAxisSpacing: mainAxisSpacing,
-        crossAxisSpacing: crossAxisSpacing,
-        axisDirection: AxisDirection.down,
-        children: [
-          StaggeredGridTile.count(
-            crossAxisCellCount: 2,
-            mainAxisCellCount: 1,
-            child: first,
-          ),
-          StaggeredGridTile.count(
-            crossAxisCellCount: 2,
-            mainAxisCellCount: 1,
-            child: second,
-          ),
-        ],
+    return Container(
+      color: color,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: StaggeredGrid.count(
+          crossAxisCount: 2,
+          mainAxisSpacing: mainAxisSpacing,
+          crossAxisSpacing: crossAxisSpacing,
+          axisDirection: AxisDirection.down,
+          children: [
+            StaggeredGridTile.count(
+              crossAxisCellCount: 2,
+              mainAxisCellCount: 1,
+              child: first,
+            ),
+            StaggeredGridTile.count(
+              crossAxisCellCount: 2,
+              mainAxisCellCount: 1,
+              child: second,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -182,6 +193,7 @@ class FirstVariantIcon extends StatelessWidget {
         CollageItemIcon(isActive: isActive),
         mainAxisSpacing: 2,
         crossAxisSpacing: 2,
+        color: Colors.transparent,
       ),
     );
   }
@@ -202,6 +214,7 @@ class SecondVariantIcon extends StatelessWidget {
         CollageItemIcon(isActive: isActive),
         mainAxisSpacing: 2,
         crossAxisSpacing: 2,
+        color: Colors.transparent,
       ),
     );
   }
