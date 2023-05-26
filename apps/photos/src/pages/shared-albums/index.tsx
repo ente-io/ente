@@ -167,6 +167,8 @@ export default function PublicCollectionGallery() {
                     collectionKey.current
                 );
                 if (localCollection) {
+                    const sortAsc: boolean =
+                        localCollection?.pubMagicMetadata?.data.asc ?? false;
                     setPublicCollection(localCollection);
                     const isPasswordProtected =
                         localCollection?.publicURLs?.[0]?.passwordEnabled;
@@ -174,7 +176,8 @@ export default function PublicCollectionGallery() {
                     const collectionUID = getPublicCollectionUID(token.current);
                     const localFiles = await getLocalPublicFiles(collectionUID);
                     const localPublicFiles = sortFiles(
-                        mergeMetadata(localFiles)
+                        mergeMetadata(localFiles),
+                        sortAsc
                     );
                     setPublicFiles(localPublicFiles);
                     passwordJWTToken.current =

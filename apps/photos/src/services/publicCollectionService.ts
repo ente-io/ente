@@ -166,18 +166,20 @@ export const syncPublicFiles = async (
 ) => {
     try {
         let files: EnteFile[] = [];
+        const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
         const collectionUID = getPublicCollectionUID(token);
         const localFiles = await getLocalPublicFiles(collectionUID);
+
         files = [...files, ...localFiles];
         try {
             if (!token) {
-                return files;
+                return sortFiles(files, sortAsc);
             }
             const lastSyncTime = await getPublicCollectionLastSyncTime(
                 collectionUID
             );
             if (collection.updationTime === lastSyncTime) {
-                return files;
+                return sortFiles(files, sortAsc);
             }
             const fetchedFiles = await getPublicFiles(
                 token,
@@ -212,7 +214,7 @@ export const syncPublicFiles = async (
                 collectionUID,
                 collection.updationTime
             );
-            setPublicFiles([...sortFiles(mergeMetadata(files))]);
+            setPublicFiles([...sortFiles(mergeMetadata(files), sortAsc)]);
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
             logError(e, 'failed to sync shared collection files');
@@ -220,7 +222,7 @@ export const syncPublicFiles = async (
                 throw e;
             }
         }
-        return [...sortFiles(mergeMetadata(files))];
+        return [...sortFiles(mergeMetadata(files), sortAsc)];
     } catch (e) {
         logError(e, 'failed to get local  or sync shared collection files');
         throw e;
@@ -239,6 +241,7 @@ const getPublicFiles = async (
         let decryptedFiles: EnteFile[] = [];
         let time = sinceTime;
         let resp;
+        const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
         do {
             if (!token) {
                 break;
@@ -278,7 +281,8 @@ const getPublicFiles = async (
                         [...(files || []), ...decryptedFiles].filter(
                             (item) => !item.isDeleted
                         )
-                    )
+                    ),
+                    sortAsc
                 )
             );
         } while (resp.data.hasMore);
