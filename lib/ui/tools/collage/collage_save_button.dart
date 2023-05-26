@@ -23,33 +23,35 @@ class SaveCollageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ButtonWidget(
-      buttonType: ButtonType.neutral,
-      labelText: S.of(context).saveCollage,
-      onTap: () async {
-        final bytes = await controller.capture();
-        final fileName = "ente_collage_" +
-            DateTime.now().microsecondsSinceEpoch.toString() +
-            ".jpeg";
-        //Disabling notifications for assets changing to insert the file into
-        //files db before triggering a sync.
-        PhotoManager.stopChangeNotify();
-        final AssetEntity? newAsset =
-            await (PhotoManager.editor.saveImage(bytes!, title: fileName));
-        final newFile = await File.fromAsset('', newAsset!);
-        newFile.generatedID = await FilesDB.instance.insert(newFile);
-        Bus.instance
-            .fire(LocalPhotosUpdatedEvent([newFile], source: "collageSave"));
-        SyncService.instance.sync();
-        showShortToast(context, S.of(context).collageSaved);
-        replacePage(
-          context,
-          DetailPage(
-            DetailPageConfiguration([newFile], null, 0, "collage"),
-          ),
-        );
-      },
-      shouldSurfaceExecutionStates: true,
+    return SafeArea(
+      child: ButtonWidget(
+        buttonType: ButtonType.neutral,
+        labelText: S.of(context).saveCollage,
+        onTap: () async {
+          final bytes = await controller.capture();
+          final fileName = "ente_collage_" +
+              DateTime.now().microsecondsSinceEpoch.toString() +
+              ".jpeg";
+          //Disabling notifications for assets changing to insert the file into
+          //files db before triggering a sync.
+          PhotoManager.stopChangeNotify();
+          final AssetEntity? newAsset =
+              await (PhotoManager.editor.saveImage(bytes!, title: fileName));
+          final newFile = await File.fromAsset('', newAsset!);
+          newFile.generatedID = await FilesDB.instance.insert(newFile);
+          Bus.instance
+              .fire(LocalPhotosUpdatedEvent([newFile], source: "collageSave"));
+          SyncService.instance.sync();
+          showShortToast(context, S.of(context).collageSaved);
+          replacePage(
+            context,
+            DetailPage(
+              DetailPageConfiguration([newFile], null, 0, "collage"),
+            ),
+          );
+        },
+        shouldSurfaceExecutionStates: true,
+      ),
     );
   }
 }

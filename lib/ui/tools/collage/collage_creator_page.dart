@@ -2,21 +2,18 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
-import "package:photos/ui/tools/collage/collage_save_button.dart";
 import "package:photos/ui/tools/collage/collage_test_grid.dart";
 import "package:photos/ui/tools/collage/collage_with_five_items.dart";
 import "package:photos/ui/tools/collage/collage_with_four_items.dart";
 import "package:photos/ui/tools/collage/collage_with_six_items.dart";
 import "package:photos/ui/tools/collage/collage_with_three_items.dart";
 import "package:photos/ui/tools/collage/collage_with_two_items.dart";
-import "package:widgets_to_image/widgets_to_image.dart";
 
 class CollageCreatorPage extends StatelessWidget {
   static const int collageItemsMin = 2;
   static const int collageItemsMax = 6;
 
   final _logger = Logger("CreateCollagePage");
-  final _widgetsToImageController = WidgetsToImageController();
 
   final List<File> files;
 
@@ -44,7 +41,6 @@ class CollageCreatorPage extends StatelessWidget {
         collage = CollageWithTwoItems(
           files[0],
           files[1],
-          _widgetsToImageController,
         );
         break;
       case 3:
@@ -52,7 +48,6 @@ class CollageCreatorPage extends StatelessWidget {
           files[0],
           files[1],
           files[2],
-          _widgetsToImageController,
         );
         break;
       case 4:
@@ -61,7 +56,6 @@ class CollageCreatorPage extends StatelessWidget {
           files[1],
           files[2],
           files[3],
-          _widgetsToImageController,
         );
         break;
       case 5:
@@ -71,7 +65,6 @@ class CollageCreatorPage extends StatelessWidget {
           files[2],
           files[3],
           files[4],
-          _widgetsToImageController,
         );
         break;
       case 6:
@@ -82,30 +75,14 @@ class CollageCreatorPage extends StatelessWidget {
           files[3],
           files[4],
           files[5],
-          _widgetsToImageController,
         );
         break;
       default:
         collage = const TestGrid();
     }
-
     return Padding(
       padding: const EdgeInsets.all(12),
-      child: Column(
-        children: [
-          SizedBox(
-            width: 320,
-            child: collage,
-          ),
-          const Expanded(child: SizedBox()),
-          SaveCollageButton(_widgetsToImageController),
-          const SafeArea(
-            child: SizedBox(
-              height: 12,
-            ),
-          ),
-        ],
-      ),
+      child: collage,
     );
   }
 }

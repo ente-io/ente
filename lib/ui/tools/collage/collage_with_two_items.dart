@@ -1,9 +1,10 @@
 import "package:flutter/widgets.dart";
 import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
+import "package:photos/ui/tools/collage/collage_common_widgets.dart";
 import 'package:photos/ui/tools/collage/collage_item_icon.dart';
 import "package:photos/ui/tools/collage/collage_item_widget.dart";
+import "package:photos/ui/tools/collage/collage_save_button.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
 enum Variant {
@@ -14,65 +15,68 @@ enum Variant {
 class CollageWithTwoItems extends StatefulWidget {
   const CollageWithTwoItems(
     this.first,
-    this.second,
-    this.controller, {
+    this.second, {
     super.key,
   });
 
   final File first, second;
-  final WidgetsToImageController controller;
 
   @override
   State<CollageWithTwoItems> createState() => _CollageWithTwoItemsState();
 }
 
 class _CollageWithTwoItemsState extends State<CollageWithTwoItems> {
+  final _widgetsToImageController = WidgetsToImageController();
   Variant _variant = Variant.first;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         WidgetsToImage(
-          controller: widget.controller,
+          controller: _widgetsToImageController,
           child: _getCollage(),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8, 20, 0, 4),
-          child: Text(S.of(context).collageLayout),
+        const Expanded(child: SizedBox()),
+        const CollageLayoutHeading(),
+        _getLayouts(),
+        const Padding(padding: EdgeInsets.all(4)),
+        SaveCollageButton(_widgetsToImageController),
+      ],
+    );
+  }
+
+  Widget _getLayouts() {
+    return Row(
+      children: [
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: SecondVariantIcon(
+              isActive: _variant == Variant.first,
+            ),
+          ),
+          onTap: () {
+            setState(() {
+              _variant = Variant.first;
+            });
+          },
         ),
-        Row(
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.all(4),
-                child: SecondVariantIcon(
-                  isActive: _variant == Variant.first,
-                ),
-              ),
-              onTap: () {
-                setState(() {
-                  _variant = Variant.first;
-                });
-              },
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: FirstVariantIcon(
+              isActive: _variant == Variant.second,
             ),
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.all(4),
-                child: FirstVariantIcon(
-                  isActive: _variant == Variant.second,
-                ),
-              ),
-              onTap: () {
-                setState(() {
-                  _variant = Variant.second;
-                });
-              },
-            ),
-          ],
+          ),
+          onTap: () {
+            setState(() {
+              _variant = Variant.second;
+            });
+          },
         ),
       ],
     );

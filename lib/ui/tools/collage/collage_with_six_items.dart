@@ -1,9 +1,10 @@
 import "package:flutter/widgets.dart";
 import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
+import "package:photos/ui/tools/collage/collage_common_widgets.dart";
 import "package:photos/ui/tools/collage/collage_item_icon.dart";
 import "package:photos/ui/tools/collage/collage_item_widget.dart";
+import "package:photos/ui/tools/collage/collage_save_button.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
 enum Variant {
@@ -18,67 +19,61 @@ class CollageWithSixItems extends StatefulWidget {
     this.third,
     this.fourth,
     this.fifth,
-    this.sixth,
-    this.controller, {
+    this.sixth, {
     super.key,
   });
 
   final File first, second, third, fourth, fifth, sixth;
-  final WidgetsToImageController controller;
 
   @override
   State<CollageWithSixItems> createState() => _CollageWithSixItemsState();
 }
 
 class _CollageWithSixItemsState extends State<CollageWithSixItems> {
+  final _widgetsToImageController = WidgetsToImageController();
   Variant _variant = Variant.first;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         WidgetsToImage(
-          controller: widget.controller,
+          controller: _widgetsToImageController,
           child: _getCollage(),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8, 20, 0, 4),
-          child: Text(S.of(context).collageLayout),
+        const Expanded(child: SizedBox()),
+        const CollageLayoutHeading(),
+        _getLayouts(),
+        const Padding(padding: EdgeInsets.all(4)),
+        SaveCollageButton(_widgetsToImageController),
+      ],
+    );
+  }
+
+  Widget _getLayouts() {
+    return Row(
+      children: [
+        CollageLayoutIconButton(
+          child: FirstVariantIcon(
+            isActive: _variant == Variant.first,
+          ),
+          onTap: () {
+            setState(() {
+              _variant = Variant.first;
+            });
+          },
         ),
-        Row(
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.all(4),
-                child: FirstVariantIcon(
-                  isActive: _variant == Variant.first,
-                ),
-              ),
-              onTap: () {
-                setState(() {
-                  _variant = Variant.first;
-                });
-              },
-            ),
-            const Padding(padding: EdgeInsets.all(2)),
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.all(4),
-                child: SecondVariantIcon(
-                  isActive: _variant == Variant.second,
-                ),
-              ),
-              onTap: () {
-                setState(() {
-                  _variant = Variant.second;
-                });
-              },
-            ),
-          ],
+        const Padding(padding: EdgeInsets.all(2)),
+        CollageLayoutIconButton(
+          child: SecondVariantIcon(
+            isActive: _variant == Variant.second,
+          ),
+          onTap: () {
+            setState(() {
+              _variant = Variant.second;
+            });
+          },
         ),
       ],
     );
@@ -96,13 +91,16 @@ class _CollageWithSixItemsState extends State<CollageWithSixItems> {
           CollageItemWidget(widget.sixth),
         );
       case Variant.second:
-        return SecondVariant(
-          CollageItemWidget(widget.first),
-          CollageItemWidget(widget.second),
-          CollageItemWidget(widget.third),
-          CollageItemWidget(widget.fourth),
-          CollageItemWidget(widget.fifth),
-          CollageItemWidget(widget.sixth),
+        return SizedBox(
+          width: 320,
+          child: SecondVariant(
+            CollageItemWidget(widget.first),
+            CollageItemWidget(widget.second),
+            CollageItemWidget(widget.third),
+            CollageItemWidget(widget.fourth),
+            CollageItemWidget(widget.fifth),
+            CollageItemWidget(widget.sixth),
+          ),
         );
     }
   }
@@ -243,6 +241,7 @@ class FirstVariantIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CollageIconContainerWidget(
+      width: 56,
       child: FirstVariant(
         CollageItemIcon(isActive: isActive),
         CollageItemIcon(isActive: isActive),
