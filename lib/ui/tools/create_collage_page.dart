@@ -29,7 +29,6 @@ class CreateCollagePage extends StatefulWidget {
 class _CreateCollagePageState extends State<CreateCollagePage> {
   final _logger = Logger("CreateCollagePage");
   final _widgetsToImageController = WidgetsToImageController();
-  bool _isLayoutVertical = false;
 
   @override
   Widget build(BuildContext context) {
@@ -46,51 +45,19 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
   }
 
   Widget _getBody() {
+    final count = widget.files.length;
+
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          WidgetsToImage(
-            controller: _widgetsToImageController,
-            child: _getCollage(),
-          ),
-          const Padding(padding: EdgeInsets.all(12)),
-          Text(S.of(context).collageLayout),
-          const Padding(padding: EdgeInsets.all(4)),
-          Row(
-            children: [
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: HorizontalSplitIcon(
-                    isActive: !_isLayoutVertical,
-                  ),
-                ),
-                onTap: () {
-                  setState(() {
-                    _isLayoutVertical = false;
-                  });
-                },
-              ),
-              const Padding(padding: EdgeInsets.all(2)),
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: VerticalSplitIcon(
-                    isActive: _isLayoutVertical,
-                  ),
-                ),
-                onTap: () {
-                  setState(() {
-                    _isLayoutVertical = true;
-                  });
-                },
-              ),
-            ],
-          ),
+          count == 2
+              ? TwoImageCollageCreator(
+                  widget.files[0],
+                  widget.files[1],
+                  _widgetsToImageController,
+                )
+              : _getGrid(),
           const SizedBox(
             height: 24,
           ),
@@ -129,20 +96,89 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
     );
   }
 
+  Widget _getGrid() {
+    return const TestGrid();
+  }
+}
+
+class TwoImageCollageCreator extends StatefulWidget {
+  const TwoImageCollageCreator(
+    this.first,
+    this.second,
+    this.controller, {
+    super.key,
+  });
+
+  final File first, second;
+  final WidgetsToImageController controller;
+
+  @override
+  State<TwoImageCollageCreator> createState() => _TwoImageCollageCreatorState();
+}
+
+class _TwoImageCollageCreatorState extends State<TwoImageCollageCreator> {
+  bool _isLayoutVertical = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        WidgetsToImage(
+          controller: widget.controller,
+          child: _getCollage(),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 20, 0, 4),
+          child: Text(S.of(context).collageLayout),
+        ),
+        Row(
+          children: [
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: HorizontalSplitIcon(
+                  isActive: !_isLayoutVertical,
+                ),
+              ),
+              onTap: () {
+                setState(() {
+                  _isLayoutVertical = false;
+                });
+              },
+            ),
+            const Padding(padding: EdgeInsets.all(2)),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: VerticalSplitIcon(
+                  isActive: _isLayoutVertical,
+                ),
+              ),
+              onTap: () {
+                setState(() {
+                  _isLayoutVertical = true;
+                });
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _getCollage() {
     return _isLayoutVertical
         ? VerticalSplit(
-            CollageItemWidget(widget.files[0]),
-            CollageItemWidget(widget.files[1]),
+            CollageItemWidget(widget.first),
+            CollageItemWidget(widget.second),
           )
         : HorizontalSplit(
-            CollageItemWidget(widget.files[0]),
-            CollageItemWidget(widget.files[1]),
+            CollageItemWidget(widget.first),
+            CollageItemWidget(widget.second),
           );
-  }
-
-  Widget _getGrid() {
-    return const TestGrid();
   }
 }
 
