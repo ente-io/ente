@@ -70,7 +70,7 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
                 curve: Curves.easeInOutCubic,
               )
               .fadeOut(
-                delay: const Duration(seconds: 5),
+                delay: const Duration(seconds: 3),
                 duration: 500.ms,
                 curve: Curves.easeInOutCubic,
               ),
@@ -86,7 +86,13 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
           final bool isQueuedForUpload =
               !isIgnored && widget.file.collectionID != null;
           if (isQueuedForUpload) {
-            return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: CircularProgressIndicator(
+                color: Colors.white.withOpacity(0.1),
+                strokeWidth: 3,
+              ),
+            );
           }
           return IconButton(
             icon: const Icon(
