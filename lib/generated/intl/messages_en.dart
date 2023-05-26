@@ -385,6 +385,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Collaborators can add photos and videos to the shared album."),
+        "collageSaved":
+            MessageLookupByLibrary.simpleMessage("Collage saved to gallery"),
         "collectEventPhotos":
             MessageLookupByLibrary.simpleMessage("Collect event photos"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Collect photos"),
@@ -988,6 +990,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight": MessageLookupByLibrary.simpleMessage("Rotate right"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Safely stored"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
+        "saveCollage": MessageLookupByLibrary.simpleMessage("Save collage"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Save copy"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Save key"),
         "saveYourRecoveryKeyIfYouHaventAlready":

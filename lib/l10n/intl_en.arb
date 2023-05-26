@@ -688,6 +688,8 @@
   "removeFromFavorite": "Remove from favorite",
   "shareLink": "Share link",
   "createCollage": "Create collage",
+  "saveCollage": "Save collage",
+  "collageSaved": "Collage saved to gallery",
   "addToEnte": "Add to ente",
   "addToAlbum": "Add to album",
   "delete": "Delete",

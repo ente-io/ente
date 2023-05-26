@@ -4865,6 +4865,26 @@ class S {
     );
   }
 
+  /// `Save collage`
+  String get saveCollage {
+    return Intl.message(
+      'Save collage',
+      name: 'saveCollage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collage saved to gallery`
+  String get collageSaved {
+    return Intl.message(
+      'Collage saved to gallery',
+      name: 'collageSaved',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add to ente`
   String get addToEnte {
     return Intl.message(

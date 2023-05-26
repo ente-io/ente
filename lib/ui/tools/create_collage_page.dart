@@ -1,9 +1,18 @@
 import "package:flutter/material.dart";
 import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart";
 import "package:logging/logging.dart";
+import "package:photo_manager/photo_manager.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/db/files_db.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
+import "package:photos/services/sync_service.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/zoomable_image.dart";
+import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/toast_util.dart";
+import "package:widgets_to_image/widgets_to_image.dart";
 
 class CreateCollagePage extends StatefulWidget {
   final List<File> files;
@@ -16,6 +25,7 @@ class CreateCollagePage extends StatefulWidget {
 
 class _CreateCollagePageState extends State<CreateCollagePage> {
   final _logger = Logger("CreateCollagePage");
+  final _widgetsToImageController = WidgetsToImageController();
   bool _isLayoutVertical = false;
 
   @override
@@ -35,9 +45,10 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
   Widget _getBody() {
     return Column(
       children: [
-        _isLayoutVertical
-            ? VerticalSplit(widget.files[0], widget.files[1])
-            : HorizontalSplit(widget.files[0], widget.files[1]),
+        WidgetsToImage(
+          controller: _widgetsToImageController,
+          child: _getCollage(),
+        ),
         const SizedBox(
           height: 24,
         ),
@@ -61,9 +72,46 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
               },
             )
           ],
+        ),
+        const SizedBox(
+          height: 24,
+        ),
+        TextButton(
+          onPressed: _onSaveClicked,
+          child: Text(S.of(context).saveCollage),
         )
       ],
     );
+  }
+
+  Future<void> _onSaveClicked() async {
+    final bytes = await _widgetsToImageController.capture();
+    final fileName = "ente_collage_" +
+        DateTime.now().microsecondsSinceEpoch.toString() +
+        ".jpeg";
+    //Disabling notifications for assets changing to insert the file into
+    //files db before triggering a sync.
+    PhotoManager.stopChangeNotify();
+    final AssetEntity? newAsset =
+        await (PhotoManager.editor.saveImage(bytes!, title: fileName));
+    final newFile = await File.fromAsset('', newAsset!);
+    newFile.generatedID = await FilesDB.instance.insert(newFile);
+    Bus.instance
+        .fire(LocalPhotosUpdatedEvent([newFile], source: "collageSave"));
+    SyncService.instance.sync();
+    showShortToast(context, S.of(context).collageSaved);
+    replacePage(
+      context,
+      DetailPage(
+        DetailPageConfiguration([newFile], null, 0, "collage"),
+      ),
+    );
+  }
+
+  Widget _getCollage() {
+    return _isLayoutVertical
+        ? VerticalSplit(widget.files[0], widget.files[1])
+        : HorizontalSplit(widget.files[0], widget.files[1]);
   }
 
   Widget _getGrid() {

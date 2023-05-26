@@ -130,6 +130,7 @@ dependencies:
   visibility_detector: ^0.3.3
   wakelock: ^0.6.1+2
   wallpaper_manager_flutter: ^0.0.2
+  widgets_to_image: ^0.0.2
 
 flutter_intl:
     enabled: true
