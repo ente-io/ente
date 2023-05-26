@@ -1,6 +1,6 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
-import { Collection, EncryptedCollection } from 'types/collection';
+import { Collection, CollectionPublicMagicMetadata } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
@@ -303,14 +303,34 @@ export const getPublicCollection = async (
             { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
         );
         const fetchedCollection = resp.data.collection;
-        const collectionName = await decryptCollectionName(
-            fetchedCollection,
-            collectionKey
-        );
+
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
+        const collectionName = (fetchedCollection.name =
+            fetchedCollection.name ||
+            (await cryptoWorker.decryptToUTF8(
+                fetchedCollection.encryptedName,
+                fetchedCollection.nameDecryptionNonce,
+                collectionKey
+            )));
+
+        let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
+        if (fetchedCollection.pubMagicMetadata?.data) {
+            collectionPublicMagicMetadata = {
+                ...fetchedCollection.pubMagicMetadata,
+                data: await cryptoWorker.decryptMetadata(
+                    fetchedCollection.pubMagicMetadata.data,
+                    fetchedCollection.pubMagicMetadata.header,
+                    collectionKey
+                ),
+            };
+        }
+
         const collection = {
             ...fetchedCollection,
             name: collectionName,
             key: collectionKey,
+            pubMagicMetadata: collectionPublicMagicMetadata,
         };
         await savePublicCollection(collection);
         return collection;
@@ -337,21 +357,6 @@ export const verifyPublicCollectionPassword = async (
         logError(e, 'failed to verify public collection password');
         throw e;
     }
-};
-
-const decryptCollectionName = async (
-    collection: EncryptedCollection,
-    collectionKey: string
-) => {
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-
-    return (collection.name =
-        collection.name ||
-        (await cryptoWorker.decryptToUTF8(
-            collection.encryptedName,
-            collection.nameDecryptionNonce,
-            collectionKey
-        )));
 };
 
 export const reportAbuse = async (
