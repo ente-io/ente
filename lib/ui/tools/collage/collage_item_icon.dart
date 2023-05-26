@@ -29,15 +29,16 @@ class CollageIconContainerWidget extends StatelessWidget {
   const CollageIconContainerWidget({
     super.key,
     required this.child,
+    this.width,
   });
 
   final Widget child;
+  final double? width;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 40,
-      height: 40,
+      width: width ?? 40,
       child: child,
     );
   }
