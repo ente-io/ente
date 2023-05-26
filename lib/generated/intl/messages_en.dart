@@ -1096,6 +1096,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device."),
+        "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sort by"),
+        "sortNewestFirst": MessageLookupByLibrary.simpleMessage("Newest first"),
+        "sortOldestFirst": MessageLookupByLibrary.simpleMessage("Oldest first"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Success"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Start backup"),
         "storage": MessageLookupByLibrary.simpleMessage("Storage"),
