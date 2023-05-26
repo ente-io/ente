@@ -157,14 +157,18 @@ export function getSelectedFiles(
     return files.filter((file) => selectedFilesIDs.has(file.id));
 }
 
-export function sortFiles(files: EnteFile[]) {
+export function sortFiles(files: EnteFile[], sortAsc = false) {
     // sort based on the time of creation time of the file,
     // for files with same creation time, sort based on the time of last modification
+    const factor = sortAsc ? -1 : 1;
     return files.sort((a, b) => {
         if (a.metadata.creationTime === b.metadata.creationTime) {
-            return b.metadata.modificationTime - a.metadata.modificationTime;
+            return (
+                factor *
+                (b.metadata.modificationTime - a.metadata.modificationTime)
+            );
         }
-        return b.metadata.creationTime - a.metadata.creationTime;
+        return factor * (b.metadata.creationTime - a.metadata.creationTime);
     });
 }
 

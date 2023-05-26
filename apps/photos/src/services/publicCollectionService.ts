@@ -1,6 +1,6 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
-import { Collection, EncryptedCollection } from 'types/collection';
+import { Collection, CollectionPublicMagicMetadata } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
@@ -166,18 +166,20 @@ export const syncPublicFiles = async (
 ) => {
     try {
         let files: EnteFile[] = [];
+        const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
         const collectionUID = getPublicCollectionUID(token);
         const localFiles = await getLocalPublicFiles(collectionUID);
+
         files = [...files, ...localFiles];
         try {
             if (!token) {
-                return files;
+                return sortFiles(files, sortAsc);
             }
             const lastSyncTime = await getPublicCollectionLastSyncTime(
                 collectionUID
             );
             if (collection.updationTime === lastSyncTime) {
-                return files;
+                return sortFiles(files, sortAsc);
             }
             const fetchedFiles = await getPublicFiles(
                 token,
@@ -212,7 +214,7 @@ export const syncPublicFiles = async (
                 collectionUID,
                 collection.updationTime
             );
-            setPublicFiles([...sortFiles(mergeMetadata(files))]);
+            setPublicFiles([...sortFiles(mergeMetadata(files), sortAsc)]);
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
             logError(e, 'failed to sync shared collection files');
@@ -220,7 +222,7 @@ export const syncPublicFiles = async (
                 throw e;
             }
         }
-        return [...sortFiles(mergeMetadata(files))];
+        return [...sortFiles(mergeMetadata(files), sortAsc)];
     } catch (e) {
         logError(e, 'failed to get local  or sync shared collection files');
         throw e;
@@ -239,6 +241,7 @@ const getPublicFiles = async (
         let decryptedFiles: EnteFile[] = [];
         let time = sinceTime;
         let resp;
+        const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
         do {
             if (!token) {
                 break;
@@ -278,7 +281,8 @@ const getPublicFiles = async (
                         [...(files || []), ...decryptedFiles].filter(
                             (item) => !item.isDeleted
                         )
-                    )
+                    ),
+                    sortAsc
                 )
             );
         } while (resp.data.hasMore);
@@ -303,14 +307,34 @@ export const getPublicCollection = async (
             { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
         );
         const fetchedCollection = resp.data.collection;
-        const collectionName = await decryptCollectionName(
-            fetchedCollection,
-            collectionKey
-        );
+
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
+        const collectionName = (fetchedCollection.name =
+            fetchedCollection.name ||
+            (await cryptoWorker.decryptToUTF8(
+                fetchedCollection.encryptedName,
+                fetchedCollection.nameDecryptionNonce,
+                collectionKey
+            )));
+
+        let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
+        if (fetchedCollection.pubMagicMetadata?.data) {
+            collectionPublicMagicMetadata = {
+                ...fetchedCollection.pubMagicMetadata,
+                data: await cryptoWorker.decryptMetadata(
+                    fetchedCollection.pubMagicMetadata.data,
+                    fetchedCollection.pubMagicMetadata.header,
+                    collectionKey
+                ),
+            };
+        }
+
         const collection = {
             ...fetchedCollection,
             name: collectionName,
             key: collectionKey,
+            pubMagicMetadata: collectionPublicMagicMetadata,
         };
         await savePublicCollection(collection);
         return collection;
@@ -337,21 +361,6 @@ export const verifyPublicCollectionPassword = async (
         logError(e, 'failed to verify public collection password');
         throw e;
     }
-};
-
-const decryptCollectionName = async (
-    collection: EncryptedCollection,
-    collectionKey: string
-) => {
-    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-
-    return (collection.name =
-        collection.name ||
-        (await cryptoWorker.decryptToUTF8(
-            collection.encryptedName,
-            collection.nameDecryptionNonce,
-            collectionKey
-        )));
 };
 
 export const reportAbuse = async (
