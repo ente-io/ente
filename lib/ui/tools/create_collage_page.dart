@@ -8,6 +8,7 @@ import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/services/sync_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
@@ -60,7 +61,7 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
           Row(
             children: [
               TextButton(
-                child: const Icon(Icons.border_vertical_rounded),
+                child: const VerticalSplitIcon(),
                 onPressed: () {
                   setState(() {
                     _isLayoutVertical = true;
@@ -68,7 +69,7 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
                 },
               ),
               TextButton(
-                child: const Icon(Icons.splitscreen),
+                child: const HorizontalSplitIcon(),
                 onPressed: () {
                   setState(() {
                     _isLayoutVertical = false;
@@ -117,8 +118,14 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
 
   Widget _getCollage() {
     return _isLayoutVertical
-        ? VerticalSplit(widget.files[0], widget.files[1])
-        : HorizontalSplit(widget.files[0], widget.files[1]);
+        ? VerticalSplit(
+            CollageItemWidget(widget.files[0]),
+            CollageItemWidget(widget.files[0]),
+          )
+        : HorizontalSplit(
+            CollageItemWidget(widget.files[0]),
+            CollageItemWidget(widget.files[1]),
+          );
   }
 
   Widget _getGrid() {
@@ -128,12 +135,15 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
 
 class VerticalSplit extends StatelessWidget {
   const VerticalSplit(
-    this.firstFile,
-    this.secondFile, {
+    this.first,
+    this.second, {
     super.key,
+    this.mainAxisSpacing = 4,
+    this.crossAxisSpacing = 4,
   });
 
-  final File firstFile, secondFile;
+  final Widget first, second;
+  final double mainAxisSpacing, crossAxisSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -141,19 +151,19 @@ class VerticalSplit extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       child: StaggeredGrid.count(
         crossAxisCount: 2,
-        mainAxisSpacing: 4,
-        crossAxisSpacing: 4,
+        mainAxisSpacing: mainAxisSpacing,
+        crossAxisSpacing: crossAxisSpacing,
         axisDirection: AxisDirection.down,
         children: [
           StaggeredGridTile.count(
             crossAxisCellCount: 1,
             mainAxisCellCount: 2,
-            child: CollageItemWidget(firstFile),
+            child: first,
           ),
           StaggeredGridTile.count(
             crossAxisCellCount: 1,
             mainAxisCellCount: 2,
-            child: CollageItemWidget(secondFile),
+            child: second,
           ),
         ],
       ),
@@ -163,12 +173,15 @@ class VerticalSplit extends StatelessWidget {
 
 class HorizontalSplit extends StatelessWidget {
   const HorizontalSplit(
-    this.firstFile,
-    this.secondFile, {
+    this.first,
+    this.second, {
     super.key,
+    this.mainAxisSpacing = 4,
+    this.crossAxisSpacing = 4,
   });
 
-  final File firstFile, secondFile;
+  final Widget first, second;
+  final double mainAxisSpacing, crossAxisSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -176,19 +189,19 @@ class HorizontalSplit extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       child: StaggeredGrid.count(
         crossAxisCount: 2,
-        mainAxisSpacing: 4,
-        crossAxisSpacing: 4,
+        mainAxisSpacing: mainAxisSpacing,
+        crossAxisSpacing: crossAxisSpacing,
         axisDirection: AxisDirection.down,
         children: [
           StaggeredGridTile.count(
             crossAxisCellCount: 2,
             mainAxisCellCount: 1,
-            child: CollageItemWidget(firstFile),
+            child: first,
           ),
           StaggeredGridTile.count(
             crossAxisCellCount: 2,
             mainAxisCellCount: 1,
-            child: CollageItemWidget(secondFile),
+            child: second,
           ),
         ],
       ),
@@ -271,6 +284,63 @@ class TestGrid extends StatelessWidget {
         //   child: Tile("4"),
         // ),
       ],
+    );
+  }
+}
+
+class VerticalSplitIcon extends StatelessWidget {
+  const VerticalSplitIcon({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 32,
+      height: 32,
+      child: VerticalSplit(
+        OutlinedTile(),
+        OutlinedTile(),
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 2,
+      ),
+    );
+  }
+}
+
+class HorizontalSplitIcon extends StatelessWidget {
+  const HorizontalSplitIcon({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 32,
+      height: 32,
+      child: HorizontalSplit(
+        OutlinedTile(),
+        OutlinedTile(),
+        mainAxisSpacing: 2,
+        crossAxisSpacing: 2,
+      ),
+    );
+  }
+}
+
+class OutlinedTile extends StatelessWidget {
+  const OutlinedTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: getEnteColorScheme(context).strokeBase,
+          width: 2,
+        ),
+        borderRadius: const BorderRadius.all(Radius.circular(2)),
+      ),
     );
   }
 }
