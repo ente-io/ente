@@ -51,7 +51,7 @@ class _CollageWithTwoItemsState extends State<CollageWithTwoItems> {
     return Row(
       children: [
         CollageLayoutIconButton(
-          child: SecondVariantIcon(
+          child: FirstVariantIcon(
             isActive: _variant == Variant.first,
           ),
           onTap: () {
@@ -61,7 +61,7 @@ class _CollageWithTwoItemsState extends State<CollageWithTwoItems> {
           },
         ),
         CollageLayoutIconButton(
-          child: FirstVariantIcon(
+          child: SecondVariantIcon(
             isActive: _variant == Variant.second,
           ),
           onTap: () {
