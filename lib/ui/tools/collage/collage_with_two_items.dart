@@ -50,13 +50,9 @@ class _CollageWithTwoItemsState extends State<CollageWithTwoItems> {
   Widget _getLayouts() {
     return Row(
       children: [
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: SecondVariantIcon(
-              isActive: _variant == Variant.first,
-            ),
+        CollageLayoutIconButton(
+          child: SecondVariantIcon(
+            isActive: _variant == Variant.first,
           ),
           onTap: () {
             setState(() {
@@ -64,13 +60,9 @@ class _CollageWithTwoItemsState extends State<CollageWithTwoItems> {
             });
           },
         ),
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: FirstVariantIcon(
-              isActive: _variant == Variant.second,
-            ),
+        CollageLayoutIconButton(
+          child: FirstVariantIcon(
+            isActive: _variant == Variant.second,
           ),
           onTap: () {
             setState(() {

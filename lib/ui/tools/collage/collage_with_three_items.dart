@@ -52,13 +52,9 @@ class _CollageWithThreeItemsState extends State<CollageWithThreeItems> {
   Widget _getLayouts() {
     return Row(
       children: [
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: FirstVariantIcon(
-              isActive: _variant == Variant.first,
-            ),
+        CollageLayoutIconButton(
+          child: FirstVariantIcon(
+            isActive: _variant == Variant.first,
           ),
           onTap: () {
             setState(() {
@@ -66,13 +62,9 @@ class _CollageWithThreeItemsState extends State<CollageWithThreeItems> {
             });
           },
         ),
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: SecondVariantIcon(
-              isActive: _variant == Variant.second,
-            ),
+        CollageLayoutIconButton(
+          child: SecondVariantIcon(
+            isActive: _variant == Variant.second,
           ),
           onTap: () {
             setState(() {

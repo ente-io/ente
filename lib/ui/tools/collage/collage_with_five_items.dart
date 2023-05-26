@@ -53,13 +53,9 @@ class _CollageWithFiveItemsState extends State<CollageWithFiveItems> {
   Widget _getLayouts() {
     return Row(
       children: [
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: FirstVariantIcon(
-              isActive: _variant == Variant.first,
-            ),
+        CollageLayoutIconButton(
+          child: FirstVariantIcon(
+            isActive: _variant == Variant.first,
           ),
           onTap: () {
             setState(() {
@@ -68,13 +64,9 @@ class _CollageWithFiveItemsState extends State<CollageWithFiveItems> {
           },
         ),
         const Padding(padding: EdgeInsets.all(2)),
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: SecondVariantIcon(
-              isActive: _variant == Variant.second,
-            ),
+        CollageLayoutIconButton(
+          child: SecondVariantIcon(
+            isActive: _variant == Variant.second,
           ),
           onTap: () {
             setState(() {
