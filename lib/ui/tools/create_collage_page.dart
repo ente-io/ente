@@ -16,6 +16,7 @@ class CreateCollagePage extends StatefulWidget {
 
 class _CreateCollagePageState extends State<CreateCollagePage> {
   final _logger = Logger("CreateCollagePage");
+  bool _isLayoutVertical = false;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,37 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
   }
 
   Widget _getBody() {
-    return VerticalSplit(widget.files[0], widget.files[1]);
+    return Column(
+      children: [
+        _isLayoutVertical
+            ? VerticalSplit(widget.files[0], widget.files[1])
+            : HorizontalSplit(widget.files[0], widget.files[1]),
+        const SizedBox(
+          height: 24,
+        ),
+        const Text("Choose layout"),
+        Row(
+          children: [
+            TextButton(
+              child: const Icon(Icons.border_vertical_rounded),
+              onPressed: () {
+                setState(() {
+                  _isLayoutVertical = true;
+                });
+              },
+            ),
+            TextButton(
+              child: const Icon(Icons.splitscreen),
+              onPressed: () {
+                setState(() {
+                  _isLayoutVertical = false;
+                });
+              },
+            )
+          ],
+        )
+      ],
+    );
   }
 
   Widget _getGrid() {
