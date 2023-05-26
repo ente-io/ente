@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart";
 import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/event_bus.dart";
@@ -10,6 +9,7 @@ import "package:photos/models/file.dart";
 import "package:photos/services/sync_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/tools/collage/collage_test_grid.dart";
 import "package:photos/ui/tools/collage/collage_with_five_items.dart";
 import "package:photos/ui/tools/collage/collage_with_four_items.dart";
 import "package:photos/ui/tools/collage/collage_with_six_items.dart";
@@ -151,66 +151,5 @@ class CollageCreatorPage extends StatelessWidget {
 
   Widget _getGrid() {
     return const TestGrid();
-  }
-}
-
-class Tile extends StatelessWidget {
-  final String text;
-  const Tile(this.text, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.blue,
-      child: Center(child: Text(text)),
-    );
-  }
-}
-
-class TestGrid extends StatelessWidget {
-  const TestGrid({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return StaggeredGrid.count(
-      crossAxisCount: 2,
-      mainAxisSpacing: 4,
-      crossAxisSpacing: 4,
-      axisDirection: AxisDirection.down,
-      children: const [
-        StaggeredGridTile.count(
-          crossAxisCellCount: 1,
-          mainAxisCellCount: 1,
-          child: Tile("1"),
-        ),
-        StaggeredGridTile.count(
-          crossAxisCellCount: 1,
-          mainAxisCellCount: 1,
-          child: Tile("2"),
-        ),
-        StaggeredGridTile.count(
-          crossAxisCellCount: 1,
-          mainAxisCellCount: 1,
-          child: Tile("3"),
-        ),
-        StaggeredGridTile.count(
-          crossAxisCellCount: 1,
-          mainAxisCellCount: 1,
-          child: Tile("4"),
-        ),
-        StaggeredGridTile.count(
-          crossAxisCellCount: 1,
-          mainAxisCellCount: 1,
-          child: Tile("5"),
-        ),
-        StaggeredGridTile.count(
-          crossAxisCellCount: 1,
-          mainAxisCellCount: 1,
-          child: Tile("6"),
-        ),
-      ],
-    );
   }
 }
