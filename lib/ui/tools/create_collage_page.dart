@@ -61,8 +61,12 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
           Row(
             children: [
               GestureDetector(
-                child: HorizontalSplitIcon(
-                  isActive: !_isLayoutVertical,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: HorizontalSplitIcon(
+                    isActive: !_isLayoutVertical,
+                  ),
                 ),
                 onTap: () {
                   setState(() {
@@ -72,8 +76,12 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
               ),
               const Padding(padding: EdgeInsets.all(2)),
               GestureDetector(
-                child: VerticalSplitIcon(
-                  isActive: _isLayoutVertical,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: VerticalSplitIcon(
+                    isActive: _isLayoutVertical,
+                  ),
                 ),
                 onTap: () {
                   setState(() {
