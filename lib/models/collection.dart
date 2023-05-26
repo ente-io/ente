@@ -35,9 +35,9 @@ class Collection {
       _pubMmd ??
       CollectionPubMagicMetadata.fromEncodedJson(mMdPubEncodedJson ?? '{}');
 
-  set magicMetadata(val) => _mmd = val;
+  set magicMetadata(CollectionMagicMetadata? val) => _mmd = val;
 
-  set pubMagicMetadata(val) => _pubMmd = val;
+  set pubMagicMetadata(CollectionPubMagicMetadata? val) => _pubMmd = val;
 
   Collection(
     this.id,
