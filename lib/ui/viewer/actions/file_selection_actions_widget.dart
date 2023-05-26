@@ -23,7 +23,7 @@ import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
-import "package:photos/ui/tools/create_collage_page.dart";
+import 'package:photos/ui/tools/collage/create_collage_page.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
