@@ -1,8 +1,8 @@
 import "package:flutter/widgets.dart";
 import "package:photos/theme/ente_theme.dart";
 
-class OutlinedTile extends StatelessWidget {
-  const OutlinedTile({
+class CollageItemIcon extends StatelessWidget {
+  const CollageItemIcon({
     super.key,
     this.isActive = false,
   });
@@ -21,6 +21,24 @@ class OutlinedTile extends StatelessWidget {
         ),
         borderRadius: const BorderRadius.all(Radius.circular(2)),
       ),
+    );
+  }
+}
+
+class CollageIconContainerWidget extends StatelessWidget {
+  const CollageIconContainerWidget({
+    super.key,
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: child,
     );
   }
 }

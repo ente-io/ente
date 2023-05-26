@@ -2,8 +2,8 @@ import "package:flutter/widgets.dart";
 import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
+import 'package:photos/ui/tools/collage/collage_item_icon.dart';
 import "package:photos/ui/tools/collage/collage_item_widget.dart";
-import "package:photos/ui/tools/collage/outlined_tile_widget.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
 enum Variant {
@@ -61,7 +61,6 @@ class _ThreeImageCollageCreatorState extends State<ThreeImageCollageCreator> {
                 });
               },
             ),
-            const Padding(padding: EdgeInsets.all(2)),
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               child: Padding(
@@ -76,7 +75,6 @@ class _ThreeImageCollageCreatorState extends State<ThreeImageCollageCreator> {
                 });
               },
             ),
-            const Padding(padding: EdgeInsets.all(2)),
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               child: Padding(
@@ -263,13 +261,11 @@ class FirstVariantIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 36,
-      height: 36,
+    return CollageIconContainerWidget(
       child: FirstVariant(
-        OutlinedTile(isActive: isActive),
-        OutlinedTile(isActive: isActive),
-        OutlinedTile(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
         mainAxisSpacing: 2,
         crossAxisSpacing: 2,
       ),
@@ -286,13 +282,11 @@ class SecondVariantIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 36,
-      height: 36,
+    return CollageIconContainerWidget(
       child: SecondVariant(
-        OutlinedTile(isActive: isActive),
-        OutlinedTile(isActive: isActive),
-        OutlinedTile(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
         mainAxisSpacing: 2,
         crossAxisSpacing: 2,
       ),
@@ -309,13 +303,11 @@ class ThirdVariantIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 36,
-      height: 36,
+    return CollageIconContainerWidget(
       child: ThirdVariant(
-        OutlinedTile(isActive: isActive),
-        OutlinedTile(isActive: isActive),
-        OutlinedTile(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
+        CollageItemIcon(isActive: isActive),
         mainAxisSpacing: 2,
         crossAxisSpacing: 2,
       ),

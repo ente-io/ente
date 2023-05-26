@@ -10,6 +10,7 @@ import "package:photos/models/file.dart";
 import "package:photos/services/sync_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/tools/collage/four_item_collage.dart";
 import "package:photos/ui/tools/collage/three_image_collage_creator.dart";
 import 'package:photos/ui/tools/collage/two_image_collage_creator.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
@@ -55,6 +56,15 @@ class CollageCreatorPage extends StatelessWidget {
           files[0],
           files[1],
           files[2],
+          _widgetsToImageController,
+        );
+        break;
+      case 4:
+        collage = CollageWithFourItems(
+          files[0],
+          files[1],
+          files[2],
+          files[3],
           _widgetsToImageController,
         );
         break;
@@ -133,25 +143,30 @@ class TestGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StaggeredGrid.count(
-      crossAxisCount: 3,
+      crossAxisCount: 4,
       mainAxisSpacing: 4,
       crossAxisSpacing: 4,
       axisDirection: AxisDirection.down,
       children: const [
         StaggeredGridTile.count(
-          crossAxisCellCount: 3,
+          crossAxisCellCount: 4,
           mainAxisCellCount: 1,
           child: Tile("1"),
         ),
         StaggeredGridTile.count(
-          crossAxisCellCount: 3,
-          mainAxisCellCount: 1,
+          crossAxisCellCount: 2,
+          mainAxisCellCount: 2,
           child: Tile("2"),
         ),
         StaggeredGridTile.count(
-          crossAxisCellCount: 3,
-          mainAxisCellCount: 1,
+          crossAxisCellCount: 2,
+          mainAxisCellCount: 2,
           child: Tile("3"),
+        ),
+        StaggeredGridTile.count(
+          crossAxisCellCount: 4,
+          mainAxisCellCount: 1,
+          child: Tile("4"),
         ),
       ],
     );
