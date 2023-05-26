@@ -10,7 +10,7 @@ import "package:photos/models/file.dart";
 import "package:photos/services/sync_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/tools/collage/create_collage_page_two.dart";
+import 'package:photos/ui/tools/collage/two_image_collage_creator.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
@@ -118,36 +118,26 @@ class TestGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StaggeredGrid.count(
-      crossAxisCount: 2,
+      crossAxisCount: 3,
       mainAxisSpacing: 4,
       crossAxisSpacing: 4,
       axisDirection: AxisDirection.down,
       children: const [
         StaggeredGridTile.count(
-          crossAxisCellCount: 2,
-          mainAxisCellCount: 1,
-          child: Tile("0"),
-        ),
-        StaggeredGridTile.count(
-          crossAxisCellCount: 2,
+          crossAxisCellCount: 3,
           mainAxisCellCount: 1,
           child: Tile("1"),
         ),
-        // StaggeredGridTile.count(
-        //   crossAxisCellCount: 1,
-        //   mainAxisCellCount: 1,
-        //   child: Tile("2"),
-        // ),
-        // StaggeredGridTile.count(
-        //   crossAxisCellCount: 1,
-        //   mainAxisCellCount: 1,
-        //   child: Tile("3"),
-        // ),
-        // StaggeredGridTile.count(
-        //   crossAxisCellCount: 4,
-        //   mainAxisCellCount: 2,
-        //   child: Tile("4"),
-        // ),
+        StaggeredGridTile.count(
+          crossAxisCellCount: 3,
+          mainAxisCellCount: 1,
+          child: Tile("2"),
+        ),
+        StaggeredGridTile.count(
+          crossAxisCellCount: 3,
+          mainAxisCellCount: 1,
+          child: Tile("3"),
+        ),
       ],
     );
   }
