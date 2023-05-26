@@ -759,35 +759,39 @@ class CollectionsService {
       final List<Collection> collections = [];
       final c = response.data["collections"];
       for (final collectionData in c) {
-        final collection = Collection.fromMap(collectionData);
-        final collectionKey =
-            _getAndCacheDecryptedKey(collection, source: "fetchCollection");
-        if (collectionData['magicMetadata'] != null) {
-          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-            CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
-            collectionKey,
-            CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
-          );
-          collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
-          collection.mMdVersion = collectionData['magicMetadata']['version'];
-          collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
-            collection.mMdEncodedJson,
-          );
-        }
+        final Collection collection = Collection.fromMap(collectionData);
+        if (!collection.isDeleted) {
+          final collectionKey =
+              _getAndCacheDecryptedKey(collection, source: "fetchDecryptMeta");
+          if (collectionData['magicMetadata'] != null) {
+            final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+              CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
+              collectionKey,
+              CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
+            );
+            collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
+            collection.mMdVersion = collectionData['magicMetadata']['version'];
+            collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
+              collection.mMdEncodedJson ?? '{}',
+            );
+          }
 
-        if (collectionData['pubMagicMetadata'] != null) {
-          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-            CryptoUtil.base642bin(collectionData['pubMagicMetadata']['data']),
-            collectionKey,
-            CryptoUtil.base642bin(collectionData['pubMagicMetadata']['header']),
-          );
-          collection.mMdPubEncodedJson = utf8.decode(utfEncodedMmd);
-          collection.mMbPubVersion =
-              collectionData['pubMagicMetadata']['version'];
-          collection.pubMagicMetadata =
-              CollectionPubMagicMetadata.fromEncodedJson(
-            collection.mMdPubEncodedJson,
-          );
+          if (collectionData['pubMagicMetadata'] != null) {
+            final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+              CryptoUtil.base642bin(collectionData['pubMagicMetadata']['data']),
+              collectionKey,
+              CryptoUtil.base642bin(
+                collectionData['pubMagicMetadata']['header'],
+              ),
+            );
+            collection.mMdPubEncodedJson = utf8.decode(utfEncodedMmd);
+            collection.mMbPubVersion =
+                collectionData['pubMagicMetadata']['version'];
+            collection.pubMagicMetadata =
+                CollectionPubMagicMetadata.fromEncodedJson(
+              collection.mMdPubEncodedJson ?? '{}',
+            );
+          }
         }
         collections.add(collection);
       }
