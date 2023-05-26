@@ -6,6 +6,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
+import "package:photos/models/file_type.dart";
 import 'package:photos/models/files_split.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
@@ -32,6 +33,9 @@ class FileSelectionActionWidget extends StatefulWidget {
   final Collection? collection;
   final DeviceCollection? deviceCollection;
   final SelectedFiles selectedFiles;
+
+  static const int collageItemsMin = 2;
+  static const int collageItemsMax = 5;
 
   const FileSelectionActionWidget(
     this.type,
@@ -133,6 +137,28 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           ),
         );
       }
+    }
+
+    bool hasVideoFile = false;
+    for (final file in widget.selectedFiles.files) {
+      if (file.fileType == FileType.video) {
+        hasVideoFile = true;
+      }
+    }
+
+    if (!hasVideoFile &&
+        widget.selectedFiles.files.length >=
+            FileSelectionActionWidget.collageItemsMin &&
+        widget.selectedFiles.files.length <=
+            FileSelectionActionWidget.collageItemsMax) {
+      firstList.add(
+        BlurMenuItemWidget(
+          leadingIcon: Icons.grid_view_outlined,
+          labelText: S.of(context).createCollage,
+          menuItemColor: colorScheme.fillFaint,
+          onTap: () {},
+        ),
+      );
     }
 
     final showUploadIcon = widget.type == GalleryType.localFolder &&

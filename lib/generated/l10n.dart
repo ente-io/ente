@@ -4855,6 +4855,16 @@ class S {
     );
   }
 
+  /// `Create collage`
+  String get createCollage {
+    return Intl.message(
+      'Create collage',
+      name: 'createCollage',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add to ente`
   String get addToEnte {
     return Intl.message(
