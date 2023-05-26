@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/event_bus.dart';
+import "package:photos/events/collection_meta_event.dart";
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
@@ -86,6 +87,9 @@ Future<void> changeSortOrder(
     final Map<String, dynamic> update = {"asc": sortedInAscOrder};
     await CollectionsService.instance
         .updatePublicMagicMetadata(collection, update);
+    Bus.instance.fire(
+      CollectionMetaEvent(collection.id, CollectionMetaEventType.sortChanged),
+    );
   } catch (e, s) {
     _logger.severe("failed to update collection visibility", e, s);
     showShortToast(context, S.of(context).somethingWentWrong);
