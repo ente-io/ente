@@ -285,6 +285,22 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (isArchived || widget.collection!.type != CollectionType.favorites) {
         items.add(
           PopupMenuItem(
+            value: 6,
+            child: Row(
+              children: [
+                const Icon(Icons.sort_outlined),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(
+                  S.of(context).sortAlbumsBy,
+                ),
+              ],
+            ),
+          ),
+        );
+        items.add(
+          PopupMenuItem(
             value: 2,
             child: Row(
               children: [
@@ -303,22 +319,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         );
       }
       if (widget.collection!.type != CollectionType.favorites) {
-        items.add(
-          PopupMenuItem(
-            value: 6,
-            child: Row(
-              children: [
-                const Icon(Icons.sort_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  S.of(context).sortAlbumsBy,
-                ),
-              ],
-            ),
-          ),
-        );
         items.add(
           PopupMenuItem(
             value: 3,
