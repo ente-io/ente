@@ -786,7 +786,7 @@ class CollectionsService {
               collectionData['pubMagicMetadata']['version'];
           collection.pubMagicMetadata =
               CollectionPubMagicMetadata.fromEncodedJson(
-            collection.mMdEncodedJson,
+            collection.mMdPubEncodedJson,
           );
         }
         collections.add(collection);
