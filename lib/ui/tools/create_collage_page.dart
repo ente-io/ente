@@ -49,33 +49,38 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           WidgetsToImage(
             controller: _widgetsToImageController,
             child: _getCollage(),
           ),
-          const SizedBox(
-            height: 24,
-          ),
-          const Text("Choose layout"),
+          const Padding(padding: EdgeInsets.all(12)),
+          Text(S.of(context).collageLayout),
+          const Padding(padding: EdgeInsets.all(4)),
           Row(
             children: [
-              TextButton(
-                child: const VerticalSplitIcon(),
-                onPressed: () {
+              GestureDetector(
+                child: HorizontalSplitIcon(
+                  isActive: !_isLayoutVertical,
+                ),
+                onTap: () {
+                  setState(() {
+                    _isLayoutVertical = false;
+                  });
+                },
+              ),
+              const Padding(padding: EdgeInsets.all(2)),
+              GestureDetector(
+                child: VerticalSplitIcon(
+                  isActive: _isLayoutVertical,
+                ),
+                onTap: () {
                   setState(() {
                     _isLayoutVertical = true;
                   });
                 },
               ),
-              TextButton(
-                child: const HorizontalSplitIcon(),
-                onPressed: () {
-                  setState(() {
-                    _isLayoutVertical = false;
-                  });
-                },
-              )
             ],
           ),
           const SizedBox(
@@ -120,7 +125,7 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
     return _isLayoutVertical
         ? VerticalSplit(
             CollageItemWidget(widget.files[0]),
-            CollageItemWidget(widget.files[0]),
+            CollageItemWidget(widget.files[1]),
           )
         : HorizontalSplit(
             CollageItemWidget(widget.files[0]),
@@ -291,16 +296,19 @@ class TestGrid extends StatelessWidget {
 class VerticalSplitIcon extends StatelessWidget {
   const VerticalSplitIcon({
     super.key,
+    this.isActive = false,
   });
+
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      width: 32,
-      height: 32,
+    return SizedBox(
+      width: 36,
+      height: 36,
       child: VerticalSplit(
-        OutlinedTile(),
-        OutlinedTile(),
+        OutlinedTile(isActive: isActive),
+        OutlinedTile(isActive: isActive),
         mainAxisSpacing: 2,
         crossAxisSpacing: 2,
       ),
@@ -311,16 +319,18 @@ class VerticalSplitIcon extends StatelessWidget {
 class HorizontalSplitIcon extends StatelessWidget {
   const HorizontalSplitIcon({
     super.key,
+    this.isActive = false,
   });
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      width: 32,
-      height: 32,
+    return SizedBox(
+      width: 36,
+      height: 36,
       child: HorizontalSplit(
-        OutlinedTile(),
-        OutlinedTile(),
+        OutlinedTile(isActive: isActive),
+        OutlinedTile(isActive: isActive),
         mainAxisSpacing: 2,
         crossAxisSpacing: 2,
       ),
@@ -329,14 +339,21 @@ class HorizontalSplitIcon extends StatelessWidget {
 }
 
 class OutlinedTile extends StatelessWidget {
-  const OutlinedTile({super.key});
+  const OutlinedTile({
+    super.key,
+    this.isActive = false,
+  });
+
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
-          color: getEnteColorScheme(context).strokeBase,
+          color: isActive
+              ? getEnteColorScheme(context).strokeBase
+              : getEnteColorScheme(context).strokeMuted,
           width: 2,
         ),
         borderRadius: const BorderRadius.all(Radius.circular(2)),

@@ -4885,6 +4885,16 @@ class S {
     );
   }
 
+  /// `Layout`
+  String get collageLayout {
+    return Intl.message(
+      'Layout',
+      name: 'collageLayout',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add to ente`
   String get addToEnte {
     return Intl.message(

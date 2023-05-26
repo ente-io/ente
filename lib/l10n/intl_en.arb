@@ -690,6 +690,7 @@
   "createCollage": "Create collage",
   "saveCollage": "Save collage",
   "collageSaved": "Collage saved to gallery",
+  "collageLayout": "Layout",
   "addToEnte": "Add to ente",
   "addToAlbum": "Add to album",
   "delete": "Delete",
