@@ -371,6 +371,7 @@ const createCollection = async (
             updationTime: null,
             isDeleted: false,
             magicMetadata: encryptedMagicMetadata,
+            pubMagicMetadata: null,
         };
         const createdCollection = await postCollection(newCollection, token);
         const decryptedCreatedCollection = await getCollectionWithSecrets(
