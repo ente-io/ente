@@ -410,10 +410,13 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   }
 
   Future<void> _onCreateCollageClicked() async {
-    routeToPage(
+    final bool? result = await routeToPage(
       context,
       CollageCreatorPage(widget.selectedFiles.files.toList()),
     );
+    if (result!) {
+      widget.selectedFiles.clearAll();
+    }
   }
 
   Future<void> _onCreatedSharedLinkClicked() async {
