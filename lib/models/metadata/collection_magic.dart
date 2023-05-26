@@ -71,7 +71,7 @@ class CollectionPubMagicMetadata {
   static fromMap(Map<String, dynamic>? map) {
     if (map == null) return null;
     return CollectionPubMagicMetadata(
-      asc: map["asc"] ?? false,
+      asc: map["asc"] as bool?,
       coverID: map["coverID"],
     );
   }

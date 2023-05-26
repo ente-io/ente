@@ -171,6 +171,8 @@ class Collection {
     );
     result.mMdVersion = mMdVersion ?? this.mMdVersion;
     result.mMdEncodedJson = mMdEncodedJson ?? this.mMdEncodedJson;
+    result.mMbPubVersion = mMbPubVersion;
+    result.mMdPubEncodedJson = mMdPubEncodedJson;
     return result;
   }
 
