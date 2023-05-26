@@ -37,6 +37,6 @@ sed -i '' "s/$version_line/$new_version/" pubspec.yaml
 
 # Commit the version bump with new_version in the commit message
 git add pubspec.yaml
-git commit -m "Bump version to $new_version"
+git commit -m "Bump $new_version"
 
 gh pr create --fill -r ashilkn --base main
