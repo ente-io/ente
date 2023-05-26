@@ -49,7 +49,7 @@ class _CollageWithFourItemsState extends State<CollageWithFourItems> {
     );
   }
 
-  Row _getLayouts() {
+  Widget _getLayouts() {
     return Row(
       children: [
         GestureDetector(
@@ -122,7 +122,7 @@ class FirstVariant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(6),
       child: StaggeredGrid.count(
         crossAxisCount: 4,
         mainAxisSpacing: mainAxisSpacing,
@@ -172,7 +172,7 @@ class SecondVariant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(6),
       child: StaggeredGrid.count(
         crossAxisCount: 4,
         mainAxisSpacing: mainAxisSpacing,

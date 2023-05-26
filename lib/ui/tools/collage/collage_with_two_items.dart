@@ -113,7 +113,7 @@ class FirstVariant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(6),
       child: StaggeredGrid.count(
         crossAxisCount: 2,
         mainAxisSpacing: mainAxisSpacing,
@@ -151,7 +151,7 @@ class SecondVariant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(6),
       child: StaggeredGrid.count(
         crossAxisCount: 2,
         mainAxisSpacing: mainAxisSpacing,
