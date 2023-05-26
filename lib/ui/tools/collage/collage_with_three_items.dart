@@ -105,10 +105,13 @@ class _CollageWithThreeItemsState extends State<CollageWithThreeItems> {
           CollageItemWidget(widget.third),
         );
       case Variant.third:
-        return ThirdVariant(
-          CollageItemWidget(widget.first),
-          CollageItemWidget(widget.second),
-          CollageItemWidget(widget.third),
+        return SizedBox(
+          width: 320,
+          child: ThirdVariant(
+            CollageItemWidget(widget.first),
+            CollageItemWidget(widget.second),
+            CollageItemWidget(widget.third),
+          ),
         );
     }
   }
@@ -220,23 +223,23 @@ class ThirdVariant extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(6),
       child: StaggeredGrid.count(
-        crossAxisCount: 3,
+        crossAxisCount: 2,
         mainAxisSpacing: mainAxisSpacing,
         crossAxisSpacing: crossAxisSpacing,
         axisDirection: AxisDirection.down,
         children: [
           StaggeredGridTile.count(
-            crossAxisCellCount: 3,
+            crossAxisCellCount: 2,
             mainAxisCellCount: 1,
             child: first,
           ),
           StaggeredGridTile.count(
-            crossAxisCellCount: 3,
+            crossAxisCellCount: 2,
             mainAxisCellCount: 1,
             child: second,
           ),
           StaggeredGridTile.count(
-            crossAxisCellCount: 3,
+            crossAxisCellCount: 2,
             mainAxisCellCount: 1,
             child: third,
           ),
@@ -257,6 +260,7 @@ class FirstVariantIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CollageIconContainerWidget(
+      width: 56,
       child: FirstVariant(
         CollageItemIcon(isActive: isActive),
         CollageItemIcon(isActive: isActive),
@@ -278,6 +282,7 @@ class SecondVariantIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CollageIconContainerWidget(
+      width: 56,
       child: SecondVariant(
         CollageItemIcon(isActive: isActive),
         CollageItemIcon(isActive: isActive),
