@@ -77,9 +77,7 @@ class CollageCreatorPage extends StatelessWidget {
       child: Column(
         children: [
           collage,
-          const SizedBox(
-            height: 24,
-          ),
+          const Expanded(child: SizedBox()),
           ButtonWidget(
             buttonType: ButtonType.neutral,
             labelText: S.of(context).saveCollage,
@@ -87,6 +85,11 @@ class CollageCreatorPage extends StatelessWidget {
               return _onSaveClicked(context);
             },
             shouldSurfaceExecutionStates: true,
+          ),
+          const SafeArea(
+            child: SizedBox(
+              height: 12,
+            ),
           ),
         ],
       ),
