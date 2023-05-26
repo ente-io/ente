@@ -120,7 +120,7 @@ export interface CollectionPublicMagicMetadataProps {
 
 export interface CollectionPublicMagicMetadata
     extends Omit<MagicMetadataCore, 'data'> {
-    data: CollectionMagicMetadataProps;
+    data: CollectionPublicMagicMetadataProps;
 }
 export interface CollectionSummary {
     id: number;

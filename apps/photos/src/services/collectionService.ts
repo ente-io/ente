@@ -132,7 +132,7 @@ const getCollectionWithSecrets = async (
         };
     }
     let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
-    if (collection.magicMetadata?.data) {
+    if (collection.pubMagicMetadata?.data) {
         collectionPublicMagicMetadata = {
             ...collection.pubMagicMetadata,
             data: await cryptoWorker.decryptMetadata(
