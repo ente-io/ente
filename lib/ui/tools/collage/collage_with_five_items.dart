@@ -35,7 +35,7 @@ class _CollageWithFiveItemsState extends State<CollageWithFiveItems> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         WidgetsToImage(
           controller: _widgetsToImageController,
@@ -89,12 +89,15 @@ class _CollageWithFiveItemsState extends State<CollageWithFiveItems> {
           CollageItemWidget(widget.fifth),
         );
       case Variant.second:
-        return SecondVariant(
-          CollageItemWidget(widget.first),
-          CollageItemWidget(widget.second),
-          CollageItemWidget(widget.third),
-          CollageItemWidget(widget.fourth),
-          CollageItemWidget(widget.fifth),
+        return SizedBox(
+          width: 320,
+          child: SecondVariant(
+            CollageItemWidget(widget.first),
+            CollageItemWidget(widget.second),
+            CollageItemWidget(widget.third),
+            CollageItemWidget(widget.fourth),
+            CollageItemWidget(widget.fifth),
+          ),
         );
     }
   }
@@ -120,34 +123,34 @@ class FirstVariant extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(6),
       child: StaggeredGrid.count(
-        crossAxisCount: 4,
+        crossAxisCount: 6,
         mainAxisSpacing: mainAxisSpacing,
         crossAxisSpacing: crossAxisSpacing,
         axisDirection: AxisDirection.down,
         children: [
           StaggeredGridTile.count(
-            crossAxisCellCount: 2,
-            mainAxisCellCount: 2,
+            crossAxisCellCount: 3,
+            mainAxisCellCount: 3,
             child: first,
           ),
           StaggeredGridTile.count(
-            crossAxisCellCount: 2,
-            mainAxisCellCount: 1,
+            crossAxisCellCount: 3,
+            mainAxisCellCount: 2,
             child: second,
           ),
           StaggeredGridTile.count(
-            crossAxisCellCount: 2,
+            crossAxisCellCount: 3,
             mainAxisCellCount: 2,
             child: third,
           ),
           StaggeredGridTile.count(
-            crossAxisCellCount: 2,
-            mainAxisCellCount: 2,
+            crossAxisCellCount: 3,
+            mainAxisCellCount: 3,
             child: fourth,
           ),
           StaggeredGridTile.count(
-            crossAxisCellCount: 2,
-            mainAxisCellCount: 1,
+            crossAxisCellCount: 3,
+            mainAxisCellCount: 2,
             child: fifth,
           ),
         ],
@@ -183,12 +186,12 @@ class SecondVariant extends StatelessWidget {
         children: [
           StaggeredGridTile.count(
             crossAxisCellCount: 2,
-            mainAxisCellCount: 1,
+            mainAxisCellCount: 2,
             child: first,
           ),
           StaggeredGridTile.count(
             crossAxisCellCount: 2,
-            mainAxisCellCount: 1,
+            mainAxisCellCount: 2,
             child: second,
           ),
           StaggeredGridTile.count(
@@ -198,12 +201,12 @@ class SecondVariant extends StatelessWidget {
           ),
           StaggeredGridTile.count(
             crossAxisCellCount: 2,
-            mainAxisCellCount: 1,
+            mainAxisCellCount: 2,
             child: fourth,
           ),
           StaggeredGridTile.count(
             crossAxisCellCount: 2,
-            mainAxisCellCount: 1,
+            mainAxisCellCount: 2,
             child: fifth,
           ),
         ],
@@ -223,6 +226,7 @@ class FirstVariantIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CollageIconContainerWidget(
+      width: 56,
       child: FirstVariant(
         CollageItemIcon(isActive: isActive),
         CollageItemIcon(isActive: isActive),
