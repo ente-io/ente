@@ -454,7 +454,7 @@ export function getUniqueFiles(files: EnteFile[], sortAsc = false) {
 
     if (sortAsc === true) {
         return uniqueFiles.sort(
-            (b, a) => b.metadata.creationTime - a.metadata.creationTime
+            (a, b) => a.metadata.creationTime - b.metadata.creationTime
         );
     }
     return uniqueFiles;
