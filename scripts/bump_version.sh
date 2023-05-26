@@ -6,15 +6,16 @@ set -e
 # Go to the project root directory
 cd "$(dirname "$0")/.."
 
-# Check that the current branch is main
-if [[ $(git rev-parse --abbrev-ref HEAD) != "main" ]]; then
-  echo "Error: Not on main branch"
+# Check that there are no uncommitted changes
+git diff-index --quiet HEAD --
+if [ $? -ne 0 ]; then
+  echo "Error: There are uncommitted changes"
   exit 1
 fi
 
-# Check that there are no uncommitted changes
-if [[ $(git diff-index --quiet HEAD --) != 0 ]]; then
-  echo "Error: There are uncommitted changes"
+# Check that the current branch is main
+if [[ $(git rev-parse --abbrev-ref HEAD) != "main" ]]; then
+  echo "Error: Not on main branch"
   exit 1
 fi
 
