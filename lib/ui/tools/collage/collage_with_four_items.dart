@@ -87,11 +87,14 @@ class _CollageWithFourItemsState extends State<CollageWithFourItems> {
           CollageItemWidget(widget.fourth),
         );
       case Variant.second:
-        return SecondVariant(
-          CollageItemWidget(widget.first),
-          CollageItemWidget(widget.second),
-          CollageItemWidget(widget.third),
-          CollageItemWidget(widget.fourth),
+        return SizedBox(
+          width: 320,
+          child: SecondVariant(
+            CollageItemWidget(widget.first),
+            CollageItemWidget(widget.second),
+            CollageItemWidget(widget.third),
+            CollageItemWidget(widget.fourth),
+          ),
         );
     }
   }
@@ -173,7 +176,7 @@ class SecondVariant extends StatelessWidget {
         children: [
           StaggeredGridTile.count(
             crossAxisCellCount: 4,
-            mainAxisCellCount: 1,
+            mainAxisCellCount: 2,
             child: first,
           ),
           StaggeredGridTile.count(
@@ -188,7 +191,7 @@ class SecondVariant extends StatelessWidget {
           ),
           StaggeredGridTile.count(
             crossAxisCellCount: 4,
-            mainAxisCellCount: 1,
+            mainAxisCellCount: 2,
             child: fourth,
           ),
         ],
@@ -208,6 +211,7 @@ class FirstVariantIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CollageIconContainerWidget(
+      width: 56,
       child: FirstVariant(
         CollageItemIcon(isActive: isActive),
         CollageItemIcon(isActive: isActive),
