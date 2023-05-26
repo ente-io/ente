@@ -17,13 +17,13 @@ import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
-class CreateCollagePage extends StatelessWidget {
+class CollageCreatorPage extends StatelessWidget {
   final _logger = Logger("CreateCollagePage");
   final _widgetsToImageController = WidgetsToImageController();
 
   final List<File> files;
 
-  CreateCollagePage(this.files, {super.key});
+  CollageCreatorPage(this.files, {super.key});
 
   @override
   Widget build(BuildContext context) {
