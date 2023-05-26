@@ -11,7 +11,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/hidden_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/remote_sync_service.dart";
-import "package:photos/theme/ente_theme.dart";
+import "package:photos/services/sync_service.dart";
 
 class UploadIconWidget extends StatefulWidget {
   final File file;
@@ -53,14 +53,16 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (SyncService.instance.isSyncInProgress()) {
+      return const SizedBox.shrink();
+    }
     if (widget.file.isUploaded || isUploadedNow) {
       if (isUploadedNow) {
-        final colorScheme = getEnteColorScheme(context);
         return Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Icon(
+          child: const Icon(
             Icons.cloud_done_outlined,
-            color: colorScheme.primary700,
+            color: Colors.white,
           )
               .animate()
               .fadeIn(
@@ -83,11 +85,12 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
           final bool isIgnored = snapshot.data!;
           final bool isQueuedForUpload =
               !isIgnored && widget.file.collectionID != null;
+          if (isQueuedForUpload) {
+            return const SizedBox.shrink();
+          }
           return IconButton(
-            icon: Icon(
-              isQueuedForUpload
-                  ? Icons.cloud_upload_outlined
-                  : Icons.upload_rounded,
+            icon: const Icon(
+              Icons.upload_rounded,
               color: Colors.white,
             ),
             onPressed: () async {
