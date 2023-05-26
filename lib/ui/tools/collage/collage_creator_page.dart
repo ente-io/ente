@@ -12,6 +12,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/tools/collage/collage_with_five_items.dart";
 import "package:photos/ui/tools/collage/collage_with_four_items.dart";
+import "package:photos/ui/tools/collage/collage_with_six_items.dart";
 import "package:photos/ui/tools/collage/collage_with_three_items.dart";
 import "package:photos/ui/tools/collage/collage_with_two_items.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
@@ -20,6 +21,9 @@ import "package:photos/utils/toast_util.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
 class CollageCreatorPage extends StatelessWidget {
+  static const int collageItemsMin = 2;
+  static const int collageItemsMax = 6;
+
   final _logger = Logger("CreateCollagePage");
   final _widgetsToImageController = WidgetsToImageController();
 
@@ -79,6 +83,17 @@ class CollageCreatorPage extends StatelessWidget {
           _widgetsToImageController,
         );
         break;
+      case 6:
+        collage = CollageWithSixItems(
+          files[0],
+          files[1],
+          files[2],
+          files[3],
+          files[4],
+          files[5],
+          _widgetsToImageController,
+        );
+        break;
       default:
         collage = _getGrid();
     }
@@ -87,7 +102,10 @@ class CollageCreatorPage extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Column(
         children: [
-          collage,
+          SizedBox(
+            width: 320,
+            child: collage,
+          ),
           const Expanded(child: SizedBox()),
           ButtonWidget(
             buttonType: ButtonType.neutral,
@@ -157,35 +175,40 @@ class TestGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StaggeredGrid.count(
-      crossAxisCount: 4,
+      crossAxisCount: 2,
       mainAxisSpacing: 4,
       crossAxisSpacing: 4,
       axisDirection: AxisDirection.down,
       children: const [
         StaggeredGridTile.count(
-          crossAxisCellCount: 2,
-          mainAxisCellCount: 2,
+          crossAxisCellCount: 1,
+          mainAxisCellCount: 1,
           child: Tile("1"),
         ),
         StaggeredGridTile.count(
-          crossAxisCellCount: 2,
+          crossAxisCellCount: 1,
           mainAxisCellCount: 1,
           child: Tile("2"),
         ),
         StaggeredGridTile.count(
-          crossAxisCellCount: 2,
-          mainAxisCellCount: 2,
+          crossAxisCellCount: 1,
+          mainAxisCellCount: 1,
           child: Tile("3"),
         ),
         StaggeredGridTile.count(
-          crossAxisCellCount: 2,
-          mainAxisCellCount: 2,
+          crossAxisCellCount: 1,
+          mainAxisCellCount: 1,
           child: Tile("4"),
         ),
         StaggeredGridTile.count(
-          crossAxisCellCount: 2,
+          crossAxisCellCount: 1,
           mainAxisCellCount: 1,
           child: Tile("5"),
+        ),
+        StaggeredGridTile.count(
+          crossAxisCellCount: 1,
+          mainAxisCellCount: 1,
+          child: Tile("6"),
         ),
       ],
     );

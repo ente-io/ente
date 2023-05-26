@@ -35,9 +35,6 @@ class FileSelectionActionWidget extends StatefulWidget {
   final DeviceCollection? deviceCollection;
   final SelectedFiles selectedFiles;
 
-  static const int collageItemsMin = 2;
-  static const int collageItemsMax = 5;
-
   const FileSelectionActionWidget(
     this.type,
     this.selectedFiles, {
@@ -149,9 +146,9 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
 
     if (!hasVideoFile &&
         widget.selectedFiles.files.length >=
-            FileSelectionActionWidget.collageItemsMin &&
+            CollageCreatorPage.collageItemsMin &&
         widget.selectedFiles.files.length <=
-            FileSelectionActionWidget.collageItemsMax) {
+            CollageCreatorPage.collageItemsMax) {
       firstList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.grid_view_outlined,
