@@ -8,6 +8,8 @@ import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/services/sync_service.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/zoomable_image.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -76,10 +78,12 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
         const SizedBox(
           height: 24,
         ),
-        TextButton(
-          onPressed: _onSaveClicked,
-          child: Text(S.of(context).saveCollage),
-        )
+        ButtonWidget(
+          buttonType: ButtonType.neutral,
+          labelText: S.of(context).saveCollage,
+          onTap: _onSaveClicked,
+          shouldSurfaceExecutionStates: true,
+        ),
       ],
     );
   }
