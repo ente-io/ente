@@ -16,22 +16,17 @@ import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
-class CreateCollagePage extends StatefulWidget {
-  final List<File> files;
-
-  const CreateCollagePage(this.files, {super.key});
-
-  @override
-  State<CreateCollagePage> createState() => _CreateCollagePageState();
-}
-
-class _CreateCollagePageState extends State<CreateCollagePage> {
+class CreateCollagePage extends StatelessWidget {
   final _logger = Logger("CreateCollagePage");
   final _widgetsToImageController = WidgetsToImageController();
 
+  final List<File> files;
+
+  CreateCollagePage(this.files, {super.key});
+
   @override
   Widget build(BuildContext context) {
-    for (final file in widget.files) {
+    for (final file in files) {
       _logger.info(file.displayName);
     }
     return Scaffold(
@@ -39,12 +34,12 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
         elevation: 0,
         title: Text(S.of(context).createCollage),
       ),
-      body: _getBody(),
+      body: _getBody(context),
     );
   }
 
-  Widget _getBody() {
-    final count = widget.files.length;
+  Widget _getBody(BuildContext context) {
+    final count = files.length;
 
     return Padding(
       padding: const EdgeInsets.all(12),
@@ -52,8 +47,8 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
         children: [
           count == 2
               ? TwoImageCollageCreator(
-                  widget.files[0],
-                  widget.files[1],
+                  files[0],
+                  files[1],
                   _widgetsToImageController,
                 )
               : _getGrid(),
@@ -63,7 +58,9 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
           ButtonWidget(
             buttonType: ButtonType.neutral,
             labelText: S.of(context).saveCollage,
-            onTap: _onSaveClicked,
+            onTap: () {
+              return _onSaveClicked(context);
+            },
             shouldSurfaceExecutionStates: true,
           ),
         ],
@@ -71,7 +68,7 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
     );
   }
 
-  Future<void> _onSaveClicked() async {
+  Future<void> _onSaveClicked(context) async {
     final bytes = await _widgetsToImageController.capture();
     final fileName = "ente_collage_" +
         DateTime.now().microsecondsSinceEpoch.toString() +
@@ -99,7 +96,6 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
     return const TestGrid();
   }
 }
-
 
 class Tile extends StatelessWidget {
   final String text;
@@ -156,4 +152,3 @@ class TestGrid extends StatelessWidget {
     );
   }
 }
-
