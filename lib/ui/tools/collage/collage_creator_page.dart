@@ -10,9 +10,9 @@ import "package:photos/models/file.dart";
 import "package:photos/services/sync_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/tools/collage/four_item_collage.dart";
-import "package:photos/ui/tools/collage/three_image_collage_creator.dart";
-import 'package:photos/ui/tools/collage/two_image_collage_creator.dart';
+import "package:photos/ui/tools/collage/collage_with_four_items.dart";
+import "package:photos/ui/tools/collage/collage_with_three_items.dart";
+import "package:photos/ui/tools/collage/collage_with_two_items.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
@@ -45,14 +45,14 @@ class CollageCreatorPage extends StatelessWidget {
     Widget collage;
     switch (count) {
       case 2:
-        collage = TwoImageCollageCreator(
+        collage = CollageWithTwoItems(
           files[0],
           files[1],
           _widgetsToImageController,
         );
         break;
       case 3:
-        collage = ThreeImageCollageCreator(
+        collage = CollageWithThreeItems(
           files[0],
           files[1],
           files[2],

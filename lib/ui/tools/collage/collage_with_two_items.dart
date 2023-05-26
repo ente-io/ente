@@ -6,8 +6,13 @@ import 'package:photos/ui/tools/collage/collage_item_icon.dart';
 import "package:photos/ui/tools/collage/collage_item_widget.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
-class TwoImageCollageCreator extends StatefulWidget {
-  const TwoImageCollageCreator(
+enum Variant {
+  first,
+  second,
+}
+
+class CollageWithTwoItems extends StatefulWidget {
+  const CollageWithTwoItems(
     this.first,
     this.second,
     this.controller, {
@@ -18,11 +23,11 @@ class TwoImageCollageCreator extends StatefulWidget {
   final WidgetsToImageController controller;
 
   @override
-  State<TwoImageCollageCreator> createState() => _TwoImageCollageCreatorState();
+  State<CollageWithTwoItems> createState() => _CollageWithTwoItemsState();
 }
 
-class _TwoImageCollageCreatorState extends State<TwoImageCollageCreator> {
-  bool _isLayoutVertical = false;
+class _CollageWithTwoItemsState extends State<CollageWithTwoItems> {
+  Variant _variant = Variant.first;
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +48,13 @@ class _TwoImageCollageCreatorState extends State<TwoImageCollageCreator> {
               behavior: HitTestBehavior.opaque,
               child: Padding(
                 padding: const EdgeInsets.all(4),
-                child: HorizontalSplitIcon(
-                  isActive: !_isLayoutVertical,
+                child: SecondVariantIcon(
+                  isActive: _variant == Variant.first,
                 ),
               ),
               onTap: () {
                 setState(() {
-                  _isLayoutVertical = false;
+                  _variant = Variant.first;
                 });
               },
             ),
@@ -57,13 +62,13 @@ class _TwoImageCollageCreatorState extends State<TwoImageCollageCreator> {
               behavior: HitTestBehavior.opaque,
               child: Padding(
                 padding: const EdgeInsets.all(4),
-                child: VerticalSplitIcon(
-                  isActive: _isLayoutVertical,
+                child: FirstVariantIcon(
+                  isActive: _variant == Variant.second,
                 ),
               ),
               onTap: () {
                 setState(() {
-                  _isLayoutVertical = true;
+                  _variant = Variant.second;
                 });
               },
             ),
@@ -74,20 +79,23 @@ class _TwoImageCollageCreatorState extends State<TwoImageCollageCreator> {
   }
 
   Widget _getCollage() {
-    return _isLayoutVertical
-        ? VerticalSplit(
-            CollageItemWidget(widget.first),
-            CollageItemWidget(widget.second),
-          )
-        : HorizontalSplit(
-            CollageItemWidget(widget.first),
-            CollageItemWidget(widget.second),
-          );
+    switch (_variant) {
+      case Variant.first:
+        return FirstVariant(
+          CollageItemWidget(widget.first),
+          CollageItemWidget(widget.second),
+        );
+      case Variant.second:
+        return SecondVariant(
+          CollageItemWidget(widget.first),
+          CollageItemWidget(widget.second),
+        );
+    }
   }
 }
 
-class VerticalSplit extends StatelessWidget {
-  const VerticalSplit(
+class FirstVariant extends StatelessWidget {
+  const FirstVariant(
     this.first,
     this.second, {
     super.key,
@@ -124,8 +132,8 @@ class VerticalSplit extends StatelessWidget {
   }
 }
 
-class HorizontalSplit extends StatelessWidget {
-  const HorizontalSplit(
+class SecondVariant extends StatelessWidget {
+  const SecondVariant(
     this.first,
     this.second, {
     super.key,
@@ -162,8 +170,8 @@ class HorizontalSplit extends StatelessWidget {
   }
 }
 
-class VerticalSplitIcon extends StatelessWidget {
-  const VerticalSplitIcon({
+class FirstVariantIcon extends StatelessWidget {
+  const FirstVariantIcon({
     super.key,
     this.isActive = false,
   });
@@ -173,7 +181,7 @@ class VerticalSplitIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CollageIconContainerWidget(
-      child: VerticalSplit(
+      child: FirstVariant(
         CollageItemIcon(isActive: isActive),
         CollageItemIcon(isActive: isActive),
         mainAxisSpacing: 2,
@@ -183,8 +191,8 @@ class VerticalSplitIcon extends StatelessWidget {
   }
 }
 
-class HorizontalSplitIcon extends StatelessWidget {
-  const HorizontalSplitIcon({
+class SecondVariantIcon extends StatelessWidget {
+  const SecondVariantIcon({
     super.key,
     this.isActive = false,
   });
@@ -193,7 +201,7 @@ class HorizontalSplitIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CollageIconContainerWidget(
-      child: HorizontalSplit(
+      child: SecondVariant(
         CollageItemIcon(isActive: isActive),
         CollageItemIcon(isActive: isActive),
         mainAxisSpacing: 2,

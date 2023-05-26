@@ -12,8 +12,8 @@ enum Variant {
   third,
 }
 
-class ThreeImageCollageCreator extends StatefulWidget {
-  const ThreeImageCollageCreator(
+class CollageWithThreeItems extends StatefulWidget {
+  const CollageWithThreeItems(
     this.first,
     this.second,
     this.third,
@@ -25,11 +25,10 @@ class ThreeImageCollageCreator extends StatefulWidget {
   final WidgetsToImageController controller;
 
   @override
-  State<ThreeImageCollageCreator> createState() =>
-      _ThreeImageCollageCreatorState();
+  State<CollageWithThreeItems> createState() => _CollageWithThreeItemsState();
 }
 
-class _ThreeImageCollageCreatorState extends State<ThreeImageCollageCreator> {
+class _CollageWithThreeItemsState extends State<CollageWithThreeItems> {
   Variant _variant = Variant.first;
 
   @override
