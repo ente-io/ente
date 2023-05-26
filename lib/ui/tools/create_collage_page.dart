@@ -45,46 +45,49 @@ class _CreateCollagePageState extends State<CreateCollagePage> {
   }
 
   Widget _getBody() {
-    return Column(
-      children: [
-        WidgetsToImage(
-          controller: _widgetsToImageController,
-          child: _getCollage(),
-        ),
-        const SizedBox(
-          height: 24,
-        ),
-        const Text("Choose layout"),
-        Row(
-          children: [
-            TextButton(
-              child: const Icon(Icons.border_vertical_rounded),
-              onPressed: () {
-                setState(() {
-                  _isLayoutVertical = true;
-                });
-              },
-            ),
-            TextButton(
-              child: const Icon(Icons.splitscreen),
-              onPressed: () {
-                setState(() {
-                  _isLayoutVertical = false;
-                });
-              },
-            )
-          ],
-        ),
-        const SizedBox(
-          height: 24,
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.neutral,
-          labelText: S.of(context).saveCollage,
-          onTap: _onSaveClicked,
-          shouldSurfaceExecutionStates: true,
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        children: [
+          WidgetsToImage(
+            controller: _widgetsToImageController,
+            child: _getCollage(),
+          ),
+          const SizedBox(
+            height: 24,
+          ),
+          const Text("Choose layout"),
+          Row(
+            children: [
+              TextButton(
+                child: const Icon(Icons.border_vertical_rounded),
+                onPressed: () {
+                  setState(() {
+                    _isLayoutVertical = true;
+                  });
+                },
+              ),
+              TextButton(
+                child: const Icon(Icons.splitscreen),
+                onPressed: () {
+                  setState(() {
+                    _isLayoutVertical = false;
+                  });
+                },
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 24,
+          ),
+          ButtonWidget(
+            buttonType: ButtonType.neutral,
+            labelText: S.of(context).saveCollage,
+            onTap: _onSaveClicked,
+            shouldSurfaceExecutionStates: true,
+          ),
+        ],
+      ),
     );
   }
 
