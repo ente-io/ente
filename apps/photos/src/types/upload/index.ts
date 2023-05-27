@@ -1,7 +1,7 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
 import { B64EncryptionResult, LocalFileAttributes } from 'types/crypto';
-import { FileAttributes } from 'types/file';
+import { MetadataFileAttributes, S3FileAttributes } from 'types/file';
 import {
     EncryptedMagicMetadata,
     FilePublicMagicMetadata,
@@ -122,9 +122,9 @@ export interface ProcessedFile {
     localID: number;
 }
 export interface BackupedFile {
-    file: FileAttributes;
-    thumbnail: FileAttributes;
-    metadata: FileAttributes;
+    file: S3FileAttributes;
+    thumbnail: S3FileAttributes;
+    metadata: MetadataFileAttributes;
     pubMagicMetadata: EncryptedMagicMetadata;
 }
 

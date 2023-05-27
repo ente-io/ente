@@ -5,18 +5,16 @@ import {
 } from 'types/magicMetadata';
 import { Metadata } from 'types/upload';
 
-interface MetadataFileAttributes {
+export interface MetadataFileAttributes {
     encryptedData: string;
     decryptionHeader: string;
     objectKey?: string;
 }
-interface S3FileAttributes {
+export interface S3FileAttributes {
     objectKey: string;
     encryptedData?: string;
     decryptionHeader: string;
 }
-
-export type FileAttributes = MetadataFileAttributes | S3FileAttributes;
 
 export interface FileInfo {
     fileSize: number;
@@ -27,9 +25,9 @@ export interface EncryptedEnteFile {
     id: number;
     collectionID: number;
     ownerID: number;
-    file: FileAttributes;
-    thumbnail: FileAttributes;
-    metadata: FileAttributes;
+    file: S3FileAttributes;
+    thumbnail: S3FileAttributes;
+    metadata: MetadataFileAttributes;
     info: FileInfo;
     magicMetadata: EncryptedMagicMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
