@@ -11,12 +11,6 @@ export const VerticallyCentered = styled(Box)`
     overflow: auto;
 `;
 
-export const DisclaimerContainer = styled('div')`
-    margin: 16px 0;
-    color: rgb(158, 150, 137);
-    font-size: 14px;
-`;
-
 export const Row = styled('div')`
     min-height: 32px;
     display: flex;
