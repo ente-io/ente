@@ -72,9 +72,9 @@ class SocialSectionWidget extends StatelessWidget {
 
 class SocialsMenuItemWidget extends StatelessWidget {
   final String text;
-  final String urlSring;
+  final String url;
 
-  const SocialsMenuItemWidget(this.text, this.urlSring, {Key? key})
+  const SocialsMenuItemWidget(this.text, this.url, {Key? key})
       : super(key: key);
 
   @override
@@ -88,7 +88,7 @@ class SocialsMenuItemWidget extends StatelessWidget {
       trailingIconIsMuted: true,
       onTap: () async {
         launchUrlString(
-          urlSring,
+          url,
           mode: LaunchMode.externalApplication,
         );
       },
