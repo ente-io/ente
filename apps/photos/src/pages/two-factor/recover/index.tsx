@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
-import VerticallyCentered from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 import { logError } from 'utils/sentry';
 import {
     logoutUser,

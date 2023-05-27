@@ -16,7 +16,7 @@ import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
 import { KEK, KeyAttributes, UpdatedKey, User } from 'types/user';
 import LinkButton from 'components/pages/gallery/LinkButton';
-import VerticallyCentered from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import FormPaperTitle from 'components/Form/FormPaper/Title';

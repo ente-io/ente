@@ -19,7 +19,7 @@ import { mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { CustomError, parseSharingErrorCodes } from 'utils/error';
-import VerticallyCentered, { CenteredFlex } from 'components/Container';
+import { VerticallyCentered, CenteredFlex } from 'components/Container';
 import { t } from 'i18next';
 
 import EnteSpinner from 'components/EnteSpinner';

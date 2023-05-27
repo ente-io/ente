@@ -1,7 +1,7 @@
 import {} from './../Container';
 import { Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import VerticallyCentered from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 
 export const MappingsContainer = styled(Box)(() => ({
     height: '278px',

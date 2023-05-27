@@ -1,4 +1,4 @@
-import VerticallyCentered from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 
 const FormContainer = VerticallyCentered;
 

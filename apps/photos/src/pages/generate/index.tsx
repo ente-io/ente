@@ -14,7 +14,7 @@ import SetPasswordForm from 'components/SetPasswordForm';
 import { justSignedUp, setJustSignedUp } from 'utils/storage';
 import RecoveryKey from 'components/RecoveryKey';
 import { PAGES } from 'constants/pages';
-import VerticallyCentered from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';

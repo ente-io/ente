@@ -27,7 +27,7 @@ import {
 import FormPaperTitle from './Form/FormPaper/Title';
 import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
-import VerticallyCentered from './Container';
+import { VerticallyCentered } from './Container';
 import { PasswordStrengthHint } from './PasswordStrength';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';

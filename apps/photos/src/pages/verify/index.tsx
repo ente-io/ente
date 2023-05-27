@@ -26,7 +26,7 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
 import EnteSpinner from 'components/EnteSpinner';
-import VerticallyCentered from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 
 export default function Verify() {
     const [email, setEmail] = useState('');

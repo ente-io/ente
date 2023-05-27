@@ -10,7 +10,7 @@ import { TextField } from '@mui/material';
 import AuthNavbar from 'components/pages/auth/Navbar';
 import { t } from 'i18next';
 import EnteSpinner from 'components/EnteSpinner';
-import VerticallyCentered from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 
 const AuthenticatorCodesPage = () => {
     const appContext = useContext(AppContext);

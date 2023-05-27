@@ -1,5 +1,5 @@
 import { Button, Stack, styled, Typography } from '@mui/material';
-import VerticallyCentered, { FlexWrapper } from './Container';
+import { VerticallyCentered, FlexWrapper } from './Container';
 import { Box } from '@mui/material';
 import uploadManager from 'services/upload/uploadManager';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternateOutlined';

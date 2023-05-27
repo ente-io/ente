@@ -1,12 +1,12 @@
 import React, { FC } from 'react';
 import { BoxProps, Divider } from '@mui/material';
-import Container from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 
 const FormPaperFooter: FC<BoxProps> = ({ sx, style, ...props }) => {
     return (
         <>
             <Divider />
-            <Container
+            <VerticallyCentered
                 style={{ flexDirection: 'row', ...style }}
                 sx={{
                     mt: 3,
@@ -14,7 +14,7 @@ const FormPaperFooter: FC<BoxProps> = ({ sx, style, ...props }) => {
                 }}
                 {...props}>
                 {props.children}
-            </Container>
+            </VerticallyCentered>
         </>
     );
 };

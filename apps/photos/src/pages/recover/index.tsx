@@ -13,7 +13,7 @@ import { decryptAndStoreToken, saveKeyInSessionStore } from 'utils/crypto';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
-import VerticallyCentered from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';

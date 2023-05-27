@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { enableTwoFactor, setupTwoFactor } from 'services/userService';
 import { t } from 'i18next';
 
-import VerticallyCentered from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 import { useRouter } from 'next/router';
 import VerifyTwoFactor, {
     VerifyTwoFactorCallback,

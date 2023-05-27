@@ -1,4 +1,4 @@
-import VerticallyCentered from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 import React, { useEffect } from 'react';
 import { t } from 'i18next';
 
