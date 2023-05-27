@@ -796,7 +796,8 @@ class CollectionsService {
         collections.add(collection);
       }
       return collections;
-    } catch (e) {
+    } catch (e, s) {
+      _logger.warning(e, s);
       if (e is DioError && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }

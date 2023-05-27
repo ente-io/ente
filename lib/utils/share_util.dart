@@ -159,7 +159,7 @@ DateTime? parseDateFromFileNam1e(String fileName) {
 void shareSelected(
   BuildContext context,
   GlobalKey shareButtonKey,
-  Set<File> selectedFiles,
+  List<File> selectedFiles,
 ) {
   share(
     context,

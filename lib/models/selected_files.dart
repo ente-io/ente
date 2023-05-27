@@ -5,7 +5,7 @@ import 'package:photos/events/clear_selections_event.dart';
 import 'package:photos/models/file.dart';
 
 class SelectedFiles extends ChangeNotifier {
-  final files = <File>{};
+  final files = <File>[];
   final lastSelections = <File>{};
 
   void toggleSelection(File file) {
@@ -33,7 +33,7 @@ class SelectedFiles extends ChangeNotifier {
   }
 
   void unSelectAll(Set<File> selectedFiles, {bool skipNotify = false}) {
-    files.removeAll(selectedFiles);
+    files.removeWhere((file) => selectedFiles.contains(file));
     lastSelections.clear();
     if (!skipNotify) {
       notifyListeners();

@@ -104,7 +104,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           onTap: () async {
             if (await deleteFromTrash(
               context,
-              widget.selectedFiles.files.toList(),
+              widget.selectedFiles.files,
             )) {
               widget.selectedFiles.clearAll();
             }
@@ -160,7 +160,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Future<void> _onUnArchiveClick() async {
     await changeVisibility(
       context,
-      widget.selectedFiles.files.toList(),
+      widget.selectedFiles.files,
       visibleVisibility,
     );
     widget.selectedFiles.clearAll();

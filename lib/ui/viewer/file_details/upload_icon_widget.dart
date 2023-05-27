@@ -11,7 +11,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/hidden_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/remote_sync_service.dart";
-import "package:photos/theme/ente_theme.dart";
+import "package:photos/services/sync_service.dart";
 
 class UploadIconWidget extends StatefulWidget {
   final File file;
@@ -27,6 +27,7 @@ class UploadIconWidget extends StatefulWidget {
 class _UpdateIconWidgetState extends State<UploadIconWidget> {
   late StreamSubscription<CollectionUpdatedEvent> _firstImportEvent;
   bool isUploadedNow = false;
+  bool isBeingUploaded = false;
 
   @override
   void initState() {
@@ -53,14 +54,16 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (SyncService.instance.isSyncInProgress()) {
+      return const SizedBox.shrink();
+    }
     if (widget.file.isUploaded || isUploadedNow) {
       if (isUploadedNow) {
-        final colorScheme = getEnteColorScheme(context);
         return Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Icon(
+          child: const Icon(
             Icons.cloud_done_outlined,
-            color: colorScheme.primary700,
+            color: Colors.white,
           )
               .animate()
               .fadeIn(
@@ -68,7 +71,7 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
                 curve: Curves.easeInOutCubic,
               )
               .fadeOut(
-                delay: const Duration(seconds: 5),
+                delay: const Duration(seconds: 3),
                 duration: 500.ms,
                 curve: Curves.easeInOutCubic,
               ),
@@ -83,11 +86,18 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
           final bool isIgnored = snapshot.data!;
           final bool isQueuedForUpload =
               !isIgnored && widget.file.collectionID != null;
+          if (isQueuedForUpload && isBeingUploaded) {
+            return Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: CircularProgressIndicator(
+                color: Colors.white.withOpacity(0.1),
+                strokeWidth: 3,
+              ),
+            );
+          }
           return IconButton(
-            icon: Icon(
-              isQueuedForUpload
-                  ? Icons.cloud_upload_outlined
-                  : Icons.upload_rounded,
+            icon: const Icon(
+              Icons.upload_rounded,
               color: Colors.white,
             ),
             onPressed: () async {
@@ -103,7 +113,9 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
               }
               RemoteSyncService.instance.sync().ignore();
               if (mounted) {
-                setState(() {});
+                setState(() {
+                  isBeingUploaded = true;
+                });
               }
             },
           );

@@ -4855,6 +4855,46 @@ class S {
     );
   }
 
+  /// `Create collage`
+  String get createCollage {
+    return Intl.message(
+      'Create collage',
+      name: 'createCollage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save collage`
+  String get saveCollage {
+    return Intl.message(
+      'Save collage',
+      name: 'saveCollage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collage saved to gallery`
+  String get collageSaved {
+    return Intl.message(
+      'Collage saved to gallery',
+      name: 'collageSaved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Layout`
+  String get collageLayout {
+    return Intl.message(
+      'Layout',
+      name: 'collageLayout',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add to ente`
   String get addToEnte {
     return Intl.message(

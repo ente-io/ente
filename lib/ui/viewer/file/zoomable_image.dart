@@ -25,6 +25,7 @@ class ZoomableImage extends StatefulWidget {
   final Function(bool)? shouldDisableScroll;
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
+  final bool shouldCover;
 
   const ZoomableImage(
     this.photo, {
@@ -32,6 +33,7 @@ class ZoomableImage extends StatefulWidget {
     this.shouldDisableScroll,
     required this.tagPrefix,
     this.backgroundDecoration,
+    this.shouldCover = false,
   }) : super(key: key);
 
   @override
@@ -93,7 +95,9 @@ class _ZoomableImageState extends State<ZoomableImage>
           imageProvider: _imageProvider,
           controller: _photoViewController,
           scaleStateChangedCallback: _scaleStateChangedCallback,
-          minScale: PhotoViewComputedScale.contained,
+          minScale: widget.shouldCover
+              ? PhotoViewComputedScale.covered
+              : PhotoViewComputedScale.contained,
           gaplessPlayback: true,
           heroAttributes: PhotoViewHeroAttributes(
             tag: widget.tagPrefix! + _photo.tag,

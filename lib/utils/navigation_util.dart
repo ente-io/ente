@@ -22,9 +22,14 @@ Future<T?> routeToPage<T extends Object>(
   }
 }
 
-void replacePage(BuildContext context, Widget page) {
+void replacePage(
+  BuildContext context,
+  Widget page, {
+  Object? result,
+}) {
   Navigator.of(context).pushReplacement(
     _buildPageRoute(page),
+    result: result,
   );
 }
 
