@@ -7,7 +7,7 @@ import { changeEmail, sendOTTForEmailChange } from 'services/userService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
 import { Alert, Box, TextField } from '@mui/material';
-import Container from './Container';
+import { VerticallyCentered } from './Container';
 import LinkButton from './pages/gallery/LinkButton';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import { sleep } from 'utils/common';
@@ -99,7 +99,7 @@ function ChangeEmailForm() {
                         </Alert>
                     )}
                     <form noValidate onSubmit={handleSubmit}>
-                        <Container>
+                        <VerticallyCentered>
                             <TextField
                                 fullWidth
                                 InputProps={{
@@ -136,7 +136,7 @@ function ChangeEmailForm() {
                                         : t('VERIFY')
                                 }
                             />
-                        </Container>
+                        </VerticallyCentered>
                     </form>
 
                     <FormPaperFooter
