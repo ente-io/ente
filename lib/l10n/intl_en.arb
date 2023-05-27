@@ -791,6 +791,7 @@
   "close": "Close",
   "setAs": "Set as",
   "fileSavedToGallery": "File saved to gallery",
+  "fileFailedToSaveToGallery": "Failed to save file to gallery",
   "download": "Download",
   "pressAndHoldToPlayVideo": "Press and hold to play video",
   "downloadFailed": "Download failed",

@@ -414,7 +414,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       context,
       CollageCreatorPage(widget.selectedFiles.files),
     );
-    if (result!) {
+    if (result != null && result) {
       widget.selectedFiles.clearAll();
     }
   }

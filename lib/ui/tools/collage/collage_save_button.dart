@@ -40,12 +40,20 @@ class SaveCollageButton extends StatelessWidget {
             final fileName = "ente_collage_" +
                 DateTime.now().microsecondsSinceEpoch.toString() +
                 ".jpeg";
-            final AssetEntity? newAsset = await (PhotoManager.editor.saveImage(
+            AssetEntity? newAsset = await (PhotoManager.editor.saveImage(
               compressedBytes,
               title: fileName,
               relativePath: "ente Collages",
             ));
-            final newFile = await File.fromAsset("ente Collages", newAsset!);
+            newAsset ??= await (PhotoManager.editor.saveImage(
+              compressedBytes,
+              title: fileName,
+            ));
+            if (newAsset == null) {
+              showShortToast(context, S.of(context).fileFailedToSaveToGallery);
+              return;
+            }
+            final newFile = await File.fromAsset("ente Collages", newAsset);
             SyncService.instance.sync();
             showShortToast(context, S.of(context).collageSaved);
             replacePage(
