@@ -1,3 +1,5 @@
+import "dart:io";
+
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/update_service.dart';
@@ -34,11 +36,16 @@ class SocialSectionWidget extends StatelessWidget {
     );
     options.addAll(
       [
-        SocialsMenuItemWidget(S.of(context).blog, "https://ente.io/blog"),
+        SocialsMenuItemWidget(
+          S.of(context).blog,
+          "https://ente.io/blog",
+          launchInExternalApp: !Platform.isAndroid,
+        ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
           S.of(context).merchandise,
           "https://shop.ente.io",
+          launchInExternalApp: !Platform.isAndroid,
         ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
@@ -72,10 +79,15 @@ class SocialSectionWidget extends StatelessWidget {
 
 class SocialsMenuItemWidget extends StatelessWidget {
   final String text;
-  final String urlSring;
+  final String url;
+  final bool launchInExternalApp;
 
-  const SocialsMenuItemWidget(this.text, this.urlSring, {Key? key})
-      : super(key: key);
+  const SocialsMenuItemWidget(
+    this.text,
+    this.url, {
+    Key? key,
+    this.launchInExternalApp = true,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +99,12 @@ class SocialsMenuItemWidget extends StatelessWidget {
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
       onTap: () async {
-        launchUrlString(urlSring);
+        launchUrlString(
+          url,
+          mode: launchInExternalApp
+              ? LaunchMode.externalApplication
+              : LaunchMode.platformDefault,
+        );
       },
     );
   }
