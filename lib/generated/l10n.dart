@@ -5663,6 +5663,16 @@ class S {
     );
   }
 
+  /// `Failed to save file to gallery`
+  String get fileFailedToSaveToGallery {
+    return Intl.message(
+      'Failed to save file to gallery',
+      name: 'fileFailedToSaveToGallery',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Download`
   String get download {
     return Intl.message(

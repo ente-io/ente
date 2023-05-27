@@ -49,7 +49,11 @@ class SaveCollageButton extends StatelessWidget {
               compressedBytes,
               title: fileName,
             ));
-            final newFile = await File.fromAsset("ente Collages", newAsset!);
+            if (newAsset == null) {
+              showShortToast(context, S.of(context).fileFailedToSaveToGallery);
+              return;
+            }
+            final newFile = await File.fromAsset("ente Collages", newAsset);
             SyncService.instance.sync();
             showShortToast(context, S.of(context).collageSaved);
             replacePage(

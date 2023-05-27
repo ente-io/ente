@@ -618,6 +618,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "faqs": MessageLookupByLibrary.simpleMessage("FAQs"),
         "favorite": MessageLookupByLibrary.simpleMessage("Favorite"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
+        "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
+            "Failed to save file to gallery"),
         "fileInfoAddDescHint":
             MessageLookupByLibrary.simpleMessage("Add a description..."),
         "fileSavedToGallery":
