@@ -422,7 +422,7 @@ class CollectionsListWidget extends StatelessWidget {
       await CollectionsService.instance.move(
         toCollectionID,
         fromCollectionID,
-        selectedFiles!.files.toList(),
+        selectedFiles!.files,
       );
       await dialog.hide();
       RemoteSyncService.instance.sync(silently: true);
@@ -453,7 +453,7 @@ class CollectionsListWidget extends StatelessWidget {
     await dialog.show();
     try {
       await CollectionsService.instance
-          .restore(toCollectionID, selectedFiles!.files.toList());
+          .restore(toCollectionID, selectedFiles!.files);
       RemoteSyncService.instance.sync(silently: true);
       selectedFiles?.clearAll();
       await dialog.hide();
