@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/ui/tools/collage/collage_test_grid.dart";
@@ -13,17 +12,12 @@ class CollageCreatorPage extends StatelessWidget {
   static const int collageItemsMin = 2;
   static const int collageItemsMax = 6;
 
-  final _logger = Logger("CreateCollagePage");
-
   final List<File> files;
 
-  CollageCreatorPage(this.files, {super.key});
+  const CollageCreatorPage(this.files, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    for (final file in files) {
-      _logger.info(file.displayName);
-    }
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
