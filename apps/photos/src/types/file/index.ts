@@ -5,17 +5,15 @@ import {
 } from 'types/magicMetadata';
 import { Metadata } from 'types/upload';
 
-interface FileAttributesBase {
-    decryptionHeader: string;
-}
-
-interface MetadataFileAttributes extends FileAttributesBase {
+interface MetadataFileAttributes {
     encryptedData: string;
+    decryptionHeader: string;
     objectKey?: string;
 }
-interface S3FileAttributes extends FileAttributesBase {
+interface S3FileAttributes {
     objectKey: string;
     encryptedData?: string;
+    decryptionHeader: string;
 }
 
 export type FileAttributes = MetadataFileAttributes | S3FileAttributes;
