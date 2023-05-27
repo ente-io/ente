@@ -22,6 +22,7 @@ import { GalleryContext } from 'pages/gallery';
 import { formatDate } from 'utils/time/format';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
+import { areFilesWithFileHashSame, hasFileHash } from 'utils/upload';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
@@ -341,9 +342,11 @@ export function PhotoList({
     const groupByFileSize = (timeStampList: TimeStampListItem[]) => {
         let index = 0;
         while (index < displayFiles.length) {
-            const file = displayFiles[index];
-            const currentFileSize = deduplicateContext.fileSizeMap.get(file.id);
-            const currentCreationTime = file.metadata.creationTime;
+            const currentFile = displayFiles[index];
+            const currentFileSize = deduplicateContext.fileSizeMap.get(
+                currentFile.id
+            );
+            const currentCreationTime = currentFile.metadata.creationTime;
             let lastFileIndex = index;
 
             while (lastFileIndex < displayFiles.length) {
@@ -353,7 +356,13 @@ export function PhotoList({
                     ) !== currentFileSize ||
                     (deduplicateContext.clubSameTimeFilesOnly &&
                         displayFiles[lastFileIndex].metadata.creationTime !==
-                            currentCreationTime)
+                            currentCreationTime) ||
+                    ((hasFileHash(displayFiles[lastFileIndex].metadata) ||
+                        hasFileHash(currentFile.metadata)) &&
+                        !areFilesWithFileHashSame(
+                            displayFiles[lastFileIndex].metadata,
+                            currentFile.metadata
+                        ))
                 ) {
                     break;
                 }
