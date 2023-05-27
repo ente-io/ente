@@ -793,7 +793,7 @@ class CollectionsService {
       }
       return collections;
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.warning(e, s);
       if (e is DioError && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
