@@ -1,7 +1,7 @@
 import { Box, IconButton } from '@mui/material';
 import { styled } from '@mui/material';
 
-const VerticallyCentered = styled(Box)`
+export const VerticallyCentered = styled(Box)`
     flex: 1;
     display: flex;
     align-items: center;
@@ -10,8 +10,6 @@ const VerticallyCentered = styled(Box)`
     text-align: center;
     overflow: auto;
 `;
-
-export default VerticallyCentered;
 
 export const DisclaimerContainer = styled('div')`
     margin: 16px 0;
@@ -80,4 +78,5 @@ export const VerticalFlex = styled(HorizontalFlex)({
 
 export const VerticallyCenteredFlex = styled(HorizontalFlex)({
     alignItems: 'center',
+    display: 'flex',
 });
