@@ -25,7 +25,7 @@ import { MLFactory } from './machineLearningFactory';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
 import { CustomError, parseUploadErrorCodes } from 'utils/error';
-import { MAX_ML_SYNC_ERROR_COUNT } from 'constants/machineLearning/config';
+import { MAX_ML_SYNC_ERROR_COUNT } from 'constants/mlConfig';
 import FaceService from './faceService';
 import PeopleService from './peopleService';
 import ObjectService from './objectService';

@@ -14,7 +14,7 @@ import {
 import { ibExtractFaceImageFromCrop } from 'utils/machineLearning/faceCrop';
 import { FaceCropsRow, FaceImagesRow, ImageBitmapView } from './ImageViews';
 import ssdMobileNetV2Service from 'services/machineLearning/ssdMobileNetV2Service';
-import { DEFAULT_ML_SYNC_CONFIG } from 'constants/machineLearning/config';
+import { DEFAULT_ML_SYNC_CONFIG } from 'constants/mlConfig';
 import imageSceneService from 'services/machineLearning/imageSceneService';
 import { addLogLine } from 'utils/logging';
 
