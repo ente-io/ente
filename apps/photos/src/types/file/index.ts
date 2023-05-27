@@ -8,11 +8,9 @@ import { Metadata } from 'types/upload';
 export interface MetadataFileAttributes {
     encryptedData: string;
     decryptionHeader: string;
-    objectKey?: string;
 }
 export interface S3FileAttributes {
     objectKey: string;
-    encryptedData?: string;
     decryptionHeader: string;
 }
 
