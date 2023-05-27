@@ -22,6 +22,7 @@ import { GalleryContext } from 'pages/gallery';
 import { formatDate } from 'utils/time/format';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
+import { areFilesWithFileHashSame, hasFileHash } from 'utils/upload';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
@@ -341,19 +342,40 @@ export function PhotoList({
     const groupByFileSize = (timeStampList: TimeStampListItem[]) => {
         let index = 0;
         while (index < displayFiles.length) {
-            const file = displayFiles[index];
-            const currentFileSize = deduplicateContext.fileSizeMap.get(file.id);
-            const currentCreationTime = file.metadata.creationTime;
+            const firstFile = displayFiles[index];
+            const firstFileSize = deduplicateContext.fileSizeMap.get(
+                firstFile.id
+            );
+            const firstFileCreationTime = firstFile.metadata.creationTime;
             let lastFileIndex = index;
 
             while (lastFileIndex < displayFiles.length) {
+                const lastFile = displayFiles[lastFileIndex];
+
+                const lastFileSize = deduplicateContext.fileSizeMap.get(
+                    lastFile.id
+                );
+                if (lastFileSize !== firstFileSize) {
+                    break;
+                }
+
+                const lastFileCreationTime = lastFile.metadata.creationTime;
                 if (
-                    deduplicateContext.fileSizeMap.get(
-                        displayFiles[lastFileIndex].id
-                    ) !== currentFileSize ||
-                    (deduplicateContext.clubSameTimeFilesOnly &&
-                        displayFiles[lastFileIndex].metadata.creationTime !==
-                            currentCreationTime)
+                    deduplicateContext.clubSameTimeFilesOnly &&
+                    lastFileCreationTime !== firstFileCreationTime
+                ) {
+                    break;
+                }
+
+                const eitherFileHasFileHash =
+                    hasFileHash(lastFile.metadata) ||
+                    hasFileHash(firstFile.metadata);
+                if (
+                    eitherFileHasFileHash &&
+                    !areFilesWithFileHashSame(
+                        lastFile.metadata,
+                        firstFile.metadata
+                    )
                 ) {
                     break;
                 }
@@ -362,7 +384,7 @@ export function PhotoList({
             lastFileIndex--;
             timeStampList.push({
                 itemType: ITEM_TYPE.SIZE_AND_COUNT,
-                fileSize: currentFileSize,
+                fileSize: firstFileSize,
                 fileCount: lastFileIndex - index + 1,
             });
 
