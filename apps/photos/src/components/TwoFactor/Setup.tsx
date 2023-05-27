@@ -1,4 +1,4 @@
-import VerticallyCentered from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 import { SetupMode } from 'pages/two-factor/setup';
 import SetupManualMode from 'pages/two-factor/setup/ManualMode';
 import SetupQRMode from 'pages/two-factor/setup/QRMode';

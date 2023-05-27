@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material';
-import VerticallyCentered, { FlexWrapper } from 'components/Container';
+import { VerticallyCentered, FlexWrapper } from 'components/Container';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useEffect } from 'react';
 import billingService from 'services/billingService';

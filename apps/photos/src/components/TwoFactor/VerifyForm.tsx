@@ -5,7 +5,7 @@ import OtpInput from 'react-otp-input';
 import { t } from 'i18next';
 
 import SubmitButton from 'components/SubmitButton';
-import VerticallyCentered, { CenteredFlex } from 'components/Container';
+import { VerticallyCentered, CenteredFlex } from 'components/Container';
 import { Box, Typography, TypographyProps } from '@mui/material';
 import InvalidInputMessage from './InvalidInputMessage';
 import { sleep } from 'utils/common';

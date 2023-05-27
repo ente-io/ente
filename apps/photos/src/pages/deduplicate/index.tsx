@@ -26,7 +26,7 @@ import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { styled } from '@mui/material';
 import { syncCollections } from 'services/collectionService';
 import EnteSpinner from 'components/EnteSpinner';
-import VerticallyCentered from 'components/Container';
+import { VerticallyCentered } from 'components/Container';
 import Typography from '@mui/material/Typography';
 import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
 
