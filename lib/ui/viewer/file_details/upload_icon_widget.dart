@@ -27,6 +27,7 @@ class UploadIconWidget extends StatefulWidget {
 class _UpdateIconWidgetState extends State<UploadIconWidget> {
   late StreamSubscription<CollectionUpdatedEvent> _firstImportEvent;
   bool isUploadedNow = false;
+  bool isBeingUploaded = false;
 
   @override
   void initState() {
@@ -85,7 +86,7 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
           final bool isIgnored = snapshot.data!;
           final bool isQueuedForUpload =
               !isIgnored && widget.file.collectionID != null;
-          if (isQueuedForUpload) {
+          if (isQueuedForUpload && isBeingUploaded) {
             return Padding(
               padding: const EdgeInsets.all(2.0),
               child: CircularProgressIndicator(
@@ -112,7 +113,9 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
               }
               RemoteSyncService.instance.sync().ignore();
               if (mounted) {
-                setState(() {});
+                setState(() {
+                  isBeingUploaded = true;
+                });
               }
             },
           );
