@@ -1,6 +1,6 @@
 import * as tf from '@tensorflow/tfjs-core';
 import { TFLiteModel } from '@tensorflow/tfjs-tflite';
-import { MOBILEFACENET_FACE_SIZE } from 'constants/machineLearning/config';
+import { MOBILEFACENET_FACE_SIZE } from 'constants/mlConfig';
 import PQueue from 'p-queue';
 import {
     FaceEmbedding,

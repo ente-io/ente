@@ -2,7 +2,7 @@ import {
     DEFAULT_ML_SEARCH_CONFIG,
     DEFAULT_ML_SYNC_CONFIG,
     DEFAULT_ML_SYNC_JOB_CONFIG,
-} from 'constants/machineLearning/config';
+} from 'constants/mlConfig';
 import { JobConfig } from 'types/common/job';
 import { MLSearchConfig, MLSyncConfig } from 'types/machineLearning';
 import mlIDbStorage, {

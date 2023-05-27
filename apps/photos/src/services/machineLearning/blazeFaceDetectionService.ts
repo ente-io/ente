@@ -32,7 +32,7 @@ import {
     BLAZEFACE_PASS1_SCORE_THRESHOLD,
     BLAZEFACE_SCORE_THRESHOLD,
     MAX_FACE_DISTANCE_PERCENT,
-} from 'constants/machineLearning/config';
+} from 'constants/mlConfig';
 import { addLogLine } from 'utils/logging';
 
 class BlazeFaceDetectionService implements FaceDetectionService {

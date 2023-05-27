@@ -3,7 +3,7 @@ import {
     DEFAULT_ML_SYNC_CONFIG,
     DEFAULT_ML_SYNC_JOB_CONFIG,
     MAX_ML_SYNC_ERROR_COUNT,
-} from 'constants/machineLearning/config';
+} from 'constants/mlConfig';
 import {
     openDB,
     deleteDB,

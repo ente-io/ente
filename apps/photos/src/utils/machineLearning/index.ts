@@ -3,7 +3,7 @@ import * as tf from '@tensorflow/tfjs-core';
 import {
     BLAZEFACE_FACE_SIZE,
     ML_SYNC_DOWNLOAD_TIMEOUT_MS,
-} from 'constants/machineLearning/config';
+} from 'constants/mlConfig';
 import { euclidean } from 'hdbscan';
 import PQueue from 'p-queue';
 import DownloadManager from 'services/downloadManager';
