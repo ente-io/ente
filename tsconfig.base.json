@@ -22,5 +22,6 @@
         "target": "es2021",
         "types": ["webpack-env"]
     },
-    "exclude": ["**/node_modules", "**/.*/"]
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
+    "exclude": ["node_modules", "out", ".next", "thirdparty"]
 }
