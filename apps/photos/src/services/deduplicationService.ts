@@ -50,10 +50,10 @@ export async function getDuplicateFiles(
             if (duplicateFiles.length > 1) {
                 result = [
                     ...result,
-                    ...getDupesGroupedBySameFileHashes(
-                        duplicateFiles,
-                        dupe.size
-                    ),
+                    ...getDupesGroupedBySameFileHashes({
+                        files: duplicateFiles,
+                        size: dupe.size,
+                    }),
                 ];
             }
         }
@@ -64,85 +64,78 @@ export async function getDuplicateFiles(
     }
 }
 
-function getDupesGroupedBySameFileHashes(files: EnteFile[], size: number) {
-    const clubbedDupesByFileHash = clubDuplicatesBySameFileHashes([
-        { files, size },
-    ]);
-
-    const clubbedFileIDs = new Set<number>();
-    for (const dupe of clubbedDupesByFileHash) {
-        for (const file of dupe.files) {
-            clubbedFileIDs.add(file.id);
-        }
-    }
-
-    files = files.filter((file) => {
-        return !clubbedFileIDs.has(file.id);
-    });
-
-    if (files.length > 1) {
-        clubbedDupesByFileHash.push({
-            files: [...files],
-            size,
-        });
-    }
-
-    return clubbedDupesByFileHash;
-}
-
-function clubDuplicatesBySameFileHashes(dupes: DuplicateFiles[]) {
+function getDupesGroupedBySameFileHashes(dupe: DuplicateFiles) {
     const result: DuplicateFiles[] = [];
 
-    for (const dupe of dupes) {
-        let files: EnteFile[] = [];
+    const fileWithHashes: EnteFile[] = [];
+    const fileWithoutHashes: EnteFile[] = [];
+    for (const file of dupe.files) {
+        if (hasFileHash(file.metadata)) {
+            fileWithHashes.push(file);
+        } else {
+            fileWithoutHashes.push(file);
+        }
+    }
 
-        const filteredFiles = dupe.files.filter((file) => {
-            return hasFileHash(file.metadata);
+    if (fileWithHashes.length > 1) {
+        result.push(
+            ...groupDupesByFileHashes({
+                files: fileWithHashes,
+                size: dupe.size,
+            })
+        );
+    }
+
+    if (fileWithoutHashes.length > 1) {
+        result.push({
+            files: fileWithoutHashes,
+            size: dupe.size,
+        });
+    }
+    return result;
+}
+
+function groupDupesByFileHashes(dupe: DuplicateFiles) {
+    const result: DuplicateFiles[] = [];
+
+    const filesSortedByFileHash = dupe.files
+        .map((file) => {
+            return {
+                file,
+                hash:
+                    file.metadata.hash ??
+                    `${file.metadata.imageHash}_${file.metadata.videoHash}`,
+            };
+        })
+        .sort((firstFile, secondFile) => {
+            return firstFile.hash.localeCompare(secondFile.hash);
         });
 
-        if (filteredFiles.length <= 1) {
-            continue;
-        }
-
-        const dupesSortedByFileHash = filteredFiles
-            .map((file) => {
-                return {
-                    file,
-                    hash:
-                        file.metadata.hash ??
-                        `${file.metadata.imageHash}_${file.metadata.videoHash}`,
-                };
-            })
-            .sort((firstFile, secondFile) => {
-                return firstFile.hash.localeCompare(secondFile.hash);
-            });
-
-        files.push(dupesSortedByFileHash[0].file);
-        for (let i = 1; i < dupesSortedByFileHash.length; i++) {
-            if (
-                areFileHashesSame(
-                    dupesSortedByFileHash[i - 1].file.metadata,
-                    dupesSortedByFileHash[i].file.metadata
-                )
-            ) {
-                files.push(dupesSortedByFileHash[i].file);
-            } else {
-                if (files.length > 1) {
-                    result.push({
-                        files: [...files],
-                        size: dupe.size,
-                    });
-                }
-                files = [dupesSortedByFileHash[i].file];
+    let sameHashFiles: EnteFile[] = [];
+    sameHashFiles.push(filesSortedByFileHash[0].file);
+    for (let i = 1; i < filesSortedByFileHash.length; i++) {
+        if (
+            areFileHashesSame(
+                filesSortedByFileHash[i - 1].file.metadata,
+                filesSortedByFileHash[i].file.metadata
+            )
+        ) {
+            sameHashFiles.push(filesSortedByFileHash[i].file);
+        } else {
+            if (sameHashFiles.length > 1) {
+                result.push({
+                    files: [...sameHashFiles],
+                    size: dupe.size,
+                });
             }
+            sameHashFiles = [filesSortedByFileHash[i].file];
         }
-
-        if (files.length > 1) {
-            result.push({
-                files,
-                size: dupe.size,
-            });
-        }
+    }
+    if (sameHashFiles.length > 1) {
+        result.push({
+            files: sameHashFiles,
+            size: dupe.size,
+        });
     }
 
     return result;
