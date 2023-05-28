@@ -11,14 +11,11 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
-import QueueProcessor, { PROCESSING_STRATEGY } from './queueProcessor';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { CacheStorageService } from './cache/cacheStorageService';
 import { CACHES } from 'constants/cache';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
-
-const MAX_PARALLEL_DOWNLOADS = 10;
 
 class DownloadManager {
     private fileObjectURLPromise = new Map<
@@ -26,11 +23,6 @@ class DownloadManager {
         Promise<{ original: string[]; converted: string[] }>
     >();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
-
-    private thumbnailDownloadRequestsProcessor = new QueueProcessor<any>(
-        MAX_PARALLEL_DOWNLOADS,
-        PROCESSING_STRATEGY.LIFO
-    );
 
     public async getThumbnail(
         file: EnteFile,
@@ -55,16 +47,12 @@ class DownloadManager {
                     if (cacheResp) {
                         return URL.createObjectURL(await cacheResp.blob());
                     }
-                    const thumb =
-                        await this.thumbnailDownloadRequestsProcessor.queueUpRequest(
-                            () =>
-                                this.downloadThumb(
-                                    token,
-                                    file,
-                                    usingWorker,
-                                    timeout
-                                )
-                        ).promise;
+                    const thumb = await this.downloadThumb(
+                        token,
+                        file,
+                        usingWorker,
+                        timeout
+                    );
                     const thumbBlob = new Blob([thumb]);
 
                     thumbnailCache
