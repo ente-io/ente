@@ -252,10 +252,10 @@ export default function PreviewCard(props: IProps) {
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
                     ) {
-                        url;
-                        await PublicCollectionDownloadManager.getCachedThumbnail(
-                            file
-                        );
+                        url =
+                            await PublicCollectionDownloadManager.getCachedThumbnail(
+                                file
+                            );
                     } else {
                         url = await DownloadManager.getCachedThumbnail(file);
                     }
