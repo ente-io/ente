@@ -1,23 +1,26 @@
 {
     "compilerOptions": {
         "allowJs": true,
+        "allowSyntheticDefaultImports": true,
         "baseUrl": ".",
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "incremental": true,
-        "jsx": "preserve",
+        "isolatedModules": true,
+        "jsx": "react-jsx",
         "lib": ["dom", "dom.iterable", "esnext"],
-        "maxNodeModuleJsDepth": 10,
         "module": "esnext",
         "moduleResolution": "node",
         "noEmit": true,
+        "noFallthroughCasesInSwitch": true,
         "noImplicitAny": true,
         "noUnusedLocals": true,
+        "noUnusedParameters": true,
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "strict": true,
         "target": "es2021",
-        "types": ["webpack-env", "jest"]
+        "types": ["webpack-env"]
     },
     "exclude": ["**/node_modules", "**/.*/"]
 }
