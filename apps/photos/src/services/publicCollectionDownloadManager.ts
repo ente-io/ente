@@ -13,7 +13,6 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
-import QueueProcessor from './queueProcessor';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { CACHES } from 'constants/cache';
 import { CacheStorageService } from './cache/cacheStorageService';
@@ -25,8 +24,6 @@ class PublicCollectionDownloadManager {
         Promise<{ original: string[]; converted: string[] }>
     >();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
-
-    private thumbnailDownloadRequestsProcessor = new QueueProcessor<any>(5);
 
     private async getThumbnailCache() {
         try {
@@ -83,10 +80,11 @@ class PublicCollectionDownloadManager {
                         return cachedThumb;
                     }
 
-                    const thumb =
-                        await this.thumbnailDownloadRequestsProcessor.queueUpRequest(
-                            () => this.downloadThumb(token, passwordToken, file)
-                        ).promise;
+                    const thumb = await this.downloadThumb(
+                        token,
+                        passwordToken,
+                        file
+                    );
                     const thumbBlob = new Blob([thumb]);
                     try {
                         await thumbnailCache?.put(
