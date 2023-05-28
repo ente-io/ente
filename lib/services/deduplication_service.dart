@@ -103,6 +103,44 @@ class DeduplicationService {
     return result;
   }
 
+  List<DuplicateFiles> clubDuplicatesByName(List<DuplicateFiles> dupes) {
+    final result = <DuplicateFiles>[];
+    for (final dupe in dupes) {
+      final files = <File>[];
+      final Map<String, int> fileNameCounter = {};
+      String mostFrequentFileName = "";
+      int mostFrequentFileNameCount = 0;
+      // Counts the frequency of creationTimes within the supposed duplicates
+      for (final file in dupe.files) {
+        if (fileNameCounter.containsKey(file.displayName)) {
+          fileNameCounter[file.displayName] =
+              fileNameCounter[file.displayName]! + 1;
+        } else {
+          fileNameCounter[file.displayName] = 0;
+        }
+        if (fileNameCounter[file.displayName]! >
+            mostFrequentFileNameCount) {
+          mostFrequentFileNameCount =
+              fileNameCounter[file.displayName]!;
+          mostFrequentFileName = file.displayName;
+        }
+        files.add(file);
+      }
+      // Ignores those files that were not created within the most common creationTime
+      final incorrectDuplicates = <File>{};
+      for (final file in files) {
+        if (file.displayName != mostFrequentFileName) {
+          incorrectDuplicates.add(file);
+        }
+      }
+      files.removeWhere((file) => incorrectDuplicates.contains(file));
+      if (files.length > 1) {
+        result.add(DuplicateFiles(files, dupe.size));
+      }
+    }
+    return result;
+  }
+
   Future<DuplicateFilesResponse> _fetchDuplicateFileIDs() async {
     final response = await _enteDio.get("/files/duplicates");
     return DuplicateFilesResponse.fromMap(response.data);

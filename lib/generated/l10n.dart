@@ -5743,6 +5743,16 @@ class S {
     );
   }
 
+  /// `Club by file name`
+  String get clubByFileName {
+    return Intl.message(
+      'Club by file name',
+      name: 'clubByFileName',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Count`
   String get count {
     return Intl.message(

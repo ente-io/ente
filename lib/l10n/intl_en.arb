@@ -799,6 +799,7 @@
   "deselectAll": "Deselect all",
   "reviewDeduplicateItems": "Please review and delete the items you believe are duplicates.",
   "clubByCaptureTime": "Club by capture time",
+  "clubByFileName": "Club by file name",
   "count": "Count",
   "totalSize": "Total size",
   "time": "Time",

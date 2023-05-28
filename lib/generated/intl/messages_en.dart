@@ -370,6 +370,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "close": MessageLookupByLibrary.simpleMessage("Close"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("Club by capture time"),
+        "clubByFileName":
+            MessageLookupByLibrary.simpleMessage("Club by file name"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Code applied"),
         "codeCopiedToClipboard":
