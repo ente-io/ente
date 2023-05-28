@@ -240,7 +240,7 @@ export default function PreviewCard(props: IProps) {
     useEffect(() => {
         const main = async () => {
             try {
-                if (imgSrc) {
+                if (file.msrc) {
                     return;
                 }
                 let url: string;
