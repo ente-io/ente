@@ -15,6 +15,9 @@ import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
 import QueueProcessor from './queueProcessor';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { CACHES } from 'constants/cache';
+import { CacheStorageService } from './cache/cacheStorageService';
+import { LimitedCache } from 'types/cache';
 
 class PublicCollectionDownloadManager {
     private fileObjectURLPromise = new Map<
@@ -24,6 +27,40 @@ class PublicCollectionDownloadManager {
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
 
     private thumbnailDownloadRequestsProcessor = new QueueProcessor<any>(5);
+
+    private async getThumbnailCache() {
+        try {
+            const thumbnailCache = await CacheStorageService.open(
+                CACHES.THUMBS
+            );
+            return thumbnailCache;
+        } catch (e) {
+            return null;
+            // ignore
+        }
+    }
+
+    public async getCachedThumbnail(
+        file: EnteFile,
+        thumbnailCache?: LimitedCache
+    ) {
+        try {
+            if (!thumbnailCache) {
+                thumbnailCache = await this.getThumbnailCache();
+            }
+            const cacheResp: Response = await thumbnailCache?.match(
+                file.id.toString()
+            );
+
+            if (cacheResp) {
+                return URL.createObjectURL(await cacheResp.blob());
+            }
+            return null;
+        } catch (e) {
+            logError(e, 'failed to get cached thumbnail');
+            throw e;
+        }
+    }
 
     public async getThumbnail(
         file: EnteFile,
@@ -37,21 +74,13 @@ class PublicCollectionDownloadManager {
 
             if (!this.thumbnailObjectURLPromise.has(file.id)) {
                 const downloadPromise = async () => {
-                    const thumbnailCache = await (async () => {
-                        try {
-                            return await caches.open('thumbs');
-                        } catch (e) {
-                            return null;
-                            // ignore
-                        }
-                    })();
-
-                    const cacheResp: Response = await thumbnailCache?.match(
-                        file.id.toString()
+                    const thumbnailCache = await this.getThumbnailCache();
+                    const cachedThumb = await this.getCachedThumbnail(
+                        file,
+                        thumbnailCache
                     );
-
-                    if (cacheResp) {
-                        return URL.createObjectURL(await cacheResp.blob());
+                    if (cachedThumb) {
+                        return cachedThumb;
                     }
 
                     const thumb =
