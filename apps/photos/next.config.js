@@ -52,7 +52,6 @@ module.exports = (phase) =>
                 '@mui/material',
                 '@mui/system',
                 '@mui/icons-material',
-                '@ente/tsconfig',
                 '@ente/eslint-config',
             ],
             env: {

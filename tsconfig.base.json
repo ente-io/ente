@@ -19,8 +19,10 @@
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "strict": true,
-        "target": "es2021"
+        "target": "es2021",
+        "paths": {
+            "@ente/eslint-config/*": ["./packages/eslint-config/*"]
+        }
     },
-
     "exclude": ["**/node_modules", "**/.*/"]
 }
