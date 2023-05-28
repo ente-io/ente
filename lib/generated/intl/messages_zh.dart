@@ -338,6 +338,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaborator": MessageLookupByLibrary.simpleMessage("协作者"),
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage("协作者可以将照片和视频添加到共享相册中。"),
+        "collageLayout": MessageLookupByLibrary.simpleMessage("布局"),
+        "collageSaved": MessageLookupByLibrary.simpleMessage("拼贴已保存到相册"),
         "collectEventPhotos": MessageLookupByLibrary.simpleMessage("收集活动照片"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("收集照片"),
         "color": MessageLookupByLibrary.simpleMessage("颜色"),
@@ -371,6 +373,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "createAccount": MessageLookupByLibrary.simpleMessage("创建账户"),
         "createAlbumActionHint":
             MessageLookupByLibrary.simpleMessage("长按选择照片，然后点击 + 创建相册"),
+        "createCollage": MessageLookupByLibrary.simpleMessage("创建拼贴"),
         "createNewAccount": MessageLookupByLibrary.simpleMessage("创建新账号"),
         "createOrSelectAlbum": MessageLookupByLibrary.simpleMessage("创建或选择相册"),
         "createPublicLink": MessageLookupByLibrary.simpleMessage("创建公开链接"),
@@ -522,6 +525,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "faqs": MessageLookupByLibrary.simpleMessage("常见问题"),
         "favorite": MessageLookupByLibrary.simpleMessage("收藏"),
         "feedback": MessageLookupByLibrary.simpleMessage("反馈"),
+        "fileFailedToSaveToGallery":
+            MessageLookupByLibrary.simpleMessage("无法将文件保存到相册"),
         "fileInfoAddDescHint": MessageLookupByLibrary.simpleMessage("添加说明..."),
         "fileSavedToGallery": MessageLookupByLibrary.simpleMessage("文件已保存到相册"),
         "filesBackedUpFromDevice": m50,
@@ -832,6 +837,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight": MessageLookupByLibrary.simpleMessage("向右旋转"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("安全存储"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
+        "saveCollage": MessageLookupByLibrary.simpleMessage("保存拼贴"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("保存副本"),
         "saveKey": MessageLookupByLibrary.simpleMessage("保存密钥"),
         "saveYourRecoveryKeyIfYouHaventAlready":
@@ -923,6 +929,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "抱歉，我们无法在此设备上生成安全密钥。\n\n请使用其他设备注册。"),
+        "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("排序方式"),
+        "sortNewestFirst": MessageLookupByLibrary.simpleMessage("最新在前"),
+        "sortOldestFirst": MessageLookupByLibrary.simpleMessage("最旧在前"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ 成功"),
         "startBackup": MessageLookupByLibrary.simpleMessage("开始备份"),
         "storage": MessageLookupByLibrary.simpleMessage("存储空间"),

@@ -445,6 +445,7 @@
   "installManually": "Install manually",
   "criticalUpdateAvailable": "Critical update available",
   "updateAvailable": "Update available",
+  "ignoreUpdate": "Ignore",
   "downloading": "Downloading...",
   "theDownloadCouldNotBeCompleted": "The download could not be completed",
   "retry": "Retry",

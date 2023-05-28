@@ -3190,6 +3190,16 @@ class S {
     );
   }
 
+  /// `Ignore`
+  String get ignoreUpdate {
+    return Intl.message(
+      'Ignore',
+      name: 'ignoreUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Downloading...`
   String get downloading {
     return Intl.message(

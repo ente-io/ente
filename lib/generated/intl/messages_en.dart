@@ -667,6 +667,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iOSLockOut": MessageLookupByLibrary.simpleMessage(
             "Biometric authentication is disabled. Please lock and unlock your screen to enable it."),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("OK"),
+        "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignore"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Some files in this album are ignored from upload because they had previously been deleted from ente."),
         "importing": MessageLookupByLibrary.simpleMessage("Importing...."),
