@@ -203,9 +203,9 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
         content: Text(S.of(context).theDownloadCouldNotBeCompleted),
         actions: [
           TextButton(
-            child: const Text(
-              "Ignore",
-              style: TextStyle(
+            child: Text(
+              S.of(context).ignoreUpdate,
+              style: const TextStyle(
                 color: Colors.white,
               ),
             ),
