@@ -6,7 +6,7 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SignUp from 'components/SignUp';
 import { PAGES } from 'constants/pages';
 import FormPaper from 'components/Form/FormPaper';
-import FormContainer from 'components/Form/FormContainer';
+import { VerticallyCentered } from 'components/Container';
 
 export default function SignUpPage() {
     const router = useRouter();
@@ -29,7 +29,7 @@ export default function SignUpPage() {
     };
 
     return (
-        <FormContainer>
+        <VerticallyCentered>
             {loading ? (
                 <EnteSpinner />
             ) : (
@@ -37,6 +37,6 @@ export default function SignUpPage() {
                     <SignUp login={login} />
                 </FormPaper>
             )}
-        </FormContainer>
+        </VerticallyCentered>
     );
 }
