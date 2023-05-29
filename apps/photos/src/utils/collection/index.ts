@@ -6,6 +6,7 @@ import {
     restoreToCollection,
     unhideToCollection,
     updateCollectionMagicMetadata,
+    updatePublicCollectionMagicMetadata,
 } from 'services/collectionService';
 import { downloadFiles } from 'utils/file';
 import { getLocalFiles, getLocalHiddenFiles } from 'services/fileService';
@@ -17,6 +18,7 @@ import { logError } from 'utils/sentry';
 import {
     Collection,
     CollectionMagicMetadataProps,
+    CollectionPublicMagicMetadataProps,
     CollectionSummaries,
 } from 'types/collection';
 import {
@@ -176,7 +178,37 @@ export const changeCollectionVisibility = async (
 
         await updateCollectionMagicMetadata(updatedCollection);
     } catch (e) {
-        logError(e, 'change file visibility failed');
+        logError(e, 'change collection visibility failed');
+        switch (e.status?.toString()) {
+            case ServerErrorCodes.FORBIDDEN:
+                throw Error(CustomError.NOT_FILE_OWNER);
+        }
+        throw e;
+    }
+};
+
+export const changeCollectionOrder = async (
+    collection: Collection,
+    asc: boolean
+) => {
+    try {
+        const updatedPublicMagicMetadataProps: CollectionPublicMagicMetadataProps =
+            {
+                asc,
+            };
+
+        const updatedCollection = {
+            ...collection,
+            magicMetadata: await updateMagicMetadataProps(
+                collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
+                collection.key,
+                updatedPublicMagicMetadataProps
+            ),
+        } as Collection;
+
+        await updatePublicCollectionMagicMetadata(updatedCollection);
+    } catch (e) {
+        logError(e, 'change collection order failed');
         switch (e.status?.toString()) {
             case ServerErrorCodes.FORBIDDEN:
                 throw Error(CustomError.NOT_FILE_OWNER);
