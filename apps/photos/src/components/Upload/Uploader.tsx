@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import { syncCollections, createAlbum } from 'services/collectionService';
+import { createAlbum, getLatestCollections } from 'services/collectionService';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
@@ -427,7 +427,7 @@ export default function Uploader(props: Props) {
                 `upload collections - [${[...collectionNameToFilesMap.keys()]}]`
             );
             try {
-                const existingCollection = await syncCollections();
+                const existingCollection = await getLatestCollections();
                 let index = 0;
                 for (const [
                     collectionName,

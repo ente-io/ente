@@ -19,7 +19,7 @@ import {
 } from 'services/fileService';
 import { styled, Typography } from '@mui/material';
 import {
-    syncCollections,
+    getLatestCollections,
     getFavItemIds,
     getLocalCollections,
     createAlbum,
@@ -416,15 +416,6 @@ export default function Gallery() {
                     return false;
                 }
 
-                // shared files can only be seen in their respective collection and not searchable
-                if (isSharedFile(user, item)) {
-                    if (activeCollection === item.collectionID) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-
                 // SEARCH MODE
                 if (isInSearchMode) {
                     if (
@@ -469,6 +460,15 @@ export default function Gallery() {
                         return false;
                     }
                     return true;
+                }
+
+                // shared files can only be seen in their respective collection and not searchable
+                if (isSharedFile(user, item)) {
+                    if (activeCollection === item.collectionID) {
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
 
                 // archived collections files can only be seen in their respective collection
@@ -546,7 +546,7 @@ export default function Gallery() {
                 throw new Error(ServerErrorCodes.SESSION_EXPIRED);
             }
             !silent && startLoading();
-            const collections = await syncCollections();
+            const collections = await getLatestCollections(true);
             const { normalCollections, hiddenCollections } =
                 await splitNormalAndHiddenCollections(collections);
             setCollections(normalCollections);

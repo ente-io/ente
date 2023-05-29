@@ -290,7 +290,7 @@ export function isValidReplacementAlbum(
         collection.name === wantedCollectionName &&
         (collection.type === CollectionType.album ||
             collection.type === CollectionType.folder) &&
-        !isDefaultHiddenCollection(collection) &&
+        !isHiddenCollection(collection) &&
         !isQuickLinkCollection(collection) &&
         !isIncomingShare(collection, user)
     );

@@ -24,7 +24,7 @@ import { PAGES } from 'constants/pages';
 import router from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { styled } from '@mui/material';
-import { syncCollections } from 'services/collectionService';
+import { getLatestCollections } from 'services/collectionService';
 import EnteSpinner from 'components/EnteSpinner';
 import { VerticallyCentered } from 'components/Container';
 import Typography from '@mui/material/Typography';
@@ -80,7 +80,7 @@ export default function Deduplicate() {
 
     const syncWithRemote = async () => {
         startLoading();
-        const collections = await syncCollections();
+        const collections = await getLatestCollections();
         const collectionNameMap = new Map<number, string>();
         for (const collection of collections) {
             collectionNameMap.set(collection.id, collection.name);
