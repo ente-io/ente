@@ -33,6 +33,10 @@ class CollectionsDB {
 
   static const columnPubMMdEncodedJson = 'pub_mmd_encoded_json';
   static const columnPubMMdVersion = 'pub_mmd_ver';
+
+  static const columnSharedMMdJson = 'shared_mmd_json';
+  static const columnSharedMMdVersion = 'shared_mmd_ver';
+
   static const columnUpdationTime = 'updation_time';
   static const columnIsDeleted = 'is_deleted';
 
@@ -45,6 +49,7 @@ class CollectionsDB {
     ...addPublicURLs(),
     ...addPrivateMetadata(),
     ...addPublicMetadata(),
+    ...addShareeMetadata(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -172,6 +177,18 @@ class CollectionsDB {
     ];
   }
 
+  static List<String> addShareeMetadata() {
+    return [
+      '''
+        ALTER TABLE $table ADD COLUMN $columnSharedMMdJson TEXT DEFAULT '
+        {}';
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnSharedMMdVersion INTEGER DEFAULT 0;
+      '''
+    ];
+  }
+
   Future<void> insert(List<Collection> collections) async {
     final db = await instance.database;
     var batch = db.batch();
@@ -256,6 +273,9 @@ class CollectionsDB {
     row[columnMMdEncodedJson] = collection.mMdEncodedJson ?? '{}';
     row[columnPubMMdVersion] = collection.mMbPubVersion;
     row[columnPubMMdEncodedJson] = collection.mMdPubEncodedJson ?? '{}';
+
+    row[columnSharedMMdVersion] = collection.sharedMmdVersion;
+    row[columnSharedMMdJson] = collection.sharedMmdJson ?? '{}';
     return row;
   }
 
@@ -291,6 +311,9 @@ class CollectionsDB {
     result.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
     result.mMbPubVersion = row[columnPubMMdVersion] ?? 0;
     result.mMdPubEncodedJson = row[columnPubMMdEncodedJson] ?? '{}';
+
+    result.sharedMmdVersion = row[columnSharedMMdVersion] ?? 0;
+    result.sharedMmdJson = row[columnSharedMMdJson] ?? '{}';
     return result;
   }
 }
