@@ -706,7 +706,7 @@ class CollectionsService {
         ),
       );
       await _enteDio.put(
-        "/collections/public-magic-metadata",
+        "/collections/sharee-magic-metadata",
         data: params,
       );
       // update the local information so that it's reflected on UI
