@@ -49,8 +49,9 @@ Future<void> changeVisibility(
 Future<void> changeCollectionVisibility(
   BuildContext context,
   Collection collection,
-  int newVisibility,
-) async {
+  int newVisibility, {
+  bool isOwner = true,
+}) async {
   final dialog = createProgressDialog(
     context,
     newVisibility == archiveVisibility
@@ -60,7 +61,12 @@ Future<void> changeCollectionVisibility(
   await dialog.show();
   try {
     final Map<String, dynamic> update = {magicKeyVisibility: newVisibility};
-    await CollectionsService.instance.updateMagicMetadata(collection, update);
+    if (isOwner) {
+      await CollectionsService.instance.updateMagicMetadata(collection, update);
+    } else {
+      await CollectionsService.instance
+          .updateShareeMagicMetadata(collection, update);
+    }
     // Force reload home gallery to pull in the now unarchived files
     Bus.instance.fire(ForceReloadHomeGalleryEvent("CollectionArchiveChange"));
     showShortToast(

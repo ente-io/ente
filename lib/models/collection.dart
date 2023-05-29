@@ -23,10 +23,13 @@ class Collection {
   final bool isDeleted;
   String? mMdEncodedJson;
   String? mMdPubEncodedJson;
+  String? sharedMmdJson;
   int mMdVersion = 0;
   int mMbPubVersion = 0;
+  int sharedMmdVersion = 0;
   CollectionMagicMetadata? _mmd;
   CollectionPubMagicMetadata? _pubMmd;
+  ShareeMagicMetadata? _sharedMmd;
 
   CollectionMagicMetadata get magicMetadata =>
       _mmd ?? CollectionMagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
@@ -35,9 +38,14 @@ class Collection {
       _pubMmd ??
       CollectionPubMagicMetadata.fromEncodedJson(mMdPubEncodedJson ?? '{}');
 
+  ShareeMagicMetadata get sharedMagicMetadata =>
+      _sharedMmd ?? ShareeMagicMetadata.fromEncodedJson(sharedMmdJson ?? '{}');
+
   set magicMetadata(CollectionMagicMetadata? val) => _mmd = val;
 
   set pubMagicMetadata(CollectionPubMagicMetadata? val) => _pubMmd = val;
+
+  set sharedMagicMetadata(ShareeMagicMetadata? val) => _sharedMmd = val;
 
   Collection(
     this.id,
@@ -57,6 +65,11 @@ class Collection {
 
   bool isArchived() {
     return mMdVersion > 0 && magicMetadata.visibility == archiveVisibility;
+  }
+
+  bool hasShareeArchived() {
+    return sharedMmdVersion > 0 &&
+        sharedMagicMetadata.visibility == archiveVisibility;
   }
 
   // hasLink returns true if there's any link attached to the collection
@@ -173,6 +186,8 @@ class Collection {
     result.mMdEncodedJson = mMdEncodedJson ?? this.mMdEncodedJson;
     result.mMbPubVersion = mMbPubVersion;
     result.mMdPubEncodedJson = mMdPubEncodedJson;
+    result.sharedMmdVersion = sharedMmdVersion;
+    result.sharedMmdJson = sharedMmdJson;
     return result;
   }
 
