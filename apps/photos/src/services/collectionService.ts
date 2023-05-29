@@ -205,7 +205,7 @@ export const getCollectionUpdationTime = async (): Promise<number> =>
     (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
 
 export const syncCollections = async () => {
-    const localCollections = await getLocalCollections();
+    const localCollections = await getLocalCollections(true);
     const lastCollectionUpdationTime = await getCollectionUpdationTime();
     const token = getToken();
     const key = await getActualKey();
