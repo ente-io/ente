@@ -5,7 +5,7 @@ import {
     FluidContainer,
     IconButtonWithBG,
 } from 'components/Container';
-import CollectionSort from 'components/Collections/AllCollections/CollectionSort';
+import CollectionSort from 'components/Collections/CollectionSort';
 import Close from '@mui/icons-material/Close';
 import { t } from 'i18next';
 

@@ -10,7 +10,7 @@ import { IconButtonWithBG, SpaceBetweenFlex } from 'components/Container';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { AppContext } from 'pages/_app';
 import { CollectionSummary } from 'types/collection';
-import CollectionSort from '../AllCollections/CollectionSort';
+import CollectionSort from '../CollectionSort';
 import { t } from 'i18next';
 import {
     FixedSizeList as List,
