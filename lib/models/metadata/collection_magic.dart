@@ -9,6 +9,8 @@ const subTypeSharedFilesCollection = 2;
 // key for collection subType
 const subTypeKey = 'subType';
 
+const muteKey = "mute";
+
 class CollectionMagicMetadata {
   // 0 -> visible
   // 1 -> archived
@@ -73,6 +75,40 @@ class CollectionPubMagicMetadata {
     return CollectionPubMagicMetadata(
       asc: map["asc"] as bool?,
       coverID: map["coverID"],
+    );
+  }
+}
+
+class ShareeMagicMetadata {
+  // 0 -> visible
+  // 1 -> archived
+  // 2 -> hidden etc?
+  int visibility;
+
+  // null/false value -> no mute
+  bool? mute;
+
+  ShareeMagicMetadata({required this.visibility, this.mute});
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> result = {magicKeyVisibility: visibility};
+    if (mute != null) {
+      result[muteKey] = mute!;
+    }
+    return result;
+  }
+
+  factory ShareeMagicMetadata.fromEncodedJson(String encodedJson) =>
+      ShareeMagicMetadata.fromJson(jsonDecode(encodedJson));
+
+  factory ShareeMagicMetadata.fromJson(dynamic json) =>
+      ShareeMagicMetadata.fromMap(json);
+
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
+    return ShareeMagicMetadata(
+      visibility: map[magicKeyVisibility] ?? visibleVisibility,
+      mute: map[muteKey],
     );
   }
 }
