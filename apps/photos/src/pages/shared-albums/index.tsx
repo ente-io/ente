@@ -33,7 +33,6 @@ import SharedAlbumNavbar from 'components/pages/sharedAlbum/Navbar';
 import { CollectionInfo } from 'components/Collections/CollectionInfo';
 import { CollectionInfoBarWrapper } from 'components/Collections/styledComponents';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
-import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import Typography from '@mui/material/Typography';
@@ -355,7 +354,7 @@ export default function PublicCollectionGallery() {
         }
         if (isPasswordProtected && !passwordJWTToken.current) {
             return (
-                <FormContainer>
+                <VerticallyCentered>
                     <FormPaper>
                         <FormPaperTitle>{t('PASSWORD')}</FormPaperTitle>
                         <Typography color={'text.muted'} mb={2} variant="small">
@@ -368,7 +367,7 @@ export default function PublicCollectionGallery() {
                             fieldType="password"
                         />
                     </FormPaper>
-                </FormContainer>
+                </VerticallyCentered>
             );
         }
         if (!publicFiles) {

@@ -10,10 +10,10 @@ import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import { t } from 'i18next';
 
 import LinkButton from 'components/pages/gallery/LinkButton';
-import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
+import { VerticallyCentered } from 'components/Container';
 
 export default function Home() {
     const [sessionID, setSessionID] = useState('');
@@ -57,7 +57,7 @@ export default function Home() {
         }
     };
     return (
-        <FormContainer>
+        <VerticallyCentered>
             <FormPaper sx={{ maxWidth: '410px' }}>
                 <FormTitle>{t('TWO_FACTOR')}</FormTitle>
                 <VerifyTwoFactor onSubmit={onSubmit} buttonText={t('VERIFY')} />
@@ -72,6 +72,6 @@ export default function Home() {
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>
-        </FormContainer>
+        </VerticallyCentered>
     );
 }

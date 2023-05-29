@@ -19,7 +19,6 @@ import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
-import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormTitle from 'components/Form/FormPaper/Title';
 import { APPS, getAppName } from 'constants/apps';
@@ -112,7 +111,7 @@ export default function Generate() {
                     somethingWentWrong={() => null}
                 />
             ) : (
-                <FormContainer>
+                <VerticallyCentered>
                     <FormPaper>
                         <FormTitle>{t('SET_PASSPHRASE')}</FormTitle>
                         <SetPasswordForm
@@ -126,7 +125,7 @@ export default function Generate() {
                             </LinkButton>
                         </FormPaperFooter>
                     </FormPaper>
-                </FormContainer>
+                </VerticallyCentered>
             )}
         </>
     );

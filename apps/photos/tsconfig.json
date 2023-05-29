@@ -1,7 +1,20 @@
 {
-    "extends": "@ente/tsconfig/ente.json",
+    "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "baseUrl": "./src"
+        "baseUrl": "./src",
+        "downlevelIteration": true,
+        "jsx": "preserve",
+        "jsxImportSource": "@emotion/react",
+        "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+        "noFallthroughCasesInSwitch": false,
+        "noImplicitAny": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "strictBindCallApply": false,
+        "strictNullChecks": false,
+        "strictPropertyInitialization": false,
+        "target": "es5",
+        "useUnknownInCatchVariables": false
     },
     "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
     "exclude": ["node_modules", "out", ".next", "thirdparty"]

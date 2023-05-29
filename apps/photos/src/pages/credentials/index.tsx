@@ -16,7 +16,6 @@ import { isFirstLogin } from 'utils/storage';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
-import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
@@ -109,7 +108,7 @@ export default function Credentials() {
     }
 
     return (
-        <FormContainer>
+        <VerticallyCentered>
             <FormPaper style={{ minWidth: '320px' }}>
                 <FormPaperTitle>{t('PASSWORD')}</FormPaperTitle>
 
@@ -128,6 +127,6 @@ export default function Credentials() {
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>
-        </FormContainer>
+        </VerticallyCentered>
     );
 }
