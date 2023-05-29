@@ -19,7 +19,7 @@ import {
 } from 'services/fileService';
 import { styled, Typography } from '@mui/material';
 import {
-    syncCollections,
+    getLatestCollections,
     getFavItemIds,
     getLocalCollections,
     createAlbum,
@@ -546,7 +546,7 @@ export default function Gallery() {
                 throw new Error(ServerErrorCodes.SESSION_EXPIRED);
             }
             !silent && startLoading();
-            const collections = await syncCollections();
+            const collections = await getLatestCollections(true);
             const { normalCollections, hiddenCollections } =
                 await splitNormalAndHiddenCollections(collections);
             setCollections(normalCollections);

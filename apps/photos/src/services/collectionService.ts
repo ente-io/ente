@@ -204,6 +204,13 @@ export const getLocalCollections = async (
 export const getCollectionUpdationTime = async (): Promise<number> =>
     (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
 
+export const getLatestCollections = async (
+    includeHidden = false
+): Promise<Collection[]> => {
+    const collections = await syncCollections();
+    return includeHidden ? collections : getNonHiddenCollections(collections);
+};
+
 export const syncCollections = async () => {
     const localCollections = await getLocalCollections(true);
     const lastCollectionUpdationTime = await getCollectionUpdationTime();
@@ -314,7 +321,7 @@ export const createAlbum = async (
     existingCollections?: Collection[]
 ) => {
     if (!existingCollections) {
-        existingCollections = await syncCollections();
+        existingCollections = await getLatestCollections(true);
     }
     const user: User = getData(LS_KEYS.USER);
     for (const collection of existingCollections) {
