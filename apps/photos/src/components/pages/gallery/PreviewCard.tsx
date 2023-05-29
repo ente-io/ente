@@ -238,13 +238,34 @@ export default function PreviewCard(props: IProps) {
     }, []);
 
     useEffect(() => {
-        if (!file.msrc && !props.showPlaceholder) {
-            const main = async () => {
-                try {
-                    let url;
-                    if (thumbs.has(file.id)) {
-                        url = thumbs.get(file.id);
+        const main = async () => {
+            try {
+                if (file.msrc) {
+                    return;
+                }
+                let url: string;
+                // check in in-memory cache
+                if (thumbs.has(file.id)) {
+                    url = thumbs.get(file.id);
+                } else {
+                    // check in cacheStorage
+                    if (
+                        publicCollectionGalleryContext.accessedThroughSharedURL
+                    ) {
+                        url =
+                            await PublicCollectionDownloadManager.getCachedThumbnail(
+                                file
+                            );
                     } else {
+                        url = await DownloadManager.getCachedThumbnail(file);
+                    }
+                    if (url) {
+                        thumbs.set(file.id, url);
+                    } else {
+                        // download thumbnail
+                        if (props.showPlaceholder) {
+                            return;
+                        }
                         if (
                             publicCollectionGalleryContext.accessedThroughSharedURL
                         ) {
@@ -259,18 +280,18 @@ export default function PreviewCard(props: IProps) {
                         }
                         thumbs.set(file.id, url);
                     }
-                    if (!isMounted.current) {
-                        return;
-                    }
-                    setImgSrc(url);
-                    updateURL(file.id, url);
-                } catch (e) {
-                    logError(e, 'preview card useEffect failed');
-                    // no-op
                 }
-            };
-            main();
-        }
+                if (!isMounted.current) {
+                    return;
+                }
+                setImgSrc(url);
+                updateURL(file.id, url);
+            } catch (e) {
+                logError(e, 'preview card useEffect failed');
+                // no-op
+            }
+        };
+        main();
     }, [props.showPlaceholder]);
 
     const handleClick = () => {
