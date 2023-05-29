@@ -427,7 +427,7 @@ export default function Uploader(props: Props) {
                 `upload collections - [${[...collectionNameToFilesMap.keys()]}]`
             );
             try {
-                const existingCollection = await getLatestCollections(true);
+                const existingCollection = await getLatestCollections();
                 let index = 0;
                 for (const [
                     collectionName,

@@ -318,11 +318,8 @@ export const getFavItemIds = async (
 
 export const createAlbum = async (
     albumName: string,
-    existingCollections?: Collection[]
+    existingCollections: Collection[]
 ) => {
-    if (!existingCollections) {
-        existingCollections = await getLatestCollections(true);
-    }
     const user: User = getData(LS_KEYS.USER);
     for (const collection of existingCollections) {
         if (isValidReplacementAlbum(collection, user, albumName)) {
