@@ -416,15 +416,6 @@ export default function Gallery() {
                     return false;
                 }
 
-                // shared files can only be seen in their respective collection and not searchable
-                if (isSharedFile(user, item)) {
-                    if (activeCollection === item.collectionID) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-
                 // SEARCH MODE
                 if (isInSearchMode) {
                     if (
@@ -469,6 +460,15 @@ export default function Gallery() {
                         return false;
                     }
                     return true;
+                }
+
+                // shared files can only be seen in their respective collection and not searchable
+                if (isSharedFile(user, item)) {
+                    if (activeCollection === item.collectionID) {
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
 
                 // archived collections files can only be seen in their respective collection
