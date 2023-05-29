@@ -18,6 +18,9 @@ export const getTheme = (themeColor: THEME_COLOR, appName: APPS) => {
         shape: {
             borderRadius: 8,
         },
+        transitions: {
+            duration: { leavingScreen: 300 },
+        },
     });
     return theme;
 };
