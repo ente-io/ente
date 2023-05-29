@@ -89,7 +89,7 @@
         "zxcvbn": "^4.4.2"
     },
     "devDependencies": {
-        "@ente/eslint-config": "workspace:packages/eslint-config",
+        "@ente/eslint-config": "*",
         "@next/bundle-analyzer": "^13.1.6",
         "@typescript-eslint/parser": "^5.59.2",
         "@types/bs58": "^4.0.1",
