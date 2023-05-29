@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/generated/l10n.dart";
@@ -10,7 +11,7 @@ class GrantPermissionsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLightMode =
-        MediaQuery.of(context).platformBrightness == Brightness.light;
+        AdaptiveTheme.of(context).brightness == Brightness.light;
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
