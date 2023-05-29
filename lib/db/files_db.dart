@@ -510,7 +510,7 @@ class FilesDB {
     final results = await db.query(
       filesTable,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
           ' AND $columnMMdVisibility = ?',
       whereArgs: [startTime, endTime, ownerID, visibility],
       orderBy:
@@ -540,9 +540,9 @@ class FilesDB {
     final results = await db.query(
       filesTable,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+          '$columnCreationTime >= ? AND $columnCreationTime <= ?  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
           ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime, ownerID, visibleVisibility],
+      whereArgs: [startTime, endTime, visibleVisibility],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,

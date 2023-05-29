@@ -36,6 +36,9 @@ class HomeGalleryWidget extends StatelessWidget {
             Configuration.instance.hasSelectedAllFoldersForBackup();
         final collectionsToHide =
             CollectionsService.instance.collectionsHiddenFromTimeline();
+        collectionsToHide.addAll(
+          CollectionsService.instance.sharedColectionsHiddenFromTimeline(),
+        );
         FileLoadResult result;
         if (hasSelectedAllForBackup) {
           result = await FilesDB.instance.getAllLocalAndUploadedFiles(

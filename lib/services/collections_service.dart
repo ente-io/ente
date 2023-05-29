@@ -211,6 +211,14 @@ class CollectionsService {
         .toSet();
   }
 
+  Set<int> sharedColectionsHiddenFromTimeline() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => element.hasShareeArchived())
+        .map((e) => e.id)
+        .toSet();
+  }
+
   int getCollectionSyncTime(int collectionID) {
     return _prefs
             .getInt(_collectionSyncTimeKeyPrefix + collectionID.toString()) ??
