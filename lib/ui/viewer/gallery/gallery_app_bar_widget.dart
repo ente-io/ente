@@ -414,6 +414,18 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               await _deleteBackedUpFiles(context);
             } else if (value == 6) {
               await _showSortOption(context);
+            } else if (value == 7) {
+              await changeCollectionVisibility(
+                context,
+                widget.collection!,
+                widget.collection!.hasShareeArchived()
+                    ? visibleVisibility
+                    : archiveVisibility,
+                isOwner: false,
+              );
+              if (mounted) {
+                setState(() {});
+              }
             } else {
               showToast(context, S.of(context).somethingWentWrong);
             }
