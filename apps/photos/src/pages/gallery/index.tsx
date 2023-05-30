@@ -419,6 +419,10 @@ export default function Gallery() {
 
                 // SEARCH MODE
                 if (isInSearchMode) {
+                    // shared files are not searchable
+                    if (isSharedFile(user, item)) {
+                        return false;
+                    }
                     if (
                         search?.date &&
                         !isSameDayAnyYear(search.date)(
@@ -463,7 +467,7 @@ export default function Gallery() {
                     return true;
                 }
 
-                // shared files can only be seen in their respective collection and not searchable
+                // shared files can only be seen in their respective collection
                 if (isSharedFile(user, item)) {
                     if (activeCollection === item.collectionID) {
                         return true;
