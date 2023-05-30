@@ -1,6 +1,6 @@
 import { ALL_SECTION } from 'constants/collection';
 import PhotoFrame from 'components/PhotoFrame';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
     getLocalPublicCollection,
     getLocalPublicCollectionPassword,
@@ -198,7 +198,15 @@ export default function PublicCollectionGallery() {
         main();
     }, []);
 
+    const downloadEnabled = useMemo(
+        () => publicCollection?.publicURLs?.[0]?.enableDownload ?? true,
+        [publicCollection]
+    );
+
     const downloadAllFiles = async () => {
+        if (!downloadEnabled) {
+            return;
+        }
         appContext.startLoading();
         for (const file of publicFiles) {
             await downloadFile(
@@ -222,16 +230,19 @@ export default function PublicCollectionGallery() {
                                 name={publicCollection.name}
                                 fileCount={publicFiles.length}
                             />
-
-                            <OverflowMenu
-                                ariaControls={'collection-options'}
-                                triggerButtonIcon={<MoreHoriz />}>
-                                <OverflowMenuOption
-                                    startIcon={<FileDownloadOutlinedIcon />}
-                                    onClick={downloadAllFiles}>
-                                    {t('DOWNLOAD_COLLECTION')}
-                                </OverflowMenuOption>
-                            </OverflowMenu>
+                            {downloadEnabled ? (
+                                <OverflowMenu
+                                    ariaControls={'collection-options'}
+                                    triggerButtonIcon={<MoreHoriz />}>
+                                    <OverflowMenuOption
+                                        startIcon={<FileDownloadOutlinedIcon />}
+                                        onClick={downloadAllFiles}>
+                                        {t('DOWNLOAD_COLLECTION')}
+                                    </OverflowMenuOption>
+                                </OverflowMenu>
+                            ) : (
+                                <div />
+                            )}
                         </SpaceBetweenFlex>
                     </CollectionInfoBarWrapper>
                 ),
@@ -437,10 +448,7 @@ export default function PublicCollectionGallery() {
                     selected={{ count: 0, collectionID: null, ownCount: 0 }}
                     activeCollection={ALL_SECTION}
                     isIncomingSharedCollection
-                    enableDownload={
-                        publicCollection?.publicURLs?.[0]?.enableDownload ??
-                        true
-                    }
+                    enableDownload={downloadEnabled}
                     fileToCollectionsMap={null}
                     collectionNameMap={null}
                 />
