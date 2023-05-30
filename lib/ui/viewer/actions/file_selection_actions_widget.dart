@@ -6,6 +6,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
+import "package:photos/models/file_type.dart";
 import 'package:photos/models/files_split.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
@@ -22,6 +23,7 @@ import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
+import "package:photos/ui/tools/collage/collage_creator_page.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -133,6 +135,28 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           ),
         );
       }
+    }
+
+    bool hasVideoFile = false;
+    for (final file in widget.selectedFiles.files) {
+      if (file.fileType == FileType.video) {
+        hasVideoFile = true;
+      }
+    }
+
+    if (!hasVideoFile &&
+        widget.selectedFiles.files.length >=
+            CollageCreatorPage.collageItemsMin &&
+        widget.selectedFiles.files.length <=
+            CollageCreatorPage.collageItemsMax) {
+      firstList.add(
+        BlurMenuItemWidget(
+          leadingIcon: Icons.grid_view_outlined,
+          labelText: S.of(context).createCollage,
+          menuItemColor: colorScheme.fillFaint,
+          onTap: _onCreateCollageClicked,
+        ),
+      );
     }
 
     final showUploadIcon = widget.type == GalleryType.localFolder &&
@@ -385,6 +409,16 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     );
   }
 
+  Future<void> _onCreateCollageClicked() async {
+    final bool? result = await routeToPage(
+      context,
+      CollageCreatorPage(widget.selectedFiles.files),
+    );
+    if (result != null && result) {
+      widget.selectedFiles.clearAll();
+    }
+  }
+
   Future<void> _onCreatedSharedLinkClicked() async {
     if (split.ownedByCurrentUser.isEmpty) {
       showShortToast(
@@ -468,7 +502,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   Future<void> _permanentlyDelete() async {
     if (await deleteFromTrash(
       context,
-      widget.selectedFiles.files.toList(),
+      widget.selectedFiles.files,
     )) {
       widget.selectedFiles.clearAll();
     }

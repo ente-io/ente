@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/event_bus.dart';
+import "package:photos/events/collection_meta_event.dart";
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
@@ -48,8 +49,9 @@ Future<void> changeVisibility(
 Future<void> changeCollectionVisibility(
   BuildContext context,
   Collection collection,
-  int newVisibility,
-) async {
+  int newVisibility, {
+  bool isOwner = true,
+}) async {
   final dialog = createProgressDialog(
     context,
     newVisibility == archiveVisibility
@@ -59,7 +61,12 @@ Future<void> changeCollectionVisibility(
   await dialog.show();
   try {
     final Map<String, dynamic> update = {magicKeyVisibility: newVisibility};
-    await CollectionsService.instance.updateMagicMetadata(collection, update);
+    if (isOwner) {
+      await CollectionsService.instance.updateMagicMetadata(collection, update);
+    } else {
+      await CollectionsService.instance
+          .updateShareeMagicMetadata(collection, update);
+    }
     // Force reload home gallery to pull in the now unarchived files
     Bus.instance.fire(ForceReloadHomeGalleryEvent("CollectionArchiveChange"));
     showShortToast(
@@ -73,6 +80,25 @@ Future<void> changeCollectionVisibility(
   } catch (e, s) {
     _logger.severe("failed to update collection visibility", e, s);
     await dialog.hide();
+    rethrow;
+  }
+}
+
+Future<void> changeSortOrder(
+  BuildContext context,
+  Collection collection,
+  bool sortedInAscOrder,
+) async {
+  try {
+    final Map<String, dynamic> update = {"asc": sortedInAscOrder};
+    await CollectionsService.instance
+        .updatePublicMagicMetadata(collection, update);
+    Bus.instance.fire(
+      CollectionMetaEvent(collection.id, CollectionMetaEventType.sortChanged),
+    );
+  } catch (e, s) {
+    _logger.severe("failed to update collection visibility", e, s);
+    showShortToast(context, S.of(context).somethingWentWrong);
     rethrow;
   }
 }

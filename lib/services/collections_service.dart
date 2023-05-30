@@ -205,6 +205,14 @@ class CollectionsService {
         .toSet();
   }
 
+  Set<int> sharedColectionsHiddenFromTimeline() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => element.hasShareeArchived())
+        .map((e) => e.id)
+        .toSet();
+  }
+
   int getCollectionSyncTime(int collectionID) {
     return _prefs
             .getInt(_collectionSyncTimeKeyPrefix + collectionID.toString()) ??
@@ -604,6 +612,125 @@ class CollectionsService {
     }
   }
 
+  Future<void> updatePublicMagicMetadata(
+    Collection collection,
+    Map<String, dynamic> newMetadataUpdate,
+  ) async {
+    final int ownerID = Configuration.instance.getUserID()!;
+    try {
+      if (collection.owner?.id != ownerID) {
+        throw AssertionError("cannot modify albums not owned by you");
+      }
+      // read the existing magic metadata and apply new updates to existing data
+      // current update is simple replace. This will be enhanced in the future,
+      // as required.
+      final Map<String, dynamic> jsonToUpdate =
+          jsonDecode(collection.mMdPubEncodedJson ?? '{}');
+      newMetadataUpdate.forEach((key, value) {
+        jsonToUpdate[key] = value;
+      });
+
+      final key = getCollectionKey(collection.id);
+      final encryptedMMd = await CryptoUtil.encryptChaCha(
+        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        key,
+      );
+      // for required field, the json validator on golang doesn't treat 0 as valid
+      // value. Instead of changing version to ptr, decided to start version with 1.
+      final int currentVersion = max(collection.mMbPubVersion, 1);
+      final params = UpdateMagicMetadataRequest(
+        id: collection.id,
+        magicMetadata: MetadataRequest(
+          version: currentVersion,
+          count: jsonToUpdate.length,
+          data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+          header: CryptoUtil.bin2base64(encryptedMMd.header!),
+        ),
+      );
+      await _enteDio.put(
+        "/collections/public-magic-metadata",
+        data: params,
+      );
+      // update the local information so that it's reflected on UI
+      collection.mMdPubEncodedJson = jsonEncode(jsonToUpdate);
+      collection.pubMagicMetadata =
+          CollectionPubMagicMetadata.fromJson(jsonToUpdate);
+      collection.mMbPubVersion = currentVersion + 1;
+      _cacheCollectionAttributes(collection);
+      // trigger sync to fetch the latest collection state from server
+      sync().ignore();
+    } on DioError catch (e) {
+      if (e.response != null && e.response?.statusCode == 409) {
+        _logger.severe('collection magic data out of sync');
+        sync().ignore();
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to sync magic metadata", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> updateShareeMagicMetadata(
+    Collection collection,
+    Map<String, dynamic> newMetadataUpdate,
+  ) async {
+    final int ownerID = Configuration.instance.getUserID()!;
+    try {
+      if (collection.owner?.id == ownerID) {
+        throw AssertionError("cannot modify sharee settings for albums owned "
+            "by you");
+      }
+      // read the existing magic metadata and apply new updates to existing data
+      // current update is simple replace. This will be enhanced in the future,
+      // as required.
+      final Map<String, dynamic> jsonToUpdate =
+          jsonDecode(collection.sharedMmdJson ?? '{}');
+      newMetadataUpdate.forEach((key, value) {
+        jsonToUpdate[key] = value;
+      });
+
+      final key = getCollectionKey(collection.id);
+      final encryptedMMd = await CryptoUtil.encryptChaCha(
+        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        key,
+      );
+      // for required field, the json validator on golang doesn't treat 0 as valid
+      // value. Instead of changing version to ptr, decided to start version with 1.
+      final int currentVersion = max(collection.sharedMmdVersion, 1);
+      final params = UpdateMagicMetadataRequest(
+        id: collection.id,
+        magicMetadata: MetadataRequest(
+          version: currentVersion,
+          count: jsonToUpdate.length,
+          data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+          header: CryptoUtil.bin2base64(encryptedMMd.header!),
+        ),
+      );
+      await _enteDio.put(
+        "/collections/sharee-magic-metadata",
+        data: params,
+      );
+      // update the local information so that it's reflected on UI
+      collection.sharedMmdJson = jsonEncode(jsonToUpdate);
+      collection.sharedMagicMetadata =
+          ShareeMagicMetadata.fromJson(jsonToUpdate);
+      collection.sharedMmdVersion = currentVersion + 1;
+      _cacheCollectionAttributes(collection);
+      // trigger sync to fetch the latest collection state from server
+      sync().ignore();
+    } on DioError catch (e) {
+      if (e.response != null && e.response?.statusCode == 409) {
+        _logger.severe('collection magic data out of sync');
+        sync().ignore();
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to sync magic metadata", e, s);
+      rethrow;
+    }
+  }
+
   Future<void> createShareUrl(
     Collection collection, {
     bool enableCollect = false,
@@ -699,7 +826,8 @@ class CollectionsService {
         collections.add(collection);
       }
       return collections;
-    } catch (e) {
+    } catch (e, s) {
+      _logger.warning(e, s);
       if (e is DioError && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
@@ -711,19 +839,55 @@ class CollectionsService {
     Map<String, dynamic>? collectionData,
   ) async {
     final Collection collection = Collection.fromMap(collectionData);
-    if (collectionData != null && collectionData['magicMetadata'] != null) {
+    if (collectionData != null && !collection.isDeleted) {
       final collectionKey =
-          _getAndCacheDecryptedKey(collection, source: "fetchCollection");
-      final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-        CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
-        collectionKey,
-        CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
-      );
-      collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
-      collection.mMdVersion = collectionData['magicMetadata']['version'];
-      collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
-        collection.mMdEncodedJson ?? '{}',
-      );
+          _getAndCacheDecryptedKey(collection, source: "fetchDecryptMeta");
+      if (collectionData['magicMetadata'] != null) {
+        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+          CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
+          collectionKey,
+          CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
+        );
+        collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
+        collection.mMdVersion = collectionData['magicMetadata']['version'];
+        collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
+          collection.mMdEncodedJson ?? '{}',
+        );
+      }
+
+      if (collectionData['pubMagicMetadata'] != null) {
+        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+          CryptoUtil.base642bin(collectionData['pubMagicMetadata']['data']),
+          collectionKey,
+          CryptoUtil.base642bin(
+            collectionData['pubMagicMetadata']['header'],
+          ),
+        );
+        collection.mMdPubEncodedJson = utf8.decode(utfEncodedMmd);
+        collection.mMbPubVersion =
+            collectionData['pubMagicMetadata']['version'];
+        collection.pubMagicMetadata =
+            CollectionPubMagicMetadata.fromEncodedJson(
+          collection.mMdPubEncodedJson ?? '{}',
+        );
+      }
+      if (collectionData['sharedMagicMetadata'] != null) {
+        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+          CryptoUtil.base642bin(
+            collectionData['sharedMagicMetadata']['data'],
+          ),
+          collectionKey,
+          CryptoUtil.base642bin(
+            collectionData['sharedMagicMetadata']['header'],
+          ),
+        );
+        collection.sharedMmdJson = utf8.decode(utfEncodedMmd);
+        collection.sharedMmdVersion =
+            collectionData['sharedMagicMetadata']['version'];
+        collection.sharedMagicMetadata = ShareeMagicMetadata.fromEncodedJson(
+          collection.sharedMmdJson ?? '{}',
+        );
+      }
     }
     collection.setName(_getDecryptedCollectionName(collection));
     if (collection.canLinkToDevicePath(_config.getUserID()!)) {

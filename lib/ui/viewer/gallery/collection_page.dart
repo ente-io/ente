@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/events/collection_meta_event.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/collection.dart';
@@ -65,6 +66,13 @@ class CollectionPage extends StatelessWidget {
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()
           .where((event) => event.collectionID == c.collection.id),
+      forceReloadEvents: [
+        Bus.instance.on<CollectionMetaEvent>().where(
+              (event) =>
+                  event.id == c.collection.id &&
+                  event.type == CollectionMetaEventType.sortChanged,
+            )
+      ],
       removalEventTypes: const {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
@@ -74,6 +82,7 @@ class CollectionPage extends StatelessWidget {
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
       albumName: c.collection.displayName,
+      sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
     );
     return Scaffold(
       appBar: PreferredSize(

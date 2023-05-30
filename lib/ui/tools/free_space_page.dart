@@ -1,3 +1,4 @@
+import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
@@ -57,7 +58,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
       fontWeight: FontWeight.w500,
     );
     final isLightMode =
-        MediaQuery.of(context).platformBrightness == Brightness.light;
+        AdaptiveTheme.of(context).brightness == Brightness.light;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,

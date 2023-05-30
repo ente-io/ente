@@ -3190,6 +3190,16 @@ class S {
     );
   }
 
+  /// `Ignore`
+  String get ignoreUpdate {
+    return Intl.message(
+      'Ignore',
+      name: 'ignoreUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Downloading...`
   String get downloading {
     return Intl.message(
@@ -4855,6 +4865,46 @@ class S {
     );
   }
 
+  /// `Create collage`
+  String get createCollage {
+    return Intl.message(
+      'Create collage',
+      name: 'createCollage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save collage`
+  String get saveCollage {
+    return Intl.message(
+      'Save collage',
+      name: 'saveCollage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collage saved to gallery`
+  String get collageSaved {
+    return Intl.message(
+      'Collage saved to gallery',
+      name: 'collageSaved',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Layout`
+  String get collageLayout {
+    return Intl.message(
+      'Layout',
+      name: 'collageLayout',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add to ente`
   String get addToEnte {
     return Intl.message(
@@ -5233,6 +5283,36 @@ class S {
     );
   }
 
+  /// `Sort by`
+  String get sortAlbumsBy {
+    return Intl.message(
+      'Sort by',
+      name: 'sortAlbumsBy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Newest first`
+  String get sortNewestFirst {
+    return Intl.message(
+      'Newest first',
+      name: 'sortNewestFirst',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Oldest first`
+  String get sortOldestFirst {
+    return Intl.message(
+      'Oldest first',
+      name: 'sortOldestFirst',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Rename`
   String get rename {
     return Intl.message(
@@ -5593,6 +5673,16 @@ class S {
     );
   }
 
+  /// `Failed to save file to gallery`
+  String get fileFailedToSaveToGallery {
+    return Intl.message(
+      'Failed to save file to gallery',
+      name: 'fileFailedToSaveToGallery',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Download`
   String get download {
     return Intl.message(
@@ -5658,6 +5748,16 @@ class S {
     return Intl.message(
       'Club by capture time',
       name: 'clubByCaptureTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Club by file name`
+  String get clubByFileName {
+    return Intl.message(
+      'Club by file name',
+      name: 'clubByFileName',
       desc: '',
       args: [],
     );

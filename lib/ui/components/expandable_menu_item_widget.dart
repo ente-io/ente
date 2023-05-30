@@ -1,3 +1,4 @@
+import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -45,7 +46,7 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
 
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     final backgroundColor =
-        MediaQuery.of(context).platformBrightness == Brightness.light
+        AdaptiveTheme.of(context).brightness == Brightness.light
             ? enteColorScheme.backgroundElevated2
             : enteColorScheme.backgroundElevated;
     return Padding(

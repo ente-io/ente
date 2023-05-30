@@ -370,6 +370,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "close": MessageLookupByLibrary.simpleMessage("Close"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("Club by capture time"),
+        "clubByFileName":
+            MessageLookupByLibrary.simpleMessage("Club by file name"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Code applied"),
         "codeCopiedToClipboard":
@@ -385,6 +387,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Collaborators can add photos and videos to the shared album."),
+        "collageLayout": MessageLookupByLibrary.simpleMessage("Layout"),
+        "collageSaved":
+            MessageLookupByLibrary.simpleMessage("Collage saved to gallery"),
         "collectEventPhotos":
             MessageLookupByLibrary.simpleMessage("Collect event photos"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Collect photos"),
@@ -427,6 +432,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "createAccount": MessageLookupByLibrary.simpleMessage("Create account"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
             "Long press to select photos and click + to create an album"),
+        "createCollage": MessageLookupByLibrary.simpleMessage("Create collage"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Create new account"),
         "createOrSelectAlbum":
@@ -614,6 +620,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "faqs": MessageLookupByLibrary.simpleMessage("FAQs"),
         "favorite": MessageLookupByLibrary.simpleMessage("Favorite"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
+        "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
+            "Failed to save file to gallery"),
         "fileInfoAddDescHint":
             MessageLookupByLibrary.simpleMessage("Add a description..."),
         "fileSavedToGallery":
@@ -661,6 +669,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iOSLockOut": MessageLookupByLibrary.simpleMessage(
             "Biometric authentication is disabled. Please lock and unlock your screen to enable it."),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("OK"),
+        "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignore"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Some files in this album are ignored from upload because they had previously been deleted from ente."),
         "importing": MessageLookupByLibrary.simpleMessage("Importing...."),
@@ -987,6 +996,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight": MessageLookupByLibrary.simpleMessage("Rotate right"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Safely stored"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
+        "saveCollage": MessageLookupByLibrary.simpleMessage("Save collage"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Save copy"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Save key"),
         "saveYourRecoveryKeyIfYouHaventAlready":
@@ -1096,6 +1106,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device."),
+        "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sort by"),
+        "sortNewestFirst": MessageLookupByLibrary.simpleMessage("Newest first"),
+        "sortOldestFirst": MessageLookupByLibrary.simpleMessage("Oldest first"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Success"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Start backup"),
         "storage": MessageLookupByLibrary.simpleMessage("Storage"),

@@ -48,7 +48,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   final Set<File> _selectedFiles = <File>{};
   final Map<int?, int> _fileSizeMap = {};
   late List<DuplicateFiles> _duplicates;
-  bool? _shouldClubByCaptureTime = true;
+  bool _shouldClubByCaptureTime = true;
+  bool _shouldClubByFileName = false;
   bool toastShown = false;
 
   SortKey sortKey = SortKey.size;
@@ -204,14 +205,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Following files were clubbed based on their sizes" +
-                (_shouldClubByCaptureTime! ? " and capture times." : "."),
-            style: Theme.of(context).textTheme.subtitle2,
-          ),
-          const Padding(
-            padding: EdgeInsets.all(2),
-          ),
-          Text(
             S.of(context).reviewDeduplicateItems,
             style: Theme.of(context).textTheme.subtitle2,
           ),
@@ -229,24 +222,49 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   Widget _getClubbingConfig() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
-      child: CheckboxListTile(
-        value: _shouldClubByCaptureTime,
-        onChanged: (value) {
-          _shouldClubByCaptureTime = value;
-          _resetEntriesAndSelection();
-          setState(() {});
-        },
-        title: Text(S.of(context).clubByCaptureTime),
+      child: Column(
+        children: [
+          CheckboxListTile(
+            value: _shouldClubByFileName,
+            onChanged: (value) {
+              _shouldClubByFileName = value!;
+              _resetEntriesAndSelection();
+              setState(() {});
+            },
+            title: Text(S.of(context).clubByFileName),
+          ),
+          CheckboxListTile(
+            value: _shouldClubByCaptureTime,
+            onChanged: (value) {
+              _shouldClubByCaptureTime = value!;
+              _resetEntriesAndSelection();
+              setState(() {});
+            },
+            title: Text(S.of(context).clubByCaptureTime),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8),
+          ),
+          const Divider(
+            height: 0,
+          ),
+          const Padding(
+            padding: EdgeInsets.all(4),
+          ),
+        ],
       ),
     );
   }
 
   void _resetEntriesAndSelection() {
-    if (_shouldClubByCaptureTime!) {
+    _duplicates = widget.duplicates;
+    if (_shouldClubByCaptureTime) {
       _duplicates =
           DeduplicationService.instance.clubDuplicatesByTime(_duplicates);
-    } else {
-      _duplicates = widget.duplicates;
+    }
+    if (_shouldClubByFileName) {
+      _duplicates =
+          DeduplicationService.instance.clubDuplicatesByName(_duplicates);
     }
     _selectAllFilesButFirst();
   }

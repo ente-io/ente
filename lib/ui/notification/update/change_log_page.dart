@@ -102,27 +102,30 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   Widget _getChangeLog() {
     final scrollController = ScrollController();
     final List<ChangeLogEntry> items = [];
-
     items.add(
       ChangeLogEntry(
-        "Motion photos",
-        "We now support the playback of Motion Photos. Open a Motion Photo, and long press to play the video.",
+        "Collages ✨",
+        'Create collages out of your favorite photos!\n\nSelect your photos, '
+            'and click on "Create collage" to build a single frame that captures your whole memory.',
       ),
     );
 
     items.add(
       ChangeLogEntry(
-        "Language",
-        "Thanks to the help from our community, we can now speak Spanish,"
-            " Dutch, and Simplified Chinese.\n\nTo change language, go to "
-            "Settings -> General -> Language",
+        "Album sort order",
+        'You can now choose how photos within your albums are ordered – '
+            'newest or oldest first.\n\nThis is useful for albums of trips '
+            'and events, where you wish to see your stories unfold along '
+            'their original timelines.\n\nClick on the overflow menu within '
+            'an album to configure how it\'s sorted.',
       ),
     );
     //You can now specify a custom radius while creating Location tags.
     items.add(
       ChangeLogEntry(
-        "Custom radius for Location tags",
-        "You can now specify a custom radius while creating Location tags.",
+        "Performance improvements",
+        "We've worked super hard to improve how smoothly our home gallery "
+            "scrolls. Skimming through your memories should be a lot more enjoyable now.",
         isFeature: false,
       ),
     );

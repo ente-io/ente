@@ -25,6 +25,8 @@ typedef GalleryLoader = Future<FileLoadResult> Function(
   bool? asc,
 });
 
+typedef SortAscFn = bool Function();
+
 class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
   final List<File>? initialFiles;
@@ -43,6 +45,9 @@ class Gallery extends StatefulWidget {
   final bool disableScroll;
   final bool limitSelectionToOne;
 
+  // add a Function variable to get sort value in bool
+  final SortAscFn? sortAsyncFn;
+
   const Gallery({
     required this.asyncLoader,
     required this.tagPrefix,
@@ -60,6 +65,7 @@ class Gallery extends StatefulWidget {
     this.loadingWidget = const EnteLoadingWidget(),
     this.disableScroll = false,
     this.limitSelectionToOne = false,
+    this.sortAsyncFn,
     Key? key,
   }) : super(key: key);
 
@@ -82,6 +88,7 @@ class _GalleryState extends State<Gallery> {
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
   late String _logTag;
+  bool _sortOrderAsc = false;
 
   @override
   void initState() {
@@ -89,6 +96,7 @@ class _GalleryState extends State<Gallery> {
         "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}";
     _logger = Logger(_logTag);
     _logger.finest("init Gallery");
+    _sortOrderAsc = widget.sortAsyncFn != null ? widget.sortAsyncFn!() : false;
     _itemScroller = ItemScrollController();
     if (widget.reloadEvent != null) {
       _reloadEventSubscription = widget.reloadEvent!.listen((event) async {
@@ -120,13 +128,15 @@ class _GalleryState extends State<Gallery> {
         _forceReloadEventSubscriptions.add(
           event.listen((event) async {
             _logger.finest("Force refresh all files on ${event.reason}");
+            _sortOrderAsc =
+                widget.sortAsyncFn != null ? widget.sortAsyncFn!() : false;
             final result = await _loadFiles();
             _setFilesAndReload(result.files);
           }),
         );
       }
     }
-    if (widget.initialFiles != null) {
+    if (widget.initialFiles != null && !_sortOrderAsc) {
       _onFilesLoaded(widget.initialFiles!);
     }
     _loadFiles(limit: kInitialLoadLimit).then((result) async {
@@ -154,6 +164,7 @@ class _GalleryState extends State<Gallery> {
         galleryLoadStartTime,
         galleryLoadEndTime,
         limit: limit,
+        asc: _sortOrderAsc,
       );
       final endTime = DateTime.now().microsecondsSinceEpoch;
       final duration = Duration(microseconds: endTime - startTime);
@@ -213,6 +224,7 @@ class _GalleryState extends State<Gallery> {
       disableScroll: widget.disableScroll,
       emptyState: widget.emptyState,
       asyncLoader: widget.asyncLoader,
+      sortOrderAsc: _sortOrderAsc,
       removalEventTypes: widget.removalEventTypes,
       tagPrefix: widget.tagPrefix,
       scrollBottomSafeArea: widget.scrollBottomSafeArea,
@@ -244,8 +256,13 @@ class _GalleryState extends State<Gallery> {
     if (dailyFiles.isNotEmpty) {
       collatedFiles.add(dailyFiles);
     }
-    collatedFiles
-        .sort((a, b) => b[0].creationTime!.compareTo(a[0].creationTime!));
+    if (_sortOrderAsc) {
+      collatedFiles
+          .sort((a, b) => a[0].creationTime!.compareTo(b[0].creationTime!));
+    } else {
+      collatedFiles
+          .sort((a, b) => b[0].creationTime!.compareTo(a[0].creationTime!));
+    }
     return collatedFiles;
   }
 }
