@@ -42,6 +42,7 @@ class ArchivePage extends StatelessWidget {
           limit: limit,
           asc: asc,
           ignoredCollectionIDs: hiddenCollectionIDs,
+          applyOwnerCheck: true,
         );
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(

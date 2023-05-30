@@ -502,8 +502,23 @@ class FilesDB {
     bool? asc,
     int visibility = visibleVisibility,
     Set<int>? ignoredCollectionIDs,
+    bool applyOwnerCheck = false,
   }) async {
     final stopWatch = Stopwatch()..start();
+    late String whereQuery;
+    late List<Object?>? whereArgs;
+    if (applyOwnerCheck) {
+      whereQuery = '$columnCreationTime >= ? AND $columnCreationTime <= ? '
+          'AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) '
+          'AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+          ' AND $columnMMdVisibility = ?';
+      whereArgs = [startTime, endTime, ownerID, visibility];
+    } else {
+      whereQuery =
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+          ' AND $columnMMdVisibility = ?';
+      whereArgs = [startTime, endTime, visibility];
+    }
 
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -512,7 +527,7 @@ class FilesDB {
       where:
           '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
           ' AND $columnMMdVisibility = ?',
-      whereArgs: [startTime, endTime, ownerID, visibility],
+      whereArgs: [startTime, endTime, visibility],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
