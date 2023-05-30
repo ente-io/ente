@@ -718,7 +718,7 @@ class FilesDB {
         whereClause += " OR ";
       }
     }
-    whereClause += ") AND $columnMMdVisibility = $visibleVisibility";
+    whereClause += ")";
     final results = await db.query(
       filesTable,
       where: whereClause,
