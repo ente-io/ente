@@ -523,5 +523,8 @@
     "HIDDEN": "已隐藏",
     "HIDE": "隐藏",
     "UNHIDE": "取消隐藏",
-    "UNHIDE_TO_COLLECTION": "取消隐藏到相册"
+    "UNHIDE_TO_COLLECTION": "取消隐藏到相册",
+    "SORT_BY": "",
+    "NEWEST_FIRST": "",
+    "OLDEST_FIRST": ""
 }
