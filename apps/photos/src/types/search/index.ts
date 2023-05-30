@@ -5,7 +5,7 @@ import { LocationTagData } from 'services/entityService';
 
 export enum SuggestionType {
     DATE = 'DATE',
-    LOCATION = 'LOCATION_TAG',
+    LOCATION = 'LOCATION',
     COLLECTION = 'COLLECTION',
     FILE_NAME = 'FILE_NAME',
     PERSON = 'PERSON',
