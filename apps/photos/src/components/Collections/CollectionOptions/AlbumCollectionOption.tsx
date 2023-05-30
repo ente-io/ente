@@ -34,7 +34,7 @@ export function AlbumCollectionOption({
             </OverflowMenuOption>
             <OverflowMenuOption
                 onClick={handleCollectionAction(
-                    CollectionActions.SHOW_SORT_ORDER_OVERFLOW_MENU,
+                    CollectionActions.SHOW_SORT_ORDER_MENU,
                     false
                 )}
                 startIcon={<SortIcon />}>

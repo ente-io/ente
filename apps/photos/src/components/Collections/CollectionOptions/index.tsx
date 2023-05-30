@@ -3,7 +3,7 @@ import React, { useContext, useRef, useState } from 'react';
 import * as CollectionAPI from 'services/collectionService';
 import * as TrashService from 'services/trashService';
 import {
-    changeCollectionOrder,
+    changeCollectionSortOrder,
     changeCollectionVisibility,
     downloadAllCollectionFiles,
     downloadHiddenFiles,
@@ -26,7 +26,7 @@ import { HorizontalFlex } from 'components/Container';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 import { Box } from '@mui/material';
-import { CollectionFileSortOrderMenu } from './CollectionFileSort';
+import CollectionSortOrderMenu from './CollectionSortOrderMenu';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -51,8 +51,8 @@ export enum CollectionActions {
     EMPTY_TRASH,
     CONFIRM_LEAVE_SHARED_ALBUM,
     LEAVE_SHARED_ALBUM,
-    SHOW_SORT_ORDER_OVERFLOW_MENU,
-    UPDATE_COLLECTION_FILES_ORDER,
+    SHOW_SORT_ORDER_MENU,
+    UPDATE_COLLECTION_SORT_ORDER,
 }
 
 const CollectionOptions = (props: CollectionOptionsProps) => {
@@ -68,14 +68,14 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         useContext(AppContext);
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
-    const [collectionFileSortOptionView, setCollectionFileSortOptionView] =
+    const [collectionSortOrderMenuView, setCollectionSortOrderMenuView] =
         useState(false);
 
-    const openCollectionFileSortOption = () => {
-        setCollectionFileSortOptionView(true);
+    const openCollectionSortOrderMenu = () => {
+        setCollectionSortOrderMenuView(true);
     };
-    const closeCollectionFileSortOption = () => {
-        setCollectionFileSortOptionView(false);
+    const closeCollectionSortOrderMenu = () => {
+        setCollectionSortOrderMenuView(false);
     };
 
     const handleCollectionAction = (
@@ -126,10 +126,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.LEAVE_SHARED_ALBUM:
                 callback = leaveSharedAlbum;
                 break;
-            case CollectionActions.SHOW_SORT_ORDER_OVERFLOW_MENU:
-                callback = openCollectionFileSortOption;
+            case CollectionActions.SHOW_SORT_ORDER_MENU:
+                callback = openCollectionSortOrderMenu;
                 break;
-            case CollectionActions.UPDATE_COLLECTION_FILES_ORDER:
+            case CollectionActions.UPDATE_COLLECTION_SORT_ORDER:
                 callback = updateCollectionFilesOrder;
                 break;
             default:
@@ -287,7 +287,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const updateCollectionFilesOrder = async (asc: boolean) => {
-        await changeCollectionOrder(activeCollection, asc);
+        await changeCollectionSortOrder(activeCollection, asc);
     };
 
     return (
@@ -333,13 +333,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     />
                 )}
             </OverflowMenu>
-            <CollectionFileSortOrderMenu
+            <CollectionSortOrderMenu
                 handleCollectionAction={handleCollectionAction}
                 overFlowMenuIconRef={overFlowMenuIconRef}
-                collectionFileSortOptionView={collectionFileSortOptionView}
-                closeCollectionFileSortOptionView={
-                    closeCollectionFileSortOption
-                }
+                collectionSortOrderMenuView={collectionSortOrderMenuView}
+                closeCollectionSortOrderMenu={closeCollectionSortOrderMenu}
             />
         </HorizontalFlex>
     );

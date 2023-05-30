@@ -1,5 +1,5 @@
 import { StyledMenu } from 'components/OverflowMenu/menu';
-import { CollectionActions } from '..';
+import { CollectionActions } from '.';
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
 import { t } from 'i18next';
 
@@ -9,26 +9,26 @@ interface Iprops {
         loader?: boolean
     ) => (...args: any[]) => Promise<void>;
     overFlowMenuIconRef: React.MutableRefObject<SVGSVGElement>;
-    collectionFileSortOptionView: boolean;
-    closeCollectionFileSortOptionView: () => void;
+    collectionSortOrderMenuView: boolean;
+    closeCollectionSortOrderMenu: () => void;
 }
 
-export const CollectionFileSortOrderMenu = ({
+const CollectionSortOrderMenu = ({
     handleCollectionAction,
-    collectionFileSortOptionView,
-    closeCollectionFileSortOptionView,
+    collectionSortOrderMenuView,
+    closeCollectionSortOrderMenu,
     overFlowMenuIconRef,
 }: Iprops) => {
-    const setCollectionFileOrderToAsc = () => {
-        closeCollectionFileSortOptionView();
-        handleCollectionAction(CollectionActions.UPDATE_COLLECTION_FILES_ORDER)(
+    const setCollectionSortOrderToAsc = () => {
+        closeCollectionSortOrderMenu();
+        handleCollectionAction(CollectionActions.UPDATE_COLLECTION_SORT_ORDER)(
             true
         );
     };
 
-    const setCollectionFileOrderToDesc = () => {
-        closeCollectionFileSortOptionView();
-        handleCollectionAction(CollectionActions.UPDATE_COLLECTION_FILES_ORDER)(
+    const setCollectionSortOrderToDesc = () => {
+        closeCollectionSortOrderMenu();
+        handleCollectionAction(CollectionActions.UPDATE_COLLECTION_SORT_ORDER)(
             false
         );
     };
@@ -36,8 +36,8 @@ export const CollectionFileSortOrderMenu = ({
         <StyledMenu
             id={'collection-files-sort'}
             anchorEl={overFlowMenuIconRef.current}
-            open={collectionFileSortOptionView}
-            onClose={closeCollectionFileSortOptionView}
+            open={collectionSortOrderMenuView}
+            onClose={closeCollectionSortOrderMenu}
             MenuListProps={{
                 disablePadding: true,
                 'aria-labelledby': 'collection-files-sort',
@@ -50,12 +50,14 @@ export const CollectionFileSortOrderMenu = ({
                 vertical: 'top',
                 horizontal: 'right',
             }}>
-            <OverflowMenuOption onClick={setCollectionFileOrderToAsc}>
+            <OverflowMenuOption onClick={setCollectionSortOrderToAsc}>
                 {t('NEWEST_FIRST')}
             </OverflowMenuOption>
-            <OverflowMenuOption onClick={setCollectionFileOrderToDesc}>
+            <OverflowMenuOption onClick={setCollectionSortOrderToDesc}>
                 {t('OLDEST_FIRST')}
             </OverflowMenuOption>
         </StyledMenu>
     );
 };
+
+export default CollectionSortOrderMenu;

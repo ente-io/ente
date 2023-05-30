@@ -187,7 +187,7 @@ export const changeCollectionVisibility = async (
     }
 };
 
-export const changeCollectionOrder = async (
+export const changeCollectionSortOrder = async (
     collection: Collection,
     asc: boolean
 ) => {
