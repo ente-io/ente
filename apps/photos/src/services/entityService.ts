@@ -5,16 +5,21 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { logError } from 'utils/sentry';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getActualKey } from 'utils/common/key';
-import { Location } from 'types/upload';
 import { CustomError } from 'utils/error';
+import {
+    EntityType,
+    Entity,
+    EncryptedEntityKey,
+    EntityKey,
+    EntitySyncDiffResponse,
+    EncryptedEntity,
+} from 'types/entity';
+import { getLatestVersionEntities } from 'utils/entity';
 
 const ENDPOINT = getEndpoint();
 
 const DIFF_LIMIT = 500;
 
-export enum EntityType {
-    LOCATION_TAG = 'location',
-}
 const ENTITY_TABLES: Record<EntityType, string> = {
     [EntityType.LOCATION_TAG]: 'location_tags',
 };
@@ -22,46 +27,6 @@ const ENTITY_TABLES: Record<EntityType, string> = {
 const ENTITY_SYNC_TIME_TABLES: Record<EntityType, string> = {
     [EntityType.LOCATION_TAG]: 'location_tags_time',
 };
-interface EntitySyncDiffResponse {
-    diff: EncryptedEntity[];
-    hasMore: boolean;
-}
-
-interface EncryptedEntityKey {
-    userID: number;
-    encryptedKey: string;
-    type: EntityType;
-    header: string;
-    createdAt: number;
-}
-
-interface EntityKey extends Omit<EncryptedEntityKey, 'encryptedData'> {
-    data: any;
-}
-
-interface EncryptedEntity {
-    id: string;
-    encryptedData: string;
-    header: string;
-    isDeleted: boolean;
-    createdAt: number;
-    updatedAt: number;
-    userID: number;
-}
-
-export interface LocationTagData {
-    name: string;
-    radius: number;
-    aSquare: number;
-    bSquare: number;
-    centerPoint: Location;
-}
-
-export type LocationTag = Entity<LocationTagData>;
-
-interface Entity<T> extends Omit<EncryptedEntity, 'encryptedData' | 'header'> {
-    data: T;
-}
 
 const getLocalEntity = async <T>(type: EntityType) => {
     const entities: Array<Entity<T>> =
@@ -209,15 +174,4 @@ const getEntityDiff = async (
         logError(e, 'Get entity diff failed');
         throw e;
     }
-};
-
-const getLatestVersionEntities = <T>(entities: Entity<T>[]) => {
-    const latestVersionEntities = new Map<string, Entity<T>>();
-    entities.forEach((entity) => {
-        const existingEntity = latestVersionEntities.get(entity.id);
-        if (!existingEntity || existingEntity.updatedAt < entity.updatedAt) {
-            latestVersionEntities.set(entity.id, entity);
-        }
-    });
-    return Array.from(latestVersionEntities.values());
 };

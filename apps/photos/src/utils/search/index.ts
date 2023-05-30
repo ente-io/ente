@@ -1,4 +1,4 @@
-import { LocationTagData } from 'services/entityService';
+import { LocationTagData } from 'types/entity';
 import { DateValue } from 'types/search';
 import { Location } from 'types/upload';
 

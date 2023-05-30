@@ -1,7 +1,7 @@
 import { Person, Thing, WordGroup } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { EnteFile } from 'types/file';
-import { LocationTagData } from 'services/entityService';
+import { LocationTagData } from 'types/entity';
 
 export enum SuggestionType {
     DATE = 'DATE',

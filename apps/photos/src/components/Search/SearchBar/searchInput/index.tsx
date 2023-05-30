@@ -19,7 +19,7 @@ import { SearchInputWrapper } from '../styledComponents';
 import MenuWithPeople from './MenuWithPeople';
 import { Person, Thing, WordGroup } from 'types/machineLearning';
 import { t } from 'i18next';
-import { LocationTagData } from 'services/entityService';
+import { LocationTagData } from 'types/entity';
 
 interface Iprops {
     isOpen: boolean;
