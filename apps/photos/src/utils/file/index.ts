@@ -25,7 +25,7 @@ import {
     NEW_FILE_MAGIC_METADATA,
     VISIBILITY_STATE,
 } from 'types/magicMetadata';
-import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
+import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
 
 import { addLogLine } from 'utils/logging';
 import { CustomError } from 'utils/error';
@@ -360,7 +360,7 @@ export async function changeFilesVisibility(
 
         updatedFiles.push({
             ...file,
-            magicMetadata: await updateMagicMetadataProps(
+            magicMetadata: await updateMagicMetadata(
                 file.magicMetadata ?? NEW_FILE_MAGIC_METADATA,
                 file.key,
                 updatedMagicMetadataProps
@@ -377,7 +377,7 @@ export async function changeFileCreationTime(
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedTime,
     };
-    file.pubMagicMetadata = await updateMagicMetadataProps(
+    file.pubMagicMetadata = await updateMagicMetadata(
         file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
         file.key,
         updatedPublicMagicMetadataProps
@@ -390,7 +390,7 @@ export async function changeFileName(file: EnteFile, editedName: string) {
         editedName,
     };
 
-    file.pubMagicMetadata = await updateMagicMetadataProps(
+    file.pubMagicMetadata = await updateMagicMetadata(
         file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
         file.key,
         updatedPublicMagicMetadataProps
@@ -403,7 +403,7 @@ export async function changeCaption(file: EnteFile, caption: string) {
         caption,
     };
 
-    file.pubMagicMetadata = await updateMagicMetadataProps(
+    file.pubMagicMetadata = await updateMagicMetadata(
         file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
         file.key,
         updatedPublicMagicMetadataProps

@@ -20,7 +20,7 @@ export function IsArchived(item: Collection | EnteFile) {
     return item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
 }
 
-export async function updateMagicMetadataProps(
+export async function updateMagicMetadata(
     originalMagicMetadata: MagicMetadataCore,
     decryptionKey: string,
     magicMetadataUpdates: Record<string, any>
