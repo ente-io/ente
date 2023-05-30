@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import Divider from '@mui/material/Divider';
-import { COLLECTION_SORT_BY } from 'constants/collection';
+import { COLLECTION_LIST_SORT_BY } from 'constants/collection';
 import {
     Transition,
     AllCollectionDialog,
@@ -15,8 +15,8 @@ interface Iprops {
     onClose: () => void;
     collectionSummaries: CollectionSummary[];
     setActiveCollection: (id?: number) => void;
-    collectionSortBy: COLLECTION_SORT_BY;
-    setCollectionSortBy: (v: COLLECTION_SORT_BY) => void;
+    collectionListSortBy: COLLECTION_LIST_SORT_BY;
+    setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
 }
 
 const LeftSlideTransition = Transition('up');
@@ -27,8 +27,8 @@ export default function AllCollections(props: Iprops) {
         open,
         onClose,
         setActiveCollection,
-        collectionSortBy,
-        setCollectionSortBy,
+        collectionListSortBy,
+        setCollectionListSortBy,
     } = props;
     const { isMobile } = useContext(AppContext);
 
@@ -47,8 +47,8 @@ export default function AllCollections(props: Iprops) {
             <AllCollectionsHeader
                 onClose={onClose}
                 collectionCount={props.collectionSummaries.length}
-                collectionSortBy={collectionSortBy}
-                setCollectionSortBy={setCollectionSortBy}
+                collectionSortBy={collectionListSortBy}
+                setCollectionSortBy={setCollectionListSortBy}
             />
             <Divider />
             <AllCollectionContent

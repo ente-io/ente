@@ -32,7 +32,7 @@ import {
     RemoveFromCollectionRequest,
 } from 'types/collection';
 import {
-    COLLECTION_SORT_BY,
+    COLLECTION_LIST_SORT_BY,
     CollectionType,
     ARCHIVE_SECTION,
     TRASH_SECTION,
@@ -985,19 +985,19 @@ export const getNonEmptyCollections = (
 
 export function sortCollectionSummaries(
     collectionSummaries: CollectionSummary[],
-    sortBy: COLLECTION_SORT_BY
+    sortBy: COLLECTION_LIST_SORT_BY
 ) {
     return collectionSummaries
         .sort((a, b) => {
             switch (sortBy) {
-                case COLLECTION_SORT_BY.CREATION_TIME_ASCENDING:
+                case COLLECTION_LIST_SORT_BY.CREATION_TIME_ASCENDING:
                     return (
                         -1 *
                         compareCollectionsLatestFile(b.latestFile, a.latestFile)
                     );
-                case COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING:
+                case COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING:
                     return b.updationTime - a.updationTime;
-                case COLLECTION_SORT_BY.NAME:
+                case COLLECTION_LIST_SORT_BY.NAME:
                     return a.name.localeCompare(b.name);
             }
         })

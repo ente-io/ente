@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
+import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from 'constants/collection';
 import { Box, IconButton, Typography } from '@mui/material';
 import {
     CollectionListBarWrapper,
@@ -10,7 +10,7 @@ import { IconButtonWithBG, SpaceBetweenFlex } from 'components/Container';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { AppContext } from 'pages/_app';
 import { CollectionSummary } from 'types/collection';
-import CollectionSort from '../AllCollections/CollectionSort';
+import CollectionListSortBy from '../CollectionListSortBy';
 import { t } from 'i18next';
 import {
     FixedSizeList as List,
@@ -28,8 +28,8 @@ interface IProps {
     setActiveCollection: (id?: number) => void;
     collectionSummaries: CollectionSummary[];
     showAllCollections: () => void;
-    collectionSortBy: COLLECTION_SORT_BY;
-    setCollectionSortBy: (v: COLLECTION_SORT_BY) => void;
+    collectionListSortBy: COLLECTION_LIST_SORT_BY;
+    setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
 }
 
 interface ItemData {
@@ -125,9 +125,9 @@ const CollectionListBar = (props: IProps) => {
                 <Typography>{t('ALBUMS')}</Typography>
                 {appContext.isMobile && (
                     <Box display="flex" alignItems={'center'} gap={1}>
-                        <CollectionSort
-                            setCollectionSortBy={props.setCollectionSortBy}
-                            activeSortBy={props.collectionSortBy}
+                        <CollectionListSortBy
+                            setSortBy={props.setCollectionListSortBy}
+                            activeSortBy={props.collectionListSortBy}
                             disableBG
                         />
                         <IconButton onClick={showAllCollections}>
@@ -173,9 +173,9 @@ const CollectionListBar = (props: IProps) => {
                         alignItems={'center'}
                         gap={1}
                         height={'64px'}>
-                        <CollectionSort
-                            setCollectionSortBy={props.setCollectionSortBy}
-                            activeSortBy={props.collectionSortBy}
+                        <CollectionListSortBy
+                            setSortBy={props.setCollectionListSortBy}
+                            activeSortBy={props.collectionListSortBy}
                         />
                         <IconButtonWithBG onClick={showAllCollections}>
                             <ExpandMore />
