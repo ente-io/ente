@@ -347,28 +347,6 @@ class FilesDB {
     ];
   }
 
-  static List<String> createCollectionTable() {
-    return [
-      '''
-       CREATE TABLE IF NOT EXISTS collections (
-          collection_id TEXT PRIMARY KEY NOT NULL,
-          owner TEXT NOT NULL,
-          is_deleted INTEGER NOT NULL DEFAULT 0,
-          encrypted_key TEXT NOT NULL,
-          key_decryption_nonce TEXT,
-          name TEXT,
-          type TEXT NOT NULL,
-          device_path TEXT,
-          sharees TEXT,
-          public_urls TEXT,
-          mmd_encoded_json TEXT DEFAULT '{}',
-          mmd_ver INTEGER DEFAULT 0,
-          updation_time INTEGER NOT NULL
-      );
-      '''
-    ];
-  }
-
   static List<String> addFileSizeColumn() {
     return [
       '''
