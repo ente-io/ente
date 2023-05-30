@@ -11,7 +11,7 @@ import {
 import { downloadFiles } from 'utils/file';
 import { getLocalFiles, getLocalHiddenFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
-import { CustomError, ServerErrorCodes } from 'utils/error';
+import { CustomError } from 'utils/error';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { logError } from 'utils/sentry';
@@ -35,7 +35,7 @@ import {
     SUB_TYPE,
     VISIBILITY_STATE,
 } from 'types/magicMetadata';
-import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
+import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
 import { getAlbumsURL } from 'utils/common/apiUtil';
 import bs58 from 'bs58';
 import { t } from 'i18next';
@@ -167,22 +167,14 @@ export const changeCollectionVisibility = async (
             visibility,
         };
 
-        const updatedCollection = {
-            ...collection,
-            magicMetadata: await updateMagicMetadataProps(
-                collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
-                collection.key,
-                updatedMagicMetadataProps
-            ),
-        } as Collection;
-
-        await updateCollectionMagicMetadata(updatedCollection);
+        const updatedMagicMetadata = await updateMagicMetadata(
+            collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
+            collection.key,
+            updatedMagicMetadataProps
+        );
+        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
     } catch (e) {
         logError(e, 'change collection visibility failed');
-        switch (e.status?.toString()) {
-            case ServerErrorCodes.FORBIDDEN:
-                throw Error(CustomError.NOT_FILE_OWNER);
-        }
         throw e;
     }
 };
@@ -197,22 +189,38 @@ export const changeCollectionSortOrder = async (
                 asc,
             };
 
-        const updatedCollection = {
-            ...collection,
-            magicMetadata: await updateMagicMetadataProps(
-                collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
-                collection.key,
-                updatedPublicMagicMetadataProps
-            ),
-        } as Collection;
+        const updatedPubMagicMetadata = await updateMagicMetadata(
+            collection.pubMagicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
+            collection.key,
+            updatedPublicMagicMetadataProps
+        );
 
-        await updatePublicCollectionMagicMetadata(updatedCollection);
+        await updatePublicCollectionMagicMetadata(
+            collection,
+            updatedPubMagicMetadata
+        );
     } catch (e) {
         logError(e, 'change collection order failed');
-        switch (e.status?.toString()) {
-            case ServerErrorCodes.FORBIDDEN:
-                throw Error(CustomError.NOT_FILE_OWNER);
-        }
+    }
+};
+
+export const changeCollectionSubType = async (
+    collection: Collection,
+    subType: SUB_TYPE
+) => {
+    try {
+        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
+            subType: subType,
+        };
+
+        const updatedMagicMetadata = await updateMagicMetadata(
+            collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
+            collection.key,
+            updatedMagicMetadataProps
+        );
+        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
+    } catch (e) {
+        logError(e, 'change collection subType failed');
         throw e;
     }
 };

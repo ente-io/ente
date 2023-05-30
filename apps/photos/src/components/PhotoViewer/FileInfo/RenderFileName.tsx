@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { updateFilePublicMagicMetadata } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import {
     changeFileName,
@@ -82,10 +81,7 @@ export function RenderFileName({
                 }
                 setFilename(newFilename);
                 const newTitle = getFileTitle(newFilename, extension);
-                let updatedFile = await changeFileName(file, newTitle);
-                updatedFile = (
-                    await updateFilePublicMagicMetadata([updatedFile])
-                )[0];
+                const updatedFile = await changeFileName(file, newTitle);
                 updateExistingFilePubMetadata(file, updatedFile);
                 scheduleUpdate();
             }

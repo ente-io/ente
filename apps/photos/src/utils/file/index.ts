@@ -1,5 +1,9 @@
 import { SelectedState } from 'types/gallery';
-import { EnteFile, EncryptedEnteFile } from 'types/file';
+import {
+    EnteFile,
+    EncryptedEnteFile,
+    FileWithUpdatedMagicMetadata,
+} from 'types/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
@@ -25,12 +29,16 @@ import {
     NEW_FILE_MAGIC_METADATA,
     VISIBILITY_STATE,
 } from 'types/magicMetadata';
-import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
+import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
 
 import { addLogLine } from 'utils/logging';
 import { CustomError } from 'utils/error';
 import { convertBytesToHumanReadable } from './size';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import {
+    updateFileMagicMetadata,
+    updateFilePublicMagicMetadata,
+} from 'services/fileService';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -351,64 +359,82 @@ export function isExactTypeHEIC(exactType: string) {
 export async function changeFilesVisibility(
     files: EnteFile[],
     visibility: VISIBILITY_STATE
-) {
-    const updatedFiles: EnteFile[] = [];
+): Promise<EnteFile[]> {
+    const fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[] = [];
     for (const file of files) {
         const updatedMagicMetadataProps: FileMagicMetadataProps = {
             visibility,
         };
 
-        updatedFiles.push({
-            ...file,
-            magicMetadata: await updateMagicMetadataProps(
+        fileWithUpdatedMagicMetadataList.push({
+            file,
+            updatedMagicMetadata: await updateMagicMetadata(
                 file.magicMetadata ?? NEW_FILE_MAGIC_METADATA,
                 file.key,
                 updatedMagicMetadataProps
             ),
         });
     }
-    return updatedFiles;
+    return await updateFileMagicMetadata(fileWithUpdatedMagicMetadataList);
 }
 
 export async function changeFileCreationTime(
     file: EnteFile,
     editedTime: number
-) {
+): Promise<EnteFile> {
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedTime,
     };
-    file.pubMagicMetadata = await updateMagicMetadataProps(
-        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
-        file.key,
-        updatedPublicMagicMetadataProps
-    );
-    return file;
+    const updatedPublicMagicMetadata: FilePublicMagicMetadata =
+        await updateMagicMetadata(
+            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+            file.key,
+            updatedPublicMagicMetadataProps
+        );
+    const updateResult = await updateFilePublicMagicMetadata([
+        { file, updatedPublicMagicMetadata },
+    ]);
+    return updateResult[0];
 }
 
-export async function changeFileName(file: EnteFile, editedName: string) {
+export async function changeFileName(
+    file: EnteFile,
+    editedName: string
+): Promise<EnteFile> {
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedName,
     };
 
-    file.pubMagicMetadata = await updateMagicMetadataProps(
-        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
-        file.key,
-        updatedPublicMagicMetadataProps
-    );
-    return file;
+    const updatedPublicMagicMetadata: FilePublicMagicMetadata =
+        await updateMagicMetadata(
+            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+            file.key,
+            updatedPublicMagicMetadataProps
+        );
+    const updateResult = await updateFilePublicMagicMetadata([
+        { file, updatedPublicMagicMetadata },
+    ]);
+    return updateResult[0];
 }
 
-export async function changeCaption(file: EnteFile, caption: string) {
+export async function changeCaption(
+    file: EnteFile,
+    caption: string
+): Promise<EnteFile> {
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         caption,
     };
 
-    file.pubMagicMetadata = await updateMagicMetadataProps(
-        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
-        file.key,
-        updatedPublicMagicMetadataProps
-    );
-    return file;
+    const updatedPublicMagicMetadata: FilePublicMagicMetadata =
+        await updateMagicMetadata(
+            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+            file.key,
+            updatedPublicMagicMetadataProps
+        );
+    const updateResult = await updateFilePublicMagicMetadata([
+        { file, updatedPublicMagicMetadata },
+    ]);
+    return updateResult[0];
 }
 
 export function isSharedFile(user: User, file: EnteFile) {
