@@ -1,5 +1,5 @@
 import React from 'react';
-import { COLLECTION_SORT_BY } from 'constants/collection';
+import { COLLECTION_LIST_SORT_BY } from 'constants/collection';
 import SortIcon from '@mui/icons-material/Sort';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import SvgIcon from '@mui/material/SvgIcon';
@@ -8,17 +8,17 @@ import { OverflowMenuOption } from 'components/OverflowMenu/option';
 import { t } from 'i18next';
 
 interface CollectionSortProps {
-    setCollectionSortBy: (sortBy: COLLECTION_SORT_BY) => void;
-    activeSortBy: COLLECTION_SORT_BY;
+    setSortBy: (sortBy: COLLECTION_LIST_SORT_BY) => void;
+    activeSortBy: COLLECTION_LIST_SORT_BY;
     nestedInDialog?: boolean;
     disableBG?: boolean;
 }
 
 const SortByOptionCreator =
-    ({ setCollectionSortBy, activeSortBy }: CollectionSortProps) =>
-    (props: { sortBy: COLLECTION_SORT_BY; children: any }) => {
+    ({ setSortBy, activeSortBy }: CollectionSortProps) =>
+    (props: { sortBy: COLLECTION_LIST_SORT_BY; children: any }) => {
         const handleClick = () => {
-            setCollectionSortBy(props.sortBy);
+            setSortBy(props.sortBy);
         };
 
         return (
@@ -32,7 +32,7 @@ const SortByOptionCreator =
         );
     };
 
-export default function CollectionSort(props: CollectionSortProps) {
+export default function CollectionListSortBy(props: CollectionSortProps) {
     const SortByOption = SortByOptionCreator(props);
 
     return (
@@ -52,13 +52,15 @@ export default function CollectionSort(props: CollectionSortProps) {
                         !props.disableBG && theme.colors.fill.faint,
                 },
             }}>
-            <SortByOption sortBy={COLLECTION_SORT_BY.NAME}>
+            <SortByOption sortBy={COLLECTION_LIST_SORT_BY.NAME}>
                 {t('SORT_BY_NAME')}
             </SortByOption>
-            <SortByOption sortBy={COLLECTION_SORT_BY.CREATION_TIME_ASCENDING}>
+            <SortByOption
+                sortBy={COLLECTION_LIST_SORT_BY.CREATION_TIME_ASCENDING}>
                 {t('SORT_BY_CREATION_TIME_ASCENDING')}
             </SortByOption>
-            <SortByOption sortBy={COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING}>
+            <SortByOption
+                sortBy={COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING}>
                 {t('SORT_BY_UPDATION_TIME_DESCENDING')}
             </SortByOption>
         </OverflowMenu>

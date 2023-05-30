@@ -24,7 +24,7 @@ export enum CollectionSummaryType {
     archived = 'archived',
     hidden = 'hidden',
 }
-export enum COLLECTION_SORT_BY {
+export enum COLLECTION_LIST_SORT_BY {
     NAME,
     CREATION_TIME_ASCENDING,
     UPDATION_TIME_DESCENDING,
