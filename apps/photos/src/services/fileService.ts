@@ -17,6 +17,7 @@ import {
     EncryptedEnteFile,
     TrashRequest,
     FileWithUpdatedMagicMetadata,
+    FileWithUpdatedPublicMagicMetadata,
 } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
@@ -294,24 +295,29 @@ export const updateFileMagicMetadata = async (
     );
 };
 
-export const updateFilePublicMagicMetadata = async (files: EnteFile[]) => {
+export const updateFilePublicMagicMetadata = async (
+    fileWithUpdatedPublicMagicMetadataList: FileWithUpdatedPublicMagicMetadata[]
+) => {
     const token = getToken();
     if (!token) {
         return;
     }
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-    for (const file of files) {
+    for (const {
+        file,
+        updatedPublicMagicMetadata: updatePublicMagicMetadata,
+    } of fileWithUpdatedPublicMagicMetadataList) {
         const { file: encryptedPubMagicMetadata } =
             await cryptoWorker.encryptMetadata(
-                file.pubMagicMetadata.data,
+                updatePublicMagicMetadata.data,
                 file.key
             );
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
-                version: file.pubMagicMetadata.version,
-                count: file.pubMagicMetadata.count,
+                version: updatePublicMagicMetadata.version,
+                count: updatePublicMagicMetadata.count,
                 data: encryptedPubMagicMetadata.encryptedData,
                 header: encryptedPubMagicMetadata.decryptionHeader,
             },
@@ -325,12 +331,12 @@ export const updateFilePublicMagicMetadata = async (files: EnteFile[]) => {
             'X-Auth-Token': token,
         }
     );
-    return files.map(
-        (file): EnteFile => ({
+    return fileWithUpdatedPublicMagicMetadataList.map(
+        ({ file, updatedPublicMagicMetadata }): EnteFile => ({
             ...file,
             pubMagicMetadata: {
-                ...file.pubMagicMetadata,
-                version: file.pubMagicMetadata.version + 1,
+                ...updatedPublicMagicMetadata,
+                version: updatedPublicMagicMetadata.version + 1,
             },
         })
     );

@@ -35,7 +35,10 @@ import { addLogLine } from 'utils/logging';
 import { CustomError } from 'utils/error';
 import { convertBytesToHumanReadable } from './size';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
-import { updateFileMagicMetadata } from 'services/fileService';
+import {
+    updateFileMagicMetadata,
+    updateFilePublicMagicMetadata,
+} from 'services/fileService';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -379,42 +382,57 @@ export async function changeFilesVisibility(
 export async function changeFileCreationTime(
     file: EnteFile,
     editedTime: number
-) {
+): Promise<EnteFile> {
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedTime,
     };
-    file.pubMagicMetadata = await updateMagicMetadata(
-        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
-        file.key,
-        updatedPublicMagicMetadataProps
-    );
-    return file;
+    const updatedPublicMagicMetadata: FilePublicMagicMetadata =
+        await updateMagicMetadata(
+            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+            file.key,
+            updatedPublicMagicMetadataProps
+        );
+    return await updateFilePublicMagicMetadata([
+        { file, updatedPublicMagicMetadata },
+    ])[0];
 }
 
-export async function changeFileName(file: EnteFile, editedName: string) {
+export async function changeFileName(
+    file: EnteFile,
+    editedName: string
+): Promise<EnteFile> {
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedName,
     };
 
-    file.pubMagicMetadata = await updateMagicMetadata(
-        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
-        file.key,
-        updatedPublicMagicMetadataProps
-    );
-    return file;
+    const updatedPublicMagicMetadata: FilePublicMagicMetadata =
+        await updateMagicMetadata(
+            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+            file.key,
+            updatedPublicMagicMetadataProps
+        );
+    return await updateFilePublicMagicMetadata([
+        { file, updatedPublicMagicMetadata },
+    ])[0];
 }
 
-export async function changeCaption(file: EnteFile, caption: string) {
+export async function changeCaption(
+    file: EnteFile,
+    caption: string
+): Promise<EnteFile> {
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         caption,
     };
 
-    file.pubMagicMetadata = await updateMagicMetadata(
-        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
-        file.key,
-        updatedPublicMagicMetadataProps
-    );
-    return file;
+    const updatedPublicMagicMetadata: FilePublicMagicMetadata =
+        await updateMagicMetadata(
+            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+            file.key,
+            updatedPublicMagicMetadataProps
+        );
+    return await updateFilePublicMagicMetadata([
+        { file, updatedPublicMagicMetadata },
+    ])[0];
 }
 
 export function isSharedFile(user: User, file: EnteFile) {

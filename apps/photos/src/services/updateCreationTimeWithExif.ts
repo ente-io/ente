@@ -7,7 +7,6 @@ import {
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import downloadManager from './downloadManager';
-import { updateFilePublicMagicMetadata } from './fileService';
 import { EnteFile } from 'types/file';
 
 import { getParsedExifData } from './upload/exifService';
@@ -66,13 +65,10 @@ export async function updateCreationTimeWithExif(
                     correctCreationTime &&
                     correctCreationTime !== file.metadata.creationTime
                 ) {
-                    let updatedFile = await changeFileCreationTime(
+                    const updatedFile = await changeFileCreationTime(
                         file,
                         correctCreationTime
                     );
-                    updatedFile = (
-                        await updateFilePublicMagicMetadata([updatedFile])
-                    )[0];
                     updateExistingFilePubMetadata(file, updatedFile);
                 }
             } catch (e) {
