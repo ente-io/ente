@@ -50,10 +50,10 @@ const CollectionSortOrderMenu = ({
                 vertical: 'top',
                 horizontal: 'right',
             }}>
-            <OverflowMenuOption onClick={setCollectionSortOrderToAsc}>
+            <OverflowMenuOption onClick={setCollectionSortOrderToDesc}>
                 {t('NEWEST_FIRST')}
             </OverflowMenuOption>
-            <OverflowMenuOption onClick={setCollectionSortOrderToDesc}>
+            <OverflowMenuOption onClick={setCollectionSortOrderToAsc}>
                 {t('OLDEST_FIRST')}
             </OverflowMenuOption>
         </StyledMenu>
