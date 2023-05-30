@@ -47,7 +47,7 @@ export interface PeopleListProps extends PeopleListPropsBase {
     maxRows?: number;
 }
 
-export function PeopleList(props: PeopleListProps) {
+export const PeopleList = React.memo((props: PeopleListProps) => {
     return (
         <FaceChipContainer
             style={
@@ -57,7 +57,7 @@ export function PeopleList(props: PeopleListProps) {
             }>
             {props.people.map((person, index) => (
                 <FaceChip
-                    key={index}
+                    key={person.id}
                     clickable={!!props.onSelect}
                     onClick={() =>
                         props.onSelect && props.onSelect(person, index)
@@ -70,7 +70,7 @@ export function PeopleList(props: PeopleListProps) {
             ))}
         </FaceChipContainer>
     );
-}
+});
 
 export interface PhotoPeopleListProps extends PeopleListPropsBase {
     file: EnteFile;
