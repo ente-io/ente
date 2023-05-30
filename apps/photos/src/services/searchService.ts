@@ -8,20 +8,28 @@ import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import {
-    Bbox,
     DateValue,
-    LocationSearchResponse,
     Search,
     SearchOption,
     Suggestion,
     SuggestionType,
 } from 'types/search';
 import ObjectService from './machineLearning/objectService';
-import { getFormattedDate, isInsideBox, isSameDayAnyYear } from 'utils/search';
+import {
+    getFormattedDate,
+    isInsideLocationTag,
+    isSameDayAnyYear,
+} from 'utils/search';
 import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import {
+    EntityType,
+    LocationTag,
+    LocationTagData,
+    getLatestEntities,
+} from './entityService';
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
@@ -46,6 +54,7 @@ export const getAutoCompleteSuggestions =
             ...getCollectionSuggestion(searchPhrase, collections),
             getFileNameSuggestion(searchPhrase, files),
             getFileCaptionSuggestion(searchPhrase, files),
+            ...(await getLocationTagSuggestions(searchPhrase)),
             ...(await getThingSuggestion(searchPhrase)),
         ];
 
@@ -214,16 +223,15 @@ function getFileCaptionSuggestion(
     };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function getLocationSuggestions(searchPhrase: string) {
-    const locationResults = await searchLocation(searchPhrase);
+async function getLocationTagSuggestions(searchPhrase: string) {
+    const searchResults = await searchLocationTag(searchPhrase);
 
-    return locationResults.map(
-        (searchResult) =>
+    return searchResults.map(
+        (locationTag) =>
             ({
                 type: SuggestionType.LOCATION,
-                value: searchResult.bbox,
-                label: searchResult.place,
+                value: locationTag.data,
+                label: locationTag.data.name,
             } as Suggestion)
     );
 }
@@ -298,12 +306,14 @@ function parseHumanDate(humanDate: string): DateValue[] {
     return [];
 }
 
-async function searchLocation(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    searchPhrase: string
-): Promise<LocationSearchResponse[]> {
-    logError(Error(), 'attempting to use unimplemented search API');
-    return [];
+async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
+    const locationTags = await getLatestEntities<LocationTagData>(
+        EntityType.LOCATION_TAG
+    );
+    const matchedLocationTags = locationTags.filter((locationTag) =>
+        locationTag.data.name.toLowerCase().includes(searchPhrase)
+    );
+    return matchedLocationTags;
 }
 
 async function searchThing(searchPhrase: string) {
@@ -327,7 +337,7 @@ function isSearchedFile(user: User, file: EnteFile, search: Search) {
         );
     }
     if (search?.location) {
-        return isInsideBox(
+        return isInsideLocationTag(
             {
                 latitude: file.metadata.latitude,
                 longitude: file.metadata.longitude,
@@ -361,7 +371,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
 
         case SuggestionType.LOCATION:
             return {
-                location: option.value as Bbox,
+                location: option.value as LocationTagData,
             };
 
         case SuggestionType.COLLECTION:

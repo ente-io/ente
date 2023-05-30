@@ -1,17 +1,11 @@
 import { Person, Thing, WordGroup } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { EnteFile } from 'types/file';
-
-export type Bbox = [number, number, number, number];
-
-export interface LocationSearchResponse {
-    place: string;
-    bbox: Bbox;
-}
+import { LocationTagData } from 'services/entityService';
 
 export enum SuggestionType {
     DATE = 'DATE',
-    LOCATION = 'LOCATION',
+    LOCATION = 'LOCATION_TAG',
     COLLECTION = 'COLLECTION',
     FILE_NAME = 'FILE_NAME',
     PERSON = 'PERSON',
@@ -31,19 +25,19 @@ export interface Suggestion {
     type: SuggestionType;
     label: string;
     value:
-        | Bbox
         | DateValue
         | number[]
         | Person
         | IndexStatus
         | Thing
-        | WordGroup;
+        | WordGroup
+        | LocationTagData;
     hide?: boolean;
 }
 
 export type Search = {
     date?: DateValue;
-    location?: Bbox;
+    location?: LocationTagData;
     collection?: number;
     files?: number[];
     person?: Person;

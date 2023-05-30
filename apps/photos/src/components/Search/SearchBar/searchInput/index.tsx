@@ -6,13 +6,7 @@ import {
     getAutoCompleteSuggestions,
     getDefaultOptions,
 } from 'services/searchService';
-import {
-    Bbox,
-    DateValue,
-    Search,
-    SearchOption,
-    SuggestionType,
-} from 'types/search';
+import { DateValue, Search, SearchOption, SuggestionType } from 'types/search';
 import { ValueContainerWithIcon } from './valueContainerWithIcon';
 import { SelectStyles } from '../../../../styles/search';
 import AsyncSelect from 'react-select/async';
@@ -25,6 +19,7 @@ import { SearchInputWrapper } from '../styledComponents';
 import MenuWithPeople from './MenuWithPeople';
 import { Person, Thing, WordGroup } from 'types/machineLearning';
 import { t } from 'i18next';
+import { LocationTagData } from 'services/entityService';
 
 interface Iprops {
     isOpen: boolean;
@@ -88,7 +83,7 @@ export default function SearchInput(props: Iprops) {
                 break;
             case SuggestionType.LOCATION:
                 search = {
-                    location: selectedOption.value as Bbox,
+                    location: selectedOption.value as LocationTagData,
                 };
                 props.setIsOpen(true);
                 break;
