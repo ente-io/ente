@@ -5,7 +5,6 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { logError } from 'utils/sentry';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getActualKey } from 'utils/common/key';
-import { CustomError } from 'utils/error';
 import {
     EntityType,
     Entity,
@@ -66,9 +65,6 @@ const getEntityKey = async (type: EntityType) => {
         );
         return { data: decryptedData, ...rest } as EntityKey;
     } catch (e) {
-        if (e.status === 404) {
-            throw Error(CustomError.LOCATION_TAG_ENTITY_NOT_FOUND);
-        }
         logError(e, 'Get entity key failed');
         throw e;
     }
@@ -142,9 +138,7 @@ const syncEntity = async <T>(type: EntityType) => {
             await localForage.setItem(ENTITY_SYNC_TIME_TABLES[type], syncTime);
         } while (response.hasMore);
     } catch (e) {
-        if (e.message !== CustomError.LOCATION_TAG_ENTITY_NOT_FOUND) {
-            logError(e, 'Sync entity failed');
-        }
+        logError(e, 'Sync entity failed');
     }
 };
 
