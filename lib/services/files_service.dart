@@ -42,6 +42,28 @@ class FilesService {
     }
   }
 
+  Future<Map<int, int>> getFilesSizeFromInfo(List<int> uploadedFileID) async {
+    try {
+      final response = await _enteDio.post(
+        "/files/info",
+        data: {
+          "fileIDs": [uploadedFileID]
+        },
+      );
+      final Map<int, int> idToSize = {};
+      final List result = response.data["filesInfo"] as List;
+      for (var fileInfo in result) {
+        final int uploadedFileID = fileInfo["id"];
+        final int size = fileInfo["fileInfo"]["fileSize"];
+        idToSize[uploadedFileID] = size;
+      }
+      return idToSize;
+    } catch (e) {
+      _logger.severe(e);
+      rethrow;
+    }
+  }
+
   // Note: this method is not used anywhere, but it is kept for future
   // reference when we add bulk EditTime feature
   Future<void> bulkEditTime(
