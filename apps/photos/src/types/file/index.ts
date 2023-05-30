@@ -70,3 +70,13 @@ export interface TrashRequestItems {
     fileID: number;
     collectionID: number;
 }
+
+export interface FileWithUpdatedMagicMetadata {
+    file: EnteFile;
+    updatedMagicMetadata: FileMagicMetadata;
+}
+
+export interface FileWithUpdatedPublicMagicMetadata {
+    file: EnteFile;
+    updatedPublicMagicMetadata: FilePublicMagicMetadata;
+}

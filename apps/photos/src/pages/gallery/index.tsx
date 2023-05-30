@@ -11,7 +11,6 @@ import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
     getLocalFiles,
     syncFiles,
-    updateFileMagicMetadata,
     trashFiles,
     deleteFromTrash,
     getLocalHiddenFiles,
@@ -664,11 +663,7 @@ export default function Gallery() {
         startLoading();
         try {
             const selectedFiles = getSelectedFiles(selected, filteredData);
-            const updatedFiles = await changeFilesVisibility(
-                selectedFiles,
-                visibility
-            );
-            await updateFileMagicMetadata(updatedFiles);
+            await changeFilesVisibility(selectedFiles, visibility);
             clearSelection();
         } catch (e) {
             logError(e, 'change file visibility failed');
