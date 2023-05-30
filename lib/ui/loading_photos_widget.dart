@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:photos/core/event_bus.dart';
@@ -87,8 +86,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   @override
   Widget build(BuildContext context) {
     _setupLoadingMessages(context);
-    final isLightMode =
-        AdaptiveTheme.of(context).brightness == Brightness.light;
+    final isLightMode = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(
