@@ -391,9 +391,10 @@ export async function changeFileCreationTime(
             file.key,
             updatedPublicMagicMetadataProps
         );
-    return await updateFilePublicMagicMetadata([
+    const updateResult = await updateFilePublicMagicMetadata([
         { file, updatedPublicMagicMetadata },
-    ])[0];
+    ]);
+    return updateResult[0];
 }
 
 export async function changeFileName(
@@ -410,9 +411,10 @@ export async function changeFileName(
             file.key,
             updatedPublicMagicMetadataProps
         );
-    return await updateFilePublicMagicMetadata([
+    const updateResult = await updateFilePublicMagicMetadata([
         { file, updatedPublicMagicMetadata },
-    ])[0];
+    ]);
+    return updateResult[0];
 }
 
 export async function changeCaption(
@@ -429,9 +431,10 @@ export async function changeCaption(
             file.key,
             updatedPublicMagicMetadataProps
         );
-    return await updateFilePublicMagicMetadata([
+    const updateResult = await updateFilePublicMagicMetadata([
         { file, updatedPublicMagicMetadata },
-    ])[0];
+    ]);
+    return updateResult[0];
 }
 
 export function isSharedFile(user: User, file: EnteFile) {

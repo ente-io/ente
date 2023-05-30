@@ -297,7 +297,7 @@ export const updateFileMagicMetadata = async (
 
 export const updateFilePublicMagicMetadata = async (
     fileWithUpdatedPublicMagicMetadataList: FileWithUpdatedPublicMagicMetadata[]
-) => {
+): Promise<EnteFile[]> => {
     const token = getToken();
     if (!token) {
         return;
