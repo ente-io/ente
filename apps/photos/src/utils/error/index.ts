@@ -66,6 +66,7 @@ export const CustomError = {
     EXIF_DATA_NOT_FOUND: 'exif data not found',
     SELECT_FOLDER_ABORTED: 'select folder aborted',
     NON_MEDIA_FILE: 'non media file',
+    LOCATION_TAG_ENTITY_NOT_FOUND: 'location tag entity not found',
 };
 
 export function parseUploadErrorCodes(error) {
