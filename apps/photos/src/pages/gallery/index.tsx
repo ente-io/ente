@@ -118,8 +118,9 @@ import GalleryEmptyState from 'components/GalleryEmptyState';
 import AuthenticateUserModal from 'components/AuthenticateUserModal';
 import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
 import { IsArchived } from 'utils/magicMetadata';
-import { isSameDayAnyYear, isInsideBox } from 'utils/search';
+import { isSameDayAnyYear, isInsideLocationTag } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
+import { syncEntities } from 'services/entityService';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -418,6 +419,10 @@ export default function Gallery() {
 
                 // SEARCH MODE
                 if (isInSearchMode) {
+                    // shared files are not searchable
+                    if (isSharedFile(user, item)) {
+                        return false;
+                    }
                     if (
                         search?.date &&
                         !isSameDayAnyYear(search.date)(
@@ -428,7 +433,7 @@ export default function Gallery() {
                     }
                     if (
                         search?.location &&
-                        !isInsideBox(
+                        !isInsideLocationTag(
                             {
                                 latitude: item.metadata.latitude,
                                 longitude: item.metadata.longitude,
@@ -462,7 +467,7 @@ export default function Gallery() {
                     return true;
                 }
 
-                // shared files can only be seen in their respective collection and not searchable
+                // shared files can only be seen in their respective collection
                 if (isSharedFile(user, item)) {
                     if (activeCollection === item.collectionID) {
                         return true;
@@ -553,6 +558,7 @@ export default function Gallery() {
             await syncFiles(normalCollections, setFiles);
             await syncHiddenFiles(hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
+            await syncEntities();
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:

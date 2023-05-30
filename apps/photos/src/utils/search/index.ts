@@ -1,19 +1,6 @@
-import { Bbox, DateValue } from 'types/search';
+import { LocationTagData } from 'types/entity';
+import { DateValue } from 'types/search';
 import { Location } from 'types/upload';
-
-export function isInsideBox({ latitude, longitude }: Location, bbox: Bbox) {
-    if (latitude === null && longitude === null) {
-        return false;
-    }
-    if (
-        longitude >= bbox[0] &&
-        latitude >= bbox[1] &&
-        longitude <= bbox[2] &&
-        latitude <= bbox[3]
-    ) {
-        return true;
-    }
-}
 
 export const isSameDayAnyYear =
     (baseDate: DateValue) => (compareDate: Date) => {
@@ -40,4 +27,19 @@ export function getFormattedDate(date: DateValue) {
     return new Intl.DateTimeFormat('en-IN', options).format(
         new Date(date.year ?? 1, date.month ?? 1, date.date ?? 1)
     );
+}
+
+export function isInsideLocationTag(
+    location: Location,
+    locationTag: LocationTagData
+) {
+    const { centerPoint, aSquare, bSquare } = locationTag;
+    const { latitude, longitude } = location;
+    const x = Math.abs(centerPoint.latitude - latitude);
+    const y = Math.abs(centerPoint.longitude - longitude);
+    if ((x * x) / aSquare + (y * y) / bSquare <= 1) {
+        return true;
+    } else {
+        return false;
+    }
 }
