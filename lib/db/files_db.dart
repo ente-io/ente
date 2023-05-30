@@ -1469,10 +1469,9 @@ class FilesDB {
       filesTable,
       where:
           '$columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0)'
-          ' AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND '
-          '($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+          ' AND $columnCreationTime >= ? AND $columnCreationTime <= ?'
           ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime, visibleVisibility],
+      whereArgs: [startTime, endTime],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
