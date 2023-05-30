@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photos/models/collection.dart';
+import "package:photos/models/api/collection/user.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:tuple/tuple.dart';

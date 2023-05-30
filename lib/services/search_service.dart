@@ -76,7 +76,7 @@ class SearchService {
 
       if (!c.collection.isHidden() &&
           c.collection.type != CollectionType.uncategorized &&
-          c.collection.name!.toLowerCase().contains(
+          c.collection.displayName.toLowerCase().contains(
                 query.toLowerCase(),
               )) {
         collectionSearchResults.add(AlbumSearchResult(c));

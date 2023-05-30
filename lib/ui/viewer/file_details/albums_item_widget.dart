@@ -83,7 +83,7 @@ class AlbumsItemWidget extends StatelessWidget {
         collections.add(c!);
         chipButtons.add(
           ChipButtonWidget(
-            c.isHidden() ? S.of(context).hidden : c.name,
+            c.isHidden() ? S.of(context).hidden : c.displayName,
             onTap: () {
               if (c.isHidden()) {
                 return;

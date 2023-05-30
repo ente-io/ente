@@ -218,7 +218,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
               final searchResults = _searchQuery.isNotEmpty
                   ? collectionsWithThumbnail
                       .where(
-                        (element) => element.collection.name!
+                        (element) => element.collection.displayName
                             .toLowerCase()
                             .contains(_searchQuery),
                       )
@@ -263,8 +263,8 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     );
     collectionsWithThumbnail.sort((first, second) {
       return compareAsciiLowerCaseNatural(
-        first.collection.name ?? "",
-        second.collection.name ?? "",
+        first.collection.displayName,
+        second.collection.displayName,
       );
     });
     return collectionsWithThumbnail;

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/errors.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';
+import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/files_split.dart';
@@ -82,7 +84,7 @@ class CollectionActions {
       title: S.of(context).removePublicLink,
       body:
           //'This will remove the public link for accessing "${collection.name}".',
-          S.of(context).disableLinkMessage(collection.collectionName),
+          S.of(context).disableLinkMessage(collection.displayName),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {

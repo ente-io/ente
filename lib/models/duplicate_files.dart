@@ -55,11 +55,12 @@ class DuplicateFiles {
 
   sortByCollectionName() {
     files.sort((first, second) {
-      final firstName =
-          collectionsService.getCollectionByID(first.collectionID!)!.name ?? '';
-      final secondName =
-          collectionsService.getCollectionByID(second.collectionID!)!.name ??
-              '';
+      final firstName = collectionsService
+          .getCollectionByID(first.collectionID!)!
+          .displayName;
+      final secondName = collectionsService
+          .getCollectionByID(second.collectionID!)!
+          .displayName;
       return firstName.compareTo(secondName);
     });
   }

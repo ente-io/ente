@@ -1,7 +1,8 @@
-import 'dart:convert';
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
+import "package:photos/models/api/collection/public_url.dart";
+import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/metadata/common_keys.dart";
 
@@ -10,7 +11,8 @@ class Collection {
   final User? owner;
   final String encryptedKey;
   final String? keyDecryptionNonce;
-  final String? name;
+  @Deprecated("Use collectionName instead")
+  String? name;
   // encryptedName & nameDecryptionNonce will be null for collections
   // created before we started encrypting collection name
   final String? encryptedName;
@@ -21,6 +23,15 @@ class Collection {
   final List<PublicURL?>? publicURLs;
   final int updationTime;
   final bool isDeleted;
+
+  // In early days before public launch, we used to store collection name
+  // un-encrypted. decryptName will be value either decrypted value for
+  // encryptedName or name itself.
+  String? decryptedName;
+  // decryptedPath will be null for collections now owned by user, deleted
+  // collections, && collections which don't have a path. The path is used
+  // to map local on-device album on mobile to remote collection on ente.
+  String? decryptedPath;
   String? mMdEncodedJson;
   String? mMdPubEncodedJson;
   String? sharedMmdJson;
@@ -46,6 +57,14 @@ class Collection {
   set pubMagicMetadata(CollectionPubMagicMetadata? val) => _pubMmd = val;
 
   set sharedMagicMetadata(ShareeMagicMetadata? val) => _sharedMmd = val;
+
+  String get displayName => decryptedName ?? name ?? "Unnamed Album";
+
+  // set the value for both name and decryptedName till we finish migration
+  void setName(String newName) {
+    name = newName;
+    decryptedName = newName;
+  }
 
   Collection(
     this.id,
@@ -111,7 +130,12 @@ class Collection {
     return (owner?.id ?? 0) == userID;
   }
 
-  String get collectionName => name ?? "Unnamed collection";
+  // canLinkToDevicePath returns true if the collection can be linked to local
+  // device album based on path. The path is nothing but the name of the device
+  // album.
+  bool canLinkToDevicePath(int userID) {
+    return isOwner(userID) && !isDeleted && attributes.encryptedPath != null;
+  }
 
   void updateSharees(List<User> newSharees) {
     sharees?.clear();
@@ -166,6 +190,8 @@ class Collection {
     bool? isDeleted,
     String? mMdEncodedJson,
     int? mMdVersion,
+    String? decryptedName,
+    String? decryptedPath,
   }) {
     final Collection result = Collection(
       id ?? this.id,
@@ -184,29 +210,13 @@ class Collection {
     );
     result.mMdVersion = mMdVersion ?? this.mMdVersion;
     result.mMdEncodedJson = mMdEncodedJson ?? this.mMdEncodedJson;
+    result.decryptedName = decryptedName ?? this.decryptedName;
+    result.decryptedPath = decryptedPath ?? this.decryptedPath;
     result.mMbPubVersion = mMbPubVersion;
     result.mMdPubEncodedJson = mMdPubEncodedJson;
     result.sharedMmdVersion = sharedMmdVersion;
     result.sharedMmdJson = sharedMmdJson;
     return result;
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'owner': owner?.toMap(),
-      'encryptedKey': encryptedKey,
-      'keyDecryptionNonce': keyDecryptionNonce,
-      'name': name,
-      'encryptedName': encryptedName,
-      'nameDecryptionNonce': nameDecryptionNonce,
-      'type': typeToString(type),
-      'attributes': attributes.toMap(),
-      'sharees': sharees?.map((x) => x?.toMap()).toList(),
-      'publicURLs': publicURLs?.map((x) => x?.toMap()).toList(),
-      'updationTime': updationTime,
-      'isDeleted': isDeleted,
-    };
   }
 
   static fromMap(Map<String, dynamic>? map) {
@@ -306,92 +316,6 @@ class CollectionAttributes {
       encryptedPath: map['encryptedPath'],
       pathDecryptionNonce: map['pathDecryptionNonce'],
       version: map['version'] ?? 0,
-    );
-  }
-}
-
-class User {
-  int? id;
-  String email;
-  String? name;
-  String? role;
-
-  User({
-    this.id,
-    required this.email,
-    this.name,
-    this.role,
-  });
-
-  bool get isViewer => role == null || role?.toUpperCase() == 'VIEWER';
-
-  bool get isCollaborator =>
-      role != null && role?.toUpperCase() == 'COLLABORATOR';
-
-  Map<String, dynamic> toMap() {
-    return {'id': id, 'email': email, 'name': name, 'role': role};
-  }
-
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
-
-    return User(
-      id: map['id'],
-      email: map['email'],
-      name: map['name'],
-      role: map['role'] ?? 'VIEWER',
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory User.fromJson(String source) => User.fromMap(json.decode(source));
-}
-
-class PublicURL {
-  String url;
-  int deviceLimit;
-  int validTill;
-  bool enableDownload;
-  bool enableCollect;
-  bool passwordEnabled;
-
-  PublicURL({
-    required this.url,
-    required this.deviceLimit,
-    required this.validTill,
-    this.enableDownload = true,
-    this.passwordEnabled = false,
-    this.enableCollect = false,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'url': url,
-      'deviceLimit': deviceLimit,
-      'validTill': validTill,
-      'enableDownload': enableDownload,
-      'passwordEnabled': passwordEnabled,
-      'enableCollect': enableCollect,
-    };
-  }
-
-  bool get hasExpiry => validTill != 0;
-
-  // isExpired indicates whether the link has expired or not
-  bool get isExpired =>
-      hasExpiry && validTill < DateTime.now().microsecondsSinceEpoch;
-
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
-
-    return PublicURL(
-      url: map['url'],
-      deviceLimit: map['deviceLimit'],
-      validTill: map['validTill'] ?? 0,
-      enableDownload: map['enableDownload'] ?? true,
-      passwordEnabled: map['passwordEnabled'] ?? false,
-      enableCollect: map['enableCollect'] ?? false,
     );
   }
 }

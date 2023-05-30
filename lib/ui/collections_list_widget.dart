@@ -181,12 +181,14 @@ class CollectionsListWidget extends StatelessWidget {
       late final String toastMessage;
       bool shouldNavigateToCollection = false;
       if (actionType == CollectionActionType.addFiles) {
-        toastMessage = S.of(context).addedSuccessfullyTo(item.collection.name!);
+        toastMessage =
+            S.of(context).addedSuccessfullyTo(item.collection.displayName);
         shouldNavigateToCollection = true;
       } else if (actionType == CollectionActionType.moveFiles ||
           actionType == CollectionActionType.restoreFiles ||
           actionType == CollectionActionType.unHide) {
-        toastMessage = S.of(context).movedSuccessfullyTo(item.collection.name!);
+        toastMessage =
+            S.of(context).movedSuccessfullyTo(item.collection.displayName);
         shouldNavigateToCollection = true;
       } else {
         toastMessage = "";
@@ -275,7 +277,7 @@ class CollectionsListWidget extends StatelessWidget {
               .updateShareUrl(collection, {'enableCollect': true}).then(
             (value) => showShortToast(
               context,
-              S.of(context).collaborativeLinkCreatedFor(collection.name!),
+              S.of(context).collaborativeLinkCreatedFor(collection.displayName),
             ),
           );
           return true;
@@ -293,7 +295,7 @@ class CollectionsListWidget extends StatelessWidget {
     if (result) {
       showShortToast(
         context,
-        S.of(context).collaborativeLinkCreatedFor(collection.name!),
+        S.of(context).collaborativeLinkCreatedFor(collection.displayName),
       );
       if (Configuration.instance.getUserID() == collection.owner!.id) {
         unawaited(

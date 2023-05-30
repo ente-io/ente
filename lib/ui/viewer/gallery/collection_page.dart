@@ -81,7 +81,7 @@ class CollectionPage extends StatelessWidget {
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
-      albumName: c.collection.name,
+      albumName: c.collection.displayName,
       sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
     );
     return Scaffold(
@@ -89,7 +89,7 @@ class CollectionPage extends StatelessWidget {
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarTypeValue,
-          c.collection.name,
+          c.collection.displayName,
           _selectedFiles,
           collection: c.collection,
         ),
