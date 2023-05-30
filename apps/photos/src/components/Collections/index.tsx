@@ -3,7 +3,7 @@ import CollectionListBar from 'components/Collections/CollectionListBar';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import AllCollections from 'components/Collections/AllCollections';
 import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWithOptions';
-import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
+import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from 'constants/collection';
 import CollectionShare from 'components/Collections/CollectionShare';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
@@ -41,10 +41,10 @@ export default function Collections(props: Iprops) {
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
 
-    const [collectionSortBy, setCollectionSortBy] =
-        useLocalState<COLLECTION_SORT_BY>(
+    const [collectionListSortBy, setCollectionListSortBy] =
+        useLocalState<COLLECTION_LIST_SORT_BY>(
             LS_KEYS.COLLECTION_SORT_BY,
-            COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING
+            COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING
         );
     const collectionsMap = useRef<Map<number, Collection>>(new Map());
     const activeCollection = useRef<Collection>(null);
@@ -72,9 +72,9 @@ export default function Collections(props: Iprops) {
         () =>
             sortCollectionSummaries(
                 [...collectionSummaries.values()],
-                collectionSortBy
+                collectionListSortBy
             ),
-        [collectionSortBy, collectionSummaries]
+        [collectionListSortBy, collectionSummaries]
     );
 
     useEffect(() => {
@@ -114,8 +114,8 @@ export default function Collections(props: Iprops) {
                     shouldBeShownOnCollectionBar(x.type)
                 )}
                 showAllCollections={openAllCollections}
-                setCollectionSortBy={setCollectionSortBy}
-                collectionSortBy={collectionSortBy}
+                setCollectionListSortBy={setCollectionListSortBy}
+                collectionListSortBy={collectionListSortBy}
             />
 
             <AllCollections
@@ -125,8 +125,8 @@ export default function Collections(props: Iprops) {
                     (x) => !isSystemCollection(x.type)
                 )}
                 setActiveCollection={setActiveCollectionID}
-                setCollectionSortBy={setCollectionSortBy}
-                collectionSortBy={collectionSortBy}
+                setCollectionListSortBy={setCollectionListSortBy}
+                collectionListSortBy={collectionListSortBy}
             />
 
             <CollectionShare
