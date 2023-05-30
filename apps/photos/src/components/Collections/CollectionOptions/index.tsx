@@ -130,7 +130,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 callback = openCollectionSortOrderMenu;
                 break;
             case CollectionActions.UPDATE_COLLECTION_SORT_ORDER:
-                callback = updateCollectionFilesOrder;
+                callback = updateCollectionSortOrder;
                 break;
             default:
                 logError(
@@ -286,7 +286,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         });
     };
 
-    const updateCollectionFilesOrder = async (asc: boolean) => {
+    const updateCollectionSortOrder = async ({ asc }: { asc: boolean }) => {
         await changeCollectionSortOrder(activeCollection, asc);
     };
 

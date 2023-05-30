@@ -21,16 +21,16 @@ const CollectionSortOrderMenu = ({
 }: Iprops) => {
     const setCollectionSortOrderToAsc = () => {
         closeCollectionSortOrderMenu();
-        handleCollectionAction(CollectionActions.UPDATE_COLLECTION_SORT_ORDER)(
-            true
-        );
+        handleCollectionAction(CollectionActions.UPDATE_COLLECTION_SORT_ORDER)({
+            asc: true,
+        });
     };
 
     const setCollectionSortOrderToDesc = () => {
         closeCollectionSortOrderMenu();
-        handleCollectionAction(CollectionActions.UPDATE_COLLECTION_SORT_ORDER)(
-            false
-        );
+        handleCollectionAction(CollectionActions.UPDATE_COLLECTION_SORT_ORDER)({
+            asc: false,
+        });
     };
     return (
         <StyledMenu
