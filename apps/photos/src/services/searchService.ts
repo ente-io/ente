@@ -43,22 +43,27 @@ export const getDefaultOptions = async (files: EnteFile[]) => {
 export const getAutoCompleteSuggestions =
     (files: EnteFile[], collections: Collection[]) =>
     async (searchPhrase: string): Promise<SearchOption[]> => {
-        searchPhrase = searchPhrase.trim().toLowerCase();
-        if (!searchPhrase?.length) {
+        try {
+            searchPhrase = searchPhrase.trim().toLowerCase();
+            if (!searchPhrase?.length) {
+                return [];
+            }
+            const suggestions: Suggestion[] = [
+                ...getHolidaySuggestion(searchPhrase),
+                ...getYearSuggestion(searchPhrase),
+                ...getDateSuggestion(searchPhrase),
+                ...getCollectionSuggestion(searchPhrase, collections),
+                getFileNameSuggestion(searchPhrase, files),
+                getFileCaptionSuggestion(searchPhrase, files),
+                ...(await getLocationTagSuggestions(searchPhrase)),
+                ...(await getThingSuggestion(searchPhrase)),
+            ];
+
+            return convertSuggestionsToOptions(suggestions, files);
+        } catch (e) {
+            logError(e, 'getAutoCompleteSuggestions failed');
             return [];
         }
-        const suggestions: Suggestion[] = [
-            ...getHolidaySuggestion(searchPhrase),
-            ...getYearSuggestion(searchPhrase),
-            ...getDateSuggestion(searchPhrase),
-            ...getCollectionSuggestion(searchPhrase, collections),
-            getFileNameSuggestion(searchPhrase, files),
-            getFileCaptionSuggestion(searchPhrase, files),
-            ...(await getLocationTagSuggestions(searchPhrase)),
-            ...(await getThingSuggestion(searchPhrase)),
-        ];
-
-        return convertSuggestionsToOptions(suggestions, files);
     };
 
 function convertSuggestionsToOptions(
