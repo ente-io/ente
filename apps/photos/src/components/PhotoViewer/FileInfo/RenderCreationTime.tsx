@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { updateFilePublicMagicMetadata } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import {
@@ -37,13 +36,10 @@ export function RenderCreationTime({
                     closeEditMode();
                     return;
                 }
-                let updatedFile = await changeFileCreationTime(
+                const updatedFile = await changeFileCreationTime(
                     file,
                     unixTimeInMicroSec
                 );
-                updatedFile = (
-                    await updateFilePublicMagicMetadata([updatedFile])
-                )[0];
                 updateExistingFilePubMetadata(file, updatedFile);
                 scheduleUpdate();
             }

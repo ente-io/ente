@@ -10,7 +10,7 @@ import {
 import { downloadFiles } from 'utils/file';
 import { getLocalFiles, getLocalHiddenFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
-import { CustomError, ServerErrorCodes } from 'utils/error';
+import { CustomError } from 'utils/error';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { logError } from 'utils/sentry';
@@ -172,11 +172,7 @@ export const changeCollectionVisibility = async (
         );
         await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
     } catch (e) {
-        logError(e, 'change file visibility failed');
-        switch (e.status?.toString()) {
-            case ServerErrorCodes.FORBIDDEN:
-                throw Error(CustomError.NOT_FILE_OWNER);
-        }
+        logError(e, 'change collection visibility failed');
         throw e;
     }
 };
@@ -185,16 +181,21 @@ export const changeCollectionSubType = async (
     collection: Collection,
     subType: SUB_TYPE
 ) => {
-    const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-        subType: subType,
-    };
+    try {
+        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
+            subType: subType,
+        };
 
-    const updatedMagicMetadata = await updateMagicMetadata(
-        collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
-        collection.key,
-        updatedMagicMetadataProps
-    );
-    await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
+        const updatedMagicMetadata = await updateMagicMetadata(
+            collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
+            collection.key,
+            updatedMagicMetadataProps
+        );
+        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
+    } catch (e) {
+        logError(e, 'change collection subType failed');
+        throw e;
+    }
 };
 
 export const getArchivedCollections = (collections: Collection[]) => {

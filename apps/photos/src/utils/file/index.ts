@@ -359,7 +359,7 @@ export function isExactTypeHEIC(exactType: string) {
 export async function changeFilesVisibility(
     files: EnteFile[],
     visibility: VISIBILITY_STATE
-) {
+): Promise<EnteFile[]> {
     const fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[] = [];
     for (const file of files) {
         const updatedMagicMetadataProps: FileMagicMetadataProps = {
@@ -375,8 +375,7 @@ export async function changeFilesVisibility(
             ),
         });
     }
-    await updateFileMagicMetadata(fileWithUpdatedMagicMetadataList);
-    return fileWithUpdatedMagicMetadataList;
+    return await updateFileMagicMetadata(fileWithUpdatedMagicMetadataList);
 }
 
 export async function changeFileCreationTime(
