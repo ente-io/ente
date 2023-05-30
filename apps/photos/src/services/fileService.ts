@@ -12,7 +12,12 @@ import {
     sortFiles,
 } from 'utils/file';
 import { eventBus, Events } from './events';
-import { EnteFile, EncryptedEnteFile, TrashRequest } from 'types/file';
+import {
+    EnteFile,
+    EncryptedEnteFile,
+    TrashRequest,
+    FileWithUpdatedMagicMetadata,
+} from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from 'utils/logging';
@@ -250,24 +255,26 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
     }
 };
 
-export const updateFileMagicMetadata = async (files: EnteFile[]) => {
+export const updateFileMagicMetadata = async (
+    fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[]
+) => {
     const token = getToken();
     if (!token) {
         return;
     }
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-    for (const file of files) {
+    for (const {
+        file,
+        updatedMagicMetadata,
+    } of fileWithUpdatedMagicMetadataList) {
         const { file: encryptedMagicMetadata } =
-            await cryptoWorker.encryptMetadata(
-                file.magicMetadata.data,
-                file.key
-            );
+            await cryptoWorker.encryptMetadata(updatedMagicMetadata, file.key);
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
-                version: file.magicMetadata.version,
-                count: file.magicMetadata.count,
+                version: updatedMagicMetadata.version,
+                count: updatedMagicMetadata.count,
                 data: encryptedMagicMetadata.encryptedData,
                 header: encryptedMagicMetadata.decryptionHeader,
             },
@@ -276,12 +283,12 @@ export const updateFileMagicMetadata = async (files: EnteFile[]) => {
     await HTTPService.put(`${ENDPOINT}/files/magic-metadata`, reqBody, null, {
         'X-Auth-Token': token,
     });
-    return files.map(
-        (file): EnteFile => ({
+    return fileWithUpdatedMagicMetadataList.map(
+        ({ file, updatedMagicMetadata }): EnteFile => ({
             ...file,
             magicMetadata: {
-                ...file.magicMetadata,
-                version: file.magicMetadata.version + 1,
+                ...updatedMagicMetadata,
+                version: updatedMagicMetadata.version + 1,
             },
         })
     );

@@ -1,5 +1,9 @@
 import { SelectedState } from 'types/gallery';
-import { EnteFile, EncryptedEnteFile } from 'types/file';
+import {
+    EnteFile,
+    EncryptedEnteFile,
+    FileWithUpdatedMagicMetadata,
+} from 'types/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
@@ -31,6 +35,7 @@ import { addLogLine } from 'utils/logging';
 import { CustomError } from 'utils/error';
 import { convertBytesToHumanReadable } from './size';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { updateFileMagicMetadata } from 'services/fileService';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -352,22 +357,23 @@ export async function changeFilesVisibility(
     files: EnteFile[],
     visibility: VISIBILITY_STATE
 ) {
-    const updatedFiles: EnteFile[] = [];
+    const fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[] = [];
     for (const file of files) {
         const updatedMagicMetadataProps: FileMagicMetadataProps = {
             visibility,
         };
 
-        updatedFiles.push({
-            ...file,
-            magicMetadata: await updateMagicMetadata(
+        fileWithUpdatedMagicMetadataList.push({
+            file,
+            updatedMagicMetadata: await updateMagicMetadata(
                 file.magicMetadata ?? NEW_FILE_MAGIC_METADATA,
                 file.key,
                 updatedMagicMetadataProps
             ),
         });
     }
-    return updatedFiles;
+    await updateFileMagicMetadata(fileWithUpdatedMagicMetadataList);
+    return fileWithUpdatedMagicMetadataList;
 }
 
 export async function changeFileCreationTime(
