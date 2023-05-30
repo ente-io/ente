@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/tab_changed_event.dart';
@@ -102,7 +101,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                     gap: 0,
                     tabBorderRadius: 32,
                     tabBackgroundColor:
-                        AdaptiveTheme.of(context).brightness == Brightness.light
+                        Theme.of(context).brightness == Brightness.light
                             ? strokeFainterLight
                             : strokeSolidFaintLight,
                     haptic: false,

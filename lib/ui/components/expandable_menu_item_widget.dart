@@ -1,4 +1,3 @@
-import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -45,10 +44,9 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
     final isSuppressed = isAnySectionExpanded && !isCurrentSectionExpanded;
 
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
-    final backgroundColor =
-        AdaptiveTheme.of(context).brightness == Brightness.light
-            ? enteColorScheme.backgroundElevated2
-            : enteColorScheme.backgroundElevated;
+    final backgroundColor = Theme.of(context).brightness == Brightness.light
+        ? enteColorScheme.backgroundElevated2
+        : enteColorScheme.backgroundElevated;
     return Padding(
       padding: EdgeInsets.only(bottom: expandableController.value ? 8 : 0),
       child: AnimatedContainer(

@@ -502,8 +502,23 @@ class FilesDB {
     bool? asc,
     int visibility = visibleVisibility,
     Set<int>? ignoredCollectionIDs,
+    bool applyOwnerCheck = false,
   }) async {
     final stopWatch = Stopwatch()..start();
+    late String whereQuery;
+    late List<Object?>? whereArgs;
+    if (applyOwnerCheck) {
+      whereQuery = '$columnCreationTime >= ? AND $columnCreationTime <= ? '
+          'AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) '
+          'AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+          ' AND $columnMMdVisibility = ?';
+      whereArgs = [startTime, endTime, ownerID, visibility];
+    } else {
+      whereQuery =
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+          ' AND $columnMMdVisibility = ?';
+      whereArgs = [startTime, endTime, visibility];
+    }
 
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -512,7 +527,7 @@ class FilesDB {
       where:
           '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
           ' AND $columnMMdVisibility = ?',
-      whereArgs: [startTime, endTime, ownerID, visibility],
+      whereArgs: [startTime, endTime, visibility],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
@@ -703,7 +718,7 @@ class FilesDB {
         whereClause += " OR ";
       }
     }
-    whereClause += ") AND $columnMMdVisibility = $visibleVisibility";
+    whereClause += ")";
     final results = await db.query(
       filesTable,
       where: whereClause,
@@ -1400,33 +1415,6 @@ class FilesDB {
     return result;
   }
 
-  // returns the localID of all files which are uploaded and belong to the
-  // user and upload time is greater than 20 April 2023 epoch time and less than
-  // 15 May 2023 epoch time
-  Future<List<String>> getFilesWithLocationUploadedBtw20AprTo15May2023(
-    int ownerID,
-  ) async {
-    final db = await database;
-    final result = await db.query(
-      filesTable,
-      columns: [columnLocalID],
-      distinct: true,
-      where: ''
-          '($columnUploadedFileID IS NOT NULL'
-          ' AND $columnUploadedFileID IS NOT -1)'
-          ' AND $columnOwnerID = ?'
-          ' AND $columnUpdationTime > ? AND $columnUpdationTime < ? '
-          'AND ($columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL) '
-          'AND ($columnLongitude IS NOT 0.0 AND $columnLongitude IS NOT 0.0)',
-      whereArgs: [
-        ownerID,
-        1681952400000000,
-        1684112400000000,
-      ],
-    );
-    return result.map((row) => row[columnLocalID].toString()).toList();
-  }
-
   // For given list of localIDs and ownerID, get a list of uploaded files
   // owned by given user
   Future<List<File>> getFilesForLocalIDs(
@@ -1481,10 +1469,9 @@ class FilesDB {
       filesTable,
       where:
           '$columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0)'
-          ' AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND '
-          '($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
+          ' AND $columnCreationTime >= ? AND $columnCreationTime <= ?'
           ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime, visibleVisibility],
+      whereArgs: [startTime, endTime],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,

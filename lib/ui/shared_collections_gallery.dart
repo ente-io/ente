@@ -427,6 +427,8 @@ class IncomingCollectionItem extends StatelessWidget {
                     child: ThumbnailWidget(
                       c.thumbnail,
                       key: Key("shared_collection" + c.thumbnail!.tag),
+                      shouldShowArchiveStatus: c.collection.hasShareeArchived(),
+                      shouldShowSyncStatus: false,
                     ),
                   ),
                   Align(
