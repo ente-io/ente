@@ -270,7 +270,10 @@ export const updateFileMagicMetadata = async (
         updatedMagicMetadata,
     } of fileWithUpdatedMagicMetadataList) {
         const { file: encryptedMagicMetadata } =
-            await cryptoWorker.encryptMetadata(updatedMagicMetadata, file.key);
+            await cryptoWorker.encryptMetadata(
+                updatedMagicMetadata.data,
+                file.key
+            );
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
