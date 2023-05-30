@@ -152,7 +152,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             leadingIcon: Icons.error_outline,
             leadingIconColor: getEnteColorScheme(context).warning500,
             menuItemColor: getEnteColorScheme(context).fillFaint,
-            onTap: () async {},
             isBottomBorderRadiusRemoved: true,
           ),
         );
