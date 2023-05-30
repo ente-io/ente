@@ -75,6 +75,10 @@ const CollectionCardContainer = React.memo(
     areEqual
 );
 
+const getItemKey = (index: number, data: ItemData) => {
+    return `${data.collectionSummaries[index].id}-${data.collectionSummaries[index].latestFile?.id}`;
+};
+
 const CollectionListBar = (props: IProps) => {
     const {
         activeCollection,
@@ -153,6 +157,7 @@ const CollectionListBar = (props: IProps) => {
                                 layout="horizontal"
                                 width={width}
                                 height={110}
+                                itemKey={getItemKey}
                                 itemCount={collectionSummaries.length}
                                 itemSize={CollectionListBarCardWidth}
                                 useIsScrolling>
