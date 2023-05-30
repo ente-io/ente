@@ -12,8 +12,9 @@ export interface EncryptedEntityKey {
     createdAt: number;
 }
 
-export interface EntityKey extends Omit<EncryptedEntityKey, 'encryptedData'> {
-    data: any;
+export interface EntityKey
+    extends Omit<EncryptedEntityKey, 'encryptedKey' | 'header'> {
+    data: string;
 }
 
 export interface EncryptedEntity {

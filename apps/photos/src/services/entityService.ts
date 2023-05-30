@@ -23,6 +23,10 @@ const ENTITY_TABLES: Record<EntityType, string> = {
     [EntityType.LOCATION_TAG]: 'location_tags',
 };
 
+const ENTITY_KEY_TABLES: Record<EntityType, string> = {
+    [EntityType.LOCATION_TAG]: 'location_tags_key',
+};
+
 const ENTITY_SYNC_TIME_TABLES: Record<EntityType, string> = {
     [EntityType.LOCATION_TAG]: 'location_tags_time',
 };
@@ -39,8 +43,18 @@ const getEntityLastSyncTime = async (type: EntityType) => {
     );
 };
 
+const getCachedEntityKey = async (type: EntityType) => {
+    const entityKey: EntityKey =
+        (await localForage.getItem<EntityKey>(ENTITY_KEY_TABLES[type])) || null;
+    return entityKey;
+};
+
 const getEntityKey = async (type: EntityType) => {
     try {
+        const entityKey = await getCachedEntityKey(type);
+        if (entityKey) {
+            return entityKey;
+        }
         const token = getToken();
         if (!token) {
             return;
@@ -63,7 +77,9 @@ const getEntityKey = async (type: EntityType) => {
             header,
             masterKey
         );
-        return { data: decryptedData, ...rest } as EntityKey;
+        const decryptedEntityKey: EntityKey = { data: decryptedData, ...rest };
+        localForage.setItem(ENTITY_KEY_TABLES[type], decryptedEntityKey);
+        return decryptedEntityKey;
     } catch (e) {
         logError(e, 'Get entity key failed');
         throw e;
@@ -89,7 +105,7 @@ export const syncEntities = async () => {
     }
 };
 
-const syncEntity = async <T>(type: EntityType) => {
+const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
     try {
         let entities = await getLocalEntity(type);
         let syncTime = await getEntityLastSyncTime(type);
@@ -118,7 +134,7 @@ const syncEntity = async <T>(type: EntityType) => {
                     return {
                         ...rest,
                         data: decryptedData,
-                    } as Entity<T>;
+                    };
                 })
             );
 
