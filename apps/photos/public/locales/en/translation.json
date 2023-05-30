@@ -523,5 +523,8 @@
     "HIDDEN":"Hidden",
     "HIDE":"Hide",
     "UNHIDE":"Unhide",
-    "UNHIDE_TO_COLLECTION":"Unhide to album"
+    "UNHIDE_TO_COLLECTION":"Unhide to album",
+    "SORT_BY":"Sort by",
+    "NEWEST_FIRST":"Newest first",
+    "OLDEST_FIRST":"Oldest first"
 }

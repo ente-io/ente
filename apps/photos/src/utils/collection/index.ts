@@ -6,6 +6,7 @@ import {
     restoreToCollection,
     unhideToCollection,
     updateCollectionMagicMetadata,
+    updatePublicCollectionMagicMetadata,
 } from 'services/collectionService';
 import { downloadFiles } from 'utils/file';
 import { getLocalFiles, getLocalHiddenFiles } from 'services/fileService';
@@ -17,6 +18,7 @@ import { logError } from 'utils/sentry';
 import {
     Collection,
     CollectionMagicMetadataProps,
+    CollectionPublicMagicMetadataProps,
     CollectionSummaries,
 } from 'types/collection';
 import {
@@ -174,6 +176,31 @@ export const changeCollectionVisibility = async (
     } catch (e) {
         logError(e, 'change collection visibility failed');
         throw e;
+    }
+};
+
+export const changeCollectionSortOrder = async (
+    collection: Collection,
+    asc: boolean
+) => {
+    try {
+        const updatedPublicMagicMetadataProps: CollectionPublicMagicMetadataProps =
+            {
+                asc,
+            };
+
+        const updatedPubMagicMetadata = await updateMagicMetadata(
+            collection.pubMagicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
+            collection.key,
+            updatedPublicMagicMetadataProps
+        );
+
+        await updatePublicCollectionMagicMetadata(
+            collection,
+            updatedPubMagicMetadata
+        );
+    } catch (e) {
+        logError(e, 'change collection order failed');
     }
 };
 

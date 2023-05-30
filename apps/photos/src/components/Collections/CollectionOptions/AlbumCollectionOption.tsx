@@ -7,6 +7,7 @@ import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { CollectionActions } from '.';
 import Unarchive from '@mui/icons-material/Unarchive';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
+import SortIcon from '@mui/icons-material/Sort';
 import { t } from 'i18next';
 
 interface Iprops {
@@ -30,6 +31,14 @@ export function AlbumCollectionOption({
                 )}
                 startIcon={<EditIcon />}>
                 {t('RENAME_COLLECTION')}
+            </OverflowMenuOption>
+            <OverflowMenuOption
+                onClick={handleCollectionAction(
+                    CollectionActions.SHOW_SORT_ORDER_MENU,
+                    false
+                )}
+                startIcon={<SortIcon />}>
+                {t('SORT_BY')}
             </OverflowMenuOption>
             {IsArchived ? (
                 <OverflowMenuOption

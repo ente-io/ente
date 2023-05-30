@@ -756,6 +756,50 @@ export const updateCollectionMagicMetadata = async (
     return updatedCollection;
 };
 
+export const updatePublicCollectionMagicMetadata = async (
+    collection: Collection,
+    updatedPublicMagicMetadata: CollectionPublicMagicMetadata
+) => {
+    const token = getToken();
+    if (!token) {
+        return;
+    }
+
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
+    const { file: encryptedMagicMetadata } = await cryptoWorker.encryptMetadata(
+        updatedPublicMagicMetadata.data,
+        collection.key
+    );
+
+    const reqBody: UpdateMagicMetadataRequest = {
+        id: collection.id,
+        magicMetadata: {
+            version: updatedPublicMagicMetadata.version,
+            count: updatedPublicMagicMetadata.count,
+            data: encryptedMagicMetadata.encryptedData,
+            header: encryptedMagicMetadata.decryptionHeader,
+        },
+    };
+
+    await HTTPService.put(
+        `${ENDPOINT}/collections/public-magic-metadata`,
+        reqBody,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    const updatedCollection: Collection = {
+        ...collection,
+        pubMagicMetadata: {
+            ...updatedPublicMagicMetadata,
+            version: updatedPublicMagicMetadata.version + 1,
+        },
+    };
+    return updatedCollection;
+};
+
 export const renameCollection = async (
     collection: Collection,
     newCollectionName: string
