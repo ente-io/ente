@@ -47,7 +47,7 @@ import {
     SUB_TYPE,
     UpdateMagicMetadataRequest,
 } from 'types/magicMetadata';
-import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
+import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
 import { User } from 'types/user';
 import {
     isQuickLinkCollection,
@@ -58,6 +58,7 @@ import {
     isHiddenCollection,
     isValidReplacementAlbum,
     getNonHiddenCollections,
+    changeCollectionSubType,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -345,7 +346,7 @@ const createCollection = async (
             await cryptoWorker.encryptUTF8(collectionName, collectionKey);
         let encryptedMagicMetadata: EncryptedMagicMetadata;
         if (magicMetadataProps) {
-            const magicMetadata = await updateMagicMetadataProps(
+            const magicMetadata = await updateMagicMetadata(
                 NEW_COLLECTION_MAGIC_METADATA,
                 null,
                 magicMetadataProps
@@ -711,7 +712,10 @@ export const leaveSharedAlbum = async (collectionID: number) => {
     }
 };
 
-export const updateCollectionMagicMetadata = async (collection: Collection) => {
+export const updateCollectionMagicMetadata = async (
+    collection: Collection,
+    updatedMagicMetadata: CollectionMagicMetadata
+) => {
     const token = getToken();
     if (!token) {
         return;
@@ -720,15 +724,15 @@ export const updateCollectionMagicMetadata = async (collection: Collection) => {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
     const { file: encryptedMagicMetadata } = await cryptoWorker.encryptMetadata(
-        collection.magicMetadata.data,
+        updatedMagicMetadata.data,
         collection.key
     );
 
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
-            version: collection.magicMetadata.version,
-            count: collection.magicMetadata.count,
+            version: updatedMagicMetadata.version,
+            count: updatedMagicMetadata.count,
             data: encryptedMagicMetadata.encryptedData,
             header: encryptedMagicMetadata.decryptionHeader,
         },
@@ -745,8 +749,8 @@ export const updateCollectionMagicMetadata = async (collection: Collection) => {
     const updatedCollection: Collection = {
         ...collection,
         magicMetadata: {
-            ...collection.magicMetadata,
-            version: collection.magicMetadata.version + 1,
+            ...updatedMagicMetadata,
+            version: updatedMagicMetadata.version + 1,
         },
     };
     return updatedCollection;
@@ -758,7 +762,7 @@ export const renameCollection = async (
 ) => {
     if (isQuickLinkCollection(collection)) {
         // Convert quick link collection to normal collection on rename
-        await updateCollectionSubType(collection, SUB_TYPE.DEFAULT);
+        await changeCollectionSubType(collection, SUB_TYPE.DEFAULT);
     }
     const token = getToken();
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
@@ -777,24 +781,6 @@ export const renameCollection = async (
             'X-Auth-Token': token,
         }
     );
-};
-
-const updateCollectionSubType = async (
-    collection: Collection,
-    subType: SUB_TYPE
-) => {
-    const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-        subType: subType,
-    };
-    const updatedCollection = {
-        ...collection,
-        magicMetadata: await updateMagicMetadataProps(
-            collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
-            collection.key,
-            updatedMagicMetadataProps
-        ),
-    } as Collection;
-    await updateCollectionMagicMetadata(updatedCollection);
 };
 
 export const shareCollection = async (

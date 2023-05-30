@@ -33,7 +33,7 @@ import {
     SUB_TYPE,
     VISIBILITY_STATE,
 } from 'types/magicMetadata';
-import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
+import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
 import { getAlbumsURL } from 'utils/common/apiUtil';
 import bs58 from 'bs58';
 import { t } from 'i18next';
@@ -165,16 +165,12 @@ export const changeCollectionVisibility = async (
             visibility,
         };
 
-        const updatedCollection = {
-            ...collection,
-            magicMetadata: await updateMagicMetadataProps(
-                collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
-                collection.key,
-                updatedMagicMetadataProps
-            ),
-        } as Collection;
-
-        await updateCollectionMagicMetadata(updatedCollection);
+        const updatedMagicMetadata = await updateMagicMetadata(
+            collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
+            collection.key,
+            updatedMagicMetadataProps
+        );
+        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
     } catch (e) {
         logError(e, 'change file visibility failed');
         switch (e.status?.toString()) {
@@ -183,6 +179,22 @@ export const changeCollectionVisibility = async (
         }
         throw e;
     }
+};
+
+export const changeCollectionSubType = async (
+    collection: Collection,
+    subType: SUB_TYPE
+) => {
+    const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
+        subType: subType,
+    };
+
+    const updatedMagicMetadata = await updateMagicMetadata(
+        collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
+        collection.key,
+        updatedMagicMetadataProps
+    );
+    await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
 };
 
 export const getArchivedCollections = (collections: Collection[]) => {
