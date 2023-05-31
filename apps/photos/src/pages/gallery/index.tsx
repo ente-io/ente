@@ -643,7 +643,9 @@ export default function Gallery() {
                 );
                 clearSelection();
                 await syncWithRemote(false, true);
-                setActiveCollection(collection.id);
+                if (!isInSearchMode) {
+                    setActiveCollection(collection.id);
+                }
             } catch (e) {
                 logError(e, 'collection ops failed', { ops });
                 setDialogMessage({
