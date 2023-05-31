@@ -56,7 +56,7 @@ class FilesService {
       }
       return Future.value(true);
     } catch (e, s) {
-      _logger.severe("failed to get all size", e, s);
+      _logger.severe("error during has migrated sizes", e, s);
       return Future.value(false);
     }
   }
@@ -77,8 +77,8 @@ class FilesService {
         idToSize[uploadedFileID] = size;
       }
       return idToSize;
-    } catch (e) {
-      _logger.severe(e);
+    } catch (e, s) {
+      _logger.severe("failed to fetch size from fileInfo", e, s);
       rethrow;
     }
   }
