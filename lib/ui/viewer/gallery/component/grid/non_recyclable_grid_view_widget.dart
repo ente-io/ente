@@ -8,7 +8,7 @@ import "package:visibility_detector/visibility_detector.dart";
 
 class NonRecyclableGridViewWidget extends StatefulWidget {
   final bool shouldRender;
-  final List<File> filesInDay;
+  final List<File> filesInGroup;
   final int photoGridSize;
   final bool limitSelectionToOne;
   final String tag;
@@ -17,7 +17,7 @@ class NonRecyclableGridViewWidget extends StatefulWidget {
   final SelectedFiles? selectedFiles;
   const NonRecyclableGridViewWidget({
     required this.shouldRender,
-    required this.filesInDay,
+    required this.filesInGroup,
     required this.photoGridSize,
     required this.limitSelectionToOne,
     required this.tag,
@@ -45,7 +45,7 @@ class _NonRecyclableGridViewWidgetState
   Widget build(BuildContext context) {
     if (!_shouldRender) {
       return VisibilityDetector(
-        key: Key("gallery" + widget.filesInDay.first.tag),
+        key: Key("gallery" + widget.filesInGroup.first.tag),
         onVisibilityChanged: (visibility) {
           if (mounted && visibility.visibleFraction > 0 && !_shouldRender) {
             setState(() {
@@ -54,13 +54,13 @@ class _NonRecyclableGridViewWidgetState
           }
         },
         child: PlaceHolderGridViewWidget(
-          widget.filesInDay.length,
+          widget.filesInGroup.length,
           widget.photoGridSize,
         ),
       );
     } else {
       return GalleryGridViewWidget(
-        filesInDay: widget.filesInDay,
+        filesInGroup: widget.filesInGroup,
         photoGridSize: widget.photoGridSize,
         limitSelectionToOne: widget.limitSelectionToOne,
         tag: widget.tag,

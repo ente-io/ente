@@ -8,7 +8,7 @@ import "package:visibility_detector/visibility_detector.dart";
 
 class RecyclableGridViewWidget extends StatefulWidget {
   final bool shouldRender;
-  final List<File> filesInDay;
+  final List<File> filesInGroup;
   final int photoGridSize;
   final bool limitSelectionToOne;
   final String tag;
@@ -17,7 +17,7 @@ class RecyclableGridViewWidget extends StatefulWidget {
   final SelectedFiles? selectedFiles;
   const RecyclableGridViewWidget({
     required this.shouldRender,
-    required this.filesInDay,
+    required this.filesInGroup,
     required this.photoGridSize,
     required this.limitSelectionToOne,
     required this.tag,
@@ -43,7 +43,7 @@ class _RecyclableGridViewWidgetState extends State<RecyclableGridViewWidget> {
   @override
   Widget build(BuildContext context) {
     return VisibilityDetector(
-      key: Key("gallery" + widget.filesInDay.first.tag),
+      key: Key("gallery" + widget.filesInGroup.first.tag),
       onVisibilityChanged: (visibility) {
         final shouldRender = visibility.visibleFraction > 0;
         if (mounted && shouldRender != _shouldRender) {
@@ -54,7 +54,7 @@ class _RecyclableGridViewWidgetState extends State<RecyclableGridViewWidget> {
       },
       child: _shouldRender
           ? GalleryGridViewWidget(
-              filesInDay: widget.filesInDay,
+              filesInGroup: widget.filesInGroup,
               photoGridSize: widget.photoGridSize,
               limitSelectionToOne: widget.limitSelectionToOne,
               tag: widget.tag,
@@ -63,7 +63,7 @@ class _RecyclableGridViewWidgetState extends State<RecyclableGridViewWidget> {
               currentUserID: widget.currentUserID,
             )
           : PlaceHolderGridViewWidget(
-              widget.filesInDay.length,
+              widget.filesInGroup.length,
               widget.photoGridSize,
             ),
     );

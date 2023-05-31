@@ -6,7 +6,7 @@ import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
 class GalleryGridViewWidget extends StatelessWidget {
-  final List<File> filesInDay;
+  final List<File> filesInGroup;
   final int photoGridSize;
   final SelectedFiles? selectedFiles;
   final bool limitSelectionToOne;
@@ -14,7 +14,7 @@ class GalleryGridViewWidget extends StatelessWidget {
   final int? currentUserID;
   final GalleryLoader asyncLoader;
   const GalleryGridViewWidget({
-    required this.filesInDay,
+    required this.filesInGroup,
     required this.photoGridSize,
     this.selectedFiles,
     required this.limitSelectionToOne,
@@ -32,17 +32,17 @@ class GalleryGridViewWidget extends StatelessWidget {
       // to disable GridView's scrolling
       itemBuilder: (context, index) {
         return GalleryFileWidget(
-          file: filesInDay[index],
+          file: filesInGroup[index],
           selectedFiles: selectedFiles,
           limitSelectionToOne: limitSelectionToOne,
           tag: tag,
           photoGridSize: photoGridSize,
           currentUserID: currentUserID,
-          filesInDay: filesInDay,
+          filesInGroup: filesInGroup,
           asyncLoader: asyncLoader,
         );
       },
-      itemCount: filesInDay.length,
+      itemCount: filesInGroup.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,

@@ -13,7 +13,7 @@ import "package:photos/ui/viewer/gallery/gallery.dart";
 
 class LazyGridView extends StatefulWidget {
   final String tag;
-  final List<File> filesInDay;
+  final List<File> filesInGroup;
   final GalleryLoader asyncLoader;
   final SelectedFiles? selectedFiles;
   final bool shouldRender;
@@ -25,7 +25,7 @@ class LazyGridView extends StatefulWidget {
 
   LazyGridView(
     this.tag,
-    this.filesInDay,
+    this.filesInGroup,
     this.asyncLoader,
     this.selectedFiles,
     this.shouldRender,
@@ -73,7 +73,7 @@ class _LazyGridViewState extends State<LazyGridView> {
   @override
   void didUpdateWidget(LazyGridView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!listEquals(widget.filesInDay, oldWidget.filesInDay)) {
+    if (!listEquals(widget.filesInGroup, oldWidget.filesInGroup)) {
       _shouldRender = widget.shouldRender;
     }
   }
@@ -83,7 +83,7 @@ class _LazyGridViewState extends State<LazyGridView> {
     if (widget.shouldRecycle) {
       return RecyclableGridViewWidget(
         shouldRender: _shouldRender,
-        filesInDay: widget.filesInDay,
+        filesInGroup: widget.filesInGroup,
         photoGridSize: widget.photoGridSize!,
         limitSelectionToOne: widget.limitSelectionToOne,
         tag: widget.tag,
@@ -94,7 +94,7 @@ class _LazyGridViewState extends State<LazyGridView> {
     } else {
       return NonRecyclableGridViewWidget(
         shouldRender: _shouldRender,
-        filesInDay: widget.filesInDay,
+        filesInGroup: widget.filesInGroup,
         photoGridSize: widget.photoGridSize!,
         limitSelectionToOne: widget.limitSelectionToOne,
         tag: widget.tag,
@@ -108,13 +108,13 @@ class _LazyGridViewState extends State<LazyGridView> {
   void _selectedFilesListener() {
     if (widget.selectedFiles!.files
         .toSet()
-        .containsAll(widget.filesInDay.toSet())) {
+        .containsAll(widget.filesInGroup.toSet())) {
       widget.areAllFilesSelected.value = true;
     } else {
       widget.areAllFilesSelected.value = false;
     }
     bool shouldRefresh = false;
-    for (final file in widget.filesInDay) {
+    for (final file in widget.filesInGroup) {
       if (widget.selectedFiles!.isPartOfLastSelected(file)) {
         shouldRefresh = true;
       }
@@ -127,12 +127,12 @@ class _LazyGridViewState extends State<LazyGridView> {
   void _toggleSelectAllFromDayListener() {
     if (widget.selectedFiles!.files
         .toSet()
-        .containsAll(widget.filesInDay.toSet())) {
+        .containsAll(widget.filesInGroup.toSet())) {
       setState(() {
-        widget.selectedFiles!.unSelectAll(widget.filesInDay.toSet());
+        widget.selectedFiles!.unSelectAll(widget.filesInGroup.toSet());
       });
     } else {
-      widget.selectedFiles!.selectAll(widget.filesInDay.toSet());
+      widget.selectedFiles!.selectAll(widget.filesInGroup.toSet());
     }
   }
 }

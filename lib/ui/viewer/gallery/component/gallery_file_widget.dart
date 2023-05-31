@@ -21,7 +21,7 @@ class GalleryFileWidget extends StatelessWidget {
   final String tag;
   final int photoGridSize;
   final int? currentUserID;
-  final List<File> filesInDay;
+  final List<File> filesInGroup;
   final GalleryLoader asyncLoader;
   const GalleryFileWidget({
     required this.file,
@@ -30,7 +30,7 @@ class GalleryFileWidget extends StatelessWidget {
     required this.tag,
     required this.photoGridSize,
     required this.currentUserID,
-    required this.filesInDay,
+    required this.filesInGroup,
     required this.asyncLoader,
     super.key,
   });
@@ -167,9 +167,9 @@ class GalleryFileWidget extends StatelessWidget {
   void _routeToDetailPage(File file, BuildContext context) {
     final page = DetailPage(
       DetailPageConfiguration(
-        List.unmodifiable(filesInDay),
+        List.unmodifiable(filesInGroup),
         asyncLoader,
-        filesInDay.indexOf(file),
+        filesInGroup.indexOf(file),
         tag,
       ),
     );
