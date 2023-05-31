@@ -485,8 +485,8 @@ class FilesDB {
       where:
           '$columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
     );
-    final localIDs = <String>{};
-    final uploadedIDs = <int>{};
+    final Set<String> localIDs = <String>{};
+    final Set<int> uploadedIDs = <int>{};
     for (final result in results) {
       localIDs.add(result[columnLocalID] as String);
       uploadedIDs.add(result[columnUploadedFileID] as int);
@@ -1429,6 +1429,23 @@ class FilesDB {
       whereArgs: [ownerID],
     );
     return _deduplicatedAndFilterIgnoredFiles(convertToFiles(rows), {});
+  }
+
+  // For a given userID, return unique uploadedFileId for the given userID
+  Future<List<int>> getUploadIDsWithMissingSize(int userId) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      columns: [columnUploadedFileID],
+      distinct: true,
+      where: '$columnOwnerID = ? AND $columnFileSize IS NULL',
+      whereArgs: [userId],
+    );
+    final result = <int>[];
+    for (final row in rows) {
+      result.add(row[columnUploadedFileID] as int);
+    }
+    return result;
   }
 
   Future<List<File>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {
