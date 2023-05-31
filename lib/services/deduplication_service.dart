@@ -1,9 +1,12 @@
 import 'package:logging/logging.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
+import "package:photos/services/collections_service.dart";
+import "package:photos/services/files_service.dart";
 
 class DeduplicationService {
   final _logger = Logger("DeduplicationService");
@@ -16,6 +19,11 @@ class DeduplicationService {
 
   Future<List<DuplicateFiles>> getDuplicateFiles() async {
     try {
+      final bool hasFileSizes = await FilesService.instance.hasMigratedSizes();
+      if (hasFileSizes) {
+        final List<DuplicateFiles> result = await _getDuplicateFilesFromLocal();
+        return result;
+      }
       final DuplicateFilesResponse dupes = await _fetchDuplicateFileIDs();
       final ids = <int>[];
       for (final dupe in dupes.duplicates) {
@@ -60,8 +68,8 @@ class DeduplicationService {
         );
       }
       return result;
-    } catch (e) {
-      _logger.severe(e);
+    } catch (e, s) {
+      _logger.severe("failed to get dedupeFile", e, s);
       rethrow;
     }
   }
@@ -93,6 +101,33 @@ class DeduplicationService {
       }
     }
     return dupesBySizeAndClubKey;
+  }
+
+  Future<List<DuplicateFiles>> _getDuplicateFilesFromLocal() async {
+    final List<File> allFiles = await FilesDB.instance
+        .getAllFilesFromDB(CollectionsService.instance.getHiddenCollections());
+    final int ownerID = Configuration.instance.getUserID()!;
+    allFiles.removeWhere(
+      (f) =>
+          !f.isUploaded ||
+          (f.ownerID ?? 0) != ownerID ||
+          (f.fileSize ?? 0) <= 0,
+    );
+    final Map<int, List<File>> sizeToFilesMap = {};
+    for (final file in allFiles) {
+      if (!sizeToFilesMap.containsKey(file.fileSize)) {
+        sizeToFilesMap[file.fileSize!] = <File>[];
+      }
+      sizeToFilesMap[file.fileSize]!.add(file);
+    }
+    final List<DuplicateFiles> dupesBySize = [];
+    for (final size in sizeToFilesMap.keys) {
+      final List<File> files = sizeToFilesMap[size]!;
+      if (files.length > 1) {
+        dupesBySize.add(DuplicateFiles(files, size));
+      }
+    }
+    return dupesBySize;
   }
 
   Future<DuplicateFilesResponse> _fetchDuplicateFileIDs() async {
