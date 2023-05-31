@@ -403,6 +403,9 @@ export const getOrCreateAlbum = async (
     existingCollections: Collection[]
 ) => {
     const user: User = getData(LS_KEYS.USER);
+    if (!user?.id) {
+        throw Error('user missing');
+    }
     for (const collection of existingCollections) {
         if (isValidReplacementAlbum(collection, user, albumName)) {
             return collection;
