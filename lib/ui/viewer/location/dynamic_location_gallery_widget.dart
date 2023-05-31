@@ -113,7 +113,7 @@ class _DynamicLocationGalleryWidgetState
                     return snapshot.data as FileLoadResult;
                   },
                   tagPrefix: widget.tagPrefix,
-                  shouldCollateFilesByDay: false,
+                  enableFileGrouping: false,
                 ),
               );
             },

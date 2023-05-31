@@ -28,7 +28,7 @@ class GalleryListView extends StatelessWidget {
   final double scrollBottomSafeArea;
   final bool limitSelectionToOne;
   final SelectedFiles? selectedFiles;
-  final bool shouldCollateFilesByDay;
+  final bool enableFileGrouping;
   final String logTag;
   final Logger logger;
   final bool sortOrderAsc;
@@ -48,7 +48,7 @@ class GalleryListView extends StatelessWidget {
     required this.scrollBottomSafeArea,
     required this.limitSelectionToOne,
     this.selectedFiles,
-    required this.shouldCollateFilesByDay,
+    required this.enableFileGrouping,
     required this.logTag,
     required this.logger,
     required this.sortOrderAsc,
@@ -100,7 +100,7 @@ class GalleryListView extends StatelessWidget {
               .on<GalleryIndexUpdatedEvent>()
               .where((event) => event.tag == tagPrefix)
               .map((event) => event.index),
-          shouldCollateFilesByDay,
+          enableFileGrouping,
           logTag: logTag,
           photoGridSize: LocalSettings.instance.getPhotoGridSize(),
           limitSelectionToOne: limitSelectionToOne,

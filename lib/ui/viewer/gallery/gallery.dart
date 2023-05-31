@@ -40,7 +40,7 @@ class Gallery extends StatefulWidget {
   final Widget emptyState;
   final String? albumName;
   final double scrollBottomSafeArea;
-  final bool shouldCollateFilesByDay;
+  final bool enableFileGrouping;
   final Widget loadingWidget;
   final bool disableScroll;
   final bool limitSelectionToOne;
@@ -61,7 +61,7 @@ class Gallery extends StatefulWidget {
     this.emptyState = const EmptyState(),
     this.scrollBottomSafeArea = 120.0,
     this.albumName = '',
-    this.shouldCollateFilesByDay = true,
+    this.enableFileGrouping = true,
     this.loadingWidget = const EnteLoadingWidget(),
     this.disableScroll = false,
     this.limitSelectionToOne = false,
@@ -185,7 +185,7 @@ class _GalleryState extends State<Gallery> {
   // Collates files and returns `true` if it resulted in a gallery reload
   bool _onFilesLoaded(List<File> files) {
     final updatedCollatedFiles =
-        widget.shouldCollateFilesByDay ? _collateFiles(files) : [files];
+        widget.enableFileGrouping ? _collateFiles(files) : [files];
     if (_collatedFiles.length != updatedCollatedFiles.length ||
         _collatedFiles.isEmpty) {
       if (mounted) {
@@ -229,7 +229,7 @@ class _GalleryState extends State<Gallery> {
       tagPrefix: widget.tagPrefix,
       scrollBottomSafeArea: widget.scrollBottomSafeArea,
       limitSelectionToOne: widget.limitSelectionToOne,
-      shouldCollateFilesByDay: widget.shouldCollateFilesByDay,
+      enableFileGrouping: widget.enableFileGrouping,
       logTag: _logTag,
       logger: _logger,
       reloadEvent: widget.reloadEvent,

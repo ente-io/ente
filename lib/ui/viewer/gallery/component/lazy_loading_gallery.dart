@@ -26,7 +26,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final String? logTag;
   final Stream<int> currentIndexStream;
   final int photoGridSize;
-  final bool areFilesCollatedByDay;
+  final bool enableFileGrouping;
   final bool limitSelectionToOne;
   LazyLoadingGallery(
     this.files,
@@ -38,7 +38,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.selectedFiles,
     this.tag,
     this.currentIndexStream,
-    this.areFilesCollatedByDay, {
+    this.enableFileGrouping, {
     this.logTag = "",
     this.photoGridSize = photoGridSizeDefault,
     this.limitSelectionToOne = false,
@@ -186,7 +186,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (widget.areFilesCollatedByDay)
+            if (widget.enableFileGrouping)
               DayWidget(
                 timestamp: _files[0].creationTime!,
                 gridSize: widget.photoGridSize,
