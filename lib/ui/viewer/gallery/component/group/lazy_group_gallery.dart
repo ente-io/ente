@@ -8,9 +8,9 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/viewer/gallery/component/day_widget.dart";
-import 'package:photos/ui/viewer/gallery/component/grid/place_holder_grid_view_widget.dart';
+import "package:photos/ui/viewer/gallery/component/grid/place_holder_grid_view_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/group_gallery.dart";
+import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 
 class LazyGroupGallery extends StatefulWidget {
@@ -186,7 +186,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             if (widget.enableFileGrouping)
-              DayWidget(
+              GroupHeaderWidget(
                 timestamp: _files[0].creationTime!,
                 gridSize: widget.photoGridSize,
               ),
