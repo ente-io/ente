@@ -104,7 +104,7 @@ class DeduplicationService {
   }
 
   List<DuplicateFiles> clubDuplicatesByName(List<DuplicateFiles> dupesBySize) {
-    final dupeBySizeAndName = <DuplicateFiles>[];
+    final dupesBySizeAndName = <DuplicateFiles>[];
     for (final sizeBasedDupe in dupesBySize) {
       final Map<String, List<File>> fileNameToFilesMap = {};
       for (final file in sizeBasedDupe.files) {
@@ -120,13 +120,13 @@ class DeduplicationService {
       for (final fileName in fileNameToFilesMap.keys) {
         final filesWithSameNameAndSize = fileNameToFilesMap[fileName]!;
         if (filesWithSameNameAndSize.length > 1) {
-          dupeBySizeAndName.add(
+          dupesBySizeAndName.add(
             DuplicateFiles(filesWithSameNameAndSize, sizeBasedDupe.size),
           );
         }
       }
     }
-    return dupeBySizeAndName;
+    return dupesBySizeAndName;
   }
 
   Future<DuplicateFilesResponse> _fetchDuplicateFileIDs() async {
