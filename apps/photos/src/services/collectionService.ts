@@ -56,7 +56,6 @@ import {
     isSharedOnlyViaLink,
     isValidMoveTarget,
     isHiddenCollection,
-    isValidReplacementAlbum,
     getNonHiddenCollections,
     changeCollectionSubType,
 } from 'utils/collection';
@@ -317,16 +316,7 @@ export const getFavItemIds = async (
     );
 };
 
-export const createAlbum = async (
-    albumName: string,
-    existingCollections: Collection[]
-) => {
-    const user: User = getData(LS_KEYS.USER);
-    for (const collection of existingCollections) {
-        if (isValidReplacementAlbum(collection, user, albumName)) {
-            return collection;
-        }
-    }
+export const createAlbum = (albumName: string) => {
     return createCollection(albumName, CollectionType.album);
 };
 

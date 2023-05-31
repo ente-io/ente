@@ -1,5 +1,6 @@
 import {
     addToCollection,
+    createAlbum,
     getNonEmptyCollections,
     moveToCollection,
     removeFromCollection,
@@ -396,3 +397,19 @@ export function constructCollectionNameMap(
         ])
     );
 }
+
+export const getOrCreateAlbum = async (
+    albumName: string,
+    existingCollections: Collection[]
+) => {
+    const user: User = getData(LS_KEYS.USER);
+    if (!user?.id) {
+        throw Error('user missing');
+    }
+    for (const collection of existingCollections) {
+        if (isValidReplacementAlbum(collection, user, albumName)) {
+            return collection;
+        }
+    }
+    return createAlbum(albumName);
+};
