@@ -10,7 +10,6 @@ import 'package:photos/models/ente_file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
-
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/exif_util.dart';
@@ -159,11 +158,11 @@ class File extends EnteFile {
     // handle past live photos upload from web client
     if (hash == null &&
         fileType == FileType.livePhoto &&
-        metadata.containsKey('imgHash') &&
-        metadata.containsKey('vidHash')) {
+        metadata.containsKey('imageHash') &&
+        metadata.containsKey('videoHash')) {
       // convert to imgHash:vidHash
       hash =
-          '${metadata['imgHash']}$kLivePhotoHashSeparator${metadata['vidHash']}';
+          '${metadata['imageHash']}$kLivePhotoHashSeparator${metadata['videoHash']}';
     }
     metadataVersion = metadata["version"] ?? 0;
   }

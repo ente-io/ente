@@ -48,7 +48,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   final Set<File> _selectedFiles = <File>{};
   final Map<int?, int> _fileSizeMap = {};
   late List<DuplicateFiles> _duplicates;
-  bool _shouldClubByCaptureTime = true;
+  bool _shouldClubByCaptureTime = false;
   bool _shouldClubByFileName = false;
   bool toastShown = false;
 
@@ -56,8 +56,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   @override
   void initState() {
-    _duplicates =
-        DeduplicationService.instance.clubDuplicatesByTime(widget.duplicates);
+    _duplicates = DeduplicationService.instance.clubDuplicates(
+      widget.duplicates,
+      clubbingKey: (File f) => f.hash,
+    );
     _selectAllFilesButFirst();
 
     super.initState();
@@ -228,6 +230,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             value: _shouldClubByFileName,
             onChanged: (value) {
               _shouldClubByFileName = value!;
+              if (_shouldClubByFileName) {
+                _shouldClubByCaptureTime = false;
+              }
               _resetEntriesAndSelection();
               setState(() {});
             },
@@ -237,6 +242,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             value: _shouldClubByCaptureTime,
             onChanged: (value) {
               _shouldClubByCaptureTime = value!;
+              if (_shouldClubByCaptureTime) {
+                _shouldClubByFileName = false;
+              }
               _resetEntriesAndSelection();
               setState(() {});
             },
@@ -258,14 +266,18 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   void _resetEntriesAndSelection() {
     _duplicates = widget.duplicates;
+    late String? Function(File) clubbingKeyFn;
     if (_shouldClubByCaptureTime) {
-      _duplicates =
-          DeduplicationService.instance.clubDuplicatesByTime(_duplicates);
+      clubbingKeyFn = (File f) => f.creationTime?.toString() ?? '';
+    } else if (_shouldClubByFileName) {
+      clubbingKeyFn = (File f) => f.displayName;
+    } else {
+      clubbingKeyFn = (File f) => f.hash;
     }
-    if (_shouldClubByFileName) {
-      _duplicates =
-          DeduplicationService.instance.clubDuplicatesByName(_duplicates);
-    }
+    _duplicates = DeduplicationService.instance.clubDuplicates(
+      _duplicates,
+      clubbingKey: clubbingKeyFn,
+    );
     _selectAllFilesButFirst();
   }
 
