@@ -42,6 +42,25 @@ class FilesService {
     }
   }
 
+  Future<bool> hasMigratedSizes() async {
+    try {
+      final List<int> uploadIDsWithMissingSize =
+          await _filesDB.getUploadIDsWithMissingSize(_config.getUserID()!);
+      if (uploadIDsWithMissingSize.isEmpty) {
+        return Future.value(true);
+      }
+      final batchedFiles = uploadIDsWithMissingSize.chunks(1000);
+      for (final batch in batchedFiles) {
+        final Map<int, int> uploadIdToSize = await getFilesSizeFromInfo(batch);
+        await _filesDB.updateSizeForUploadIDs(uploadIdToSize);
+      }
+      return Future.value(true);
+    } catch (e, s) {
+      _logger.severe("failed to get all size", e, s);
+      return Future.value(false);
+    }
+  }
+
   Future<Map<int, int>> getFilesSizeFromInfo(List<int> uploadedFileID) async {
     try {
       final response = await _enteDio.post(

@@ -340,8 +340,9 @@ extension DeviceFiles on FilesDB {
   ) async {
     final db = await database;
     const String rawQuery = ''' 
-    SELECT ${FilesDB.columnLocalID}, ${FilesDB.columnUploadedFileID}
-          FROM ${FilesDB.filesTable}
+    SELECT ${FilesDB.columnLocalID}, ${FilesDB.columnUploadedFileID}, 
+    ${FilesDB.columnFileSize} 
+    FROM ${FilesDB.filesTable}
           WHERE ${FilesDB.columnLocalID} IS NOT NULL AND
           (${FilesDB.columnOwnerID} IS NULL OR ${FilesDB.columnOwnerID} = ?)
           AND (${FilesDB.columnUploadedFileID} IS NOT NULL AND ${FilesDB.columnUploadedFileID} IS NOT -1)
@@ -352,12 +353,17 @@ extension DeviceFiles on FilesDB {
     final results = await db.rawQuery(rawQuery, [ownerID, pathID]);
     final localIDs = <String>{};
     final uploadedIDs = <int>{};
+    int localSize = 0;
     for (final result in results) {
-      // FilesDB.[columnLocalID,columnUploadedFileID] is not null check in query
-      localIDs.add(result[FilesDB.columnLocalID] as String);
+      final String localID = result[FilesDB.columnLocalID] as String;
+      final int? fileSize = result[FilesDB.columnFileSize] as int?;
+      if (!localIDs.contains(localID) && fileSize != null) {
+        localSize += fileSize;
+      }
+      localIDs.add(localID);
       uploadedIDs.add(result[FilesDB.columnUploadedFileID] as int);
     }
-    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
+    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList(), localSize);
   }
 
   Future<List<DeviceCollection>> getDeviceCollections({
