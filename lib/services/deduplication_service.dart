@@ -103,56 +103,33 @@ class DeduplicationService {
     return result;
   }
 
-  List<DuplicateFiles> clubDuplicatesByName(List<DuplicateFiles> dupesBySize) {
-    final dupesBySizeAndName = <DuplicateFiles>[];
+  List<DuplicateFiles> clubDuplicates(
+    List<DuplicateFiles> dupesBySize, {
+    required String? Function(File) clubbingKey,
+  }) {
+    final dupesBySizeAndClubKey = <DuplicateFiles>[];
     for (final sizeBasedDupe in dupesBySize) {
-      final Map<String, List<File>> fileNameToFilesMap = {};
+      final Map<String, List<File>> clubKeyToFilesMap = {};
       for (final file in sizeBasedDupe.files) {
-        final currentFileName = file.displayName;
-        if (currentFileName.isEmpty) {
+        final String? clubKey = clubbingKey(file);
+        if (clubKey == null || clubKey.isEmpty) {
           continue;
         }
-        if (!fileNameToFilesMap.containsKey(currentFileName)) {
-          fileNameToFilesMap[currentFileName] = <File>[];
+        if (!clubKeyToFilesMap.containsKey(clubKey)) {
+          clubKeyToFilesMap[clubKey] = <File>[];
         }
-        fileNameToFilesMap[currentFileName]!.add(file);
+        clubKeyToFilesMap[clubKey]!.add(file);
       }
-      for (final fileName in fileNameToFilesMap.keys) {
-        final filesWithSameNameAndSize = fileNameToFilesMap[fileName]!;
-        if (filesWithSameNameAndSize.length > 1) {
-          dupesBySizeAndName.add(
-            DuplicateFiles(filesWithSameNameAndSize, sizeBasedDupe.size),
+      for (final clubbingKey in clubKeyToFilesMap.keys) {
+        final clubbedFiles = clubKeyToFilesMap[clubbingKey]!;
+        if (clubbedFiles.length > 1) {
+          dupesBySizeAndClubKey.add(
+            DuplicateFiles(clubbedFiles, sizeBasedDupe.size),
           );
         }
       }
     }
-    return dupesBySizeAndName;
-  }
-
-  List<DuplicateFiles> clubDuplicatesByHash(List<DuplicateFiles> dupesBySize) {
-    final dupesBySizeAndHash = <DuplicateFiles>[];
-    for (final sizeBasedDupe in dupesBySize) {
-      final Map<String, List<File>> hashToFilesMap = {};
-      for (final file in sizeBasedDupe.files) {
-        final String? currentHash = file.hash;
-        if (currentHash == null || currentHash.isEmpty) {
-          continue;
-        }
-        if (!hashToFilesMap.containsKey(currentHash)) {
-          hashToFilesMap[currentHash] = <File>[];
-        }
-        hashToFilesMap[currentHash]!.add(file);
-      }
-      for (final fileName in hashToFilesMap.keys) {
-        final filesWithSameHashAndSize = hashToFilesMap[fileName]!;
-        if (filesWithSameHashAndSize.length > 1) {
-          dupesBySizeAndHash.add(
-            DuplicateFiles(filesWithSameHashAndSize, sizeBasedDupe.size),
-          );
-        }
-      }
-    }
-    return dupesBySizeAndHash;
+    return dupesBySizeAndClubKey;
   }
 
   Future<DuplicateFilesResponse> _fetchDuplicateFileIDs() async {
