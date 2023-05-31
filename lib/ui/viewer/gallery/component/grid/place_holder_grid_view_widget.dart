@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:photos/theme/ente_theme.dart';
 
-class PlaceHolderWidget extends StatelessWidget {
-  const PlaceHolderWidget(
+class PlaceHolderGridViewWidget extends StatelessWidget {
+  const PlaceHolderGridViewWidget(
     this.count,
     this.columns, {
     Key? key,

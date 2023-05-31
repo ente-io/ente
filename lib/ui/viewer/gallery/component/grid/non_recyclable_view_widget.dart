@@ -1,12 +1,12 @@
 import "package:flutter/material.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/selected_files.dart";
-import "package:photos/ui/huge_listview/place_holder_widget.dart";
-import "package:photos/ui/viewer/gallery/component/lazy_loading_gallery.dart";
+import "package:photos/ui/viewer/gallery/component/grid/gallery_grid_vew_widget.dart";
+import "package:photos/ui/viewer/gallery/component/grid/place_holder_grid_view_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:visibility_detector/visibility_detector.dart";
 
-class NonRecyclableViewWidget extends StatefulWidget {
+class NonRecyclableGridViewWidget extends StatefulWidget {
   final bool shouldRender;
   final List<File> filesInDay;
   final int photoGridSize;
@@ -15,7 +15,7 @@ class NonRecyclableViewWidget extends StatefulWidget {
   final GalleryLoader asyncLoader;
   final int? currentUserID;
   final SelectedFiles? selectedFiles;
-  const NonRecyclableViewWidget({
+  const NonRecyclableGridViewWidget({
     required this.shouldRender,
     required this.filesInDay,
     required this.photoGridSize,
@@ -28,11 +28,12 @@ class NonRecyclableViewWidget extends StatefulWidget {
   });
 
   @override
-  State<NonRecyclableViewWidget> createState() =>
-      _NonRecyclableViewWidgetState();
+  State<NonRecyclableGridViewWidget> createState() =>
+      _NonRecyclableGridViewWidgetState();
 }
 
-class _NonRecyclableViewWidgetState extends State<NonRecyclableViewWidget> {
+class _NonRecyclableGridViewWidgetState
+    extends State<NonRecyclableGridViewWidget> {
   late bool _shouldRender;
   @override
   void initState() {
@@ -52,8 +53,10 @@ class _NonRecyclableViewWidgetState extends State<NonRecyclableViewWidget> {
             });
           }
         },
-        child:
-            PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize),
+        child: PlaceHolderGridViewWidget(
+          widget.filesInDay.length,
+          widget.photoGridSize,
+        ),
       );
     } else {
       return GalleryGridViewWidget(

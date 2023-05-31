@@ -9,10 +9,9 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import "package:photos/ui/viewer/gallery/component/day_widget.dart";
-import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
-import 'package:photos/ui/viewer/gallery/component/lazy_loading_grid_view.dart';
+import 'package:photos/ui/viewer/gallery/component/grid/lazy_loading_grid_view.dart';
+import 'package:photos/ui/viewer/gallery/component/grid/place_holder_grid_view_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 
 class LazyLoadingGallery extends StatefulWidget {
@@ -243,7 +242,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                 areAllFromDaySelected: _areAllFromDaySelected,
                 limitSelectionToOne: widget.limitSelectionToOne,
               )
-            : PlaceHolderWidget(
+            : PlaceHolderGridViewWidget(
                 _files.length,
                 widget.photoGridSize,
               ),
@@ -309,54 +308,6 @@ class GetGallery extends StatelessWidget {
 
     return Column(
       children: childGalleries,
-    );
-  }
-}
-
-class GalleryGridViewWidget extends StatelessWidget {
-  final List<File> filesInDay;
-  final int photoGridSize;
-  final SelectedFiles? selectedFiles;
-  final bool limitSelectionToOne;
-  final String tag;
-  final int? currentUserID;
-  final GalleryLoader asyncLoader;
-  const GalleryGridViewWidget({
-    required this.filesInDay,
-    required this.photoGridSize,
-    this.selectedFiles,
-    required this.limitSelectionToOne,
-    required this.tag,
-    super.key,
-    this.currentUserID,
-    required this.asyncLoader,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      // to disable GridView's scrolling
-      itemBuilder: (context, index) {
-        return GalleryFileWidget(
-          file: filesInDay[index],
-          selectedFiles: selectedFiles,
-          limitSelectionToOne: limitSelectionToOne,
-          tag: tag,
-          photoGridSize: photoGridSize,
-          currentUserID: currentUserID,
-          filesInDay: filesInDay,
-          asyncLoader: asyncLoader,
-        );
-      },
-      itemCount: filesInDay.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisSpacing: 2,
-        mainAxisSpacing: 2,
-        crossAxisCount: photoGridSize,
-      ),
-      padding: const EdgeInsets.symmetric(vertical: (galleryGridSpacing / 2)),
     );
   }
 }

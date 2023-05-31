@@ -7,8 +7,8 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_selections_event.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/selected_files.dart";
-import "package:photos/ui/viewer/gallery/component/non_recyclable_view_widget.dart";
-import "package:photos/ui/viewer/gallery/component/recyclable_view_widget.dart";
+import "package:photos/ui/viewer/gallery/component/grid/non_recyclable_view_widget.dart";
+import "package:photos/ui/viewer/gallery/component/grid/recyclable_grid_view_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
 class LazyLoadingGridView extends StatefulWidget {
@@ -81,7 +81,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   @override
   Widget build(BuildContext context) {
     if (widget.shouldRecycle) {
-      return RecyclableViewWidget(
+      return RecyclableGridViewWidget(
         shouldRender: _shouldRender,
         filesInDay: widget.filesInDay,
         photoGridSize: widget.photoGridSize!,
@@ -92,7 +92,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         currentUserID: _currentUserID,
       );
     } else {
-      return NonRecyclableViewWidget(
+      return NonRecyclableGridViewWidget(
         shouldRender: _shouldRender,
         filesInDay: widget.filesInDay,
         photoGridSize: widget.photoGridSize!,
