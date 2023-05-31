@@ -693,10 +693,7 @@ export default function Gallery() {
         const callback = async (collectionName: string) => {
             try {
                 startLoading();
-                const collection = await createAlbum(
-                    collectionName,
-                    collections
-                );
+                const collection = await createAlbum(collectionName);
                 await collectionOpsHelper(ops)(collection);
             } catch (e) {
                 logError(e, 'create and collection ops failed', { ops });
