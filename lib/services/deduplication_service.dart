@@ -66,43 +66,6 @@ class DeduplicationService {
     }
   }
 
-  List<DuplicateFiles> clubDuplicatesByTime(List<DuplicateFiles> dupes) {
-    final result = <DuplicateFiles>[];
-    for (final dupe in dupes) {
-      final files = <File>[];
-      final Map<int, int> creationTimeCounter = {};
-      int mostFrequentCreationTime = 0, mostFrequentCreationTimeCount = 0;
-      // Counts the frequency of creationTimes within the supposed duplicates
-      for (final file in dupe.files) {
-        if (creationTimeCounter.containsKey(file.creationTime!)) {
-          creationTimeCounter[file.creationTime!] =
-              creationTimeCounter[file.creationTime!]! + 1;
-        } else {
-          creationTimeCounter[file.creationTime!] = 0;
-        }
-        if (creationTimeCounter[file.creationTime]! >
-            mostFrequentCreationTimeCount) {
-          mostFrequentCreationTimeCount =
-              creationTimeCounter[file.creationTime]!;
-          mostFrequentCreationTime = file.creationTime!;
-        }
-        files.add(file);
-      }
-      // Ignores those files that were not created within the most common creationTime
-      final incorrectDuplicates = <File>{};
-      for (final file in files) {
-        if (file.creationTime != mostFrequentCreationTime) {
-          incorrectDuplicates.add(file);
-        }
-      }
-      files.removeWhere((file) => incorrectDuplicates.contains(file));
-      if (files.length > 1) {
-        result.add(DuplicateFiles(files, dupe.size));
-      }
-    }
-    return result;
-  }
-
   List<DuplicateFiles> clubDuplicates(
     List<DuplicateFiles> dupesBySize, {
     required String? Function(File) clubbingKey,
