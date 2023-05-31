@@ -66,79 +66,33 @@ class DeduplicationService {
     }
   }
 
-  List<DuplicateFiles> clubDuplicatesByTime(List<DuplicateFiles> dupes) {
-    final result = <DuplicateFiles>[];
-    for (final dupe in dupes) {
-      final files = <File>[];
-      final Map<int, int> creationTimeCounter = {};
-      int mostFrequentCreationTime = 0, mostFrequentCreationTimeCount = 0;
-      // Counts the frequency of creationTimes within the supposed duplicates
-      for (final file in dupe.files) {
-        if (creationTimeCounter.containsKey(file.creationTime!)) {
-          creationTimeCounter[file.creationTime!] =
-              creationTimeCounter[file.creationTime!]! + 1;
-        } else {
-          creationTimeCounter[file.creationTime!] = 0;
+  List<DuplicateFiles> clubDuplicates(
+    List<DuplicateFiles> dupesBySize, {
+    required String? Function(File) clubbingKey,
+  }) {
+    final dupesBySizeAndClubKey = <DuplicateFiles>[];
+    for (final sizeBasedDupe in dupesBySize) {
+      final Map<String, List<File>> clubKeyToFilesMap = {};
+      for (final file in sizeBasedDupe.files) {
+        final String? clubKey = clubbingKey(file);
+        if (clubKey == null || clubKey.isEmpty) {
+          continue;
         }
-        if (creationTimeCounter[file.creationTime]! >
-            mostFrequentCreationTimeCount) {
-          mostFrequentCreationTimeCount =
-              creationTimeCounter[file.creationTime]!;
-          mostFrequentCreationTime = file.creationTime!;
+        if (!clubKeyToFilesMap.containsKey(clubKey)) {
+          clubKeyToFilesMap[clubKey] = <File>[];
         }
-        files.add(file);
+        clubKeyToFilesMap[clubKey]!.add(file);
       }
-      // Ignores those files that were not created within the most common creationTime
-      final incorrectDuplicates = <File>{};
-      for (final file in files) {
-        if (file.creationTime != mostFrequentCreationTime) {
-          incorrectDuplicates.add(file);
+      for (final clubbingKey in clubKeyToFilesMap.keys) {
+        final clubbedFiles = clubKeyToFilesMap[clubbingKey]!;
+        if (clubbedFiles.length > 1) {
+          dupesBySizeAndClubKey.add(
+            DuplicateFiles(clubbedFiles, sizeBasedDupe.size),
+          );
         }
-      }
-      files.removeWhere((file) => incorrectDuplicates.contains(file));
-      if (files.length > 1) {
-        result.add(DuplicateFiles(files, dupe.size));
       }
     }
-    return result;
-  }
-
-  List<DuplicateFiles> clubDuplicatesByName(List<DuplicateFiles> dupes) {
-    final result = <DuplicateFiles>[];
-    for (final dupe in dupes) {
-      final files = <File>[];
-      final Map<String, int> fileNameCounter = {};
-      String mostFrequentFileName = "";
-      int mostFrequentFileNameCount = 0;
-      // Counts the frequency of creationTimes within the supposed duplicates
-      for (final file in dupe.files) {
-        if (fileNameCounter.containsKey(file.displayName)) {
-          fileNameCounter[file.displayName] =
-              fileNameCounter[file.displayName]! + 1;
-        } else {
-          fileNameCounter[file.displayName] = 0;
-        }
-        if (fileNameCounter[file.displayName]! >
-            mostFrequentFileNameCount) {
-          mostFrequentFileNameCount =
-              fileNameCounter[file.displayName]!;
-          mostFrequentFileName = file.displayName;
-        }
-        files.add(file);
-      }
-      // Ignores those files that were not created within the most common creationTime
-      final incorrectDuplicates = <File>{};
-      for (final file in files) {
-        if (file.displayName != mostFrequentFileName) {
-          incorrectDuplicates.add(file);
-        }
-      }
-      files.removeWhere((file) => incorrectDuplicates.contains(file));
-      if (files.length > 1) {
-        result.add(DuplicateFiles(files, dupe.size));
-      }
-    }
-    return result;
+    return dupesBySizeAndClubKey;
   }
 
   Future<DuplicateFilesResponse> _fetchDuplicateFileIDs() async {
