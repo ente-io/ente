@@ -152,7 +152,6 @@ const SelectedFileOptions = ({
                 COLLECTION_OPS_TYPE.UNHIDE
             ),
             title: t('UNHIDE_TO_COLLECTION'),
-            fromCollection: !isInSearchMode ? activeCollection : undefined,
         });
     };
 
