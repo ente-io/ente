@@ -65,9 +65,7 @@ class FilesService {
     try {
       final response = await _enteDio.post(
         "/files/info",
-        data: {
-          "fileIDs": [uploadedFileID]
-        },
+        data: {"fileIDs": uploadedFileID},
       );
       final Map<int, int> idToSize = {};
       final List result = response.data["filesInfo"] as List;
