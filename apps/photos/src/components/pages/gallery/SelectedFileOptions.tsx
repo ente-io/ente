@@ -81,7 +81,7 @@ const SelectedFileOptions = ({
             callback: addToCollectionHelper,
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
             title: t('ADD_TO_COLLECTION'),
-            fromCollection: activeCollection,
+            fromCollection: !isInSearchMode ? activeCollection : undefined,
         });
 
     const trashHandler = () =>
@@ -141,7 +141,7 @@ const SelectedFileOptions = ({
             callback: moveToCollectionHelper,
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
             title: t('MOVE_TO_COLLECTION'),
-            fromCollection: activeCollection,
+            fromCollection: !isInSearchMode ? activeCollection : undefined,
         });
     };
 
@@ -152,7 +152,7 @@ const SelectedFileOptions = ({
                 COLLECTION_OPS_TYPE.UNHIDE
             ),
             title: t('UNHIDE_TO_COLLECTION'),
-            fromCollection: activeCollection,
+            fromCollection: !isInSearchMode ? activeCollection : undefined,
         });
     };
 
