@@ -48,7 +48,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   final Set<File> _selectedFiles = <File>{};
   final Map<int?, int> _fileSizeMap = {};
   late List<DuplicateFiles> _duplicates;
-  bool _shouldClubByCaptureTime = true;
+  bool _shouldClubByCaptureTime = false;
   bool _shouldClubByFileName = false;
   bool toastShown = false;
 
