@@ -56,8 +56,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   @override
   void initState() {
-    _duplicates =
-        DeduplicationService.instance.clubDuplicatesByTime(widget.duplicates);
+    _duplicates = DeduplicationService.instance.clubDuplicates(
+      widget.duplicates,
+      clubbingKey: (File f) => f.hash,
+    );
     _selectAllFilesButFirst();
 
     super.initState();
