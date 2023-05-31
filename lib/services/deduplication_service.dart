@@ -103,25 +103,23 @@ class DeduplicationService {
     return result;
   }
 
-  List<DuplicateFiles> clubDuplicatesByName(List<DuplicateFiles> dupes) {
-    final result = <DuplicateFiles>[];
-    for (final dupe in dupes) {
+  List<DuplicateFiles> clubDuplicatesByName(List<DuplicateFiles> dupesBySize) {
+    final dupeBySizeAndName = <DuplicateFiles>[];
+    for (final sizeBasedDupe in dupesBySize) {
       final files = <File>[];
       final Map<String, int> fileNameCounter = {};
       String mostFrequentFileName = "";
       int mostFrequentFileNameCount = 0;
       // Counts the frequency of creationTimes within the supposed duplicates
-      for (final file in dupe.files) {
+      for (final file in sizeBasedDupe.files) {
         if (fileNameCounter.containsKey(file.displayName)) {
           fileNameCounter[file.displayName] =
               fileNameCounter[file.displayName]! + 1;
         } else {
           fileNameCounter[file.displayName] = 0;
         }
-        if (fileNameCounter[file.displayName]! >
-            mostFrequentFileNameCount) {
-          mostFrequentFileNameCount =
-              fileNameCounter[file.displayName]!;
+        if (fileNameCounter[file.displayName]! > mostFrequentFileNameCount) {
+          mostFrequentFileNameCount = fileNameCounter[file.displayName]!;
           mostFrequentFileName = file.displayName;
         }
         files.add(file);
@@ -135,10 +133,10 @@ class DeduplicationService {
       }
       files.removeWhere((file) => incorrectDuplicates.contains(file));
       if (files.length > 1) {
-        result.add(DuplicateFiles(files, dupe.size));
+        dupeBySizeAndName.add(DuplicateFiles(files, sizeBasedDupe.size));
       }
     }
-    return result;
+    return dupeBySizeAndName;
   }
 
   Future<DuplicateFilesResponse> _fetchDuplicateFileIDs() async {
