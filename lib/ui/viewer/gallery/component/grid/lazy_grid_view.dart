@@ -11,7 +11,7 @@ import "package:photos/ui/viewer/gallery/component/grid/non_recyclable_grid_view
 import "package:photos/ui/viewer/gallery/component/grid/recyclable_grid_view_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
-class LazyLoadingGridView extends StatefulWidget {
+class LazyGridView extends StatefulWidget {
   final String tag;
   final List<File> filesInDay;
   final GalleryLoader asyncLoader;
@@ -23,7 +23,7 @@ class LazyLoadingGridView extends StatefulWidget {
   final int? photoGridSize;
   final bool limitSelectionToOne;
 
-  LazyLoadingGridView(
+  LazyGridView(
     this.tag,
     this.filesInDay,
     this.asyncLoader,
@@ -38,10 +38,10 @@ class LazyLoadingGridView extends StatefulWidget {
   }) : super(key: key ?? UniqueKey());
 
   @override
-  State<LazyLoadingGridView> createState() => _LazyLoadingGridViewState();
+  State<LazyGridView> createState() => _LazyGridViewState();
 }
 
-class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
+class _LazyGridViewState extends State<LazyGridView> {
   late bool _shouldRender;
   int? _currentUserID;
   late StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
@@ -71,7 +71,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   @override
-  void didUpdateWidget(LazyLoadingGridView oldWidget) {
+  void didUpdateWidget(LazyGridView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!listEquals(widget.filesInDay, oldWidget.filesInDay)) {
       _shouldRender = widget.shouldRender;
