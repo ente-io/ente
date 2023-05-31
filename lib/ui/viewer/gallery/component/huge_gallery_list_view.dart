@@ -8,12 +8,20 @@ import "package:photos/models/file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/huge_listview/huge_listview.dart";
-import "package:photos/ui/viewer/gallery/component/lazy_loading_gallery.dart";
+import 'package:photos/ui/viewer/gallery/component/group/lazy_group_gallery.dart';
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
-class GalleryListView extends StatelessWidget {
+/*
+HugeGalleryListView is a widget that displays a list of grouped/collated
+files when grouping is enabled.
+For each group, it displays a header and use LazyGroupGallery to display a
+particular group of files.
+If a group has more than 400 files, LazyGroupGallery internally divides the
+group into multiple grid views during rendering.
+ */
+class HugeGalleryListView extends StatelessWidget {
   final GlobalKey<HugeListViewState<dynamic>> hugeListViewKey;
   final ItemScrollController itemScroller;
   final List<List<File>> collatedFiles;
@@ -33,7 +41,7 @@ class GalleryListView extends StatelessWidget {
   final Logger logger;
   final bool sortOrderAsc;
 
-  const GalleryListView({
+  const HugeGalleryListView({
     required this.hugeListViewKey,
     required this.itemScroller,
     required this.collatedFiles,
@@ -87,7 +95,7 @@ class GalleryListView extends StatelessWidget {
       },
       itemBuilder: (context, index) {
         Widget gallery;
-        gallery = LazyLoadingGallery(
+        gallery = LazyGroupGallery(
           collatedFiles[index],
           index,
           reloadEvent,

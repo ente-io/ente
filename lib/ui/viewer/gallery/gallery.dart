@@ -13,7 +13,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/huge_listview/huge_listview.dart';
-import "package:photos/ui/viewer/gallery/component/gallery_list_view_widget.dart";
+import "package:photos/ui/viewer/gallery/component/huge_gallery_list_view.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -217,7 +217,7 @@ class _GalleryState extends State<Gallery> {
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
     }
-    return GalleryListView(
+    return HugeGalleryListView(
       hugeListViewKey: _hugeListViewKey,
       itemScroller: _itemScroller,
       collatedFiles: _collatedFiles,
