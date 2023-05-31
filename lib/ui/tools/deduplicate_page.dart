@@ -228,6 +228,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             value: _shouldClubByFileName,
             onChanged: (value) {
               _shouldClubByFileName = value!;
+              if (_shouldClubByFileName) {
+                _shouldClubByCaptureTime = false;
+              }
               _resetEntriesAndSelection();
               setState(() {});
             },
@@ -237,6 +240,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             value: _shouldClubByCaptureTime,
             onChanged: (value) {
               _shouldClubByCaptureTime = value!;
+              if (_shouldClubByCaptureTime) {
+                _shouldClubByFileName = false;
+              }
               _resetEntriesAndSelection();
               setState(() {});
             },
