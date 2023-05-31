@@ -106,34 +106,24 @@ class DeduplicationService {
   List<DuplicateFiles> clubDuplicatesByName(List<DuplicateFiles> dupesBySize) {
     final dupeBySizeAndName = <DuplicateFiles>[];
     for (final sizeBasedDupe in dupesBySize) {
-      final files = <File>[];
-      final Map<String, int> fileNameCounter = {};
-      String mostFrequentFileName = "";
-      int mostFrequentFileNameCount = 0;
-      // Counts the frequency of creationTimes within the supposed duplicates
+      final Map<String, List<File>> fileNameToFilesMap = {};
       for (final file in sizeBasedDupe.files) {
-        if (fileNameCounter.containsKey(file.displayName)) {
-          fileNameCounter[file.displayName] =
-              fileNameCounter[file.displayName]! + 1;
-        } else {
-          fileNameCounter[file.displayName] = 0;
+        final currentFileName = file.displayName;
+        if (currentFileName.isEmpty) {
+          continue;
         }
-        if (fileNameCounter[file.displayName]! > mostFrequentFileNameCount) {
-          mostFrequentFileNameCount = fileNameCounter[file.displayName]!;
-          mostFrequentFileName = file.displayName;
+        if (!fileNameToFilesMap.containsKey(currentFileName)) {
+          fileNameToFilesMap[currentFileName] = <File>[];
         }
-        files.add(file);
+        fileNameToFilesMap[currentFileName]!.add(file);
       }
-      // Ignores those files that were not created within the most common creationTime
-      final incorrectDuplicates = <File>{};
-      for (final file in files) {
-        if (file.displayName != mostFrequentFileName) {
-          incorrectDuplicates.add(file);
+      for (final fileName in fileNameToFilesMap.keys) {
+        final filesWithSameNameAndSize = fileNameToFilesMap[fileName]!;
+        if (filesWithSameNameAndSize.length > 1) {
+          dupeBySizeAndName.add(
+            DuplicateFiles(filesWithSameNameAndSize, sizeBasedDupe.size),
+          );
         }
-      }
-      files.removeWhere((file) => incorrectDuplicates.contains(file));
-      if (files.length > 1) {
-        dupeBySizeAndName.add(DuplicateFiles(files, sizeBasedDupe.size));
       }
     }
     return dupeBySizeAndName;
