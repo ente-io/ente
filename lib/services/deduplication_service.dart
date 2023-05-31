@@ -129,6 +129,32 @@ class DeduplicationService {
     return dupesBySizeAndName;
   }
 
+  List<DuplicateFiles> clubDuplicatesByHash(List<DuplicateFiles> dupesBySize) {
+    final dupesBySizeAndHash = <DuplicateFiles>[];
+    for (final sizeBasedDupe in dupesBySize) {
+      final Map<String, List<File>> hashToFilesMap = {};
+      for (final file in sizeBasedDupe.files) {
+        final String? currentHash = file.hash;
+        if (currentHash == null || currentHash.isEmpty) {
+          continue;
+        }
+        if (!hashToFilesMap.containsKey(currentHash)) {
+          hashToFilesMap[currentHash] = <File>[];
+        }
+        hashToFilesMap[currentHash]!.add(file);
+      }
+      for (final fileName in hashToFilesMap.keys) {
+        final filesWithSameHashAndSize = hashToFilesMap[fileName]!;
+        if (filesWithSameHashAndSize.length > 1) {
+          dupesBySizeAndHash.add(
+            DuplicateFiles(filesWithSameHashAndSize, sizeBasedDupe.size),
+          );
+        }
+      }
+    }
+    return dupesBySizeAndHash;
+  }
+
   Future<DuplicateFilesResponse> _fetchDuplicateFileIDs() async {
     final response = await _enteDio.get("/files/duplicates");
     return DuplicateFilesResponse.fromMap(response.data);

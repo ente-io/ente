@@ -267,10 +267,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     if (_shouldClubByCaptureTime) {
       _duplicates =
           DeduplicationService.instance.clubDuplicatesByTime(_duplicates);
-    }
-    if (_shouldClubByFileName) {
+    } else if (_shouldClubByFileName) {
       _duplicates =
           DeduplicationService.instance.clubDuplicatesByName(_duplicates);
+    } else {
+      _duplicates =
+          DeduplicationService.instance.clubDuplicatesByHash(_duplicates);
     }
     _selectAllFilesButFirst();
   }
