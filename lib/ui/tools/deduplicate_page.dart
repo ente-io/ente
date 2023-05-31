@@ -264,22 +264,18 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   void _resetEntriesAndSelection() {
     _duplicates = widget.duplicates;
+    late String? Function(File) clubbingKeyFn;
     if (_shouldClubByCaptureTime) {
-      _duplicates = DeduplicationService.instance.clubDuplicates(
-        _duplicates,
-        clubbingKey: (File f) => f.creationTime?.toString() ?? '',
-      );
+      clubbingKeyFn = (File f) => f.creationTime?.toString() ?? '';
     } else if (_shouldClubByFileName) {
-      _duplicates = DeduplicationService.instance.clubDuplicates(
-        _duplicates,
-        clubbingKey: (File f) => f.displayName,
-      );
+      clubbingKeyFn = (File f) => f.displayName;
     } else {
-      _duplicates = DeduplicationService.instance.clubDuplicates(
-        _duplicates,
-        clubbingKey: (File f) => f.hash,
-      );
+      clubbingKeyFn = (File f) => f.hash;
     }
+    _duplicates = DeduplicationService.instance.clubDuplicates(
+      _duplicates,
+      clubbingKey: clubbingKeyFn,
+    );
     _selectAllFilesButFirst();
   }
 
