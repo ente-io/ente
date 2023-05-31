@@ -78,6 +78,9 @@ export default function Collections(props: Iprops) {
     );
 
     useEffect(() => {
+        if (isInSearchMode) {
+            return;
+        }
         setPhotoListHeader({
             item: (
                 <CollectionInfoWithOptions
