@@ -18,6 +18,7 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file_type.dart';
+import "package:photos/services/files_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/notification_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
@@ -209,6 +210,7 @@ class SyncService {
 
   Future<BackupStatus> getBackupStatus({String? pathID}) async {
     BackedUpFileIDs ids;
+    final bool hasMigratedSize = await FilesService.instance.hasMigratedSizes();
     if (pathID == null) {
       ids = await FilesDB.instance.getBackedUpIDs();
     } else {
@@ -217,7 +219,12 @@ class SyncService {
         Configuration.instance.getUserID()!,
       );
     }
-    final size = await _getFileSize(ids.uploadedIDs);
+    late int size;
+    if (hasMigratedSize) {
+      size = ids.localSize;
+    } else {
+      size = await _getFileSize(ids.uploadedIDs);
+    }
     return BackupStatus(ids.localIDs, size);
   }
 

@@ -481,17 +481,23 @@ class FilesDB {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
-      columns: [columnLocalID, columnUploadedFileID],
+      columns: [columnLocalID, columnUploadedFileID, columnFileSize],
       where:
           '$columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
     );
-    final localIDs = <String>{};
-    final uploadedIDs = <int>{};
+    final Set<String> localIDs = <String>{};
+    final Set<int> uploadedIDs = <int>{};
+    int localSize = 0;
     for (final result in results) {
+      final String localID = result[columnLocalID] as String;
+      final int? fileSize = result[columnFileSize] as int?;
+      if (!localIDs.contains(localID) && fileSize != null) {
+        localSize += fileSize;
+      }
       localIDs.add(result[columnLocalID] as String);
       uploadedIDs.add(result[columnUploadedFileID] as int);
     }
-    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
+    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList(), localSize);
   }
 
   Future<FileLoadResult> getAllPendingOrUploadedFiles(
@@ -1429,6 +1435,44 @@ class FilesDB {
       whereArgs: [ownerID],
     );
     return _deduplicatedAndFilterIgnoredFiles(convertToFiles(rows), {});
+  }
+
+  // For a given userID, return unique uploadedFileId for the given userID
+  Future<List<int>> getUploadIDsWithMissingSize(int userId) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      columns: [columnUploadedFileID],
+      distinct: true,
+      where: '$columnOwnerID = ? AND $columnFileSize IS NULL',
+      whereArgs: [userId],
+    );
+    final result = <int>[];
+    for (final row in rows) {
+      result.add(row[columnUploadedFileID] as int);
+    }
+    return result;
+  }
+
+  // updateSizeForUploadIDs takes a map of upploadedFileID and fileSize and
+  // update the fileSize for the given uploadedFileID
+  Future<void> updateSizeForUploadIDs(
+    Map<int, int> uploadedFileIDToSize,
+  ) async {
+    if (uploadedFileIDToSize.isEmpty) {
+      return;
+    }
+    final db = await instance.database;
+    final batch = db.batch();
+    for (final uploadedFileID in uploadedFileIDToSize.keys) {
+      batch.update(
+        filesTable,
+        {columnFileSize: uploadedFileIDToSize[uploadedFileID]},
+        where: '$columnUploadedFileID = ?',
+        whereArgs: [uploadedFileID],
+      );
+    }
+    await batch.commit(noResult: true);
   }
 
   Future<List<File>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {
