@@ -133,7 +133,7 @@ export default function SearchInput(props: Iprops) {
         refreshDefaultOptions();
     };
 
-    const MenuWithPeopleX = useCallback(
+    const MemoizedMenuWithPeople = useCallback(
         (props) => (
             <MenuWithPeople
                 {...props}
@@ -147,7 +147,7 @@ export default function SearchInput(props: Iprops) {
     const components = createComponents(
         OptionWithInfo,
         ValueContainerWithIcon,
-        MenuWithPeopleX
+        MemoizedMenuWithPeople
     );
 
     return (
