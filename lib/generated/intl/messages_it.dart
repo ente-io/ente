@@ -299,7 +299,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Qual è il motivo principale per cui stai cancellando il tuo account?"),
         "askYourLovedOnesToShare": MessageLookupByLibrary.simpleMessage(
-            "Chiedi ai tuoi cari di condividere"),
+            "Invita amici, amiche e parenti su ente"),
         "atAFalloutShelter":
             MessageLookupByLibrary.simpleMessage("in un rifugio antiatomico"),
         "authToChangeLockscreenSetting": MessageLookupByLibrary.simpleMessage(
@@ -381,6 +381,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "close": MessageLookupByLibrary.simpleMessage("Chiudi"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("Club per tempo di cattura"),
+        "clubByFileName":
+            MessageLookupByLibrary.simpleMessage("Unisci per nome file"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Codice applicato"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
@@ -396,6 +398,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "I collaboratori possono aggiungere foto e video all\'album condiviso."),
+        "collageLayout": MessageLookupByLibrary.simpleMessage("Disposizione"),
+        "collageSaved": MessageLookupByLibrary.simpleMessage(
+            "Collage salvato nella galleria"),
         "collectEventPhotos": MessageLookupByLibrary.simpleMessage(
             "Raccogli le foto di un evento"),
         "collectPhotos":
@@ -439,6 +444,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "createAccount": MessageLookupByLibrary.simpleMessage("Crea account"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
             "Premi a lungo per selezionare le foto e fai clic su + per creare un album"),
+        "createCollage":
+            MessageLookupByLibrary.simpleMessage("Crea un collage"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Crea un nuovo account"),
         "createOrSelectAlbum":
@@ -631,6 +638,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "faqs": MessageLookupByLibrary.simpleMessage("FAQ"),
         "favorite": MessageLookupByLibrary.simpleMessage("Preferito"),
         "feedback": MessageLookupByLibrary.simpleMessage("Suggerimenti"),
+        "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
+            "Impossibile salvare il file nella galleria"),
         "fileInfoAddDescHint":
             MessageLookupByLibrary.simpleMessage("Aggiungi descrizione..."),
         "fileSavedToGallery":
@@ -679,6 +688,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iOSLockOut": MessageLookupByLibrary.simpleMessage(
             "L\'autenticazione biometrica è disabilitata. Blocca e sblocca lo schermo per abilitarla."),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("OK"),
+        "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignora"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Alcuni file in questo album vengono ignorati dal caricamento perché erano stati precedentemente cancellati da ente."),
         "importing":
@@ -1022,6 +1032,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Salvati in sicurezza"),
         "save": MessageLookupByLibrary.simpleMessage("Salva"),
+        "saveCollage": MessageLookupByLibrary.simpleMessage("Salva il collage"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Salva una copia"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Salva chiave"),
         "saveYourRecoveryKeyIfYouHaventAlready":
@@ -1135,6 +1146,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Siamo spiacenti, non possiamo generare le chiavi sicure su questo dispositivo.\n\nPer favore, accedi da un altro dispositivo."),
+        "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Ordina per"),
+        "sortNewestFirst":
+            MessageLookupByLibrary.simpleMessage("Prima le più nuove"),
+        "sortOldestFirst":
+            MessageLookupByLibrary.simpleMessage("Prima le più vecchie"),
         "sparkleSuccess":
             MessageLookupByLibrary.simpleMessage("✨ Operazione riuscita"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Avvia backup"),

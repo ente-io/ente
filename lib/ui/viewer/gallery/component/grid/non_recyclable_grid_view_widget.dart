@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/selected_files.dart";
-import "package:photos/ui/viewer/gallery/component/grid/gallery_grid_vew_widget.dart";
+import "package:photos/ui/viewer/gallery/component/grid/gallery_grid_view_widget.dart";
 import "package:photos/ui/viewer/gallery/component/grid/place_holder_grid_view_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:visibility_detector/visibility_detector.dart";
