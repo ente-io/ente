@@ -1,5 +1,9 @@
 import React, { useRef, useEffect, useContext, useState } from 'react';
-import { VariableSizeList as List } from 'react-window';
+import {
+    VariableSizeList as List,
+    ListChildComponentProps,
+    areEqual,
+} from 'react-window';
 import { Box, Link, styled } from '@mui/material';
 import { EnteFile } from 'types/file';
 import {
@@ -23,6 +27,7 @@ import { formatDate } from 'utils/time/format';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 import { areFilesWithFileHashSame, hasFileHash } from 'utils/upload';
+import memoize from 'memoize-one';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
@@ -173,6 +178,54 @@ interface Props {
     ) => JSX.Element;
     activeCollection: number;
 }
+
+interface ItemData {
+    timeStampList: TimeStampListItem[];
+    columns: number;
+    shrinkRatio: number;
+    renderListItem: (
+        timeStampListItem: TimeStampListItem,
+        isScrolling?: boolean
+    ) => JSX.Element;
+}
+
+const createItemData = memoize(
+    (
+        timeStampList: TimeStampListItem[],
+        columns: number,
+        shrinkRatio: number,
+        renderListItem: (
+            timeStampListItem: TimeStampListItem,
+            isScrolling?: boolean
+        ) => JSX.Element
+    ): ItemData => ({
+        timeStampList,
+        columns,
+        shrinkRatio,
+        renderListItem,
+    })
+);
+const PhotoListRow = React.memo(
+    ({
+        index,
+        style,
+        isScrolling,
+        data,
+    }: ListChildComponentProps<ItemData>) => {
+        const { timeStampList, columns, shrinkRatio, renderListItem } = data;
+        return (
+            <ListItem style={style}>
+                <ListContainer
+                    columns={columns}
+                    shrinkRatio={shrinkRatio}
+                    groups={timeStampList[index].groups}>
+                    {renderListItem(timeStampList[index], isScrolling)}
+                </ListContainer>
+            </ListItem>
+        );
+    },
+    areEqual
+);
 
 export function PhotoList({
     height,
@@ -725,9 +778,17 @@ export function PhotoList({
         return <></>;
     }
 
+    const itemData = createItemData(
+        timeStampList,
+        columns,
+        shrinkRatio,
+        renderListItem
+    );
+
     return (
         <List
             key={`${activeCollection}`}
+            itemData={itemData}
             ref={listRef}
             itemSize={getItemSize(timeStampList)}
             height={height}
@@ -736,16 +797,7 @@ export function PhotoList({
             itemKey={generateKey}
             overscanCount={3}
             useIsScrolling>
-            {({ index, style, isScrolling }) => (
-                <ListItem style={style}>
-                    <ListContainer
-                        columns={columns}
-                        shrinkRatio={shrinkRatio}
-                        groups={timeStampList[index].groups}>
-                        {renderListItem(timeStampList[index], isScrolling)}
-                    </ListContainer>
-                </ListItem>
-            )}
+            {PhotoListRow}
         </List>
     );
 }

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { updateFilePublicMagicMetadata } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { changeCaption, updateExistingFilePubMetadata } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -41,10 +40,7 @@ export function RenderCaption({
                 }
                 setCaption(newCaption);
 
-                let updatedFile = await changeCaption(file, newCaption);
-                updatedFile = (
-                    await updateFilePublicMagicMetadata([updatedFile])
-                )[0];
+                const updatedFile = await changeCaption(file, newCaption);
                 updateExistingFilePubMetadata(file, updatedFile);
                 file.title = file.pubMagicMetadata.data.caption;
                 refreshPhotoswipe();

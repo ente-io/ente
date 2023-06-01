@@ -5,7 +5,7 @@ import {
     FluidContainer,
     IconButtonWithBG,
 } from 'components/Container';
-import CollectionSort from 'components/Collections/AllCollections/CollectionSort';
+import CollectionListSortBy from 'components/Collections/CollectionListSortBy';
 import Close from '@mui/icons-material/Close';
 import { t } from 'i18next';
 
@@ -27,9 +27,9 @@ export default function AllCollectionsHeader({
                     </Box>
                 </FluidContainer>
                 <Stack direction="row" spacing={1.5}>
-                    <CollectionSort
+                    <CollectionListSortBy
                         activeSortBy={collectionSortBy}
-                        setCollectionSortBy={setCollectionSortBy}
+                        setSortBy={setCollectionSortBy}
                         nestedInDialog
                     />
                     <IconButtonWithBG onClick={onClose}>

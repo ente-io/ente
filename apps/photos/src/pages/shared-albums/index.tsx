@@ -1,6 +1,6 @@
 import { ALL_SECTION } from 'constants/collection';
 import PhotoFrame from 'components/PhotoFrame';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
     getLocalPublicCollection,
     getLocalPublicCollectionPassword,
@@ -15,11 +15,15 @@ import {
 } from 'services/publicCollectionService';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { mergeMetadata, sortFiles } from 'utils/file';
+import { downloadFile, mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { CustomError, parseSharingErrorCodes } from 'utils/error';
-import { VerticallyCentered, CenteredFlex } from 'components/Container';
+import {
+    VerticallyCentered,
+    CenteredFlex,
+    SpaceBetweenFlex,
+} from 'components/Container';
 import { t } from 'i18next';
 
 import EnteSpinner from 'components/EnteSpinner';
@@ -48,6 +52,10 @@ import bs58 from 'bs58';
 import AddPhotoAlternateOutlined from '@mui/icons-material/AddPhotoAlternateOutlined';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { UploadTypeSelectorIntent } from 'types/gallery';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import { MoreHoriz } from '@mui/icons-material';
+import OverflowMenu from 'components/OverflowMenu/menu';
+import { OverflowMenuOption } from 'components/OverflowMenu/option';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -190,16 +198,52 @@ export default function PublicCollectionGallery() {
         main();
     }, []);
 
+    const downloadEnabled = useMemo(
+        () => publicCollection?.publicURLs?.[0]?.enableDownload ?? true,
+        [publicCollection]
+    );
+
+    const downloadAllFiles = async () => {
+        if (!downloadEnabled) {
+            return;
+        }
+        appContext.startLoading();
+        for (const file of publicFiles) {
+            await downloadFile(
+                file,
+                true,
+                token.current,
+                passwordJWTToken.current
+            );
+        }
+        appContext.finishLoading();
+    };
+
     useEffect(() => {
         publicCollection &&
             publicFiles &&
             setPhotoListHeader({
                 item: (
                     <CollectionInfoBarWrapper>
-                        <CollectionInfo
-                            name={publicCollection.name}
-                            fileCount={publicFiles.length}
-                        />
+                        <SpaceBetweenFlex>
+                            <CollectionInfo
+                                name={publicCollection.name}
+                                fileCount={publicFiles.length}
+                            />
+                            {downloadEnabled ? (
+                                <OverflowMenu
+                                    ariaControls={'collection-options'}
+                                    triggerButtonIcon={<MoreHoriz />}>
+                                    <OverflowMenuOption
+                                        startIcon={<FileDownloadOutlinedIcon />}
+                                        onClick={downloadAllFiles}>
+                                        {t('DOWNLOAD_COLLECTION')}
+                                    </OverflowMenuOption>
+                                </OverflowMenu>
+                            ) : (
+                                <div />
+                            )}
+                        </SpaceBetweenFlex>
                     </CollectionInfoBarWrapper>
                 ),
                 itemType: ITEM_TYPE.HEADER,
@@ -404,10 +448,7 @@ export default function PublicCollectionGallery() {
                     selected={{ count: 0, collectionID: null, ownCount: 0 }}
                     activeCollection={ALL_SECTION}
                     isIncomingSharedCollection
-                    enableDownload={
-                        publicCollection?.publicURLs?.[0]?.enableDownload ??
-                        true
-                    }
+                    enableDownload={downloadEnabled}
                     fileToCollectionsMap={null}
                     collectionNameMap={null}
                 />

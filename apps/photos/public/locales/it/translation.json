@@ -523,5 +523,8 @@
     "HIDDEN": "",
     "HIDE": "",
     "UNHIDE": "",
-    "UNHIDE_TO_COLLECTION": ""
+    "UNHIDE_TO_COLLECTION": "",
+    "SORT_BY": "",
+    "NEWEST_FIRST": "",
+    "OLDEST_FIRST": ""
 }

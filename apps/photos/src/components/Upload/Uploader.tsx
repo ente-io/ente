@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
-import { createAlbum, getLatestCollections } from 'services/collectionService';
+import { getLatestCollections } from 'services/collectionService';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
@@ -61,6 +61,8 @@ import {
     savePublicCollectionUploaderName,
 } from 'services/publicCollectionService';
 import { UploadTypeSelectorIntent } from 'types/gallery';
+import { getOrCreateAlbum } from 'utils/collection';
+
 const FIRST_ALBUM_NAME = 'My First Album';
 
 interface Props {
@@ -433,7 +435,7 @@ export default function Uploader(props: Props) {
                     collectionName,
                     files,
                 ] of collectionNameToFilesMap) {
-                    const collection = await createAlbum(
+                    const collection = await getOrCreateAlbum(
                         collectionName,
                         existingCollection
                     );

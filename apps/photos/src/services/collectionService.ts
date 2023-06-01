@@ -32,7 +32,7 @@ import {
     RemoveFromCollectionRequest,
 } from 'types/collection';
 import {
-    COLLECTION_SORT_BY,
+    COLLECTION_LIST_SORT_BY,
     CollectionType,
     ARCHIVE_SECTION,
     TRASH_SECTION,
@@ -47,7 +47,7 @@ import {
     SUB_TYPE,
     UpdateMagicMetadataRequest,
 } from 'types/magicMetadata';
-import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
+import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
 import { User } from 'types/user';
 import {
     isQuickLinkCollection,
@@ -56,8 +56,8 @@ import {
     isSharedOnlyViaLink,
     isValidMoveTarget,
     isHiddenCollection,
-    isValidReplacementAlbum,
     getNonHiddenCollections,
+    changeCollectionSubType,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -316,16 +316,7 @@ export const getFavItemIds = async (
     );
 };
 
-export const createAlbum = async (
-    albumName: string,
-    existingCollections: Collection[]
-) => {
-    const user: User = getData(LS_KEYS.USER);
-    for (const collection of existingCollections) {
-        if (isValidReplacementAlbum(collection, user, albumName)) {
-            return collection;
-        }
-    }
+export const createAlbum = (albumName: string) => {
     return createCollection(albumName, CollectionType.album);
 };
 
@@ -345,7 +336,7 @@ const createCollection = async (
             await cryptoWorker.encryptUTF8(collectionName, collectionKey);
         let encryptedMagicMetadata: EncryptedMagicMetadata;
         if (magicMetadataProps) {
-            const magicMetadata = await updateMagicMetadataProps(
+            const magicMetadata = await updateMagicMetadata(
                 NEW_COLLECTION_MAGIC_METADATA,
                 null,
                 magicMetadataProps
@@ -711,7 +702,10 @@ export const leaveSharedAlbum = async (collectionID: number) => {
     }
 };
 
-export const updateCollectionMagicMetadata = async (collection: Collection) => {
+export const updateCollectionMagicMetadata = async (
+    collection: Collection,
+    updatedMagicMetadata: CollectionMagicMetadata
+) => {
     const token = getToken();
     if (!token) {
         return;
@@ -720,15 +714,15 @@ export const updateCollectionMagicMetadata = async (collection: Collection) => {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
     const { file: encryptedMagicMetadata } = await cryptoWorker.encryptMetadata(
-        collection.magicMetadata.data,
+        updatedMagicMetadata.data,
         collection.key
     );
 
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
-            version: collection.magicMetadata.version,
-            count: collection.magicMetadata.count,
+            version: updatedMagicMetadata.version,
+            count: updatedMagicMetadata.count,
             data: encryptedMagicMetadata.encryptedData,
             header: encryptedMagicMetadata.decryptionHeader,
         },
@@ -745,8 +739,52 @@ export const updateCollectionMagicMetadata = async (collection: Collection) => {
     const updatedCollection: Collection = {
         ...collection,
         magicMetadata: {
-            ...collection.magicMetadata,
-            version: collection.magicMetadata.version + 1,
+            ...updatedMagicMetadata,
+            version: updatedMagicMetadata.version + 1,
+        },
+    };
+    return updatedCollection;
+};
+
+export const updatePublicCollectionMagicMetadata = async (
+    collection: Collection,
+    updatedPublicMagicMetadata: CollectionPublicMagicMetadata
+) => {
+    const token = getToken();
+    if (!token) {
+        return;
+    }
+
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
+    const { file: encryptedMagicMetadata } = await cryptoWorker.encryptMetadata(
+        updatedPublicMagicMetadata.data,
+        collection.key
+    );
+
+    const reqBody: UpdateMagicMetadataRequest = {
+        id: collection.id,
+        magicMetadata: {
+            version: updatedPublicMagicMetadata.version,
+            count: updatedPublicMagicMetadata.count,
+            data: encryptedMagicMetadata.encryptedData,
+            header: encryptedMagicMetadata.decryptionHeader,
+        },
+    };
+
+    await HTTPService.put(
+        `${ENDPOINT}/collections/public-magic-metadata`,
+        reqBody,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    const updatedCollection: Collection = {
+        ...collection,
+        pubMagicMetadata: {
+            ...updatedPublicMagicMetadata,
+            version: updatedPublicMagicMetadata.version + 1,
         },
     };
     return updatedCollection;
@@ -758,7 +796,7 @@ export const renameCollection = async (
 ) => {
     if (isQuickLinkCollection(collection)) {
         // Convert quick link collection to normal collection on rename
-        await updateCollectionSubType(collection, SUB_TYPE.DEFAULT);
+        await changeCollectionSubType(collection, SUB_TYPE.DEFAULT);
     }
     const token = getToken();
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
@@ -777,24 +815,6 @@ export const renameCollection = async (
             'X-Auth-Token': token,
         }
     );
-};
-
-const updateCollectionSubType = async (
-    collection: Collection,
-    subType: SUB_TYPE
-) => {
-    const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-        subType: subType,
-    };
-    const updatedCollection = {
-        ...collection,
-        magicMetadata: await updateMagicMetadataProps(
-            collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
-            collection.key,
-            updatedMagicMetadataProps
-        ),
-    } as Collection;
-    await updateCollectionMagicMetadata(updatedCollection);
 };
 
 export const shareCollection = async (
@@ -942,19 +962,19 @@ export const getNonEmptyCollections = (
 
 export function sortCollectionSummaries(
     collectionSummaries: CollectionSummary[],
-    sortBy: COLLECTION_SORT_BY
+    sortBy: COLLECTION_LIST_SORT_BY
 ) {
     return collectionSummaries
         .sort((a, b) => {
             switch (sortBy) {
-                case COLLECTION_SORT_BY.CREATION_TIME_ASCENDING:
+                case COLLECTION_LIST_SORT_BY.CREATION_TIME_ASCENDING:
                     return (
                         -1 *
                         compareCollectionsLatestFile(b.latestFile, a.latestFile)
                     );
-                case COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING:
+                case COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING:
                     return b.updationTime - a.updationTime;
-                case COLLECTION_SORT_BY.NAME:
+                case COLLECTION_LIST_SORT_BY.NAME:
                     return a.name.localeCompare(b.name);
             }
         })

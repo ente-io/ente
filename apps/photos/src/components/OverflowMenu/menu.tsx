@@ -11,7 +11,7 @@ export interface Iprops {
     menuPaperProps?: Partial<PaperProps>;
 }
 
-const StyledMenu = styled(Menu)`
+export const StyledMenu = styled(Menu)`
     & .MuiPaper-root {
         margin: 16px auto;
         box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.16),
