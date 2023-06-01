@@ -214,27 +214,6 @@ function PhotoViewer(props: Iprops) {
                 });
             }
 
-            const downloadLivePhotoBtn = document.getElementById(
-                `download-btn-${item.id}`
-            ) as HTMLButtonElement;
-            if (downloadLivePhotoBtn) {
-                const downloadLivePhoto = () => {
-                    downloadFileHelper(photoSwipe.currItem);
-                };
-
-                downloadLivePhotoBtn.addEventListener(
-                    'click',
-                    downloadLivePhoto
-                );
-                return () => {
-                    downloadLivePhotoBtn.removeEventListener(
-                        'click',
-                        downloadLivePhoto
-                    );
-                    setLivePhotoBtnOptions(defaultLivePhotoDefaultOptions);
-                };
-            }
-
             return () => {
                 setLivePhotoBtnOptions(defaultLivePhotoDefaultOptions);
             };
