@@ -17,7 +17,6 @@ import {
     TYPE_HEIC,
     TYPE_HEIF,
     FILE_TYPE,
-    SUPPORTED_VIDEO_FORMATS,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
@@ -377,11 +376,6 @@ export function isExactTypeHEIC(exactType: string) {
         exactType.toLowerCase().endsWith(TYPE_HEIC) ||
         exactType.toLowerCase().endsWith(TYPE_HEIF)
     );
-}
-
-export async function isVideoFormatSupported(file: File) {
-    const { exactType } = await getFileType(file);
-    return SUPPORTED_VIDEO_FORMATS.includes(exactType);
 }
 
 export async function changeFilesVisibility(
