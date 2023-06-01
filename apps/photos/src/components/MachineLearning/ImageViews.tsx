@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { styled } from '@mui/material';
+import { Skeleton, styled } from '@mui/material';
 
 import { imageBitmapToBlob } from 'utils/image';
 import { logError } from 'utils/sentry';
@@ -91,5 +91,9 @@ export function ImageBlobView(props: { blob: Blob }) {
         }
     }, [props.blob]);
 
-    return <img src={imgUrl} />;
+    return imgUrl ? (
+        <img src={imgUrl} />
+    ) : (
+        <Skeleton variant="circular" height={120} width={120} />
+    );
 }
