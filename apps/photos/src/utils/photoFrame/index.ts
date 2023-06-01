@@ -119,9 +119,9 @@ export async function updateFileSrcProps(
                 <img src="${file.msrc}" onContextMenu="return false;"/>
                 <div class="download-banner" >
                     ${t('VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD')}
-                    <a class="btn btn-outline-success" href=${convertedVideoURL} download="${
+                    <a class="btn btn-outline-success" href=${originalVideoURL} download="${
                 file.metadata.title
-            }"">Download</a>
+            }">${t('DOWNLOAD')}</a>
                 </div>
             </div>
             `;
