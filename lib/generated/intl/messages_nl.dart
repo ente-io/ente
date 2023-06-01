@@ -381,6 +381,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "close": MessageLookupByLibrary.simpleMessage("Sluiten"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("Samenvoegen op tijd"),
+        "clubByFileName":
+            MessageLookupByLibrary.simpleMessage("Samenvoegen op bestandsnaam"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Code toegepast"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
@@ -396,6 +398,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Samenwerkers kunnen foto\'s en video\'s toevoegen aan het gedeelde album."),
+        "collageLayout": MessageLookupByLibrary.simpleMessage("Layout"),
+        "collageSaved": MessageLookupByLibrary.simpleMessage(
+            "Collage opgeslagen in gallerij"),
         "collectEventPhotos": MessageLookupByLibrary.simpleMessage(
             "Foto\'s van gebeurtenissen verzamelen"),
         "collectPhotos":
@@ -440,6 +445,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Account aanmaken"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
             "Lang indrukken om foto\'s te selecteren en klik + om een album te maken"),
+        "createCollage": MessageLookupByLibrary.simpleMessage("Creëer collage"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Nieuw account aanmaken"),
         "createOrSelectAlbum":
@@ -639,6 +645,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "favorite":
             MessageLookupByLibrary.simpleMessage("Toevoegen aan favorieten"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
+        "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
+            "Opslaan van bestand naar galerij mislukt"),
         "fileInfoAddDescHint": MessageLookupByLibrary.simpleMessage(
             "Voeg een beschrijving toe..."),
         "fileSavedToGallery": MessageLookupByLibrary.simpleMessage(
@@ -688,6 +696,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iOSLockOut": MessageLookupByLibrary.simpleMessage(
             "Biometrische verificatie is uitgeschakeld. Vergrendel en ontgrendel uw scherm om het in te schakelen."),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("Oké"),
+        "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Negeren"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "Sommige bestanden in dit album worden genegeerd voor de upload omdat ze eerder van ente zijn verwijderd."),
         "importing": MessageLookupByLibrary.simpleMessage("Importeren...."),
@@ -1030,6 +1039,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Veilig opgeslagen"),
         "save": MessageLookupByLibrary.simpleMessage("Opslaan"),
+        "saveCollage": MessageLookupByLibrary.simpleMessage("Sla collage op"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Kopie opslaan"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Bewaar sleutel"),
         "saveYourRecoveryKeyIfYouHaventAlready":
@@ -1140,6 +1150,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Sorry, we konden geen beveiligde sleutels genereren op dit apparaat.\n\nGelieve je aan te melden vanaf een ander apparaat."),
+        "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sorteren op"),
+        "sortNewestFirst":
+            MessageLookupByLibrary.simpleMessage("Nieuwste eerst"),
+        "sortOldestFirst": MessageLookupByLibrary.simpleMessage("Oudste eerst"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Succes"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Back-up starten"),
         "storage": MessageLookupByLibrary.simpleMessage("Opslagruimte"),
