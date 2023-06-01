@@ -17,6 +17,7 @@ import {
     TYPE_HEIC,
     TYPE_HEIF,
     FILE_TYPE,
+    SUPPORTED_VIDEO_FORMATS,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
@@ -293,6 +294,16 @@ export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
                 original: [URL.createObjectURL(fileBlob)],
             };
         }
+        case FILE_TYPE.VIDEO: {
+            const convertedBlob = await getPlayableVideo(
+                file.metadata.title,
+                new Uint8Array(await fileBlob.arrayBuffer())
+            );
+            return {
+                converted: [URL.createObjectURL(convertedBlob)],
+                original: [URL.createObjectURL(fileBlob)],
+            };
+        }
         default: {
             const previewURL = await createTypedObjectURL(
                 fileBlob,
@@ -318,11 +329,22 @@ async function getRenderableLivePhoto(
     ]);
 }
 
-async function getPlayableVideo(videoNameTitle: string, video: Uint8Array) {
-    const mp4ConvertedVideo = await ffmpegService.convertToMP4(
+export async function getPlayableVideo(
+    videoNameTitle: string,
+    video: Uint8Array
+) {
+    const isSupportedFormat = await isVideoFormatSupported(
         new File([video], videoNameTitle)
     );
-    return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
+    if (isSupportedFormat) {
+        return new Blob([video.buffer]);
+    } else {
+        addLogLine('video format not supported, converting it');
+        const mp4ConvertedVideo = await ffmpegService.convertToMP4(
+            new File([video], videoNameTitle)
+        );
+        return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
+    }
 }
 
 export async function getRenderableImage(fileName: string, imageBlob: Blob) {
@@ -354,6 +376,11 @@ export function isExactTypeHEIC(exactType: string) {
         exactType.toLowerCase().endsWith(TYPE_HEIC) ||
         exactType.toLowerCase().endsWith(TYPE_HEIF)
     );
+}
+
+export async function isVideoFormatSupported(file: File) {
+    const { exactType } = await getFileType(file);
+    return SUPPORTED_VIDEO_FORMATS.includes(exactType);
 }
 
 export async function changeFilesVisibility(

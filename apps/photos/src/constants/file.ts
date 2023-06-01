@@ -15,3 +15,12 @@ export enum FILE_TYPE {
     LIVE_PHOTO,
     OTHERS,
 }
+
+export const SUPPORTED_VIDEO_FORMATS = [
+    'mov',
+    'webm',
+    'mp4',
+    'ogv',
+    'mkv',
+    '3gp',
+];
