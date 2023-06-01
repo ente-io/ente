@@ -40,6 +40,7 @@ import {
     updateFileMagicMetadata,
     updateFilePublicMagicMetadata,
 } from 'services/fileService';
+import { isPlaybackPossible } from 'utils/photoFrame';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -333,10 +334,10 @@ export async function getPlayableVideo(
     videoNameTitle: string,
     video: Uint8Array
 ) {
-    const isSupportedFormat = await isVideoFormatSupported(
-        new File([video], videoNameTitle)
+    const isPlayable = await isPlaybackPossible(
+        URL.createObjectURL(new Blob([video]))
     );
-    if (isSupportedFormat) {
+    if (isPlayable) {
         return new Blob([video.buffer]);
     } else {
         addLogLine('video format not supported, converting it');
