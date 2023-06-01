@@ -81,7 +81,7 @@ class _GalleryState extends State<Gallery> {
   final _hugeListViewKey = GlobalKey<HugeListViewState>();
 
   late Logger _logger;
-  List<List<File>> _collatedFiles = [];
+  List<List<File>> _currentGroupedFiles = [];
   bool _hasLoadedFiles = false;
   late ItemScrollController _itemScroller;
   StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
@@ -182,21 +182,22 @@ class _GalleryState extends State<Gallery> {
     }
   }
 
-  // Collates files and returns `true` if it resulted in a gallery reload
+  // group files into multiple groups and returns `true` if it resulted in a
+  // gallery reload
   bool _onFilesLoaded(List<File> files) {
-    final updatedCollatedFiles =
-        widget.enableFileGrouping ? _collateFiles(files) : [files];
-    if (_collatedFiles.length != updatedCollatedFiles.length ||
-        _collatedFiles.isEmpty) {
+    final updatedGroupedFiles =
+        widget.enableFileGrouping ? _groupFiles(files) : [files];
+    if (_currentGroupedFiles.length != updatedGroupedFiles.length ||
+        _currentGroupedFiles.isEmpty) {
       if (mounted) {
         setState(() {
           _hasLoadedFiles = true;
-          _collatedFiles = updatedCollatedFiles;
+          _currentGroupedFiles = updatedGroupedFiles;
         });
       }
       return true;
     } else {
-      _collatedFiles = updatedCollatedFiles;
+      _currentGroupedFiles = updatedGroupedFiles;
       return false;
     }
   }
@@ -220,7 +221,7 @@ class _GalleryState extends State<Gallery> {
     return MultipleGroupsGalleryView(
       hugeListViewKey: _hugeListViewKey,
       itemScroller: _itemScroller,
-      collatedFiles: _collatedFiles,
+      groupedFiles: _currentGroupedFiles,
       disableScroll: widget.disableScroll,
       emptyState: widget.emptyState,
       asyncLoader: widget.asyncLoader,
@@ -239,31 +240,31 @@ class _GalleryState extends State<Gallery> {
     );
   }
 
-  List<List<File>> _collateFiles(List<File> files) {
+  List<List<File>> _groupFiles(List<File> files) {
     List<File> dailyFiles = [];
-    final List<List<File>> collatedFiles = [];
+    final List<List<File>> resultGroupedFiles = [];
     for (int index = 0; index < files.length; index++) {
       if (index > 0 &&
           !areFromSameDay(
             files[index - 1].creationTime!,
             files[index].creationTime!,
           )) {
-        collatedFiles.add(dailyFiles);
+        resultGroupedFiles.add(dailyFiles);
         dailyFiles = [];
       }
       dailyFiles.add(files[index]);
     }
     if (dailyFiles.isNotEmpty) {
-      collatedFiles.add(dailyFiles);
+      resultGroupedFiles.add(dailyFiles);
     }
     if (_sortOrderAsc) {
-      collatedFiles
+      resultGroupedFiles
           .sort((a, b) => a[0].creationTime!.compareTo(b[0].creationTime!));
     } else {
-      collatedFiles
+      resultGroupedFiles
           .sort((a, b) => b[0].creationTime!.compareTo(a[0].creationTime!));
     }
-    return collatedFiles;
+    return resultGroupedFiles;
   }
 }
 

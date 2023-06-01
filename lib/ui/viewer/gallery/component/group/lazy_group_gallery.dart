@@ -88,27 +88,29 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   }
 
   Future _onReload(FilesUpdatedEvent event) async {
-    final galleryDate =
+    final groupDate =
         DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime!);
-    final filesUpdatedThisDay = event.updatedFiles.where((file) {
+    // iterate over all files and check if any of the belongs to this group
+    final updateFilesBelongingToGroup = event.updatedFiles.where((file) {
       final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-      return fileDate.year == galleryDate.year &&
-          fileDate.month == galleryDate.month &&
-          fileDate.day == galleryDate.day;
+      return fileDate.year == groupDate.year &&
+          fileDate.month == groupDate.month &&
+          fileDate.day == groupDate.day;
     });
-    if (filesUpdatedThisDay.isNotEmpty) {
+    if (updateFilesBelongingToGroup.isNotEmpty) {
       if (kDebugMode) {
         _logger.info(
-          filesUpdatedThisDay.length.toString() +
+          updateFilesBelongingToGroup.length.toString() +
               " files were updated due to ${event.reason} on " +
               DateTime.fromMicrosecondsSinceEpoch(
-                galleryDate.microsecondsSinceEpoch,
+                groupDate.microsecondsSinceEpoch,
               ).toIso8601String(),
         );
       }
       if (event.type == EventType.addedOrUpdated) {
+        // We are reloading the whole group
         final dayStartTime =
-            DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
+            DateTime(groupDate.year, groupDate.month, groupDate.day);
         final result = await widget.asyncLoader(
           dayStartTime.microsecondsSinceEpoch,
           dayStartTime.microsecondsSinceEpoch + microSecondsInDay - 1,
@@ -123,7 +125,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
         // Files were removed
         final generatedFileIDs = <int?>{};
         final uploadedFileIds = <int?>{};
-        for (final file in filesUpdatedThisDay) {
+        for (final file in updateFilesBelongingToGroup) {
           if (file.generatedID != null) {
             generatedFileIDs.add(file.generatedID);
           } else if (file.uploadedFileID != null) {

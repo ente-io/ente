@@ -24,7 +24,7 @@ group into multiple grid views during rendering.
 class MultipleGroupsGalleryView extends StatelessWidget {
   final GlobalKey<HugeListViewState<dynamic>> hugeListViewKey;
   final ItemScrollController itemScroller;
-  final List<List<File>> collatedFiles;
+  final List<List<File>> groupedFiles;
   final bool disableScroll;
   final Widget? header;
   final Widget? footer;
@@ -44,7 +44,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
   const MultipleGroupsGalleryView({
     required this.hugeListViewKey,
     required this.itemScroller,
-    required this.collatedFiles,
+    required this.groupedFiles,
     required this.disableScroll,
     this.header,
     this.footer,
@@ -69,8 +69,8 @@ class MultipleGroupsGalleryView extends StatelessWidget {
       key: hugeListViewKey,
       controller: itemScroller,
       startIndex: 0,
-      totalCount: collatedFiles.length,
-      isDraggableScrollbarEnabled: collatedFiles.length > 10,
+      totalCount: groupedFiles.length,
+      isDraggableScrollbarEnabled: groupedFiles.length > 10,
       disableScroll: disableScroll,
       waitBuilder: (_) {
         return const EnteLoadingWidget();
@@ -96,7 +96,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
       itemBuilder: (context, index) {
         Widget gallery;
         gallery = LazyGroupGallery(
-          collatedFiles[index],
+          groupedFiles[index],
           index,
           reloadEvent,
           removalEventTypes,
@@ -116,7 +116,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
         if (header != null && index == 0) {
           gallery = Column(children: [header!, gallery]);
         }
-        if (footer != null && index == collatedFiles.length - 1) {
+        if (footer != null && index == groupedFiles.length - 1) {
           gallery = Column(children: [gallery, footer!]);
         }
         return gallery;
@@ -126,7 +126,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
           return DateFormat.yMMM(Localizations.localeOf(context).languageCode)
               .format(
             DateTime.fromMicrosecondsSinceEpoch(
-              collatedFiles[index][0].creationTime!,
+              groupedFiles[index][0].creationTime!,
             ),
           );
         } catch (e) {

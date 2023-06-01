@@ -16,6 +16,7 @@ class GroupGallery extends StatelessWidget {
   final ValueNotifier<bool> toggleSelectAllFromDay;
   final ValueNotifier<bool> areAllFromDaySelected;
   final bool limitSelectionToOne;
+
   const GroupGallery({
     required this.photoGridSize,
     required this.files,
