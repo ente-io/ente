@@ -77,7 +77,7 @@
     "DOWNLOAD_OPTION": "Downloaden (D)",
     "DOWNLOAD_FAVORITES": "Favorieten downloaden",
     "DOWNLOAD_UNCATEGORIZED": "Ongecategoriseerd downloaden",
-    "DOWNLOAD_HIDDEN": "",
+    "DOWNLOAD_HIDDEN": "Download verborgen",
     "COPY_OPTION": "Kopiëren als PNG (Ctrl/Cmd - C)",
     "TOGGLE_FULLSCREEN": "Schakelen volledig scherm modus (F)",
     "ZOOM_IN_OUT": "In/uitzoomen",
@@ -491,7 +491,7 @@
     "PUBLIC_COLLECT_SUBTEXT": "Sta toe dat mensen met de link ook foto's kunnen toevoegen aan het gedeelde album.",
     "STOP_EXPORT": "Stoppen",
     "EXPORT_PROGRESS": "<a>{{progress.success}} / {{progress.total}}</a> bestanden geëxporteerd",
-    "MIGRATING_EXPORT": "",
+    "MIGRATING_EXPORT": "Voorbereiden...",
     "EXPORT_NOTIFICATION": {
         "START": "Exporteren begonnen",
         "IN_PROGRESS": "Exporteren is al bezig",
@@ -520,11 +520,11 @@
     "at": "om",
     "AUTH_NEXT": "volgende",
     "AUTH_DOWNLOAD_MOBILE_APP": "Download onze mobiele app om uw geheimen te beheren",
-    "HIDDEN": "",
-    "HIDE": "",
-    "UNHIDE": "",
-    "UNHIDE_TO_COLLECTION": "",
-    "SORT_BY": "",
-    "NEWEST_FIRST": "",
-    "OLDEST_FIRST": ""
+    "HIDDEN": "Verborgen",
+    "HIDE": "Verbergen",
+    "UNHIDE": "Zichtbaar maken",
+    "UNHIDE_TO_COLLECTION": "Zichtbaar maken in album",
+    "SORT_BY": "Sorteren op",
+    "NEWEST_FIRST": "Nieuwste eerst",
+    "OLDEST_FIRST": "Oudste eerst"
 }
