@@ -3,6 +3,9 @@ import { EnteFile } from 'types/file';
 import { MergedSourceURL } from 'types/gallery';
 import { logError } from 'utils/sentry';
 import { t } from 'i18next';
+import { getFileFromURL, getPlayableVideo } from 'utils/file';
+import { addLogLine } from 'utils/logging';
+import { getFileType } from 'services/typeDetectionService';
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 
@@ -114,17 +117,42 @@ export async function updateFileSrcProps(
             </video>
         `;
         } else {
-            file.html = `
-            <div class="pswp-item-container">
-                <img src="${file.msrc}" onContextMenu="return false;"/>
-                <div class="download-banner" >
-                    ${t('VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD')}
-                    <a class="btn btn-outline-success" href=${originalVideoURL} download="${
-                file.metadata.title
-            }">${t('DOWNLOAD')}</a>
-                </div>
-            </div>
+            addLogLine(
+                'video not playable, downloading original video and converting it to playable format'
+            );
+            const fileObject = await getFileFromURL(originalVideoURL);
+            const fileType = getFileType(fileObject);
+            logError(Error(''), 'video format not supported', {
+                fileType,
+            });
+            const originalFileData = new Uint8Array(
+                await fileObject.arrayBuffer()
+            );
+            const convertedVideoURL = URL.createObjectURL(
+                await getPlayableVideo(file.metadata.title, originalFileData)
+            );
+            addLogLine("video converted, updating it's url");
+            const isPlayable = await isPlaybackPossible(convertedVideoURL);
+            if (isPlayable) {
+                file.html = `
+                <video controls onContextMenu="return false;">
+                    <source src="${convertedVideoURL}" />
+                    Your browser does not support the video tag.
+                </video>
             `;
+            } else {
+                file.html = `
+                <div class="pswp-item-container">
+                    <img src="${file.msrc}" onContextMenu="return false;"/>
+                    <div class="download-banner" >
+                        ${t('VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD')}
+                        <a class="btn btn-outline-success" href=${originalVideoURL} download="${
+                    file.metadata.title
+                }">${t('DOWNLOAD')}</a>
+                    </div>
+                </div>
+                `;
+            }
         }
     } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         if (isPlayable) {
