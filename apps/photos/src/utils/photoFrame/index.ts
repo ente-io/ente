@@ -2,7 +2,6 @@ import { FILE_TYPE } from 'constants/file';
 import { EnteFile } from 'types/file';
 import { MergedSourceURL } from 'types/gallery';
 import { logError } from 'utils/sentry';
-import { t } from 'i18next';
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 
@@ -111,16 +110,14 @@ export async function updateFileSrcProps(
     `;
     } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         file.html = `
-                <div class="pswp-item-container">
-                    <img src="${file.msrc}" onContextMenu="return false;"/>
-                    <div class="download-banner">
-                        ${t('VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD')}
-                        <button class = "btn btn-outline-success" id = "download-btn-${
-                            file.id
-                        }">Download</button>
-                    </div>
-                </div>
-                `;
+        <div class = 'pswp-item-container'>
+            <img id = "live-photo-image-${file.id}" src="${convertedImageURL}" onContextMenu="return false;"/>
+            <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
+                <source src="${convertedVideoURL}" />
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        `;
     } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         file.src = convertedImageURL;
     } else {
