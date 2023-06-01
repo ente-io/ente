@@ -4,11 +4,11 @@ import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 
-class DayWidget extends StatelessWidget {
+class GroupHeaderWidget extends StatelessWidget {
   final int timestamp;
   final int gridSize;
 
-  const DayWidget({
+  const GroupHeaderWidget({
     super.key,
     required this.timestamp,
     required this.gridSize,

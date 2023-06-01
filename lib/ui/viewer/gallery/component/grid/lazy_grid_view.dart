@@ -7,13 +7,13 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_selections_event.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/selected_files.dart";
-import "package:photos/ui/viewer/gallery/component/non_recyclable_view_widget.dart";
-import "package:photos/ui/viewer/gallery/component/recyclable_view_widget.dart";
+import "package:photos/ui/viewer/gallery/component/grid/non_recyclable_grid_view_widget.dart";
+import "package:photos/ui/viewer/gallery/component/grid/recyclable_grid_view_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
-class LazyLoadingGridView extends StatefulWidget {
+class LazyGridView extends StatefulWidget {
   final String tag;
-  final List<File> filesInDay;
+  final List<File> filesInGroup;
   final GalleryLoader asyncLoader;
   final SelectedFiles? selectedFiles;
   final bool shouldRender;
@@ -23,9 +23,9 @@ class LazyLoadingGridView extends StatefulWidget {
   final int? photoGridSize;
   final bool limitSelectionToOne;
 
-  LazyLoadingGridView(
+  LazyGridView(
     this.tag,
-    this.filesInDay,
+    this.filesInGroup,
     this.asyncLoader,
     this.selectedFiles,
     this.shouldRender,
@@ -38,10 +38,10 @@ class LazyLoadingGridView extends StatefulWidget {
   }) : super(key: key ?? UniqueKey());
 
   @override
-  State<LazyLoadingGridView> createState() => _LazyLoadingGridViewState();
+  State<LazyGridView> createState() => _LazyGridViewState();
 }
 
-class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
+class _LazyGridViewState extends State<LazyGridView> {
   late bool _shouldRender;
   int? _currentUserID;
   late StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
@@ -71,9 +71,9 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   @override
-  void didUpdateWidget(LazyLoadingGridView oldWidget) {
+  void didUpdateWidget(LazyGridView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!listEquals(widget.filesInDay, oldWidget.filesInDay)) {
+    if (!listEquals(widget.filesInGroup, oldWidget.filesInGroup)) {
       _shouldRender = widget.shouldRender;
     }
   }
@@ -81,9 +81,9 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   @override
   Widget build(BuildContext context) {
     if (widget.shouldRecycle) {
-      return RecyclableViewWidget(
+      return RecyclableGridViewWidget(
         shouldRender: _shouldRender,
-        filesInDay: widget.filesInDay,
+        filesInGroup: widget.filesInGroup,
         photoGridSize: widget.photoGridSize!,
         limitSelectionToOne: widget.limitSelectionToOne,
         tag: widget.tag,
@@ -92,9 +92,9 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         currentUserID: _currentUserID,
       );
     } else {
-      return NonRecyclableViewWidget(
+      return NonRecyclableGridViewWidget(
         shouldRender: _shouldRender,
-        filesInDay: widget.filesInDay,
+        filesInGroup: widget.filesInGroup,
         photoGridSize: widget.photoGridSize!,
         limitSelectionToOne: widget.limitSelectionToOne,
         tag: widget.tag,
@@ -108,13 +108,13 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void _selectedFilesListener() {
     if (widget.selectedFiles!.files
         .toSet()
-        .containsAll(widget.filesInDay.toSet())) {
+        .containsAll(widget.filesInGroup.toSet())) {
       widget.areAllFilesSelected.value = true;
     } else {
       widget.areAllFilesSelected.value = false;
     }
     bool shouldRefresh = false;
-    for (final file in widget.filesInDay) {
+    for (final file in widget.filesInGroup) {
       if (widget.selectedFiles!.isPartOfLastSelected(file)) {
         shouldRefresh = true;
       }
@@ -127,12 +127,12 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void _toggleSelectAllFromDayListener() {
     if (widget.selectedFiles!.files
         .toSet()
-        .containsAll(widget.filesInDay.toSet())) {
+        .containsAll(widget.filesInGroup.toSet())) {
       setState(() {
-        widget.selectedFiles!.unSelectAll(widget.filesInDay.toSet());
+        widget.selectedFiles!.unSelectAll(widget.filesInGroup.toSet());
       });
     } else {
-      widget.selectedFiles!.selectAll(widget.filesInDay.toSet());
+      widget.selectedFiles!.selectAll(widget.filesInGroup.toSet());
     }
   }
 }

@@ -1,23 +1,23 @@
 import "package:flutter/material.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/selected_files.dart";
-import "package:photos/ui/huge_listview/place_holder_widget.dart";
-import "package:photos/ui/viewer/gallery/component/lazy_loading_gallery.dart";
+import "package:photos/ui/viewer/gallery/component/grid/gallery_grid_view_widget.dart";
+import "package:photos/ui/viewer/gallery/component/grid/place_holder_grid_view_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:visibility_detector/visibility_detector.dart";
 
-class RecyclableViewWidget extends StatefulWidget {
+class RecyclableGridViewWidget extends StatefulWidget {
   final bool shouldRender;
-  final List<File> filesInDay;
+  final List<File> filesInGroup;
   final int photoGridSize;
   final bool limitSelectionToOne;
   final String tag;
   final GalleryLoader asyncLoader;
   final int? currentUserID;
   final SelectedFiles? selectedFiles;
-  const RecyclableViewWidget({
+  const RecyclableGridViewWidget({
     required this.shouldRender,
-    required this.filesInDay,
+    required this.filesInGroup,
     required this.photoGridSize,
     required this.limitSelectionToOne,
     required this.tag,
@@ -28,10 +28,11 @@ class RecyclableViewWidget extends StatefulWidget {
   });
 
   @override
-  State<RecyclableViewWidget> createState() => _RecyclableViewWidgetState();
+  State<RecyclableGridViewWidget> createState() =>
+      _RecyclableGridViewWidgetState();
 }
 
-class _RecyclableViewWidgetState extends State<RecyclableViewWidget> {
+class _RecyclableGridViewWidgetState extends State<RecyclableGridViewWidget> {
   late bool _shouldRender;
   @override
   void initState() {
@@ -42,7 +43,7 @@ class _RecyclableViewWidgetState extends State<RecyclableViewWidget> {
   @override
   Widget build(BuildContext context) {
     return VisibilityDetector(
-      key: Key("gallery" + widget.filesInDay.first.tag),
+      key: Key("gallery" + widget.filesInGroup.first.tag),
       onVisibilityChanged: (visibility) {
         final shouldRender = visibility.visibleFraction > 0;
         if (mounted && shouldRender != _shouldRender) {
@@ -53,7 +54,7 @@ class _RecyclableViewWidgetState extends State<RecyclableViewWidget> {
       },
       child: _shouldRender
           ? GalleryGridViewWidget(
-              filesInDay: widget.filesInDay,
+              filesInGroup: widget.filesInGroup,
               photoGridSize: widget.photoGridSize,
               limitSelectionToOne: widget.limitSelectionToOne,
               tag: widget.tag,
@@ -61,7 +62,10 @@ class _RecyclableViewWidgetState extends State<RecyclableViewWidget> {
               selectedFiles: widget.selectedFiles,
               currentUserID: widget.currentUserID,
             )
-          : PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize),
+          : PlaceHolderGridViewWidget(
+              widget.filesInGroup.length,
+              widget.photoGridSize,
+            ),
     );
   }
 }

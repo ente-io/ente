@@ -8,15 +8,23 @@ import "package:photos/models/file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/huge_listview/huge_listview.dart";
-import "package:photos/ui/viewer/gallery/component/lazy_loading_gallery.dart";
+import 'package:photos/ui/viewer/gallery/component/group/lazy_group_gallery.dart';
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
-class GalleryListView extends StatelessWidget {
+/*
+MultipleGroupsGalleryView is a widget that displays a list of grouped/collated
+files when grouping is enabled.
+For each group, it displays a header and use LazyGroupGallery to display a
+particular group of files.
+If a group has more than 400 files, LazyGroupGallery internally divides the
+group into multiple grid views during rendering.
+ */
+class MultipleGroupsGalleryView extends StatelessWidget {
   final GlobalKey<HugeListViewState<dynamic>> hugeListViewKey;
   final ItemScrollController itemScroller;
-  final List<List<File>> collatedFiles;
+  final List<List<File>> groupedFiles;
   final bool disableScroll;
   final Widget? header;
   final Widget? footer;
@@ -28,15 +36,15 @@ class GalleryListView extends StatelessWidget {
   final double scrollBottomSafeArea;
   final bool limitSelectionToOne;
   final SelectedFiles? selectedFiles;
-  final bool shouldCollateFilesByDay;
+  final bool enableFileGrouping;
   final String logTag;
   final Logger logger;
   final bool sortOrderAsc;
 
-  const GalleryListView({
+  const MultipleGroupsGalleryView({
     required this.hugeListViewKey,
     required this.itemScroller,
-    required this.collatedFiles,
+    required this.groupedFiles,
     required this.disableScroll,
     this.header,
     this.footer,
@@ -48,7 +56,7 @@ class GalleryListView extends StatelessWidget {
     required this.scrollBottomSafeArea,
     required this.limitSelectionToOne,
     this.selectedFiles,
-    required this.shouldCollateFilesByDay,
+    required this.enableFileGrouping,
     required this.logTag,
     required this.logger,
     required this.sortOrderAsc,
@@ -61,8 +69,8 @@ class GalleryListView extends StatelessWidget {
       key: hugeListViewKey,
       controller: itemScroller,
       startIndex: 0,
-      totalCount: collatedFiles.length,
-      isDraggableScrollbarEnabled: collatedFiles.length > 10,
+      totalCount: groupedFiles.length,
+      isDraggableScrollbarEnabled: groupedFiles.length > 10,
       disableScroll: disableScroll,
       waitBuilder: (_) {
         return const EnteLoadingWidget();
@@ -87,8 +95,8 @@ class GalleryListView extends StatelessWidget {
       },
       itemBuilder: (context, index) {
         Widget gallery;
-        gallery = LazyLoadingGallery(
-          collatedFiles[index],
+        gallery = LazyGroupGallery(
+          groupedFiles[index],
           index,
           reloadEvent,
           removalEventTypes,
@@ -100,7 +108,7 @@ class GalleryListView extends StatelessWidget {
               .on<GalleryIndexUpdatedEvent>()
               .where((event) => event.tag == tagPrefix)
               .map((event) => event.index),
-          shouldCollateFilesByDay,
+          enableFileGrouping,
           logTag: logTag,
           photoGridSize: LocalSettings.instance.getPhotoGridSize(),
           limitSelectionToOne: limitSelectionToOne,
@@ -108,7 +116,7 @@ class GalleryListView extends StatelessWidget {
         if (header != null && index == 0) {
           gallery = Column(children: [header!, gallery]);
         }
-        if (footer != null && index == collatedFiles.length - 1) {
+        if (footer != null && index == groupedFiles.length - 1) {
           gallery = Column(children: [gallery, footer!]);
         }
         return gallery;
@@ -118,7 +126,7 @@ class GalleryListView extends StatelessWidget {
           return DateFormat.yMMM(Localizations.localeOf(context).languageCode)
               .format(
             DateTime.fromMicrosecondsSinceEpoch(
-              collatedFiles[index][0].creationTime!,
+              groupedFiles[index][0].creationTime!,
             ),
           );
         } catch (e) {

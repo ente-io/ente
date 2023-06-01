@@ -13,7 +13,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/huge_listview/huge_listview.dart';
-import "package:photos/ui/viewer/gallery/component/gallery_list_view_widget.dart";
+import "package:photos/ui/viewer/gallery/component/multiple_groups_gallery_view.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -40,7 +40,7 @@ class Gallery extends StatefulWidget {
   final Widget emptyState;
   final String? albumName;
   final double scrollBottomSafeArea;
-  final bool shouldCollateFilesByDay;
+  final bool enableFileGrouping;
   final Widget loadingWidget;
   final bool disableScroll;
   final bool limitSelectionToOne;
@@ -61,7 +61,7 @@ class Gallery extends StatefulWidget {
     this.emptyState = const EmptyState(),
     this.scrollBottomSafeArea = 120.0,
     this.albumName = '',
-    this.shouldCollateFilesByDay = true,
+    this.enableFileGrouping = true,
     this.loadingWidget = const EnteLoadingWidget(),
     this.disableScroll = false,
     this.limitSelectionToOne = false,
@@ -81,7 +81,7 @@ class _GalleryState extends State<Gallery> {
   final _hugeListViewKey = GlobalKey<HugeListViewState>();
 
   late Logger _logger;
-  List<List<File>> _collatedFiles = [];
+  List<List<File>> _currentGroupedFiles = [];
   bool _hasLoadedFiles = false;
   late ItemScrollController _itemScroller;
   StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
@@ -182,21 +182,22 @@ class _GalleryState extends State<Gallery> {
     }
   }
 
-  // Collates files and returns `true` if it resulted in a gallery reload
+  // group files into multiple groups and returns `true` if it resulted in a
+  // gallery reload
   bool _onFilesLoaded(List<File> files) {
-    final updatedCollatedFiles =
-        widget.shouldCollateFilesByDay ? _collateFiles(files) : [files];
-    if (_collatedFiles.length != updatedCollatedFiles.length ||
-        _collatedFiles.isEmpty) {
+    final updatedGroupedFiles =
+        widget.enableFileGrouping ? _groupFiles(files) : [files];
+    if (_currentGroupedFiles.length != updatedGroupedFiles.length ||
+        _currentGroupedFiles.isEmpty) {
       if (mounted) {
         setState(() {
           _hasLoadedFiles = true;
-          _collatedFiles = updatedCollatedFiles;
+          _currentGroupedFiles = updatedGroupedFiles;
         });
       }
       return true;
     } else {
-      _collatedFiles = updatedCollatedFiles;
+      _currentGroupedFiles = updatedGroupedFiles;
       return false;
     }
   }
@@ -217,10 +218,10 @@ class _GalleryState extends State<Gallery> {
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
     }
-    return GalleryListView(
+    return MultipleGroupsGalleryView(
       hugeListViewKey: _hugeListViewKey,
       itemScroller: _itemScroller,
-      collatedFiles: _collatedFiles,
+      groupedFiles: _currentGroupedFiles,
       disableScroll: widget.disableScroll,
       emptyState: widget.emptyState,
       asyncLoader: widget.asyncLoader,
@@ -229,7 +230,7 @@ class _GalleryState extends State<Gallery> {
       tagPrefix: widget.tagPrefix,
       scrollBottomSafeArea: widget.scrollBottomSafeArea,
       limitSelectionToOne: widget.limitSelectionToOne,
-      shouldCollateFilesByDay: widget.shouldCollateFilesByDay,
+      enableFileGrouping: widget.enableFileGrouping,
       logTag: _logTag,
       logger: _logger,
       reloadEvent: widget.reloadEvent,
@@ -239,31 +240,31 @@ class _GalleryState extends State<Gallery> {
     );
   }
 
-  List<List<File>> _collateFiles(List<File> files) {
+  List<List<File>> _groupFiles(List<File> files) {
     List<File> dailyFiles = [];
-    final List<List<File>> collatedFiles = [];
+    final List<List<File>> resultGroupedFiles = [];
     for (int index = 0; index < files.length; index++) {
       if (index > 0 &&
           !areFromSameDay(
             files[index - 1].creationTime!,
             files[index].creationTime!,
           )) {
-        collatedFiles.add(dailyFiles);
+        resultGroupedFiles.add(dailyFiles);
         dailyFiles = [];
       }
       dailyFiles.add(files[index]);
     }
     if (dailyFiles.isNotEmpty) {
-      collatedFiles.add(dailyFiles);
+      resultGroupedFiles.add(dailyFiles);
     }
     if (_sortOrderAsc) {
-      collatedFiles
+      resultGroupedFiles
           .sort((a, b) => a[0].creationTime!.compareTo(b[0].creationTime!));
     } else {
-      collatedFiles
+      resultGroupedFiles
           .sort((a, b) => b[0].creationTime!.compareTo(a[0].creationTime!));
     }
-    return collatedFiles;
+    return resultGroupedFiles;
   }
 }
 

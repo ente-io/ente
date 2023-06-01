@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +8,12 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/huge_listview/place_holder_widget.dart';
-import "package:photos/ui/viewer/gallery/component/day_widget.dart";
-import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
-import 'package:photos/ui/viewer/gallery/component/lazy_loading_grid_view.dart';
+import "package:photos/ui/viewer/gallery/component/grid/place_holder_grid_view_widget.dart";
+import "package:photos/ui/viewer/gallery/component/group/group_gallery.dart";
+import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 
-class LazyLoadingGallery extends StatefulWidget {
+class LazyGroupGallery extends StatefulWidget {
   final List<File> files;
   final int index;
   final Stream<FilesUpdatedEvent>? reloadEvent;
@@ -27,9 +25,9 @@ class LazyLoadingGallery extends StatefulWidget {
   final String? logTag;
   final Stream<int> currentIndexStream;
   final int photoGridSize;
-  final bool areFilesCollatedByDay;
+  final bool enableFileGrouping;
   final bool limitSelectionToOne;
-  LazyLoadingGallery(
+  LazyGroupGallery(
     this.files,
     this.index,
     this.reloadEvent,
@@ -39,7 +37,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.selectedFiles,
     this.tag,
     this.currentIndexStream,
-    this.areFilesCollatedByDay, {
+    this.enableFileGrouping, {
     this.logTag = "",
     this.photoGridSize = photoGridSizeDefault,
     this.limitSelectionToOne = false,
@@ -47,10 +45,10 @@ class LazyLoadingGallery extends StatefulWidget {
   }) : super(key: key ?? UniqueKey());
 
   @override
-  State<LazyLoadingGallery> createState() => _LazyLoadingGalleryState();
+  State<LazyGroupGallery> createState() => _LazyGroupGalleryState();
 }
 
-class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
+class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   static const kNumberOfDaysToRenderBeforeAndAfter = 8;
 
   late Logger _logger;
@@ -90,27 +88,29 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   }
 
   Future _onReload(FilesUpdatedEvent event) async {
-    final galleryDate =
+    final groupDate =
         DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime!);
-    final filesUpdatedThisDay = event.updatedFiles.where((file) {
+    // iterate over all files and check if any of the belongs to this group
+    final updateFilesBelongingToGroup = event.updatedFiles.where((file) {
       final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-      return fileDate.year == galleryDate.year &&
-          fileDate.month == galleryDate.month &&
-          fileDate.day == galleryDate.day;
+      return fileDate.year == groupDate.year &&
+          fileDate.month == groupDate.month &&
+          fileDate.day == groupDate.day;
     });
-    if (filesUpdatedThisDay.isNotEmpty) {
+    if (updateFilesBelongingToGroup.isNotEmpty) {
       if (kDebugMode) {
         _logger.info(
-          filesUpdatedThisDay.length.toString() +
+          updateFilesBelongingToGroup.length.toString() +
               " files were updated due to ${event.reason} on " +
               DateTime.fromMicrosecondsSinceEpoch(
-                galleryDate.microsecondsSinceEpoch,
+                groupDate.microsecondsSinceEpoch,
               ).toIso8601String(),
         );
       }
       if (event.type == EventType.addedOrUpdated) {
+        // We are reloading the whole group
         final dayStartTime =
-            DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
+            DateTime(groupDate.year, groupDate.month, groupDate.day);
         final result = await widget.asyncLoader(
           dayStartTime.microsecondsSinceEpoch,
           dayStartTime.microsecondsSinceEpoch + microSecondsInDay - 1,
@@ -125,7 +125,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         // Files were removed
         final generatedFileIDs = <int?>{};
         final uploadedFileIds = <int?>{};
-        for (final file in filesUpdatedThisDay) {
+        for (final file in updateFilesBelongingToGroup) {
           if (file.generatedID != null) {
             generatedFileIDs.add(file.generatedID);
           } else if (file.uploadedFileID != null) {
@@ -169,7 +169,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   }
 
   @override
-  void didUpdateWidget(LazyLoadingGallery oldWidget) {
+  void didUpdateWidget(LazyGroupGallery oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!listEquals(_files, widget.files)) {
       _reloadEventSubscription?.cancel();
@@ -187,8 +187,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (widget.areFilesCollatedByDay)
-              DayWidget(
+            if (widget.enableFileGrouping)
+              GroupHeaderWidget(
                 timestamp: _files[0].creationTime!,
                 gridSize: widget.photoGridSize,
               ),
@@ -233,7 +233,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           ],
         ),
         _shouldRender!
-            ? GetGallery(
+            ? GroupGallery(
                 photoGridSize: widget.photoGridSize,
                 files: _files,
                 tag: widget.tag,
@@ -243,7 +243,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                 areAllFromDaySelected: _areAllFromDaySelected,
                 limitSelectionToOne: widget.limitSelectionToOne,
               )
-            : PlaceHolderWidget(
+            // todo: perf eval should we have separate PlaceHolder for Groups
+            //  instead of creating a large cached view
+            : PlaceHolderGridViewWidget(
                 _files.length,
                 widget.photoGridSize,
               ),
@@ -257,106 +259,5 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     } else {
       _showSelectAllButton.value = true;
     }
-  }
-}
-
-class GetGallery extends StatelessWidget {
-  final int photoGridSize;
-  final List<File> files;
-  final String tag;
-  final GalleryLoader asyncLoader;
-  final SelectedFiles? selectedFiles;
-  final ValueNotifier<bool> toggleSelectAllFromDay;
-  final ValueNotifier<bool> areAllFromDaySelected;
-  final bool limitSelectionToOne;
-  const GetGallery({
-    required this.photoGridSize,
-    required this.files,
-    required this.tag,
-    required this.asyncLoader,
-    required this.selectedFiles,
-    required this.toggleSelectAllFromDay,
-    required this.areAllFromDaySelected,
-    required this.limitSelectionToOne,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    const kRecycleLimit = 400;
-    final List<Widget> childGalleries = [];
-    final subGalleryItemLimit = photoGridSize * subGalleryMultiplier;
-
-    for (int index = 0; index < files.length; index += subGalleryItemLimit) {
-      childGalleries.add(
-        LazyLoadingGridView(
-          tag,
-          files.sublist(
-            index,
-            min(index + subGalleryItemLimit, files.length),
-          ),
-          asyncLoader,
-          selectedFiles,
-          index == 0,
-          files.length > kRecycleLimit,
-          toggleSelectAllFromDay,
-          areAllFromDaySelected,
-          photoGridSize,
-          limitSelectionToOne: limitSelectionToOne,
-        ),
-      );
-    }
-
-    return Column(
-      children: childGalleries,
-    );
-  }
-}
-
-class GalleryGridViewWidget extends StatelessWidget {
-  final List<File> filesInDay;
-  final int photoGridSize;
-  final SelectedFiles? selectedFiles;
-  final bool limitSelectionToOne;
-  final String tag;
-  final int? currentUserID;
-  final GalleryLoader asyncLoader;
-  const GalleryGridViewWidget({
-    required this.filesInDay,
-    required this.photoGridSize,
-    this.selectedFiles,
-    required this.limitSelectionToOne,
-    required this.tag,
-    super.key,
-    this.currentUserID,
-    required this.asyncLoader,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      // to disable GridView's scrolling
-      itemBuilder: (context, index) {
-        return GalleryFileWidget(
-          file: filesInDay[index],
-          selectedFiles: selectedFiles,
-          limitSelectionToOne: limitSelectionToOne,
-          tag: tag,
-          photoGridSize: photoGridSize,
-          currentUserID: currentUserID,
-          filesInDay: filesInDay,
-          asyncLoader: asyncLoader,
-        );
-      },
-      itemCount: filesInDay.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisSpacing: 2,
-        mainAxisSpacing: 2,
-        crossAxisCount: photoGridSize,
-      ),
-      padding: const EdgeInsets.symmetric(vertical: (galleryGridSpacing / 2)),
-    );
   }
 }
