@@ -43,6 +43,18 @@ class GalleryFileWidget extends StatelessWidget {
       selectionColor =
           avatarColors[(file.ownerID!).remainder(avatarColors.length)];
     }
+    final String heroTag = tag + file.tag;
+    final Widget thumbnailWidget = ThumbnailWidget(
+      file,
+      diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
+      serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
+      shouldShowLivePhotoOverlay: true,
+      key: Key(heroTag),
+      thumbnailSize: photoGridSize < photoGridSizeDefault
+          ? thumbnailLargeSize
+          : thumbnailSmallSize,
+      shouldShowOwnerAvatar: !isFileSelected,
+    );
     return GestureDetector(
       onTap: () {
         limitSelectionToOne
@@ -59,7 +71,7 @@ class GalleryFileWidget extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(1),
             child: Hero(
-              tag: tag + file.tag,
+              tag: heroTag,
               child: isFileSelected
                   ? ColorFiltered(
                       colorFilter: ColorFilter.mode(
@@ -68,30 +80,9 @@ class GalleryFileWidget extends StatelessWidget {
                         ),
                         BlendMode.darken,
                       ),
-                      child: ThumbnailWidget(
-                        file,
-                        diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-                        serverLoadDeferDuration:
-                            thumbnailServerLoadDeferDuration,
-                        shouldShowLivePhotoOverlay: true,
-                        key: Key(tag + file.tag),
-                        thumbnailSize: photoGridSize < photoGridSizeDefault
-                            ? thumbnailLargeSize
-                            : thumbnailSmallSize,
-                        shouldShowOwnerAvatar: !isFileSelected,
-                      ),
+                      child: thumbnailWidget,
                     )
-                  : ThumbnailWidget(
-                      file,
-                      diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-                      serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
-                      shouldShowLivePhotoOverlay: true,
-                      key: Key(tag + file.tag),
-                      thumbnailSize: photoGridSize < photoGridSizeDefault
-                          ? thumbnailLargeSize
-                          : thumbnailSmallSize,
-                      shouldShowOwnerAvatar: !isFileSelected,
-                    ),
+                  : thumbnailWidget,
             ),
           ),
           isFileSelected
