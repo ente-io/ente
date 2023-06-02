@@ -94,7 +94,7 @@ tokens has been documented [here](architecture/README.md).
 1. [Install Flutter](https://flutter.dev/docs/get-started/install)
 2. Clone this repository with `git clone git@github.com:ente-io/auth.git` 
 3. Pull in all submodules with `git submodule update --init --recursive`
-4. For Android, run `flutter build apk --release --flavor independent`
+4. For Android, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`
 5. For iOS, run `flutter build ios` 
 
 For maintainers, there is [additional documentation](RELEASES.md) on
