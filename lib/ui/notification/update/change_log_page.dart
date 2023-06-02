@@ -120,6 +120,13 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
             'an album to configure how it\'s sorted.',
       ),
     );
+
+    items.add(
+      ChangeLogEntry(
+        "Shared album improvements",
+        'Photos in albums that are shared with you will now be shown in your home gallery. You can hide them by simply archiving the shared album.',
+      ),
+    );
     //You can now specify a custom radius while creating Location tags.
     items.add(
       ChangeLogEntry(
