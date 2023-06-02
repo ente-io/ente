@@ -4,7 +4,7 @@ version: 1.0.40+40
 publish_to: none
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
   adaptive_theme: ^3.1.0 # done
@@ -44,9 +44,9 @@ dependencies:
   fluttertoast: ^8.1.1
   google_nav_bar: ^5.0.5 #supported
   http: ^0.13.4
-  intl: ^0.17.0
+  intl: ^0.18.0
   json_annotation: ^4.5.0
-  local_auth: ^1.1.5
+  local_auth: ^2.1.3
   logging: ^1.0.1
   modal_bottom_sheet: ^3.0.0-pre
   move_to_background: ^1.0.2
@@ -76,7 +76,6 @@ dev_dependencies:
   json_serializable: ^6.2.0
   lints: ^1.0.1
   mocktail: ^0.3.0
-
 
 # The following section is specific to Flutter.
 flutter:
