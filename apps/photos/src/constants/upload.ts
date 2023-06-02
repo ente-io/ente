@@ -21,6 +21,11 @@ export const WHITELISTED_FILE_FORMATS: FileTypeInfo[] = [
         exactType: 'wmv',
         mimeType: 'video/x-ms-asf',
     },
+    {
+        fileType: FILE_TYPE.VIDEO,
+        exactType: 'hevc',
+        mimeType: 'video/hevc',
+    },
 ];
 
 export const KNOWN_NON_MEDIA_FORMATS = ['xmp', 'html', 'txt'];
