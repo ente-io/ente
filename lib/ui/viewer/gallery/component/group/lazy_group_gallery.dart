@@ -88,26 +88,26 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   }
 
   Future _onReload(FilesUpdatedEvent event) async {
-    final groupDate =
+    final DateTime groupDate =
         DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime!);
-    // iterate over all files and check if any of the belongs to this group
-    final updateFilesBelongingToGroup = event.updatedFiles.where((file) {
+    // iterate over  files and check if any of the belongs to this group
+    final anyCandidateForGroup = event.updatedFiles.any((file) {
       final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
       return fileDate.year == groupDate.year &&
           fileDate.month == groupDate.month &&
           fileDate.day == groupDate.day;
     });
-    if (updateFilesBelongingToGroup.isNotEmpty) {
+    if (anyCandidateForGroup) {
       if (kDebugMode) {
         _logger.info(
-          updateFilesBelongingToGroup.length.toString() +
-              " files were updated due to ${event.reason} on " +
+          " files were updated due to ${event.reason} on " +
               DateTime.fromMicrosecondsSinceEpoch(
                 groupDate.microsecondsSinceEpoch,
               ).toIso8601String(),
         );
       }
-      if (event.type == EventType.addedOrUpdated) {
+      if (event.type == EventType.addedOrUpdated ||
+          widget.removalEventTypes.contains(event.type)) {
         // We are reloading the whole group
         final dayStartTime =
             DateTime(groupDate.year, groupDate.month, groupDate.day);
@@ -121,38 +121,8 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
             _files = result.files;
           });
         }
-      } else if (widget.removalEventTypes.contains(event.type)) {
-        // Files were removed
-        final generatedFileIDs = <int?>{};
-        final uploadedFileIds = <int?>{};
-        for (final file in updateFilesBelongingToGroup) {
-          if (file.generatedID != null) {
-            generatedFileIDs.add(file.generatedID);
-          } else if (file.uploadedFileID != null) {
-            uploadedFileIds.add(file.uploadedFileID);
-          }
-        }
-        final List<File> files = [];
-        files.addAll(_files);
-        files.removeWhere(
-          (file) =>
-              generatedFileIDs.contains(file.generatedID) ||
-              uploadedFileIds.contains(file.uploadedFileID),
-        );
-        if (kDebugMode) {
-          _logger.finest(
-            "removed ${_files.length - files.length} due to ${event.reason}",
-          );
-        }
-        if (mounted) {
-          setState(() {
-            _files = files;
-          });
-        }
-      } else {
-        if (kDebugMode) {
-          debugPrint("Unexpected event ${event.type.name}");
-        }
+      } else if (kDebugMode) {
+        debugPrint("Unexpected event ${event.type.name}");
       }
     }
   }
