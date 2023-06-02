@@ -3,10 +3,11 @@ import { Formik, FormikHelpers, FormikState } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
 import TextField from '@mui/material/TextField';
-import ShowHidePassword from './Form/ShowHidePassword';
+// import ShowHidePassword from './Form/ShowHidePassword';
 import { FlexWrapper } from './Container';
 import { Button, FormHelperText } from '@mui/material';
 import { t } from 'i18next';
+import Autocomplete from '@mui/material/Autocomplete';
 
 interface formValues {
     inputValue: string;
@@ -30,6 +31,7 @@ export interface SingleInputFormProps {
     autoComplete?: string;
     blockButton?: boolean;
     hiddenLabel?: boolean;
+    optionsList?: string[];
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
@@ -37,7 +39,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
 
     const [loading, SetLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
+    // const [showPassword, setShowPassword] = useState(false);
 
     const submitForm = async (
         values: formValues,
@@ -52,15 +54,15 @@ export default function SingleInputForm(props: SingleInputFormProps) {
         SetLoading(false);
     };
 
-    const handleClickShowPassword = () => {
-        setShowPassword(!showPassword);
-    };
+    // const handleClickShowPassword = () => {
+    //     setShowPassword(!showPassword);
+    // };
 
-    const handleMouseDownPassword = (
-        event: React.MouseEvent<HTMLButtonElement>
-    ) => {
-        event.preventDefault();
-    };
+    // const handleMouseDownPassword = (
+    //     event: React.MouseEvent<HTMLButtonElement>
+    // ) => {
+    //     event.preventDefault();
+    // };
 
     const validationSchema = useMemo(() => {
         switch (props.fieldType) {
@@ -91,37 +93,48 @@ export default function SingleInputForm(props: SingleInputFormProps) {
             {({ values, errors, handleChange, handleSubmit }) => (
                 <form noValidate onSubmit={handleSubmit}>
                     {props.hiddenPreInput}
-                    <TextField
-                        hiddenLabel={props.hiddenLabel}
-                        variant="filled"
-                        fullWidth
-                        type={showPassword ? 'text' : props.fieldType}
-                        id={props.fieldType}
-                        name={props.fieldType}
-                        {...(props.hiddenLabel
-                            ? { placeholder: props.placeholder }
-                            : { label: props.placeholder })}
-                        value={values.inputValue}
-                        onChange={handleChange('inputValue')}
-                        error={Boolean(errors.inputValue)}
-                        helperText={errors.inputValue}
-                        disabled={loading}
-                        autoFocus={!props.disableAutoFocus}
-                        autoComplete={props.autoComplete}
-                        InputProps={{
-                            endAdornment: props.fieldType === 'password' && (
-                                <ShowHidePassword
-                                    showPassword={showPassword}
-                                    handleClickShowPassword={
-                                        handleClickShowPassword
-                                    }
-                                    handleMouseDownPassword={
-                                        handleMouseDownPassword
-                                    }
-                                />
-                            ),
-                        }}
+                    <Autocomplete
+                        id="free-solo-demo"
+                        freeSolo
+                        options={props.optionsList}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                hiddenLabel={props.hiddenLabel}
+                                variant="filled"
+                                fullWidth
+                                type={showPassword ? 'text' : props.fieldType}
+                                id={props.fieldType}
+                                name={props.fieldType}
+                                {...(props.hiddenLabel
+                                    ? { placeholder: props.placeholder }
+                                    : { label: props.placeholder })}
+                                value={values.inputValue}
+                                onChange={handleChange('inputValue')}
+                                error={Boolean(errors.inputValue)}
+                                helperText={errors.inputValue}
+                                disabled={loading}
+                                autoFocus={!props.disableAutoFocus}
+                                autoComplete={props.autoComplete}
+
+                                // InputProps=
+                                // {{
+                                //     endAdornment: props.fieldType === 'password' && (
+                                //         <ShowHidePassword
+                                //             showPassword={showPassword}
+                                //             handleClickShowPassword={
+                                //                 handleClickShowPassword
+                                //             }
+                                //             handleMouseDownPassword={
+                                //                 handleMouseDownPassword
+                                //             }
+                                //         />
+                                //     ),
+                                // }}
+                            />
+                        )}
                     />
+
                     <FormHelperText
                         sx={{
                             position: 'relative',

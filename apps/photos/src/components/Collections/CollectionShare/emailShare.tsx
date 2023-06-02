@@ -2,16 +2,56 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
 import { GalleryContext } from 'pages/gallery';
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { t } from 'i18next';
 import { shareCollection } from 'services/collectionService';
 import { User } from 'types/user';
 import { handleSharingErrors } from 'utils/error/ui';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CollectionShareSharees } from './sharees';
+import { getLocalCollections } from 'services/collectionService';
 
 export default function EmailShare({ collection }) {
     const galleryContext = useContext(GalleryContext);
+
+    const [updatedOptionsList, setUpdatedOptionsList] = useState(['hello']);
+    let updatedList = [];
+
+    // const collection_list = getLocalCollections();
+    // collection_list.then((result) => {
+    //     const emails = result.flatMap((item) => item.sharees.map((sharee) => sharee.email));
+    //     updatedOptionsList = [...emails];
+    //     console.log(updatedOptionsList);
+    // });
+    // console.log(updatedOptionsList)
+    useEffect(() => {
+        const owner_user1: User = getData(LS_KEYS.USER);
+        const collection_list = getLocalCollections();
+        const getUpdatedOptionsList = async () => {
+            const result = await collection_list;
+            const emails = result.flatMap((item) =>
+                item.sharees.map((sharee) => sharee.email)
+            );
+            updatedList = Array.from(new Set(emails));
+            console.log(updatedList);
+            setUpdatedOptionsList(updatedList);
+
+            const filteredList = updatedList.filter(
+                (email) =>
+                    !collection.sharees
+                        .map((sharees) => sharees.email)
+                        .includes(email) && email !== owner_user1.email
+            );
+            console.log(filteredList);
+
+            setUpdatedOptionsList(filteredList);
+
+            console.log(collection.sharees.map((sharees) => sharees.email));
+            console.log(owner_user1.email);
+        };
+
+        getUpdatedOptionsList();
+    }, []);
 
     const collectionShare: SingleInputFormProps['callback'] = async (
         email,
@@ -40,6 +80,7 @@ export default function EmailShare({ collection }) {
         <>
             <SingleInputForm
                 callback={collectionShare}
+                optionsList={updatedOptionsList}
                 placeholder={t('ENTER_EMAIL')}
                 fieldType="email"
                 buttonText={t('SHARE')}
