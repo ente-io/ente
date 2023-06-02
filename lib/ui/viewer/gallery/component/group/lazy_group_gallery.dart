@@ -107,7 +107,8 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
               ).toIso8601String(),
         );
       }
-      if (event.type == EventType.addedOrUpdated) {
+      if (event.type == EventType.addedOrUpdated ||
+          widget.removalEventTypes.contains(event.type)) {
         // We are reloading the whole group
         final dayStartTime =
             DateTime(groupDate.year, groupDate.month, groupDate.day);
@@ -121,38 +122,8 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
             _files = result.files;
           });
         }
-      } else if (widget.removalEventTypes.contains(event.type)) {
-        // Files were removed
-        final generatedFileIDs = <int?>{};
-        final uploadedFileIds = <int?>{};
-        for (final file in updateFilesBelongingToGroup) {
-          if (file.generatedID != null) {
-            generatedFileIDs.add(file.generatedID);
-          } else if (file.uploadedFileID != null) {
-            uploadedFileIds.add(file.uploadedFileID);
-          }
-        }
-        final List<File> files = [];
-        files.addAll(_files);
-        files.removeWhere(
-          (file) =>
-              generatedFileIDs.contains(file.generatedID) ||
-              uploadedFileIds.contains(file.uploadedFileID),
-        );
-        if (kDebugMode) {
-          _logger.finest(
-            "removed ${_files.length - files.length} due to ${event.reason}",
-          );
-        }
-        if (mounted) {
-          setState(() {
-            _files = files;
-          });
-        }
-      } else {
-        if (kDebugMode) {
-          debugPrint("Unexpected event ${event.type.name}");
-        }
+      } else if (kDebugMode) {
+        debugPrint("Unexpected event ${event.type.name}");
       }
     }
   }
