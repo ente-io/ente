@@ -39,7 +39,7 @@ export default function EmailShare({ collection }) {
             });
 
             updatedList = Array.from(new Set(emails));
-            console.log(updatedList);
+            // console.log(updatedList);
             setUpdatedOptionsList(updatedList);
 
             const filteredList = updatedList.filter(
@@ -48,12 +48,12 @@ export default function EmailShare({ collection }) {
                         .map((sharees) => sharees.email)
                         .includes(email) && email !== owner_user1.email
             );
-            console.log(filteredList);
+            // console.log(filteredList);
 
             setUpdatedOptionsList(filteredList);
 
-            console.log(collection.sharees.map((sharees) => sharees.email));
-            console.log(owner_user1.email);
+            // console.log(collection.sharees.map((sharees) => sharees.email));
+            // console.log(owner_user1.email);
         };
 
         getUpdatedOptionsList();
