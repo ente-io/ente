@@ -7,7 +7,7 @@ import "package:latlong2/latlong.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
-import "package:photos/services/ignored_files_service.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_credits.dart";
 import "package:photos/ui/map/map_view.dart";
@@ -43,12 +43,8 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> getFiles() async {
-    final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-    final ignoredIntIDs = <int>{};
-    for (var element in ignoredIDs) {
-      ignoredIntIDs.add(int.parse(element));
-    }
-    allImages = await FilesDB.instance.getAllFilesFromDB(ignoredIntIDs);
+    final ignoredIDs = CollectionsService.instance.getHiddenCollections();
+    allImages = await FilesDB.instance.getAllFilesFromDB(ignoredIDs);
   }
 
   void processFiles(List<File> files) {
