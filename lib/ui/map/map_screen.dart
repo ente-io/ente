@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import "package:latlong2/latlong.dart";
+import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
@@ -29,6 +30,7 @@ class _MapScreenState extends State<MapScreen> {
   List<File> visibleImages = [];
   MapController mapController = MapController();
   bool isLoading = true;
+  final Logger _logger = Logger("_MapScreenState");
 
   @override
   void initState() {
@@ -36,9 +38,13 @@ class _MapScreenState extends State<MapScreen> {
     initialize();
   }
 
-  void initialize() async {
-    await getFiles();
-    processFiles(allImages);
+  Future<void> initialize() async {
+    try {
+      await getFiles();
+      processFiles(allImages);
+    } catch (e, s) {
+      _logger.severe("Error initializing map screen", e, s);
+    }
   }
 
   Future<void> getFiles() async {
