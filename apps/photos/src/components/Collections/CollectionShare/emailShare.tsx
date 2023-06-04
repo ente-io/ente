@@ -29,9 +29,15 @@ export default function EmailShare({ collection }) {
         const collection_list = getLocalCollections();
         const getUpdatedOptionsList = async () => {
             const result = await collection_list;
-            const emails = result.flatMap((item) =>
-                item.sharees.map((sharee) => sharee.email)
-            );
+            const emails = result.flatMap((item) => {
+                const shareeEmails = item.sharees.map((sharee) => sharee.email);
+                if (item.owner.email) {
+                    return [...shareeEmails, item.owner.email];
+                } else {
+                    return shareeEmails;
+                }
+            });
+
             updatedList = Array.from(new Set(emails));
             console.log(updatedList);
             setUpdatedOptionsList(updatedList);
