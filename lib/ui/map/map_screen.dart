@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:math";
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -50,16 +49,15 @@ class _MapScreenState extends State<MapScreen> {
   void processFiles(List<File> files) {
     final List<ImageMarker> tempMarkers = [];
     for (var file in files) {
-      // if (file.hasLocation && location != null) {
-      final rand = Random();
-      tempMarkers.add(
-        ImageMarker(
-          latitude: 10.786985 + rand.nextDouble() / 10,
-          longitude: 78.6882166 + rand.nextDouble() / 10,
-          imageFile: file,
-        ),
-      );
-      // }
+      if (file.hasLocation) {
+        tempMarkers.add(
+          ImageMarker(
+            latitude: file.location!.latitude!,
+            longitude: file.location!.longitude!,
+            imageFile: file,
+          ),
+        );
+      }
     }
     setState(() {
       imageMarkers = tempMarkers;
