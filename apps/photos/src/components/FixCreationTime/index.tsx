@@ -29,6 +29,7 @@ export enum FIX_STATE {
 export enum FIX_OPTIONS {
     DATE_TIME_ORIGINAL,
     DATE_TIME_DIGITIZED,
+    METADATA_DATE,
     CUSTOM_TIME,
 }
 
