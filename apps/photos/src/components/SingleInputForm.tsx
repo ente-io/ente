@@ -35,6 +35,8 @@ export interface SingleInputFormProps {
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
+    const [selectedOptions, setSelectedOptions] = useState([]);
+
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
 
@@ -51,6 +53,11 @@ export default function SingleInputForm(props: SingleInputFormProps) {
             (message) => setFieldError('inputValue', message),
             resetForm
         );
+
+        if (props.optionsList && props.optionsList.length > 0) {
+            setSelectedOptions([...selectedOptions, values.inputValue]);
+        }
+
         SetLoading(false);
     };
 
@@ -104,9 +111,13 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                             id="free-solo-demo"
                             filterSelectedOptions
                             freeSolo
-                            options={props.optionsList.map((option) =>
-                                option.toString()
-                            )}
+                            value={values.inputValue}
+                            options={props.optionsList
+                                .map((option) => option.toString())
+                                .filter(
+                                    (option) =>
+                                        !selectedOptions.includes(option)
+                                )}
                             onChange={(event, newValue) => {
                                 setFieldValue('inputValue', newValue);
                             }}
@@ -114,7 +125,6 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                                 <TextField
                                     {...params}
                                     hiddenLabel={props.hiddenLabel}
-                                    variant="filled"
                                     fullWidth
                                     type={
                                         showPassword ? 'text' : props.fieldType
@@ -124,8 +134,6 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                                     {...(props.hiddenLabel
                                         ? { placeholder: props.placeholder }
                                         : { label: props.placeholder })}
-                                    value={values.inputValue}
-                                    onChange={handleChange('inputValue')}
                                     error={Boolean(errors.inputValue)}
                                     helperText={errors.inputValue}
                                     disabled={loading}

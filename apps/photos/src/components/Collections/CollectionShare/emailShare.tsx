@@ -14,7 +14,7 @@ import { getLocalCollections } from 'services/collectionService';
 export default function EmailShare({ collection }) {
     const galleryContext = useContext(GalleryContext);
 
-    const [updatedOptionsList, setUpdatedOptionsList] = useState(['hello']);
+    const [updatedOptionsList, setUpdatedOptionsList] = useState(['']);
     let updatedList = [];
     useEffect(() => {
         const owner_user1: User = getData(LS_KEYS.USER);
@@ -31,8 +31,6 @@ export default function EmailShare({ collection }) {
             });
 
             updatedList = Array.from(new Set(emails));
-
-            setUpdatedOptionsList(updatedList);
 
             const filteredList = updatedList.filter(
                 (email) =>
