@@ -286,14 +286,18 @@ export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
                 fileBlob
             );
             return {
-                converted: [URL.createObjectURL(convertedBlob)],
+                converted: [
+                    convertedBlob ? URL.createObjectURL(convertedBlob) : null,
+                ],
                 original: [URL.createObjectURL(fileBlob)],
             };
         }
         case FILE_TYPE.LIVE_PHOTO: {
             const livePhoto = await getRenderableLivePhoto(file, fileBlob);
             return {
-                converted: livePhoto.map((asset) => URL.createObjectURL(asset)),
+                converted: livePhoto.map((asset) =>
+                    asset ? URL.createObjectURL(asset) : null
+                ),
                 original: [URL.createObjectURL(fileBlob)],
             };
         }
@@ -330,52 +334,54 @@ async function getPlayableVideo(videoNameTitle: string, video: Uint8Array) {
 }
 
 export async function getRenderableImage(fileName: string, imageBlob: Blob) {
-    const tempFile = new File([imageBlob], fileName);
-    const { exactType } = await getFileType(tempFile);
-    let convertedImageBlob: Blob;
-    if (isRawFile(exactType)) {
-        try {
-            if (!isSupportedRawFormat(exactType)) {
-                throw Error(CustomError.UNSUPPORTED_RAW_FORMAT);
-            }
-
-            if (!isElectron()) {
-                throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
-            }
-            addLogLine(
-                `RawConverter called for ${fileName}-${convertBytesToHumanReadable(
-                    imageBlob.size
-                )}`
-            );
-            convertedImageBlob = await imageProcessor.convertToJPEG(
-                imageBlob,
-                fileName
-            );
-            addLogLine(`${fileName} successfully converted`);
-        } catch (e) {
+    try {
+        const tempFile = new File([imageBlob], fileName);
+        const { exactType } = await getFileType(tempFile);
+        let convertedImageBlob: Blob;
+        if (isRawFile(exactType)) {
             try {
-                if (!isFileHEIC(exactType)) {
-                    throw e;
+                if (!isSupportedRawFormat(exactType)) {
+                    throw Error(CustomError.UNSUPPORTED_RAW_FORMAT);
+                }
+
+                if (!isElectron()) {
+                    throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
                 }
                 addLogLine(
-                    `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
+                    `RawConverter called for ${fileName}-${convertBytesToHumanReadable(
                         imageBlob.size
                     )}`
                 );
-                convertedImageBlob = await heicConversionService.convert(
-                    imageBlob
+                convertedImageBlob = await imageProcessor.convertToJPEG(
+                    imageBlob,
+                    fileName
                 );
                 addLogLine(`${fileName} successfully converted`);
             } catch (e) {
-                logError(e, 'get Renderable Image failed', {
-                    fileType: exactType,
-                });
-                throw Error(CustomError.NON_PREVIEWABLE_FILE);
+                try {
+                    if (!isFileHEIC(exactType)) {
+                        throw e;
+                    }
+                    addLogLine(
+                        `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
+                            imageBlob.size
+                        )}`
+                    );
+                    convertedImageBlob = await heicConversionService.convert(
+                        imageBlob
+                    );
+                    addLogLine(`${fileName} successfully converted`);
+                } catch (e) {
+                    throw Error(CustomError.NON_PREVIEWABLE_FILE);
+                }
             }
+            return convertedImageBlob;
+        } else {
+            return imageBlob;
         }
-        return convertedImageBlob;
-    } else {
-        return imageBlob;
+    } catch (e) {
+        logError(e, 'get Renderable Image failed');
+        return null;
     }
 }
 
