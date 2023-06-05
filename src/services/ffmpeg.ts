@@ -47,7 +47,7 @@ export async function runFFmpegCmd(
         if (dontTimeout) {
             await execAsync(escapedCmd);
         } else {
-            promiseWithTimeout(
+            await promiseWithTimeout(
                 execAsync(escapedCmd),
                 FFMPEG_EXECUTION_WAIT_TIME
             );
