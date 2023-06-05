@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/services/search_service.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/map/map_screen.dart';
 import 'package:photos/ui/viewer/search/search_widget.dart';
@@ -68,7 +69,9 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
                     {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const MapScreen(),
+                          builder: (context) => MapScreen(
+                            filesFutureFn: SearchService.instance.getAllFiles,
+                          ),
                         ),
                       )
                     }

@@ -8,7 +8,6 @@ import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
-import "package:photos/services/search_service.dart";
 import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_credits.dart";
 import "package:photos/ui/map/map_view.dart";
@@ -17,7 +16,14 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  // Add a function parameter where the function returns a Future<List<File>>
+
+  final Future<List<File>> Function() filesFutureFn;
+
+  const MapScreen({
+    super.key,
+    required this.filesFutureFn,
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -31,7 +37,7 @@ class _MapScreenState extends State<MapScreen> {
   List<File> visibleImages = [];
   MapController mapController = MapController();
   bool isLoading = true;
-  double initialZoom = 2.0;
+  double initialZoom = 4.0;
   LatLng center = LatLng(10.732951, 78.405635);
   final Logger _logger = Logger("_MapScreenState");
 
@@ -43,15 +49,11 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> initialize() async {
     try {
-      await getFiles();
+      allImages = await widget.filesFutureFn();
       processFiles(allImages);
     } catch (e, s) {
       _logger.severe("Error initializing map screen", e, s);
     }
-  }
-
-  Future<void> getFiles() async {
-    allImages = await SearchService.instance.getAllFiles();
   }
 
   // Simple function to estimate zoom level
