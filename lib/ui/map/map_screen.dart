@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
-import "package:photos/services/collections_service.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_credits.dart";
 import "package:photos/ui/map/map_view.dart";
@@ -48,8 +47,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> getFiles() async {
-    final ignoredIDs = CollectionsService.instance.getHiddenCollections();
-    allImages = await FilesDB.instance.getAllFilesFromDB(ignoredIDs);
+    allImages = await SearchService.instance.getAllFiles();
   }
 
   void processFiles(List<File> files) {
