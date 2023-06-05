@@ -179,7 +179,8 @@ function PhotoViewer(props: Iprops) {
     useEffect(() => {
         if (!isOpen) return;
         const item = items[photoSwipe?.getCurrentIndex()];
-        if (item && item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        if (!item) return;
+        if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             const getVideoAndImage = () => {
                 const video = document.getElementById(
                     `live-photo-video-${item.id}`
@@ -213,29 +214,25 @@ function PhotoViewer(props: Iprops) {
                     loading: true,
                 });
             }
-
-            const downloadLivePhotoBtn = document.getElementById(
-                `download-btn-${item.id}`
-            ) as HTMLButtonElement;
-            if (downloadLivePhotoBtn) {
-                const downloadFile = () => {
-                    downloadFileHelper(photoSwipe.currItem);
-                };
-
-                downloadLivePhotoBtn.addEventListener('click', downloadFile);
-                return () => {
-                    downloadLivePhotoBtn.removeEventListener(
-                        'click',
-                        downloadFile
-                    );
-                    setLivePhotoBtnOptions(defaultLivePhotoDefaultOptions);
-                };
-            }
-
-            return () => {
-                setLivePhotoBtnOptions(defaultLivePhotoDefaultOptions);
-            };
         }
+
+        const downloadLivePhotoBtn = document.getElementById(
+            `download-btn-${item.id}`
+        ) as HTMLButtonElement;
+        const downloadFile = () => {
+            downloadFileHelper(photoSwipe.currItem);
+        };
+
+        if (downloadLivePhotoBtn) {
+            downloadLivePhotoBtn.addEventListener('click', downloadFile);
+        }
+
+        return () => {
+            if (downloadLivePhotoBtn) {
+                downloadLivePhotoBtn.removeEventListener('click', downloadFile);
+            }
+            setLivePhotoBtnOptions(defaultLivePhotoDefaultOptions);
+        };
     }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
 
     useEffect(() => {
