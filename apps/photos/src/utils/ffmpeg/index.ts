@@ -38,6 +38,8 @@ export function parseFFmpegExtractedMetadata(encodedMetadata: Uint8Array) {
             latitude: location.latitude,
             longitude: location.longitude,
         },
+        width: null,
+        height: null,
     };
     return parsedMetadata;
 }
