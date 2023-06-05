@@ -99,6 +99,16 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     if (DateCreated) {
         parsedExif.DateCreated = parseEXIFDate(exifData.DateCreated);
     }
+    if (exifData.GPSLatitude && exifData.GPSLongitude) {
+        const parsedLocation = parseEXIFLocation(
+            exifData.GPSLatitude,
+            exifData.GPSLatitudeRef,
+            exifData.GPSLongitude,
+            exifData.GPSLongitudeRef
+        );
+        parsedExif.latitude = parsedLocation.latitude;
+        parsedExif.longitude = parsedLocation.longitude;
+    }
     if (MetadataDate) {
         parsedExif.MetadataDate = parseEXIFDate(exifData.MetadataDate);
     }
