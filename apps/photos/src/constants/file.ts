@@ -27,15 +27,14 @@ export const RAW_FORMATS = [
     'nef',
     'psd',
     'dng',
+    'tif',
 ];
 export const SUPPORTED_RAW_FORMATS = [
     'heic',
     'rw2',
     'tiff',
-    'arw',
     'cr3',
     'cr2',
-    'raf',
     'nef',
     'psd',
     'dng',

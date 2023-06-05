@@ -355,7 +355,7 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
         } catch (e) {
             try {
                 if (!isFileHEIC(exactType)) {
-                    throw Error(CustomError.UNSUPPORTED_RAW_FORMAT);
+                    throw e;
                 }
                 addLogLine(
                     `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
@@ -367,7 +367,9 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                 );
                 addLogLine(`${fileName} successfully converted`);
             } catch (e) {
-                logError(e, 'get Renderable Image failed');
+                logError(e, 'get Renderable Image failed', {
+                    fileType: exactType,
+                });
                 throw Error(CustomError.NON_PREVIEWABLE_FILE);
             }
         }
