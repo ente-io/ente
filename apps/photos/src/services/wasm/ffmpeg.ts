@@ -42,7 +42,7 @@ export class WasmFFmpeg {
             if (dontTimeout) {
                 return this.execute(cmd, inputFile, outputFileName);
             } else {
-                promiseWithTimeout<File>(
+                return promiseWithTimeout<File>(
                     this.execute(cmd, inputFile, outputFileName),
                     FFMPEG_EXECUTION_WAIT_TIME
                 );
