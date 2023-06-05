@@ -11,30 +11,27 @@ class ElectronImageProcessorService {
         this.electronAPIs = globalThis['ElectronAPIs'];
     }
 
-    convertAPIExists() {
-        return !!this.electronAPIs?.convertHEIC;
-    }
-
     generateImageThumbnailAPIExists() {
         return !!this.electronAPIs?.generateImageThumbnail;
     }
 
-    async convertHEIC(fileBlob: Blob): Promise<Blob> {
+    async convertToJPEG(fileBlob: Blob, filename: string): Promise<Blob> {
         try {
-            if (!this.electronAPIs?.convertHEIC) {
-                throw new Error('convertHEIC API not available');
+            if (!this.electronAPIs?.convertToJPEG) {
+                throw new Error('convertToJPEG API not available');
             }
             const startTime = Date.now();
             const inputFileData = new Uint8Array(await fileBlob.arrayBuffer());
-            const convertedFileData = await this.electronAPIs.convertHEIC(
-                inputFileData
+            const convertedFileData = await this.electronAPIs.convertToJPEG(
+                inputFileData,
+                filename
             );
             addLogLine(
                 `originalFileSize:${convertBytesToHumanReadable(
                     fileBlob?.size
                 )},convertedFileSize:${convertBytesToHumanReadable(
                     convertedFileData?.length
-                )},  native heic conversion time: ${Date.now() - startTime}ms `
+                )},  native conversion time: ${Date.now() - startTime}ms `
             );
             return new Blob([convertedFileData]);
         } catch (e) {
@@ -42,7 +39,7 @@ class ElectronImageProcessorService {
                 e.message !==
                 CustomError.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
             ) {
-                logError(e, 'failed to convert heic natively');
+                logError(e, 'failed to convert to jpeg natively');
             }
             throw e;
         }

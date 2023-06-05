@@ -17,6 +17,8 @@ import {
     TYPE_HEIC,
     TYPE_HEIF,
     FILE_TYPE,
+    SUPPORTED_RAW_FORMATS,
+    RAW_FORMATS,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
@@ -39,6 +41,8 @@ import {
     updateFileMagicMetadata,
     updateFilePublicMagicMetadata,
 } from 'services/fileService';
+import isElectron from 'is-electron';
+import imageProcessor from 'services/electron/imageProcessor';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -326,34 +330,66 @@ async function getPlayableVideo(videoNameTitle: string, video: Uint8Array) {
 }
 
 export async function getRenderableImage(fileName: string, imageBlob: Blob) {
-    if (await isFileHEIC(imageBlob, fileName)) {
-        addLogLine(
-            `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
-                imageBlob.size
-            )}`
-        );
-        const convertedImageBlob = await heicConversionService.convert(
-            imageBlob
-        );
+    const tempFile = new File([imageBlob], fileName);
+    const { exactType } = await getFileType(tempFile);
+    let convertedImageBlob: Blob;
+    if (isRawFile(exactType)) {
+        try {
+            if (!isSupportedRawFormat(exactType)) {
+                throw Error(CustomError.UNSUPPORTED_RAW_FORMAT);
+            }
 
-        addLogLine(`${fileName} successfully converted`);
+            if (!isElectron()) {
+                throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
+            }
+            addLogLine(
+                `RawConverter called for ${fileName}-${convertBytesToHumanReadable(
+                    imageBlob.size
+                )}`
+            );
+            convertedImageBlob = await imageProcessor.convertToJPEG(
+                imageBlob,
+                fileName
+            );
+            addLogLine(`${fileName} successfully converted`);
+        } catch (e) {
+            try {
+                if (!isFileHEIC(exactType)) {
+                    throw Error(CustomError.UNSUPPORTED_RAW_FORMAT);
+                }
+                addLogLine(
+                    `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
+                        imageBlob.size
+                    )}`
+                );
+                convertedImageBlob = await heicConversionService.convert(
+                    imageBlob
+                );
+                addLogLine(`${fileName} successfully converted`);
+            } catch (e) {
+                logError(e, 'get Renderable Image failed');
+                throw Error(CustomError.NON_PREVIEWABLE_FILE);
+            }
+        }
         return convertedImageBlob;
     } else {
         return imageBlob;
     }
 }
 
-export async function isFileHEIC(fileBlob: Blob, fileName: string) {
-    const tempFile = new File([fileBlob], fileName);
-    const { exactType } = await getFileType(tempFile);
-    return isExactTypeHEIC(exactType);
-}
-
-export function isExactTypeHEIC(exactType: string) {
+export function isFileHEIC(exactType: string) {
     return (
         exactType.toLowerCase().endsWith(TYPE_HEIC) ||
         exactType.toLowerCase().endsWith(TYPE_HEIF)
     );
+}
+
+export function isRawFile(exactType: string) {
+    return RAW_FORMATS.includes(exactType.toLowerCase());
+}
+
+export function isSupportedRawFormat(exactType: string) {
+    return SUPPORTED_RAW_FORMATS.includes(exactType.toLowerCase());
 }
 
 export async function changeFilesVisibility(
@@ -498,17 +534,6 @@ export async function downloadFiles(files: EnteFile[]) {
             logError(e, 'download fail for file');
         }
     }
-}
-
-export async function needsConversionForPreview(
-    file: EnteFile,
-    fileBlob: Blob
-) {
-    const isHEIC = await isFileHEIC(fileBlob, file.metadata.title);
-    return (
-        file.metadata.fileType === FILE_TYPE.LIVE_PHOTO ||
-        (file.metadata.fileType === FILE_TYPE.IMAGE && isHEIC)
-    );
 }
 
 export const isImageOrVideo = (fileType: FILE_TYPE) =>
