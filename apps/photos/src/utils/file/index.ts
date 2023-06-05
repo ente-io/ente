@@ -43,6 +43,7 @@ import {
 } from 'services/fileService';
 import isElectron from 'is-electron';
 import imageProcessor from 'services/electron/imageProcessor';
+import { isPlaybackPossible } from 'utils/photoFrame';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -301,6 +302,16 @@ export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
                 original: [URL.createObjectURL(fileBlob)],
             };
         }
+        case FILE_TYPE.VIDEO: {
+            const convertedBlob = await getPlayableVideo(
+                file.metadata.title,
+                new Uint8Array(await fileBlob.arrayBuffer())
+            );
+            return {
+                converted: [URL.createObjectURL(convertedBlob)],
+                original: [URL.createObjectURL(fileBlob)],
+            };
+        }
         default: {
             const previewURL = await createTypedObjectURL(
                 fileBlob,
@@ -326,11 +337,27 @@ async function getRenderableLivePhoto(
     ]);
 }
 
-async function getPlayableVideo(videoNameTitle: string, video: Uint8Array) {
-    const mp4ConvertedVideo = await ffmpegService.convertToMP4(
-        new File([video], videoNameTitle)
-    );
-    return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
+export async function getPlayableVideo(
+    videoNameTitle: string,
+    video: Uint8Array
+) {
+    try {
+        const isPlayable = await isPlaybackPossible(
+            URL.createObjectURL(new Blob([video]))
+        );
+        if (isPlayable) {
+            return new Blob([video.buffer]);
+        } else {
+            addLogLine('video format not supported, converting it');
+            const mp4ConvertedVideo = await ffmpegService.convertToMP4(
+                new File([video], videoNameTitle)
+            );
+            return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
+        }
+    } catch (e) {
+        logError(e, 'video conversion failed');
+        return new Blob([video.buffer]);
+    }
 }
 
 export async function getRenderableImage(fileName: string, imageBlob: Blob) {
