@@ -7,8 +7,8 @@ export class DedicatedFFmpegWorker {
         this.wasmFFmpeg = new WasmFFmpeg();
     }
 
-    run(cmd, inputFile, outputFileName) {
-        return this.wasmFFmpeg.run(cmd, inputFile, outputFileName);
+    run(cmd, inputFile, outputFileName, dontTimeout) {
+        return this.wasmFFmpeg.run(cmd, inputFile, outputFileName, dontTimeout);
     }
 }
 

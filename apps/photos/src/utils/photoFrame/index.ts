@@ -1,8 +1,8 @@
 import { FILE_TYPE } from 'constants/file';
+import { t } from 'i18next';
 import { EnteFile } from 'types/file';
 import { MergedSourceURL } from 'types/gallery';
 import { logError } from 'utils/sentry';
-import { t } from 'i18next';
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 
@@ -115,16 +115,16 @@ export async function updateFileSrcProps(
         `;
         } else {
             file.html = `
-            <div class="pswp-item-container">
-                <img src="${file.msrc}" onContextMenu="return false;"/>
-                <div class="download-banner" >
-                    ${t('VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD')}
-                    <a class="btn btn-outline-success" href=${convertedVideoURL} download="${
-                file.metadata.title
-            }"">Download</a>
+                <div class="pswp-item-container">
+                    <img src="${file.msrc}" onContextMenu="return false;"/>
+                    <div class="download-banner">
+                        ${t('VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD')}
+                        <button class = "btn btn-outline-success" id = "download-btn-${
+                            file.id
+                        }">${t('DOWNLOAD')}</button>
+                    </div>
                 </div>
-            </div>
-            `;
+                `;
         }
     } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         if (isPlayable) {

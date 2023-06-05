@@ -428,7 +428,10 @@ const PhotoFrame = ({
                     `[${item.id}] gallery context cache miss, calling downloadManager to get file`
                 );
                 appContext.startLoading();
-                let downloadedURL;
+                let downloadedURL: {
+                    original: string[];
+                    converted: string[];
+                };
                 if (publicCollectionGalleryContext.accessedThroughSharedURL) {
                     downloadedURL =
                         await PublicCollectionDownloadManager.getFile(

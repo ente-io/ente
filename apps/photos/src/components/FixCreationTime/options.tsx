@@ -57,6 +57,14 @@ export default function FixCreationTimeOptions({ handleChange, values }) {
                 />
             </Row>
             <Row style={{ margin: '0' }}>
+                <Option
+                    value={FIX_OPTIONS.METADATA_DATE}
+                    onChange={handleChange('option')}
+                    label={t('METADATA_DATE')}
+                    selected={Number(values.option)}
+                />
+            </Row>
+            <Row style={{ margin: '0' }}>
                 <Value width="50%">
                     <Option
                         value={FIX_OPTIONS.CUSTOM_TIME}

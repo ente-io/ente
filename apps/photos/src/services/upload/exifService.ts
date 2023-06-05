@@ -15,6 +15,7 @@ type ParsedEXIFData = Record<string, any> &
         CreateDate: Date;
         ModifyDate: Date;
         DateCreated: Date;
+        MetadataDate: Date;
         latitude: number;
         longitude: number;
         imageWidth: number;
@@ -27,6 +28,7 @@ type RawEXIFData = Record<string, any> &
         CreateDate: string;
         ModifyDate: string;
         DateCreated: string;
+        MetadataDate: string;
         GPSLatitude: number[];
         GPSLongitude: number[];
         GPSLatitudeRef: string;
@@ -91,6 +93,7 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
         ExifImageWidth,
         PixelXDimension,
         PixelYDimension,
+        MetadataDate,
         ...rest
     } = exifData;
     const parsedExif: ParsedEXIFData = { ...rest };
@@ -105,6 +108,9 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     }
     if (DateCreated) {
         parsedExif.DateCreated = parseEXIFDate(exifData.DateCreated);
+    }
+    if (MetadataDate) {
+        parsedExif.MetadataDate = parseEXIFDate(exifData.MetadataDate);
     }
     if (exifData.GPSLatitude && exifData.GPSLongitude) {
         const parsedLocation = parseEXIFLocation(
@@ -294,6 +300,7 @@ export function getEXIFTime(exifData: ParsedEXIFData): number {
         exifData.DateTimeOriginal ??
         exifData.DateCreated ??
         exifData.CreateDate ??
+        exifData.MetadataDate ??
         exifData.ModifyDate;
     if (!dateTime) {
         return null;

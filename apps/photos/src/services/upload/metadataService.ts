@@ -48,6 +48,7 @@ const EXIF_TAGS_NEEDED = [
     'ImageHeight',
     'PixelXDimension',
     'PixelYDimension',
+    'MetadataDate',
 ];
 
 export async function extractMetadata(
