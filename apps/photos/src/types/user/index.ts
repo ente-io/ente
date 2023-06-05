@@ -86,6 +86,7 @@ export interface UserDetails {
     sharedCollectionCount: number;
     subscription: Subscription;
     familyData?: FamilyData;
+    storageBonus?: number;
 }
 
 export interface DeleteChallengeResponse {
