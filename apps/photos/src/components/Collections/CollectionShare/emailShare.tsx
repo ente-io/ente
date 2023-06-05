@@ -16,14 +16,6 @@ export default function EmailShare({ collection }) {
 
     const [updatedOptionsList, setUpdatedOptionsList] = useState(['hello']);
     let updatedList = [];
-
-    // const collection_list = getLocalCollections();
-    // collection_list.then((result) => {
-    //     const emails = result.flatMap((item) => item.sharees.map((sharee) => sharee.email));
-    //     updatedOptionsList = [...emails];
-    //     console.log(updatedOptionsList);
-    // });
-    // console.log(updatedOptionsList)
     useEffect(() => {
         const owner_user1: User = getData(LS_KEYS.USER);
         const collection_list = getLocalCollections();
@@ -39,7 +31,7 @@ export default function EmailShare({ collection }) {
             });
 
             updatedList = Array.from(new Set(emails));
-            // console.log(updatedList);
+
             setUpdatedOptionsList(updatedList);
 
             const filteredList = updatedList.filter(
@@ -48,12 +40,8 @@ export default function EmailShare({ collection }) {
                         .map((sharees) => sharees.email)
                         .includes(email) && email !== owner_user1.email
             );
-            // console.log(filteredList);
 
             setUpdatedOptionsList(filteredList);
-
-            // console.log(collection.sharees.map((sharees) => sharees.email));
-            // console.log(owner_user1.email);
         };
 
         getUpdatedOptionsList();
