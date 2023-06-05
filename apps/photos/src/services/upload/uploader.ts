@@ -20,7 +20,6 @@ import uploadCancelService from './uploadCancelService';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import uploadService from './uploadService';
-import { FilePublicMagicMetadata } from 'types/magicMetadata';
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
@@ -117,16 +116,13 @@ export default async function uploader(
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }
-        let pubMagicMetadata: FilePublicMagicMetadata;
-        if (publicMagicMetadata) {
-            pubMagicMetadata = await uploadService.constructPublicMagicMetadata(
-                publicMagicMetadata
-            );
-        } else if (uploaderName) {
-            pubMagicMetadata = await uploadService.constructPublicMagicMetadata(
-                { uploaderName }
-            );
-        }
+
+        const pubMagicMetadata =
+            await uploadService.constructPublicMagicMetadata({
+                ...publicMagicMetadata,
+                uploaderName,
+            });
+
         const fileWithMetadata: FileWithMetadata = {
             localID,
             filedata: file.filedata,
