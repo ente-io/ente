@@ -40,6 +40,7 @@ const EXIF_TAGS_NEEDED = [
     'GPSLatitudeRef',
     'GPSLongitudeRef',
     'DateCreated',
+    'MetadataDate',
 ];
 
 export async function extractMetadata(
