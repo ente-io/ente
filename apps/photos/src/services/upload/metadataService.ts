@@ -8,6 +8,7 @@ import {
     FileTypeInfo,
     ParsedExtractedMetadata,
     ElectronFile,
+    Dimensions,
 } from 'types/upload';
 import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import { getVideoMetadata } from './videoMetadataService';
@@ -40,6 +41,12 @@ const EXIF_TAGS_NEEDED = [
     'GPSLatitudeRef',
     'GPSLongitudeRef',
     'DateCreated',
+    'ExifImageWidth',
+    'ExifImageHeight',
+    'ImageWidth',
+    'ImageHeight',
+    'PixelXDimension',
+    'PixelYDimension',
 ];
 
 export async function extractMetadata(
@@ -55,6 +62,14 @@ export async function extractMetadata(
     }
     const fileHash = await getFileHash(worker, receivedFile);
 
+    let dimensions: Dimensions;
+    if (extractedMetadata.width && extractedMetadata.height) {
+        dimensions = {
+            width: extractedMetadata.width,
+            height: extractedMetadata.height,
+        };
+    }
+
     const metadata: Metadata = {
         title: receivedFile.name,
         creationTime:
@@ -66,6 +81,8 @@ export async function extractMetadata(
         longitude: extractedMetadata.location.longitude,
         fileType: fileTypeInfo.fileType,
         hash: fileHash,
+        w: dimensions.width,
+        h: dimensions.height,
     };
     return metadata;
 }
@@ -90,9 +107,12 @@ export async function getImageMetadata(
             fileTypeInfo,
             EXIF_TAGS_NEEDED
         );
+
         imageMetadata = {
             location: getEXIFLocation(exifData),
             creationTime: getEXIFTime(exifData),
+            width: exifData?.imageWidth,
+            height: exifData?.imageHeight,
         };
     } catch (e) {
         logError(e, 'getExifData failed');

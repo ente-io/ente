@@ -27,11 +27,18 @@ export interface Metadata {
     hash?: string;
     imageHash?: string;
     videoHash?: string;
+    w?: number;
+    h?: number;
 }
 
 export interface Location {
     latitude: number;
     longitude: number;
+}
+
+export interface Dimensions {
+    width: number;
+    height: number;
 }
 
 export interface ParsedMetadataJSON {
@@ -137,6 +144,8 @@ export interface UploadFile extends BackupedFile {
 export interface ParsedExtractedMetadata {
     location: Location;
     creationTime: number;
+    width: number;
+    height: number;
 }
 
 // This is used to prompt the user the make upload strategy choice
