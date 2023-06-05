@@ -8,6 +8,9 @@
     "build": {
         "appId": "io.ente.bhari-frame",
         "artifactName": "${productName}-${version}.${ext}",
+        "nsis": {
+            "deleteAppDataOnUninstall": true
+        },
         "linux": {
             "target": [
                 "AppImage",
