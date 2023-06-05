@@ -74,7 +74,8 @@ export interface ElectronAPIs {
     runFFmpegCmd: (
         cmd: string[],
         inputFile: File | ElectronFile,
-        outputFileName: string
+        outputFileName: string,
+        dontTimeout?: boolean
     ) => Promise<File>;
     muteUpdateNotification: (version: string) => void;
     generateImageThumbnail: (
