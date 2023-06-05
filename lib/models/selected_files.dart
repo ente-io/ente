@@ -5,7 +5,7 @@ import 'package:photos/events/clear_selections_event.dart';
 import 'package:photos/models/file.dart';
 
 class SelectedFiles extends ChangeNotifier {
-  final files = <File>[];
+  final files = <File>{};
   final lastSelections = <File>{};
 
   void toggleSelection(File file) {
