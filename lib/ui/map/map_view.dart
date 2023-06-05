@@ -4,6 +4,7 @@ import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart";
 import "package:latlong2/latlong.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_button.dart";
 import 'package:photos/ui/map/map_gallery_tile.dart';
@@ -75,8 +76,11 @@ class _MapViewState extends State<MapView> {
           ),
           layers: [
             TileLayerOptions(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              subdomains: ['a', 'b', 'c'],
+              urlTemplate: Configuration.urltemplate,
+              additionalOptions: {
+                "accessToken": Configuration.apikey,
+                "id": "mapbox.mapbox-streets-v7",
+              },
             ),
             MarkerClusterLayerOptions(
               maxClusterRadius: 100,

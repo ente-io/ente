@@ -9,7 +9,6 @@ import "package:logging/logging.dart";
 import "package:photos/models/file.dart";
 import "package:photos/ui/map/image_marker.dart";
 import 'package:photos/ui/map/image_tile.dart';
-import "package:photos/ui/map/map_credits.dart";
 import "package:photos/ui/map/map_view.dart";
 
 class MapScreen extends StatefulWidget {
@@ -61,7 +60,7 @@ class _MapScreenState extends State<MapScreen> {
     final List<ImageMarker> tempMarkers = [];
     bool hasAnyLocation = false;
     for (var file in files) {
-      if (file.location != null) {
+      if (file.location != null && file.hasLocation) {
         if (!hasAnyLocation) {
           minLat = file.location!.latitude!;
           minLon = file.location!.longitude!;
@@ -154,9 +153,6 @@ class _MapScreenState extends State<MapScreen> {
                     maxZoom: maxZoom,
                     debounceDuration: debounceDuration,
                   ),
-                ),
-                const SizedBox(
-                  child: MapCredits(),
                 ),
                 SizedBox(
                   height: 120,

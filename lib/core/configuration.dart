@@ -43,6 +43,9 @@ class Configuration {
     "endpoint",
     defaultValue: kDefaultProductionEndpoint,
   );
+  static const urltemplate = String.fromEnvironment("urltemplate");
+  static const apikey = String.fromEnvironment("apikey");
+
   static const emailKey = "email";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyAttributesKey = "key_attributes";
