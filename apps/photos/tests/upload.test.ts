@@ -225,13 +225,13 @@ async function fileDimensionExtractionCheck(expectedState) {
             }
             if (
                 dimensions['width'] &&
-                dimensions['width'] !== matchingFile.metadata.w &&
+                dimensions['width'] !== matchingFile.pubMagicMetadata.data.w &&
                 dimensions['height'] &&
-                dimensions['height'] !== matchingFile.metadata.h
+                dimensions['height'] !== matchingFile.pubMagicMetadata.data.h
             ) {
                 throw Error(`fileDimensionExtractionCheck failed ❌ ,
                                 for ${fileName}
-                                expected: ${dimensions['width']} x ${dimensions['height']} got: ${matchingFile.metadata.w} x ${matchingFile.metadata.h}`);
+                                expected: ${dimensions['width']} x ${dimensions['height']} got: ${matchingFile.pubMagicMetadata.data.w} x ${matchingFile.pubMagicMetadata.data.h}`);
             }
         }
     );
