@@ -5,6 +5,7 @@ import { MetadataFileAttributes, S3FileAttributes } from 'types/file';
 import {
     EncryptedMagicMetadata,
     FilePublicMagicMetadata,
+    FilePublicMagicMetadataProps,
 } from 'types/magicMetadata';
 
 export interface DataStream {
@@ -27,8 +28,6 @@ export interface Metadata {
     hash?: string;
     imageHash?: string;
     videoHash?: string;
-    w?: number;
-    h?: number;
 }
 
 export interface Location {
@@ -154,4 +153,9 @@ export interface PublicUploadProps {
     token: string;
     passwordToken: string;
     accessedThroughSharedURL: boolean;
+}
+
+export interface ExtractMetadataResult {
+    metadata: Metadata;
+    publicMagicMetadata: FilePublicMagicMetadataProps;
 }

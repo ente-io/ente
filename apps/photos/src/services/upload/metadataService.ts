@@ -8,6 +8,7 @@ import {
     FileTypeInfo,
     ParsedExtractedMetadata,
     ElectronFile,
+    ExtractMetadataResult as ExtractMetadataResult,
 } from 'types/upload';
 import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import { getVideoMetadata } from './videoMetadataService';
@@ -19,6 +20,7 @@ import {
 import { getFileHash } from './hashService';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { FilePublicMagicMetadataProps } from 'types/magicMetadata';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
@@ -52,7 +54,7 @@ export async function extractMetadata(
     worker: Remote<DedicatedCryptoWorker>,
     receivedFile: File | ElectronFile,
     fileTypeInfo: FileTypeInfo
-) {
+): Promise<ExtractMetadataResult> {
     let extractedMetadata: ParsedExtractedMetadata = NULL_EXTRACTED_METADATA;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
         extractedMetadata = await getImageMetadata(receivedFile, fileTypeInfo);
@@ -72,10 +74,12 @@ export async function extractMetadata(
         longitude: extractedMetadata.location.longitude,
         fileType: fileTypeInfo.fileType,
         hash: fileHash,
+    };
+    const publicMagicMetadata: FilePublicMagicMetadataProps = {
         w: extractedMetadata.width,
         h: extractedMetadata.height,
     };
-    return metadata;
+    return { metadata, publicMagicMetadata };
 }
 
 export async function getImageMetadata(

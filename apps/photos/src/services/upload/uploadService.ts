@@ -7,11 +7,11 @@ import { CustomError, handleUploadError } from 'utils/error';
 import {
     BackupedFile,
     EncryptedFile,
+    ExtractMetadataResult,
     FileTypeInfo,
     FileWithCollection,
     FileWithMetadata,
     isDataStream,
-    Metadata,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
     ProcessedFile,
@@ -109,7 +109,7 @@ class UploadService {
         { isLivePhoto, file, livePhotoAssets }: UploadAsset,
         collectionID: number,
         fileTypeInfo: FileTypeInfo
-    ): Promise<Metadata> {
+    ): Promise<ExtractMetadataResult> {
         return isLivePhoto
             ? extractLivePhotoMetadata(
                   worker,

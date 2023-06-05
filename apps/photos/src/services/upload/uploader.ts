@@ -55,12 +55,13 @@ export default async function uploader(
         );
 
         addLogLine(`extracting  metadata ${fileNameSize}`);
-        const metadata = await UploadService.extractAssetMetadata(
-            worker,
-            uploadAsset,
-            collection.id,
-            fileTypeInfo
-        );
+        const { metadata, publicMagicMetadata } =
+            await UploadService.extractAssetMetadata(
+                worker,
+                uploadAsset,
+                collection.id,
+                fileTypeInfo
+            );
 
         const matchingExistingFiles = findMatchingExistingFiles(
             existingFiles,
@@ -117,7 +118,11 @@ export default async function uploader(
             metadata.hasStaticThumbnail = true;
         }
         let pubMagicMetadata: FilePublicMagicMetadata;
-        if (uploaderName) {
+        if (publicMagicMetadata) {
+            pubMagicMetadata = await uploadService.constructPublicMagicMetadata(
+                publicMagicMetadata
+            );
+        } else if (uploaderName) {
             pubMagicMetadata = await uploadService.constructPublicMagicMetadata(
                 { uploaderName }
             );

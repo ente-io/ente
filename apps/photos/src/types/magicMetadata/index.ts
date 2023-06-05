@@ -24,6 +24,8 @@ export interface FilePublicMagicMetadataProps {
     editedName?: string;
     caption?: string;
     uploaderName?: string;
+    w?: number;
+    h?: number;
 }
 
 export interface FilePublicMagicMetadata
