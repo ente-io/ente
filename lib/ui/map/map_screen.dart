@@ -1,5 +1,7 @@
 import "dart:async";
+import "dart:math";
 
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import "package:latlong2/latlong.dart";
@@ -29,6 +31,8 @@ class _MapScreenState extends State<MapScreen> {
   List<File> visibleImages = [];
   MapController mapController = MapController();
   bool isLoading = true;
+  double initialZoom = 2.0;
+  LatLng center = LatLng(10.732951, 78.405635);
   final Logger _logger = Logger("_MapScreenState");
 
   @override
@@ -50,10 +54,35 @@ class _MapScreenState extends State<MapScreen> {
     allImages = await SearchService.instance.getAllFiles();
   }
 
+  // Simple function to estimate zoom level
+  double estimateZoomLevel(
+    double range,
+    double maxRange,
+    double minZoom,
+    double maxZoom,
+  ) {
+    if (range >= maxRange) return minZoom;
+    return maxZoom - ((range / maxRange) * (maxZoom - minZoom));
+  }
+
   void processFiles(List<File> files) {
+    late double minLat, maxLat, minLon, maxLon;
     final List<ImageMarker> tempMarkers = [];
+    bool hasAnyLocation = false;
     for (var file in files) {
       if (file.hasLocation) {
+        if (!hasAnyLocation) {
+          minLat = file.location!.latitude!;
+          minLon = file.location!.longitude!;
+          maxLat = file.location!.latitude!;
+          maxLon = file.location!.longitude!;
+          hasAnyLocation = true;
+        } else {
+          minLat = min(minLat, file.location!.latitude!);
+          minLon = min(minLon, file.location!.longitude!);
+          maxLat = max(maxLat, file.location!.latitude!);
+          maxLon = max(maxLon, file.location!.longitude!);
+        }
         tempMarkers.add(
           ImageMarker(
             latitude: file.location!.latitude!,
@@ -63,6 +92,21 @@ class _MapScreenState extends State<MapScreen> {
         );
       }
     }
+    if (hasAnyLocation) {
+      center = LatLng(
+        minLat + (maxLat - minLat) / 2,
+        minLon + (maxLon - minLon) / 2,
+      );
+      final double latZoom = estimateZoomLevel(maxLat - minLat, 90, 0, 19);
+      final double lonZoom = estimateZoomLevel(maxLon - minLon, 180, 0, 19);
+      initialZoom = min(latZoom, lonZoom);
+      if (kDebugMode) {
+        debugPrint("Info for map: center $center, initialZoom $initialZoom");
+        debugPrint("Info for map: minLat $minLat, maxLat $maxLat");
+        debugPrint("Info for map: minLon $minLon, maxLon $maxLon");
+      }
+    }
+
     setState(() {
       imageMarkers = tempMarkers;
       isLoading = false;
@@ -124,6 +168,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _logger.info('Building with Zoom $initialZoom');
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -135,6 +180,8 @@ class _MapScreenState extends State<MapScreen> {
                     updateVisibleImages: updateVisibleImages,
                     controller: mapController,
                     imageMarkers: imageMarkers,
+                    initialZoom: initialZoom,
+                    center: center,
                   ),
                 ),
                 const SizedBox(

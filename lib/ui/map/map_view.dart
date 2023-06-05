@@ -14,12 +14,16 @@ class MapView extends StatefulWidget {
   final List<ImageMarker> imageMarkers;
   final Function updateVisibleImages;
   final MapController controller;
+  final double initialZoom;
+  final LatLng center;
 
   const MapView({
     Key? key,
     required this.updateVisibleImages,
     required this.imageMarkers,
     required this.controller,
+    required this.initialZoom,
+    required this.center,
   }) : super(key: key);
 
   @override
@@ -28,8 +32,18 @@ class MapView extends StatefulWidget {
 
 class _MapViewState extends State<MapView> {
   Timer? _debounceTimer;
-  LatLng center = LatLng(10.732951, 78.405635);
+  late LatLng center;
   bool _isDebouncing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    center = widget.center;
+    debugPrint("ZoomMapView: ${widget.initialZoom}");
+    // widget.controller.onReady.then((_) {
+    //   widget.controller.move(center, widget.initialZoom);
+    // });
+  }
 
   void _onPositionChanged(position, hasGesture) {
     if (position.bounds != null) {
@@ -46,15 +60,16 @@ class _MapViewState extends State<MapView> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("MapViewBuild: ${widget.initialZoom}");
     return Stack(
       children: [
         FlutterMap(
           mapController: widget.controller,
           options: MapOptions(
             center: center,
-            zoom: 3,
-            minZoom: 1,
-            maxZoom: 16.5,
+            zoom: widget.initialZoom,
+            minZoom: 0,
+            maxZoom: 19,
             onPositionChanged: _onPositionChanged,
             plugins: [
               MarkerClusterPlugin(),
