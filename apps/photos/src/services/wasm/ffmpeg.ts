@@ -32,13 +32,22 @@ export class WasmFFmpeg {
         }
     }
 
-    async run(cmd: string[], inputFile: File, outputFileName: string) {
-        const response = this.ffmpegTaskQueue.queueUpRequest(() =>
-            promiseWithTimeout<File>(
-                this.execute(cmd, inputFile, outputFileName),
-                FFMPEG_EXECUTION_WAIT_TIME
-            )
-        );
+    async run(
+        cmd: string[],
+        inputFile: File,
+        outputFileName: string,
+        dontTimeout = false
+    ) {
+        const response = this.ffmpegTaskQueue.queueUpRequest(() => {
+            if (dontTimeout) {
+                return this.execute(cmd, inputFile, outputFileName);
+            } else {
+                promiseWithTimeout<File>(
+                    this.execute(cmd, inputFile, outputFileName),
+                    FFMPEG_EXECUTION_WAIT_TIME
+                );
+            }
+        });
         try {
             return await response.promise;
         } catch (e) {
