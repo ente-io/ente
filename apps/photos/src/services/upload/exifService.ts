@@ -15,6 +15,7 @@ type ParsedEXIFData = Record<string, any> &
         CreateDate: Date;
         ModifyDate: Date;
         DateCreated: Date;
+        MetadataDate: Date;
         latitude: number;
         longitude: number;
     }>;
@@ -25,6 +26,7 @@ type RawEXIFData = Record<string, any> &
         CreateDate: string;
         ModifyDate: string;
         DateCreated: string;
+        MetadataDate: string;
         GPSLatitude: number[];
         GPSLongitude: number[];
         GPSLatitudeRef: string;
@@ -76,8 +78,14 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     if (!exifData) {
         return null;
     }
-    const { DateTimeOriginal, CreateDate, ModifyDate, DateCreated, ...rest } =
-        exifData;
+    const {
+        DateTimeOriginal,
+        CreateDate,
+        ModifyDate,
+        DateCreated,
+        MetadataDate,
+        ...rest
+    } = exifData;
     const parsedExif: ParsedEXIFData = { ...rest };
     if (DateTimeOriginal) {
         parsedExif.DateTimeOriginal = parseEXIFDate(exifData.DateTimeOriginal);
@@ -91,15 +99,8 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     if (DateCreated) {
         parsedExif.DateCreated = parseEXIFDate(exifData.DateCreated);
     }
-    if (exifData.GPSLatitude && exifData.GPSLongitude) {
-        const parsedLocation = parseEXIFLocation(
-            exifData.GPSLatitude,
-            exifData.GPSLatitudeRef,
-            exifData.GPSLongitude,
-            exifData.GPSLongitudeRef
-        );
-        parsedExif.latitude = parsedLocation.latitude;
-        parsedExif.longitude = parsedLocation.longitude;
+    if (MetadataDate) {
+        parsedExif.MetadataDate = parseEXIFDate(exifData.MetadataDate);
     }
     return parsedExif;
 }
@@ -230,6 +231,7 @@ export function getEXIFTime(exifData: ParsedEXIFData): number {
         exifData.DateTimeOriginal ??
         exifData.DateCreated ??
         exifData.CreateDate ??
+        exifData.MetadataDate ??
         exifData.ModifyDate;
     if (!dateTime) {
         return null;
