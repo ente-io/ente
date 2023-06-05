@@ -537,7 +537,7 @@ Future<void> showDeleteSheet(
         onTap: () async {
           await deleteFilesFromRemoteOnly(
             context,
-            selectedFiles.files,
+            selectedFiles.files.toList(),
           ).then(
             (value) {
               showShortToast(context, S.of(context).movedToTrash);
@@ -564,7 +564,7 @@ Future<void> showDeleteSheet(
         shouldSurfaceExecutionStates: false,
         isInAlert: true,
         onTap: () async {
-          await deleteFilesOnDeviceOnly(context, selectedFiles.files);
+          await deleteFilesOnDeviceOnly(context, selectedFiles.files.toList());
         },
       ),
     );
@@ -583,7 +583,7 @@ Future<void> showDeleteSheet(
         onTap: () async {
           await deleteFilesFromEverywhere(
             context,
-            selectedFiles.files,
+            selectedFiles.files.toList(),
           );
         },
       ),
