@@ -7,13 +7,10 @@ import 'package:flutter_map/flutter_map.dart';
 import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file.dart";
-import "package:photos/models/file_load_result.dart";
 import "package:photos/ui/map/image_marker.dart";
+import 'package:photos/ui/map/image_tile.dart';
 import "package:photos/ui/map/map_credits.dart";
 import "package:photos/ui/map/map_view.dart";
-import "package:photos/ui/viewer/file/detail_page.dart";
-import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-import "package:photos/utils/navigation_util.dart";
 
 class MapScreen extends StatefulWidget {
   // Add a function parameter where the function returns a Future<List<File>>
@@ -38,7 +35,10 @@ class _MapScreenState extends State<MapScreen> {
   MapController mapController = MapController();
   bool isLoading = true;
   double initialZoom = 4.0;
-  LatLng center = LatLng(10.732951, 78.405635);
+  double maxZoom = 16.0;
+  double minZoom = 3.0;
+  int debounceDuration = 200;
+  LatLng center = LatLng(0, 0);
   final Logger _logger = Logger("_MapScreenState");
 
   @override
@@ -56,23 +56,12 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  // Simple function to estimate zoom level
-  double estimateZoomLevel(
-    double range,
-    double maxRange,
-    double minZoom,
-    double maxZoom,
-  ) {
-    if (range >= maxRange) return minZoom;
-    return maxZoom - ((range / maxRange) * (maxZoom - minZoom));
-  }
-
   void processFiles(List<File> files) {
     late double minLat, maxLat, minLon, maxLon;
     final List<ImageMarker> tempMarkers = [];
     bool hasAnyLocation = false;
     for (var file in files) {
-      if (file.hasLocation) {
+      if (file.location != null) {
         if (!hasAnyLocation) {
           minLat = file.location!.latitude!;
           minLon = file.location!.longitude!;
@@ -99,9 +88,15 @@ class _MapScreenState extends State<MapScreen> {
         minLat + (maxLat - minLat) / 2,
         minLon + (maxLon - minLon) / 2,
       );
-      final double latZoom = estimateZoomLevel(maxLat - minLat, 90, 0, 19);
-      final double lonZoom = estimateZoomLevel(maxLon - minLon, 180, 0, 19);
+      final latRange = maxLat - minLat;
+      final lonRange = maxLon - minLon;
+
+      final latZoom = log(360.0 / latRange) / log(2);
+      final lonZoom = log(180.0 / lonRange) / log(2);
+
       initialZoom = min(latZoom, lonZoom);
+      if (initialZoom < minZoom) initialZoom = minZoom;
+      if (initialZoom > maxZoom) initialZoom = maxZoom;
       if (kDebugMode) {
         debugPrint("Info for map: center $center, initialZoom $initialZoom");
         debugPrint("Info for map: minLat $minLat, maxLat $maxLat");
@@ -111,12 +106,22 @@ class _MapScreenState extends State<MapScreen> {
 
     setState(() {
       imageMarkers = tempMarkers;
-      isLoading = false;
     });
-    updateVisibleImages(mapController.bounds!);
+
+    mapController.move(
+      center,
+      initialZoom,
+    );
+
+    Timer(Duration(milliseconds: debounceDuration), () {
+      updateVisibleImages(mapController.bounds!);
+      setState(() {
+        isLoading = false;
+      });
+    });
   }
 
-  void updateVisibleImages(LatLngBounds bounds) async {
+  void updateVisibleImages(LatLngBounds bounds) {
     final images = imageMarkers
         .where((imageMarker) {
           final point = LatLng(imageMarker.latitude, imageMarker.longitude);
@@ -130,47 +135,8 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  String formatNumber(int number) {
-    if (number <= 99) {
-      return number.toString();
-    } else if (number <= 999) {
-      return '${(number / 100).toStringAsFixed(0)}00+';
-    } else if (number >= 1000 && number < 2000) {
-      return '1K+';
-    } else {
-      final int thousands = ((number - 1) ~/ 1000);
-      return '${thousands}K+';
-    }
-  }
-
-  void onTap(File image, int index) {
-    final page = DetailPage(
-      DetailPageConfiguration(
-        List.unmodifiable(visibleImages),
-        (
-          creationStartTime,
-          creationEndTime, {
-          limit,
-          asc,
-        }) async {
-          final result = FileLoadResult(allImages, false);
-          return result;
-        },
-        index,
-        'Map',
-      ),
-    );
-
-    routeToPage(
-      context,
-      page,
-      forceCustomPageRoute: true,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    _logger.info('Building with Zoom $initialZoom');
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -179,11 +145,14 @@ class _MapScreenState extends State<MapScreen> {
               children: [
                 Expanded(
                   child: MapView(
-                    updateVisibleImages: updateVisibleImages,
                     controller: mapController,
                     imageMarkers: imageMarkers,
-                    initialZoom: initialZoom,
+                    updateVisibleImages: updateVisibleImages,
                     center: center,
+                    initialZoom: initialZoom,
+                    minZoom: minZoom,
+                    maxZoom: maxZoom,
+                    debounceDuration: debounceDuration,
                   ),
                 ),
                 const SizedBox(
@@ -197,20 +166,11 @@ class _MapScreenState extends State<MapScreen> {
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (context, index) {
                         final image = visibleImages[index];
-                        return InkWell(
-                          onTap: () => onTap(image, index),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 10,
-                            ),
-                            width: 100,
-                            height: 100,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: ThumbnailWidget(image),
-                            ),
-                          ),
+                        return ImageTile(
+                          image: image,
+                          allImages: allImages,
+                          visibleImages: visibleImages,
+                          index: index,
                         );
                       },
                     ),
@@ -219,9 +179,8 @@ class _MapScreenState extends State<MapScreen> {
               ],
             ),
             isLoading
-                ? Container(
-                    color: Colors.black87,
-                    child: const Center(
+                ? const SizedBox.expand(
+                    child: Center(
                       child: CircularProgressIndicator(color: Colors.green),
                     ),
                   )

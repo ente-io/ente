@@ -14,16 +14,22 @@ class MapView extends StatefulWidget {
   final List<ImageMarker> imageMarkers;
   final Function updateVisibleImages;
   final MapController controller;
-  final double initialZoom;
   final LatLng center;
+  final double minZoom;
+  final double maxZoom;
+  final double initialZoom;
+  final int debounceDuration;
 
   const MapView({
     Key? key,
     required this.updateVisibleImages,
     required this.imageMarkers,
     required this.controller,
-    required this.initialZoom,
     required this.center,
+    required this.minZoom,
+    required this.maxZoom,
+    required this.initialZoom,
+    required this.debounceDuration,
   }) : super(key: key);
 
   @override
@@ -32,45 +38,37 @@ class MapView extends StatefulWidget {
 
 class _MapViewState extends State<MapView> {
   Timer? _debounceTimer;
-  late LatLng center;
   bool _isDebouncing = false;
 
   @override
-  void initState() {
-    super.initState();
-    center = widget.center;
-    debugPrint("ZoomMapView: ${widget.initialZoom}");
-    // widget.controller.onReady.then((_) {
-    //   widget.controller.move(center, widget.initialZoom);
-    // });
-  }
-
-  void _onPositionChanged(position, hasGesture) {
-    if (position.bounds != null) {
-      if (!_isDebouncing) {
-        _isDebouncing = true;
-        _debounceTimer?.cancel(); // Cancel previous debounce timer
-        _debounceTimer = Timer(const Duration(milliseconds: 200), () {
-          widget.updateVisibleImages(position.bounds!);
-          _isDebouncing = false;
-        });
-      }
-    }
+  void dispose() {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("MapViewBuild: ${widget.initialZoom}");
     return Stack(
       children: [
         FlutterMap(
           mapController: widget.controller,
           options: MapOptions(
-            center: center,
-            zoom: widget.initialZoom,
-            minZoom: 0,
-            maxZoom: 19,
-            onPositionChanged: _onPositionChanged,
+            minZoom: widget.minZoom,
+            maxZoom: widget.maxZoom,
+            onPositionChanged: (position, hasGesture) {
+              if (position.bounds != null) {
+                if (!_isDebouncing) {
+                  _isDebouncing = true;
+                  _debounceTimer?.cancel();
+                  _debounceTimer = Timer(
+                      Duration(milliseconds: widget.debounceDuration), () {
+                    widget.updateVisibleImages(position.bounds!);
+                    _isDebouncing = false;
+                  });
+                }
+              }
+            },
             plugins: [
               MarkerClusterPlugin(),
             ],
@@ -114,20 +112,6 @@ class _MapViewState extends State<MapView> {
               },
             ),
           ],
-        ),
-        Positioned(
-          bottom: 10,
-          left: 10,
-          child: MapButton(
-            icon: Icons.my_location,
-            onPressed: () {
-              widget.controller.move(
-                center,
-                widget.controller.zoom,
-              );
-            },
-            heroTag: 'location',
-          ),
         ),
         Positioned(
           top: 10,
