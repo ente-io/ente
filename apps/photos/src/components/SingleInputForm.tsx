@@ -102,6 +102,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                     {props.optionsList && props.optionsList.length > 0 ? (
                         <Autocomplete
                             id="free-solo-demo"
+                            filterSelectedOptions
                             freeSolo
                             options={props.optionsList.map((option) =>
                                 option.toString()
