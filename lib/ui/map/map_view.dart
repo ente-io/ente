@@ -8,7 +8,6 @@ import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_button.dart";
 import 'package:photos/ui/map/map_gallery_tile.dart';
 import 'package:photos/ui/map/map_gallery_tile_badge.dart';
-
 import "package:photos/ui/map/map_marker.dart";
 
 class MapView extends StatefulWidget {
@@ -53,8 +52,8 @@ class _MapViewState extends State<MapView> {
           mapController: widget.controller,
           options: MapOptions(
             center: center,
-            zoom: 5,
-            minZoom: 5,
+            zoom: 3,
+            minZoom: 1,
             maxZoom: 16.5,
             onPositionChanged: _onPositionChanged,
             plugins: [
@@ -71,16 +70,16 @@ class _MapViewState extends State<MapView> {
               showPolygon: true,
               size: const Size(75, 75),
               fitBoundsOptions: const FitBoundsOptions(
-                padding: EdgeInsets.all(50),
+                padding: EdgeInsets.all(1),
               ),
               markers: widget.imageMarkers.asMap().entries.map((marker) {
                 final imageMarker = marker.value;
                 return mapMarker(imageMarker, marker.key.toString());
               }).toList(),
               polygonOptions: const PolygonOptions(
-                borderColor: Colors.redAccent,
-                color: Colors.black12,
-                borderStrokeWidth: 3,
+                borderColor: Colors.green,
+                color: Colors.transparent,
+                borderStrokeWidth: 1,
               ),
               builder: (context, markers) {
                 final index = int.parse(
