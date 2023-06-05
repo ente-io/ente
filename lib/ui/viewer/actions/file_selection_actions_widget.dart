@@ -412,7 +412,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   Future<void> _onCreateCollageClicked() async {
     final bool? result = await routeToPage(
       context,
-      CollageCreatorPage(widget.selectedFiles.files),
+      CollageCreatorPage(widget.selectedFiles.files.toList()),
     );
     if (result != null && result) {
       widget.selectedFiles.clearAll();
@@ -502,7 +502,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   Future<void> _permanentlyDelete() async {
     if (await deleteFromTrash(
       context,
-      widget.selectedFiles.files,
+      widget.selectedFiles.files.toList(),
     )) {
       widget.selectedFiles.clearAll();
     }
