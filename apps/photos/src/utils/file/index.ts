@@ -333,17 +333,22 @@ export async function getPlayableVideo(
     videoNameTitle: string,
     video: Uint8Array
 ) {
-    const isPlayable = await isPlaybackPossible(
-        URL.createObjectURL(new Blob([video]))
-    );
-    if (isPlayable) {
-        return new Blob([video.buffer]);
-    } else {
-        addLogLine('video format not supported, converting it');
-        const mp4ConvertedVideo = await ffmpegService.convertToMP4(
-            new File([video], videoNameTitle)
+    try {
+        const isPlayable = await isPlaybackPossible(
+            URL.createObjectURL(new Blob([video]))
         );
-        return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
+        if (isPlayable) {
+            return new Blob([video.buffer]);
+        } else {
+            addLogLine('video format not supported, converting it');
+            const mp4ConvertedVideo = await ffmpegService.convertToMP4(
+                new File([video], videoNameTitle)
+            );
+            return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
+        }
+    } catch (e) {
+        logError(e, 'video conversion failed');
+        return new Blob([video.buffer]);
     }
 }
 

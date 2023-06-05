@@ -1,4 +1,5 @@
 import { FILE_TYPE } from 'constants/file';
+import { t } from 'i18next';
 import { EnteFile } from 'types/file';
 import { MergedSourceURL } from 'types/gallery';
 import { logError } from 'utils/sentry';
@@ -95,6 +96,9 @@ export async function updateFileSrcProps(
         [originalURL] = urls.original;
     }
 
+    const isPlayable =
+        convertedVideoURL && (await isPlaybackPossible(convertedVideoURL));
+
     file.w = window.innerWidth;
     file.h = window.innerHeight;
     file.isSourceLoaded = true;
@@ -102,22 +106,50 @@ export async function updateFileSrcProps(
     file.originalVideoURL = originalVideoURL;
 
     if (file.metadata.fileType === FILE_TYPE.VIDEO) {
-        file.html = `
-        <video controls onContextMenu="return false;">
-            <source src="${convertedVideoURL}" />
-            Your browser does not support the video tag.
-        </video>
-    `;
-    } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        file.html = `
-        <div class = 'pswp-item-container'>
-            <img id = "live-photo-image-${file.id}" src="${convertedImageURL}" onContextMenu="return false;"/>
-            <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
+        if (isPlayable) {
+            file.html = `
+            <video controls onContextMenu="return false;">
                 <source src="${convertedVideoURL}" />
                 Your browser does not support the video tag.
             </video>
-        </div>
         `;
+        } else {
+            file.html = `
+                <div class="pswp-item-container">
+                    <img src="${file.msrc}" onContextMenu="return false;"/>
+                    <div class="download-banner">
+                        ${t('VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD')}
+                        <button class = "btn btn-outline-success" id = "download-btn-${
+                            file.id
+                        }">${t('DOWNLOAD')}</button>
+                    </div>
+                </div>
+                `;
+        }
+    } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        if (isPlayable) {
+            file.html = `
+                <div class = 'pswp-item-container'>
+                    <img id = "live-photo-image-${file.id}" src="${convertedImageURL}" onContextMenu="return false;"/>
+                    <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
+                        <source src="${convertedVideoURL}" />
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                `;
+        } else {
+            file.html = `
+                <div class="pswp-item-container">
+                    <img src="${file.msrc}" onContextMenu="return false;"/>
+                    <div class="download-banner">
+                        ${t('VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD')}
+                        <button class = "btn btn-outline-success" id = "download-btn-${
+                            file.id
+                        }">Download</button>
+                    </div>
+                </div>
+                `;
+        }
     } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         file.src = convertedImageURL;
     } else {
