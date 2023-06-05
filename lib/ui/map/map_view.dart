@@ -41,6 +41,14 @@ class _MapViewState extends State<MapView> {
   bool _isDebouncing = false;
 
   @override
+  void initState() {
+    super.initState();
+    widget.controller.onReady.then((_) {
+      widget.controller.move(widget.center, widget.initialZoom);
+    });
+  }
+
+  @override
   void dispose() {
     _debounceTimer?.cancel();
     _debounceTimer = null;

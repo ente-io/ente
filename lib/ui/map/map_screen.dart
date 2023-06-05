@@ -11,6 +11,7 @@ import "package:photos/ui/map/image_marker.dart";
 import 'package:photos/ui/map/image_tile.dart';
 import "package:photos/ui/map/map_credits.dart";
 import "package:photos/ui/map/map_view.dart";
+import "package:photos/utils/toast_util.dart";
 
 class MapScreen extends StatefulWidget {
   // Add a function parameter where the function returns a Future<List<File>>
@@ -35,10 +36,10 @@ class _MapScreenState extends State<MapScreen> {
   MapController mapController = MapController();
   bool isLoading = true;
   double initialZoom = 4.0;
-  double maxZoom = 16.0;
-  double minZoom = 3.0;
+  double maxZoom = 19.0;
+  double minZoom = 0.0;
   int debounceDuration = 200;
-  LatLng center = LatLng(0, 0);
+  LatLng center = LatLng(46.7286, 4.8614);
   final Logger _logger = Logger("_MapScreenState");
 
   @override
@@ -61,7 +62,7 @@ class _MapScreenState extends State<MapScreen> {
     final List<ImageMarker> tempMarkers = [];
     bool hasAnyLocation = false;
     for (var file in files) {
-      if (file.location != null) {
+      if (file.hasLocation) {
         if (!hasAnyLocation) {
           minLat = file.location!.latitude!;
           minLon = file.location!.longitude!;
@@ -95,13 +96,15 @@ class _MapScreenState extends State<MapScreen> {
       final lonZoom = log(180.0 / lonRange) / log(2);
 
       initialZoom = min(latZoom, lonZoom);
-      if (initialZoom < minZoom) initialZoom = minZoom;
-      if (initialZoom > maxZoom) initialZoom = maxZoom;
+      if (initialZoom <= minZoom) initialZoom = minZoom + 1;
+      if (initialZoom >= (maxZoom - 1)) initialZoom = maxZoom - 1;
       if (kDebugMode) {
         debugPrint("Info for map: center $center, initialZoom $initialZoom");
         debugPrint("Info for map: minLat $minLat, maxLat $maxLat");
         debugPrint("Info for map: minLon $minLon, maxLon $maxLon");
       }
+    } else {
+      showShortToast(context, "No images with location found");
     }
 
     setState(() {
