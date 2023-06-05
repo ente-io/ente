@@ -36,11 +36,6 @@ export interface Location {
     longitude: number;
 }
 
-export interface Dimensions {
-    width: number;
-    height: number;
-}
-
 export interface ParsedMetadataJSON {
     creationTime: number;
     modificationTime: number;
