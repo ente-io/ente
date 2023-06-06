@@ -125,7 +125,9 @@ dependencies:
   url_launcher: ^6.0.3
   uuid: ^3.0.4
   video_player:
-    path: thirdparty/plugins/packages/video_player/video_player
+    git:
+      url: git@github.com:ente-io/packages.git
+      ref: android_video_roation_fix
   video_thumbnail: ^0.4.3
   visibility_detector: ^0.3.3
   wakelock: ^0.6.1+2
