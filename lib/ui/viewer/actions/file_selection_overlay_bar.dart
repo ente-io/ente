@@ -6,7 +6,7 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/collection_action_sheet.dart';
+import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/viewer/actions/file_selection_actions_widget.dart';

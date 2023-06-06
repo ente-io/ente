@@ -20,23 +20,22 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import "package:photos/ui/new_shared_collections_gallery.dart";
-import 'package:photos/ui/sharing/user_avator_widget.dart';
+import "package:photos/ui/sharing/user_avator_widget.dart";
+import 'package:photos/ui/tabs/shared/new_shared_collections_gallery.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
-class SharedCollectionGallery extends StatefulWidget {
-  const SharedCollectionGallery({Key? key}) : super(key: key);
+class SharedCollectionsTab extends StatefulWidget {
+  const SharedCollectionsTab({Key? key}) : super(key: key);
 
   @override
-  State<SharedCollectionGallery> createState() =>
-      _SharedCollectionGalleryState();
+  State<SharedCollectionsTab> createState() => _SharedCollectionsTabState();
 }
 
-class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
+class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     with AutomaticKeepAliveClientMixin {
   final Logger _logger = Logger("SharedCollectionGallery");
   late StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;

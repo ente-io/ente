@@ -12,7 +12,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/collections_list_widget.dart";
+import 'package:photos/ui/collections/collections_list_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';

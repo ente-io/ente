@@ -16,7 +16,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
-import "package:photos/ui/collection_action_sheet.dart";
+import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/components/album_list_item_widget.dart';
 import 'package:photos/ui/components/new_album_list_widget.dart';
 import "package:photos/ui/sharing/share_collection_page.dart";

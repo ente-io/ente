@@ -28,17 +28,16 @@ import 'package:photos/ui/viewer/actions/delete_empty_albums.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/local_settings.dart';
 
-class CollectionsGalleryWidget extends StatefulWidget {
-  const CollectionsGalleryWidget({Key? key}) : super(key: key);
+class UserCollectionsTab extends StatefulWidget {
+  const UserCollectionsTab({Key? key}) : super(key: key);
 
   @override
-  State<CollectionsGalleryWidget> createState() =>
-      _CollectionsGalleryWidgetState();
+  State<UserCollectionsTab> createState() => _UserCollectionsTabState();
 }
 
-class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
+class _UserCollectionsTabState extends State<UserCollectionsTab>
     with AutomaticKeepAliveClientMixin {
-  final _logger = Logger((_CollectionsGalleryWidgetState).toString());
+  final _logger = Logger((_UserCollectionsTabState).toString());
   late StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
