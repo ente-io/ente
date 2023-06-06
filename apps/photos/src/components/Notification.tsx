@@ -4,7 +4,6 @@ import {
     Button,
     ButtonProps,
     IconButton,
-    Paper,
     Snackbar,
     Stack,
     Typography,
@@ -42,14 +41,14 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                 vertical: 'bottom',
             }}
             sx={{ backgroundColor: '#000', width: '320px' }}>
-            <Paper
-                component={Button}
+            <Button
                 color={attributes.variant}
                 onClick={handleClick}
                 sx={{
                     textAlign: 'left',
                     flex: '1',
                     padding: (theme) => theme.spacing(1.5, 2),
+                    borderRadius: '8px',
                 }}>
                 <Stack
                     flex={'1'}
@@ -89,7 +88,7 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                         </IconButton>
                     )}
                 </Stack>
-            </Paper>
+            </Button>
         </Snackbar>
     );
 }
