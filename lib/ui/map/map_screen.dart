@@ -104,7 +104,7 @@ class _MapScreenState extends State<MapScreen> {
         debugPrint("Info for map: minLon $minLon, maxLon $maxLon");
       }
     } else {
-      showShortToast(context, "No images with location found");
+      showShortToast(context, "No images with location");
     }
 
     setState(() {

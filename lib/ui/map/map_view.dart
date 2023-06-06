@@ -64,6 +64,7 @@ class _MapViewState extends State<MapView> {
           options: MapOptions(
             minZoom: widget.minZoom,
             maxZoom: widget.maxZoom,
+            enableMultiFingerGestureRace: true,
             onPositionChanged: (position, hasGesture) {
               if (position.bounds != null) {
                 if (!_isDebouncing) {
@@ -85,6 +86,7 @@ class _MapViewState extends State<MapView> {
             TileLayerOptions(
               urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
               subdomains: ['a', 'b', 'c'],
+              backgroundColor: Colors.transparent,
             ),
             MarkerClusterLayerOptions(
               maxClusterRadius: 100,
