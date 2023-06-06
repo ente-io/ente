@@ -8,6 +8,7 @@ import {
     FileWithCollection,
     LivePhotoAssets,
     ParsedMetadataJSONMap,
+    ExtractMetadataResult,
 } from 'types/upload';
 import { CustomError } from 'utils/error';
 import { getFileTypeFromExtensionForLivePhotoClustering } from 'utils/file/livePhoto';
@@ -51,12 +52,15 @@ export async function extractLivePhotoMetadata(
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
     livePhotoAssets: LivePhotoAssets
-) {
+): Promise<ExtractMetadataResult> {
     const imageFileTypeInfo: FileTypeInfo = {
         fileType: FILE_TYPE.IMAGE,
         exactType: fileTypeInfo.imageType,
     };
-    const imageMetadata = await extractFileMetadata(
+    const {
+        metadata: imageMetadata,
+        publicMagicMetadata: imagePublicMagicMetadata,
+    } = await extractFileMetadata(
         worker,
         parsedMetadataJSONMap,
         collectionID,
@@ -65,12 +69,15 @@ export async function extractLivePhotoMetadata(
     );
     const videoHash = await getFileHash(worker, livePhotoAssets.video);
     return {
-        ...imageMetadata,
-        title: getLivePhotoName(livePhotoAssets),
-        fileType: FILE_TYPE.LIVE_PHOTO,
-        imageHash: imageMetadata.hash,
-        videoHash: videoHash,
-        hash: undefined,
+        metadata: {
+            ...imageMetadata,
+            title: getLivePhotoName(livePhotoAssets),
+            fileType: FILE_TYPE.LIVE_PHOTO,
+            imageHash: imageMetadata.hash,
+            videoHash: videoHash,
+            hash: undefined,
+        },
+        publicMagicMetadata: imagePublicMagicMetadata,
     };
 }
 

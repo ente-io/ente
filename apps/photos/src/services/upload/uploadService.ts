@@ -7,11 +7,11 @@ import { CustomError, handleUploadError } from 'utils/error';
 import {
     BackupedFile,
     EncryptedFile,
+    ExtractMetadataResult,
     FileTypeInfo,
     FileWithCollection,
     FileWithMetadata,
     isDataStream,
-    Metadata,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
     ProcessedFile,
@@ -36,7 +36,7 @@ import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import publicUploadHttpClient from './publicUploadHttpClient';
 import { constructPublicMagicMetadata } from './magicMetadataService';
-import { FilePublicMagicMetadataProps } from 'types/magicMetadata';
+import { FilePublicMagicMetadataProps } from 'types/file';
 import { B64EncryptionResult } from 'types/crypto';
 
 class UploadService {
@@ -109,7 +109,7 @@ class UploadService {
         { isLivePhoto, file, livePhotoAssets }: UploadAsset,
         collectionID: number,
         fileTypeInfo: FileTypeInfo
-    ): Promise<Metadata> {
+    ): Promise<ExtractMetadataResult> {
         return isLivePhoto
             ? extractLivePhotoMetadata(
                   worker,

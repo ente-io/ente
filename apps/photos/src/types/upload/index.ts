@@ -1,11 +1,13 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
 import { B64EncryptionResult, LocalFileAttributes } from 'types/crypto';
-import { MetadataFileAttributes, S3FileAttributes } from 'types/file';
 import {
-    EncryptedMagicMetadata,
+    MetadataFileAttributes,
+    S3FileAttributes,
     FilePublicMagicMetadata,
-} from 'types/magicMetadata';
+    FilePublicMagicMetadataProps,
+} from 'types/file';
+import { EncryptedMagicMetadata } from 'types/magicMetadata';
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -137,6 +139,8 @@ export interface UploadFile extends BackupedFile {
 export interface ParsedExtractedMetadata {
     location: Location;
     creationTime: number;
+    width: number;
+    height: number;
 }
 
 // This is used to prompt the user the make upload strategy choice
@@ -150,4 +154,9 @@ export interface PublicUploadProps {
     token: string;
     passwordToken: string;
     accessedThroughSharedURL: boolean;
+}
+
+export interface ExtractMetadataResult {
+    metadata: Metadata;
+    publicMagicMetadata: FilePublicMagicMetadataProps;
 }
