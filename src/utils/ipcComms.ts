@@ -137,8 +137,13 @@ export default function setupIpcComs(
 
     ipcMain.handle(
         'run-ffmpeg-cmd',
-        (_, cmd, inputFilePath, outputFileName) => {
-            return runFFmpegCmd(cmd, inputFilePath, outputFileName);
+        (_, cmd, inputFilePath, outputFileName, dontTimeout) => {
+            return runFFmpegCmd(
+                cmd,
+                inputFilePath,
+                outputFileName,
+                dontTimeout
+            );
         }
     );
     ipcMain.handle('get-temp-file-path', (_, formatSuffix) => {
