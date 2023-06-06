@@ -31,11 +31,7 @@ import {
     UPLOAD_NOT_ALLOWED_COLLECTION_TYPES,
 } from 'constants/collection';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
-import {
-    NEW_COLLECTION_MAGIC_METADATA,
-    SUB_TYPE,
-    VISIBILITY_STATE,
-} from 'types/magicMetadata';
+import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
 import { getAlbumsURL } from 'utils/common/apiUtil';
 import bs58 from 'bs58';
@@ -169,9 +165,9 @@ export const changeCollectionVisibility = async (
         };
 
         const updatedMagicMetadata = await updateMagicMetadata(
-            collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
-            collection.key,
-            updatedMagicMetadataProps
+            updatedMagicMetadataProps,
+            collection.magicMetadata,
+            collection.key
         );
         await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
     } catch (e) {
@@ -191,9 +187,9 @@ export const changeCollectionSortOrder = async (
             };
 
         const updatedPubMagicMetadata = await updateMagicMetadata(
-            collection.pubMagicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
-            collection.key,
-            updatedPublicMagicMetadataProps
+            updatedPublicMagicMetadataProps,
+            collection.pubMagicMetadata,
+            collection.key
         );
 
         await updatePublicCollectionMagicMetadata(
@@ -215,9 +211,9 @@ export const changeCollectionSubType = async (
         };
 
         const updatedMagicMetadata = await updateMagicMetadata(
-            collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
-            collection.key,
-            updatedMagicMetadataProps
+            updatedMagicMetadataProps,
+            collection.magicMetadata,
+            collection.key
         );
         await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
     } catch (e) {

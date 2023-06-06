@@ -1,10 +1,6 @@
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import {
-    FileMagicMetadataProps,
-    MagicMetadataCore,
-    VISIBILITY_STATE,
-} from 'types/magicMetadata';
+import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 export function IsArchived(item: Collection | EnteFile) {
@@ -20,27 +16,29 @@ export function IsArchived(item: Collection | EnteFile) {
     return item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
 }
 
-export async function updateMagicMetadata(
-    originalMagicMetadata: MagicMetadataCore,
-    decryptionKey: string,
-    magicMetadataUpdates: Record<string, any>
-) {
+export async function updateMagicMetadata<T>(
+    magicMetadataUpdates: T,
+    originalMagicMetadata?: MagicMetadataCore<T>,
+    decryptionKey?: string
+): Promise<MagicMetadataCore<T>> {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
     if (!originalMagicMetadata) {
-        throw Error('invalid originalMagicMetadata ');
+        originalMagicMetadata = getNewMagicMetadata<T>();
     }
-    if (typeof originalMagicMetadata.data === 'string') {
+
+    if (typeof originalMagicMetadata?.data === 'string') {
         originalMagicMetadata.data = (await cryptoWorker.decryptMetadata(
             originalMagicMetadata.data,
             originalMagicMetadata.header,
             decryptionKey
-        )) as FileMagicMetadataProps;
+        )) as T;
     }
+
     if (magicMetadataUpdates) {
         // copies the existing magic metadata properties of the files and updates the visibility value
         // The expected behavior while updating magic metadata is to let the existing property as it is and update/add the property you want
-        const magicMetadataProps: FileMagicMetadataProps = {
+        const magicMetadataProps: T = {
             ...originalMagicMetadata.data,
             ...magicMetadataUpdates,
         };
@@ -54,3 +52,12 @@ export async function updateMagicMetadata(
         return originalMagicMetadata;
     }
 }
+
+export const getNewMagicMetadata = <T>(): MagicMetadataCore<T> => {
+    return {
+        version: 1,
+        data: null,
+        header: null,
+        count: 0,
+    };
+};

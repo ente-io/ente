@@ -42,11 +42,7 @@ import {
     DUMMY_UNCATEGORIZED_SECTION,
     HIDDEN_SECTION,
 } from 'constants/collection';
-import {
-    NEW_COLLECTION_MAGIC_METADATA,
-    SUB_TYPE,
-    UpdateMagicMetadataRequest,
-} from 'types/magicMetadata';
+import { SUB_TYPE, UpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
 import { User } from 'types/user';
 import {
@@ -336,11 +332,7 @@ const createCollection = async (
             await cryptoWorker.encryptUTF8(collectionName, collectionKey);
         let encryptedMagicMetadata: EncryptedMagicMetadata;
         if (magicMetadataProps) {
-            const magicMetadata = await updateMagicMetadata(
-                NEW_COLLECTION_MAGIC_METADATA,
-                null,
-                magicMetadataProps
-            );
+            const magicMetadata = await updateMagicMetadata(magicMetadataProps);
             const { file: encryptedMagicMetadataProps } =
                 await cryptoWorker.encryptMetadata(
                     magicMetadataProps,
