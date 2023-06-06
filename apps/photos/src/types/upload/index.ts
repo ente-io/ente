@@ -1,12 +1,13 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
 import { B64EncryptionResult, LocalFileAttributes } from 'types/crypto';
-import { MetadataFileAttributes, S3FileAttributes } from 'types/file';
 import {
-    EncryptedMagicMetadata,
+    MetadataFileAttributes,
+    S3FileAttributes,
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
-} from 'types/magicMetadata';
+} from 'types/file';
+import { EncryptedMagicMetadata } from 'types/magicMetadata';
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;

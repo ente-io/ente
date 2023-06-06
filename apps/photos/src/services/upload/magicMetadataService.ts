@@ -1,17 +1,21 @@
 import {
-    NEW_FILE_MAGIC_METADATA,
     FilePublicMagicMetadataProps,
     FilePublicMagicMetadata,
-} from 'types/magicMetadata';
-import { updateMagicMetadata } from 'utils/magicMetadata';
+} from 'types/file';
+import {
+    getNonEmptyMagicMetadataProps,
+    updateMagicMetadata,
+} from 'utils/magicMetadata';
 
 export async function constructPublicMagicMetadata(
     publicMagicMetadataProps: FilePublicMagicMetadataProps
 ): Promise<FilePublicMagicMetadata> {
-    const pubMagicMetadata = await updateMagicMetadata(
-        NEW_FILE_MAGIC_METADATA,
-        null,
+    const nonEmptyPublicMagicMetadataProps = getNonEmptyMagicMetadataProps(
         publicMagicMetadataProps
     );
-    return pubMagicMetadata;
+
+    if (Object.values(nonEmptyPublicMagicMetadataProps)?.length === 0) {
+        return null;
+    }
+    return await updateMagicMetadata(publicMagicMetadataProps);
 }

@@ -1,7 +1,7 @@
 import {
     EncryptedMagicMetadata,
-    FileMagicMetadata,
-    FilePublicMagicMetadata,
+    MagicMetadataCore,
+    VISIBILITY_STATE,
 } from 'types/magicMetadata';
 import { Metadata } from 'types/upload';
 
@@ -80,3 +80,20 @@ export interface FileWithUpdatedPublicMagicMetadata {
     file: EnteFile;
     updatedPublicMagicMetadata: FilePublicMagicMetadata;
 }
+
+export interface FileMagicMetadataProps {
+    visibility?: VISIBILITY_STATE;
+    filePaths?: string[];
+}
+
+export type FileMagicMetadata = MagicMetadataCore<FileMagicMetadataProps>;
+
+export interface FilePublicMagicMetadataProps {
+    editedTime?: number;
+    editedName?: string;
+    caption?: string;
+    uploaderName?: string;
+}
+
+export type FilePublicMagicMetadata =
+    MagicMetadataCore<FilePublicMagicMetadataProps>;
