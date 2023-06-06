@@ -8,8 +8,8 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/ui/viewer/gallery/trash_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class TrashButtonWidget extends StatefulWidget {
-  const TrashButtonWidget(
+class TrashSectionButton extends StatefulWidget {
+  const TrashSectionButton(
     this.textStyle, {
     Key? key,
   }) : super(key: key);
@@ -17,10 +17,10 @@ class TrashButtonWidget extends StatefulWidget {
   final TextStyle textStyle;
 
   @override
-  State<TrashButtonWidget> createState() => _TrashButtonWidgetState();
+  State<TrashSectionButton> createState() => _TrashSectionButtonState();
 }
 
-class _TrashButtonWidgetState extends State<TrashButtonWidget> {
+class _TrashSectionButtonState extends State<TrashSectionButton> {
   late StreamSubscription<TrashUpdatedEvent> _trashUpdatedEventSubscription;
 
   @override

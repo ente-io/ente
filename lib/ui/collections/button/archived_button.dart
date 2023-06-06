@@ -7,10 +7,10 @@ import "package:photos/services/collections_service.dart";
 import 'package:photos/ui/viewer/gallery/archive_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class ArchivedCollectionsButtonWidget extends StatelessWidget {
+class ArchivedCollectionsButton extends StatelessWidget {
   final TextStyle textStyle;
 
-  const ArchivedCollectionsButtonWidget(
+  const ArchivedCollectionsButton(
     this.textStyle, {
     Key? key,
   }) : super(key: key);

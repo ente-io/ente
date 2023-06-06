@@ -7,7 +7,7 @@ import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection_items.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/collections/collection_item_widget.dart";
+import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/common/loading_widget.dart";
 
 class AlbumHorizontalList extends StatefulWidget {
@@ -83,7 +83,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       itemBuilder: (context, index) {
                         final item = collectionsWithThumbnail[index];
-                        return CollectionItem(
+                        return AlbumRowItemWidget(
                           item,
                           120,
                           shouldRender: true,

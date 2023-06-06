@@ -16,9 +16,9 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
-import "package:photos/ui/collections/album/list_item.dart";
+import "package:photos/ui/collections/album/column_item.dart";
+import "package:photos/ui/collections/album/new_list_item.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
-import 'package:photos/ui/components/new_album_list_widget.dart';
 import "package:photos/ui/sharing/share_collection_page.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import "package:photos/ui/viewer/gallery/empty_state.dart";
@@ -28,7 +28,7 @@ import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
-class CollectionsListWidget extends StatelessWidget {
+class AlbumVerticalListWidget extends StatelessWidget {
   final List<CollectionWithThumbnail> collectionsWithThumbnail;
   final CollectionActionType actionType;
   final SelectedFiles? selectedFiles;
@@ -36,7 +36,7 @@ class CollectionsListWidget extends StatelessWidget {
   final String searchQuery;
   final bool shouldShowCreateAlbum;
 
-  CollectionsListWidget(
+  AlbumVerticalListWidget(
     this.collectionsWithThumbnail,
     this.actionType,
     this.selectedFiles,
@@ -70,7 +70,7 @@ class CollectionsListWidget extends StatelessWidget {
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => _albumListItemOnTap(context, item),
-          child: AlbumListItemWidget(
+          child: AlbumColumnItemWidget(
             item,
           ),
         );

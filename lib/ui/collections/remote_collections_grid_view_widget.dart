@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:photos/models/collection_items.dart';
-import 'package:photos/ui/collections/collection_item_widget.dart';
+import "package:photos/ui/collections/album/row_item.dart";
 import 'package:photos/ui/collections/create_new_album_widget.dart';
 
 class RemoteCollectionsGridViewWidget extends StatelessWidget {
@@ -46,7 +46,7 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
         // to disable GridView's scrolling
         itemBuilder: (context, index) {
           if (index < collections!.length) {
-            return CollectionItem(
+            return AlbumRowItemWidget(
               collections![index],
               sideOfThumbnail,
               shouldRender: index < collectionItemsToPreload,
