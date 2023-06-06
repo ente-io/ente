@@ -21,6 +21,8 @@ import {
     TYPE_HEIC,
     TYPE_HEIF,
     FILE_TYPE,
+    SUPPORTED_RAW_FORMATS,
+    RAW_FORMATS,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
@@ -36,6 +38,8 @@ import {
     updateFileMagicMetadata,
     updateFilePublicMagicMetadata,
 } from 'services/fileService';
+import isElectron from 'is-electron';
+import imageProcessor from 'services/electron/imageProcessor';
 import { isPlaybackPossible } from 'utils/photoFrame';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
@@ -280,14 +284,18 @@ export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
                 fileBlob
             );
             return {
-                converted: [URL.createObjectURL(convertedBlob)],
+                converted: [
+                    convertedBlob ? URL.createObjectURL(convertedBlob) : null,
+                ],
                 original: [URL.createObjectURL(fileBlob)],
             };
         }
         case FILE_TYPE.LIVE_PHOTO: {
             const livePhoto = await getRenderableLivePhoto(file, fileBlob);
             return {
-                converted: livePhoto.map((asset) => URL.createObjectURL(asset)),
+                converted: livePhoto.map((asset) =>
+                    asset ? URL.createObjectURL(asset) : null
+                ),
                 original: [URL.createObjectURL(fileBlob)],
             };
         }
@@ -350,34 +358,71 @@ export async function getPlayableVideo(
 }
 
 export async function getRenderableImage(fileName: string, imageBlob: Blob) {
-    if (await isFileHEIC(imageBlob, fileName)) {
-        addLogLine(
-            `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
-                imageBlob.size
-            )}`
-        );
-        const convertedImageBlob = await heicConversionService.convert(
-            imageBlob
-        );
+    try {
+        throw Error('not implemented');
+        const tempFile = new File([imageBlob], fileName);
+        const { exactType } = await getFileType(tempFile);
+        let convertedImageBlob: Blob;
+        if (isRawFile(exactType)) {
+            try {
+                if (!isSupportedRawFormat(exactType)) {
+                    throw Error(CustomError.UNSUPPORTED_RAW_FORMAT);
+                }
 
-        addLogLine(`${fileName} successfully converted`);
-        return convertedImageBlob;
-    } else {
-        return imageBlob;
+                if (!isElectron()) {
+                    throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
+                }
+                addLogLine(
+                    `RawConverter called for ${fileName}-${convertBytesToHumanReadable(
+                        imageBlob.size
+                    )}`
+                );
+                convertedImageBlob = await imageProcessor.convertToJPEG(
+                    imageBlob,
+                    fileName
+                );
+                addLogLine(`${fileName} successfully converted`);
+            } catch (e) {
+                try {
+                    if (!isFileHEIC(exactType)) {
+                        throw e;
+                    }
+                    addLogLine(
+                        `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
+                            imageBlob.size
+                        )}`
+                    );
+                    convertedImageBlob = await heicConversionService.convert(
+                        imageBlob
+                    );
+                    addLogLine(`${fileName} successfully converted`);
+                } catch (e) {
+                    throw Error(CustomError.NON_PREVIEWABLE_FILE);
+                }
+            }
+            return convertedImageBlob;
+        } else {
+            return imageBlob;
+        }
+    } catch (e) {
+        logError(e, 'get Renderable Image failed');
+        return null;
     }
 }
 
-export async function isFileHEIC(fileBlob: Blob, fileName: string) {
-    const tempFile = new File([fileBlob], fileName);
-    const { exactType } = await getFileType(tempFile);
-    return isExactTypeHEIC(exactType);
-}
-
-export function isExactTypeHEIC(exactType: string) {
+export function isFileHEIC(exactType: string) {
     return (
         exactType.toLowerCase().endsWith(TYPE_HEIC) ||
         exactType.toLowerCase().endsWith(TYPE_HEIF)
     );
+}
+
+export function isRawFile(exactType: string) {
+    return RAW_FORMATS.includes(exactType.toLowerCase());
+}
+
+export function isSupportedRawFormat(exactType: string) {
+    return SUPPORTED_RAW_FORMATS.includes(exactType.toLowerCase());
 }
 
 export async function changeFilesVisibility(
@@ -522,17 +567,6 @@ export async function downloadFiles(files: EnteFile[]) {
             logError(e, 'download fail for file');
         }
     }
-}
-
-export async function needsConversionForPreview(
-    file: EnteFile,
-    fileBlob: Blob
-) {
-    const isHEIC = await isFileHEIC(fileBlob, file.metadata.title);
-    return (
-        file.metadata.fileType === FILE_TYPE.LIVE_PHOTO ||
-        (file.metadata.fileType === FILE_TYPE.IMAGE && isHEIC)
-    );
 }
 
 export const isImageOrVideo = (fileType: FILE_TYPE) =>

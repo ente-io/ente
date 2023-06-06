@@ -6,6 +6,8 @@ import {
     IconButton,
     Snackbar,
     Stack,
+    SxProps,
+    Theme,
     Typography,
 } from '@mui/material';
 import React from 'react';
@@ -17,9 +19,19 @@ interface Iprops {
     open: boolean;
     onClose: () => void;
     attributes: NotificationAttributes;
+    horizontal?: 'left' | 'right';
+    vertical?: 'top' | 'bottom';
+    sx?: SxProps<Theme>;
 }
 
-export default function Notification({ open, onClose, attributes }: Iprops) {
+export default function Notification({
+    open,
+    onClose,
+    horizontal,
+    vertical,
+    sx,
+    attributes,
+}: Iprops) {
     if (!attributes) {
         return <></>;
     }
@@ -37,10 +49,10 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
         <Snackbar
             open={open}
             anchorOrigin={{
-                horizontal: 'right',
-                vertical: 'bottom',
+                horizontal: horizontal ?? 'right',
+                vertical: vertical ?? 'bottom',
             }}
-            sx={{ backgroundColor: '#000', width: '320px' }}>
+            sx={{ width: '320px', backgroundColor: '#000', ...sx }}>
             <Button
                 color={attributes.variant}
                 onClick={handleClick}

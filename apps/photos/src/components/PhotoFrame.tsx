@@ -80,6 +80,7 @@ const PhotoFrame = ({
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const router = useRouter();
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
+    const [conversionFailed, setConversionFailed] = useState(false);
 
     const displayFiles = useMemoSingleThreaded(() => {
         return files.map((item) => {
@@ -196,7 +197,8 @@ const PhotoFrame = ({
     const updateSrcURL = async (
         index: number,
         id: number,
-        mergedSrcURL: MergedSourceURL
+        mergedSrcURL: MergedSourceURL,
+        conversionFailed: boolean
     ) => {
         const file = displayFiles[index];
         // this is to prevent outdate updateSrcURL call from updating the wrong file
@@ -216,6 +218,21 @@ const PhotoFrame = ({
                 ),
                 'PhotoSwipe updateSrcURL called when source already loaded'
             );
+            return;
+        } else if (file.conversionFailed) {
+            addLogLine(
+                `PhotoSwipe: updateSrcURL: conversion failed: ${file.id}`
+            );
+            logError(
+                new Error(
+                    `PhotoSwipe: updateSrcURL: conversion failed: ${file.id}`
+                ),
+                'PhotoSwipe updateSrcURL called when conversion failed'
+            );
+            return;
+        }
+        if (conversionFailed) {
+            setConversionFailed(true);
             return;
         }
         await updateFileSrcProps(file, mergedSrcURL);
@@ -406,18 +423,28 @@ const PhotoFrame = ({
                 logError(e, 'getSlideData failed get msrc url failed');
             }
         }
+
         if (item.isSourceLoaded) {
+            setIsSourceLoaded(true);
             addLogLine(`[${item.id}] source already loaded`);
+            return;
+        }
+        if (item.conversionFailed) {
+            setConversionFailed(true);
+            addLogLine(`[${item.id}] conversion failed`);
             return;
         }
         if (fetching[item.id]) {
             addLogLine(`[${item.id}] file download already in progress`);
             return;
         }
+        setIsSourceLoaded(false);
+        setConversionFailed(false);
         try {
             addLogLine(`[${item.id}] new file src request`);
             fetching[item.id] = true;
             let srcURL: MergedSourceURL;
+            let conversionFailed: boolean = false;
             if (galleryContext.files.has(item.id)) {
                 addLogLine(
                     `[${item.id}] gallery context cache hit, using cached file`
@@ -444,15 +471,21 @@ const PhotoFrame = ({
                     downloadedURL = await DownloadManager.getFile(item, true);
                 }
                 appContext.finishLoading();
-                const mergedURL: MergedSourceURL = {
-                    original: downloadedURL.original.join(','),
-                    converted: downloadedURL.converted.join(','),
-                };
-                galleryContext.files.set(item.id, mergedURL);
-                srcURL = mergedURL;
+                if (
+                    downloadedURL.converted.filter((url) => !!url).length !==
+                    downloadedURL.converted.length
+                ) {
+                    conversionFailed = true;
+                } else {
+                    const mergedURL: MergedSourceURL = {
+                        original: downloadedURL.original.join(','),
+                        converted: downloadedURL.converted.join(','),
+                    };
+                    galleryContext.files.set(item.id, mergedURL);
+                    srcURL = mergedURL;
+                }
             }
-            setIsSourceLoaded(false);
-            await updateSrcURL(index, item.id, srcURL);
+            await updateSrcURL(index, item.id, srcURL, conversionFailed);
 
             try {
                 addLogLine(
@@ -501,6 +534,7 @@ const PhotoFrame = ({
                 isHiddenCollection={activeCollection === HIDDEN_SECTION}
                 enableDownload={enableDownload}
                 isSourceLoaded={isSourceLoaded}
+                conversionFailed={conversionFailed}
                 fileToCollectionsMap={fileToCollectionsMap}
                 collectionNameMap={collectionNameMap}
             />

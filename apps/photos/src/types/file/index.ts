@@ -60,6 +60,7 @@ export interface EnteFile
     originalVideoURL?: string;
     originalImageURL?: string;
     dataIndex?: number;
+    conversionFailed?: boolean;
 }
 
 export interface TrashRequest {
