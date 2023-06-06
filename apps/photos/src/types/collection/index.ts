@@ -108,20 +108,17 @@ export interface CollectionMagicMetadataProps {
     subType?: SUB_TYPE;
 }
 
-export interface CollectionMagicMetadata
-    extends Omit<MagicMetadataCore, 'data'> {
-    data: CollectionMagicMetadataProps;
-}
+export type CollectionMagicMetadata =
+    MagicMetadataCore<CollectionMagicMetadataProps>;
 
 export interface CollectionPublicMagicMetadataProps {
     asc?: boolean;
     coverID?: number;
 }
 
-export interface CollectionPublicMagicMetadata
-    extends Omit<MagicMetadataCore, 'data'> {
-    data: CollectionPublicMagicMetadataProps;
-}
+export type CollectionPublicMagicMetadata =
+    MagicMetadataCore<CollectionPublicMagicMetadataProps>;
+
 export interface CollectionSummary {
     id: number;
     name: string;

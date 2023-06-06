@@ -1,4 +1,4 @@
-import { EnteFile } from 'types/file';
+import { EnteFile, FilePublicMagicMetadata } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { findMatchingExistingFiles } from 'utils/upload';
@@ -20,7 +20,6 @@ import uploadCancelService from './uploadCancelService';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import uploadService from './uploadService';
-import { FilePublicMagicMetadata } from 'types/magicMetadata';
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;

@@ -3,6 +3,10 @@ import {
     EnteFile,
     EncryptedEnteFile,
     FileWithUpdatedMagicMetadata,
+    FileMagicMetadata,
+    FileMagicMetadataProps,
+    FilePublicMagicMetadata,
+    FilePublicMagicMetadataProps,
 } from 'types/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
@@ -21,14 +25,7 @@ import {
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
 import * as ffmpegService from 'services/ffmpeg/ffmpegService';
-import {
-    FileMagicMetadata,
-    FileMagicMetadataProps,
-    FilePublicMagicMetadata,
-    FilePublicMagicMetadataProps,
-    NEW_FILE_MAGIC_METADATA,
-    VISIBILITY_STATE,
-} from 'types/magicMetadata';
+import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
 
 import { addLogLine } from 'utils/logging';
@@ -396,9 +393,9 @@ export async function changeFilesVisibility(
         fileWithUpdatedMagicMetadataList.push({
             file,
             updatedMagicMetadata: await updateMagicMetadata(
-                file.magicMetadata ?? NEW_FILE_MAGIC_METADATA,
-                file.key,
-                updatedMagicMetadataProps
+                updatedMagicMetadataProps,
+                file.magicMetadata,
+                file.key
             ),
         });
     }
@@ -414,9 +411,9 @@ export async function changeFileCreationTime(
     };
     const updatedPublicMagicMetadata: FilePublicMagicMetadata =
         await updateMagicMetadata(
-            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
-            file.key,
-            updatedPublicMagicMetadataProps
+            updatedPublicMagicMetadataProps,
+            file.pubMagicMetadata,
+            file.key
         );
     const updateResult = await updateFilePublicMagicMetadata([
         { file, updatedPublicMagicMetadata },
@@ -434,9 +431,9 @@ export async function changeFileName(
 
     const updatedPublicMagicMetadata: FilePublicMagicMetadata =
         await updateMagicMetadata(
-            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
-            file.key,
-            updatedPublicMagicMetadataProps
+            updatedPublicMagicMetadataProps,
+            file.pubMagicMetadata,
+            file.key
         );
     const updateResult = await updateFilePublicMagicMetadata([
         { file, updatedPublicMagicMetadata },
@@ -454,9 +451,9 @@ export async function changeCaption(
 
     const updatedPublicMagicMetadata: FilePublicMagicMetadata =
         await updateMagicMetadata(
-            file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
-            file.key,
-            updatedPublicMagicMetadataProps
+            updatedPublicMagicMetadataProps,
+            file.pubMagicMetadata,
+            file.key
         );
     const updateResult = await updateFilePublicMagicMetadata([
         { file, updatedPublicMagicMetadata },
