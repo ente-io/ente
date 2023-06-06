@@ -527,5 +527,6 @@
     "UNHIDE_TO_COLLECTION": "取消隐藏到相册",
     "SORT_BY": "",
     "NEWEST_FIRST": "",
-    "OLDEST_FIRST": ""
+    "OLDEST_FIRST": "",
+    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": ""
 }
