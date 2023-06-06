@@ -85,6 +85,8 @@ export const LIVE_PHOTO_ASSET_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
 export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
     location: NULL_LOCATION,
     creationTime: null,
+    width: null,
+    height: null,
 };
 
 export const A_SEC_IN_MICROSECONDS = 1e6;

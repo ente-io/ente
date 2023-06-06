@@ -28,29 +28,29 @@ export async function updateMagicMetadata<T>(
     }
 
     if (typeof originalMagicMetadata?.data === 'string') {
-        originalMagicMetadata.data = (await cryptoWorker.decryptMetadata(
+        originalMagicMetadata.data = await cryptoWorker.decryptMetadata(
             originalMagicMetadata.data,
             originalMagicMetadata.header,
             decryptionKey
-        )) as T;
+        );
     }
+    // copies the existing magic metadata properties of the files and updates the visibility value
+    // The expected behavior while updating magic metadata is to let the existing property as it is and update/add the property you want
+    const magicMetadataProps: T = {
+        ...originalMagicMetadata.data,
+        ...magicMetadataUpdates,
+    };
 
-    if (magicMetadataUpdates) {
-        // copies the existing magic metadata properties of the files and updates the visibility value
-        // The expected behavior while updating magic metadata is to let the existing property as it is and update/add the property you want
-        const magicMetadataProps: T = {
-            ...originalMagicMetadata.data,
-            ...magicMetadataUpdates,
-        };
+    const nonEmptyMagicMetadataProps =
+        getNonEmptyMagicMetadataProps(magicMetadataProps);
 
-        return {
-            ...originalMagicMetadata,
-            data: magicMetadataProps,
-            count: Object.keys(magicMetadataProps).length,
-        };
-    } else {
-        return originalMagicMetadata;
-    }
+    const magicMetadata = {
+        ...originalMagicMetadata,
+        data: nonEmptyMagicMetadataProps,
+        count: Object.keys(nonEmptyMagicMetadataProps).length,
+    };
+
+    return magicMetadata;
 }
 
 export const getNewMagicMetadata = <T>(): MagicMetadataCore<T> => {
@@ -60,4 +60,13 @@ export const getNewMagicMetadata = <T>(): MagicMetadataCore<T> => {
         header: null,
         count: 0,
     };
+};
+
+export const getNonEmptyMagicMetadataProps = <T>(magicMetadataProps: T): T => {
+    return Object.fromEntries(
+        Object.entries(magicMetadataProps).filter(
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            ([_, v]) => v !== null && v !== undefined
+        )
+    ) as T;
 };

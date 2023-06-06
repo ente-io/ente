@@ -1,4 +1,4 @@
-import { EnteFile, FilePublicMagicMetadata } from 'types/file';
+import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { findMatchingExistingFiles } from 'utils/upload';
@@ -54,12 +54,13 @@ export default async function uploader(
         );
 
         addLogLine(`extracting  metadata ${fileNameSize}`);
-        const metadata = await UploadService.extractAssetMetadata(
-            worker,
-            uploadAsset,
-            collection.id,
-            fileTypeInfo
-        );
+        const { metadata, publicMagicMetadata } =
+            await UploadService.extractAssetMetadata(
+                worker,
+                uploadAsset,
+                collection.id,
+                fileTypeInfo
+            );
 
         const matchingExistingFiles = findMatchingExistingFiles(
             existingFiles,
@@ -115,12 +116,13 @@ export default async function uploader(
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }
-        let pubMagicMetadata: FilePublicMagicMetadata;
-        if (uploaderName) {
-            pubMagicMetadata = await uploadService.constructPublicMagicMetadata(
-                { uploaderName }
-            );
-        }
+
+        const pubMagicMetadata =
+            await uploadService.constructPublicMagicMetadata({
+                ...publicMagicMetadata,
+                uploaderName,
+            });
+
         const fileWithMetadata: FileWithMetadata = {
             localID,
             filedata: file.filedata,
