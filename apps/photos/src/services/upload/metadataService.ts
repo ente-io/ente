@@ -20,7 +20,7 @@ import {
 import { getFileHash } from './hashService';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
-import { FilePublicMagicMetadataProps } from 'types/magicMetadata';
+import { FilePublicMagicMetadataProps } from 'types/file';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
