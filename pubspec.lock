@@ -244,10 +244,12 @@ packages:
   chewie:
     dependency: "direct main"
     description:
-      path: "thirdparty/chewie"
-      relative: true
-    source: path
-    version: "1.2.2"
+      path: "."
+      ref: forked_video_player
+      resolved-ref: "548fa399c76adc3f1a1c0f9d42fcac954cf0345d"
+      url: "https://github.com/ente-io/chewie.git"
+    source: git
+    version: "1.5.0"
   clock:
     dependency: transitive
     description:
@@ -1999,24 +2001,44 @@ packages:
   video_player:
     dependency: "direct main"
     description:
-      path: "thirdparty/plugins/packages/video_player/video_player"
-      relative: true
-    source: path
-    version: "2.2.5"
+      path: "packages/video_player/video_player"
+      ref: android_video_roation_fix
+      resolved-ref: a9be78ffe97b9335bcf865c72dae1ba361dad77f
+      url: "https://github.com/ente-io/packages.git"
+    source: git
+    version: "2.6.1"
+  video_player_android:
+    dependency: transitive
+    description:
+      name: video_player_android
+      sha256: ae1c7d9a71c236a1bf9e567bd7ed4c90887e389a5f233b2192593f7f7395005c
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.8"
+  video_player_avfoundation:
+    dependency: transitive
+    description:
+      name: video_player_avfoundation
+      sha256: "4c274e439f349a0ee5cb3c42978393ede173a443b98f50de6ffe6900eaa19216"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.6"
   video_player_platform_interface:
     dependency: transitive
     description:
-      path: "thirdparty/plugins/packages/video_player/video_player_platform_interface"
-      relative: true
-    source: path
-    version: "4.2.0"
+      name: video_player_platform_interface
+      sha256: a8c4dcae2a7a6e7cc1d7f9808294d968eca1993af34a98e95b9bdfa959bec684
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.0"
   video_player_web:
     dependency: transitive
     description:
-      path: "thirdparty/plugins/packages/video_player/video_player_web"
-      relative: true
-    source: path
-    version: "2.0.4"
+      name: video_player_web
+      sha256: "44ce41424d104dfb7cf6982cc6b84af2b007a24d126406025bf40de5d481c74c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.16"
   video_thumbnail:
     dependency: "direct main"
     description:
