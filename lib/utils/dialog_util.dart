@@ -46,8 +46,10 @@ Future<ButtonResult?> showErrorDialogForException({
   required Exception exception,
   bool isDismissible = true,
   String apiErrorPrefix = "It looks like something went wrong.",
+  String? message,
 }) async {
-  String errorMessage = S.of(context).tempErrorContactSupportIfPersists;
+  String errorMessage =
+      message ?? S.of(context).tempErrorContactSupportIfPersists;
   if (exception is DioError &&
       exception.response != null &&
       exception.response!.data["code"] != null) {
