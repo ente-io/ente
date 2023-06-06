@@ -1,6 +1,7 @@
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import {
+    FileMagicMetadata,
     FileMagicMetadataProps,
     MagicMetadataCore,
     VISIBILITY_STATE,
@@ -37,20 +38,27 @@ export async function updateMagicMetadata(
             decryptionKey
         )) as FileMagicMetadataProps;
     }
-    if (magicMetadataUpdates) {
-        // copies the existing magic metadata properties of the files and updates the visibility value
-        // The expected behavior while updating magic metadata is to let the existing property as it is and update/add the property you want
-        const magicMetadataProps: FileMagicMetadataProps = {
-            ...originalMagicMetadata.data,
-            ...magicMetadataUpdates,
-        };
+    // copies the existing magic metadata properties of the files and updates the visibility value
+    // The expected behavior while updating magic metadata is to let the existing property as it is and update/add the property you want
+    const magicMetadataProps: FileMagicMetadataProps = {
+        ...originalMagicMetadata.data,
+        ...magicMetadataUpdates,
+    };
 
-        return {
+    const nonEmptyMagicMetadataProps = Object.fromEntries(
+        Object.entries(magicMetadataProps).filter(
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            ([_, v]) => v !== null && v !== undefined
+        )
+    );
+
+    let pubMagicMetadata: FileMagicMetadata;
+    if (Object.values(nonEmptyMagicMetadataProps)?.length > 0) {
+        pubMagicMetadata = {
             ...originalMagicMetadata,
-            data: magicMetadataProps,
-            count: Object.keys(magicMetadataProps).length,
+            data: nonEmptyMagicMetadataProps,
+            count: Object.keys(nonEmptyMagicMetadataProps).length,
         };
-    } else {
-        return originalMagicMetadata;
     }
+    return pubMagicMetadata;
 }
