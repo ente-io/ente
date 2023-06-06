@@ -27,12 +27,3 @@ export interface UpdateMagicMetadataRequest {
     id: number;
     magicMetadata: EncryptedMagicMetadata;
 }
-
-export const getNewMagicMetadata = <T>(): MagicMetadataCore<T> => {
-    return {
-        version: 1,
-        data: {},
-        header: null,
-        count: 0,
-    } as MagicMetadataCore<T>;
-};

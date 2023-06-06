@@ -1,10 +1,6 @@
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import {
-    MagicMetadataCore,
-    VISIBILITY_STATE,
-    getNewMagicMetadata,
-} from 'types/magicMetadata';
+import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 export function IsArchived(item: Collection | EnteFile) {
@@ -56,3 +52,12 @@ export async function updateMagicMetadata<T>(
         return originalMagicMetadata;
     }
 }
+
+export const getNewMagicMetadata = <T>(): MagicMetadataCore<T> => {
+    return {
+        version: 1,
+        data: {},
+        header: null,
+        count: 0,
+    } as MagicMetadataCore<T>;
+};
