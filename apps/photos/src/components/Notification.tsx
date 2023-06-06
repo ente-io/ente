@@ -52,7 +52,7 @@ export default function Notification({
                 horizontal: horizontal ?? 'right',
                 vertical: vertical ?? 'bottom',
             }}
-            sx={{ width: '320px', ...sx }}>
+            sx={{ width: '320px', backgroundColor: '#000', ...sx }}>
             <Button
                 color={attributes.variant}
                 onClick={handleClick}
