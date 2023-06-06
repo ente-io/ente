@@ -17,9 +17,9 @@ export default function EmailShare({ collection }) {
     const [updatedOptionsList, setUpdatedOptionsList] = useState(['']);
     let updatedList = [];
     useEffect(() => {
-        const owner_user1: User = getData(LS_KEYS.USER);
-        const collection_list = getLocalCollections();
         const getUpdatedOptionsList = async () => {
+            const ownerUser: User = getData(LS_KEYS.USER);
+            const collection_list = getLocalCollections();
             const result = await collection_list;
             const emails = result.flatMap((item) => {
                 const shareeEmails = item.sharees.map((sharee) => sharee.email);
@@ -36,7 +36,7 @@ export default function EmailShare({ collection }) {
                 (email) =>
                     !collection.sharees
                         .map((sharees) => sharees.email)
-                        .includes(email) && email !== owner_user1.email
+                        .includes(email) && email !== ownerUser.email
             );
 
             setUpdatedOptionsList(filteredList);
