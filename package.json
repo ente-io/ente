@@ -1,13 +1,16 @@
 {
     "name": "ente",
     "productName": "ente",
-    "version": "1.6.31",
+    "version": "1.6.32-alpha.1",
     "private": true,
     "description": "Desktop client for ente.io",
     "main": "app/main.js",
     "build": {
         "appId": "io.ente.bhari-frame",
         "artifactName": "${productName}-${version}.${ext}",
+        "nsis": {
+            "deleteAppDataOnUninstall": true
+        },
         "linux": {
             "target": [
                 "AppImage",
