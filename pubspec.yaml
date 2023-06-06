@@ -133,15 +133,12 @@ dependencies:
       path: packages/video_player/video_player/
   video_thumbnail: ^0.4.3
   visibility_detector: ^0.3.3
-  wakelock: ^0.6.1+2
+  wakelock: ^0.6.2
   wallpaper_manager_flutter: ^0.0.2
   widgets_to_image: ^0.0.2
 
 flutter_intl:
     enabled: true
-
-dependency_overrides:
-  wakelock: ^0.6.1+2
 
 dev_dependencies:
   build_runner: ^2.3.3
