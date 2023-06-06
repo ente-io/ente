@@ -527,5 +527,6 @@
     "UNHIDE_TO_COLLECTION": "Zichtbaar maken in album",
     "SORT_BY": "Sorteren op",
     "NEWEST_FIRST": "Nieuwste eerst",
-    "OLDEST_FIRST": "Oudste eerst"
+    "OLDEST_FIRST": "Oudste eerst",
+    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": ""
 }
