@@ -77,16 +77,17 @@ function getImageMagickStaticPath() {
         : path.join(process.resourcesPath, 'image-magick');
 }
 
-export async function convertHEIC(
-    heicFileData: Uint8Array
+export async function convertToJPEG(
+    fileData: Uint8Array,
+    filename: string
 ): Promise<Uint8Array> {
     let tempInputFilePath: string;
     let tempOutputFilePath: string;
     try {
-        tempInputFilePath = await generateTempFilePath('input.heic');
+        tempInputFilePath = await generateTempFilePath(filename);
         tempOutputFilePath = await generateTempFilePath('output.jpeg');
 
-        await writeFile(tempInputFilePath, heicFileData);
+        await writeFile(tempInputFilePath, fileData);
 
         await runConvertCommand(tempInputFilePath, tempOutputFilePath);
 

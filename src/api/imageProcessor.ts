@@ -6,13 +6,17 @@ import { logError } from '../services/logging';
 import { ElectronFile } from '../types';
 import { isPlatform } from '../utils/common/platform';
 
-export async function convertHEIC(fileData: Uint8Array): Promise<Uint8Array> {
+export async function convertToJPEG(
+    fileData: Uint8Array,
+    filename: string
+): Promise<Uint8Array> {
     if (isPlatform('windows')) {
         throw Error(CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED);
     }
     const convertedFileData = await ipcRenderer.invoke(
-        'convert-heic',
-        fileData
+        'convert-to-jpeg',
+        fileData,
+        filename
     );
     return convertedFileData;
 }

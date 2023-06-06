@@ -6,8 +6,11 @@ import { readFile, rmSync, writeFile } from 'promise-fs';
 import { logErrorSentry } from './sentry';
 import { generateTempFilePath, getTempDirPath } from '../utils/temp';
 import { existsSync } from 'fs';
+import { promiseWithTimeout } from '../utils/common';
 
 const execAsync = util.promisify(require('child_process').exec);
+
+const FFMPEG_EXECUTION_WAIT_TIME = 30 * 1000;
 
 const INPUT_PATH_PLACEHOLDER = 'INPUT';
 const FFMPEG_PLACEHOLDER = 'FFMPEG';
@@ -20,7 +23,8 @@ function getFFmpegStaticPath() {
 export async function runFFmpegCmd(
     cmd: string[],
     inputFilePath: string,
-    outputFileName: string
+    outputFileName: string,
+    dontTimeout = false
 ) {
     let tempOutputFilePath: string;
     try {
@@ -40,7 +44,14 @@ export async function runFFmpegCmd(
         const escapedCmd = shellescape(cmd);
         log.info('running ffmpeg command', escapedCmd);
         const startTime = Date.now();
-        await execAsync(escapedCmd);
+        if (dontTimeout) {
+            await execAsync(escapedCmd);
+        } else {
+            await promiseWithTimeout(
+                execAsync(escapedCmd),
+                FFMPEG_EXECUTION_WAIT_TIME
+            );
+        }
         if (!existsSync(tempOutputFilePath)) {
             throw new Error('ffmpeg output file not found');
         }

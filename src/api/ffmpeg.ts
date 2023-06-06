@@ -7,7 +7,8 @@ import { ElectronFile } from '../types';
 export async function runFFmpegCmd(
     cmd: string[],
     inputFile: File | ElectronFile,
-    outputFileName: string
+    outputFileName: string,
+    dontTimeout?: boolean
 ) {
     let inputFilePath = null;
     let createdTempInputFile = null;
@@ -27,7 +28,8 @@ export async function runFFmpegCmd(
             'run-ffmpeg-cmd',
             cmd,
             inputFilePath,
-            outputFileName
+            outputFileName,
+            dontTimeout
         );
         return new File([outputFileData], outputFileName);
     } finally {
