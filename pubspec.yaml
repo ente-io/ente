@@ -26,7 +26,9 @@ dependencies:
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
   chewie:
-    path: thirdparty/chewie
+    git:
+      url: https://github.com/ente-io/chewie.git
+      ref: forked_video_player
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
@@ -126,8 +128,9 @@ dependencies:
   uuid: ^3.0.4
   video_player:
     git:
-      url: git@github.com:ente-io/packages.git
+      url: https://github.com/ente-io/packages.git
       ref: android_video_roation_fix
+      path: packages/video_player/video_player/
   video_thumbnail: ^0.4.3
   visibility_detector: ^0.3.3
   wakelock: ^0.6.1+2
