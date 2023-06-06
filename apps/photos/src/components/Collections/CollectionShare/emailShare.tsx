@@ -32,11 +32,13 @@ export default function EmailShare({ collection }) {
 
             updatedList = Array.from(new Set(emails));
 
+            const shareeEmailsCollection = collection.sharees.map(
+                (sharees) => sharees.email
+            );
             const filteredList = updatedList.filter(
                 (email) =>
-                    !collection.sharees
-                        .map((sharees) => sharees.email)
-                        .includes(email) && email !== ownerUser.email
+                    !shareeEmailsCollection.includes(email) &&
+                    email !== ownerUser.email
             );
 
             setUpdatedOptionsList(filteredList);
