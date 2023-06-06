@@ -70,51 +70,50 @@ class _MapViewState extends State<MapView> {
                 }
               }
             },
-            plugins: [
-              MarkerClusterPlugin(),
-            ],
           ),
-          layers: [
-            TileLayerOptions(
+          children: [
+            TileLayer(
               urlTemplate: Configuration.urltemplate,
-              additionalOptions: {
+              additionalOptions: const {
                 "accessToken": Configuration.apikey,
                 "id": "mapbox.mapbox-streets-v7",
               },
             ),
-            MarkerClusterLayerOptions(
-              maxClusterRadius: 100,
-              showPolygon: true,
-              size: const Size(75, 75),
-              fitBoundsOptions: const FitBoundsOptions(
-                padding: EdgeInsets.all(1),
+            MarkerClusterLayerWidget(
+              options: MarkerClusterLayerOptions(
+                maxClusterRadius: 100,
+                showPolygon: true,
+                size: const Size(75, 75),
+                fitBoundsOptions: const FitBoundsOptions(
+                  padding: EdgeInsets.all(1),
+                ),
+                markers: widget.imageMarkers.asMap().entries.map((marker) {
+                  final imageMarker = marker.value;
+                  return mapMarker(imageMarker, marker.key.toString());
+                }).toList(),
+                polygonOptions: const PolygonOptions(
+                  borderColor: Colors.green,
+                  color: Colors.transparent,
+                  borderStrokeWidth: 1,
+                ),
+                builder: (context, markers) {
+                  final index = int.parse(
+                    markers.first.key
+                        .toString()
+                        .replaceAll(RegExp(r'[^0-9]'), ''),
+                  );
+                  return Stack(
+                    children: [
+                      MapGalleryTile(
+                        key: Key(markers.first.key.toString()),
+                        imageMarker: widget.imageMarkers[index],
+                      ),
+                      MapGalleryTileBadge(size: markers.length)
+                    ],
+                  );
+                },
               ),
-              markers: widget.imageMarkers.asMap().entries.map((marker) {
-                final imageMarker = marker.value;
-                return mapMarker(imageMarker, marker.key.toString());
-              }).toList(),
-              polygonOptions: const PolygonOptions(
-                borderColor: Colors.green,
-                color: Colors.transparent,
-                borderStrokeWidth: 1,
-              ),
-              builder: (context, markers) {
-                final index = int.parse(
-                  markers.first.key
-                      .toString()
-                      .replaceAll(RegExp(r'[^0-9]'), ''),
-                );
-                return Stack(
-                  children: [
-                    MapGalleryTile(
-                      key: Key(markers.first.key.toString()),
-                      imageMarker: widget.imageMarkers[index],
-                    ),
-                    MapGalleryTileBadge(size: markers.length)
-                  ],
-                );
-              },
-            ),
+            )
           ],
         ),
         Positioned(

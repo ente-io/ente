@@ -708,26 +708,26 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_map
-      sha256: "9401bcc83b1118ddd35c0b25efaa5af182572707f1887bbb7817c2337fcd8c97"
+      sha256: "52c65a977daae42f9aae6748418dd1535eaf27186e9bac9bf431843082bc75a3"
       url: "https://pub.dev"
     source: hosted
-    version: "0.13.1"
+    version: "4.0.0"
   flutter_map_marker_cluster:
     dependency: "direct main"
     description:
       name: flutter_map_marker_cluster
-      sha256: "3eefbe1ed8ef16be52f9992363875992c688f4246e2d99be488b25f238ebfa7b"
+      sha256: "362088b16311b6743a7930857129ec6c7c807ecca777fe1033c0ad6688339e36"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.4"
+    version: "1.1.1"
   flutter_map_marker_popup:
     dependency: transitive
     description:
       name: flutter_map_marker_popup
-      sha256: "4ce4eaef4efb1ca38fc0620beb26eb65f4535ba686ae9988d7f7c4ec05fe1e3a"
+      sha256: "7cf30fab25ffe1ba04a9e0fbe1227f44a83c73256d4d70be1c26cf141ce5c41d"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.2"
+    version: "4.1.0"
   flutter_native_splash:
     dependency: "direct main"
     description:
@@ -1478,6 +1478,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.6.2"
+  polylabel:
+    dependency: transitive
+    description:
+      name: polylabel
+      sha256: "41b9099afb2aa6c1730bdd8a0fab1400d287694ec7615dd8516935fa3144214b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   pool:
     dependency: transitive
     description:
@@ -1486,14 +1494,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.1"
-  positioned_tap_detector_2:
-    dependency: transitive
-    description:
-      name: positioned_tap_detector_2
-      sha256: "52e06863ad3e1f82b058fd05054fc8c9caeeb3b47d5cea7a24bd9320746059c1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.4"
   process:
     dependency: transitive
     description:
@@ -1940,14 +1940,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
-  transparent_image:
-    dependency: transitive
-    description:
-      name: transparent_image
-      sha256: e8991d955a2094e197ca24c645efec2faf4285772a4746126ca12875e54ca02f
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
   tuple:
     dependency: "direct main"
     description:

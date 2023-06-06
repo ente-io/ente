@@ -63,8 +63,8 @@ dependencies:
   flutter_local_notifications: ^9.5.3+1
   flutter_localizations:
     sdk: flutter
-  flutter_map: ^0.13.1
-  flutter_map_marker_cluster: ^0.4.0
+  flutter_map: ^4.0.0
+  flutter_map_marker_cluster: ^1.1.1
   flutter_native_splash: ^2.2.0+1
   flutter_password_strength: ^0.1.6
   flutter_secure_storage: ^8.0.0
