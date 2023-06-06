@@ -50,7 +50,7 @@ import {
     rename,
     readTextFile,
 } from './api/fs';
-import { convertHEIC, generateImageThumbnail } from './api/imageProcessor';
+import { convertToJPEG, generateImageThumbnail } from './api/imageProcessor';
 import { setupLogging } from './utils/logging';
 import {
     setupRendererProcessStatsLogger,
@@ -94,7 +94,7 @@ windowObject['ElectronAPIs'] = {
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,
     logToDisk,
-    convertHEIC,
+    convertToJPEG,
     openLogDirectory,
     registerUpdateEventListener,
     updateAndRestart,
