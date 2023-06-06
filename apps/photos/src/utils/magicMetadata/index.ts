@@ -56,8 +56,8 @@ export async function updateMagicMetadata<T>(
 export const getNewMagicMetadata = <T>(): MagicMetadataCore<T> => {
     return {
         version: 1,
-        data: {},
+        data: null,
         header: null,
         count: 0,
-    } as MagicMetadataCore<T>;
+    };
 };
