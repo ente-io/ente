@@ -14,7 +14,7 @@ import chokidar from 'chokidar';
 import path from 'path';
 import { getDirFilePaths } from '../services/fs';
 import {
-    convertHEIC,
+    convertToJPEG,
     generateImageThumbnail,
 } from '../services/imageProcessor';
 import {
@@ -105,8 +105,8 @@ export default function setupIpcComs(
         return app.getPath(message);
     });
 
-    ipcMain.handle('convert-heic', (_, fileData) => {
-        return convertHEIC(fileData);
+    ipcMain.handle('convert-to-jpeg', (_, fileData, filename) => {
+        return convertToJPEG(fileData, filename);
     });
 
     ipcMain.handle('open-log-dir', () => {
