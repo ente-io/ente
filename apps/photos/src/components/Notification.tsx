@@ -40,7 +40,7 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                 horizontal: 'right',
                 vertical: 'bottom',
             }}
-            sx={{ backgroundColor: '#000', width: '320px' }}>
+            sx={{ width: '320px' }}>
             <Button
                 color={attributes.variant}
                 onClick={handleClick}
