@@ -42,7 +42,7 @@ import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import { t } from 'i18next';
 import { getParsedExifData } from 'services/upload/exifService';
 import { getFileType } from 'services/typeDetectionService';
-import { ConversionFailedBtn } from './styledComponents/ConversionFailedBtn';
+import { ConversionFailedNotification } from './styledComponents/ConversionFailedNotification';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -556,13 +556,11 @@ function PhotoViewer(props: Iprops) {
                         </LivePhotoBtn>
                     )}
                     {conversionFailed && (
-                        <ConversionFailedBtn
+                        <ConversionFailedNotification
                             onClick={() =>
                                 downloadFileHelper(photoSwipe.currItem)
-                            }>
-                            {' '}
-                            DOWNLOAD{' '}
-                        </ConversionFailedBtn>
+                            }
+                        />
                     )}
 
                     <div className="pswp__container">

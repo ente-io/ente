@@ -359,6 +359,7 @@ export async function getPlayableVideo(
 
 export async function getRenderableImage(fileName: string, imageBlob: Blob) {
     try {
+        throw Error('not implemented');
         const tempFile = new File([imageBlob], fileName);
         const { exactType } = await getFileType(tempFile);
         let convertedImageBlob: Blob;
