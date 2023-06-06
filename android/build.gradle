@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.6.21'
+    ext.kotlin_version = '1.8.21'
     repositories {
         google()
         jcenter()
@@ -17,6 +17,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        mavenCentral()
         // mavenLocal() // for FDroid
         maven {
             url "${project(':background_fetch').projectDir}/libs"
