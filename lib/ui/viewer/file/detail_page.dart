@@ -148,7 +148,6 @@ class _DetailPageState extends State<DetailPage> {
     // todo: perf.. do we always need to create new controller?
     _pageController = PageController(initialPage: _selectedIndex);
     return PageView.builder(
-      reverse: widget.config.sortOrderAsc,
       itemBuilder: (context, index) {
         final file = _files![index];
         final Widget content = FileWidget(
@@ -212,58 +211,69 @@ class _DetailPageState extends State<DetailPage> {
     });
   }
 
-  void _preloadEntries() async {
+  Future<void> _preloadEntries() async {
     final isSortOrderAsc = widget.config.sortOrderAsc;
-    if (widget.config.asyncLoader == null) {
-      return;
-    }
+
+    if (widget.config.asyncLoader == null) return;
+
     if (_selectedIndex == 0 && !_hasLoadedTillStart) {
-      final result = isSortOrderAsc
-          ? await widget.config.asyncLoader!(
-              galleryLoadStartTime,
-              _files![_selectedIndex].creationTime! - 1,
-              limit: kLoadLimit,
-            )
-          : await widget.config.asyncLoader!(
-              _files![_selectedIndex].creationTime! + 1,
-              DateTime.now().microsecondsSinceEpoch,
-              limit: kLoadLimit,
-              asc: true,
-            );
-      setState(() {
-        // Returned result could be a subtype of File
-        // ignore: unnecessary_cast
-        final files = result.files.reversed.map((e) => e as File).toList();
-        if (!result.hasMore) {
-          _hasLoadedTillStart = true;
-        }
-        final length = files.length;
-        files.addAll(_files!);
-        _files = files;
-        _pageController!.jumpToPage(length);
-        _selectedIndex = length;
-      });
+      await _loadStartEntries(isSortOrderAsc);
     }
+
     if (_selectedIndex == _files!.length - 1 && !_hasLoadedTillEnd) {
-      final result = isSortOrderAsc
-          ? await widget.config.asyncLoader!(
-              _files![_selectedIndex].creationTime! + 1,
-              DateTime.now().microsecondsSinceEpoch,
-              limit: kLoadLimit,
-              asc: true,
-            )
-          : await widget.config.asyncLoader!(
-              galleryLoadStartTime,
-              _files![_selectedIndex].creationTime! - 1,
-              limit: kLoadLimit,
-            );
-      setState(() {
-        if (!result.hasMore) {
-          _hasLoadedTillEnd = true;
-        }
-        _files!.addAll(result.files);
-      });
+      await _loadEndEntries(isSortOrderAsc);
     }
+  }
+
+  Future<void> _loadStartEntries(bool isSortOrderAsc) async {
+    final result = isSortOrderAsc
+        ? await widget.config.asyncLoader!(
+            galleryLoadStartTime,
+            _files![_selectedIndex].creationTime! - 1,
+            limit: kLoadLimit,
+          )
+        : await widget.config.asyncLoader!(
+            _files![_selectedIndex].creationTime! + 1,
+            DateTime.now().microsecondsSinceEpoch,
+            limit: kLoadLimit,
+            asc: true,
+          );
+
+    setState(() {
+      // Returned result could be a subtype of File
+      // ignore: unnecessary_cast
+      final files = result.files.reversed.map((e) => e as File).toList();
+      if (!result.hasMore) {
+        _hasLoadedTillStart = true;
+      }
+      final length = files.length;
+      files.addAll(_files!);
+      _files = files;
+      _pageController!.jumpToPage(length);
+      _selectedIndex = length;
+    });
+  }
+
+  Future<void> _loadEndEntries(bool isSortOrderAsc) async {
+    final result = isSortOrderAsc
+        ? await widget.config.asyncLoader!(
+            _files![_selectedIndex].creationTime! + 1,
+            DateTime.now().microsecondsSinceEpoch,
+            limit: kLoadLimit,
+            asc: true,
+          )
+        : await widget.config.asyncLoader!(
+            galleryLoadStartTime,
+            _files![_selectedIndex].creationTime! - 1,
+            limit: kLoadLimit,
+          );
+
+    setState(() {
+      if (!result.hasMore) {
+        _hasLoadedTillEnd = true;
+      }
+      _files!.addAll(result.files);
+    });
   }
 
   void _preloadFiles(int index) {
