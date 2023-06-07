@@ -6,7 +6,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/nav_bar.dart';
+import 'package:photos/ui/tabs/nav_bar.dart';
 
 class HomeBottomNavigationBar extends StatefulWidget {
   const HomeBottomNavigationBar(

@@ -49,8 +49,8 @@ dependencies:
   expansion_tile_card: ^2.0.0
   extended_image: ^6.2.1
   fast_base58: ^0.2.1
-  firebase_core: ^2.4.1
-  firebase_messaging: ^14.2.1
+  firebase_core: ^2.13.1
+  firebase_messaging: ^14.6.2
   fk_user_agent: ^2.0.1
   flutter:
     sdk: flutter

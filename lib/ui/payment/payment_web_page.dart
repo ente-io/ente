@@ -63,7 +63,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
           children: <Widget>[
             (progress != 1.0)
                 ? LinearProgressIndicator(value: progress)
-                : Container(),
+                : const SizedBox.shrink(),
             Expanded(
               child: InAppWebView(
                 initialUrlRequest: URLRequest(url: initPaymentUrl),

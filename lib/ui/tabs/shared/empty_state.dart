@@ -1,29 +1,19 @@
 import "package:flutter/material.dart";
-import "package:photos/core/constants.dart";
+import "package:fluttertoast/fluttertoast.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/collection_action_sheet.dart";
+import 'package:photos/ui/collections/collection_action_sheet.dart';
+import "package:photos/ui/common/gradient_button.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/empty_state_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/utils/share_util.dart";
+import "package:photos/utils/toast_util.dart";
 
-class NewSharedCollectionsGallery extends StatelessWidget {
-  const NewSharedCollectionsGallery({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: restrictedMaxWidth),
-        child: const EmptyStateWidget(),
-      ),
-    );
-  }
-}
-
-class EmptyStateWidget extends StatelessWidget {
-  const EmptyStateWidget({super.key});
+class SharedEmptyStateWidget extends StatelessWidget {
+  const SharedEmptyStateWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +103,79 @@ class EmptyStateWidget extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class OutgoingAlbumEmptyState extends StatelessWidget {
+  const OutgoingAlbumEmptyState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 200,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            S.of(context).shareYourFirstAlbum,
+            style: Theme.of(context).textTheme.caption,
+          ),
+          const Padding(padding: EdgeInsets.only(top: 14)),
+          SizedBox(
+            width: 200,
+            height: 50,
+            child: GradientButton(
+              onTap: () async {
+                await showToast(
+                  context,
+                  S.of(context).shareAlbumHint,
+                  toastLength: Toast.LENGTH_LONG,
+                );
+                Bus.instance.fire(
+                  TabChangedEvent(1, TabChangedEventSource.collectionsPage),
+                );
+              },
+              iconData: Icons.person_add,
+              text: S.of(context).share,
+            ),
+          ),
+          const SizedBox(height: 60),
+        ],
+      ),
+    );
+  }
+}
+
+class IncomingAlbumEmptyState extends StatelessWidget {
+  const IncomingAlbumEmptyState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 220,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            S.of(context).askYourLovedOnesToShare,
+            style: Theme.of(context).textTheme.caption,
+          ),
+          const Padding(padding: EdgeInsets.only(top: 14)),
+          SizedBox(
+            width: 200,
+            height: 50,
+            child: GradientButton(
+              onTap: () async {
+                shareText(S.of(context).shareTextRecommendUsingEnte);
+              },
+              iconData: Icons.outgoing_mail,
+              text: S.of(context).invite,
+            ),
+          ),
+          const SizedBox(height: 60),
+        ],
       ),
     );
   }

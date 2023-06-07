@@ -9,10 +9,10 @@ import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
 ///https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=7480%3A33462&t=H5AvR79OYDnB9ekw-4
-class AlbumListItemWidget extends StatelessWidget {
+class AlbumColumnItemWidget extends StatelessWidget {
   final CollectionWithThumbnail item;
 
-  const AlbumListItemWidget(
+  const AlbumColumnItemWidget(
     this.item, {
     super.key,
   });
