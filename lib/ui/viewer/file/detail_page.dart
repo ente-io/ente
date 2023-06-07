@@ -28,6 +28,7 @@ class DetailPageConfiguration {
   final int selectedIndex;
   final String tagPrefix;
   final DetailPageMode mode;
+  final bool sortOrderAsc;
 
   DetailPageConfiguration(
     this.files,
@@ -35,6 +36,7 @@ class DetailPageConfiguration {
     this.selectedIndex,
     this.tagPrefix, {
     this.mode = DetailPageMode.full,
+    this.sortOrderAsc = false,
   });
 
   DetailPageConfiguration copyWith({
@@ -42,12 +44,14 @@ class DetailPageConfiguration {
     GalleryLoader? asyncLoader,
     int? selectedIndex,
     String? tagPrefix,
+    bool? sortOrderAsc,
   }) {
     return DetailPageConfiguration(
       files ?? this.files,
       asyncLoader ?? this.asyncLoader,
       selectedIndex ?? this.selectedIndex,
       tagPrefix ?? this.tagPrefix,
+      sortOrderAsc: sortOrderAsc!,
     );
   }
 }
@@ -144,6 +148,7 @@ class _DetailPageState extends State<DetailPage> {
     // todo: perf.. do we always need to create new controller?
     _pageController = PageController(initialPage: _selectedIndex);
     return PageView.builder(
+      reverse: widget.config.sortOrderAsc,
       itemBuilder: (context, index) {
         final file = _files![index];
         final Widget content = FileWidget(

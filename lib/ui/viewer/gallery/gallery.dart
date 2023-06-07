@@ -220,6 +220,7 @@ class _GalleryState extends State<Gallery> {
       return widget.loadingWidget;
     }
     return GallerySortOrderProvider(
+      key: ValueKey(_sortOrderAsc),
       sortOrderAsc: _sortOrderAsc,
       child: MultipleGroupsGalleryView(
         hugeListViewKey: _hugeListViewKey,
