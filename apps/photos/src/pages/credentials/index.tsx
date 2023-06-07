@@ -11,7 +11,7 @@ import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
 } from 'utils/crypto';
-import { logoutUser, setupSRP } from 'services/userService';
+import { logoutUser, configureSRP } from 'services/userService';
 import { getUserSRPSetupPending, isFirstLogin } from 'utils/storage';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
@@ -87,7 +87,7 @@ export default function Credentials() {
             addLocalLog(() => `userSRPSetupPending ${userSRPSetupPending}`);
             if (userSRPSetupPending) {
                 // we don't have access to kek here, so we will have to re-derive it from the passphrase
-                await setupSRP(user.email, passphrase);
+                await configureSRP(user.email, passphrase);
             }
 
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);

@@ -6,7 +6,11 @@ import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
-import { getRecoveryKey } from 'utils/crypto';
+import {
+    generateSRPA,
+    generateSRPAttributes,
+    getRecoveryKey,
+} from 'utils/crypto';
 import { logError } from 'utils/sentry';
 import { eventBus, Events } from './events';
 import {
@@ -20,6 +24,8 @@ import {
     DeleteChallengeResponse,
     GetRemoteStoreValueResponse,
     GetSRPAttributesResponse,
+    SetupSRPRequest,
+    PostVerifySRPResponse,
 } from 'types/user';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
@@ -29,6 +35,8 @@ import { B64EncryptionResult } from 'types/crypto';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
 import { AxiosResponse } from 'axios';
 import { APPS, getAppName } from 'constants/apps';
+import { addLocalLog } from 'utils/logging';
+import { setUserSRPSetupPending } from 'utils/storage';
 
 const ENDPOINT = getEndpoint();
 
@@ -456,18 +464,77 @@ export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
 
 export const getSRPAttributes = async (email: string) => {
     try {
-        const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp-attributes`,
-            {
-                email,
-            }
-        );
-        return resp.data as GetSRPAttributesResponse;
+        const resp = await HTTPService.get(`${ENDPOINT}/users/srp/attributes`, {
+            email,
+        });
+        return (resp.data as GetSRPAttributesResponse)?.srpAttributes;
     } catch (e) {
         if (e.status?.toString() === ServerErrorCodes.NOT_FOUND) {
             return null;
         }
         logError(e, 'failed to get SRP attributes');
+        throw e;
+    }
+};
+
+export const configureSRP = async (email: string, password: string) => {
+    try {
+        addLocalLog(() => `starting srp setup for ${email}`);
+        const setupSRPRequest = await generateSRPAttributes(email, password);
+
+        await setupSRP(setupSRPRequest);
+        setUserSRPSetupPending(false);
+    } catch (e) {
+        logError(e, 'srp configure failed');
+        throw e;
+    }
+};
+
+export const setupSRP = async (setupSRPRequest: SetupSRPRequest) => {
+    try {
+        addLocalLog(() => `posting srp attributes`);
+        await HTTPService.post(
+            `${ENDPOINT}/users/srp/setup`,
+            setupSRPRequest,
+            null
+        );
+        addLocalLog(() => `post successful`);
+    } catch (e) {
+        logError(e, 'failed to post SRP attributes');
+        throw e;
+    }
+};
+
+export const verifySRP = async (
+    srpSalt: string,
+    email: string,
+    password: string
+) => {
+    try {
+        addLocalLog(() => `starting srp verify for ${email}`);
+        const srpA = await generateSRPA(srpSalt, email, password);
+        addLocalLog(() => `srpA: ${srpA}`);
+        const { srpB } = await postSRPA(email, srpA);
+        addLocalLog(() => `srp verify successful, srpB: ${srpB}`);
+    } catch (e) {
+        logError(e, 'srp verify failed');
+        throw e;
+    }
+};
+
+export const postSRPA = async (email: string, srpA: string) => {
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp/verify`,
+            {
+                email,
+                srpA,
+            },
+            null
+        );
+        return resp.data as PostVerifySRPResponse;
+    } catch (e) {
+        logError(e, 'failed to post SRP A');
         throw e;
     }
 };

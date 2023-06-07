@@ -1,4 +1,4 @@
-import { KeyAttributes } from 'types/user';
+import { KeyAttributes, SetupSRPRequest } from 'types/user';
 import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getActualKey, getToken } from 'utils/common/key';
@@ -9,6 +9,10 @@ import safeStorageService from 'services/electron/safeStorage';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { PasswordStrength } from 'constants/crypto';
 import zxcvbn from 'zxcvbn';
+import { SRP, SrpClient } from 'fast-srp-hap';
+import { addLocalLog } from 'utils/logging';
+
+const SRP_PARAMS = SRP.params['2048'];
 
 export async function generateKeyAttributes(
     passphrase: string
@@ -240,4 +244,74 @@ export function estimatePasswordStrength(password: string): PasswordStrength {
 
 export const isWeakPassword = (password: string) => {
     return estimatePasswordStrength(password) === PasswordStrength.WEAK;
+};
+
+export const generateSRPAttributes = async (
+    email: string,
+    password: string
+    // keyAttributes: KeyAttributes
+): Promise<SetupSRPRequest> => {
+    addLocalLog(() => `started generateSRPAttributes email ${email}`);
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    // const kek = await cryptoWorker.deriveKey(
+    //     password,
+    //     keyAttributes.kekSalt,
+    //     keyAttributes.opsLimit,
+    //     keyAttributes.memLimit
+    // );
+    // const loginSubKey = await cryptoWorker.generateSubKey(kek, 'login');
+    const srpSalt = await cryptoWorker.generateSaltToDeriveKey();
+
+    // DOCS: var verifier = srp.computeVerifier(params, salt, identity, password);
+    const srpVerifierBuffer = SRP.computeVerifier(
+        SRP_PARAMS,
+        Buffer.from(srpSalt),
+        Buffer.from(email),
+        Buffer.from(password)
+    );
+
+    const srpVerifier = srpVerifierBuffer.toString('base64');
+    addLocalLog(
+        () =>
+            `finished generateSRPAttributes , srpSalt ${srpSalt} , srpVerifier ${srpVerifier} email ${email}`
+    );
+    return {
+        email,
+        srpSalt,
+        srpVerifier,
+    };
+};
+
+export const generateSRPA = async (
+    srpSalt: string,
+    email: string,
+    password: string
+) => {
+    return new Promise<string>((resolve, reject) => {
+        SRP.genKey(function (err, secret1) {
+            try {
+                if (err) {
+                    reject(err);
+                }
+                console.log('secret1', secret1);
+                const srpClient = new SrpClient(
+                    SRP_PARAMS,
+                    Buffer.from(srpSalt),
+                    Buffer.from(email),
+                    Buffer.from(password),
+                    Buffer.from(secret1)
+                );
+                const srpA = srpClient.computeA();
+                //convert  buffer To B64 srpA
+
+                resolve(convertBufferToB64(srpA));
+            } catch (e) {
+                reject(e);
+            }
+        });
+    });
+};
+
+const convertBufferToB64 = (buffer: Buffer) => {
+    return buffer.toString('base64');
 };

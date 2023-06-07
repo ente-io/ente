@@ -111,3 +111,13 @@ export interface SRPAttributes {
 export interface GetSRPAttributesResponse {
     srpAttributes: SRPAttributes;
 }
+
+export interface SetupSRPRequest {
+    email: string;
+    srpSalt: string;
+    srpVerifier: string;
+}
+
+export interface PostVerifySRPResponse {
+    srpB: string;
+}
