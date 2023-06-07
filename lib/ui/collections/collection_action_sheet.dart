@@ -12,7 +12,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/collections_list_widget.dart";
+import 'package:photos/ui/collections/album/vertical_list.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -229,7 +229,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                 radius: const Radius.circular(2),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 12),
-                  child: CollectionsListWidget(
+                  child: AlbumVerticalListWidget(
                     searchResults,
                     widget.actionType,
                     widget.selectedFiles,

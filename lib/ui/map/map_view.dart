@@ -4,12 +4,14 @@ import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart";
 import "package:latlong2/latlong.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_button.dart";
 import 'package:photos/ui/map/map_gallery_tile.dart';
 import 'package:photos/ui/map/map_gallery_tile_badge.dart';
 import "package:photos/ui/map/map_marker.dart";
+import "package:photos/ui/map/tile/layers.dart";
+import "package:url_launcher/url_launcher.dart";
+import "package:url_launcher/url_launcher_string.dart";
 
 class MapView extends StatefulWidget {
   final List<ImageMarker> imageMarkers;
@@ -42,6 +44,12 @@ class _MapViewState extends State<MapView> {
   bool _isDebouncing = false;
 
   @override
+  void initState() {
+    super.initState();
+    // widget.controller.move(widget.center, widget.initialZoom);
+  }
+
+  @override
   void dispose() {
     _debounceTimer?.cancel();
     _debounceTimer = null;
@@ -57,6 +65,7 @@ class _MapViewState extends State<MapView> {
           options: MapOptions(
             minZoom: widget.minZoom,
             maxZoom: widget.maxZoom,
+            enableMultiFingerGestureRace: true,
             onPositionChanged: (position, hasGesture) {
               if (position.bounds != null) {
                 if (!_isDebouncing) {
@@ -71,14 +80,32 @@ class _MapViewState extends State<MapView> {
               }
             },
           ),
-          children: [
-            TileLayer(
-              urlTemplate: Configuration.urltemplate,
-              additionalOptions: const {
-                "accessToken": Configuration.apikey,
-                "id": "mapbox.mapbox-streets-v7",
-              },
+          nonRotatedChildren: [
+            RichAttributionWidget(
+              alignment: AttributionAlignment.bottomLeft,
+              animationConfig: const ScaleRAWA(), // Or `FadeRAWA` as is default
+              showFlutterMapAttribution: false,
+              attributions: [
+                TextSourceAttribution(
+                  'OpenStreetMap contributors',
+                  onTap: () =>
+                      launchUrlString('https://openstreetmap.org/copyright'),
+                ),
+                TextSourceAttribution(
+                  'HOT',
+                  onTap: () => launchUrl(Uri.parse('https://www.hotosm.org/')),
+                ),
+                TextSourceAttribution(
+                  'Hosted @ OSM France',
+                  onTap: () =>
+                      launchUrl(Uri.parse('https://www.openstreetmap.fr/')),
+                  prependCopyright: false,
+                ),
+              ],
             ),
+          ],
+          children: [
+            const OSMFranceTileLayer(),
             MarkerClusterLayerWidget(
               options: MarkerClusterLayerOptions(
                 maxClusterRadius: 100,

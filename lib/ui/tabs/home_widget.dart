@@ -30,22 +30,22 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/collection_action_sheet.dart';
-import 'package:photos/ui/collections_gallery_widget.dart';
-import 'package:photos/ui/common/bottom_shadow.dart';
+import 'package:photos/ui/collections/collection_action_sheet.dart';
+import "package:photos/ui/common/bottom_shadow.dart";
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/home/grant_permissions_widget.dart';
 import 'package:photos/ui/home/header_widget.dart';
 import 'package:photos/ui/home/home_bottom_nav_bar.dart';
 import 'package:photos/ui/home/home_gallery_widget.dart';
 import 'package:photos/ui/home/landing_page_widget.dart';
+import "package:photos/ui/home/loading_photos_widget.dart";
 import 'package:photos/ui/home/preserve_footer_widget.dart';
 import 'package:photos/ui/home/start_backup_hook_widget.dart';
-import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/notification/update/change_log_page.dart';
 import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings_page.dart';
-import "package:photos/ui/shared_collections_gallery.dart";
+import "package:photos/ui/tabs/shared_collections_tab.dart";
+import "package:photos/ui/tabs/user_collections_tab.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
@@ -60,8 +60,8 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
-  static const _deviceFolderGalleryWidget = CollectionsGalleryWidget();
-  static const _sharedCollectionGallery = SharedCollectionGallery();
+  static const _userCollectionsTab = UserCollectionsTab();
+  static const _sharedCollectionTab = SharedCollectionsTab();
   static final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
   );
@@ -375,8 +375,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                         footer: const PreserveFooterWidget(),
                         selectedFiles: _selectedFiles,
                       ),
-                _deviceFolderGalleryWidget,
-                _sharedCollectionGallery,
+                _userCollectionsTab,
+                _sharedCollectionTab,
               ],
             );
           },

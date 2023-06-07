@@ -7,23 +7,22 @@ import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection_items.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/collections/collection_item_widget.dart";
+import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/common/loading_widget.dart";
 
-class AlbumHorizontalListWidget extends StatefulWidget {
+class AlbumHorizontalList extends StatefulWidget {
   final Future<List<CollectionWithThumbnail>> Function() collectionsFuture;
 
-  const AlbumHorizontalListWidget(
+  const AlbumHorizontalList(
     this.collectionsFuture, {
     Key? key,
   }) : super(key: key);
 
   @override
-  State<AlbumHorizontalListWidget> createState() =>
-      _AlbumHorizontalListWidgetState();
+  State<AlbumHorizontalList> createState() => _AlbumHorizontalListState();
 }
 
-class _AlbumHorizontalListWidgetState extends State<AlbumHorizontalListWidget> {
+class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
   late Logger _logger;
@@ -34,7 +33,7 @@ class _AlbumHorizontalListWidgetState extends State<AlbumHorizontalListWidget> {
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       setState(() {});
     });
-    _logger = Logger((_AlbumHorizontalListWidgetState).toString());
+    _logger = Logger((_AlbumHorizontalListState).toString());
     super.initState();
   }
 
@@ -84,7 +83,7 @@ class _AlbumHorizontalListWidgetState extends State<AlbumHorizontalListWidget> {
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       itemBuilder: (context, index) {
                         final item = collectionsWithThumbnail[index];
-                        return CollectionItem(
+                        return AlbumRowItemWidget(
                           item,
                           120,
                           shouldRender: true,

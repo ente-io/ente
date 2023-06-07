@@ -8,10 +8,10 @@ import 'package:photos/services/hidden_service.dart';
 import 'package:photos/ui/viewer/gallery/uncategorized_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class UnCatCollectionsButtonWidget extends StatelessWidget {
+class UnCategorizedCollections extends StatelessWidget {
   final TextStyle textStyle;
 
-  const UnCatCollectionsButtonWidget(
+  const UnCategorizedCollections(
     this.textStyle, {
     Key? key,
   }) : super(key: key);
