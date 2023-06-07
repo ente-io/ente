@@ -54,7 +54,7 @@ class OutgoingAlbumItem extends StatelessWidget {
                   tag: "outgoing_collection" + c.thumbnail!.tag,
                   child: ThumbnailWidget(
                     c.thumbnail,
-                    key: Key("outgoing_collection" + c.thumbnail!.tag),
+                    key: ValueKey("outgoing_collection" + c.thumbnail!.tag),
                   ),
                 ),
               ),
