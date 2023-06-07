@@ -219,8 +219,7 @@ class _GalleryState extends State<Gallery> {
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
     }
-    return GallerySortOrderProvider(
-      key: ValueKey(_sortOrderAsc),
+    return GallerySortOrder(
       sortOrderAsc: _sortOrderAsc,
       child: MultipleGroupsGalleryView(
         hugeListViewKey: _hugeListViewKey,
