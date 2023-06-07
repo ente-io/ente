@@ -8,6 +8,7 @@ import { RenderCaption } from './RenderCaption';
 import CopyButton from 'components/CodeBlock/CopyButton';
 import { formatDate, formatTime } from 'utils/time/format';
 import Titlebar from 'components/Titlebar';
+import MapBox from './MapBox';
 import InfoItem from './InfoItem';
 import { FlexWrapper } from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
@@ -202,25 +203,28 @@ export function FileInfo({
                 )}
 
                 {location && (
-                    <InfoItem
-                        icon={<LocationOnOutlined />}
-                        title={t('LOCATION')}
-                        caption={
-                            <Link
-                                href={getOpenStreetMapLink(location)}
-                                target="_blank"
-                                sx={{ fontWeight: 'bold' }}>
-                                {t('SHOW_ON_MAP')}
-                            </Link>
-                        }
-                        customEndButton={
-                            <CopyButton
-                                code={getOpenStreetMapLink(location)}
-                                color="secondary"
-                                size="medium"
-                            />
-                        }
-                    />
+                    <div>
+                        <InfoItem
+                            icon={<LocationOnOutlined />}
+                            title={t('LOCATION')}
+                            caption={
+                                <Link
+                                    href={getOpenStreetMapLink(location)}
+                                    target="_blank"
+                                    sx={{ fontWeight: 'bold' }}>
+                                    {t('SHOW_ON_MAP')}
+                                </Link>
+                            }
+                            customEndButton={
+                                <CopyButton
+                                    code={getOpenStreetMapLink(location)}
+                                    color="secondary"
+                                    size="medium"
+                                />
+                            }
+                        />
+                        <MapBox location={location} />
+                    </div>
                 )}
                 <InfoItem
                     icon={<TextSnippetOutlined />}
