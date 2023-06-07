@@ -11,8 +11,8 @@ import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
 } from 'utils/crypto';
-import { logoutUser } from 'services/userService';
-import { isFirstLogin } from 'utils/storage';
+import { logoutUser, setupSRP } from 'services/userService';
+import { getUserSRPSetupPending, isFirstLogin } from 'utils/storage';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
@@ -28,6 +28,7 @@ import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
 } from 'components/VerifyMasterPasswordForm';
 import { APPS, getAppName } from 'constants/apps';
+import { addLocalLog } from 'utils/logging';
 
 export default function Credentials() {
     const router = useRouter();
@@ -82,6 +83,13 @@ export default function Credentials() {
                     key
                 );
             }
+            const userSRPSetupPending = getUserSRPSetupPending();
+            addLocalLog(() => `userSRPSetupPending ${userSRPSetupPending}`);
+            if (userSRPSetupPending) {
+                // we don't have access to kek here, so we will have to re-derive it from the passphrase
+                await setupSRP(user.email, passphrase);
+            }
+
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
             await decryptAndStoreToken(key);
             const redirectURL = appContext.redirectURL;
