@@ -515,9 +515,9 @@ export const loginViaSRP = async (
     try {
         addLocalLog(() => `starting srp verify for ${email}`);
         const srpClient = await generateSRPClient(srpSalt, email, password);
-        addLocalLog(() => `srpClient: ${srpClient}`);
 
         const srpA = srpClient.computeA();
+        addLocalLog(() => `srp a: ${convertBufferToBase64(srpA)}`);
         const { srpB } = await exchangeAB(email, convertBufferToBase64(srpA));
         addLocalLog(() => `srp verify successful, srpB: ${srpB}`);
         srpClient.setB(convertBase64ToBuffer(srpB));
@@ -526,9 +526,12 @@ export const loginViaSRP = async (
         addLocalLog(() => `srp k: ${convertBufferToBase64(k)}`);
         const m1 = srpClient.computeM1();
         addLocalLog(() => `srp m1: ${convertBufferToBase64(m1)}`);
-        const x = await verifySRP(email, convertBufferToBase64(m1));
+        const verificationResponse = await verifySRP(
+            email,
+            convertBufferToBase64(m1)
+        );
         addLocalLog(() => `srp verify successful, x: ${x}`);
-        return x;
+        return verificationResponse;
     } catch (e) {
         logError(e, 'srp verify failed');
         throw e;

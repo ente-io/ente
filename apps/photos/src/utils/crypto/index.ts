@@ -11,6 +11,7 @@ import { PasswordStrength } from 'constants/crypto';
 import zxcvbn from 'zxcvbn';
 import { SRP, SrpClient } from 'fast-srp-hap';
 import { addLocalLog } from 'utils/logging';
+import { convertBufferToBase64 } from 'utils/user';
 
 const SRP_PARAMS = SRP.params['2048'];
 
@@ -293,13 +294,13 @@ export const generateSRPClient = async (
                 if (err) {
                     reject(err);
                 }
-                console.log('secret1', secret1);
+                addLocalLog(() => `secret1 ${convertBufferToBase64(secret1)}`);
                 const srpClient = new SrpClient(
                     SRP_PARAMS,
                     Buffer.from(srpSalt),
                     Buffer.from(email),
                     Buffer.from(password),
-                    Buffer.from(secret1)
+                    secret1
                 );
 
                 resolve(srpClient);
