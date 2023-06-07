@@ -661,6 +661,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Group nearby photos"),
         "hidden": MessageLookupByLibrary.simpleMessage("Hidden"),
         "hide": MessageLookupByLibrary.simpleMessage("Hide"),
+        "hostedAtOsmFrance":
+            MessageLookupByLibrary.simpleMessage("Hosted at OSM France"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("How it works"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
             "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match."),
@@ -829,6 +831,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oops, something went wrong"),
         "openTheItem": MessageLookupByLibrary.simpleMessage("• Open the item"),
+        "openstreetmapContributors":
+            MessageLookupByLibrary.simpleMessage("OpenStreetMap contributors"),
         "optionalAsShortAsYouLike": MessageLookupByLibrary.simpleMessage(
             "Optional, as short as you like..."),
         "orPickAnExistingOne":

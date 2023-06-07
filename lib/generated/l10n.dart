@@ -7222,6 +7222,26 @@ class S {
       args: [],
     );
   }
+
+  /// `OpenStreetMap contributors`
+  String get openstreetmapContributors {
+    return Intl.message(
+      'OpenStreetMap contributors',
+      name: 'openstreetmapContributors',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hosted at OSM France`
+  String get hostedAtOsmFrance {
+    return Intl.message(
+      'Hosted at OSM France',
+      name: 'hostedAtOsmFrance',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

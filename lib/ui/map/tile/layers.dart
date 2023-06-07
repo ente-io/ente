@@ -1,5 +1,10 @@
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
+import "package:photos/generated/l10n.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/map/tile/attribution/map_attribution.dart";
+import "package:url_launcher/url_launcher.dart";
+import "package:url_launcher/url_launcher_string.dart";
 
 class OSMTileLayer extends StatelessWidget {
   const OSMTileLayer({super.key});
@@ -23,6 +28,35 @@ class OSMFranceTileLayer extends StatelessWidget {
       urlTemplate: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
       subdomains: const ['a', 'b', 'c'],
       backgroundColor: Colors.transparent,
+    );
+  }
+}
+
+class OSMFranceTileAttributes extends StatelessWidget {
+  const OSMFranceTileAttributes({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MapAttributionWidget(
+      alignment: AttributionAlignment.bottomLeft,
+      showFlutterMapAttribution: false,
+      attributions: [
+        TextSourceAttribution(
+          S.of(context).openstreetmapContributors,
+          textStyle: getEnteTextTheme(context).smallBold,
+          onTap: () => launchUrlString('https://openstreetmap.org/copyright'),
+        ),
+        TextSourceAttribution(
+          'HOT',
+          textStyle: getEnteTextTheme(context).smallBold,
+          onTap: () => launchUrl(Uri.parse('https://www.hotosm.org/')),
+        ),
+        TextSourceAttribution(
+          S.of(context).hostedAtOsmFrance,
+          onTap: () => launchUrl(Uri.parse('https://www.openstreetmap.fr/')),
+          textStyle: getEnteTextTheme(context).smallBold,
+        ),
+      ],
     );
   }
 }
