@@ -118,6 +118,6 @@ export interface SetupSRPRequest {
     srpVerifier: string;
 }
 
-export interface PostVerifySRPResponse {
+export interface ExchangeSRPABResponse {
     srpB: string;
 }

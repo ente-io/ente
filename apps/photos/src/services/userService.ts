@@ -7,7 +7,7 @@ import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
 import {
-    generateSRPA,
+    generateSRPClient,
     generateSRPAttributes,
     getRecoveryKey,
 } from 'utils/crypto';
@@ -25,7 +25,8 @@ import {
     GetRemoteStoreValueResponse,
     GetSRPAttributesResponse,
     SetupSRPRequest,
-    PostVerifySRPResponse,
+    ExchangeSRPABResponse,
+    EmailVerificationResponse,
 } from 'types/user';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
@@ -37,6 +38,7 @@ import { AxiosResponse } from 'axios';
 import { APPS, getAppName } from 'constants/apps';
 import { addLocalLog } from 'utils/logging';
 import { setUserSRPSetupPending } from 'utils/storage';
+import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
 
 const ENDPOINT = getEndpoint();
 
@@ -505,36 +507,64 @@ export const setupSRP = async (setupSRPRequest: SetupSRPRequest) => {
     }
 };
 
-export const verifySRP = async (
+export const loginViaSRP = async (
     srpSalt: string,
     email: string,
     password: string
 ) => {
     try {
         addLocalLog(() => `starting srp verify for ${email}`);
-        const srpA = await generateSRPA(srpSalt, email, password);
-        addLocalLog(() => `srpA: ${srpA}`);
-        const { srpB } = await postSRPA(email, srpA);
+        const srpClient = await generateSRPClient(srpSalt, email, password);
+        addLocalLog(() => `srpClient: ${srpClient}`);
+
+        const srpA = srpClient.computeA();
+        const { srpB } = await exchangeAB(email, convertBufferToBase64(srpA));
         addLocalLog(() => `srp verify successful, srpB: ${srpB}`);
+        srpClient.setB(convertBase64ToBuffer(srpB));
+
+        const k = srpClient.computeK();
+        addLocalLog(() => `srp k: ${convertBufferToBase64(k)}`);
+        const m1 = srpClient.computeM1();
+        addLocalLog(() => `srp m1: ${convertBufferToBase64(m1)}`);
+        const x = await verifySRP(email, convertBufferToBase64(m1));
+        addLocalLog(() => `srp verify successful, x: ${x}`);
+        return x;
     } catch (e) {
         logError(e, 'srp verify failed');
         throw e;
     }
 };
 
-export const postSRPA = async (email: string, srpA: string) => {
+export const exchangeAB = async (email: string, srpA: string) => {
     try {
         const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp/verify`,
+            `${ENDPOINT}/users/srp/exchange-ab`,
             {
                 email,
                 srpA,
             },
             null
         );
-        return resp.data as PostVerifySRPResponse;
+        return resp.data as ExchangeSRPABResponse;
     } catch (e) {
-        logError(e, 'failed to post SRP A');
+        logError(e, 'exchangeAB failed');
+        throw e;
+    }
+};
+
+export const verifySRP = async (email: string, srpM1: string) => {
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp/verify`,
+            {
+                email,
+                srpM1,
+            },
+            null
+        );
+        return resp.data as EmailVerificationResponse;
+    } catch (e) {
+        logError(e, 'failed to verify SRP');
         throw e;
     }
 };

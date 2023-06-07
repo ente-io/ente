@@ -282,12 +282,12 @@ export const generateSRPAttributes = async (
     };
 };
 
-export const generateSRPA = async (
+export const generateSRPClient = async (
     srpSalt: string,
     email: string,
     password: string
 ) => {
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<SrpClient>((resolve, reject) => {
         SRP.genKey(function (err, secret1) {
             try {
                 if (err) {
@@ -301,17 +301,11 @@ export const generateSRPA = async (
                     Buffer.from(password),
                     Buffer.from(secret1)
                 );
-                const srpA = srpClient.computeA();
-                //convert  buffer To B64 srpA
 
-                resolve(convertBufferToB64(srpA));
+                resolve(srpClient);
             } catch (e) {
                 reject(e);
             }
         });
     });
-};
-
-const convertBufferToB64 = (buffer: Buffer) => {
-    return buffer.toString('base64');
 };
