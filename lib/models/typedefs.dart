@@ -7,6 +7,7 @@ typedef BoolCallBack = bool Function();
 typedef VoidCallbackParamStr = void Function(String);
 typedef VoidCallbackParamInt = void Function(int);
 typedef VoidCallbackParamDouble = Function(double);
+typedef VoidCallbackParamBool = void Function(bool);
 typedef VoidCallbackParamListDouble = void Function(List<double>);
 typedef VoidCallbackParamLocation = void Function(Location);
 
