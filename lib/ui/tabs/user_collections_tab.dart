@@ -15,30 +15,29 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/remote_sync_service.dart";
-import 'package:photos/ui/collections/archived_collections_button_widget.dart';
+import "package:photos/ui/collections/button/archived_button.dart";
+import "package:photos/ui/collections/button/hidden_button.dart";
+import "package:photos/ui/collections/button/trash_button.dart";
+import "package:photos/ui/collections/button/uncategorized_button.dart";
 import 'package:photos/ui/collections/device_folders_grid_view_widget.dart';
-import 'package:photos/ui/collections/hidden_collections_button_widget.dart';
 import 'package:photos/ui/collections/remote_collections_grid_view_widget.dart';
-import 'package:photos/ui/collections/section_title.dart';
-import 'package:photos/ui/collections/trash_button_widget.dart';
-import 'package:photos/ui/collections/uncat_collections_button_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
+import 'package:photos/ui/tabs/section_title.dart';
 import 'package:photos/ui/viewer/actions/delete_empty_albums.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/local_settings.dart';
 
-class CollectionsGalleryWidget extends StatefulWidget {
-  const CollectionsGalleryWidget({Key? key}) : super(key: key);
+class UserCollectionsTab extends StatefulWidget {
+  const UserCollectionsTab({Key? key}) : super(key: key);
 
   @override
-  State<CollectionsGalleryWidget> createState() =>
-      _CollectionsGalleryWidgetState();
+  State<UserCollectionsTab> createState() => _UserCollectionsTabState();
 }
 
-class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
+class _UserCollectionsTabState extends State<UserCollectionsTab>
     with AutomaticKeepAliveClientMixin {
-  final _logger = Logger((_CollectionsGalleryWidgetState).toString());
+  final _logger = Logger((_UserCollectionsTabState).toString());
   late StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
@@ -174,13 +173,13 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  UnCatCollectionsButtonWidget(trashAndHiddenTextStyle),
+                  UnCategorizedCollections(trashAndHiddenTextStyle),
                   const SizedBox(height: 12),
-                  ArchivedCollectionsButtonWidget(trashAndHiddenTextStyle),
+                  ArchivedCollectionsButton(trashAndHiddenTextStyle),
                   const SizedBox(height: 12),
                   HiddenCollectionsButtonWidget(trashAndHiddenTextStyle),
                   const SizedBox(height: 12),
-                  TrashButtonWidget(trashAndHiddenTextStyle),
+                  TrashSectionButton(trashAndHiddenTextStyle),
                 ],
               ),
             ),

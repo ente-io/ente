@@ -101,7 +101,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         leading: widget.mode == PasswordEntryMode.reset
-            ? Container()
+            ? const SizedBox.shrink()
             : IconButton(
                 icon: const Icon(Icons.arrow_back),
                 color: Theme.of(context).iconTheme.color,
@@ -142,7 +142,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       passwordStrengthColor = Colors.orangeAccent;
     }
     if (_volatilePassword != null) {
-      return Container();
+      return const SizedBox.shrink();
     }
     return Column(
       children: [

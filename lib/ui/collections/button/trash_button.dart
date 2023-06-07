@@ -1,24 +1,47 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
-import 'package:photos/db/files_db.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/trash_db.dart';
+import 'package:photos/events/trash_updated_event.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/metadata/common_keys.dart";
-import "package:photos/services/collections_service.dart";
-import 'package:photos/ui/viewer/gallery/archive_page.dart';
+import 'package:photos/ui/viewer/gallery/trash_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class ArchivedCollectionsButtonWidget extends StatelessWidget {
-  final TextStyle textStyle;
-
-  const ArchivedCollectionsButtonWidget(
+class TrashSectionButton extends StatefulWidget {
+  const TrashSectionButton(
     this.textStyle, {
     Key? key,
   }) : super(key: key);
 
+  final TextStyle textStyle;
+
+  @override
+  State<TrashSectionButton> createState() => _TrashSectionButtonState();
+}
+
+class _TrashSectionButtonState extends State<TrashSectionButton> {
+  late StreamSubscription<TrashUpdatedEvent> _trashUpdatedEventSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _trashUpdatedEventSubscription =
+        Bus.instance.on<TrashUpdatedEvent>().listen((event) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _trashUpdatedEventSubscription.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Set<int> hiddenCollectionId =
-        CollectionsService.instance.getHiddenCollections();
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         backgroundColor: Theme.of(context).backgroundColor,
@@ -42,24 +65,20 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    Icons.archive_outlined,
+                    Icons.delete,
                     color: Theme.of(context).iconTheme.color,
                   ),
                   const Padding(padding: EdgeInsets.all(6)),
                   FutureBuilder<int>(
-                    future: FilesDB.instance.archivedFilesCount(
-                      archiveVisibility,
-                      Configuration.instance.getUserID()!,
-                      hiddenCollectionId,
-                    ),
+                    future: TrashDB.instance.count(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData && snapshot.data! > 0) {
                         return RichText(
                           text: TextSpan(
-                            style: textStyle,
+                            style: widget.textStyle,
                             children: [
                               TextSpan(
-                                text: S.of(context).archive,
+                                text: S.of(context).trash,
                                 style: Theme.of(context).textTheme.subtitle1,
                               ),
                               const TextSpan(text: "  \u2022  "),
@@ -73,10 +92,10 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
                       } else {
                         return RichText(
                           text: TextSpan(
-                            style: textStyle,
+                            style: widget.textStyle,
                             children: [
                               TextSpan(
-                                text: S.of(context).archive,
+                                text: S.of(context).trash,
                                 style: Theme.of(context).textTheme.subtitle1,
                               ),
                               //need to query in db and bring this value
@@ -96,10 +115,10 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
           ),
         ),
       ),
-      onPressed: () async {
+      onPressed: () {
         routeToPage(
           context,
-          ArchivePage(),
+          TrashPage(),
         );
       },
     );

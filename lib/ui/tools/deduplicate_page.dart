@@ -309,7 +309,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Container(),
+        const SizedBox.shrink(),
         PopupMenuButton(
           initialValue: sortKey.index,
           child: Padding(

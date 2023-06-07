@@ -109,7 +109,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             padding: EdgeInsets.all(10),
           ),
           _deviceCollections == null
-              ? Container()
+              ? const SizedBox.shrink()
               : GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   child: Padding(

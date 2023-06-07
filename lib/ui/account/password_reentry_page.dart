@@ -10,7 +10,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/ui/account/recovery_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/ui/home_widget.dart';
+import 'package:photos/ui/tabs/home_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 

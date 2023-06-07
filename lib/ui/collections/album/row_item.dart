@@ -12,13 +12,13 @@ import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-class CollectionItem extends StatelessWidget {
+class AlbumRowItemWidget extends StatelessWidget {
   final CollectionWithThumbnail c;
   final double sideOfThumbnail;
   final bool shouldRender;
   final bool showFileCount;
 
-  CollectionItem(
+  AlbumRowItemWidget(
     this.c,
     this.sideOfThumbnail, {
     this.shouldRender = false,

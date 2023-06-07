@@ -26,7 +26,9 @@ dependencies:
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
   chewie:
-    path: thirdparty/chewie
+    git:
+      url: https://github.com/ente-io/chewie.git
+      ref: forked_video_player
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
@@ -47,8 +49,8 @@ dependencies:
   expansion_tile_card: ^2.0.0
   extended_image: ^6.2.1
   fast_base58: ^0.2.1
-  firebase_core: ^2.4.1
-  firebase_messaging: ^14.2.1
+  firebase_core: ^2.13.1
+  firebase_messaging: ^14.6.2
   fk_user_agent: ^2.0.1
   flutter:
     sdk: flutter
@@ -128,20 +130,19 @@ dependencies:
   url_launcher: ^6.0.3
   uuid: ^3.0.4
   video_player:
-    path: thirdparty/plugins/packages/video_player/video_player
+    git:
+      url: https://github.com/ente-io/packages.git
+      ref: android_video_roation_fix
+      path: packages/video_player/video_player/
   video_thumbnail: ^0.4.3
   visibility_detector: ^0.3.3
-  wakelock: ^0.6.1+2
+  wakelock: ^0.6.2
   wallpaper_manager_flutter: ^0.0.2
   widgets_to_image: ^0.0.2
 
 
 flutter_intl:
     enabled: true
-
-dependency_overrides:
-  provider: ^6.0.1 # for chewie 1.2.2 https://github.com/brianegan/chewie/issues/530
-  wakelock: ^0.6.1+2
 
 dev_dependencies:
   build_runner: ^2.3.3

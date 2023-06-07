@@ -5,7 +5,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
-import 'package:photos/ui/home_widget.dart';
+import "package:photos/ui/tabs/home_widget.dart";
 
 class SkipSubscriptionWidget extends StatelessWidget {
   const SkipSubscriptionWidget({

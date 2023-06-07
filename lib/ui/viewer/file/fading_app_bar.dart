@@ -21,7 +21,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
-import 'package:photos/ui/collection_action_sheet.dart';
+import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
