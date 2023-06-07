@@ -213,16 +213,23 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   void _preloadEntries() async {
+    final isSortOrderAsc = widget.config.sortOrderAsc;
     if (widget.config.asyncLoader == null) {
       return;
     }
     if (_selectedIndex == 0 && !_hasLoadedTillStart) {
-      final result = await widget.config.asyncLoader!(
-        _files![_selectedIndex].creationTime! + 1,
-        DateTime.now().microsecondsSinceEpoch,
-        limit: kLoadLimit,
-        asc: true,
-      );
+      final result = isSortOrderAsc
+          ? await widget.config.asyncLoader!(
+              galleryLoadStartTime,
+              _files![_selectedIndex].creationTime! - 1,
+              limit: kLoadLimit,
+            )
+          : await widget.config.asyncLoader!(
+              _files![_selectedIndex].creationTime! + 1,
+              DateTime.now().microsecondsSinceEpoch,
+              limit: kLoadLimit,
+              asc: true,
+            );
       setState(() {
         // Returned result could be a subtype of File
         // ignore: unnecessary_cast
@@ -238,11 +245,18 @@ class _DetailPageState extends State<DetailPage> {
       });
     }
     if (_selectedIndex == _files!.length - 1 && !_hasLoadedTillEnd) {
-      final result = await widget.config.asyncLoader!(
-        galleryLoadStartTime,
-        _files![_selectedIndex].creationTime! - 1,
-        limit: kLoadLimit,
-      );
+      final result = isSortOrderAsc
+          ? await widget.config.asyncLoader!(
+              _files![_selectedIndex].creationTime! + 1,
+              DateTime.now().microsecondsSinceEpoch,
+              limit: kLoadLimit,
+              asc: true,
+            )
+          : await widget.config.asyncLoader!(
+              galleryLoadStartTime,
+              _files![_selectedIndex].creationTime! - 1,
+              limit: kLoadLimit,
+            );
       setState(() {
         if (!result.hasMore) {
           _hasLoadedTillEnd = true;
