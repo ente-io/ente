@@ -6,7 +6,7 @@ class GallerySortOrderProvider extends StatefulWidget {
   final Widget child;
 
   const GallerySortOrderProvider({
-    ///true if null
+    ///false if null
     this.sortOrderAsc,
     required this.child,
     Key? key,
@@ -21,7 +21,7 @@ class GallerySortOrderStateProvider extends State<GallerySortOrderProvider> {
   late bool _sortOrderAsc;
   @override
   void initState() {
-    _sortOrderAsc = widget.sortOrderAsc ?? true;
+    _sortOrderAsc = widget.sortOrderAsc ?? false;
 
     super.initState();
   }
