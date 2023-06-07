@@ -4,11 +4,13 @@ import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart";
 import "package:latlong2/latlong.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_button.dart";
 import 'package:photos/ui/map/map_gallery_tile.dart';
 import 'package:photos/ui/map/map_gallery_tile_badge.dart';
 import "package:photos/ui/map/map_marker.dart";
+import "package:photos/ui/map/tile/attribution/map_attribution.dart";
 import "package:photos/ui/map/tile/layers.dart";
 import "package:url_launcher/url_launcher.dart";
 import "package:url_launcher/url_launcher_string.dart";
@@ -81,25 +83,26 @@ class _MapViewState extends State<MapView> {
             },
           ),
           nonRotatedChildren: [
-            RichAttributionWidget(
+            MapAttributionWidget(
               alignment: AttributionAlignment.bottomLeft,
-              animationConfig: const ScaleRAWA(), // Or `FadeRAWA` as is default
               showFlutterMapAttribution: false,
               attributions: [
                 TextSourceAttribution(
                   'OpenStreetMap contributors',
+                  textStyle: getEnteTextTheme(context).smallBold,
                   onTap: () =>
                       launchUrlString('https://openstreetmap.org/copyright'),
                 ),
                 TextSourceAttribution(
                   'HOT',
+                  textStyle: getEnteTextTheme(context).smallBold,
                   onTap: () => launchUrl(Uri.parse('https://www.hotosm.org/')),
                 ),
                 TextSourceAttribution(
-                  'Hosted @ OSM France',
+                  'Hosted at OSM France',
                   onTap: () =>
                       launchUrl(Uri.parse('https://www.openstreetmap.fr/')),
-                  prependCopyright: false,
+                  textStyle: getEnteTextTheme(context).smallBold,
                 ),
               ],
             ),

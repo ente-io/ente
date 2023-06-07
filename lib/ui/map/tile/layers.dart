@@ -22,7 +22,7 @@ class OSMFranceTileLayer extends StatelessWidget {
     return TileLayer(
       urlTemplate: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
       subdomains: const ['a', 'b', 'c'],
-      backgroundColor: Colors.transparent,
+      // backgroundColor: Colors.transparent,
     );
   }
 }
