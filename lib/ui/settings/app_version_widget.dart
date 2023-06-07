@@ -46,7 +46,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
               ),
             );
           }
-          return Container();
+          return const SizedBox.shrink();
         },
       ),
     );

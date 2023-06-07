@@ -80,11 +80,11 @@ class OutgoingAlbumItem extends StatelessWidget {
                                   color: warning500,
                                 )
                               : const Icon(Icons.link))
-                          : Container(),
+                          : const SizedBox.shrink(),
                     ],
                   ),
                   shareesName.isEmpty
-                      ? Container()
+                      ? const SizedBox.shrink()
                       : Padding(
                           padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                           child: Text(

@@ -90,7 +90,7 @@ class IncomingAlbumItem extends StatelessWidget {
                       ),
                     );
                   } else {
-                    return Container();
+                    return const SizedBox.shrink();
                   }
                 },
               ),
