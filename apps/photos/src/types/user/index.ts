@@ -102,3 +102,12 @@ export interface UpdateRemoteStoreValueRequest {
     key: string;
     value: string;
 }
+
+export interface SRPAttributes {
+    srpSalt: string;
+    srpGroup: string;
+}
+
+export interface GetSRPAttributesResponse {
+    srpAttributes: SRPAttributes;
+}

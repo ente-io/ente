@@ -19,6 +19,7 @@ import {
     UserDetails,
     DeleteChallengeResponse,
     GetRemoteStoreValueResponse,
+    GetSRPAttributesResponse,
 } from 'types/user';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
@@ -449,6 +450,24 @@ export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
         );
     } catch (e) {
         logError(e, 'failed to update face search enabled status');
+        throw e;
+    }
+};
+
+export const getSRPAttributes = async (email: string) => {
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp-attributes`,
+            {
+                email,
+            }
+        );
+        return resp.data as GetSRPAttributesResponse;
+    } catch (e) {
+        if (e.status?.toString() === ServerErrorCodes.NOT_FOUND) {
+            return null;
+        }
+        logError(e, 'failed to get SRP attributes');
         throw e;
     }
 };

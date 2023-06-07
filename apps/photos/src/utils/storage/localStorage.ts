@@ -22,6 +22,7 @@ export enum LS_KEYS {
     WAIT_TIME = 'waitTime',
     API_ENDPOINT = 'apiEndpoint',
     LOCALE = 'locale',
+    USER_SRP_SETUP_PENDING = 'userSRPSetupPending',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {
