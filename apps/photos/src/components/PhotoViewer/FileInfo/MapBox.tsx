@@ -34,7 +34,7 @@ const MapBox: React.FC<MapBoxProps> = ({ location }) => {
 
                 L.marker(position)
                     .addTo(map)
-                    .bindPopup('You were here.')
+                    .bindPopup("Photo's location")
                     .openPopup();
             }
         }
