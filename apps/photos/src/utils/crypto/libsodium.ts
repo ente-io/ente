@@ -363,6 +363,22 @@ export async function boxSeal(input: string, publicKey: string) {
     );
 }
 
+export async function generateSubKey(
+    key: string,
+    context: string,
+    index: number
+) {
+    await sodium.ready;
+    return await toB64(
+        sodium.crypto_kdf_derive_from_key(
+            sodium.crypto_secretbox_KEYBYTES,
+            index,
+            context,
+            await fromB64(key)
+        )
+    );
+}
+
 export async function fromB64(input: string) {
     await sodium.ready;
     return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
