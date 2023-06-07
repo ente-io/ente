@@ -530,7 +530,7 @@ export const loginViaSRP = async (
             email,
             convertBufferToBase64(m1)
         );
-        addLocalLog(() => `srp verify successful, x: ${x}`);
+        addLocalLog(() => `srp verify successful, ${verificationResponse}`);
         return verificationResponse;
     } catch (e) {
         logError(e, 'srp verify failed');
