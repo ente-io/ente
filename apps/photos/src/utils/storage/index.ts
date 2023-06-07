@@ -32,5 +32,5 @@ export function setUserSRPSetupPending(status) {
 }
 
 export function getUserSRPSetupPending() {
-    return getData(LS_KEYS.USER_SRP_SETUP_PENDING)?.status ?? false;
+    return getData(LS_KEYS.USER_SRP_SETUP_PENDING)?.status ?? true;
 }
