@@ -22,7 +22,7 @@ const MapBox: React.FC<MapBoxProps> = ({ location }) => {
         if (isClient) {
             const mapContainer = document.getElementById('map-container');
             if (mapContainer && !mapContainer.hasChildNodes()) {
-                const map = L.map(mapContainer).setView(position, 13);
+                const map = L.map(mapContainer).setView(position, 16);
 
                 L.tileLayer(
                     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -34,7 +34,7 @@ const MapBox: React.FC<MapBoxProps> = ({ location }) => {
 
                 L.marker(position)
                     .addTo(map)
-                    .bindPopup("Photo's location")
+
                     .openPopup();
             }
         }
