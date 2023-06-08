@@ -26,6 +26,7 @@ class OSMFranceTileLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     return TileLayer(
       urlTemplate: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+      fallbackUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       subdomains: const ['a', 'b', 'c'],
       backgroundColor: Colors.transparent,
     );
@@ -47,7 +48,7 @@ class OSMFranceTileAttributes extends StatelessWidget {
           onTap: () => launchUrlString('https://openstreetmap.org/copyright'),
         ),
         TextSourceAttribution(
-          'HOT',
+          'HOT Tiles',
           textStyle: getEnteTextTheme(context).smallBold,
           onTap: () => launchUrl(Uri.parse('https://www.hotosm.org/')),
         ),
