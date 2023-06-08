@@ -1,6 +1,6 @@
-import SingleInputFormEmailShare, {
-    SingleInputFormEmailShareProps,
-} from 'components/SingleInputFormEmailShare';
+import SingleInputAutocomplete, {
+    SingleInputAutocompleteProps,
+} from 'components/SingleInputAutocomplete';
 import { GalleryContext } from 'pages/gallery';
 import React, { useContext, useState, useEffect } from 'react';
 import { t } from 'i18next';
@@ -47,7 +47,7 @@ export default function EmailShare({ collection }) {
         getUpdatedOptionsList();
     }, []);
 
-    const collectionShare: SingleInputFormEmailShareProps['callback'] = async (
+    const collectionShare: SingleInputAutocompleteProps['callback'] = async (
         email,
         setFieldError,
         resetForm
@@ -72,7 +72,7 @@ export default function EmailShare({ collection }) {
     };
     return (
         <>
-            <SingleInputFormEmailShare
+            <SingleInputAutocomplete
                 callback={collectionShare}
                 optionsList={updatedOptionsList}
                 placeholder={t('ENTER_EMAIL')}
