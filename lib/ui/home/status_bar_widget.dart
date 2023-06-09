@@ -108,6 +108,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   startIcon: Icons.error_outline,
                   actionIcon: Icons.arrow_forward,
                   text: S.of(context).confirmYourRecoveryKey,
+                  type: NotificationType.banner,
                   onTap: () async => {
                     await routeToPage(
                       context,

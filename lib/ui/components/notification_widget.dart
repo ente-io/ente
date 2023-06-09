@@ -10,6 +10,7 @@ enum NotificationType {
   warning,
   banner,
   goldenBanner,
+  notice,
 }
 
 class NotificationWidget extends StatelessWidget {
@@ -32,15 +33,24 @@ class NotificationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    EnteColorScheme colorScheme = getEnteColorScheme(context);
+    EnteTextTheme textTheme = getEnteTextTheme(context);
+    TextStyle mainTextStyle = darkTextTheme.bodyBold;
+    TextStyle subTextStyle = darkTextTheme.miniMuted;
     LinearGradient? backgroundGradient;
     Color? backgroundColor;
+    EnteColorScheme strokeColorScheme = darkScheme;
     switch (type) {
       case NotificationType.warning:
         backgroundColor = warning500;
         break;
       case NotificationType.banner:
-        backgroundColor = backgroundElevated2Dark;
+        colorScheme = getEnteColorScheme(context, inverse: true);
+        textTheme = getEnteTextTheme(context, inverse: true);
+        backgroundColor = colorScheme.backgroundElevated2;
+        mainTextStyle = textTheme.bodyBold;
+        subTextStyle = textTheme.miniMuted;
+        strokeColorScheme = colorScheme;
         break;
       case NotificationType.goldenBanner:
         backgroundGradient = LinearGradient(
@@ -49,6 +59,13 @@ class NotificationWidget extends StatelessWidget {
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
         );
+        break;
+      case NotificationType.notice:
+        backgroundColor = colorScheme.backgroundElevated2;
+        mainTextStyle = textTheme.bodyBold;
+        subTextStyle = textTheme.miniMuted;
+        strokeColorScheme = colorScheme;
+        break;
     }
     return Center(
       child: GestureDetector(
@@ -70,7 +87,7 @@ class NotificationWidget extends StatelessWidget {
                 Icon(
                   startIcon,
                   size: 36,
-                  color: Colors.white,
+                  color: strokeColorScheme.strokeBase,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -79,14 +96,13 @@ class NotificationWidget extends StatelessWidget {
                     children: [
                       Text(
                         text,
-                        style: darkTextTheme.bodyBold,
+                        style: mainTextStyle,
                         textAlign: TextAlign.left,
                       ),
                       subText != null
                           ? Text(
                               subText!,
-                              style: darkTextTheme.mini
-                                  .copyWith(color: textMutedDark),
+                              style: subTextStyle,
                             )
                           : const SizedBox.shrink(),
                     ],
@@ -96,9 +112,9 @@ class NotificationWidget extends StatelessWidget {
                 IconButtonWidget(
                   icon: actionIcon,
                   iconButtonType: IconButtonType.rounded,
-                  iconColor: strokeBaseDark,
-                  defaultColor: fillFaintDark,
-                  pressedColor: fillMutedDark,
+                  iconColor: strokeColorScheme.strokeBase,
+                  defaultColor: strokeColorScheme.fillFaint,
+                  pressedColor: strokeColorScheme.fillMuted,
                   onTap: onTap,
                 )
               ],
