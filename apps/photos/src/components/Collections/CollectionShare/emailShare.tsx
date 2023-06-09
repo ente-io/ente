@@ -24,10 +24,12 @@ export default function EmailShare({ collection }) {
             const familyList = getLocalFamilyData();
             const result = await collectionList;
             const emails = result.flatMap((item) => {
-                const shareeEmails = item.sharees.map((sharee) => sharee.email);
                 if (item.owner.email) {
-                    return [...shareeEmails, item.owner.email];
+                    return [item.owner.email];
                 } else {
+                    const shareeEmails = item.sharees.map(
+                        (sharee) => sharee.email
+                    );
                     return shareeEmails;
                 }
             });
