@@ -10,6 +10,7 @@ import { handleSharingErrors } from 'utils/error/ui';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CollectionShareSharees } from './sharees';
 import { getLocalCollections } from 'services/collectionService';
+import { getLocalFamilyData } from 'utils/user/family';
 
 export default function EmailShare({ collection }) {
     const galleryContext = useContext(GalleryContext);
@@ -20,6 +21,7 @@ export default function EmailShare({ collection }) {
         const getUpdatedOptionsList = async () => {
             const ownerUser: User = getData(LS_KEYS.USER);
             const collection_list = getLocalCollections();
+            const family_list = getLocalFamilyData();
             const result = await collection_list;
             const emails = result.flatMap((item) => {
                 const shareeEmails = item.sharees.map((sharee) => sharee.email);
@@ -29,6 +31,14 @@ export default function EmailShare({ collection }) {
                     return shareeEmails;
                 }
             });
+
+            // adding family members
+            if (family_list) {
+                const family = family_list.members.map(
+                    (member) => member.email
+                );
+                emails.push(...family);
+            }
 
             updatedList = Array.from(new Set(emails));
 
