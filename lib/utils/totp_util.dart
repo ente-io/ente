@@ -35,5 +35,5 @@ otp.Algorithm _getAlgorithm(Code code) {
 }
 
 String getSanitizedSecret(String secret) {
-  return secret.toUpperCase().trim();
+  return secret.toUpperCase().trim().replaceAll(' ', '');
 }
