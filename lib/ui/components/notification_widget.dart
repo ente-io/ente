@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
+import "package:photos/ente_theme_data.dart";
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/theme/text_style.dart';
@@ -40,17 +40,21 @@ class NotificationWidget extends StatelessWidget {
     LinearGradient? backgroundGradient;
     Color? backgroundColor;
     EnteColorScheme strokeColorScheme = darkScheme;
+    List<BoxShadow>? boxShadow;
     switch (type) {
       case NotificationType.warning:
         backgroundColor = warning500;
         break;
       case NotificationType.banner:
-        colorScheme = getEnteColorScheme(context, inverse: true);
-        textTheme = getEnteTextTheme(context, inverse: true);
+        colorScheme = getEnteColorScheme(context);
+        textTheme = getEnteTextTheme(context);
         backgroundColor = colorScheme.backgroundElevated2;
         mainTextStyle = textTheme.bodyBold;
         subTextStyle = textTheme.miniMuted;
         strokeColorScheme = colorScheme;
+        boxShadow = [
+          BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 1)
+        ];
         break;
       case NotificationType.goldenBanner:
         backgroundGradient = LinearGradient(
@@ -59,12 +63,14 @@ class NotificationWidget extends StatelessWidget {
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
         );
+        boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
         break;
       case NotificationType.notice:
         backgroundColor = colorScheme.backgroundElevated2;
         mainTextStyle = textTheme.bodyBold;
         subTextStyle = textTheme.miniMuted;
         strokeColorScheme = colorScheme;
+        boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
         break;
     }
     return Center(
@@ -75,7 +81,7 @@ class NotificationWidget extends StatelessWidget {
             borderRadius: const BorderRadius.all(
               Radius.circular(8),
             ),
-            boxShadow: Theme.of(context).colorScheme.enteTheme.shadowMenu,
+            boxShadow: boxShadow,
             color: backgroundColor,
             gradient: backgroundGradient,
           ),
