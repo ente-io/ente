@@ -19,10 +19,10 @@ export const ConversionFailedNotification = ({ onClick }: Iprops) => {
             onClose={handleClose}
             attributes={{
                 variant: 'secondary',
-                message: t('CONVERSION_FAILED_NOTIFICATION_MESSAGE'),
+                subtext: t('CONVERSION_FAILED_NOTIFICATION_MESSAGE'),
                 onClick: onClick,
             }}
-            horizontal="left"
+            horizontal="right"
             vertical="bottom"
             sx={{ zIndex: 4000 }}
         />
