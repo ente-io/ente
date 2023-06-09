@@ -19,6 +19,7 @@ const EXIF_TIME_TAGS = [
     'CreateDate',
     'ModifyDate',
     'DateCreated',
+    'MetadataDate',
 ];
 
 export async function updateCreationTimeWithExif(
