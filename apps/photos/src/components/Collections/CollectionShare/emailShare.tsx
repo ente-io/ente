@@ -24,7 +24,7 @@ export default function EmailShare({ collection }) {
             const familyList = getLocalFamilyData();
             const result = await collectionList;
             const emails = result.flatMap((item) => {
-                if (item.owner.email) {
+                if (item.owner.email && item.owner.id !== ownerUser.id) {
                     return [item.owner.email];
                 } else {
                     const shareeEmails = item.sharees.map(
