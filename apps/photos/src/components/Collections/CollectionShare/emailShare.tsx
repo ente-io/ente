@@ -20,9 +20,9 @@ export default function EmailShare({ collection }) {
     useEffect(() => {
         const getUpdatedOptionsList = async () => {
             const ownerUser: User = getData(LS_KEYS.USER);
-            const collection_list = getLocalCollections();
-            const family_list = getLocalFamilyData();
-            const result = await collection_list;
+            const collectionList = getLocalCollections();
+            const familyList = getLocalFamilyData();
+            const result = await collectionList;
             const emails = result.flatMap((item) => {
                 const shareeEmails = item.sharees.map((sharee) => sharee.email);
                 if (item.owner.email) {
@@ -33,10 +33,8 @@ export default function EmailShare({ collection }) {
             });
 
             // adding family members
-            if (family_list) {
-                const family = family_list.members.map(
-                    (member) => member.email
-                );
+            if (familyList) {
+                const family = familyList.members.map((member) => member.email);
                 emails.push(...family);
             }
 
