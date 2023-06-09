@@ -246,12 +246,14 @@ class NavigateToMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: IconButtonWidget(
         icon: Icons.map_sharp,
         iconButtonType: IconButtonType.primary,
-        defaultColor: getEnteColorScheme(context).backgroundElevated,
+        defaultColor: colorScheme.backgroundElevated,
+        pressedColor: colorScheme.backgroundElevated2,
         size: 28,
         onTap: () {
           Navigator.of(context).pushReplacement(
