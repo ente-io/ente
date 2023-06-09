@@ -30,7 +30,6 @@ export interface SingleInputFormProps {
     autoComplete?: string;
     blockButton?: boolean;
     hiddenLabel?: boolean;
-    optionsList?: string[];
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
@@ -50,7 +49,6 @@ export default function SingleInputForm(props: SingleInputFormProps) {
             (message) => setFieldError('inputValue', message),
             resetForm
         );
-
         SetLoading(false);
     };
 
@@ -124,7 +122,6 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                             ),
                         }}
                     />
-
                     <FormHelperText
                         sx={{
                             position: 'relative',
