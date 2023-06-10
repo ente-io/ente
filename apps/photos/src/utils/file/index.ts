@@ -30,7 +30,7 @@ import * as ffmpegService from 'services/ffmpeg/ffmpegService';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
 
-import { addLogLine } from 'utils/logging';
+import { addLocalLog, addLogLine } from 'utils/logging';
 import { CustomError } from 'utils/error';
 import { convertBytesToHumanReadable } from './size';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
@@ -41,6 +41,7 @@ import {
 import isElectron from 'is-electron';
 import imageProcessor from 'services/electron/imageProcessor';
 import { isPlaybackPossible } from 'utils/photoFrame';
+import { FileTypeInfo } from 'types/upload';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -358,10 +359,12 @@ export async function getPlayableVideo(
 }
 
 export async function getRenderableImage(fileName: string, imageBlob: Blob) {
+    let fileTypeInfo: FileTypeInfo;
     try {
-        throw Error('not implemented');
         const tempFile = new File([imageBlob], fileName);
-        const { exactType } = await getFileType(tempFile);
+        fileTypeInfo = await getFileType(tempFile);
+        addLocalLog(() => `file type info: ${JSON.stringify(fileTypeInfo)}`);
+        const { exactType } = fileTypeInfo;
         let convertedImageBlob: Blob;
         if (isRawFile(exactType)) {
             try {
@@ -405,7 +408,7 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
             return imageBlob;
         }
     } catch (e) {
-        logError(e, 'get Renderable Image failed');
+        logError(e, 'get Renderable Image failed', { fileTypeInfo });
         return null;
     }
 }
