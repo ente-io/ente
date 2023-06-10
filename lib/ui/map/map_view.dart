@@ -125,14 +125,16 @@ class _MapViewState extends State<MapView> {
           ],
         ),
         Positioned(
-          top: 10,
+          top: 4,
           left: 10,
-          child: MapButton(
-            icon: Icons.arrow_back,
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            heroTag: 'back',
+          child: SafeArea(
+            child: MapButton(
+              icon: Icons.arrow_back,
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              heroTag: 'back',
+            ),
           ),
         ),
         Positioned(

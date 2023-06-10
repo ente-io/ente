@@ -7,6 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/map/image_marker.dart";
 import 'package:photos/ui/map/image_tile.dart';
 import "package:photos/ui/map/map_view.dart";
@@ -139,52 +140,56 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Stack(
-          children: [
-            Column(
-              children: [
-                Expanded(
-                  child: MapView(
-                    controller: mapController,
-                    imageMarkers: imageMarkers,
-                    updateVisibleImages: updateVisibleImages,
-                    center: center,
-                    initialZoom: initialZoom,
-                    minZoom: minZoom,
-                    maxZoom: maxZoom,
-                    debounceDuration: debounceDuration,
-                  ),
-                ),
-                SizedBox(
-                  height: 120,
-                  child: Center(
-                    child: ListView.builder(
-                      itemCount: visibleImages.length,
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        final image = visibleImages[index];
-                        return ImageTile(
-                          image: image,
-                          allImages: allImages,
-                          visibleImages: visibleImages,
-                          index: index,
-                        );
-                      },
+    return Container(
+      color: getEnteColorScheme(context).backgroundBase,
+      child: SafeArea(
+        top: false,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              Column(
+                children: [
+                  Expanded(
+                    child: MapView(
+                      controller: mapController,
+                      imageMarkers: imageMarkers,
+                      updateVisibleImages: updateVisibleImages,
+                      center: center,
+                      initialZoom: initialZoom,
+                      minZoom: minZoom,
+                      maxZoom: maxZoom,
+                      debounceDuration: debounceDuration,
                     ),
                   ),
-                )
-              ],
-            ),
-            isLoading
-                ? const SizedBox.expand(
+                  SizedBox(
+                    height: 120,
                     child: Center(
-                      child: CircularProgressIndicator(color: Colors.green),
+                      child: ListView.builder(
+                        itemCount: visibleImages.length,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          final image = visibleImages[index];
+                          return ImageTile(
+                            image: image,
+                            allImages: allImages,
+                            visibleImages: visibleImages,
+                            index: index,
+                          );
+                        },
+                      ),
                     ),
                   )
-                : const SizedBox.shrink(),
-          ],
+                ],
+              ),
+              isLoading
+                  ? const SizedBox.expand(
+                      child: Center(
+                        child: CircularProgressIndicator(color: Colors.green),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ],
+          ),
         ),
       ),
     );
