@@ -23,7 +23,7 @@
         "husky": "^7.0.1",
         "lint-staged": "^11.1.2",
         "prettier": "2.3.2",
-        "turbo": "^1.9.3"
+        "turbo": "^1.10.3"
     },
     "standard": {
         "parser": "babel-eslint"
