@@ -61,6 +61,7 @@ class _MapViewState extends State<MapView> {
         FlutterMap(
           mapController: widget.controller,
           options: MapOptions(
+            center: widget.center,
             minZoom: widget.minZoom,
             maxZoom: widget.maxZoom,
             enableMultiFingerGestureRace: true,
@@ -68,6 +69,7 @@ class _MapViewState extends State<MapView> {
               LatLng(-90, -180),
               LatLng(90, 180),
             ),
+            zoom: widget.initialZoom,
             onPositionChanged: (position, hasGesture) {
               if (position.bounds != null) {
                 if (!_isDebouncing) {
