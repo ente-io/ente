@@ -48,11 +48,11 @@ class ImageTile extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap(context, image, index),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
         child: SizedBox(
-          width: 108,
+          width: 112,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(2),
             child: ThumbnailWidget(image),
           ),
         ),
