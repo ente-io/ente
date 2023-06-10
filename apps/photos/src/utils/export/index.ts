@@ -61,6 +61,9 @@ export const getRenamedExportedCollections = (
             const currentExportName = collectionIDExportNameMap.get(
                 collection.id
             );
+            if (collection.name === HIDDEN_COLLECTION_NAME) {
+                collection.name = getHiddenCollectionProperCasedName();
+            }
             if (currentExportName === collection.name) {
                 return false;
             }
