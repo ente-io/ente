@@ -175,21 +175,20 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                     child: SizedBox(
                       height: 116,
-                      child: Center(
-                        child: ListView.builder(
-                          itemCount: visibleImages.length,
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 2),
-                          itemBuilder: (context, index) {
-                            final image = visibleImages[index];
-                            return ImageTile(
-                              image: image,
-                              allImages: allImages,
-                              visibleImages: visibleImages,
-                              index: index,
-                            );
-                          },
-                        ),
+                      child: ListView.builder(
+                        itemCount: visibleImages.length,
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        physics: const BouncingScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          final image = visibleImages[index];
+                          return ImageTile(
+                            image: image,
+                            allImages: allImages,
+                            visibleImages: visibleImages,
+                            index: index,
+                          );
+                        },
                       ),
                     ),
                   )
