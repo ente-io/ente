@@ -236,10 +236,13 @@ class ExportService {
     ): Promise<FileExportStats> => {
         try {
             const user: User = getData(LS_KEYS.USER);
-            const files = await getLocalFiles();
+            const files = [
+                ...(await getLocalFiles()),
+                ...(await getLocalHiddenFiles()),
+            ];
             const userPersonalFiles = getPersonalFiles(files, user);
 
-            const collections = await getLocalCollections();
+            const collections = await getLocalCollections(true);
             const userNonEmptyPersonalCollections =
                 getNonEmptyPersonalCollections(
                     collections,
