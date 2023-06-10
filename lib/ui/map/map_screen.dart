@@ -150,32 +150,46 @@ class _MapScreenState extends State<MapScreen> {
               Column(
                 children: [
                   Expanded(
-                    child: MapView(
-                      controller: mapController,
-                      imageMarkers: imageMarkers,
-                      updateVisibleImages: updateVisibleImages,
-                      center: center,
-                      initialZoom: initialZoom,
-                      minZoom: minZoom,
-                      maxZoom: maxZoom,
-                      debounceDuration: debounceDuration,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(6),
+                        bottomRight: Radius.circular(6),
+                      ),
+                      child: MapView(
+                        controller: mapController,
+                        imageMarkers: imageMarkers,
+                        updateVisibleImages: updateVisibleImages,
+                        center: center,
+                        initialZoom: initialZoom,
+                        minZoom: minZoom,
+                        maxZoom: maxZoom,
+                        debounceDuration: debounceDuration,
+                      ),
                     ),
                   ),
-                  SizedBox(
-                    height: 120,
-                    child: Center(
-                      child: ListView.builder(
-                        itemCount: visibleImages.length,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          final image = visibleImages[index];
-                          return ImageTile(
-                            image: image,
-                            allImages: allImages,
-                            visibleImages: visibleImages,
-                            index: index,
-                          );
-                        },
+                  const SizedBox(height: 4),
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(2),
+                      topRight: Radius.circular(2),
+                    ),
+                    child: SizedBox(
+                      height: 116,
+                      child: Center(
+                        child: ListView.builder(
+                          itemCount: visibleImages.length,
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          itemBuilder: (context, index) {
+                            final image = visibleImages[index];
+                            return ImageTile(
+                              image: image,
+                              allImages: allImages,
+                              visibleImages: visibleImages,
+                              index: index,
+                            );
+                          },
+                        ),
                       ),
                     ),
                   )
