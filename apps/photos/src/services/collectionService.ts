@@ -68,7 +68,7 @@ const COLLECTION_TABLE = 'collections';
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
 
 const UNCATEGORIZED_COLLECTION_NAME = 'Uncategorized';
-const HIDDEN_COLLECTION_NAME = '.hidden';
+export const HIDDEN_COLLECTION_NAME = '.hidden';
 const FAVORITE_COLLECTION_NAME = 'Favorites';
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>

@@ -13,6 +13,9 @@ import { splitFilenameAndExtension } from 'utils/file';
 import { ENTE_METADATA_FOLDER, ENTE_TRASH_FOLDER } from 'constants/export';
 import sanitize from 'sanitize-filename';
 import { formatDateTimeShort } from 'utils/time/format';
+import { HIDDEN_COLLECTION_NAME } from 'services/collectionService';
+
+const PROPER_CASED_HIDDEN_COLLECTION_NAME = '.Hidden';
 
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
@@ -20,6 +23,9 @@ export const getExportRecordFileUID = (file: EnteFile) =>
 export const getCollectionIDFromFileUID = (fileUID: string) =>
     Number(fileUID.split('_')[1]);
 
+export const getHiddenCollectionProperCasedName = () => {
+    return PROPER_CASED_HIDDEN_COLLECTION_NAME;
+};
 export const convertCollectionIDExportNameObjectToMap = (
     collectionExportNames: CollectionExportNames
 ): Map<number, string> => {
@@ -190,6 +196,9 @@ export const getUniqueCollectionExportName = (
     dir: string,
     collectionName: string
 ): string => {
+    if (collectionName === HIDDEN_COLLECTION_NAME) {
+        collectionName = getHiddenCollectionProperCasedName();
+    }
     let collectionExportName = sanitizeName(collectionName);
     let count = 1;
     while (
