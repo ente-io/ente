@@ -46,7 +46,7 @@ function CollectionSelector({
         CollectionSummary[]
     >([]);
     useEffect(() => {
-        if (!attributes) {
+        if (!attributes || !props.open) {
             return;
         }
         const main = async () => {
