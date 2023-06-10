@@ -38,3 +38,11 @@ export type GalleryContextType = {
     authenticateUser: (callback: () => void) => void;
     user: User;
 };
+
+export enum CollectionSelectorIntent {
+    upload,
+    add,
+    move,
+    restore,
+    unhide,
+}
