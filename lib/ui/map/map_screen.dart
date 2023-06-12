@@ -8,6 +8,7 @@ import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/map/image_marker.dart";
 import 'package:photos/ui/map/image_tile.dart';
 import "package:photos/ui/map/map_view.dart";
@@ -141,8 +142,9 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
     return Container(
-      color: getEnteColorScheme(context).backgroundBase,
+      color: colorScheme.backgroundBase,
       child: SafeArea(
         top: false,
         child: Scaffold(
@@ -217,10 +219,9 @@ class _MapScreenState extends State<MapScreen> {
                 ],
               ),
               isLoading
-                  ? const SizedBox.expand(
-                      child: Center(
-                        child: CircularProgressIndicator(color: Colors.green),
-                      ),
+                  ? EnteLoadingWidget(
+                      size: 28,
+                      color: getEnteColorScheme(context).primary700,
                     )
                   : const SizedBox.shrink(),
             ],
