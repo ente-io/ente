@@ -140,6 +140,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
     return Container(
       color: getEnteColorScheme(context).backgroundBase,
       child: SafeArea(
@@ -175,20 +176,41 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                     child: SizedBox(
                       height: 116,
-                      child: ListView.builder(
-                        itemCount: visibleImages.length,
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 2),
-                        physics: const BouncingScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final image = visibleImages[index];
-                          return ImageTile(
-                            image: image,
-                            allImages: allImages,
-                            visibleImages: visibleImages,
-                            index: index,
-                          );
-                        },
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        switchInCurve: Curves.easeInOutExpo,
+                        switchOutCurve: Curves.easeInOutExpo,
+                        child: visibleImages.isNotEmpty
+                            ? ListView.builder(
+                                itemCount: visibleImages.length,
+                                scrollDirection: Axis.horizontal,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 2),
+                                physics: const BouncingScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  final image = visibleImages[index];
+                                  return ImageTile(
+                                    image: image,
+                                    allImages: allImages,
+                                    visibleImages: visibleImages,
+                                    index: index,
+                                  );
+                                },
+                              )
+                            : Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "No photos found here",
+                                    style: textTheme.large,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "Zoom out to see photos",
+                                    style: textTheme.smallFaint,
+                                  )
+                                ],
+                              ),
                       ),
                     ),
                   )
