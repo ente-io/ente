@@ -4,7 +4,7 @@ import { RenderCreationTime } from './RenderCreationTime';
 import { Box, DialogProps, Link, Stack, styled } from '@mui/material';
 import { getEXIFLocation } from 'services/upload/exifService';
 import { RenderCaption } from './RenderCaption';
-
+import { useRouter } from 'next/router';
 import CopyButton from 'components/CodeBlock/CopyButton';
 import { formatDate, formatTime } from 'utils/time/format';
 import Titlebar from 'components/Titlebar';
@@ -88,11 +88,13 @@ export function FileInfo({
     collectionNameMap,
     showCollectionChips,
 }: Iprops) {
+    const router = useRouter();
     const appContext = useContext(AppContext);
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
     const [showExif, setShowExif] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [updateMLDataIndex, setUpdateMLDataIndex] = useState(0);
+    const [getCollectionID, setCollectionID] = useState<number>(undefined);
 
     const openExif = () => setShowExif(true);
     const closeExif = () => setShowExif(false);
@@ -120,6 +122,17 @@ export function FileInfo({
         }
         return null;
     }, [file, exif]);
+
+    useEffect(() => {
+        let collectionURL = '';
+        if (getCollectionID) {
+            console.log('id:', getCollectionID);
+            collectionURL += '?collection=';
+            collectionURL += getCollectionID;
+            const href = `/gallery${collectionURL}`;
+            router.push(href, undefined, { shallow: true });
+        }
+    }, [getCollectionID]);
 
     useEffect(() => {
         if (!exif) {
@@ -159,11 +172,49 @@ export function FileInfo({
             parsedExifData['ISO'] = `ISO${exif['ISO']}`;
         }
         setParsedExifData(parsedExifData);
+
+        if (getCollectionID) {
+            console.log('id:', getCollectionID);
+            let collectionURL = '';
+            collectionURL += '?collection=';
+            const href = `/gallery${collectionURL}`;
+            router.push(href, undefined, { shallow: true });
+        }
     }, [exif]);
 
     if (!file) {
         return <></>;
     }
+
+    //    const goToGallery = (collectionID) => {
+    //   console.log(collectionID);
+
+    //   const { pathname, query } = PAGES.GALLERY;
+    //   const collectionURL = {
+    //     pathname,
+    //     query: { ...query, collection: collectionID },
+    //   };
+    // const goToGallery = (collectionID) => {
+    //     console.log(collectionID);
+    //     // const pathname = PAGES.GALLERY;
+    //     // const query = { collection: collectionID };
+    //     // const collectionURL = {
+    //     //   pathname,
+    //     //   query,
+    //     // };
+    //     router.push(PAGES.GALLERY);
+    // };
+
+    //   const collectionURL = `/gallery?collection=${collectionID}`;
+    //   console.log(`/gallery?collection=${collectionID}`)
+
+    //   router.push({
+    //     pathname: '/gallery',
+    //     query: { collection: collectionID },
+    //   });
+
+    // console.log(fileToCollectionsMap
+    //     ?.get(file.id))
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
@@ -264,13 +315,18 @@ export function FileInfo({
                                     collectionNameMap.has(collectionID)
                                 )
                                 ?.map((collectionID) => (
-                                    <Chip key={collectionID}>
+                                    <Chip
+                                        key={collectionID}
+                                        onClick={() =>
+                                            setCollectionID(collectionID)
+                                        }>
                                         {collectionNameMap.get(collectionID)}
                                     </Chip>
                                 ))}
                         </Box>
                     </InfoItem>
                 )}
+
                 {appContext.mlSearchEnabled && (
                     <>
                         <PhotoPeopleList
