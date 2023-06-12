@@ -97,13 +97,10 @@ class VideoOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 64,
-      child: Icon(
-        Icons.play_circle_outline,
-        size: 40,
-        color: Colors.white70,
-      ),
+    return const Icon(
+      Icons.play_circle_outline,
+      size: 24,
+      color: Colors.white70,
     );
   }
 }
