@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/models/file.dart";
+import "package:photos/theme/effects.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 class MarkerImage extends StatelessWidget {
@@ -10,41 +12,50 @@ class MarkerImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(
-              color: Colors.green,
-              width: 1.75,
+    final bgColor = getEnteColorScheme(context).backgroundElevated2;
+    return Container(
+      decoration: BoxDecoration(boxShadow: shadowMenuLight),
+      child: Stack(
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(2),
+              border: Border.all(
+                color: bgColor,
+                width: 2,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(2)),
+              child: ThumbnailWidget(file),
             ),
           ),
-          child: ThumbnailWidget(file),
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            margin: EdgeInsets.only(top: seperator),
-            child: CustomPaint(
-              painter: MarkerPointer(),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              margin: EdgeInsets.only(top: seperator),
+              child: CustomPaint(
+                painter: MarkerPointer(bgColor),
+              ),
             ),
-          ),
-        )
-      ],
+          )
+        ],
+      ),
     );
   }
 }
 
 class MarkerPointer extends CustomPainter {
+  Color bgColor;
+  MarkerPointer(this.bgColor);
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.green;
+    final paint = Paint()..color = bgColor;
 
     final path = Path();
-    path.moveTo(5, -12);
-    path.lineTo(0, 0);
-    path.lineTo(-5, -12);
+    path.moveTo(9, -12);
+    path.lineTo(0, -4);
+    path.lineTo(-9, -12);
     canvas.drawPath(path, paint);
   }
 

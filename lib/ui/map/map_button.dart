@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/theme/ente_theme.dart";
 
 class MapButton extends StatelessWidget {
   final String heroTag;
@@ -14,12 +15,19 @@ class MapButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return FloatingActionButton(
+      elevation: 2,
       heroTag: heroTag,
-      backgroundColor: Colors.white,
+      highlightElevation: 3,
+      backgroundColor: colorScheme.backgroundElevated,
       mini: true,
       onPressed: onPressed,
-      child: Icon(icon),
+      splashColor: Colors.transparent,
+      child: Icon(
+        icon,
+        color: colorScheme.textBase,
+      ),
     );
   }
 }

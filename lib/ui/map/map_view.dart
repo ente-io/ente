@@ -61,9 +61,15 @@ class _MapViewState extends State<MapView> {
         FlutterMap(
           mapController: widget.controller,
           options: MapOptions(
+            center: widget.center,
             minZoom: widget.minZoom,
             maxZoom: widget.maxZoom,
             enableMultiFingerGestureRace: true,
+            maxBounds: LatLngBounds(
+              LatLng(-90, -180),
+              LatLng(90, 180),
+            ),
+            zoom: widget.initialZoom,
             onPositionChanged: (position, hasGesture) {
               if (position.bounds != null) {
                 if (!_isDebouncing) {
@@ -119,14 +125,16 @@ class _MapViewState extends State<MapView> {
           ],
         ),
         Positioned(
-          top: 10,
+          top: 4,
           left: 10,
-          child: MapButton(
-            icon: Icons.arrow_back,
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            heroTag: 'back',
+          child: SafeArea(
+            child: MapButton(
+              icon: Icons.arrow_back,
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              heroTag: 'back',
+            ),
           ),
         ),
         Positioned(
