@@ -12,6 +12,7 @@ import "package:photos/ui/viewer/gallery/component/grid/place_holder_grid_view_w
 import "package:photos/ui/viewer/gallery/component/group/group_gallery.dart";
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_sort_order.dart";
 
 class LazyGroupGallery extends StatefulWidget {
   final List<File> files;
@@ -19,7 +20,6 @@ class LazyGroupGallery extends StatefulWidget {
   final Stream<FilesUpdatedEvent>? reloadEvent;
   final Set<EventType> removalEventTypes;
   final GalleryLoader asyncLoader;
-  final bool sortOrderAsc;
   final SelectedFiles? selectedFiles;
   final String tag;
   final String? logTag;
@@ -33,7 +33,6 @@ class LazyGroupGallery extends StatefulWidget {
     this.reloadEvent,
     this.removalEventTypes,
     this.asyncLoader,
-    this.sortOrderAsc,
     this.selectedFiles,
     this.tag,
     this.currentIndexStream,
@@ -114,7 +113,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
         final result = await widget.asyncLoader(
           dayStartTime.microsecondsSinceEpoch,
           dayStartTime.microsecondsSinceEpoch + microSecondsInDay - 1,
-          asc: widget.sortOrderAsc,
+          asc: GallerySortOrder.of(context)!.sortOrderAsc,
         );
         if (mounted) {
           setState(() {

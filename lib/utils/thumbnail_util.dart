@@ -157,7 +157,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   if (!_uploadIDToDownloadItem.containsKey(file.uploadedFileID)) {
     return;
   }
-  final thumbnailDecryptionKey = getFileKey(file);
+  final thumbnailDecryptionKey = await getFileKeyUsingBgWorker(file);
   var data = await CryptoUtil.decryptChaCha(
     encryptedThumbnail,
     thumbnailDecryptionKey,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
+import "package:photos/ente_theme_data.dart";
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/theme/text_style.dart';
@@ -10,6 +10,7 @@ enum NotificationType {
   warning,
   banner,
   goldenBanner,
+  notice,
 }
 
 class NotificationWidget extends StatelessWidget {
@@ -32,15 +33,28 @@ class NotificationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    EnteColorScheme colorScheme = getEnteColorScheme(context);
+    EnteTextTheme textTheme = getEnteTextTheme(context);
+    TextStyle mainTextStyle = darkTextTheme.bodyBold;
+    TextStyle subTextStyle = darkTextTheme.miniMuted;
     LinearGradient? backgroundGradient;
     Color? backgroundColor;
+    EnteColorScheme strokeColorScheme = darkScheme;
+    List<BoxShadow>? boxShadow;
     switch (type) {
       case NotificationType.warning:
         backgroundColor = warning500;
         break;
       case NotificationType.banner:
-        backgroundColor = backgroundElevated2Dark;
+        colorScheme = getEnteColorScheme(context);
+        textTheme = getEnteTextTheme(context);
+        backgroundColor = colorScheme.backgroundElevated2;
+        mainTextStyle = textTheme.bodyBold;
+        subTextStyle = textTheme.miniMuted;
+        strokeColorScheme = colorScheme;
+        boxShadow = [
+          BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 1)
+        ];
         break;
       case NotificationType.goldenBanner:
         backgroundGradient = LinearGradient(
@@ -49,6 +63,15 @@ class NotificationWidget extends StatelessWidget {
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
         );
+        boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
+        break;
+      case NotificationType.notice:
+        backgroundColor = colorScheme.backgroundElevated2;
+        mainTextStyle = textTheme.bodyBold;
+        subTextStyle = textTheme.miniMuted;
+        strokeColorScheme = colorScheme;
+        boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
+        break;
     }
     return Center(
       child: GestureDetector(
@@ -58,7 +81,7 @@ class NotificationWidget extends StatelessWidget {
             borderRadius: const BorderRadius.all(
               Radius.circular(8),
             ),
-            boxShadow: Theme.of(context).colorScheme.enteTheme.shadowMenu,
+            boxShadow: boxShadow,
             color: backgroundColor,
             gradient: backgroundGradient,
           ),
@@ -70,7 +93,7 @@ class NotificationWidget extends StatelessWidget {
                 Icon(
                   startIcon,
                   size: 36,
-                  color: Colors.white,
+                  color: strokeColorScheme.strokeBase,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -79,14 +102,13 @@ class NotificationWidget extends StatelessWidget {
                     children: [
                       Text(
                         text,
-                        style: darkTextTheme.bodyBold,
+                        style: mainTextStyle,
                         textAlign: TextAlign.left,
                       ),
                       subText != null
                           ? Text(
                               subText!,
-                              style: darkTextTheme.mini
-                                  .copyWith(color: textMutedDark),
+                              style: subTextStyle,
                             )
                           : const SizedBox.shrink(),
                     ],
@@ -96,9 +118,9 @@ class NotificationWidget extends StatelessWidget {
                 IconButtonWidget(
                   icon: actionIcon,
                   iconButtonType: IconButtonType.rounded,
-                  iconColor: strokeBaseDark,
-                  defaultColor: fillFaintDark,
-                  pressedColor: fillMutedDark,
+                  iconColor: strokeColorScheme.strokeBase,
+                  defaultColor: strokeColorScheme.fillFaint,
+                  pressedColor: strokeColorScheme.fillMuted,
                   onTap: onTap,
                 )
               ],

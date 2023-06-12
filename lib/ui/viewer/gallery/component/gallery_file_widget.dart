@@ -10,6 +10,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_sort_order.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -156,6 +157,7 @@ class GalleryFileWidget extends StatelessWidget {
         asyncLoader,
         filesInGroup.indexOf(file),
         tag,
+        sortOrderAsc: GallerySortOrder.of(context)!.sortOrderAsc,
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);
