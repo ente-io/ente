@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/theme/ente_theme.dart";
 
 class MapGalleryTileBadge extends StatelessWidget {
   final int size;
@@ -23,21 +24,19 @@ class MapGalleryTileBadge extends StatelessWidget {
       top: 0,
       right: 0,
       child: Container(
-        padding: const EdgeInsets.all(5),
+        padding: const EdgeInsets.all(4),
         decoration: const BoxDecoration(
           borderRadius: BorderRadius.all(
-            Radius.circular(5),
+            Radius.circular(2),
           ),
           shape: BoxShape.rectangle,
+          // color: Color.fromRGBO(30, 215, 96, 1),
           color: Colors.green,
+          // color: Colors.redAccent,
         ),
         child: Text(
           formatNumber(size),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 8,
-            fontWeight: FontWeight.bold,
-          ),
+          style: getEnteTextTheme(context).tinyBold,
         ),
       ),
     );
