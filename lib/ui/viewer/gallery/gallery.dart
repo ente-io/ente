@@ -45,6 +45,7 @@ class Gallery extends StatefulWidget {
   final Widget loadingWidget;
   final bool disableScroll;
   final bool limitSelectionToOne;
+  final bool showSelectAllByDefault;
 
   // add a Function variable to get sort value in bool
   final SortAscFn? sortAsyncFn;
@@ -67,6 +68,7 @@ class Gallery extends StatefulWidget {
     this.disableScroll = false,
     this.limitSelectionToOne = false,
     this.sortAsyncFn,
+    this.showSelectAllByDefault = true,
     Key? key,
   }) : super(key: key);
 
@@ -239,6 +241,7 @@ class _GalleryState extends State<Gallery> {
         header: widget.header,
         footer: widget.footer,
         selectedFiles: widget.selectedFiles,
+        showSelectAllByDefault: widget.showSelectAllByDefault,
       ),
     );
   }
