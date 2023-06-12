@@ -83,6 +83,8 @@ class CollectionPage extends StatelessWidget {
       initialFiles: initialFiles,
       albumName: c.collection.displayName,
       sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
+      showSelectAllByDefault:
+          c.collection.isOwner(Configuration.instance.getUserID()!),
     );
     return Scaffold(
       appBar: PreferredSize(
