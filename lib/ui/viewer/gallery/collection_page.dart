@@ -41,7 +41,7 @@ class CollectionPage extends StatelessWidget {
       return const EmptyState();
     }
 
-    final appBarTypeValue = _getGalleryType(c.collection);
+    final galleryType = _getGalleryType(c.collection);
     final List<File>? initialFiles =
         c.thumbnail != null ? [c.thumbnail!] : null;
     final gallery = Gallery(
@@ -83,14 +83,13 @@ class CollectionPage extends StatelessWidget {
       initialFiles: initialFiles,
       albumName: c.collection.displayName,
       sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
-      showSelectAllByDefault:
-          c.collection.isOwner(Configuration.instance.getUserID()!),
+      showSelectAllByDefault: galleryType != GalleryType.sharedCollection,
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
-          appBarTypeValue,
+          galleryType,
           c.collection.displayName,
           _selectedFiles,
           collection: c.collection,
@@ -101,7 +100,7 @@ class CollectionPage extends StatelessWidget {
         children: [
           gallery,
           FileSelectionOverlayBar(
-            appBarTypeValue,
+            galleryType,
             _selectedFiles,
             collection: c.collection,
           )
