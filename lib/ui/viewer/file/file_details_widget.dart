@@ -310,7 +310,7 @@ class FileDetailsDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const dividerPadding = EdgeInsets.symmetric(vertical: 15.5);
+    const dividerPadding = EdgeInsets.symmetric(vertical: 9.5);
     return const DividerWidget(
       dividerType: DividerType.menu,
       divColorHasBlur: false,

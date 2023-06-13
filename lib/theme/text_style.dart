@@ -94,6 +94,7 @@ class EnteTextTheme {
   final TextStyle bodyMuted;
   final TextStyle smallMuted;
   final TextStyle miniMuted;
+  final TextStyle miniBoldMuted;
   final TextStyle tinyMuted;
 
   // textFaint variants
@@ -132,6 +133,7 @@ class EnteTextTheme {
     required this.bodyMuted,
     required this.smallMuted,
     required this.miniMuted,
+    required this.miniBoldMuted,
     required this.tinyMuted,
     required this.h1Faint,
     required this.h2Faint,
@@ -187,6 +189,7 @@ EnteTextTheme _buildEnteTextStyle(
     bodyMuted: body.copyWith(color: textMuted),
     smallMuted: small.copyWith(color: textMuted),
     miniMuted: mini.copyWith(color: textMuted),
+    miniBoldMuted: mini.copyWith(color: textMuted, fontWeight: _boldWeight),
     tinyMuted: tiny.copyWith(color: textMuted),
     h1Faint: h1.copyWith(color: textFaint),
     h2Faint: h2.copyWith(color: textFaint),
