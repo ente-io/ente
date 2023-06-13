@@ -138,7 +138,13 @@ dependencies:
   widgets_to_image: ^0.0.2
 
 flutter_intl:
-    enabled: true
+  enabled: true
+
+dependency_overrides:
+  # package_info_plus depends on ffi ^2 but tflite_flutter_helper
+  # depends on ffi: ^1
+  ffi: ^1.0.0
+
 
 dev_dependencies:
   build_runner: ^2.3.3
