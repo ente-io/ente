@@ -180,36 +180,6 @@ export function FileInfo({
         return <></>;
     }
 
-    //    const goToGallery = (collectionID) => {
-    //   console.log(collectionID);
-
-    //   const { pathname, query } = PAGES.GALLERY;
-    //   const collectionURL = {
-    //     pathname,
-    //     query: { ...query, collection: collectionID },
-    //   };
-    // const goToGallery = (collectionID) => {
-    //     console.log(collectionID);
-    //     // const pathname = PAGES.GALLERY;
-    //     // const query = { collection: collectionID };
-    //     // const collectionURL = {
-    //     //   pathname,
-    //     //   query,
-    //     // };
-    //     router.push(PAGES.GALLERY);
-    // };
-
-    //   const collectionURL = `/gallery?collection=${collectionID}`;
-    //   console.log(`/gallery?collection=${collectionID}`)
-
-    //   router.push({
-    //     pathname: '/gallery',
-    //     query: { collection: collectionID },
-    //   });
-
-    // console.log(fileToCollectionsMap
-    //     ?.get(file.id))
-
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
             <Titlebar onClose={handleCloseInfo} title={t('INFO')} backIsClose />
