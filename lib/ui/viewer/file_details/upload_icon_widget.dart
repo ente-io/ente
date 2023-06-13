@@ -12,6 +12,7 @@ import "package:photos/services/hidden_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/remote_sync_service.dart";
 import "package:photos/services/sync_service.dart";
+import "package:photos/ui/common/loading_widget.dart";
 
 class UploadIconWidget extends StatefulWidget {
   final File file;
@@ -87,13 +88,7 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
           final bool isQueuedForUpload =
               !isIgnored && widget.file.collectionID != null;
           if (isQueuedForUpload && isBeingUploaded) {
-            return Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: CircularProgressIndicator(
-                color: Colors.white.withOpacity(0.1),
-                strokeWidth: 3,
-              ),
-            );
+            return const EnteLoadingWidget();
           }
           return IconButton(
             icon: const Icon(
