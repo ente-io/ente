@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:flutter_datetime_picker/flutter_datetime_picker.dart";
+import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart";
 import "package:intl/intl.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file.dart";
@@ -46,7 +46,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
   }
 
   void _showDateTimePicker(File file) async {
-    final dateResult = await DatePicker.showDatePicker(
+    final dateResult = await DatePickerBdaya.showDatePicker(
       context,
       minTime: DateTime(1800, 1, 1),
       maxTime: DateTime.now(),
@@ -57,7 +57,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
     if (dateResult == null) {
       return;
     }
-    final dateWithTimeResult = await DatePicker.showTime12hPicker(
+    final dateWithTimeResult = await DatePickerBdaya.showTime12hPicker(
       context,
       showTitleActions: true,
       currentTime: dateResult,

@@ -193,7 +193,7 @@ DEPENDENCIES:
   - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_editor_common (from `.symlinks/plugins/image_editor_common/ios`)
-  - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/ios`)
+  - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
   - media_extension (from `.symlinks/plugins/media_extension/ios`)
@@ -201,12 +201,12 @@ DEPENDENCIES:
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
   - open_mail_app (from `.symlinks/plugins/open_mail_app/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
-  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
-  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - tflite_flutter (from `.symlinks/plugins/tflite_flutter/ios`)
   - tflite_flutter_helper (from `.symlinks/plugins/tflite_flutter_helper/ios`)
@@ -273,7 +273,7 @@ EXTERNAL SOURCES:
   image_editor_common:
     :path: ".symlinks/plugins/image_editor_common/ios"
   in_app_purchase_storekit:
-    :path: ".symlinks/plugins/in_app_purchase_storekit/ios"
+    :path: ".symlinks/plugins/in_app_purchase_storekit/darwin"
   integration_test:
     :path: ".symlinks/plugins/integration_test/ios"
   local_auth_ios:
@@ -289,7 +289,7 @@ EXTERNAL SOURCES:
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
-    :path: ".symlinks/plugins/path_provider_foundation/ios"
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   photo_manager:
     :path: ".symlinks/plugins/photo_manager/ios"
   receive_sharing_intent:
@@ -299,7 +299,7 @@ EXTERNAL SOURCES:
   share_plus:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
-    :path: ".symlinks/plugins/shared_preferences_foundation/ios"
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
   tflite_flutter:
@@ -344,7 +344,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: 9aa0ad5a7bc171f8bae016300bfcfa3fb8425749
   image_editor_common: d6f6644ae4a6de80481e89fe6d0a8c49e30b4b43
   in_app_purchase_storekit: 4fb7ee9e824b1f09107fbfbbce8c4b276366dc43
-  integration_test: a1e7d09bd98eca2fc37aefd79d4f41ad37bdbbe5
+  integration_test: 13825b8a9334a850581300559b8839134b124670
   libwebp: f62cb61d0a484ba548448a4bd52aabf150ff6eef
   local_auth_ios: c6cf091ded637a88f24f86a8875d8b0f526e2605
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
