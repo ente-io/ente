@@ -125,17 +125,6 @@ export function FileInfo({
         return null;
     }, [file, exif]);
 
-    // useEffect(() => {
-    //     let collectionURL = '';
-    //     if (getCollectionID) {
-    //         console.log('id:', getCollectionID);
-    //         collectionURL += '?collection=';
-    //         collectionURL += getCollectionID;
-    //         const href = `/gallery${collectionURL}`;
-    //         router.push(href, undefined, { shallow: false });
-    //     }
-    // }, [getCollectionID]);
-
     useEffect(() => {
         if (!exif) {
             setParsedExifData({});
