@@ -51,7 +51,7 @@ class DetailPageConfiguration {
       asyncLoader ?? this.asyncLoader,
       selectedIndex ?? this.selectedIndex,
       tagPrefix ?? this.tagPrefix,
-      sortOrderAsc: sortOrderAsc!,
+      sortOrderAsc: sortOrderAsc ?? this.sortOrderAsc,
     );
   }
 }
