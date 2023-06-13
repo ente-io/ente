@@ -4,7 +4,6 @@ import { RenderCreationTime } from './RenderCreationTime';
 import { Box, DialogProps, Link, Stack, styled } from '@mui/material';
 import { getEXIFLocation } from 'services/upload/exifService';
 import { RenderCaption } from './RenderCaption';
-import { useRouter } from 'next/router';
 import CopyButton from 'components/CodeBlock/CopyButton';
 import { formatDate, formatTime } from 'utils/time/format';
 import Titlebar from 'components/Titlebar';
@@ -32,6 +31,7 @@ import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
 // import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
 import { AppContext } from 'pages/_app';
 import { t } from 'i18next';
+import { GalleryContext } from 'pages/gallery';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
@@ -53,6 +53,7 @@ interface Iprops {
     fileToCollectionsMap?: Map<number, number[]>;
     collectionNameMap?: Map<number, string>;
     showCollectionChips: boolean;
+    closePhotoViewer: () => void;
 }
 
 function BasicDeviceCamera({
@@ -87,14 +88,15 @@ export function FileInfo({
     fileToCollectionsMap,
     collectionNameMap,
     showCollectionChips,
+    closePhotoViewer,
 }: Iprops) {
-    const router = useRouter();
     const appContext = useContext(AppContext);
+    const galleryContext = useContext(GalleryContext);
+
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
     const [showExif, setShowExif] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [updateMLDataIndex, setUpdateMLDataIndex] = useState(0);
-    const [getCollectionID, setCollectionID] = useState<number>(undefined);
 
     const openExif = () => setShowExif(true);
     const closeExif = () => setShowExif(false);
@@ -123,16 +125,16 @@ export function FileInfo({
         return null;
     }, [file, exif]);
 
-    useEffect(() => {
-        let collectionURL = '';
-        if (getCollectionID) {
-            console.log('id:', getCollectionID);
-            collectionURL += '?collection=';
-            collectionURL += getCollectionID;
-            const href = `/gallery${collectionURL}`;
-            router.push(href, undefined, { shallow: true });
-        }
-    }, [getCollectionID]);
+    // useEffect(() => {
+    //     let collectionURL = '';
+    //     if (getCollectionID) {
+    //         console.log('id:', getCollectionID);
+    //         collectionURL += '?collection=';
+    //         collectionURL += getCollectionID;
+    //         const href = `/gallery${collectionURL}`;
+    //         router.push(href, undefined, { shallow: false });
+    //     }
+    // }, [getCollectionID]);
 
     useEffect(() => {
         if (!exif) {
@@ -172,14 +174,6 @@ export function FileInfo({
             parsedExifData['ISO'] = `ISO${exif['ISO']}`;
         }
         setParsedExifData(parsedExifData);
-
-        if (getCollectionID) {
-            console.log('id:', getCollectionID);
-            let collectionURL = '';
-            collectionURL += '?collection=';
-            const href = `/gallery${collectionURL}`;
-            router.push(href, undefined, { shallow: true });
-        }
     }, [exif]);
 
     if (!file) {
@@ -317,9 +311,13 @@ export function FileInfo({
                                 ?.map((collectionID) => (
                                     <Chip
                                         key={collectionID}
-                                        onClick={() =>
-                                            setCollectionID(collectionID)
-                                        }>
+                                        onClick={() => {
+                                            galleryContext.setActiveCollection(
+                                                collectionID
+                                            );
+                                            console.log(closePhotoViewer);
+                                            closePhotoViewer();
+                                        }}>
                                         {collectionNameMap.get(collectionID)}
                                     </Chip>
                                 ))}
