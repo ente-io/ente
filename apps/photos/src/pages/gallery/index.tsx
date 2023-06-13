@@ -342,11 +342,9 @@ export default function Gallery() {
                 collectionURL += activeCollection;
             }
         }
-        console.log('Testing ablum selection');
-        console.log(activeCollection);
         const href = `/gallery${collectionURL}`;
         router.push(href, undefined, { shallow: true });
-    }, [activeCollection]);
+    }, []);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
