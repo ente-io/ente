@@ -1,12 +1,12 @@
 import React from 'react';
 
-interface CircleProps {
-    letter: string;
+interface AvatarCircleProps {
+    email: string;
     color: string;
     size: number;
 }
 
-const Circle: React.FC<CircleProps> = ({ letter, color, size }) => {
+const AvatarCircle: React.FC<AvatarCircleProps> = ({ email, color, size }) => {
     const circleStyle = {
         width: `${size}px`,
         height: `${size}px`,
@@ -20,7 +20,7 @@ const Circle: React.FC<CircleProps> = ({ letter, color, size }) => {
         fontSize: `${Math.floor(size / 2)}px`,
     };
 
-    return <div style={circleStyle}>{letter}</div>;
+    return <div style={circleStyle}>{email}</div>;
 };
 
-export default Circle;
+export default AvatarCircle;
