@@ -21,7 +21,7 @@ class ArchivedCollectionsButton extends StatelessWidget {
         CollectionsService.instance.getHiddenCollections();
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),

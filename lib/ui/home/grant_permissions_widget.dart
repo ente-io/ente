@@ -77,7 +77,7 @@ class GrantPermissionsWidget extends StatelessWidget {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).colorScheme.background,
               spreadRadius: 190,
               blurRadius: 30,
               offset: const Offset(0, 170),

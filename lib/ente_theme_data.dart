@@ -15,6 +15,7 @@ final lightThemeData = ThemeData(
   colorScheme: const ColorScheme.light(
     primary: Colors.black,
     secondary: Color.fromARGB(255, 163, 163, 163),
+    background: Colors.white,
   ),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: const Color.fromRGBO(158, 158, 158, 1),
@@ -28,7 +29,6 @@ final lightThemeData = ThemeData(
   ),
   switchTheme: getSwitchThemeData(const Color.fromRGBO(102, 187, 106, 1)),
   scaffoldBackgroundColor: const Color.fromRGBO(255, 255, 255, 1),
-  backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
   appBarTheme: const AppBarTheme().copyWith(
     backgroundColor: Colors.white,
     foregroundColor: Colors.black,
@@ -90,7 +90,10 @@ final darkThemeData = ThemeData(
   primaryIconTheme:
       const IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
   hintColor: const Color.fromRGBO(158, 158, 158, 1),
-  colorScheme: const ColorScheme.dark(primary: Colors.white),
+  colorScheme: const ColorScheme.dark(
+    primary: Colors.white,
+    background: Color.fromRGBO(0, 0, 0, 1),
+  ),
   buttonTheme: const ButtonThemeData().copyWith(
     buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
   ),
@@ -107,7 +110,6 @@ final darkThemeData = ThemeData(
     primary: const Color.fromRGBO(255, 255, 255, 1),
   ),
   scaffoldBackgroundColor: const Color.fromRGBO(0, 0, 0, 1),
-  backgroundColor: const Color.fromRGBO(0, 0, 0, 1),
   appBarTheme: const AppBarTheme().copyWith(
     color: Colors.black,
     elevation: 0,

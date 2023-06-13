@@ -14,7 +14,7 @@ class CreateNewAlbumWidget extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.fromLTRB(30, 30, 30, 54),
         decoration: BoxDecoration(
-          color: Theme.of(context).backgroundColor,
+          color: Theme.of(context).colorScheme.background,
           boxShadow: [
             BoxShadow(
               blurRadius: 2,
