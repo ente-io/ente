@@ -315,7 +315,6 @@ export function FileInfo({
                                             galleryContext.setActiveCollection(
                                                 collectionID
                                             );
-                                            console.log(closePhotoViewer);
                                             closePhotoViewer();
                                         }}>
                                         {collectionNameMap.get(collectionID)}
