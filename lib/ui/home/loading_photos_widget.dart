@@ -136,7 +136,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                           S.of(context).didYouKnow,
                           style: Theme.of(context)
                               .textTheme
-                              .headline6!
+                              .titleLarge!
                               .copyWith(
                                 color: Theme.of(context).colorScheme.greenText,
                               ),
@@ -196,7 +196,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
       textAlign: TextAlign.start,
       style: Theme.of(context)
           .textTheme
-          .headline5!
+          .headlineSmall!
           .copyWith(color: Theme.of(context).colorScheme.defaultTextColor),
     );
   }

@@ -120,7 +120,7 @@ class OutgoingAlbumEmptyState extends StatelessWidget {
         children: [
           Text(
             S.of(context).shareYourFirstAlbum,
-            style: Theme.of(context).textTheme.caption,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           const Padding(padding: EdgeInsets.only(top: 14)),
           SizedBox(
@@ -160,7 +160,7 @@ class IncomingAlbumEmptyState extends StatelessWidget {
         children: [
           Text(
             S.of(context).askYourLovedOnesToShare,
-            style: Theme.of(context).textTheme.caption,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           const Padding(padding: EdgeInsets.only(top: 14)),
           SizedBox(

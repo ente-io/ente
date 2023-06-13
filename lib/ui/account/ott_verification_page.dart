@@ -97,7 +97,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               padding: const EdgeInsets.fromLTRB(20, 30, 20, 15),
               child: Text(
                 S.of(context).verifyEmail,
-                style: Theme.of(context).textTheme.headline4,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
             Padding(
@@ -114,7 +114,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                             text: S.of(context).weHaveSendEmailTo(widget.email),
                             style: Theme.of(context)
                                 .textTheme
-                                .subtitle1!
+                                .titleMedium!
                                 .copyWith(fontSize: 14),
                             tags: {
                               'green': StyledTextTag(
@@ -131,7 +131,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                           S.of(context).checkInboxAndSpamFolder,
                           style: Theme.of(context)
                               .textTheme
-                              .subtitle1!
+                              .titleMedium!
                               .copyWith(fontSize: 14),
                         ),
                       ],
@@ -148,7 +148,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               child: TextFormField(
                 key: const ValueKey("ottVerificationInputField"),
-                style: Theme.of(context).textTheme.subtitle1,
+                style: Theme.of(context).textTheme.titleMedium,
                 decoration: InputDecoration(
                   filled: true,
                   hintText: S.of(context).tapToEnterCode,
@@ -185,7 +185,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                     },
                     child: Text(
                       S.of(context).resendEmail,
-                      style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                             fontSize: 14,
                             decoration: TextDecoration.underline,
                           ),

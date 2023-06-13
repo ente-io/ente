@@ -22,7 +22,7 @@ class IncomingAlbumItem extends StatelessWidget {
     const double horizontalPaddingOfGridRow = 16;
     const double crossAxisSpacingOfGrid = 9;
     final TextStyle albumTitleTextStyle =
-        Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 14);
+        Theme.of(context).textTheme.titleMedium!.copyWith(fontSize: 14);
     final Size size = MediaQuery.of(context).size;
     final int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
     final double totalWhiteSpaceOfRow = (horizontalPaddingOfGridRow * 2) +

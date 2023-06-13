@@ -47,7 +47,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
                       children: [
                         TextSpan(
                           text: S.of(context).hidden,
-                          style: Theme.of(context).textTheme.subtitle1,
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const TextSpan(text: "  \u2022  "),
                         WidgetSpan(

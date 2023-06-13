@@ -57,12 +57,12 @@ class SubscriptionPlanWidget extends StatelessWidget {
                   convertBytesToReadableFormat(storage),
                   style: Theme.of(context)
                       .textTheme
-                      .headline6!
+                      .titleLarge!
                       .copyWith(color: textColor),
                 ),
                 Text(
                   _displayPrice(context),
-                  style: Theme.of(context).textTheme.headline6!.copyWith(
+                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
                         color: textColor,
                         fontWeight: FontWeight.normal,
                       ),

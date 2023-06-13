@@ -79,7 +79,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
                             children: [
                               TextSpan(
                                 text: S.of(context).trash,
-                                style: Theme.of(context).textTheme.subtitle1,
+                                style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const TextSpan(text: "  \u2022  "),
                               TextSpan(
@@ -96,7 +96,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
                             children: [
                               TextSpan(
                                 text: S.of(context).trash,
-                                style: Theme.of(context).textTheme.subtitle1,
+                                style: Theme.of(context).textTheme.titleMedium,
                               ),
                               //need to query in db and bring this value
                             ],

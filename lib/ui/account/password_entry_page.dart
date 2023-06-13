@@ -155,7 +155,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     buttonTextAndHeading,
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -167,7 +167,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     textAlign: TextAlign.start,
                     style: Theme.of(context)
                         .textTheme
-                        .subtitle1!
+                        .titleMedium!
                         .copyWith(fontSize: 14),
                   ),
                 ),
@@ -178,14 +178,15 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     text: S.of(context).passwordWarning,
                     style: Theme.of(context)
                         .textTheme
-                        .subtitle1!
+                        .titleMedium!
                         .copyWith(fontSize: 14),
                     tags: {
                       'underline': StyledTextTag(
-                        style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium!.copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                       ),
                     },
                   ),
@@ -357,10 +358,11 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     child: RichText(
                       text: TextSpan(
                         text: S.of(context).howItWorks,
-                        style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium!.copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                       ),
                     ),
                   ),

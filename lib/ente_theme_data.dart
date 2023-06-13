@@ -39,8 +39,8 @@ final lightThemeData = ThemeData(
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
   textTheme: _buildTextTheme(const Color.fromRGBO(0, 0, 0, 1)),
   primaryTextTheme: const TextTheme().copyWith(
-    bodyText2: const TextStyle(color: Colors.yellow),
-    bodyText1: const TextStyle(color: Colors.orange),
+    bodyMedium: const TextStyle(color: Colors.yellow),
+    bodyLarge: const TextStyle(color: Colors.orange),
   ),
   cardColor: const Color.fromRGBO(250, 250, 250, 1.0),
   dialogTheme: const DialogTheme().copyWith(
@@ -161,54 +161,54 @@ final darkThemeData = ThemeData(
 
 TextTheme _buildTextTheme(Color textColor) {
   return const TextTheme().copyWith(
-    headline4: TextStyle(
+    headlineMedium: TextStyle(
       color: textColor,
       fontSize: 32,
       fontWeight: FontWeight.w600,
       fontFamily: 'Inter',
     ),
-    headline5: TextStyle(
+    headlineSmall: TextStyle(
       color: textColor,
       fontSize: 24,
       fontWeight: FontWeight.w600,
       fontFamily: 'Inter',
     ),
-    headline6: TextStyle(
+    titleLarge: TextStyle(
       color: textColor,
       fontSize: 18,
       fontFamily: 'Inter',
       fontWeight: FontWeight.w600,
     ),
-    subtitle1: TextStyle(
+    titleMedium: TextStyle(
       color: textColor,
       fontFamily: 'Inter',
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
-    subtitle2: TextStyle(
+    titleSmall: TextStyle(
       color: textColor,
       fontFamily: 'Inter',
       fontSize: 14,
       fontWeight: FontWeight.w500,
     ),
-    bodyText1: TextStyle(
+    bodyLarge: TextStyle(
       fontFamily: 'Inter',
       color: textColor,
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
-    bodyText2: TextStyle(
+    bodyMedium: TextStyle(
       fontFamily: 'Inter',
       color: textColor,
       fontSize: 14,
       fontWeight: FontWeight.w500,
     ),
-    caption: TextStyle(
+    bodySmall: TextStyle(
       color: textColor.withOpacity(0.6),
       fontSize: 14,
       fontWeight: FontWeight.w500,
     ),
-    overline: TextStyle(
+    labelSmall: TextStyle(
       fontFamily: 'Inter',
       color: textColor,
       fontSize: 14,

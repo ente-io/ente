@@ -98,7 +98,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                       _appBarTitle!,
                       style: Theme.of(context)
                           .textTheme
-                          .headline5!
+                          .headlineSmall!
                           .copyWith(fontSize: 16),
                     ),
                     onPressed: () => _renameAlbum(context),
