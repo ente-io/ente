@@ -102,7 +102,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                       file.creationTime!,
                     ),
                   ),
-                  style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                         fontSize: 14,
                         color: Colors.white,
                       ), //same for both themes

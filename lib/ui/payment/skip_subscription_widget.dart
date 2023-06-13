@@ -26,7 +26,7 @@ class SkipSubscriptionWidget extends StatelessWidget {
         style: Theme.of(context).outlinedButtonTheme.style?.copyWith(
           textStyle: MaterialStateProperty.resolveWith<TextStyle>(
             (Set<MaterialState> states) {
-              return Theme.of(context).textTheme.subtitle1!;
+              return Theme.of(context).textTheme.titleMedium!;
             },
           ),
         ),

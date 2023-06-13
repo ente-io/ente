@@ -150,7 +150,7 @@ class TrashedFileOverlayText extends StatelessWidget {
         S.of(context).trashDaysLeft(daysLeft),
         style: Theme.of(context)
             .textTheme
-            .subtitle2!
+            .titleSmall!
             .copyWith(color: Colors.white), //same for both themes
       ),
     );

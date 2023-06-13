@@ -28,7 +28,7 @@ class FavoritesService {
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
 
-  FavoritesService._privateConstructor() {}
+  FavoritesService._privateConstructor();
   Future<void> initFav() async {
     _config = Configuration.instance;
     _collectionsService = CollectionsService.instance;

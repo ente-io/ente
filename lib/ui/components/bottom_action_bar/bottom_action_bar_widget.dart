@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';

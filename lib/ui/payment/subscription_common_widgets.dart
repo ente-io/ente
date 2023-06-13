@@ -38,19 +38,19 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
               children: [
                 Text(
                   S.of(context).selectYourPlan,
-                  style: Theme.of(context).textTheme.headline4,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ],
             ),
             const SizedBox(height: 10),
             Text(
               S.of(context).enteSubscriptionPitch,
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 4),
             Text(
               S.of(context).enteSubscriptionShareWithFamily,
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
         ),
@@ -66,13 +66,13 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
               children: [
                 TextSpan(
                   text: S.of(context).currentUsageIs,
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 TextSpan(
                   text: formatBytes(widget.currentUsage!),
                   style: Theme.of(context)
                       .textTheme
-                      .subtitle1!
+                      .titleMedium!
                       .copyWith(fontWeight: FontWeight.bold),
                 )
               ],
@@ -109,7 +109,7 @@ class ValidityWidget extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8),
       child: Text(
         message,
-        style: Theme.of(context).textTheme.caption,
+        style: Theme.of(context).textTheme.bodySmall,
       ),
     );
   }

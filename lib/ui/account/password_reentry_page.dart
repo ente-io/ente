@@ -150,7 +150,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     S.of(context).welcomeBack,
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 Visibility(
@@ -236,11 +236,13 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         child: Center(
                           child: Text(
                             S.of(context).forgotPassword,
-                            style:
-                                Theme.of(context).textTheme.subtitle1!.copyWith(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.underline,
-                                    ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         ),
                       ),
@@ -260,11 +262,13 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         child: Center(
                           child: Text(
                             S.of(context).changeEmail,
-                            style:
-                                Theme.of(context).textTheme.subtitle1!.copyWith(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.underline,
-                                    ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         ),
                       ),

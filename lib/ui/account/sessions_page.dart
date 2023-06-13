@@ -162,7 +162,7 @@ class _SessionsPageState extends State<SessionsPage> {
             const Padding(padding: EdgeInsets.all(8)),
             Text(
               session.ua,
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
         ),

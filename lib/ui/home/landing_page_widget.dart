@@ -292,12 +292,12 @@ class FeatureItemWidget extends StatelessWidget {
           children: [
             Text(
               featureTitleFirstLine,
-              style: Theme.of(context).textTheme.headline5,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             const Padding(padding: EdgeInsets.all(2)),
             Text(
               featureTitleSecondLine,
-              style: Theme.of(context).textTheme.headline5,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             const Padding(padding: EdgeInsets.all(12)),
             Text(

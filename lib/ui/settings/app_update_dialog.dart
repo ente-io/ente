@@ -96,7 +96,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
               S.of(context).installManually,
               style: Theme.of(context)
                   .textTheme
-                  .caption!
+                  .bodySmall!
                   .copyWith(decoration: TextDecoration.underline),
             ),
             onTap: () => launchUrlString(
