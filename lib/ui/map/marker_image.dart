@@ -60,7 +60,7 @@ class MarkerPointer extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
+  bool shouldRepaint(MarkerPointer oldDelegate) {
+    return bgColor != oldDelegate.bgColor;
   }
 }
