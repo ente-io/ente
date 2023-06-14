@@ -35,7 +35,8 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   List<ImageMarker> imageMarkers = [];
   List<File> allImages = [];
-  List<File> visibleImages = [];
+  StreamController<List<File>> visibleImages =
+      StreamController<List<File>>.broadcast();
   MapController mapController = MapController();
   bool isLoading = true;
   double initialZoom = 4.0;
@@ -44,11 +45,20 @@ class _MapScreenState extends State<MapScreen> {
   int debounceDuration = 500;
   LatLng center = LatLng(46.7286, 4.8614);
   final Logger _logger = Logger("_MapScreenState");
+  StreamSubscription? _mapMoveSubscription;
+  Isolate? isolate;
 
   @override
   void initState() {
     super.initState();
     initialize();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    visibleImages.close();
+    _mapMoveSubscription?.cancel();
   }
 
   Future<void> initialize() async {
@@ -64,7 +74,7 @@ class _MapScreenState extends State<MapScreen> {
     late double minLat, maxLat, minLon, maxLon;
     final List<ImageMarker> tempMarkers = [];
     bool hasAnyLocation = false;
-    for (File file in files) {
+    for (var file in files) {
       if (file.hasLocation && file.location != null) {
         if (!hasAnyLocation) {
           minLat = file.location!.latitude!;
@@ -115,22 +125,20 @@ class _MapScreenState extends State<MapScreen> {
       imageMarkers = tempMarkers;
     });
 
-    mapController.move(
-      center,
-      initialZoom,
-    );
-
     Timer(Duration(milliseconds: debounceDuration), () {
-      updateVisibleImages(mapController.bounds!);
+      mapController.move(
+        center,
+        initialZoom,
+      );
       setState(() {
         isLoading = false;
       });
     });
   }
 
-  Future<List<File>> calculateVisibleMarkers(LatLngBounds bounds) async {
+  void calculateVisibleMarkers(LatLngBounds bounds) async {
     final ReceivePort receivePort = ReceivePort();
-    final isolate = await Isolate.spawn<MapIsolate>(
+    isolate = await Isolate.spawn<MapIsolate>(
       _calculateMarkersIsolate,
       MapIsolate(
         bounds: bounds,
@@ -139,17 +147,14 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
 
-    final completer = Completer<List<File>>();
-    receivePort.listen((dynamic message) {
+    _mapMoveSubscription = receivePort.listen((dynamic message) async {
       if (message is List<File>) {
-        completer.complete(message);
+        visibleImages.sink.add(message);
       } else {
-        completer.completeError(message);
+        _mapMoveSubscription?.cancel();
+        isolate?.kill();
       }
-      isolate.kill();
     });
-
-    return completer.future;
   }
 
   @pragma('vm:entry-point')
@@ -158,27 +163,17 @@ class _MapScreenState extends State<MapScreen> {
     final imageMarkers = message.imageMarkers;
     final SendPort sendPort = message.sendPort;
     try {
-      final List<File> images = [];
+      final List<File> visibleFiles = [];
       for (var imageMarker in imageMarkers) {
         final point = LatLng(imageMarker.latitude, imageMarker.longitude);
         if (bounds.contains(point)) {
-          images.add(imageMarker.imageFile);
+          visibleFiles.add(imageMarker.imageFile);
         }
       }
-      sendPort.send(images);
+      sendPort.send(visibleFiles);
     } catch (e) {
       sendPort.send(e.toString());
     }
-  }
-
-  void updateVisibleImages(LatLngBounds bounds) async {
-    final images = await calculateVisibleMarkers(bounds);
-    if (kDebugMode) {
-      debugPrint("Visible images: ${images.length}");
-    }
-    setState(() {
-      visibleImages = images;
-    });
   }
 
   @override
@@ -206,7 +201,7 @@ class _MapScreenState extends State<MapScreen> {
                         ),
                         controller: mapController,
                         imageMarkers: imageMarkers,
-                        updateVisibleImages: updateVisibleImages,
+                        updateVisibleImages: calculateVisibleMarkers,
                         center: center,
                         initialZoom: initialZoom,
                         minZoom: minZoom,
@@ -227,24 +222,19 @@ class _MapScreenState extends State<MapScreen> {
                         duration: const Duration(milliseconds: 200),
                         switchInCurve: Curves.easeInOutExpo,
                         switchOutCurve: Curves.easeInOutExpo,
-                        child: visibleImages.isNotEmpty
-                            ? ListView.builder(
-                                itemCount: visibleImages.length,
-                                scrollDirection: Axis.horizontal,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 2),
-                                physics: const BouncingScrollPhysics(),
-                                itemBuilder: (context, index) {
-                                  final image = visibleImages[index];
-                                  return ImageTile(
-                                    image: image,
-                                    allImages: allImages,
-                                    visibleImages: visibleImages,
-                                    index: index,
-                                  );
-                                },
-                              )
-                            : Column(
+                        child: StreamBuilder<List<File>>(
+                          stream: visibleImages.stream,
+                          builder: (
+                            BuildContext context,
+                            AsyncSnapshot<List<File>> snapshot,
+                          ) {
+                            if (!snapshot.hasData) {
+                              return const Text("Loading...");
+                            }
+                            final images = snapshot.data!;
+                            _logger.info("Visible images: ${images.length}");
+                            if (images.isEmpty) {
+                              return Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
@@ -257,10 +247,29 @@ class _MapScreenState extends State<MapScreen> {
                                     style: textTheme.smallFaint,
                                   )
                                 ],
-                              ),
+                              );
+                            }
+                            return ListView.builder(
+                              itemCount: images.length,
+                              scrollDirection: Axis.horizontal,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 2),
+                              physics: const BouncingScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                final image = images[index];
+                                return ImageTile(
+                                  image: image,
+                                  allImages: allImages,
+                                  visibleImages: images,
+                                  index: index,
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
               isLoading
