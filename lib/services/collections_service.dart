@@ -77,9 +77,6 @@ class CollectionsService {
       // format in the DB
       _cacheCollectionAttributes(collection);
     }
-    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _cachedLatestFiles = null;
-    });
     Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _cachedLatestFiles = null;
     });
