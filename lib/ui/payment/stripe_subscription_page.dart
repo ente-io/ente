@@ -127,7 +127,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).colorScheme.background,
               blurRadius: 16,
               offset: const Offset(0, 8),
             )

@@ -137,9 +137,9 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             collections!.where((c) => c.thumbnail == null).length >= 3;
     final TextStyle trashAndHiddenTextStyle = Theme.of(context)
         .textTheme
-        .subtitle1!
+        .titleMedium!
         .copyWith(
-          color: Theme.of(context).textTheme.subtitle1!.color!.withOpacity(0.5),
+          color: Theme.of(context).textTheme.titleMedium!.color!.withOpacity(0.5),
         );
 
     return SingleChildScrollView(
@@ -205,7 +205,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
       }
       return Text(
         text,
-        style: Theme.of(context).textTheme.subtitle1!.copyWith(
+        style: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontSize: 14,
               color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
             ),

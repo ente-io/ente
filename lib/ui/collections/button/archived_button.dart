@@ -21,7 +21,7 @@ class ArchivedCollectionsButton extends StatelessWidget {
         CollectionsService.instance.getHiddenCollections();
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -60,7 +60,7 @@ class ArchivedCollectionsButton extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: S.of(context).archive,
-                                style: Theme.of(context).textTheme.subtitle1,
+                                style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const TextSpan(text: "  \u2022  "),
                               TextSpan(
@@ -77,7 +77,7 @@ class ArchivedCollectionsButton extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: S.of(context).archive,
-                                style: Theme.of(context).textTheme.subtitle1,
+                                style: Theme.of(context).textTheme.titleMedium,
                               ),
                               //need to query in db and bring this value
                             ],

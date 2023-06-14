@@ -102,7 +102,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             padding: const EdgeInsets.only(left: 24, right: 48),
             child: Text(
               S.of(context).selectedFoldersWillBeEncryptedAndBackedUp,
-              style: Theme.of(context).textTheme.caption!.copyWith(height: 1.3),
+              style:
+                  Theme.of(context).textTheme.bodySmall!.copyWith(height: 1.3),
             ),
           ),
           const Padding(
@@ -154,7 +155,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).backgroundColor,
+                      color: Theme.of(context).colorScheme.background,
                       blurRadius: 24,
                       offset: const Offset(0, -8),
                       spreadRadius: 4,
@@ -192,9 +193,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                         },
                         child: Text(
                           S.of(context).skip,
-                          style: Theme.of(context).textTheme.caption!.copyWith(
-                                decoration: TextDecoration.underline,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall!.copyWith(
+                                    decoration: TextDecoration.underline,
+                                  ),
                         ),
                       ),
                     )

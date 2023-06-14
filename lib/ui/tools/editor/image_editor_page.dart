@@ -162,7 +162,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildFlipButton() {
-    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
+    final TextStyle subtitle2 = Theme.of(context).textTheme.titleSmall!;
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
@@ -196,7 +196,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildRotateLeftButton() {
-    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
+    final TextStyle subtitle2 = Theme.of(context).textTheme.titleSmall!;
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
@@ -226,7 +226,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildRotateRightButton() {
-    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
+    final TextStyle subtitle2 = Theme.of(context).textTheme.titleSmall!;
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
@@ -256,7 +256,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildSaveButton() {
-    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
+    final TextStyle subtitle2 = Theme.of(context).textTheme.titleSmall!;
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
@@ -416,7 +416,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildSat() {
-    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
+    final TextStyle subtitle2 = Theme.of(context).textTheme.titleSmall!;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -462,7 +462,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Widget _buildBrightness() {
-    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
+    final TextStyle subtitle2 = Theme.of(context).textTheme.titleSmall!;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),

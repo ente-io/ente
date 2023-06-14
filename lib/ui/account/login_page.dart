@@ -82,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     l10n.accountWelcomeBack,
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -148,7 +148,7 @@ class _LoginPageState extends State<LoginPage> {
                           text: S.of(context).loginTerms,
                           style: Theme.of(context)
                               .textTheme
-                              .subtitle1!
+                              .titleMedium!
                               .copyWith(fontSize: 12),
                           tags: {
                             'u-terms': StyledTextActionTag(

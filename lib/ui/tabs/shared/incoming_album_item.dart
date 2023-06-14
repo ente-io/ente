@@ -5,6 +5,7 @@ import "package:photos/db/files_db.dart";
 import "package:photos/models/collection_items.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
+import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -19,10 +20,11 @@ class IncomingAlbumItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final heroTag = "shared_collection" + (c.thumbnail?.tag ?? '');
     const double horizontalPaddingOfGridRow = 16;
     const double crossAxisSpacingOfGrid = 9;
     final TextStyle albumTitleTextStyle =
-        Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 14);
+        Theme.of(context).textTheme.titleMedium!.copyWith(fontSize: 14);
     final Size size = MediaQuery.of(context).size;
     final int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
     final double totalWhiteSpaceOfRow = (horizontalPaddingOfGridRow * 2) +
@@ -40,15 +42,18 @@ class IncomingAlbumItem extends StatelessWidget {
               width: sideOfThumbnail,
               child: Stack(
                 children: [
-                  Hero(
-                    tag: "shared_collection" + c.thumbnail!.tag,
-                    child: ThumbnailWidget(
-                      c.thumbnail,
-                      key: Key("shared_collection" + c.thumbnail!.tag),
-                      shouldShowArchiveStatus: c.collection.hasShareeArchived(),
-                      shouldShowSyncStatus: false,
-                    ),
-                  ),
+                  c.thumbnail != null
+                      ? Hero(
+                          tag: heroTag,
+                          child: ThumbnailWidget(
+                            c.thumbnail,
+                            key: Key(heroTag),
+                            shouldShowArchiveStatus:
+                                c.collection.hasShareeArchived(),
+                            shouldShowSyncStatus: false,
+                          ),
+                        )
+                      : const NoThumbnailWidget(),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Padding(

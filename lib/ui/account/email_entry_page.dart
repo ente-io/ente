@@ -135,13 +135,13 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     S.of(context).createNewAccount,
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
-                    style: Theme.of(context).textTheme.subtitle1,
+                    style: Theme.of(context).textTheme.titleMedium,
                     autofillHints: const [AutofillHints.email],
                     decoration: InputDecoration(
                       fillColor: _emailIsValid ? _validFieldValueColor : null,
@@ -371,8 +371,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Expanded(
             child: StyledText(
               text: S.of(context).signUpTerms,
-              style:
-                  Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 12),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium!
+                  .copyWith(fontSize: 12),
               tags: {
                 'u-terms': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) => {
@@ -438,8 +440,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Expanded(
             child: StyledText(
               text: S.of(context).ackPasswordLostWarning,
-              style:
-                  Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 12),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium!
+                  .copyWith(fontSize: 12),
               tags: {
                 'underline': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) => {

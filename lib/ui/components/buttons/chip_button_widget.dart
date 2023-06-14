@@ -34,7 +34,7 @@ class ChipButtonWidget extends StatelessWidget {
               leadingIcon != null
                   ? Icon(
                       leadingIcon,
-                      size: 17,
+                      size: 16,
                     )
                   : const SizedBox.shrink(),
               if (label != null && leadingIcon != null)
@@ -44,7 +44,7 @@ class ChipButtonWidget extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     label!,
-                    style: getEnteTextTheme(context).smallBold,
+                    style: getEnteTextTheme(context).miniBold,
                   ),
                 )
             ],

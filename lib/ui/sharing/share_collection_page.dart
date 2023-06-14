@@ -289,7 +289,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
       appBar: AppBar(
         title: Text(
           widget.collection.displayName,
-          style: Theme.of(context).textTheme.headline5?.copyWith(fontSize: 16),
+          style:
+              Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 16),
         ),
         elevation: 0,
         centerTitle: false,

@@ -16,7 +16,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -47,7 +47,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
                       children: [
                         TextSpan(
                           text: S.of(context).hidden,
-                          style: Theme.of(context).textTheme.subtitle1,
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const TextSpan(text: "  \u2022  "),
                         WidgetSpan(

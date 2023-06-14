@@ -28,7 +28,7 @@ class StartBackupHookWidget extends StatelessWidget {
           S.of(context).noPhotosAreBeingBackedUpRightNow,
           style: Theme.of(context)
               .textTheme
-              .caption!
+              .bodySmall!
               .copyWith(fontFamily: 'Inter-Medium', fontSize: 16),
         ),
         Center(

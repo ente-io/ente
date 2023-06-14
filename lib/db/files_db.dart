@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
@@ -530,10 +531,8 @@ class FilesDB {
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       filesTable,
-      where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-          ' AND $columnMMdVisibility = ?',
-      whereArgs: [startTime, endTime, visibility],
+      where: whereQuery,
+      whereArgs: whereArgs,
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
@@ -1214,6 +1213,9 @@ class FilesDB {
   }
 
   Future<List<File>> getLatestCollectionFiles() async {
+    final enteWatch = EnteWatch("getLatestCollectionFiles")
+      ..start()
+      ..log("start");
     debugPrint("Fetching latestCollectionFiles from db");
     const String query = '''
       SELECT $filesTable.*
@@ -1247,7 +1249,9 @@ class FilesDB {
       }
       collectionMap[file.collectionID!] = file;
     }
-    return collectionMap.values.toList();
+    final result = collectionMap.values.toList();
+    enteWatch.log("end");
+    return result;
   }
 
   Future<void> markForReUploadIfLocationMissing(List<String> localIDs) async {

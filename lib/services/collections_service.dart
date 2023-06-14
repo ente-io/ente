@@ -73,15 +73,12 @@ class CollectionsService {
     final collections = await _db.getAllCollections();
 
     for (final collection in collections) {
+      // using deprecated method because the path is stored in encrypted
+      // format in the DB
       _cacheCollectionAttributes(collection);
     }
-    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _cachedLatestFiles = null;
-      getLatestCollectionFiles();
-    });
     Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _cachedLatestFiles = null;
-      getLatestCollectionFiles();
     });
   }
 
@@ -143,7 +140,7 @@ class CollectionsService {
     _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
     watch.logAndReset("till DB insertion ${updatedCollections.length}");
     for (final collection in fetchedCollections) {
-      _cacheCollectionAttributes(collection);
+      _cacheLocalPathAndCollection(collection);
     }
     _logger.info("Collections synced");
     watch.log("${fetchedCollections.length} collection cached refreshed ");
@@ -197,18 +194,15 @@ class CollectionsService {
         .toSet();
   }
 
-  Set<int> collectionsHiddenFromTimeline() {
+  Set<int> archivedOrHiddenCollections() {
     return _collectionIDToCollections.values
         .toList()
-        .where((element) => element.isHidden() || element.isArchived())
-        .map((e) => e.id)
-        .toSet();
-  }
-
-  Set<int> sharedColectionsHiddenFromTimeline() {
-    return _collectionIDToCollections.values
-        .toList()
-        .where((element) => element.hasShareeArchived())
+        .where(
+          (element) =>
+              element.hasShareeArchived() ||
+              element.isHidden() ||
+              element.isArchived(),
+        )
         .map((e) => e.id)
         .toSet();
   }
@@ -219,7 +213,7 @@ class CollectionsService {
         0;
   }
 
-  Future<List<File>> getLatestCollectionFiles() {
+  Future<List<File>> _getLatestCollectionFiles() {
     _cachedLatestFiles ??= _filesDB.getLatestCollectionFiles();
     return _cachedLatestFiles!;
   }
@@ -288,7 +282,7 @@ class CollectionsService {
         usersCollection.removeWhere((c) => c.owner?.id != userID);
       }
     }
-    final latestCollectionFiles = await getLatestCollectionFiles();
+    final latestCollectionFiles = await _getLatestCollectionFiles();
     final Map<int, File> collectionToThumbnailMap = Map.fromEntries(
       latestCollectionFiles.map((e) => MapEntry(e.collectionID!, e)),
     );
@@ -656,7 +650,7 @@ class CollectionsService {
       collection.pubMagicMetadata =
           CollectionPubMagicMetadata.fromJson(jsonToUpdate);
       collection.mMbPubVersion = currentVersion + 1;
-      _cacheCollectionAttributes(collection);
+      _cacheLocalPathAndCollection(collection);
       // trigger sync to fetch the latest collection state from server
       sync().ignore();
     } on DioError catch (e) {
@@ -716,7 +710,7 @@ class CollectionsService {
       collection.sharedMagicMetadata =
           ShareeMagicMetadata.fromJson(jsonToUpdate);
       collection.sharedMmdVersion = currentVersion + 1;
-      _cacheCollectionAttributes(collection);
+      _cacheLocalPathAndCollection(collection);
       // trigger sync to fetch the latest collection state from server
       sync().ignore();
     } on DioError catch (e) {

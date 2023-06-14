@@ -124,7 +124,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                         S.of(context).deselectAll,
                         style: Theme.of(context)
                             .textTheme
-                            .subtitle1!
+                            .titleMedium!
                             .copyWith(fontWeight: FontWeight.w600),
                       ),
                     ),
@@ -208,7 +208,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         children: [
           Text(
             S.of(context).reviewDeduplicateItems,
-            style: Theme.of(context).textTheme.subtitle2,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
           const Padding(
             padding: EdgeInsets.all(12),
@@ -297,7 +297,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       }
       return Text(
         text,
-        style: Theme.of(context).textTheme.subtitle1!.copyWith(
+        style: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontSize: 14,
               color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
             ),
@@ -420,7 +420,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 " files, " +
                 formatBytes(duplicates.size) +
                 " each",
-            style: Theme.of(context).textTheme.subtitle2,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
         Padding(
@@ -512,7 +512,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                   .getCollectionByID(file.collectionID!)!
                   .displayName,
               style:
-                  Theme.of(context).textTheme.caption!.copyWith(fontSize: 12),
+                  Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),
           ),

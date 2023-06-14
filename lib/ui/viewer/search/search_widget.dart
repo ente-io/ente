@@ -83,7 +83,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                     height: 44,
                     color: Theme.of(context).colorScheme.defaultBackgroundColor,
                     child: TextFormField(
-                      style: Theme.of(context).textTheme.subtitle1,
+                      style: Theme.of(context).textTheme.titleMedium,
                       // Below parameters are to disable auto-suggestion
                       enableSuggestions: false,
                       autocorrect: false,

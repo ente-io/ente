@@ -27,7 +27,7 @@ class UnCategorizedCollections extends StatelessWidget {
     }
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
-        backgroundColor: Theme.of(context).backgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.background,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -64,7 +64,7 @@ class UnCategorizedCollections extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: S.of(context).uncategorized,
-                                style: Theme.of(context).textTheme.subtitle1,
+                                style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const TextSpan(text: "  \u2022  "),
                               TextSpan(
@@ -81,7 +81,7 @@ class UnCategorizedCollections extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: S.of(context).uncategorized,
-                                style: Theme.of(context).textTheme.subtitle1,
+                                style: Theme.of(context).textTheme.titleMedium,
                               ),
                               //need to query in db and bring this value
                             ],

@@ -38,7 +38,7 @@ class _DynamicLocationGalleryWidgetState
   @override
   void initState() {
     final collectionsToHide =
-        CollectionsService.instance.collectionsHiddenFromTimeline();
+        CollectionsService.instance.archivedOrHiddenCollections();
     fileLoadResult =
         FilesDB.instance.fetchAllUploadedAndSharedFilesWithLocation(
       galleryLoadStartTime,
@@ -114,6 +114,7 @@ class _DynamicLocationGalleryWidgetState
                   },
                   tagPrefix: widget.tagPrefix,
                   enableFileGrouping: false,
+                  showSelectAllByDefault: false,
                 ),
               );
             },

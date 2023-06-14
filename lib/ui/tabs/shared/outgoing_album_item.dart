@@ -3,6 +3,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection_items.dart";
 import "package:photos/models/gallery_type.dart";
 import 'package:photos/theme/colors.dart';
+import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -39,6 +40,7 @@ class OutgoingAlbumItem extends StatelessWidget {
         }
       }
     }
+    final String heroTag = "outgoing_collection" + (c.thumbnail?.tag ?? '');
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -50,13 +52,15 @@ class OutgoingAlbumItem extends StatelessWidget {
               child: SizedBox(
                 height: 60,
                 width: 60,
-                child: Hero(
-                  tag: "outgoing_collection" + c.thumbnail!.tag,
-                  child: ThumbnailWidget(
-                    c.thumbnail,
-                    key: ValueKey("outgoing_collection" + c.thumbnail!.tag),
-                  ),
-                ),
+                child: c.thumbnail != null
+                    ? Hero(
+                        tag: heroTag,
+                        child: ThumbnailWidget(
+                          c.thumbnail,
+                          key: ValueKey(heroTag),
+                        ),
+                      )
+                    : const NoThumbnailWidget(),
               ),
             ),
             const Padding(padding: EdgeInsets.all(8)),

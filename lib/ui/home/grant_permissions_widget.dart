@@ -53,7 +53,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                   text: TextSpan(
                     style: Theme.of(context)
                         .textTheme
-                        .headline5!
+                        .headlineSmall!
                         .copyWith(fontWeight: FontWeight.w700),
                     children: [
                       const TextSpan(text: 'ente '),
@@ -61,7 +61,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                         text: "needs permission to ",
                         style: Theme.of(context)
                             .textTheme
-                            .headline5!
+                            .headlineSmall!
                             .copyWith(fontWeight: FontWeight.w400),
                       ),
                       const TextSpan(text: 'preserve your photos'),
@@ -77,7 +77,7 @@ class GrantPermissionsWidget extends StatelessWidget {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).colorScheme.background,
               spreadRadius: 190,
               blurRadius: 30,
               offset: const Offset(0, 170),
@@ -108,7 +108,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                   TextButton(
                     child: Text(
                       S.of(context).ok,
-                      style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),
