@@ -19,6 +19,7 @@ import {
 } from 'components/PlaceholderThumbnails';
 import { FILE_TYPE } from 'constants/file';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
+import AvatarCircle from './AvatarIcon';
 
 interface IProps {
     file: EnteFile;
@@ -106,6 +107,14 @@ export const HoverOverlay = styled('div')<{ checked: boolean }>`
     ${(props) =>
         !props.checked &&
         'background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))'};
+`;
+
+export const AvatarOverlay = styled('div')`
+    position: relative;
+    width: 100%;
+    height: 100%;
+    top: 5px;
+    right: 25px;
 `;
 
 export const InSelectRangeOverLay = styled('div')<{ $active: boolean }>`
@@ -358,6 +367,12 @@ export default function PreviewCard(props: IProps) {
                 )
             )}
             <SelectedOverlay selected={selected} />
+            <AvatarOverlay>
+                <AvatarCircle
+                    color={'green'}
+                    email="j"
+                    size={20}></AvatarCircle>
+            </AvatarOverlay>
             <HoverOverlay checked={selected} />
             <InSelectRangeOverLay
                 $active={isRangeSelectActive && isInsSelectRange}

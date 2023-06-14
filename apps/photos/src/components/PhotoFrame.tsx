@@ -16,8 +16,13 @@ import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
+import { User } from 'types/user';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import PhotoSwipe from 'photoswipe';
 import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
+// import { getLocalFiles } from 'services/fileService';
+import { getLocalCollections } from 'services/collectionService';
+// import { getLocalPublicFiles } from 'services/publicCollectionService';
 
 const Container = styled('div')`
     display: block;
@@ -81,6 +86,46 @@ const PhotoFrame = ({
     const router = useRouter();
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
     const [conversionFailed, setConversionFailed] = useState(false);
+
+    // const res =files.map((item) => item.id);
+    // console.log('id of Files:', res)
+
+    // const resFilesCollect= getLocalFiles()
+    // const resPublicfiles= getLocalPublicFiles()
+
+    useEffect(() => {
+        const FetchSharedAlbum = async () => {
+            try {
+                // const resLocalFiles = getLocalFiles();
+                // const files = await resLocalFiles;
+                // const fileIds: number[] = files.map((file) => file.id);
+                // console.log(fileIds);
+                const ownerUser: User = getData(LS_KEYS.USER);
+
+                const collectionList = getLocalCollections();
+
+                const collections = await collectionList;
+
+                const collectionIds = collections
+                    .map((collection) => {
+                        if (
+                            collection.owner.id !== ownerUser.id ||
+                            collection.publicURLs.length > 0
+                        ) {
+                            return collection.id;
+                        }
+                        return null; // Or you can return any other placeholder value
+                    })
+                    .filter((id) => id !== null);
+
+                console.log(collectionIds);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        FetchSharedAlbum();
+    }, []);
 
     const displayFiles = useMemoSingleThreaded(() => {
         return files.map((item) => {
@@ -328,6 +373,7 @@ const PhotoFrame = ({
             )(!checked);
         }
     };
+
     const getThumbnail = (
         item: EnteFile,
         index: number,
