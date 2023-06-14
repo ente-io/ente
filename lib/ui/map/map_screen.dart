@@ -12,20 +12,9 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/map/image_marker.dart";
 import 'package:photos/ui/map/image_tile.dart';
+import "package:photos/ui/map/map_isolate.dart";
 import "package:photos/ui/map/map_view.dart";
 import "package:photos/utils/toast_util.dart";
-
-class IsolateModel {
-  final LatLngBounds bounds;
-  final List<ImageMarker> imageMarkers;
-  final SendPort sendPort;
-
-  IsolateModel({
-    required this.bounds,
-    required this.imageMarkers,
-    required this.sendPort,
-  });
-}
 
 class MapScreen extends StatefulWidget {
   // Add a function parameter where the function returns a Future<List<File>>
@@ -75,8 +64,8 @@ class _MapScreenState extends State<MapScreen> {
     late double minLat, maxLat, minLon, maxLon;
     final List<ImageMarker> tempMarkers = [];
     bool hasAnyLocation = false;
-    for (final file in files) {
-      if (file.hasLocation) {
+    await Future.forEach<File>(files, (file) async {
+      if (file.hasLocation && file.location != null) {
         if (!hasAnyLocation) {
           minLat = file.location!.latitude!;
           minLon = file.location!.longitude!;
@@ -97,7 +86,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
         );
       }
-    }
+    });
 
     if (hasAnyLocation) {
       center = LatLng(
@@ -141,9 +130,9 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<List<File>> calculateVisibleMarkers(LatLngBounds bounds) async {
     final ReceivePort receivePort = ReceivePort();
-    final isolate = await Isolate.spawn<IsolateModel>(
+    final isolate = await Isolate.spawn<MapIsolate>(
       _calculateMarkersIsolate,
-      IsolateModel(
+      MapIsolate(
         bounds: bounds,
         imageMarkers: imageMarkers,
         sendPort: receivePort.sendPort,
@@ -164,7 +153,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   @pragma('vm:entry-point')
-  static void _calculateMarkersIsolate(IsolateModel message) async {
+  static void _calculateMarkersIsolate(MapIsolate message) async {
     final bounds = message.bounds;
     final imageMarkers = message.imageMarkers;
     final SendPort sendPort = message.sendPort;
@@ -184,6 +173,9 @@ class _MapScreenState extends State<MapScreen> {
 
   void updateVisibleImages(LatLngBounds bounds) async {
     final images = await calculateVisibleMarkers(bounds);
+    if (kDebugMode) {
+      debugPrint("Visible images: ${images.length}");
+    }
     setState(() {
       visibleImages = images;
     });
