@@ -79,11 +79,11 @@ class CollectionsService {
     }
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       _cachedLatestFiles = null;
-      getLatestCollectionFiles();
+      _getLatestCollectionFiles();
     });
     Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _cachedLatestFiles = null;
-      getLatestCollectionFiles();
+      _getLatestCollectionFiles();
     });
   }
 
@@ -218,7 +218,7 @@ class CollectionsService {
         0;
   }
 
-  Future<List<File>> getLatestCollectionFiles() {
+  Future<List<File>> _getLatestCollectionFiles() {
     _cachedLatestFiles ??= _filesDB.getLatestCollectionFiles();
     return _cachedLatestFiles!;
   }
@@ -287,7 +287,7 @@ class CollectionsService {
         usersCollection.removeWhere((c) => c.owner?.id != userID);
       }
     }
-    final latestCollectionFiles = await getLatestCollectionFiles();
+    final latestCollectionFiles = await _getLatestCollectionFiles();
     final Map<int, File> collectionToThumbnailMap = Map.fromEntries(
       latestCollectionFiles.map((e) => MapEntry(e.collectionID!, e)),
     );
