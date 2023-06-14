@@ -269,7 +269,6 @@ class _MapScreenState extends State<MapScreen> {
                                 final image = images[index];
                                 return ImageTile(
                                   image: image,
-                                  allImages: allImages,
                                   visibleImages: images,
                                   index: index,
                                 );

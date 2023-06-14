@@ -1,3 +1,4 @@
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
@@ -8,17 +9,19 @@ import "package:photos/utils/navigation_util.dart";
 class ImageTile extends StatelessWidget {
   final File image;
   final int index;
-  final List<File> allImages;
   final List<File> visibleImages;
   const ImageTile({
     super.key,
     required this.image,
     required this.index,
-    required this.allImages,
     required this.visibleImages,
   });
 
   void onTap(BuildContext context, File image, int index) {
+    if (kDebugMode) {
+      debugPrint('size of visibleImages: ${visibleImages.length}');
+    }
+
     final page = DetailPage(
       DetailPageConfiguration(
         List.unmodifiable(visibleImages),
@@ -28,7 +31,7 @@ class ImageTile extends StatelessWidget {
           limit,
           asc,
         }) async {
-          final result = FileLoadResult(allImages, false);
+          final result = FileLoadResult(visibleImages, false);
           return result;
         },
         index,
