@@ -76,11 +76,13 @@ class _MapScreenState extends State<MapScreen> {
     final List<ImageMarker> tempMarkers = [];
     bool hasAnyLocation = false;
     for (var file in files) {
-      final rand = Random();
-      file.location = Location(
-        latitude: 46.7286 + rand.nextDouble() * 0.1,
-        longitude: 4.8614 + rand.nextDouble() * 0.1,
-      );
+      if (kDebugMode && !file.hasLocation) {
+        final rand = Random();
+        file.location = Location(
+          latitude: 46.7286 + rand.nextDouble() * 0.1,
+          longitude: 4.8614 + rand.nextDouble() * 0.1,
+        );
+      }
       if (file.hasLocation && file.location != null) {
         if (!hasAnyLocation) {
           minLat = file.location!.latitude!;

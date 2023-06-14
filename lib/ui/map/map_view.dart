@@ -55,6 +55,20 @@ class _MapViewState extends State<MapView> {
     super.dispose();
   }
 
+  void onChange(LatLngBounds bounds) {
+    if (!_isDebouncing) {
+      _isDebouncing = true;
+      _debounceTimer?.cancel();
+      _debounceTimer = Timer(
+        Duration(milliseconds: widget.debounceDuration),
+        () {
+          widget.updateVisibleImages(bounds);
+          _isDebouncing = false;
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -69,18 +83,7 @@ class _MapViewState extends State<MapView> {
             zoom: widget.initialZoom,
             onPositionChanged: (position, hasGesture) {
               if (position.bounds != null) {
-                if (!_isDebouncing) {
-                  _isDebouncing = true;
-                  _debounceTimer?.cancel();
-                  _debounceTimer = Timer(
-                    Duration(milliseconds: widget.debounceDuration),
-                    () {
-                      final bounds = position.bounds!;
-                      widget.updateVisibleImages(bounds);
-                      _isDebouncing = false;
-                    },
-                  );
-                }
+                onChange(position.bounds!);
               }
             },
           ),
@@ -97,6 +100,11 @@ class _MapViewState extends State<MapView> {
                   padding: EdgeInsets.all(1),
                 ),
                 markers: _markers,
+                onClusterTap: (_) {
+                  if (!_isDebouncing) {
+                    onChange(widget.controller.bounds!);
+                  }
+                },
                 builder: (context, List<Marker> markers) {
                   final index = int.parse(
                     markers.first.key
