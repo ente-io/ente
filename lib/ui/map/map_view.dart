@@ -1,5 +1,4 @@
 import "dart:async";
-
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart";
@@ -54,6 +53,15 @@ class _MapViewState extends State<MapView> {
     super.dispose();
   }
 
+  List<Marker> _generateMarkers(LatLngBounds bounds) {
+    final List<Marker> visibleMarkers = [];
+    widget.imageMarkers.asMap().entries.forEach((marker) {
+      final imageMarker = marker.value;
+      visibleMarkers.add(mapMarker(imageMarker, marker.key.toString()));
+    });
+    return visibleMarkers;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -76,10 +84,13 @@ class _MapViewState extends State<MapView> {
                   _isDebouncing = true;
                   _debounceTimer?.cancel();
                   _debounceTimer = Timer(
-                      Duration(milliseconds: widget.debounceDuration), () {
-                    widget.updateVisibleImages(position.bounds!);
-                    _isDebouncing = false;
-                  });
+                    Duration(milliseconds: widget.debounceDuration),
+                    () {
+                      final bounds = position.bounds!;
+                      widget.updateVisibleImages(bounds);
+                      _isDebouncing = false;
+                    },
+                  );
                 }
               }
             },
