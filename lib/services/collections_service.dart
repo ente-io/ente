@@ -73,6 +73,8 @@ class CollectionsService {
     final collections = await _db.getAllCollections();
 
     for (final collection in collections) {
+      // using deprecated method because the path is stored in encrypted
+      // format in the DB
       _cacheCollectionAttributes(collection);
     }
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
@@ -143,7 +145,7 @@ class CollectionsService {
     _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
     watch.logAndReset("till DB insertion ${updatedCollections.length}");
     for (final collection in fetchedCollections) {
-      _cacheCollectionAttributes(collection);
+      _cacheLocalPathAndCollection(collection);
     }
     _logger.info("Collections synced");
     watch.log("${fetchedCollections.length} collection cached refreshed ");
@@ -656,7 +658,7 @@ class CollectionsService {
       collection.pubMagicMetadata =
           CollectionPubMagicMetadata.fromJson(jsonToUpdate);
       collection.mMbPubVersion = currentVersion + 1;
-      _cacheCollectionAttributes(collection);
+      _cacheLocalPathAndCollection(collection);
       // trigger sync to fetch the latest collection state from server
       sync().ignore();
     } on DioError catch (e) {
@@ -716,7 +718,7 @@ class CollectionsService {
       collection.sharedMagicMetadata =
           ShareeMagicMetadata.fromJson(jsonToUpdate);
       collection.sharedMmdVersion = currentVersion + 1;
-      _cacheCollectionAttributes(collection);
+      _cacheLocalPathAndCollection(collection);
       // trigger sync to fetch the latest collection state from server
       sync().ignore();
     } on DioError catch (e) {
