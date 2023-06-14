@@ -3,7 +3,6 @@ import "package:photos/app.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/billing_service.dart';
-import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
@@ -28,8 +27,6 @@ class GeneralSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final bool showLanguageChangeOption =
-        FeatureFlagService.instance.isInternalUserOrDebugBuild();
     return Column(
       children: [
         sectionOptionSpacing,
