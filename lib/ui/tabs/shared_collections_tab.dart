@@ -58,8 +58,8 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
       future: Future.value(
         CollectionsService.instance
             .getCollectionsWithThumbnails(includedOwnedByOthers: true),
-      ).then((files) async {
-        return _getSharedCollections(files);
+      ).then((collections) async {
+        return _getSharedCollections(collections);
       }),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
