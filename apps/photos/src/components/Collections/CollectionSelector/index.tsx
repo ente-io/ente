@@ -15,9 +15,11 @@ import { CollectionSelectorIntent } from 'types/gallery';
 import {
     COLLECTION_SORT_ORDER,
     CollectionSummaryType,
+    DUMMY_UNCATEGORIZED_SECTION,
 } from 'constants/collection';
 import { t } from 'i18next';
 import { isSelectAllowedCollection } from 'utils/collection';
+import { createUnCategorizedCollection } from 'services/collectionService';
 
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
@@ -81,15 +83,22 @@ function CollectionSelector({
             setCollectionsToShow(collectionsToShow);
         };
         main();
-    }, [collectionSummaries, attributes]);
+    }, [collectionSummaries, attributes, props.open]);
 
     if (!collectionsToShow?.length) {
         return <></>;
     }
 
-    const handleCollectionClick = (collectionID: number) => {
-        const collection = collections.find((c) => c.id === collectionID);
-        attributes.callback(collection);
+    const handleCollectionClick = async (collectionID: number) => {
+        let selectedCollection: Collection;
+        if (collectionID === DUMMY_UNCATEGORIZED_SECTION) {
+            const uncategorizedCollection =
+                await createUnCategorizedCollection();
+            selectedCollection = uncategorizedCollection;
+        } else {
+            selectedCollection = collections.find((c) => c.id === collectionID);
+        }
+        attributes.callback(selectedCollection);
         props.onClose();
     };
 
