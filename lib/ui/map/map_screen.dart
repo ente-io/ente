@@ -60,11 +60,11 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void processFiles(List<File> files) async {
+  Future<void> processFiles(List<File> files) async {
     late double minLat, maxLat, minLon, maxLon;
     final List<ImageMarker> tempMarkers = [];
     bool hasAnyLocation = false;
-    await Future.forEach<File>(files, (file) async {
+    for (File file in files) {
       if (file.hasLocation && file.location != null) {
         if (!hasAnyLocation) {
           minLat = file.location!.latitude!;
@@ -86,7 +86,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
         );
       }
-    });
+    }
 
     if (hasAnyLocation) {
       center = LatLng(
