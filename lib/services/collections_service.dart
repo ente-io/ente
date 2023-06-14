@@ -199,18 +199,15 @@ class CollectionsService {
         .toSet();
   }
 
-  Set<int> collectionsHiddenFromTimeline() {
+  Set<int> archivedOrHiddenCollections() {
     return _collectionIDToCollections.values
         .toList()
-        .where((element) => element.isHidden() || element.isArchived())
-        .map((e) => e.id)
-        .toSet();
-  }
-
-  Set<int> sharedColectionsHiddenFromTimeline() {
-    return _collectionIDToCollections.values
-        .toList()
-        .where((element) => element.hasShareeArchived())
+        .where(
+          (element) =>
+              element.hasShareeArchived() ||
+              element.isHidden() ||
+              element.isArchived(),
+        )
         .map((e) => e.id)
         .toSet();
   }
