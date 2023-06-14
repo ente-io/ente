@@ -93,7 +93,7 @@ class PickCenterPointWidget extends StatelessWidget {
                             }) async {
                               final collectionsToHide = CollectionsService
                                   .instance
-                                  .collectionsHiddenFromTimeline();
+                                  .archivedOrHiddenCollections();
                               FileLoadResult result;
                               result = await FilesDB.instance
                                   .fetchAllUploadedAndSharedFilesWithLocation(
