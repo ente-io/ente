@@ -23,7 +23,7 @@ class BackedUpTimeItemWidget extends StatelessWidget {
           getTimeIn12hrFormat(dateTimeForUpdationTime) +
               "  " +
               dateTimeForUpdationTime.timeZoneName,
-          style: getEnteTextTheme(context).smallMuted,
+          style: getEnteTextTheme(context).miniMuted,
         ),
       ]),
     );
