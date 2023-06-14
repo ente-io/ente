@@ -53,15 +53,6 @@ class _MapViewState extends State<MapView> {
     super.dispose();
   }
 
-  List<Marker> _generateMarkers(LatLngBounds bounds) {
-    final List<Marker> visibleMarkers = [];
-    widget.imageMarkers.asMap().entries.forEach((marker) {
-      final imageMarker = marker.value;
-      visibleMarkers.add(mapMarker(imageMarker, marker.key.toString()));
-    });
-    return visibleMarkers;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Stack(
