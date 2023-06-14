@@ -40,12 +40,12 @@ class MapView extends StatefulWidget {
 class _MapViewState extends State<MapView> {
   Timer? _debounceTimer;
   bool _isDebouncing = false;
+  late List<Marker> _markers;
 
   @override
   void initState() {
     super.initState();
-    debugPrint("minZoom ${widget.minZoom} and maxZoom ${widget.maxZoom}");
-    // widget.controller.move(widget.center, widget.initialZoom);
+    _markers = _buildMakers();
   }
 
   @override
@@ -91,27 +91,23 @@ class _MapViewState extends State<MapView> {
               options: MarkerClusterLayerOptions(
                 anchor: AnchorPos.align(AnchorAlign.top),
                 maxClusterRadius: 100,
-                showPolygon: true,
+                showPolygon: false,
                 size: const Size(75, 75),
                 fitBoundsOptions: const FitBoundsOptions(
                   padding: EdgeInsets.all(1),
                 ),
-                markers: widget.imageMarkers.asMap().entries.map((marker) {
-                  final imageMarker = marker.value;
-                  return mapMarker(imageMarker, marker.key.toString());
-                }).toList(),
-                polygonOptions: const PolygonOptions(
-                  borderColor: Colors.green,
-                  color: Colors.transparent,
-                  borderStrokeWidth: 1,
-                ),
-                builder: (context, markers) {
+                markers: _markers,
+                builder: (context, List<Marker> markers) {
                   final index = int.parse(
                     markers.first.key
                         .toString()
                         .replaceAll(RegExp(r'[^0-9]'), ''),
                   );
+                  final String clusterKey =
+                      'map-badge-$index-len-${markers.length}';
+
                   return Stack(
+                    key: ValueKey(clusterKey),
                     children: [
                       MapGalleryTile(
                         key: Key(markers.first.key.toString()),
@@ -168,5 +164,12 @@ class _MapViewState extends State<MapView> {
         ),
       ],
     );
+  }
+
+  List<Marker> _buildMakers() {
+    return List<Marker>.generate(widget.imageMarkers.length, (index) {
+      final imageMarker = widget.imageMarkers[index];
+      return mapMarker(imageMarker, index.toString());
+    });
   }
 }

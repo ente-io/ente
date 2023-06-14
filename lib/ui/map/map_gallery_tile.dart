@@ -11,7 +11,7 @@ class MapGalleryTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(8),
       child: MarkerImage(
-        key: key,
+        key: super.key,
         file: imageMarker.imageFile,
         seperator: 69,
       ),

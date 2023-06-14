@@ -39,7 +39,7 @@ class _MapScreenState extends State<MapScreen> {
   MapController mapController = MapController();
   bool isLoading = true;
   double initialZoom = 4.0;
-  double maxZoom = 19.0;
+  double maxZoom = 18.0;
   double minZoom = 0.0;
   int debounceDuration = 500;
   LatLng center = LatLng(46.7286, 4.8614);
@@ -201,6 +201,9 @@ class _MapScreenState extends State<MapScreen> {
                         bottomRight: Radius.circular(6),
                       ),
                       child: MapView(
+                        key: ValueKey(
+                          'image-marker-count-${imageMarkers.length}',
+                        ),
                         controller: mapController,
                         imageMarkers: imageMarkers,
                         updateVisibleImages: updateVisibleImages,
