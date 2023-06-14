@@ -1,4 +1,5 @@
 import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart";
@@ -43,6 +44,7 @@ class _MapViewState extends State<MapView> {
   @override
   void initState() {
     super.initState();
+    debugPrint("minZoom ${widget.minZoom} and maxZoom ${widget.maxZoom}");
     // widget.controller.move(widget.center, widget.initialZoom);
   }
 
@@ -64,10 +66,6 @@ class _MapViewState extends State<MapView> {
             minZoom: widget.minZoom,
             maxZoom: widget.maxZoom,
             enableMultiFingerGestureRace: true,
-            maxBounds: LatLngBounds(
-              LatLng(-90, -180),
-              LatLng(90, 180),
-            ),
             zoom: widget.initialZoom,
             onPositionChanged: (position, hasGesture) {
               if (position.bounds != null) {

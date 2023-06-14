@@ -8,7 +8,6 @@ import 'package:flutter_map/flutter_map.dart';
 import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file.dart";
-import "package:photos/models/location/location.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/map/image_marker.dart";
@@ -76,34 +75,29 @@ class _MapScreenState extends State<MapScreen> {
     late double minLat, maxLat, minLon, maxLon;
     final List<ImageMarker> tempMarkers = [];
     bool hasAnyLocation = false;
-    await Future.forEach<File>(files, (file) async {
-      final rand = Random();
-      file.location = Location(
-        latitude: 10.786971 * rand.nextDouble() * 0.1,
-        longitude: 78.688241 * rand.nextDouble() * 0.1,
-      );
-      // if (file.hasLocation) {
-      if (!hasAnyLocation) {
-        minLat = file.location!.latitude!;
-        minLon = file.location!.longitude!;
-        maxLat = file.location!.latitude!;
-        maxLon = file.location!.longitude!;
-        hasAnyLocation = true;
-      } else {
-        minLat = min(minLat, file.location!.latitude!);
-        minLon = min(minLon, file.location!.longitude!);
-        maxLat = max(maxLat, file.location!.latitude!);
-        maxLon = max(maxLon, file.location!.longitude!);
+    for (final file in files) {
+      if (file.hasLocation) {
+        if (!hasAnyLocation) {
+          minLat = file.location!.latitude!;
+          minLon = file.location!.longitude!;
+          maxLat = file.location!.latitude!;
+          maxLon = file.location!.longitude!;
+          hasAnyLocation = true;
+        } else {
+          minLat = min(minLat, file.location!.latitude!);
+          minLon = min(minLon, file.location!.longitude!);
+          maxLat = max(maxLat, file.location!.latitude!);
+          maxLon = max(maxLon, file.location!.longitude!);
+        }
+        tempMarkers.add(
+          ImageMarker(
+            latitude: file.location!.latitude!,
+            longitude: file.location!.longitude!,
+            imageFile: file,
+          ),
+        );
       }
-      tempMarkers.add(
-        ImageMarker(
-          latitude: file.location!.latitude!,
-          longitude: file.location!.longitude!,
-          imageFile: file,
-        ),
-      );
-      // }
-    });
+    }
 
     if (hasAnyLocation) {
       center = LatLng(
@@ -176,12 +170,12 @@ class _MapScreenState extends State<MapScreen> {
     final SendPort sendPort = message.sendPort;
     try {
       final List<File> images = [];
-      imageMarkers.forEach((imageMarker) async {
+      for (var imageMarker in imageMarkers) {
         final point = LatLng(imageMarker.latitude, imageMarker.longitude);
         if (bounds.contains(point)) {
           images.add(imageMarker.imageFile);
         }
-      });
+      }
       sendPort.send(images);
     } catch (e) {
       sendPort.send(e.toString());
