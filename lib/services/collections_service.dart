@@ -79,11 +79,9 @@ class CollectionsService {
     }
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       _cachedLatestFiles = null;
-      _getLatestCollectionFiles();
     });
     Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _cachedLatestFiles = null;
-      _getLatestCollectionFiles();
     });
   }
 
