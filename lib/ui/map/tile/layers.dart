@@ -3,6 +3,7 @@ import "package:flutter_map/flutter_map.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/map/tile/attribution/map_attribution.dart";
+import "package:photos/ui/map/tile/cache.dart";
 import "package:url_launcher/url_launcher.dart";
 import "package:url_launcher/url_launcher_string.dart";
 
@@ -18,6 +19,7 @@ class OSMTileLayer extends StatelessWidget {
       subdomains: const ['a', 'b', 'c'],
       backgroundColor: Colors.transparent,
       userAgentPackageName: _userAgent,
+      tileProvider: CachedNetworkTileProvider(),
     );
   }
 }
@@ -31,6 +33,7 @@ class OSMFranceTileLayer extends StatelessWidget {
       urlTemplate: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
       fallbackUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       subdomains: const ['a', 'b', 'c'],
+      tileProvider: CachedNetworkTileProvider(),
       backgroundColor: Colors.transparent,
       userAgentPackageName: _userAgent,
     );
@@ -78,6 +81,7 @@ class MapBoxTilesLayer extends StatelessWidget {
       subdomains: const ['a', 'b', 'c'],
       backgroundColor: Colors.transparent,
       userAgentPackageName: _userAgent,
+      tileProvider: CachedNetworkTileProvider(),
       additionalOptions: const {
         "mb_token": String.fromEnvironment("mb_token"),
         "mb_style_id": String.fromEnvironment("mb_style_id"),
