@@ -288,12 +288,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           PopupMenuItem(
             value: 8,
             child: Row(
-              children: const [
-                Icon(Icons.map_outlined),
-                Padding(
+              children: [
+                const Icon(Icons.map_outlined),
+                const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text("Map"),
+                Text(S.of(context).maps),
               ],
             ),
           ),

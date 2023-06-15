@@ -112,8 +112,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                               height: 24,
                             ),
                             MenuItemWidget(
-                              captionedTextWidget: const CaptionedTextWidget(
-                                title: "Maps",
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).maps,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               singleBorderRadius: 8,
