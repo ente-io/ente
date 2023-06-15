@@ -1047,6 +1047,9 @@
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
   "openstreetmapContributors": "OpenStreetMap contributors",
-  "hostedAtOsmFrance": "Hosted at OSM France"
+  "hostedAtOsmFrance": "Hosted at OSM France",
+  "maps" : "Maps",
+  "enableMaps": "Enable Maps",
+  "enableMapsDesc" : "This will show your photos on a world map.\n\nThe map is hosted by OpenStreetMap, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings."
 }
 

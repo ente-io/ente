@@ -549,6 +549,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Email your logs"),
         "empty": MessageLookupByLibrary.simpleMessage("Empty"),
         "emptyTrash": MessageLookupByLibrary.simpleMessage("Empty trash?"),
+        "enableMaps": MessageLookupByLibrary.simpleMessage("Enable Maps"),
+        "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
+            "This will show your photos on a world map.\n\nThe map is hosted by OpenStreetMap, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings."),
         "encryptingBackup":
             MessageLookupByLibrary.simpleMessage("Encrypting backup..."),
         "encryption": MessageLookupByLibrary.simpleMessage("Encryption"),
@@ -782,6 +785,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageSubscription":
             MessageLookupByLibrary.simpleMessage("Manage subscription"),
+        "maps": MessageLookupByLibrary.simpleMessage("Maps"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "maxDeviceLimitSpikeHandling": m13,

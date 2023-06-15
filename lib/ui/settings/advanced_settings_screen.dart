@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/services/user_remote_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import "package:photos/ui/components/toggle_switch_widget.dart";
 import 'package:photos/ui/tools/debug/app_storage_viewer.dart';
 import 'package:photos/ui/viewer/gallery/photo_grid_size_picker_page.dart';
 import 'package:photos/utils/local_settings.dart';
@@ -106,6 +108,36 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 routeToPage(context, const AppStorageViewer());
                               },
                             ),
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            MenuItemWidget(
+                              captionedTextWidget: const CaptionedTextWidget(
+                                title: "Maps",
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () => UserRemoteFlagService.instance
+                                    .getCachedBoolValue(
+                                  UserRemoteFlagService.mapEnabled,
+                                ),
+                                onChanged: () async {
+                                  final isEnabled = UserRemoteFlagService
+                                      .instance
+                                      .getCachedBoolValue(
+                                    UserRemoteFlagService.mapEnabled,
+                                  );
+
+                                  await UserRemoteFlagService.instance
+                                      .setBoolValue(
+                                    UserRemoteFlagService.mapEnabled,
+                                    !isEnabled,
+                                  );
+                                },
+                              ),
+                            )
                           ],
                         ),
                       ],

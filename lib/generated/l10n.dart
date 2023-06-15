@@ -7242,6 +7242,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Maps`
+  String get maps {
+    return Intl.message(
+      'Maps',
+      name: 'maps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable Maps`
+  String get enableMaps {
+    return Intl.message(
+      'Enable Maps',
+      name: 'enableMaps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will show your photos on a world map.\n\nThe map is hosted by OpenStreetMap, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.`
+  String get enableMapsDesc {
+    return Intl.message(
+      'This will show your photos on a world map.\n\nThe map is hosted by OpenStreetMap, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.',
+      name: 'enableMapsDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

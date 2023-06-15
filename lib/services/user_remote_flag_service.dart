@@ -43,6 +43,10 @@ class UserRemoteFlagService {
     }
   }
 
+  bool getCachedBoolValue(String key) {
+    return _prefs.getBool(key) ?? false;
+  }
+
   Future<bool> getBoolValue(String key) async {
     if (_prefs.containsKey(key)) {
       return _prefs.getBool(key)!;

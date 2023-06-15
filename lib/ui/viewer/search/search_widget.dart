@@ -8,6 +8,7 @@ import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/search_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
+import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
 import 'package:photos/ui/viewer/search/result/no_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
@@ -255,14 +256,17 @@ class NavigateToMap extends StatelessWidget {
         defaultColor: colorScheme.backgroundElevated,
         pressedColor: colorScheme.backgroundElevated2,
         size: 28,
-        onTap: () {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => MapScreen(
-                filesFutureFn: SearchService.instance.getAllFiles,
+        onTap: () async {
+          final bool result = await requestForMapEnable(context);
+          if (result) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => MapScreen(
+                  filesFutureFn: SearchService.instance.getAllFiles,
+                ),
               ),
-            ),
-          );
+            );
+          }
         },
       ),
     );
