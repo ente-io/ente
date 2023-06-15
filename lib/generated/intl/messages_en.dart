@@ -785,6 +785,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageSubscription":
             MessageLookupByLibrary.simpleMessage("Manage subscription"),
+        "map": MessageLookupByLibrary.simpleMessage("Map"),
         "maps": MessageLookupByLibrary.simpleMessage("Maps"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),

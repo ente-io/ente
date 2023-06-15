@@ -7243,6 +7243,16 @@ class S {
     );
   }
 
+  /// `Map`
+  String get map {
+    return Intl.message(
+      'Map',
+      name: 'map',
+      desc: 'Label for the map view',
+      args: [],
+    );
+  }
+
   /// `Maps`
   String get maps {
     return Intl.message(

@@ -293,7 +293,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).maps),
+                Text(S.of(context).map),
               ],
             ),
           ),
