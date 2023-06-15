@@ -36,6 +36,7 @@ class OSMFranceTileLayer extends StatelessWidget {
       tileProvider: CachedNetworkTileProvider(),
       backgroundColor: Colors.transparent,
       userAgentPackageName: _userAgent,
+      panBuffer: 1,
     );
   }
 }
