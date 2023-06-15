@@ -35,6 +35,7 @@ interface IProps {
     isInsSelectRange: boolean;
     activeCollection: number;
     showPlaceholder: boolean;
+    avatarEnabledFiles: { [key: number]: { name: string; colorCode: string } };
 }
 
 const Check = styled('input')<{ $active: boolean }>`
@@ -217,6 +218,8 @@ const Cont = styled('div')<{ disabled: boolean }>`
 export default function PreviewCard(props: IProps) {
     const { thumbs } = useContext(GalleryContext);
 
+    // console.log('SharedAlbumPassed to PreviewCards', props.avatarEnabledFiles);
+
     const {
         file,
         onClick,
@@ -230,6 +233,12 @@ export default function PreviewCard(props: IProps) {
         isRangeSelectActive,
         isInsSelectRange,
     } = props;
+    // console.log('Files', file.id);
+
+    // console.log(
+    //     'SharedAlbumPassed to PreviewCards value',
+    //     props.avatarEnabledFiles[file.id]
+    // );
 
     const [imgSrc, setImgSrc] = useState<string>(file.msrc);
 
@@ -367,12 +376,17 @@ export default function PreviewCard(props: IProps) {
                 )
             )}
             <SelectedOverlay selected={selected} />
-            <AvatarOverlay>
-                <AvatarCircle
-                    color={'green'}
-                    email="j"
-                    size={20}></AvatarCircle>
-            </AvatarOverlay>
+            {file.id in props.avatarEnabledFiles && (
+                <AvatarOverlay>
+                    <AvatarCircle
+                        color={props.avatarEnabledFiles[file.id].colorCode}
+                        email={props.avatarEnabledFiles[file.id].name
+                            ?.charAt(0)
+                            ?.toUpperCase()}
+                        size={20}></AvatarCircle>
+                </AvatarOverlay>
+            )}
+
             <HoverOverlay checked={selected} />
             <InSelectRangeOverLay
                 $active={isRangeSelectActive && isInsSelectRange}
