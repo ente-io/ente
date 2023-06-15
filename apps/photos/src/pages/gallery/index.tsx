@@ -343,8 +343,14 @@ export default function Gallery() {
             }
         }
         const href = `/gallery${collectionURL}`;
-        router.push(href, undefined, { shallow: true });
-    }, []);
+        const delayRouteChange = () => {
+            setTimeout(() => {
+                router.push(href, undefined, { shallow: true });
+            }, 500);
+        };
+
+        delayRouteChange();
+    }, [activeCollection]);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
