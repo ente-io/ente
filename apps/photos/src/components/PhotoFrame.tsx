@@ -132,9 +132,6 @@ const PhotoFrame = ({
     useEffect(() => {
         const fetchOwnerEmails = async () => {
             try {
-                // Replace with your logic to fetch the collection array
-                // const ownerUser: User = getData(LS_KEYS.USER);
-
                 const collection: CollectionItem[] =
                     await getLocalCollections();
 
@@ -151,11 +148,8 @@ const PhotoFrame = ({
                 console.error('Error fetching collection:', error);
             }
         };
-
         fetchOwnerEmails();
     }, []);
-
-    // console.log('UserId to Email mapping ', ownerIdToEmail);
 
     useEffect(() => {
         const FetchSharedAlbum = async () => {
@@ -164,7 +158,7 @@ const PhotoFrame = ({
 
                 const collectionList = getLocalCollections();
 
-                const collections = await collectionList; // rename collection
+                const collections = await collectionList;
 
                 const collectionIds = collections
                     .map((collection) => {
@@ -183,52 +177,42 @@ const PhotoFrame = ({
                 console.error('Error fetching data:', error);
             }
         };
-
         FetchSharedAlbum();
     }, []);
-
-    // console.log('Avatar Enabled albums : ', sharedAlbums);
 
     useEffect(() => {
         const filesOfSharedAlbums = async () => {
             try {
                 const resLocalFiles = getLocalFiles();
                 const files = await resLocalFiles;
-                // console.log('ALL FILES', files);
+
                 const sharedAlbumsFiles = files
                     .map((files) => {
                         if (sharedAlbums.includes(files.collectionID)) {
                             return files.id;
-                            // console.log('Testing FileofSharedAlbums');
                         }
                         return null;
                     })
                     .filter((id) => id !== null);
 
                 setSharedAlbumsFiles(sharedAlbumsFiles);
-                // setSharedAlbums(collectionIds)
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         };
-
         filesOfSharedAlbums();
     }, [sharedAlbums]);
-
-    // console.log('sharedAlbumsFiles', sharedAlbumsFiles);
 
     useEffect(() => {
         const fileIdToName = async () => {
             try {
                 const resLocalFiles = getLocalFiles();
                 const files = await resLocalFiles;
-                // const fileIds: number[] = files.map((file) => file.id);
-                // console.log('ALL FILES', files);
 
                 const fileIdName: {
                     [key: number]: { name: string; colorCode: string };
                 } = {};
-                // console.log('Checking fileIdName declaration');
+
                 files.forEach((file) => {
                     if (sharedAlbumsFiles.includes(file.id)) {
                         if (file.pubMagicMetadata?.data?.uploaderName) {
@@ -248,9 +232,7 @@ const PhotoFrame = ({
                                 name: ownerEmail,
                                 colorCode: colorCode,
                             };
-                            // console.log('Testing inside else of ForEach');
                         }
-                        // console.log('Testing inside fileIdToName');
                     }
                 });
 
@@ -258,14 +240,10 @@ const PhotoFrame = ({
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
-
-            // console.log('Testing fileIdToName');
         };
 
         fileIdToName();
     }, [sharedAlbumsFiles]);
-
-    // console.log(' Avatar to file name FileToName : ', fileToAvatarName);
 
     const displayFiles = useMemoSingleThreaded(() => {
         return files.map((item) => {
