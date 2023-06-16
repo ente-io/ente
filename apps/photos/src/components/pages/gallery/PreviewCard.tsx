@@ -218,8 +218,6 @@ const Cont = styled('div')<{ disabled: boolean }>`
 export default function PreviewCard(props: IProps) {
     const { thumbs } = useContext(GalleryContext);
 
-    // console.log('SharedAlbumPassed to PreviewCards', props.avatarEnabledFiles);
-
     const {
         file,
         onClick,
@@ -233,12 +231,6 @@ export default function PreviewCard(props: IProps) {
         isRangeSelectActive,
         isInsSelectRange,
     } = props;
-    // console.log('Files', file.id);
-
-    // console.log(
-    //     'SharedAlbumPassed to PreviewCards value',
-    //     props.avatarEnabledFiles[file.id]
-    // );
 
     const [imgSrc, setImgSrc] = useState<string>(file.msrc);
 
