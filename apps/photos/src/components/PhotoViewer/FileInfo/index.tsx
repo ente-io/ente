@@ -168,6 +168,10 @@ export function FileInfo({
     if (!file) {
         return <></>;
     }
+    const onCollectionChipClick = (collectionID) => {
+        galleryContext.setActiveCollection(collectionID);
+        closePhotoViewer();
+    };
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
@@ -270,12 +274,9 @@ export function FileInfo({
                                 ?.map((collectionID) => (
                                     <Chip
                                         key={collectionID}
-                                        onClick={() => {
-                                            galleryContext.setActiveCollection(
-                                                collectionID
-                                            );
-                                            closePhotoViewer();
-                                        }}>
+                                        onClick={() =>
+                                            onCollectionChipClick(collectionID)
+                                        }>
                                         {collectionNameMap.get(collectionID)}
                                     </Chip>
                                 ))}
