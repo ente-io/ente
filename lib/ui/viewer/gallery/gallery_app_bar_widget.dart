@@ -244,6 +244,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getDefaultActions(BuildContext context) {
     final List<Widget> actions = <Widget>[];
+    if (widget.selectedFiles.files.isNotEmpty) {
+      return actions;
+    }
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.selectedFiles.files.isEmpty &&
         (widget.type == GalleryType.ownedCollection ||
