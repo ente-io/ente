@@ -16,12 +16,9 @@ import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
-import { User } from 'types/user';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+
 import PhotoSwipe from 'photoswipe';
 import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
-import { getLocalFiles } from 'services/fileService';
-import { getLocalCollections } from 'services/collectionService';
 
 const Container = styled('div')`
     display: block;
@@ -56,14 +53,6 @@ interface Props {
     showAppDownloadBanner?: boolean;
 }
 
-interface CollectionItem {
-    id: number;
-    owner: {
-        id: number;
-        email: string;
-    };
-}
-
 const PhotoFrame = ({
     files,
     syncWithRemote,
@@ -81,15 +70,6 @@ const PhotoFrame = ({
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
-    const [sharedAlbums, setSharedAlbums] = useState<any[]>([]);
-    const [sharedAlbumsFiles, setSharedAlbumsFiles] = useState<any[]>([]);
-    const [fileToAvatarName, setFileToAvatarName] = useState<{
-        [key: number]: { name: string; colorCode: string };
-    }>({});
-
-    const [ownerIdToEmail, setOwnerIdToEmail] = useState<{
-        [key: number]: string;
-    }>({});
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
@@ -102,148 +82,6 @@ const PhotoFrame = ({
     const router = useRouter();
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
     const [conversionFailed, setConversionFailed] = useState(false);
-
-    const avatarColors: string[] = [
-        '#76549A',
-        '#DF7861',
-        '#94B49F',
-        '#87A2FB',
-        '#C689C6',
-        '#937DC2',
-        '#325288',
-        '#85B4E0',
-        '#C1A3A3',
-        '#E1A059',
-        '#426165',
-        '#6B77B2',
-        '#957FEF',
-        '#DD9DE2',
-        '#82AB8B',
-        '#9BBBE8',
-        '#8FBEBE',
-        '#8AC3A1',
-        '#A8B0F2',
-        '#B0C695',
-        '#E99AAD',
-        '#D18484',
-        '#78B5A7',
-    ];
-
-    useEffect(() => {
-        const fetchOwnerEmails = async () => {
-            try {
-                const collection: CollectionItem[] =
-                    await getLocalCollections();
-
-                const emailMapping: { [key: number]: string } = {};
-                collection.forEach((item) => {
-                    const { owner } = item;
-                    if (owner.email) {
-                        emailMapping[owner.id] = owner.email;
-                    }
-                });
-
-                setOwnerIdToEmail(emailMapping);
-            } catch (error) {
-                console.error('Error fetching collection:', error);
-            }
-        };
-        fetchOwnerEmails();
-    }, []);
-
-    useEffect(() => {
-        const FetchSharedAlbum = async () => {
-            try {
-                const ownerUser: User = getData(LS_KEYS.USER);
-
-                const collectionList = getLocalCollections();
-
-                const collections = await collectionList;
-
-                const collectionIds = collections
-                    .map((collection) => {
-                        if (
-                            collection.owner.id !== ownerUser.id ||
-                            collection.publicURLs.length > 0
-                        ) {
-                            return collection.id;
-                        }
-                        return null;
-                    })
-                    .filter((id) => id !== null);
-
-                setSharedAlbums(collectionIds);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-        FetchSharedAlbum();
-    }, []);
-
-    useEffect(() => {
-        const filesOfSharedAlbums = async () => {
-            try {
-                const resLocalFiles = getLocalFiles();
-                const files = await resLocalFiles;
-
-                const sharedAlbumsFiles = files
-                    .map((files) => {
-                        if (sharedAlbums.includes(files.collectionID)) {
-                            return files.id;
-                        }
-                        return null;
-                    })
-                    .filter((id) => id !== null);
-
-                setSharedAlbumsFiles(sharedAlbumsFiles);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-        filesOfSharedAlbums();
-    }, [sharedAlbums]);
-
-    useEffect(() => {
-        const fileIdToName = async () => {
-            try {
-                const resLocalFiles = getLocalFiles();
-                const files = await resLocalFiles;
-
-                const fileIdName: {
-                    [key: number]: { name: string; colorCode: string };
-                } = {};
-
-                files.forEach((file) => {
-                    if (sharedAlbumsFiles.includes(file.id)) {
-                        if (file.pubMagicMetadata?.data?.uploaderName) {
-                            const uploaderName =
-                                file.pubMagicMetadata?.data?.uploaderName;
-                            const colorCode = '#000000';
-                            fileIdName[file.id] = {
-                                name: uploaderName,
-                                colorCode: colorCode,
-                            };
-                        } else if (file.ownerID in ownerIdToEmail) {
-                            const ownerEmail = ownerIdToEmail[file.ownerID];
-                            const colorIndex =
-                                file.ownerID % avatarColors.length;
-                            const colorCode = avatarColors[colorIndex];
-                            fileIdName[file.id] = {
-                                name: ownerEmail,
-                                colorCode: colorCode,
-                            };
-                        }
-                    }
-                });
-
-                setFileToAvatarName(fileIdName);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-
-        fileIdToName();
-    }, [sharedAlbumsFiles]);
 
     const displayFiles = useMemoSingleThreaded(() => {
         return files.map((item) => {
@@ -523,7 +361,6 @@ const PhotoFrame = ({
             }
             activeCollection={activeCollection}
             showPlaceholder={isScrolling}
-            avatarEnabledFiles={fileToAvatarName}
         />
     );
 
