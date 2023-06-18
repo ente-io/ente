@@ -20,6 +20,10 @@ import {
 import { FILE_TYPE } from 'constants/file';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 import AvatarCircle from './AvatarIcon';
+import { userIdtoEmail } from 'services/collectionService';
+import { avatarColors } from 'themes/userAvatar';
+import { User } from 'types/user';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 interface IProps {
     file: EnteFile;
@@ -35,7 +39,6 @@ interface IProps {
     isInsSelectRange: boolean;
     activeCollection: number;
     showPlaceholder: boolean;
-    avatarEnabledFiles: { [key: number]: { name: string; colorCode: string } };
 }
 
 const Check = styled('input')<{ $active: boolean }>`
@@ -333,6 +336,45 @@ export default function PreviewCard(props: IProps) {
         }
     };
 
+    const [colorCode, setColorCode] = useState('');
+    const [userLetter, setUserLetter] = useState('');
+
+    const avatarEnabledFiles = async (file) => {
+        console.log('File ID OF PREVIEW CARD', file.ownerID);
+
+        const userIdEmail = userIdtoEmail();
+        const idEmailMap = await userIdEmail;
+        const user: User = getData(LS_KEYS.USER);
+
+        console.log(file);
+
+        if (file.ownerID !== user.id && idEmailMap.has(file.ownerID)) {
+            const email = idEmailMap.get(file.ownerID);
+            console.log('Email:', email);
+            setUserLetter(email?.charAt(0)?.toUpperCase());
+            console.log('First user letter', userLetter);
+
+            const colorIndex = file.ownerID % avatarColors.length;
+            const colorCode = avatarColors[colorIndex];
+            setColorCode(colorCode);
+            console.log(colorCode);
+            return true;
+        } else if (
+            file.ownerID === user.id &&
+            file.pubMagicMetadata?.data?.uploaderName
+        ) {
+            const uploaderName = file.pubMagicMetadata?.data?.uploaderName;
+            setUserLetter(uploaderName?.charAt(0)?.toUpperCase());
+            const colorCode = '#000000';
+            setColorCode(colorCode);
+        } else {
+            return false;
+        }
+    };
+
+    avatarEnabledFiles(file);
+    console.log('OutsideFile', file.id);
+
     return (
         <Cont
             key={`thumb-${file.id}-${props.showPlaceholder}`}
@@ -368,13 +410,11 @@ export default function PreviewCard(props: IProps) {
                 )
             )}
             <SelectedOverlay selected={selected} />
-            {file.id in props.avatarEnabledFiles && (
+            {avatarEnabledFiles(file) && (
                 <AvatarOverlay>
                     <AvatarCircle
-                        color={props.avatarEnabledFiles[file.id].colorCode}
-                        email={props.avatarEnabledFiles[file.id].name
-                            ?.charAt(0)
-                            ?.toUpperCase()}
+                        color={colorCode}
+                        email={userLetter}
                         size={20}></AvatarCircle>
                 </AvatarOverlay>
             )}
