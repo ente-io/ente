@@ -1260,3 +1260,31 @@ export async function unhideToCollection(
         throw e;
     }
 }
+
+export const userIdtoEmail = async () => {
+    try {
+        const collection = await getLocalCollections();
+        const user: User = getData(LS_KEYS.USER);
+        const emailMapping = new Map<number, string>();
+        // const emailMapping: { [key: number]: string } = {};
+        collection.map((item) => {
+            const { owner } = item;
+            const { sharees } = item;
+
+            if (user.id !== owner.id && owner.email) {
+                emailMapping.set(owner.id, owner.email);
+            }
+
+            if (sharees) {
+                sharees.map((item) => {
+                    if (item.id !== user.id)
+                        emailMapping.set(item.id, item.email);
+                });
+            }
+        });
+        const userIdToEmail = emailMapping;
+        return userIdToEmail;
+    } catch (error) {
+        console.error('Error Mapping UserId to email:', error);
+    }
+};
