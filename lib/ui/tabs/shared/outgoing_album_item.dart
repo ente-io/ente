@@ -12,6 +12,7 @@ import "package:photos/utils/navigation_util.dart";
 
 class OutgoingAlbumItem extends StatelessWidget {
   final CollectionWithThumbnail c;
+  static const heroTagPrefix = "outgoing_collection";
 
   const OutgoingAlbumItem({super.key, required this.c});
 
@@ -42,7 +43,7 @@ class OutgoingAlbumItem extends StatelessWidget {
         }
       }
     }
-    final String heroTag = "outgoing_collection" + (c.thumbnail?.tag ?? '');
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -58,6 +59,7 @@ class OutgoingAlbumItem extends StatelessWidget {
                   future: CollectionsService.instance.getCover(c.collection),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
+                      final String heroTag = heroTagPrefix + snapshot.data!.tag;
                       return Hero(
                         tag: heroTag,
                         child: ThumbnailWidget(
@@ -120,7 +122,7 @@ class OutgoingAlbumItem extends StatelessWidget {
         final page = CollectionPage(
           c,
           appBarType: GalleryType.ownedCollection,
-          tagPrefix: "outgoing_collection",
+          tagPrefix: heroTagPrefix,
         );
         routeToPage(context, page);
       },
