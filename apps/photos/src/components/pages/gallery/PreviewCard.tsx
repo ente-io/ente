@@ -359,14 +359,11 @@ export default function PreviewCard(props: IProps) {
             }
 
             if (file.ownerID !== user.id && idToMail.has(file.ownerID)) {
-                // const email = idEmailMap.get(file.ownerID);
-
                 setUserLetter(email?.charAt(0)?.toUpperCase());
 
                 const colorIndex = file.ownerID % avatarColors.length;
                 const colorCode = avatarColors[colorIndex];
                 setColorCode(colorCode);
-                // return true;
             } else if (
                 file.ownerID === user.id &&
                 file.pubMagicMetadata?.data?.uploaderName
@@ -375,9 +372,6 @@ export default function PreviewCard(props: IProps) {
                 setUserLetter(uploaderName?.charAt(0)?.toUpperCase());
                 const colorCode = '#000000';
                 setColorCode(colorCode);
-                // return true;
-            } else {
-                // return false;
             }
         };
 
@@ -388,8 +382,6 @@ export default function PreviewCard(props: IProps) {
             file.pubMagicMetadata?.data?.uploaderName
         ) {
             avatarEnabledFiles(file);
-        } else {
-            // return false;
         }
     }, []);
 
