@@ -3,17 +3,19 @@ import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection_items.dart';
+import "package:photos/models/collection.dart";
+import "package:photos/models/file.dart";
+import "package:photos/services/collections_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
 ///https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=7480%3A33462&t=H5AvR79OYDnB9ekw-4
 class AlbumColumnItemWidget extends StatelessWidget {
-  final CollectionWithThumbnail item;
+  final Collection collection;
 
   const AlbumColumnItemWidget(
-    this.item, {
+    this.collection, {
     super.key,
   });
 
@@ -36,15 +38,24 @@ class AlbumColumnItemWidget extends StatelessWidget {
                   child: SizedBox(
                     height: sideOfThumbnail,
                     width: sideOfThumbnail,
-                    child: item.thumbnail != null
-                        ? ThumbnailWidget(
-                            item.thumbnail,
+                    child: FutureBuilder<File?>(
+                      future: CollectionsService.instance.getCover(collection),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final thumbnail = snapshot.data!;
+
+                          return ThumbnailWidget(
+                            thumbnail,
                             showFavForAlbumOnly: true,
                             shouldShowOwnerAvatar: false,
-                          )
-                        : const NoThumbnailWidget(
+                          );
+                        } else {
+                          return const NoThumbnailWidget(
                             addBorder: false,
-                          ),
+                          );
+                        }
+                      },
+                    ),
                   ),
                 ),
                 Padding(
@@ -52,10 +63,10 @@ class AlbumColumnItemWidget extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.collection.displayName),
+                      Text(collection.displayName),
                       FutureBuilder<int>(
                         future: FilesDB.instance.collectionFileCount(
-                          item.collection.id,
+                          collection.id,
                         ),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {

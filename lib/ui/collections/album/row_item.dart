@@ -3,7 +3,9 @@ import "package:intl/intl.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
+import "package:photos/models/file.dart";
 import 'package:photos/models/gallery_type.dart';
+import "package:photos/services/collections_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
@@ -13,10 +15,11 @@ import 'package:photos/utils/navigation_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class AlbumRowItemWidget extends StatelessWidget {
-  final CollectionWithThumbnail c;
+  final Collection c;
   final double sideOfThumbnail;
   final bool shouldRender;
   final bool showFileCount;
+  static const tagPrefix = "collection";
 
   AlbumRowItemWidget(
     this.c,
@@ -24,14 +27,12 @@ class AlbumRowItemWidget extends StatelessWidget {
     this.shouldRender = false,
     this.showFileCount = true,
     Key? key,
-  }) : super(key: Key(c.collection.id.toString()));
+  }) : super(key: Key(c.id.toString()));
 
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     final enteTextTheme = getEnteTextTheme(context);
-    final String heroTag =
-        "collection" + (c.thumbnail?.tag ?? c.collection.id.toString());
     return GestureDetector(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,15 +44,23 @@ class AlbumRowItemWidget extends StatelessWidget {
                 child: SizedBox(
                   height: sideOfThumbnail,
                   width: sideOfThumbnail,
-                  child: Hero(
-                    tag: heroTag,
-                    child: c.thumbnail != null
-                        ? CollectionItemThumbnailWidget(
-                            c: c,
+                  child: FutureBuilder<File?>(
+                    future: CollectionsService.instance.getCover(c),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final thumbnail = snapshot.data!;
+                        final String heroTag = tagPrefix + thumbnail.tag;
+                        return Hero(
+                          tag: heroTag,
+                          child: CollectionItemThumbnailWidget(
+                            c: CollectionWithThumbnail(c, thumbnail),
                             heroTag: heroTag,
-                            shouldRender: shouldRender,
-                          )
-                        : const NoThumbnailWidget(),
+                          ),
+                        );
+                      } else {
+                        return const NoThumbnailWidget();
+                      }
+                    },
                   ),
                 ),
               ),
@@ -62,14 +71,13 @@ class AlbumRowItemWidget extends StatelessWidget {
             children: [
               const SizedBox(height: 2),
               Text(
-                (c.collection.displayName).trim(),
+                (c.displayName).trim(),
                 style: enteTextTheme.small,
                 overflow: TextOverflow.ellipsis,
               ),
               showFileCount
                   ? FutureBuilder<int>(
-                      future:
-                          FilesDB.instance.collectionFileCount(c.collection.id),
+                      future: FilesDB.instance.collectionFileCount(c.id),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           return Text(
@@ -93,12 +101,14 @@ class AlbumRowItemWidget extends StatelessWidget {
           ),
         ],
       ),
-      onTap: () {
+      onTap: () async {
+        final thumbnail = await CollectionsService.instance.getCover(c);
         routeToPage(
           context,
           CollectionPage(
-            c,
-            appBarType: (c.collection.type == CollectionType.favorites
+            CollectionWithThumbnail(c, thumbnail),
+            tagPrefix: tagPrefix,
+            appBarType: (c.type == CollectionType.favorites
                 ? GalleryType.favorite
                 : GalleryType.ownedCollection),
           ),

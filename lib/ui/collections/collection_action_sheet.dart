@@ -7,7 +7,6 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
@@ -203,27 +202,26 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     return Flexible(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
-        child: FutureBuilder(
+        child: FutureBuilder<List<Collection>>(
           future: _getCollectionsWithThumbnail(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               //Need to show an error on the UI here
               return const SizedBox.shrink();
             } else if (snapshot.hasData) {
-              final collectionsWithThumbnail =
-                  snapshot.data as List<CollectionWithThumbnail>;
-              _removeIncomingCollections(collectionsWithThumbnail);
+              final collections = snapshot.data as List<Collection>;
+              _removeIncomingCollections(collections);
               final shouldShowCreateAlbum =
                   widget.showOptionToCreateNewAlbum && _searchQuery.isEmpty;
               final searchResults = _searchQuery.isNotEmpty
-                  ? collectionsWithThumbnail
+                  ? collections
                       .where(
-                        (element) => element.collection.displayName
+                        (element) => element.displayName
                             .toLowerCase()
                             .contains(_searchQuery),
                       )
                       .toList()
-                  : collectionsWithThumbnail;
+                  : collections;
               return Scrollbar(
                 thumbVisibility: true,
                 radius: const Radius.circular(2),
@@ -248,34 +246,33 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     );
   }
 
-  Future<List<CollectionWithThumbnail>> _getCollectionsWithThumbnail() async {
-    final List<CollectionWithThumbnail> collectionsWithThumbnail =
-        await CollectionsService.instance.getCollectionsWithThumbnails(
+  Future<List<Collection>> _getCollectionsWithThumbnail() async {
+    final List<Collection> collections =
+        CollectionsService.instance.getCollectionsForUI(
       // in collections where user is a collaborator, only addTo and remove
       // action can to be performed
-      includeCollabCollections:
-          widget.actionType == CollectionActionType.addFiles,
+      includeCollab: widget.actionType == CollectionActionType.addFiles,
     );
-    collectionsWithThumbnail.removeWhere(
-      (element) => (element.collection.type == CollectionType.favorites ||
-          element.collection.type == CollectionType.uncategorized ||
-          element.collection.isSharedFilesCollection()),
+    collections.removeWhere(
+      (element) => (element.type == CollectionType.favorites ||
+          element.type == CollectionType.uncategorized ||
+          element.isSharedFilesCollection()),
     );
-    collectionsWithThumbnail.sort((first, second) {
+    collections.sort((first, second) {
       return compareAsciiLowerCaseNatural(
-        first.collection.displayName,
-        second.collection.displayName,
+        first.displayName,
+        second.displayName,
       );
     });
-    return collectionsWithThumbnail;
+    return collections;
   }
 
-  void _removeIncomingCollections(List<CollectionWithThumbnail> items) {
+  void _removeIncomingCollections(List<Collection> items) {
     if (widget.actionType == CollectionActionType.shareCollection ||
         widget.actionType == CollectionActionType.collectPhotos) {
       final ownerID = Configuration.instance.getUserID();
       items.removeWhere(
-        (e) => !e.collection.isOwner(ownerID!),
+        (e) => !e.isOwner(ownerID!),
       );
     }
   }

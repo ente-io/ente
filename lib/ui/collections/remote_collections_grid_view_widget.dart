@@ -47,7 +47,7 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index < collections!.length) {
             return AlbumRowItemWidget(
-              collections![index],
+              collections![index].collection,
               sideOfThumbnail,
               shouldRender: index < collectionItemsToPreload,
             );

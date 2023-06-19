@@ -69,7 +69,7 @@ class ArchivePage extends StatelessWidget {
         text: S.of(context).youDontHaveAnyArchivedItems,
       ),
       header: AlbumHorizontalList(
-        CollectionsService.instance.getArchivedCollectionWithThumb,
+        CollectionsService.instance.getArchivedCollection,
       ),
     );
     return Scaffold(

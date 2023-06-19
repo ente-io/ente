@@ -177,11 +177,11 @@ class CollectionsService {
     return result;
   }
 
-  Future<List<CollectionWithThumbnail>> getArchivedCollectionWithThumb() async {
-    final allCollections = await getCollectionsWithThumbnails();
+  Future<List<Collection>> getArchivedCollection() async {
+    final allCollections = getCollectionsForUI();
     return allCollections
         .where(
-          (c) => c.collection.isArchived() && !c.collection.isHidden(),
+          (c) => c.isArchived() && !c.isHidden(),
         )
         .toList();
   }
@@ -289,9 +289,9 @@ class CollectionsService {
     return _collectionIDToCollections.values
         .where(
           (c) =>
-              !c.isDeleted ||
-              c.type != CollectionType.uncategorized ||
-              !c.isHidden() ||
+              !c.isDeleted &&
+              c.type != CollectionType.uncategorized &&
+              !c.isHidden() &&
               allowedRoles.contains(c.getRole(userID)),
         )
         .toList();
