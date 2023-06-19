@@ -141,6 +141,7 @@ const defaultGalleryContext: GalleryContextType = {
     openExportModal: () => null,
     authenticateUser: () => null,
     user: null,
+    idToMail: new Map(),
 };
 
 export const GalleryContext = createContext<GalleryContextType>(

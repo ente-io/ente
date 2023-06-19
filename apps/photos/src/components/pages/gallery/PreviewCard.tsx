@@ -220,6 +220,7 @@ const Cont = styled('div')<{ disabled: boolean }>`
 
 export default function PreviewCard(props: IProps) {
     const { thumbs } = useContext(GalleryContext);
+    const { idToMail } = useContext(GalleryContext);
 
     const {
         file,
@@ -341,7 +342,45 @@ export default function PreviewCard(props: IProps) {
 
     const user: User = getData(LS_KEYS.USER);
 
-    const avatarEnabledFilesCheck = async (file: EnteFile) => {
+    useEffect(() => {
+        const avatarEnabledFiles = async (file: EnteFile) => {
+            let email: string;
+
+            // checking cache
+            if (idToMail.has(file.ownerID)) {
+                email = idToMail.get(file.ownerID);
+            } else {
+                const userIdEmail = userIdtoEmail();
+                const idEmailMap = await userIdEmail;
+                email = idEmailMap.get(file.ownerID);
+                if (email) {
+                    idToMail.set(file.ownerID, email);
+                }
+            }
+
+            if (file.ownerID !== user.id && idToMail.has(file.ownerID)) {
+                // const email = idEmailMap.get(file.ownerID);
+
+                setUserLetter(email?.charAt(0)?.toUpperCase());
+
+                const colorIndex = file.ownerID % avatarColors.length;
+                const colorCode = avatarColors[colorIndex];
+                setColorCode(colorCode);
+                // return true;
+            } else if (
+                file.ownerID === user.id &&
+                file.pubMagicMetadata?.data?.uploaderName
+            ) {
+                const uploaderName = file.pubMagicMetadata?.data?.uploaderName;
+                setUserLetter(uploaderName?.charAt(0)?.toUpperCase());
+                const colorCode = '#000000';
+                setColorCode(colorCode);
+                // return true;
+            } else {
+                // return false;
+            }
+        };
+
         if (file.ownerID !== user.id) {
             avatarEnabledFiles(file);
         } else if (
@@ -350,36 +389,9 @@ export default function PreviewCard(props: IProps) {
         ) {
             avatarEnabledFiles(file);
         } else {
-            return false;
+            // return false;
         }
-    };
-
-    const avatarEnabledFiles = async (file: EnteFile) => {
-        const userIdEmail = userIdtoEmail();
-        const idEmailMap = await userIdEmail;
-
-        if (file.ownerID !== user.id && idEmailMap.has(file.ownerID)) {
-            const email = idEmailMap.get(file.ownerID);
-
-            setUserLetter(email?.charAt(0)?.toUpperCase());
-
-            const colorIndex = file.ownerID % avatarColors.length;
-            const colorCode = avatarColors[colorIndex];
-            setColorCode(colorCode);
-            return true;
-        } else if (
-            file.ownerID === user.id &&
-            file.pubMagicMetadata?.data?.uploaderName
-        ) {
-            const uploaderName = file.pubMagicMetadata?.data?.uploaderName;
-            setUserLetter(uploaderName?.charAt(0)?.toUpperCase());
-            const colorCode = '#000000';
-            setColorCode(colorCode);
-            return true;
-        } else {
-            return false;
-        }
-    };
+    }, []);
 
     return (
         <Cont
@@ -416,7 +428,9 @@ export default function PreviewCard(props: IProps) {
                 )
             )}
             <SelectedOverlay selected={selected} />
-            {avatarEnabledFilesCheck(file) && (
+            {(file.ownerID !== user.id ||
+                (file.ownerID === user.id &&
+                    file.pubMagicMetadata?.data?.uploaderName)) && (
                 <AvatarOverlay>
                     <AvatarCircle
                         color={colorCode}
