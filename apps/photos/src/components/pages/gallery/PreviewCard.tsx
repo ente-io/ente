@@ -341,22 +341,20 @@ export default function PreviewCard(props: IProps) {
 
     const user: User = getData(LS_KEYS.USER);
 
-    const avatarEnabledFilesCheck = async (file) => {
+    const avatarEnabledFilesCheck = async (file: EnteFile) => {
         if (file.ownerID !== user.id) {
             avatarEnabledFiles(file);
-            return true;
         } else if (
             file.ownerID === user.id &&
             file.pubMagicMetadata?.data?.uploaderName
         ) {
             avatarEnabledFiles(file);
-            return true;
         } else {
             return false;
         }
     };
 
-    const avatarEnabledFiles = async (file) => {
+    const avatarEnabledFiles = async (file: EnteFile) => {
         const userIdEmail = userIdtoEmail();
         const idEmailMap = await userIdEmail;
 
@@ -368,7 +366,6 @@ export default function PreviewCard(props: IProps) {
             const colorIndex = file.ownerID % avatarColors.length;
             const colorCode = avatarColors[colorIndex];
             setColorCode(colorCode);
-
             return true;
         } else if (
             file.ownerID === user.id &&
@@ -378,6 +375,7 @@ export default function PreviewCard(props: IProps) {
             setUserLetter(uploaderName?.charAt(0)?.toUpperCase());
             const colorCode = '#000000';
             setColorCode(colorCode);
+            return true;
         } else {
             return false;
         }
