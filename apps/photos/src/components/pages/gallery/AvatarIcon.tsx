@@ -10,12 +10,14 @@ const AvatarCircle: React.FC<AvatarCircleProps> = ({ email, color, size }) => {
     const circleStyle = {
         width: `${size}px`,
         height: `${size}px`,
-        backgroundColor: color,
+        backgroundColor: `${color}80`,
         borderRadius: '50%',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         color: '#fff',
+        radius: '9px',
+
         fontWeight: 'bold',
         fontSize: `${Math.floor(size / 2)}px`,
     };
