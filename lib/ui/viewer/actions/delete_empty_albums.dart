@@ -107,7 +107,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
             S.of(context).deleteProgress(currentlyDeleting, collections.length);
         try {
           await CollectionsService.instance.trashEmptyCollection(
-            collections[i].collection,
+            collections[i],
             isBulkDelete: true,
           );
         } catch (_) {
