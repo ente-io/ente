@@ -12,8 +12,8 @@ class CollectionWithThumbnail {
 }
 
 class SharedCollections {
-  final List<CollectionWithThumbnail> outgoing;
-  final List<CollectionWithThumbnail> incoming;
+  final List<Collection> outgoing;
+  final List<Collection> incoming;
 
   SharedCollections(this.outgoing, this.incoming);
 }

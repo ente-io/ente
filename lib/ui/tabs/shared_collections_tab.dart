@@ -55,12 +55,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder<SharedCollections>(
-      future: Future.value(
-        CollectionsService.instance
-            .getCollectionsWithThumbnails(includedOwnedByOthers: true),
-      ).then((collections) async {
-        return _getSharedCollections(collections);
-      }),
+      future: Future.value(_getSharedCollections()),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if ((snapshot.data?.incoming.length ?? 0) == 0 &&
@@ -145,37 +140,32 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     );
   }
 
-  SharedCollections _getSharedCollections(
-    List<CollectionWithThumbnail> allCollections,
-  ) {
-    final List<CollectionWithThumbnail> outgoing = [];
-    final List<CollectionWithThumbnail> incoming = [];
-    for (final collectionWithThumbnail in allCollections) {
-      final Collection c = collectionWithThumbnail.collection;
-
+  SharedCollections _getSharedCollections() {
+    final List<Collection> outgoing = [];
+    final List<Collection> incoming = [];
+    final List<Collection> collections =
+        CollectionsService.instance.getCollectionsForUI(includedShared: true);
+    for (final c in collections) {
       if (c.owner!.id == Configuration.instance.getUserID()) {
         if (c.hasSharees || c.hasLink || c.isSharedFilesCollection()) {
-          outgoing.add(collectionWithThumbnail);
+          outgoing.add(c);
         }
       } else {
-        incoming.add(collectionWithThumbnail);
+        incoming.add(c);
       }
     }
     outgoing.sort((first, second) {
-      if (second.collection.isSharedFilesCollection() ==
-          first.collection.isSharedFilesCollection()) {
-        return second.collection.updationTime
-            .compareTo(first.collection.updationTime);
+      if (second.isSharedFilesCollection() == first.isSharedFilesCollection()) {
+        return second.updationTime.compareTo(first.updationTime);
       } else {
-        if (first.collection.isSharedFilesCollection()) {
+        if (first.isSharedFilesCollection()) {
           return 1;
         }
         return -1;
       }
     });
     incoming.sort((first, second) {
-      return second.collection.updationTime
-          .compareTo(first.collection.updationTime);
+      return second.updationTime.compareTo(first.updationTime);
     });
     return SharedCollections(outgoing, incoming);
   }

@@ -248,6 +248,12 @@ class CollectionsService {
     return null;
   }
 
+  File? cachedCover(Collection c) {
+    final int localSyncTime = getCollectionSyncTime(c.id);
+    final String coverKey = '${c.id}_${localSyncTime}_${c.updationTime}';
+    return _coverCache[coverKey];
+  }
+
   Future<bool> setCollectionSyncTime(int collectionID, int? time) async {
     final key = _collectionSyncTimeKeyPrefix + collectionID.toString();
     if (time == null) {
@@ -317,6 +323,7 @@ class CollectionsService {
         );
   }
 
+  @Deprecated("Use getCollectionsForUI and getCover instead")
   Future<List<CollectionWithThumbnail>> getCollectionsWithThumbnails({
     bool includedOwnedByOthers = false,
     // includeCollabCollections will include collections where the current user
