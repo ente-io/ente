@@ -1,4 +1,3 @@
-import 'dart:developer' as dev;
 import 'dart:io' as io;
 
 import 'package:flutter/foundation.dart';
@@ -511,7 +510,7 @@ class FilesDB {
     Set<int>? ignoredCollectionIDs,
     bool applyOwnerCheck = false,
   }) async {
-    final stopWatch = Stopwatch()..start();
+    final stopWatch = EnteWatch('getAllPendingOrUploadedFiles')..start();
     late String whereQuery;
     late List<Object?>? whereArgs;
     if (applyOwnerCheck) {
@@ -537,11 +536,13 @@ class FilesDB {
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
     );
+    stopWatch.log('queryDone');
     final files = convertToFiles(results);
+    stopWatch.log('convertDone');
     final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
-    dev.log(
-      "getAllPendingOrUploadedFiles time taken: ${stopWatch.elapsedMilliseconds} ms",
+    stopWatch.log(
+      "dedupeDone: for ${files.length} files.",
     );
     stopWatch.stop();
     return FileLoadResult(deduplicatedFiles, files.length == limit);
