@@ -218,6 +218,36 @@ class CollectionsService {
     return _cachedLatestFiles!;
   }
 
+  final Map<String, File> _coverCache = <String, File>{};
+
+  Future<File?> getCover(Collection c) async {
+    final int localSyncTime = getCollectionSyncTime(c.id);
+    final String coverKey = '${c.id}_${localSyncTime}_${c.updationTime}';
+    if (_coverCache.containsKey(coverKey)) {
+      return Future.value(_coverCache[coverKey]!);
+    }
+    if (kDebugMode) {
+      debugPrint("getCover for collection ${c.id} ${c.displayName}");
+    }
+    final coverID = c.pubMagicMetadata.coverID;
+    if (coverID != null) {
+      final File? cover = await filesDB.getUploadedFile(coverID, c.id);
+      if (cover != null) {
+        _coverCache[coverKey] = cover;
+        return Future.value(cover);
+      }
+    }
+    final coverFile = await filesDB.getCollectionFileFirstOrLast(
+      c.id,
+      c.pubMagicMetadata.asc ?? false,
+    );
+    if (coverFile != null) {
+      _coverCache[coverKey] = coverFile;
+      return Future.value(coverFile);
+    }
+    return null;
+  }
+
   Future<bool> setCollectionSyncTime(int collectionID, int? time) async {
     final key = _collectionSyncTimeKeyPrefix + collectionID.toString();
     if (time == null) {

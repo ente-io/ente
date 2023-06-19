@@ -391,7 +391,7 @@ class FilesDB {
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
   }) async {
     final startTime = DateTime.now();
-    final db = await instance.database;
+    final db = await database;
     var batch = db.batch();
     int batchCounter = 0;
     for (File file in files) {
@@ -1252,6 +1252,28 @@ class FilesDB {
     final result = collectionMap.values.toList();
     enteWatch.log("end");
     return result;
+  }
+
+  // getCollectionFileFirstOrLast returns the first or last uploaded file in
+  // the collection based on the given collectionID and the order.
+  Future<File?> getCollectionFileFirstOrLast(
+    int collectionID,
+    bool sortAsc,
+  ) async {
+    final db = await instance.database;
+    final order = sortAsc ? 'ASC' : 'DESC';
+    final rows = await db.query(
+      filesTable,
+      where: '$columnCollectionID = ? AND $columnUploadedFileID IS NOT NULL',
+      whereArgs: [collectionID],
+      orderBy:
+          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+      limit: 1,
+    );
+    if (rows.isEmpty) {
+      return null;
+    }
+    return convertToFiles(rows).first;
   }
 
   Future<void> markForReUploadIfLocationMissing(List<String> localIDs) async {
