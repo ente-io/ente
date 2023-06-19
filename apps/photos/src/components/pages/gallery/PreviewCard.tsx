@@ -339,25 +339,34 @@ export default function PreviewCard(props: IProps) {
     const [colorCode, setColorCode] = useState('');
     const [userLetter, setUserLetter] = useState('');
 
-    const avatarEnabledFiles = async (file) => {
-        console.log('File ID OF PREVIEW CARD', file.ownerID);
+    const user: User = getData(LS_KEYS.USER);
 
+    const avatarEnabledFilesCheck = async (file) => {
+        if (file.ownerID !== user.id) {
+            avatarEnabledFiles(file);
+        } else if (
+            file.ownerID === user.id &&
+            file.pubMagicMetadata?.data?.uploaderName
+        ) {
+            avatarEnabledFiles(file);
+        } else {
+            return false;
+        }
+    };
+
+    const avatarEnabledFiles = async (file) => {
         const userIdEmail = userIdtoEmail();
         const idEmailMap = await userIdEmail;
-        const user: User = getData(LS_KEYS.USER);
-
-        console.log(file);
 
         if (file.ownerID !== user.id && idEmailMap.has(file.ownerID)) {
             const email = idEmailMap.get(file.ownerID);
-            console.log('Email:', email);
+
             setUserLetter(email?.charAt(0)?.toUpperCase());
-            console.log('First user letter', userLetter);
 
             const colorIndex = file.ownerID % avatarColors.length;
             const colorCode = avatarColors[colorIndex];
             setColorCode(colorCode);
-            console.log(colorCode);
+
             return true;
         } else if (
             file.ownerID === user.id &&
@@ -371,9 +380,6 @@ export default function PreviewCard(props: IProps) {
             return false;
         }
     };
-
-    avatarEnabledFiles(file);
-    console.log('OutsideFile', file.id);
 
     return (
         <Cont
@@ -410,7 +416,7 @@ export default function PreviewCard(props: IProps) {
                 )
             )}
             <SelectedOverlay selected={selected} />
-            {avatarEnabledFiles(file) && (
+            {avatarEnabledFilesCheck(file) && (
                 <AvatarOverlay>
                     <AvatarCircle
                         color={colorCode}
