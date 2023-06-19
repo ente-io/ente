@@ -346,7 +346,7 @@ export default function Gallery() {
         const delayRouteChange = () => {
             setTimeout(() => {
                 router.push(href, undefined, { shallow: true });
-            }, 500);
+            }, 1000);
         };
 
         delayRouteChange();
