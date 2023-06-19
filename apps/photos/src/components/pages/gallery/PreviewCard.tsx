@@ -344,11 +344,13 @@ export default function PreviewCard(props: IProps) {
     const avatarEnabledFilesCheck = async (file) => {
         if (file.ownerID !== user.id) {
             avatarEnabledFiles(file);
+            return true;
         } else if (
             file.ownerID === user.id &&
             file.pubMagicMetadata?.data?.uploaderName
         ) {
             avatarEnabledFiles(file);
+            return true;
         } else {
             return false;
         }
