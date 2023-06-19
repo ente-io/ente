@@ -14,6 +14,7 @@ import "package:photos/utils/navigation_util.dart";
 
 class IncomingAlbumItem extends StatelessWidget {
   final CollectionWithThumbnail c;
+  const String heroTagPrefix = "shared_collection";
 
   const IncomingAlbumItem(
     this.c, {
@@ -22,7 +23,6 @@ class IncomingAlbumItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heroTag = "shared_collection" + (c.thumbnail?.tag ?? '');
     const double horizontalPaddingOfGridRow = 16;
     const double crossAxisSpacingOfGrid = 9;
     final TextStyle albumTitleTextStyle =
@@ -48,6 +48,7 @@ class IncomingAlbumItem extends StatelessWidget {
                     future: CollectionsService.instance.getCover(c.collection),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
+                        final heroTag = heroTagPrefix + snapshot.data!.tag;
                         return Hero(
                           tag: heroTag,
                           child: ThumbnailWidget(
@@ -118,7 +119,7 @@ class IncomingAlbumItem extends StatelessWidget {
           CollectionPage(
             c,
             appBarType: GalleryType.sharedCollection,
-            tagPrefix: "shared_collection",
+            tagPrefix: heroTagPrefix,
           ),
         );
       },
