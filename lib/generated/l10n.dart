@@ -7273,10 +7273,10 @@ class S {
     );
   }
 
-  /// `This will show your photos on a world map.\n\nThe map is hosted by OpenStreetMap, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.`
+  /// `This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.`
   String get enableMapsDesc {
     return Intl.message(
-      'This will show your photos on a world map.\n\nThe map is hosted by OpenStreetMap, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.',
+      'This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.',
       name: 'enableMapsDesc',
       desc: '',
       args: [],

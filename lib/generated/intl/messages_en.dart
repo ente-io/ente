@@ -551,7 +551,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "emptyTrash": MessageLookupByLibrary.simpleMessage("Empty trash?"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Enable Maps"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
-            "This will show your photos on a world map.\n\nThe map is hosted by OpenStreetMap, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings."),
+            "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings."),
         "encryptingBackup":
             MessageLookupByLibrary.simpleMessage("Encrypting backup..."),
         "encryption": MessageLookupByLibrary.simpleMessage("Encryption"),
