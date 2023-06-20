@@ -1469,22 +1469,6 @@ class FilesDB {
     return result;
   }
 
-  // For given list of localIDs and ownerID, get a list of uploaded files
-  // owned by given user
-  Future<List<File>> getFilesForLocalIDs(
-    List<String> localIDs,
-    int ownerID,
-  ) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      filesTable,
-      where:
-          '$columnLocalID IN (${localIDs.map((e) => "'$e'").join(',')}) AND $columnOwnerID = ?',
-      whereArgs: [ownerID],
-    );
-    return _deduplicatedAndFilterIgnoredFiles(convertToFiles(rows), {});
-  }
-
   // For a given userID, return unique uploadedFileId for the given userID
   Future<List<int>> getUploadIDsWithMissingSize(int userId) async {
     final db = await instance.database;
