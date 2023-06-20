@@ -14,7 +14,7 @@ import "package:photos/utils/navigation_util.dart";
 
 class IncomingAlbumItem extends StatelessWidget {
   final CollectionWithThumbnail c;
-  const String heroTagPrefix = "shared_collection";
+  static String heroTagPrefix = "shared_collection";
 
   const IncomingAlbumItem(
     this.c, {
