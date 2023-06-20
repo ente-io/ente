@@ -41,7 +41,7 @@ Future<List<File>> applyCommonFilter(
   if (options.ignoredCollectionIDs != null &&
       options.ignoredCollectionIDs!.isNotEmpty) {
     final collectionIgnoreFilter =
-        CollectionsIgnoreFilter(options.ignoredCollectionIDs!)..init(files);
+        CollectionsIgnoreFilter(options.ignoredCollectionIDs!, files);
     filters.add(collectionIgnoreFilter);
   }
   final List<File> filterFiles = [];

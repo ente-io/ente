@@ -6,7 +6,9 @@ class CollectionsIgnoreFilter extends Filter {
 
   Set<int>? _ignoredUploadIDs;
 
-  CollectionsIgnoreFilter(this.collectionIDs) : super();
+  CollectionsIgnoreFilter(this.collectionIDs, List<File> files) : super() {
+    init(files);
+  }
 
   void init(List<File> files) {
     _ignoredUploadIDs = {};
