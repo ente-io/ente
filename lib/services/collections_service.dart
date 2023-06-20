@@ -264,6 +264,33 @@ class CollectionsService {
         .toList();
   }
 
+  // returns collections after removing deleted,uncategorized, and hidden
+  // collections
+  List<Collection> getCollectionsForUI({
+    bool includedShared = false,
+    bool includeCollab = false,
+  }) {
+    final Set<CollectionParticipantRole> allowedRoles = {
+      CollectionParticipantRole.owner,
+    };
+    if (includedShared) {
+      allowedRoles.add(CollectionParticipantRole.viewer);
+    }
+    if (includedShared || includeCollab) {
+      allowedRoles.add(CollectionParticipantRole.collaborator);
+    }
+    final int userID = _config.getUserID()!;
+    return _collectionIDToCollections.values
+        .where(
+          (c) =>
+              !c.isDeleted ||
+              c.type != CollectionType.uncategorized ||
+              !c.isHidden() ||
+              allowedRoles.contains(c.getRole(userID)),
+        )
+        .toList();
+  }
+
   User getFileOwner(int userID, int? collectionID) {
     if (_cachedUserIdToUser.containsKey(userID)) {
       return _cachedUserIdToUser[userID]!;

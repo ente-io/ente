@@ -1,4 +1,3 @@
-import 'dart:developer' as dev;
 import 'dart:io' as io;
 
 import 'package:flutter/foundation.dart';
@@ -511,7 +510,7 @@ class FilesDB {
     Set<int>? ignoredCollectionIDs,
     bool applyOwnerCheck = false,
   }) async {
-    final stopWatch = Stopwatch()..start();
+    final stopWatch = EnteWatch('getAllPendingOrUploadedFiles')..start();
     late String whereQuery;
     late List<Object?>? whereArgs;
     if (applyOwnerCheck) {
@@ -537,11 +536,13 @@ class FilesDB {
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
     );
+    stopWatch.log('queryDone');
     final files = convertToFiles(results);
+    stopWatch.log('convertDone');
     final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
-    dev.log(
-      "getAllPendingOrUploadedFiles time taken: ${stopWatch.elapsedMilliseconds} ms",
+    stopWatch.log(
+      "dedupeDone: for ${files.length} files.",
     );
     stopWatch.stop();
     return FileLoadResult(deduplicatedFiles, files.length == limit);
@@ -1251,6 +1252,28 @@ class FilesDB {
     }
     final result = collectionMap.values.toList();
     enteWatch.log("end");
+    return result;
+  }
+
+  // getCollectionLatestFileTime returns map of collectionID to the max
+  // creationTime of the files in the collection.
+  Future<Map<int, int>> getCollectionIDToMaxCreationTime() async {
+    final db = await instance.database;
+    final rows = await db.rawQuery(
+      '''
+      SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
+      FROM $filesTable
+      WHERE 
+      ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1
+       AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS 
+       NOT -1)
+      GROUP BY $columnCollectionID;
+    ''',
+    );
+    final result = <int, int>{};
+    for (final row in rows) {
+      result[row[columnCollectionID] as int] = row['max_creation_time'] as int;
+    }
     return result;
   }
 
