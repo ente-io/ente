@@ -123,14 +123,16 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => WidgetsBinding.instance.addPostFrameCallback(
-        (_) => setState(
-          () => persistentAttributionSize =
-              (persistentAttributionKey.currentContext!.findRenderObject()
-                      as RenderBox)
-                  .size,
-        ),
-      ),
+      (_) => WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(
+            () => persistentAttributionSize =
+                (persistentAttributionKey.currentContext!.findRenderObject()
+                        as RenderBox)
+                    .size,
+          );
+        }
+      }),
     );
   }
 
