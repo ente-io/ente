@@ -50,7 +50,6 @@ class HomeGalleryWidget extends StatelessWidget {
             limit: limit,
             asc: asc,
             filterOptions: filterOptions,
-            ignoredCollectionIDs: collectionsToHide,
           );
         } else {
           result = await FilesDB.instance.getAllPendingOrUploadedFiles(
