@@ -10,7 +10,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/ignored_files_service.dart';
+import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 
@@ -37,6 +37,11 @@ class HomeGalleryWidget extends StatelessWidget {
         final collectionsToHide =
             CollectionsService.instance.archivedOrHiddenCollections();
         FileLoadResult result;
+        final DBFilterOptions filterOptions = DBFilterOptions(
+          hideIgnoredForUpload: true,
+          dedupeUploadID: true,
+          ignoredCollectionIDs: collectionsToHide,
+        );
         if (hasSelectedAllForBackup) {
           result = await FilesDB.instance.getAllLocalAndUploadedFiles(
             creationStartTime,
@@ -44,7 +49,7 @@ class HomeGalleryWidget extends StatelessWidget {
             ownerID!,
             limit: limit,
             asc: asc,
-            ignoredCollectionIDs: collectionsToHide,
+            filterOptions: filterOptions,
           );
         } else {
           result = await FilesDB.instance.getAllPendingOrUploadedFiles(
@@ -53,17 +58,10 @@ class HomeGalleryWidget extends StatelessWidget {
             ownerID!,
             limit: limit,
             asc: asc,
-            ignoredCollectionIDs: collectionsToHide,
+            filterOptions: filterOptions,
           );
         }
 
-        // hide ignored files from home page UI
-        final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-        result.files.removeWhere(
-          (f) =>
-              f.uploadedFileID == null &&
-              IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
-        );
         return result;
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
