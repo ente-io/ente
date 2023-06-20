@@ -10,7 +10,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/filter/common_filters.dart";
+import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 
@@ -53,7 +53,7 @@ class HomeGalleryWidget extends StatelessWidget {
             ownerID!,
             limit: limit,
             asc: asc,
-            filterOptions: CommonDBFilterOptions(
+            filterOptions: DBFilterOptions(
               hideIgnoredForUpload: true,
               dedupeUploadID: true,
               ignoredCollectionIDs: collectionsToHide,

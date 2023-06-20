@@ -11,7 +11,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/common_keys.dart";
-import "package:photos/services/filter/common_filters.dart";
+import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
@@ -508,7 +508,7 @@ class FilesDB {
     int? limit,
     bool? asc,
     int visibility = visibleVisibility,
-    CommonDBFilterOptions? filterOptions,
+    DBFilterOptions? filterOptions,
     bool applyOwnerCheck = false,
   }) async {
     final stopWatch = EnteWatch('getAllPendingOrUploadedFiles')..start();
@@ -540,7 +540,7 @@ class FilesDB {
     stopWatch.log('queryDone');
     final files = convertToFiles(results);
     stopWatch.log('convertDone');
-    final filteredFiles = await applyCommonFilter(files, filterOptions);
+    final filteredFiles = await applyDBFilters(files, filterOptions);
     stopWatch.log('filteringDone');
     stopWatch.stop();
     return FileLoadResult(filteredFiles, files.length == limit);

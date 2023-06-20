@@ -5,7 +5,7 @@ import "package:photos/services/filter/filter.dart";
 import "package:photos/services/filter/upload_ignore.dart";
 import "package:photos/services/ignored_files_service.dart";
 
-class CommonDBFilterOptions {
+class DBFilterOptions {
   // typically used for filtering out all files which are present in hidden
   // (searchable files result) or archived collections or both (ex: home
   // timeline)
@@ -13,16 +13,16 @@ class CommonDBFilterOptions {
   bool dedupeUploadID;
   bool hideIgnoredForUpload;
 
-  CommonDBFilterOptions({
+  DBFilterOptions({
     this.ignoredCollectionIDs,
     this.hideIgnoredForUpload = false,
     this.dedupeUploadID = true,
   });
 }
 
-Future<List<File>> applyCommonFilter(
+Future<List<File>> applyDBFilters(
   List<File> files,
-  CommonDBFilterOptions? options,
+  DBFilterOptions? options,
 ) async {
   if (options == null) {
     return files;
