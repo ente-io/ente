@@ -541,8 +541,8 @@ class FilesDB {
     final files = convertToFiles(results);
     stopWatch.log('convertDone');
     final filteredFiles = await applyCommonFilter(files, filterOptions);
-    stopWatch.stop();
     stopWatch.log('filteringDone');
+    stopWatch.stop();
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
@@ -1250,6 +1250,28 @@ class FilesDB {
     }
     final result = collectionMap.values.toList();
     enteWatch.log("end");
+    return result;
+  }
+
+  // getCollectionLatestFileTime returns map of collectionID to the max
+  // creationTime of the files in the collection.
+  Future<Map<int, int>> getCollectionIDToMaxCreationTime() async {
+    final db = await instance.database;
+    final rows = await db.rawQuery(
+      '''
+      SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
+      FROM $filesTable
+      WHERE 
+      ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1
+       AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS 
+       NOT -1)
+      GROUP BY $columnCollectionID;
+    ''',
+    );
+    final result = <int, int>{};
+    for (final row in rows) {
+      result[row[columnCollectionID] as int] = row['max_creation_time'] as int;
+    }
     return result;
   }
 
