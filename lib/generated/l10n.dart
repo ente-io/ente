@@ -7222,6 +7222,66 @@ class S {
       args: [],
     );
   }
+
+  /// `OpenStreetMap contributors`
+  String get openstreetmapContributors {
+    return Intl.message(
+      'OpenStreetMap contributors',
+      name: 'openstreetmapContributors',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hosted at OSM France`
+  String get hostedAtOsmFrance {
+    return Intl.message(
+      'Hosted at OSM France',
+      name: 'hostedAtOsmFrance',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Map`
+  String get map {
+    return Intl.message(
+      'Map',
+      name: 'map',
+      desc: 'Label for the map view',
+      args: [],
+    );
+  }
+
+  /// `Maps`
+  String get maps {
+    return Intl.message(
+      'Maps',
+      name: 'maps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable Maps`
+  String get enableMaps {
+    return Intl.message(
+      'Enable Maps',
+      name: 'enableMaps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.`
+  String get enableMapsDesc {
+    return Intl.message(
+      'This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.',
+      name: 'enableMapsDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

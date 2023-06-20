@@ -23,6 +23,13 @@ extension ListExtension<E> on List<E> {
     }
     return listMatch;
   }
+
+  Iterable<E> interleave(E separator) sync* {
+    for (int i = 0; i < length; i++) {
+      yield this[i];
+      if (i < length) yield separator;
+    }
+  }
 }
 
 class ListMatch<T> {

@@ -22,6 +22,8 @@ import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import "package:photos/ui/map/enable_map.dart";
+import "package:photos/ui/map/map_screen.dart";
 import 'package:photos/ui/sharing/album_participants_page.dart';
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
@@ -282,6 +284,23 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           ),
         );
       }
+      if (widget.type == GalleryType.ownedCollection ||
+          widget.type == GalleryType.sharedCollection) {
+        items.add(
+          PopupMenuItem(
+            value: 8,
+            child: Row(
+              children: [
+                const Icon(Icons.map_outlined),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(S.of(context).map),
+              ],
+            ),
+          ),
+        );
+      }
       final bool isArchived = widget.collection!.isArchived();
       // Do not show archive option for favorite collection. If collection is
       // already archived, allow user to unarchive that collection.
@@ -429,6 +448,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               if (mounted) {
                 setState(() {});
               }
+            } else if (value == 8) {
+              await showOnMap();
             } else {
               showToast(context, S.of(context).somethingWentWrong);
             }
@@ -438,6 +459,23 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
 
     return actions;
+  }
+
+  Future<void> showOnMap() async {
+    final bool result = await requestForMapEnable(context);
+    if (result) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => MapScreen(
+            filesFutureFn: () async {
+              return FilesDB.instance.getAllFilesCollection(
+                widget.collection!.id,
+              );
+            },
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _showSortOption(BuildContext bContext) async {
