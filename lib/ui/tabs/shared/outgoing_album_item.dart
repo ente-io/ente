@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection_items.dart";
+import "package:photos/models/file.dart";
 import "package:photos/models/gallery_type.dart";
+import "package:photos/services/collections_service.dart";
 import 'package:photos/theme/colors.dart';
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -10,6 +12,7 @@ import "package:photos/utils/navigation_util.dart";
 
 class OutgoingAlbumItem extends StatelessWidget {
   final CollectionWithThumbnail c;
+  static const heroTagPrefix = "outgoing_collection";
 
   const OutgoingAlbumItem({super.key, required this.c});
 
@@ -40,7 +43,7 @@ class OutgoingAlbumItem extends StatelessWidget {
         }
       }
     }
-    final String heroTag = "outgoing_collection" + (c.thumbnail?.tag ?? '');
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -52,15 +55,23 @@ class OutgoingAlbumItem extends StatelessWidget {
               child: SizedBox(
                 height: 60,
                 width: 60,
-                child: c.thumbnail != null
-                    ? Hero(
+                child: FutureBuilder<File?>(
+                  future: CollectionsService.instance.getCover(c.collection),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final String heroTag = heroTagPrefix + snapshot.data!.tag;
+                      return Hero(
                         tag: heroTag,
                         child: ThumbnailWidget(
-                          c.thumbnail,
+                          snapshot.data!,
                           key: ValueKey(heroTag),
                         ),
-                      )
-                    : const NoThumbnailWidget(),
+                      );
+                    } else {
+                      return const NoThumbnailWidget();
+                    }
+                  },
+                ),
               ),
             ),
             const Padding(padding: EdgeInsets.all(8)),
@@ -111,7 +122,7 @@ class OutgoingAlbumItem extends StatelessWidget {
         final page = CollectionPage(
           c,
           appBarType: GalleryType.ownedCollection,
-          tagPrefix: "outgoing_collection",
+          tagPrefix: heroTagPrefix,
         );
         routeToPage(context, page);
       },

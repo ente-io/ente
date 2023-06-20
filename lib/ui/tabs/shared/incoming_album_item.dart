@@ -3,7 +3,9 @@ import "dart:math";
 import "package:flutter/material.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/collection_items.dart";
+import "package:photos/models/file.dart";
 import "package:photos/models/gallery_type.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -12,6 +14,7 @@ import "package:photos/utils/navigation_util.dart";
 
 class IncomingAlbumItem extends StatelessWidget {
   final CollectionWithThumbnail c;
+  static const String heroTagPrefix = "shared_collection";
 
   const IncomingAlbumItem(
     this.c, {
@@ -20,7 +23,6 @@ class IncomingAlbumItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heroTag = "shared_collection" + (c.thumbnail?.tag ?? '');
     const double horizontalPaddingOfGridRow = 16;
     const double crossAxisSpacingOfGrid = 9;
     final TextStyle albumTitleTextStyle =
@@ -42,18 +44,26 @@ class IncomingAlbumItem extends StatelessWidget {
               width: sideOfThumbnail,
               child: Stack(
                 children: [
-                  c.thumbnail != null
-                      ? Hero(
+                  FutureBuilder<File?>(
+                    future: CollectionsService.instance.getCover(c.collection),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final heroTag = heroTagPrefix + snapshot.data!.tag;
+                        return Hero(
                           tag: heroTag,
                           child: ThumbnailWidget(
-                            c.thumbnail,
+                            snapshot.data!,
                             key: Key(heroTag),
                             shouldShowArchiveStatus:
                                 c.collection.hasShareeArchived(),
                             shouldShowSyncStatus: false,
                           ),
-                        )
-                      : const NoThumbnailWidget(),
+                        );
+                      } else {
+                        return const NoThumbnailWidget();
+                      }
+                    },
+                  ),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Padding(
@@ -109,7 +119,7 @@ class IncomingAlbumItem extends StatelessWidget {
           CollectionPage(
             c,
             appBarType: GalleryType.sharedCollection,
-            tagPrefix: "shared_collection",
+            tagPrefix: heroTagPrefix,
           ),
         );
       },
