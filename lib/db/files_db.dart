@@ -11,6 +11,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/common_keys.dart";
+import "package:photos/services/filter/common_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
@@ -507,7 +508,7 @@ class FilesDB {
     int? limit,
     bool? asc,
     int visibility = visibleVisibility,
-    Set<int>? ignoredCollectionIDs,
+    CommonDBFilterOptions? filterOptions,
     bool applyOwnerCheck = false,
   }) async {
     final stopWatch = EnteWatch('getAllPendingOrUploadedFiles')..start();
@@ -539,13 +540,10 @@ class FilesDB {
     stopWatch.log('queryDone');
     final files = convertToFiles(results);
     stopWatch.log('convertDone');
-    final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
-    stopWatch.log(
-      "dedupeDone: for ${files.length} files.",
-    );
+    final filteredFiles = await applyCommonFilter(files, filterOptions);
     stopWatch.stop();
-    return FileLoadResult(deduplicatedFiles, files.length == limit);
+    stopWatch.log('filteringDone');
+    return FileLoadResult(filteredFiles, files.length == limit);
   }
 
   Future<FileLoadResult> getAllLocalAndUploadedFiles(
@@ -570,7 +568,7 @@ class FilesDB {
     );
     final files = convertToFiles(results);
     final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+        deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
@@ -591,7 +589,7 @@ class FilesDB {
     return deduplicatedFiles;
   }
 
-  List<File> _deduplicatedAndFilterIgnoredFiles(
+  List<File> deduplicatedAndFilterIgnoredFiles(
     List<File> files,
     Set<int>? ignoredCollectionIDs,
   ) {
@@ -699,7 +697,7 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final dedupeResult = _deduplicatedAndFilterIgnoredFiles(files, {});
+    final dedupeResult = deduplicatedAndFilterIgnoredFiles(files, {});
     _logger.info("Fetched " + dedupeResult.length.toString() + " files");
     return FileLoadResult(files, files.length == limit);
   }
@@ -731,7 +729,7 @@ class FilesDB {
       orderBy: '$columnCreationTime ' + order,
     );
     final files = convertToFiles(results);
-    return _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+    return deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
   }
 
   // Files which user added to a collection manually but they are not
@@ -1461,7 +1459,7 @@ class FilesDB {
           '$columnLocalID IN (${localIDs.map((e) => "'$e'").join(',')}) AND $columnOwnerID = ?',
       whereArgs: [ownerID],
     );
-    return _deduplicatedAndFilterIgnoredFiles(convertToFiles(rows), {});
+    return deduplicatedAndFilterIgnoredFiles(convertToFiles(rows), {});
   }
 
   // For a given userID, return unique uploadedFileId for the given userID
@@ -1508,7 +1506,7 @@ class FilesDB {
         await db.query(filesTable, orderBy: '$columnCreationTime DESC');
     final List<File> files = convertToFiles(result);
     final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, collectionsToIgnore);
+        deduplicatedAndFilterIgnoredFiles(files, collectionsToIgnore);
     return deduplicatedFiles;
   }
 
@@ -1549,7 +1547,7 @@ class FilesDB {
     );
     final files = convertToFiles(results);
     final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+        deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
