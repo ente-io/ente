@@ -1,16 +1,24 @@
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { EnteFile } from 'types/file';
+import { userIdtoEmail } from 'services/collectionService';
+import { User } from 'types/user';
+import { GalleryContext } from 'pages/gallery';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import darkThemeColors from 'themes/colors/dark';
 
 interface AvatarCircleProps {
-    email: string;
-    color: string;
-    size: number;
+    file: EnteFile;
 }
 
-const AvatarCircle: React.FC<AvatarCircleProps> = ({ email, color, size }) => {
+const AvatarCircle: React.FC<AvatarCircleProps> = ({ file }) => {
+    const [colorCode, setColorCode] = useState('');
+    const [userLetter, setUserLetter] = useState('');
+    const { idToMail } = useContext(GalleryContext);
+    const size = 20;
     const circleStyle = {
         width: `${size}px`,
         height: `${size}px`,
-        backgroundColor: `${color}80`,
+        backgroundColor: `${colorCode}80`,
         borderRadius: '50%',
         display: 'flex',
         justifyContent: 'center',
@@ -21,8 +29,52 @@ const AvatarCircle: React.FC<AvatarCircleProps> = ({ email, color, size }) => {
         fontWeight: 'bold',
         fontSize: `${Math.floor(size / 2)}px`,
     };
+    const user: User = getData(LS_KEYS.USER);
+    useEffect(() => {
+        const avatarEnabledFiles = async (file: EnteFile) => {
+            let email: string;
 
-    return <div style={circleStyle}>{email}</div>;
+            // checking cache
+            if (idToMail.has(file.ownerID)) {
+                email = idToMail.get(file.ownerID);
+            } else {
+                const userIdEmail = userIdtoEmail();
+                const idEmailMap = await userIdEmail;
+                email = idEmailMap.get(file.ownerID);
+                if (email) {
+                    idToMail.set(file.ownerID, email);
+                }
+            }
+
+            if (file.ownerID !== user.id && idToMail.has(file.ownerID)) {
+                setUserLetter(email?.charAt(0)?.toUpperCase());
+
+                const colorIndex =
+                    file.ownerID % darkThemeColors.avatarColors.length;
+                const colorCode = darkThemeColors.avatarColors[colorIndex];
+                setColorCode(colorCode);
+            } else if (
+                file.ownerID === user.id &&
+                file.pubMagicMetadata?.data?.uploaderName
+            ) {
+                const uploaderName = file.pubMagicMetadata?.data?.uploaderName;
+                setUserLetter(uploaderName?.charAt(0)?.toUpperCase());
+                const colorCode = '#000000';
+                setColorCode(colorCode);
+            }
+        };
+
+        if (file.ownerID !== user.id) {
+            avatarEnabledFiles(file);
+        } else if (
+            file.ownerID === user.id &&
+            file.pubMagicMetadata?.data?.uploaderName
+        ) {
+            avatarEnabledFiles(file);
+        }
+    }, []);
+
+    return <div style={circleStyle}>{userLetter}</div>;
 };
 
 export default AvatarCircle;
