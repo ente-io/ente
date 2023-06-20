@@ -37,6 +37,11 @@ class HomeGalleryWidget extends StatelessWidget {
         final collectionsToHide =
             CollectionsService.instance.archivedOrHiddenCollections();
         FileLoadResult result;
+        final DBFilterOptions filterOptions = DBFilterOptions(
+          hideIgnoredForUpload: true,
+          dedupeUploadID: true,
+          ignoredCollectionIDs: collectionsToHide,
+        );
         if (hasSelectedAllForBackup) {
           result = await FilesDB.instance.getAllLocalAndUploadedFiles(
             creationStartTime,
@@ -44,6 +49,7 @@ class HomeGalleryWidget extends StatelessWidget {
             ownerID!,
             limit: limit,
             asc: asc,
+            filterOptions: filterOptions,
             ignoredCollectionIDs: collectionsToHide,
           );
         } else {
@@ -53,11 +59,7 @@ class HomeGalleryWidget extends StatelessWidget {
             ownerID!,
             limit: limit,
             asc: asc,
-            filterOptions: DBFilterOptions(
-              hideIgnoredForUpload: true,
-              dedupeUploadID: true,
-              ignoredCollectionIDs: collectionsToHide,
-            ),
+            filterOptions: filterOptions,
           );
         }
 

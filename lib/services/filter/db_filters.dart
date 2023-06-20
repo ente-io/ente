@@ -18,6 +18,10 @@ class DBFilterOptions {
     this.hideIgnoredForUpload = false,
     this.dedupeUploadID = true,
   });
+
+  static DBFilterOptions dedupeOption = DBFilterOptions(
+    dedupeUploadID: true,
+  );
 }
 
 Future<List<File>> applyDBFilters(

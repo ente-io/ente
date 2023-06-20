@@ -552,7 +552,7 @@ class FilesDB {
     int ownerID, {
     int? limit,
     bool? asc,
-    Set<int>? ignoredCollectionIDs,
+    required DBFilterOptions filterOptions,
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -567,9 +567,8 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
-    return FileLoadResult(deduplicatedFiles, files.length == limit);
+    final List<File> filteredFiles = await applyDBFilters(files, filterOptions);
+    return FileLoadResult(filteredFiles, files.length == limit);
   }
 
   List<File> deduplicateByLocalID(List<File> files) {
@@ -584,44 +583,6 @@ class FilesDB {
         continue;
       }
       localIDs.add(id);
-      deduplicatedFiles.add(file);
-    }
-    return deduplicatedFiles;
-  }
-
-  @Deprecated('Use applyCommonFilter instead')
-  List<File> _deduplicatedAndFilterIgnoredFiles(
-    List<File> files,
-    Set<int>? ignoredCollectionIDs,
-  ) {
-    final Set<int> uploadedFileIDs = <int>{};
-    // ignoredFileUploadIDs is to keep a track of files which are part of
-    // archived collection
-    final Set<int> ignoredFileUploadIDs = <int>{};
-    final List<File> deduplicatedFiles = [];
-    for (final file in files) {
-      final id = file.uploadedFileID;
-      final bool isFileUploaded = id != null && id != -1;
-      final bool isCollectionIgnored = ignoredCollectionIDs != null &&
-          ignoredCollectionIDs.contains(file.collectionID);
-      if (isCollectionIgnored || ignoredFileUploadIDs.contains(id)) {
-        if (isFileUploaded) {
-          ignoredFileUploadIDs.add(id);
-          // remove the file from the list of deduplicated files
-          if (uploadedFileIDs.contains(id)) {
-            deduplicatedFiles
-                .removeWhere((element) => element.uploadedFileID == id);
-            uploadedFileIDs.remove(id);
-          }
-        }
-        continue;
-      }
-      if (isFileUploaded && uploadedFileIDs.contains(id)) {
-        continue;
-      }
-      if (isFileUploaded) {
-        uploadedFileIDs.add(id);
-      }
       deduplicatedFiles.add(file);
     }
     return deduplicatedFiles;
@@ -698,7 +659,8 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final dedupeResult = _deduplicatedAndFilterIgnoredFiles(files, {});
+    final dedupeResult =
+        await applyDBFilters(files, DBFilterOptions.dedupeOption);
     _logger.info("Fetched " + dedupeResult.length.toString() + " files");
     return FileLoadResult(files, files.length == limit);
   }
@@ -730,7 +692,10 @@ class FilesDB {
       orderBy: '$columnCreationTime ' + order,
     );
     final files = convertToFiles(results);
-    return _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+    return applyDBFilters(
+      files,
+      DBFilterOptions(ignoredCollectionIDs: ignoredCollectionIDs),
+    );
   }
 
   // Files which user added to a collection manually but they are not
@@ -1512,8 +1477,10 @@ class FilesDB {
     final List<Map<String, dynamic>> result =
         await db.query(filesTable, orderBy: '$columnCreationTime DESC');
     final List<File> files = convertToFiles(result);
-    final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, collectionsToIgnore);
+    final List<File> deduplicatedFiles = await applyDBFilters(
+      files,
+      DBFilterOptions(ignoredCollectionIDs: collectionsToIgnore),
+    );
     return deduplicatedFiles;
   }
 
@@ -1537,7 +1504,7 @@ class FilesDB {
     int endTime, {
     int? limit,
     bool? asc,
-    Set<int>? ignoredCollectionIDs,
+    required DBFilterOptions? filterOptions,
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -1553,9 +1520,8 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
-    return FileLoadResult(deduplicatedFiles, files.length == limit);
+    final List<File> filteredFiles = await applyDBFilters(files, filterOptions);
+    return FileLoadResult(filteredFiles, files.length == limit);
   }
 
   Map<String, dynamic> _getRowForFile(File file) {
