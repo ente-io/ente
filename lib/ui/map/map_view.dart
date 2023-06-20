@@ -81,6 +81,10 @@ class _MapViewState extends State<MapView> {
             maxZoom: widget.maxZoom,
             enableMultiFingerGestureRace: true,
             zoom: widget.initialZoom,
+            maxBounds: LatLngBounds(
+              LatLng(-90, -180),
+              LatLng(90, 180),
+            ),
             onPositionChanged: (position, hasGesture) {
               if (position.bounds != null) {
                 onChange(position.bounds!);

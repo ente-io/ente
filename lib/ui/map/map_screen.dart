@@ -1,6 +1,5 @@
 import "dart:async";
 import "dart:isolate";
-import "dart:math";
 
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
@@ -8,7 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file.dart";
-import "package:photos/models/location/location.dart";
+// import "package:photos/models/location/location.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/map/image_marker.dart";
@@ -42,7 +41,7 @@ class _MapScreenState extends State<MapScreen> {
   bool isLoading = true;
   double initialZoom = 4.0;
   double maxZoom = 18.0;
-  double minZoom = 0.0;
+  double minZoom = 2.8;
   int debounceDuration = 500;
   LatLng center = LatLng(46.7286, 4.8614);
   final Logger _logger = Logger("_MapScreenState");
@@ -72,30 +71,21 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> processFiles(List<File> files) async {
-    late double minLat, maxLat, minLon, maxLon;
     final List<ImageMarker> tempMarkers = [];
     bool hasAnyLocation = false;
+    File? mostRecentFile;
     for (var file in files) {
-      if (kDebugMode && !file.hasLocation) {
-        final rand = Random();
-        file.location = Location(
-          latitude: 46.7286 + rand.nextDouble() * 0.1,
-          longitude: 4.8614 + rand.nextDouble() * 0.1,
-        );
-      }
       if (file.hasLocation && file.location != null) {
-        if (!hasAnyLocation) {
-          minLat = file.location!.latitude!;
-          minLon = file.location!.longitude!;
-          maxLat = file.location!.latitude!;
-          maxLon = file.location!.longitude!;
-          hasAnyLocation = true;
+        hasAnyLocation = true;
+
+        if (mostRecentFile == null) {
+          mostRecentFile = file;
         } else {
-          minLat = min(minLat, file.location!.latitude!);
-          minLon = min(minLon, file.location!.longitude!);
-          maxLat = max(maxLat, file.location!.latitude!);
-          maxLon = max(maxLon, file.location!.longitude!);
+          if ((mostRecentFile.creationTime ?? 0) < (file.creationTime ?? 0)) {
+            mostRecentFile = file;
+          }
         }
+
         tempMarkers.add(
           ImageMarker(
             latitude: file.location!.latitude!,
@@ -108,22 +98,12 @@ class _MapScreenState extends State<MapScreen> {
 
     if (hasAnyLocation) {
       center = LatLng(
-        minLat + (maxLat - minLat) / 2,
-        minLon + (maxLon - minLon) / 2,
+        mostRecentFile!.location!.latitude!,
+        mostRecentFile.location!.longitude!,
       );
-      final latRange = maxLat - minLat;
-      final lonRange = maxLon - minLon;
 
-      final latZoom = log(360.0 / latRange) / log(2);
-      final lonZoom = log(180.0 / lonRange) / log(2);
-
-      initialZoom = min(latZoom, lonZoom);
-      if (initialZoom <= minZoom) initialZoom = minZoom + 1;
-      if (initialZoom >= (maxZoom - 1)) initialZoom = maxZoom - 1;
       if (kDebugMode) {
         debugPrint("Info for map: center $center, initialZoom $initialZoom");
-        debugPrint("Info for map: minLat $minLat, maxLat $maxLat");
-        debugPrint("Info for map: minLon $minLon, maxLon $maxLon");
       }
     } else {
       showShortToast(context, "No images with location");
