@@ -568,7 +568,7 @@ class FilesDB {
     );
     final files = convertToFiles(results);
     final List<File> deduplicatedFiles =
-        deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
@@ -589,7 +589,8 @@ class FilesDB {
     return deduplicatedFiles;
   }
 
-  List<File> deduplicatedAndFilterIgnoredFiles(
+  @Deprecated('Use applyCommonFilter instead')
+  List<File> _deduplicatedAndFilterIgnoredFiles(
     List<File> files,
     Set<int>? ignoredCollectionIDs,
   ) {
@@ -697,7 +698,7 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final dedupeResult = deduplicatedAndFilterIgnoredFiles(files, {});
+    final dedupeResult = _deduplicatedAndFilterIgnoredFiles(files, {});
     _logger.info("Fetched " + dedupeResult.length.toString() + " files");
     return FileLoadResult(files, files.length == limit);
   }
@@ -729,7 +730,7 @@ class FilesDB {
       orderBy: '$columnCreationTime ' + order,
     );
     final files = convertToFiles(results);
-    return deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+    return _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
   }
 
   // Files which user added to a collection manually but they are not
@@ -1481,7 +1482,7 @@ class FilesDB {
           '$columnLocalID IN (${localIDs.map((e) => "'$e'").join(',')}) AND $columnOwnerID = ?',
       whereArgs: [ownerID],
     );
-    return deduplicatedAndFilterIgnoredFiles(convertToFiles(rows), {});
+    return _deduplicatedAndFilterIgnoredFiles(convertToFiles(rows), {});
   }
 
   // For a given userID, return unique uploadedFileId for the given userID
@@ -1528,7 +1529,7 @@ class FilesDB {
         await db.query(filesTable, orderBy: '$columnCreationTime DESC');
     final List<File> files = convertToFiles(result);
     final List<File> deduplicatedFiles =
-        deduplicatedAndFilterIgnoredFiles(files, collectionsToIgnore);
+        _deduplicatedAndFilterIgnoredFiles(files, collectionsToIgnore);
     return deduplicatedFiles;
   }
 
@@ -1569,7 +1570,7 @@ class FilesDB {
     );
     final files = convertToFiles(results);
     final List<File> deduplicatedFiles =
-        deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
