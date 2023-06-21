@@ -8,7 +8,6 @@ import "package:interactive_bottom_sheet/interactive_bottom_sheet.dart";
 import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file.dart";
-// import "package:photos/models/location/location.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/map/image_marker.dart";
@@ -52,7 +51,7 @@ class _MapScreenState extends State<MapScreen> {
   double heightOfBottomSheetContent = 100;
   static const gridCrossAxisSpacing = 4.0;
   static const gridMainAxisSpacing = 4.0;
-  static const gridPadding = 4.0;
+  static const gridPadding = 2.0;
   static const gridCrossAxisCount = 4;
   static const bottomSheetDraggableAreaHeight = 32.0;
 
