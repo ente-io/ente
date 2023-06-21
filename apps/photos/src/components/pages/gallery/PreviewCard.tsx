@@ -113,12 +113,12 @@ export const HoverOverlay = styled('div')<{ checked: boolean }>`
         'background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))'};
 `;
 
-export const AvatarOverlay = styled('div')`
-    position: relative;
-    width: 100%;
-    height: 100%;
-    top: 5px;
-    right: 25px;
+export const AvatarOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding-right: 5px;
+    padding-top: 5px;
 `;
 
 export const InSelectRangeOverLay = styled('div')<{ $active: boolean }>`
