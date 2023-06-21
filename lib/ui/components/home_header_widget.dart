@@ -17,12 +17,17 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        IconButtonWidget(
-          iconButtonType: IconButtonType.primary,
-          icon: Icons.menu_outlined,
-          onTap: () {
-            Scaffold.of(context).openDrawer();
-          },
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButtonWidget(
+              iconButtonType: IconButtonType.primary,
+              icon: Icons.menu_outlined,
+              onTap: () {
+                Scaffold.of(context).openDrawer();
+              },
+            ),
+          ],
         ),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 250),

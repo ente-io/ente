@@ -42,3 +42,4 @@ android/app/.settings/*
 
 
 fastlane/report.xml
+TensorFlowLiteC.framework

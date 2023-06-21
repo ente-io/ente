@@ -16,7 +16,7 @@ class FeatureFlagService {
   static const _featureFlagsKey = "feature_flags_key";
   static final _internalUserIDs = const String.fromEnvironment(
     "internal_user_ids",
-    defaultValue: "1,2,3,4,191",
+    defaultValue: "1,2,3,4,191,125,1580559962388044,1580559962392434,10000025",
   ).split(",").map((element) {
     return int.parse(element);
   }).toSet();

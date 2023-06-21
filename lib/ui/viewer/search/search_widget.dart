@@ -6,7 +6,10 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/search_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
+import "package:photos/ui/map/enable_map.dart";
+import "package:photos/ui/map/map_screen.dart";
 import 'package:photos/ui/viewer/search/result/no_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
@@ -73,6 +76,7 @@ class _SearchWidgetState extends State<SearchWidget> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
@@ -156,7 +160,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                     ? SearchSuggestionsWidget(_results)
                     : _query.isNotEmpty
                         ? const NoResultWidget()
-                        : const SizedBox.shrink(),
+                        : const NavigateToMap(),
               ],
             ),
           ),
@@ -235,5 +239,36 @@ class _SearchWidgetState extends State<SearchWidget> {
   bool _isYearValid(String year) {
     final yearAsInt = int.tryParse(year); //returns null if cannot be parsed
     return yearAsInt != null && yearAsInt <= currentYear;
+  }
+}
+
+class NavigateToMap extends StatelessWidget {
+  const NavigateToMap({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: IconButtonWidget(
+        icon: Icons.map_sharp,
+        iconButtonType: IconButtonType.primary,
+        defaultColor: colorScheme.backgroundElevated,
+        pressedColor: colorScheme.backgroundElevated2,
+        size: 28,
+        onTap: () async {
+          final bool result = await requestForMapEnable(context);
+          if (result) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => MapScreen(
+                  filesFutureFn: SearchService.instance.getAllFiles,
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
   }
 }
