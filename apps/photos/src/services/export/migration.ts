@@ -135,10 +135,7 @@ async function migrationV2ToV3(
     );
 
     const collectionExportNames =
-        await getCollectionExportNamesFromExportedCollectionPaths(
-            exportDir,
-            exportRecord
-        );
+        await getCollectionExportNamesFromExportedCollectionPaths(exportRecord);
 
     const fileExportNames = await getFileExportNamesFromExportedFiles(
         exportRecord,
@@ -250,7 +247,6 @@ async function removeDeprecatedExportRecordProperties(
 }
 
 async function getCollectionExportNamesFromExportedCollectionPaths(
-    exportDir: string,
     exportRecord: ExportRecordV2
 ): Promise<CollectionExportNames> {
     if (!exportRecord.exportedCollectionPaths) {
@@ -258,7 +254,12 @@ async function getCollectionExportNamesFromExportedCollectionPaths(
     }
     const exportedCollectionNames = Object.fromEntries(
         Object.entries(exportRecord.exportedCollectionPaths).map(
-            ([key, value]) => [key, value.replace(exportDir, '').slice(1)]
+            ([key, exportedCollectionPath]) => {
+                const exportedCollectionName = exportedCollectionPath
+                    .split('/')
+                    .pop();
+                return [key, exportedCollectionName];
+            }
         )
     );
     return exportedCollectionNames;
