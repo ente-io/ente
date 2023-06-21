@@ -4,6 +4,7 @@ import "dart:isolate";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import "package:interactive_bottom_sheet/interactive_bottom_sheet.dart";
 import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file.dart";
@@ -33,6 +34,7 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  GlobalKey bottomSheetKey = GlobalKey();
   List<ImageMarker> imageMarkers = [];
   List<File> allImages = [];
   StreamController<List<File>> visibleImages =
@@ -47,6 +49,11 @@ class _MapScreenState extends State<MapScreen> {
   final Logger _logger = Logger("_MapScreenState");
   StreamSubscription? _mapMoveSubscription;
   Isolate? isolate;
+  double heightOfBottomSheetContent = 100;
+  static const gridCrossAxisSpacing = 4.0;
+  static const gridMainAxisSpacing = 4.0;
+  static const gridPadding = 4.0;
+  static const gridCrossAxisCount = 4;
 
   @override
   void initState() {
@@ -201,64 +208,6 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(2),
-                      topRight: Radius.circular(2),
-                    ),
-                    child: SizedBox(
-                      height: 116,
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        switchInCurve: Curves.easeInOutExpo,
-                        switchOutCurve: Curves.easeInOutExpo,
-                        child: StreamBuilder<List<File>>(
-                          stream: visibleImages.stream,
-                          builder: (
-                            BuildContext context,
-                            AsyncSnapshot<List<File>> snapshot,
-                          ) {
-                            if (!snapshot.hasData) {
-                              return const Text("Loading...");
-                            }
-                            final images = snapshot.data!;
-                            _logger.info("Visible images: ${images.length}");
-                            if (images.isEmpty) {
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "No photos found here",
-                                    style: textTheme.large,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "Zoom out to see photos",
-                                    style: textTheme.smallFaint,
-                                  )
-                                ],
-                              );
-                            }
-                            return ListView.builder(
-                              itemCount: images.length,
-                              scrollDirection: Axis.horizontal,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 2),
-                              physics: const BouncingScrollPhysics(),
-                              itemBuilder: (context, index) {
-                                final image = images[index];
-                                return ImageTile(
-                                  image: image,
-                                  visibleImages: images,
-                                  index: index,
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
               isLoading
@@ -269,8 +218,99 @@ class _MapScreenState extends State<MapScreen> {
                   : const SizedBox.shrink(),
             ],
           ),
+          bottomSheet: InteractiveBottomSheet(
+            options: InteractiveBottomSheetOptions(
+              backgroundColor: colorScheme.backgroundBase,
+              maxSize: 0.95,
+            ),
+            draggableAreaOptions: DraggableAreaOptions(
+              backgroundColor: colorScheme.backgroundBase,
+              indicatorColor: colorScheme.fillBase,
+              height: 32,
+              indicatorHeight: 4,
+            ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              switchInCurve: Curves.easeInOutExpo,
+              switchOutCurve: Curves.easeInOutExpo,
+              child: StreamBuilder<List<File>>(
+                stream: visibleImages.stream,
+                builder: (
+                  BuildContext context,
+                  AsyncSnapshot<List<File>> snapshot,
+                ) {
+                  if (!snapshot.hasData) {
+                    return const Text("Loading...");
+                  }
+                  final images = snapshot.data!;
+                  _logger.info("Visible images: ${images.length}");
+                  if (images.isEmpty) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "No photos found here",
+                          style: textTheme.large,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Zoom out to see photos",
+                          style: textTheme.smallFaint,
+                        )
+                      ],
+                    );
+                  }
+                  //Be very careful when changing the height of the grid. It
+                  //the height should be exactly how much the grid occupies.
+                  //Do not add padding around the grid.
+                  //Doing these will cause unexpected scroll behaviour. This
+                  //is an issue with the package that is used here
+                  //(InteractiveBottomSheet)
+                  return ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: maxHeightOfGrid(images.length),
+                    ),
+                    key: ValueKey(images.length),
+                    child: GridView.builder(
+                      itemCount: images.length,
+                      scrollDirection: Axis.vertical,
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: gridPadding),
+                      physics: const BouncingScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: gridCrossAxisCount,
+                        crossAxisSpacing: gridCrossAxisSpacing,
+                        mainAxisSpacing: gridMainAxisSpacing,
+                      ),
+                      // shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        final image = images[index];
+                        return ImageTile(
+                          image: image,
+                          visibleImages: images,
+                          index: index,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
         ),
       ),
     );
+  }
+
+  double maxHeightOfGrid(int imageCount) {
+    final rowHeight = ((MediaQuery.of(context).size.width -
+                (gridPadding * 2 +
+                    gridCrossAxisSpacing * (gridCrossAxisCount - 1))) /
+            gridCrossAxisCount) +
+        gridMainAxisSpacing;
+    final rowCount = (imageCount / gridCrossAxisCount).ceilToDouble();
+
+    return rowCount * rowHeight;
   }
 }
