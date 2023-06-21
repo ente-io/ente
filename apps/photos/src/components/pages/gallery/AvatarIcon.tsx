@@ -13,7 +13,7 @@ interface AvatarCircleProps {
 const Avatar = styled('div')<{ colorCode: string; size: number }>`
     width: ${({ size }) => `${size}px`};
     height: ${({ size }) => `${size}px`};
-    background-color: ${({ colorCode }) => `${colorCode}80`};
+    background-color: ${({ colorCode }) => `${colorCode}95`};
     border-radius: 50%;
     display: flex;
     justify-content: center;
