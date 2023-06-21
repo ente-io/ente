@@ -31,7 +31,7 @@ const AvatarCircle: React.FC<AvatarCircleProps> = ({ file }) => {
     const user: User = getData(LS_KEYS.USER);
 
     useLayoutEffect(() => {
-        const avatarEnabledFiles = async (file: EnteFile) => {
+        const main = async () => {
             let email: string;
             // checking cache
             if (idToMail.has(file.ownerID)) {
@@ -56,7 +56,7 @@ const AvatarCircle: React.FC<AvatarCircleProps> = ({ file }) => {
                 setColorCode(colorCode);
             }
         };
-        avatarEnabledFiles(file);
+        main();
     }, []);
 
     return (
