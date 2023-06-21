@@ -240,24 +240,32 @@ class _MapScreenState extends State<MapScreen> {
                   AsyncSnapshot<List<File>> snapshot,
                 ) {
                   if (!snapshot.hasData) {
-                    return const Text("Loading...");
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      child: const EnteLoadingWidget(),
+                    );
                   }
                   final images = snapshot.data!;
                   _logger.info("Visible images: ${images.length}");
                   if (images.isEmpty) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "No photos found here",
-                          style: textTheme.large,
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "No photos found here",
+                              style: textTheme.large,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Zoom out to see photos",
+                              style: textTheme.smallFaint,
+                            )
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Zoom out to see photos",
-                          style: textTheme.smallFaint,
-                        )
-                      ],
+                      ),
                     );
                   }
                   //Be very careful when changing the height of the grid. It
@@ -270,7 +278,6 @@ class _MapScreenState extends State<MapScreen> {
                     constraints: BoxConstraints(
                       maxHeight: maxHeightOfGrid(images.length),
                     ),
-                    key: ValueKey(images.length),
                     child: GridView.builder(
                       itemCount: images.length,
                       scrollDirection: Axis.vertical,
