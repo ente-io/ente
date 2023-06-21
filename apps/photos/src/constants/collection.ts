@@ -61,7 +61,6 @@ export const SELECT_NOT_ALLOWED_COLLECTION = new Set([
     CollectionSummaryType.all,
     CollectionSummaryType.archive,
     CollectionSummaryType.incomingShare,
-    CollectionSummaryType.outgoingShare,
     CollectionSummaryType.trash,
     CollectionSummaryType.uncategorized,
     CollectionSummaryType.hidden,
