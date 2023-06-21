@@ -91,7 +91,12 @@ class _MapViewState extends State<MapView> {
               }
             },
           ),
-          nonRotatedChildren: const [OSMFranceTileAttributes()],
+          nonRotatedChildren: const [
+            Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: OSMFranceTileAttributes(),
+            )
+          ],
           children: [
             const OSMFranceTileLayer(),
             MarkerClusterLayerWidget(
@@ -147,7 +152,7 @@ class _MapViewState extends State<MapView> {
           ),
         ),
         Positioned(
-          bottom: 10,
+          bottom: 30,
           right: 10,
           child: Column(
             children: [

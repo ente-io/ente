@@ -54,6 +54,7 @@ class _MapScreenState extends State<MapScreen> {
   static const gridMainAxisSpacing = 4.0;
   static const gridPadding = 4.0;
   static const gridCrossAxisCount = 4;
+  static const bottomSheetDraggableAreaHeight = 32.0;
 
   @override
   void initState() {
@@ -181,127 +182,126 @@ class _MapScreenState extends State<MapScreen> {
       color: colorScheme.backgroundBase,
       child: SafeArea(
         top: false,
-        child: Scaffold(
-          body: Stack(
-            children: [
-              Column(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(6),
-                        bottomRight: Radius.circular(6),
-                      ),
-                      child: MapView(
-                        key: ValueKey(
-                          'image-marker-count-${imageMarkers.length}',
-                        ),
-                        controller: mapController,
-                        imageMarkers: imageMarkers,
-                        updateVisibleImages: calculateVisibleMarkers,
-                        center: center,
-                        initialZoom: initialZoom,
-                        minZoom: minZoom,
-                        maxZoom: maxZoom,
-                        debounceDuration: debounceDuration,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                ],
-              ),
-              isLoading
-                  ? EnteLoadingWidget(
-                      size: 28,
-                      color: getEnteColorScheme(context).primary700,
-                    )
-                  : const SizedBox.shrink(),
-            ],
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            bottomSheetTheme: const BottomSheetThemeData(
+              backgroundColor: Colors.transparent,
+            ),
           ),
-          bottomSheet: InteractiveBottomSheet(
-            options: InteractiveBottomSheetOptions(
-              backgroundColor: colorScheme.backgroundBase,
-              maxSize: 0.95,
+          child: Scaffold(
+            body: Stack(
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.78 -
+                      bottomSheetDraggableAreaHeight,
+                  child: MapView(
+                    key: ValueKey(
+                      'image-marker-count-${imageMarkers.length}',
+                    ),
+                    controller: mapController,
+                    imageMarkers: imageMarkers,
+                    updateVisibleImages: calculateVisibleMarkers,
+                    center: center,
+                    initialZoom: initialZoom,
+                    minZoom: minZoom,
+                    maxZoom: maxZoom,
+                    debounceDuration: debounceDuration,
+                  ),
+                ),
+                isLoading
+                    ? EnteLoadingWidget(
+                        size: 28,
+                        color: getEnteColorScheme(context).primary700,
+                      )
+                    : const SizedBox.shrink(),
+              ],
             ),
-            draggableAreaOptions: DraggableAreaOptions(
-              backgroundColor: colorScheme.backgroundBase,
-              indicatorColor: colorScheme.fillBase,
-              height: 32,
-              indicatorHeight: 4,
-            ),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              switchInCurve: Curves.easeInOutExpo,
-              switchOutCurve: Curves.easeInOutExpo,
-              child: StreamBuilder<List<File>>(
-                stream: visibleImages.stream,
-                builder: (
-                  BuildContext context,
-                  AsyncSnapshot<List<File>> snapshot,
-                ) {
-                  if (!snapshot.hasData) {
-                    return SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.2,
-                      child: const EnteLoadingWidget(),
-                    );
-                  }
-                  final images = snapshot.data!;
-                  _logger.info("Visible images: ${images.length}");
-                  if (images.isEmpty) {
-                    return SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.2,
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "No photos found here",
-                              style: textTheme.large,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "Zoom out to see photos",
-                              style: textTheme.smallFaint,
-                            )
-                          ],
+            bottomSheet: InteractiveBottomSheet(
+              options: InteractiveBottomSheetOptions(
+                backgroundColor: colorScheme.backgroundBase,
+                maxSize: 0.8,
+              ),
+              draggableAreaOptions: DraggableAreaOptions(
+                topBorderRadius: 12,
+                backgroundColor: colorScheme.backgroundBase,
+                indicatorColor: colorScheme.fillBase,
+                height: bottomSheetDraggableAreaHeight,
+                indicatorHeight: 4,
+              ),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                switchInCurve: Curves.easeInOutExpo,
+                switchOutCurve: Curves.easeInOutExpo,
+                child: StreamBuilder<List<File>>(
+                  stream: visibleImages.stream,
+                  builder: (
+                    BuildContext context,
+                    AsyncSnapshot<List<File>> snapshot,
+                  ) {
+                    if (!snapshot.hasData) {
+                      return SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.2,
+                        child: const EnteLoadingWidget(),
+                      );
+                    }
+                    final images = snapshot.data!;
+                    _logger.info("Visible images: ${images.length}");
+                    if (images.isEmpty) {
+                      return SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.2,
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "No photos found here",
+                                style: textTheme.large,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Zoom out to see photos",
+                                style: textTheme.smallFaint,
+                              )
+                            ],
+                          ),
                         ),
+                      );
+                    }
+                    //Be very careful when changing the height of the grid. It
+                    //the height should be exactly how much the grid occupies.
+                    //Do not add padding around the grid.
+                    //Doing these will cause unexpected scroll behaviour. This
+                    //is an issue with the package that is used here
+                    //(InteractiveBottomSheet)
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: maxHeightOfGrid(images.length),
+                      ),
+                      child: GridView.builder(
+                        itemCount: images.length,
+                        scrollDirection: Axis.vertical,
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: gridPadding),
+                        physics: const BouncingScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: gridCrossAxisCount,
+                          crossAxisSpacing: gridCrossAxisSpacing,
+                          mainAxisSpacing: gridMainAxisSpacing,
+                        ),
+                        // shrinkWrap: true,
+                        itemBuilder: (context, index) {
+                          final image = images[index];
+                          return ImageTile(
+                            image: image,
+                            visibleImages: images,
+                            index: index,
+                          );
+                        },
                       ),
                     );
-                  }
-                  //Be very careful when changing the height of the grid. It
-                  //the height should be exactly how much the grid occupies.
-                  //Do not add padding around the grid.
-                  //Doing these will cause unexpected scroll behaviour. This
-                  //is an issue with the package that is used here
-                  //(InteractiveBottomSheet)
-                  return ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: maxHeightOfGrid(images.length),
-                    ),
-                    child: GridView.builder(
-                      itemCount: images.length,
-                      scrollDirection: Axis.vertical,
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: gridPadding),
-                      physics: const BouncingScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: gridCrossAxisCount,
-                        crossAxisSpacing: gridCrossAxisSpacing,
-                        mainAxisSpacing: gridMainAxisSpacing,
-                      ),
-                      // shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        final image = images[index];
-                        return ImageTile(
-                          image: image,
-                          visibleImages: images,
-                          index: index,
-                        );
-                      },
-                    ),
-                  );
-                },
+                  },
+                ),
               ),
             ),
           ),

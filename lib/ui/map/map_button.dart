@@ -20,7 +20,7 @@ class MapButton extends StatelessWidget {
       elevation: 2,
       heroTag: heroTag,
       highlightElevation: 3,
-      backgroundColor: colorScheme.backgroundElevated,
+      backgroundColor: colorScheme.backgroundBase,
       mini: true,
       onPressed: onPressed,
       splashColor: Colors.transparent,
