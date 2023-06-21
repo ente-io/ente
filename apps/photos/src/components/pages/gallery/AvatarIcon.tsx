@@ -19,7 +19,6 @@ const Avatar = styled('div')<{ colorCode: string; size: number }>`
     justify-content: center;
     align-items: center;
     color: #fff;
-    border-radius: 9px;
     font-weight: bold;
     font-size: ${({ size }) => `${Math.floor(size / 2)}px`};
 `;
@@ -61,7 +60,7 @@ const AvatarCircle: React.FC<AvatarCircleProps> = ({ file }) => {
     }, []);
 
     return (
-        <Avatar size={20} colorCode={colorCode}>
+        <Avatar size={18} colorCode={colorCode}>
             {userLetter}
         </Avatar>
     );
