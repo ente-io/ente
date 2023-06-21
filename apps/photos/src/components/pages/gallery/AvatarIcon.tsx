@@ -1,36 +1,37 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useState, useContext, useLayoutEffect } from 'react';
 import { EnteFile } from 'types/file';
 import { User } from 'types/user';
 import { GalleryContext } from 'pages/gallery';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import darkThemeColors from 'themes/colors/dark';
+import { styled } from '@mui/material';
 
 interface AvatarCircleProps {
     file: EnteFile;
 }
 
+const Avatar = styled('div')<{ colorCode: string; size: number }>`
+    width: ${({ size }) => `${size}px`};
+    height: ${({ size }) => `${size}px`};
+    background-color: ${({ colorCode }) => `${colorCode}80`};
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    border-radius: 9px;
+    font-weight: bold;
+    font-size: ${({ size }) => `${Math.floor(size / 2)}px`};
+`;
+
 const AvatarCircle: React.FC<AvatarCircleProps> = ({ file }) => {
     const [colorCode, setColorCode] = useState('');
     const [userLetter, setUserLetter] = useState('');
     const { idToMail } = useContext(GalleryContext);
-    const size = 20;
-    const circleStyle = {
-        width: `${size}px`,
-        height: `${size}px`,
-        backgroundColor: `${colorCode}80`,
-        borderRadius: '50%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        color: '#fff',
-        radius: '9px',
 
-        fontWeight: 'bold',
-        fontSize: `${Math.floor(size / 2)}px`,
-    };
     const user: User = getData(LS_KEYS.USER);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const avatarEnabledFiles = async (file: EnteFile) => {
             let email: string;
             // checking cache
@@ -59,7 +60,11 @@ const AvatarCircle: React.FC<AvatarCircleProps> = ({ file }) => {
         avatarEnabledFiles(file);
     }, []);
 
-    return <div style={circleStyle}>{userLetter}</div>;
+    return (
+        <Avatar size={20} colorCode={colorCode}>
+            {userLetter}
+        </Avatar>
+    );
 };
 
 export default AvatarCircle;
