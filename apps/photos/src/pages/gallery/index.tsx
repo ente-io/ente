@@ -343,7 +343,13 @@ export default function Gallery() {
             }
         }
         const href = `/gallery${collectionURL}`;
-        router.push(href, undefined, { shallow: true });
+        const delayRouteChange = () => {
+            setTimeout(() => {
+                router.push(href, undefined, { shallow: true });
+            }, 1000);
+        };
+
+        delayRouteChange();
     }, [activeCollection]);
 
     useEffect(() => {

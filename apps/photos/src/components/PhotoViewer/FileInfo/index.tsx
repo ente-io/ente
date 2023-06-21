@@ -4,7 +4,6 @@ import { RenderCreationTime } from './RenderCreationTime';
 import { Box, DialogProps, Link, Stack, styled } from '@mui/material';
 import { getEXIFLocation } from 'services/upload/exifService';
 import { RenderCaption } from './RenderCaption';
-
 import CopyButton from 'components/CodeBlock/CopyButton';
 import { formatDate, formatTime } from 'utils/time/format';
 import Titlebar from 'components/Titlebar';
@@ -32,6 +31,7 @@ import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
 // import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
 import { AppContext } from 'pages/_app';
 import { t } from 'i18next';
+import { GalleryContext } from 'pages/gallery';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
@@ -53,6 +53,7 @@ interface Iprops {
     fileToCollectionsMap?: Map<number, number[]>;
     collectionNameMap?: Map<number, string>;
     showCollectionChips: boolean;
+    closePhotoViewer: () => void;
 }
 
 function BasicDeviceCamera({
@@ -87,8 +88,11 @@ export function FileInfo({
     fileToCollectionsMap,
     collectionNameMap,
     showCollectionChips,
+    closePhotoViewer,
 }: Iprops) {
     const appContext = useContext(AppContext);
+    const galleryContext = useContext(GalleryContext);
+
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
     const [showExif, setShowExif] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -164,6 +168,10 @@ export function FileInfo({
     if (!file) {
         return <></>;
     }
+    const onCollectionChipClick = (collectionID) => {
+        galleryContext.setActiveCollection(collectionID);
+        closePhotoViewer();
+    };
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
@@ -264,13 +272,18 @@ export function FileInfo({
                                     collectionNameMap.has(collectionID)
                                 )
                                 ?.map((collectionID) => (
-                                    <Chip key={collectionID}>
+                                    <Chip
+                                        key={collectionID}
+                                        onClick={() =>
+                                            onCollectionChipClick(collectionID)
+                                        }>
                                         {collectionNameMap.get(collectionID)}
                                     </Chip>
                                 ))}
                         </Box>
                     </InfoItem>
                 )}
+
                 {appContext.mlSearchEnabled && (
                     <>
                         <PhotoPeopleList
