@@ -62,7 +62,7 @@ export default function Preferences({ open, onClose, onRootClose }) {
                         <EnteMenuItem
                             onClick={openAdvancedMapSettings}
                             endIcon={<ChevronRight />}
-                            label={t('MAP')}
+                            label={t('Map')}
                         />
                     </Stack>
                 </Box>
