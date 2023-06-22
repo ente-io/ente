@@ -56,7 +56,7 @@ export default function AdvancedMApSettings({ open, onClose, onRootClose }) {
                                 <EnteMenuItem
                                     endIcon={<ChevronRight />}
                                     onClick={openMapSettings}
-                                    label={t('Map Setting')}
+                                    label={t('Map Settings')}
                                 />
                             </MenuItemGroup>
                         </Box>

@@ -9,7 +9,7 @@ export default function ManageMapEnabled({ onClose, disableMap, onRootClose }) {
         <Stack spacing={'4px'} py={'12px'}>
             <Titlebar
                 onClose={onClose}
-                title={t('MAP')}
+                title={t('Map Settings')}
                 onRootClose={onRootClose}
             />
             <Box px={'16px'}>
@@ -17,7 +17,7 @@ export default function ManageMapEnabled({ onClose, disableMap, onRootClose }) {
                     <MenuItemGroup>
                         <EnteMenuItem
                             onClick={disableMap}
-                            label={t('DISABLE MAP')}
+                            label={t('Disable Map')}
                         />
                     </MenuItemGroup>
                 </Stack>
