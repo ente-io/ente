@@ -1177,51 +1177,10 @@ class FilesDB {
     return result;
   }
 
-  Future<List<File>> getLatestCollectionFiles() async {
-    final enteWatch = EnteWatch("getLatestCollectionFiles")
-      ..start()
-      ..log("start");
-    debugPrint("Fetching latestCollectionFiles from db");
-    const String query = '''
-      SELECT $filesTable.*
-      FROM $filesTable
-      INNER JOIN
-        (
-          SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
-          FROM $filesTable
-          WHERE 
-          ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1
-           AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS 
-           NOT -1)
-          GROUP BY $columnCollectionID
-        ) latest_files
-        ON $filesTable.$columnCollectionID = latest_files.$columnCollectionID
-        AND $filesTable.$columnCreationTime = latest_files.max_creation_time;
-  ''';
-    final db = await instance.database;
-    final rows = await db.rawQuery(
-      query,
-    );
-    final files = convertToFiles(rows);
-    // TODO: Do this de-duplication within the SQL Query
-    final collectionMap = <int, File>{};
-    for (final file in files) {
-      if (collectionMap.containsKey(file.collectionID)) {
-        if (collectionMap[file.collectionID]!.updationTime! <
-            file.updationTime!) {
-          continue;
-        }
-      }
-      collectionMap[file.collectionID!] = file;
-    }
-    final result = collectionMap.values.toList();
-    enteWatch.log("end");
-    return result;
-  }
-
   // getCollectionLatestFileTime returns map of collectionID to the max
   // creationTime of the files in the collection.
   Future<Map<int, int>> getCollectionIDToMaxCreationTime() async {
+    final enteWatch = EnteWatch("getCollectionIDToMaxCreationTime")..start();
     final db = await instance.database;
     final rows = await db.rawQuery(
       '''
@@ -1238,6 +1197,7 @@ class FilesDB {
     for (final row in rows) {
       result[row[columnCollectionID] as int] = row['max_creation_time'] as int;
     }
+    enteWatch.log("query done");
     return result;
   }
 

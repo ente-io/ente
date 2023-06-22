@@ -29,7 +29,7 @@ import 'package:photos/utils/toast_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 class AlbumVerticalListWidget extends StatelessWidget {
-  final List<CollectionWithThumbnail> collectionsWithThumbnail;
+  final List<Collection> collections;
   final CollectionActionType actionType;
   final SelectedFiles? selectedFiles;
   final List<SharedMediaFile>? sharedFiles;
@@ -37,7 +37,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
   final bool shouldShowCreateAlbum;
 
   AlbumVerticalListWidget(
-    this.collectionsWithThumbnail,
+    this.collections,
     this.actionType,
     this.selectedFiles,
     this.sharedFiles,
@@ -54,7 +54,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
         ? sharedFiles!.length
         : selectedFiles?.files.length ?? 0;
 
-    if (collectionsWithThumbnail.isEmpty) {
+    if (collections.isEmpty) {
       if (shouldShowCreateAlbum) {
         return _getNewAlbumWidget(context, filesCount);
       }
@@ -65,8 +65,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
         if (index == 0 && shouldShowCreateAlbum) {
           return _getNewAlbumWidget(context, filesCount);
         }
-        final item =
-            collectionsWithThumbnail[index - (shouldShowCreateAlbum ? 1 : 0)];
+        final item = collections[index - (shouldShowCreateAlbum ? 1 : 0)];
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => _albumListItemOnTap(context, item),
@@ -78,8 +77,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
       separatorBuilder: (context, index) => const SizedBox(
         height: 8,
       ),
-      itemCount:
-          collectionsWithThumbnail.length + (shouldShowCreateAlbum ? 1 : 0),
+      itemCount: collections.length + (shouldShowCreateAlbum ? 1 : 0),
       shrinkWrap: true,
       physics: const BouncingScrollPhysics(),
     );
@@ -175,20 +173,18 @@ class AlbumVerticalListWidget extends StatelessWidget {
 
   Future<void> _albumListItemOnTap(
     BuildContext context,
-    CollectionWithThumbnail item,
+    Collection item,
   ) async {
-    if (await _runCollectionAction(context, item.collection)) {
+    if (await _runCollectionAction(context, item)) {
       late final String toastMessage;
       bool shouldNavigateToCollection = false;
       if (actionType == CollectionActionType.addFiles) {
-        toastMessage =
-            S.of(context).addedSuccessfullyTo(item.collection.displayName);
+        toastMessage = S.of(context).addedSuccessfullyTo(item.displayName);
         shouldNavigateToCollection = true;
       } else if (actionType == CollectionActionType.moveFiles ||
           actionType == CollectionActionType.restoreFiles ||
           actionType == CollectionActionType.unHide) {
-        toastMessage =
-            S.of(context).movedSuccessfullyTo(item.collection.displayName);
+        toastMessage = S.of(context).movedSuccessfullyTo(item.displayName);
         shouldNavigateToCollection = true;
       } else {
         toastMessage = "";
@@ -202,7 +198,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
       if (shouldNavigateToCollection) {
         _navigateToCollection(
           context,
-          item.collection,
+          item,
         );
       }
     }

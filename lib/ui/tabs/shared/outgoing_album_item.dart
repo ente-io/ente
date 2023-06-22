@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection.dart";
 import "package:photos/models/collection_items.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/gallery_type.dart";
@@ -11,7 +12,7 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class OutgoingAlbumItem extends StatelessWidget {
-  final CollectionWithThumbnail c;
+  final Collection c;
   static const heroTagPrefix = "outgoing_collection";
 
   const OutgoingAlbumItem({super.key, required this.c});
@@ -19,15 +20,15 @@ class OutgoingAlbumItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shareesName = <String>[];
-    if (c.collection.hasSharees) {
-      for (int index = 0; index < c.collection.sharees!.length; index++) {
-        final sharee = c.collection.sharees![index]!;
+    if (c.hasSharees) {
+      for (int index = 0; index < c.sharees!.length; index++) {
+        final sharee = c.sharees![index]!;
         final String name =
             (sharee.name?.isNotEmpty ?? false) ? sharee.name! : sharee.email;
         if (index < 2) {
           shareesName.add(name);
         } else {
-          final remaining = c.collection.sharees!.length - index;
+          final remaining = c.sharees!.length - index;
           if (remaining == 1) {
             // If it's the last sharee
             shareesName.add(name);
@@ -56,7 +57,7 @@ class OutgoingAlbumItem extends StatelessWidget {
                 height: 60,
                 width: 60,
                 child: FutureBuilder<File?>(
-                  future: CollectionsService.instance.getCover(c.collection),
+                  future: CollectionsService.instance.getCover(c),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       final String heroTag = heroTagPrefix + snapshot.data!.tag;
@@ -82,14 +83,14 @@ class OutgoingAlbumItem extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        c.collection.displayName,
+                        c.displayName,
                         style: const TextStyle(
                           fontSize: 16,
                         ),
                       ),
                       const Padding(padding: EdgeInsets.all(2)),
-                      c.collection.hasLink
-                          ? (c.collection.publicURLs!.first!.isExpired
+                      c.hasLink
+                          ? (c.publicURLs!.first!.isExpired
                               ? const Icon(
                                   Icons.link,
                                   color: warning500,
@@ -118,9 +119,13 @@ class OutgoingAlbumItem extends StatelessWidget {
           ],
         ),
       ),
-      onTap: () {
+      onTap: () async {
+        final thumbnail = await CollectionsService.instance.getCover(c);
         final page = CollectionPage(
-          c,
+          CollectionWithThumbnail(
+            c,
+            thumbnail,
+          ),
           appBarType: GalleryType.ownedCollection,
           tagPrefix: heroTagPrefix,
         );

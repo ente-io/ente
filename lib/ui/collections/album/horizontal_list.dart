@@ -5,13 +5,13 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/collection_items.dart";
+import "package:photos/models/collection.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/common/loading_widget.dart";
 
 class AlbumHorizontalList extends StatefulWidget {
-  final Future<List<CollectionWithThumbnail>> Function() collectionsFuture;
+  final Future<List<Collection>> Function() collectionsFuture;
 
   const AlbumHorizontalList(
     this.collectionsFuture, {
@@ -46,7 +46,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
   @override
   Widget build(BuildContext context) {
     debugPrint('$runtimeType widget build');
-    return FutureBuilder<List<CollectionWithThumbnail>>(
+    return FutureBuilder<List<Collection>>(
       future: widget.collectionsFuture(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -56,8 +56,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
           if (snapshot.data!.isEmpty) {
             return const SizedBox.shrink();
           }
-          final collectionsWithThumbnail =
-              snapshot.data as List<CollectionWithThumbnail>;
+          final collections = snapshot.data as List<Collection>;
           return Padding(
             padding: const EdgeInsets.only(bottom: 24, top: 8),
             child: Column(
@@ -79,10 +78,10 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                       separatorBuilder: (context, index) =>
                           const SizedBox(width: 4),
                       scrollDirection: Axis.horizontal,
-                      itemCount: collectionsWithThumbnail.length,
+                      itemCount: collections.length,
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       itemBuilder: (context, index) {
-                        final item = collectionsWithThumbnail[index];
+                        final item = collections[index];
                         return AlbumRowItemWidget(
                           item,
                           120,
