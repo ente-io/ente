@@ -74,7 +74,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
       future: _getCollections(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return _getCollectionsGalleryWidget(snapshot.data);
+          return _getCollectionsGalleryWidget(snapshot.data!);
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         } else {
@@ -134,9 +134,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     return favMathResult.matched + potentialSharedLinkCollection.unmatched;
   }
 
-  Widget _getCollectionsGalleryWidget(
-    List<Collection>? collections,
-  ) {
+  Widget _getCollectionsGalleryWidget(List<Collection> collections) {
     final TextStyle trashAndHiddenTextStyle =
         Theme.of(context).textTheme.titleMedium!.copyWith(
               color: Theme.of(context)
@@ -189,7 +187,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     );
   }
 
-  Widget _sortMenu(List<Collection>? collections) {
+  Widget _sortMenu(List<Collection> collections) {
     Text sortOptionText(AlbumSortKey key) {
       String text = key.toString();
       switch (key) {
@@ -220,27 +218,33 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
         ),
         child: Row(
           children: [
-            PopupMenuButton(
-              offset: const Offset(10, 50),
-              initialValue: sortKey?.index ?? 0,
+            GestureDetector(
+              onTapDown: (TapDownDetails details) async {
+                final int? selectedValue = await showMenu<int>(
+                  context: context,
+                  position: RelativeRect.fromLTRB(
+                    details.globalPosition.dx,
+                    details.globalPosition.dy,
+                    details.globalPosition.dx,
+                    details.globalPosition.dy + 50,
+                  ),
+                  items: List.generate(AlbumSortKey.values.length, (index) {
+                    return PopupMenuItem(
+                      value: index,
+                      child: sortOptionText(AlbumSortKey.values[index]),
+                    );
+                  }),
+                );
+                if (selectedValue != null) {
+                  sortKey = AlbumSortKey.values[selectedValue];
+                  await LocalSettings.instance.setAlbumSortKey(sortKey!);
+                  setState(() {});
+                }
+              },
               child: const IconButtonWidget(
                 icon: Icons.sort_outlined,
                 iconButtonType: IconButtonType.secondary,
-                disableGestureDetector: true,
               ),
-              onSelected: (int index) async {
-                sortKey = AlbumSortKey.values[index];
-                await LocalSettings.instance.setAlbumSortKey(sortKey!);
-                setState(() {});
-              },
-              itemBuilder: (context) {
-                return List.generate(AlbumSortKey.values.length, (index) {
-                  return PopupMenuItem(
-                    value: index,
-                    child: sortOptionText(AlbumSortKey.values[index]),
-                  );
-                });
-              },
             ),
             IconButtonWidget(
               icon: Icons.chevron_right,
@@ -250,7 +254,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                   routeToPage(
                     context,
                     CollectionVerticalGridView(
-                      collections ?? [],
+                      collections,
                       appTitle: SectionTitle(
                         titleWithBrand: getOnEnteSection(context),
                         skipMargin: true,
