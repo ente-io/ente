@@ -1050,6 +1050,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Session expired"),
         "setAPassword": MessageLookupByLibrary.simpleMessage("Set a password"),
         "setAs": MessageLookupByLibrary.simpleMessage("Set as"),
+        "setCover": MessageLookupByLibrary.simpleMessage("Set cover"),
         "setLabel": MessageLookupByLibrary.simpleMessage("Set"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Set password"),
