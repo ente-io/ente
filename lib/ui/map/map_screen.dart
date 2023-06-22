@@ -190,22 +190,28 @@ class _MapScreenState extends State<MapScreen> {
           child: Scaffold(
             body: Stack(
               children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.78 -
-                      bottomSheetDraggableAreaHeight,
-                  child: MapView(
-                    key: ValueKey(
-                      'image-marker-count-${imageMarkers.length}',
-                    ),
-                    controller: mapController,
-                    imageMarkers: imageMarkers,
-                    updateVisibleImages: calculateVisibleMarkers,
-                    center: center,
-                    initialZoom: initialZoom,
-                    minZoom: minZoom,
-                    maxZoom: maxZoom,
-                    debounceDuration: debounceDuration,
-                  ),
+                LayoutBuilder(
+                  builder: (context, constrains) {
+                    return SizedBox(
+                      height: constrains.maxHeight * 0.75 +
+                          bottomSheetDraggableAreaHeight,
+                      child: MapView(
+                        key: ValueKey(
+                          'image-marker-count-${imageMarkers.length}',
+                        ),
+                        controller: mapController,
+                        imageMarkers: imageMarkers,
+                        updateVisibleImages: calculateVisibleMarkers,
+                        center: center,
+                        initialZoom: initialZoom,
+                        minZoom: minZoom,
+                        maxZoom: maxZoom,
+                        debounceDuration: debounceDuration,
+                        bottomSheetDraggableAreaHeight:
+                            bottomSheetDraggableAreaHeight,
+                      ),
+                    );
+                  },
                 ),
                 isLoading
                     ? EnteLoadingWidget(

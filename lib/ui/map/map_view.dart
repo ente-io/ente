@@ -20,6 +20,7 @@ class MapView extends StatefulWidget {
   final double maxZoom;
   final double initialZoom;
   final int debounceDuration;
+  final double bottomSheetDraggableAreaHeight;
 
   const MapView({
     Key? key,
@@ -31,6 +32,7 @@ class MapView extends StatefulWidget {
     required this.maxZoom,
     required this.initialZoom,
     required this.debounceDuration,
+    required this.bottomSheetDraggableAreaHeight,
   }) : super(key: key);
 
   @override
@@ -91,10 +93,12 @@ class _MapViewState extends State<MapView> {
               }
             },
           ),
-          nonRotatedChildren: const [
+          nonRotatedChildren: [
             Padding(
-              padding: EdgeInsets.only(bottom: 16),
-              child: OSMFranceTileAttributes(),
+              padding: EdgeInsets.only(
+                bottom: widget.bottomSheetDraggableAreaHeight,
+              ),
+              child: const OSMFranceTileAttributes(),
             )
           ],
           children: [
@@ -152,7 +156,7 @@ class _MapViewState extends State<MapView> {
           ),
         ),
         Positioned(
-          bottom: 30,
+          bottom: widget.bottomSheetDraggableAreaHeight + 10,
           right: 10,
           child: Column(
             children: [
