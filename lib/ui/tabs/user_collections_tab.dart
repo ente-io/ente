@@ -18,10 +18,9 @@ import "package:photos/ui/collections/button/archived_button.dart";
 import "package:photos/ui/collections/button/hidden_button.dart";
 import "package:photos/ui/collections/button/trash_button.dart";
 import "package:photos/ui/collections/button/uncategorized_button.dart";
-import "package:photos/ui/collections/collections_grid_view_horizontal.dart";
-import "package:photos/ui/collections/collections_vertical_grid.dart";
 import 'package:photos/ui/collections/device_folders_grid_view_widget.dart';
-import 'package:photos/ui/collections/remote_collections_grid_view_widget.dart';
+import 'package:photos/ui/collections/horizontal_grid_view.dart';
+import "package:photos/ui/collections/vertical_grid_view.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/tabs/section_title.dart';
@@ -250,7 +249,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 unawaited(
                   routeToPage(
                     context,
-                    CollectionVerticalGrid(
+                    CollectionVerticalGridView(
                       collections ?? [],
                       appTitle: SectionTitle(
                         titleWithBrand: getOnEnteSection(context),
