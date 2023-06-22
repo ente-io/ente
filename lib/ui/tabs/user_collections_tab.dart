@@ -18,6 +18,8 @@ import "package:photos/ui/collections/button/archived_button.dart";
 import "package:photos/ui/collections/button/hidden_button.dart";
 import "package:photos/ui/collections/button/trash_button.dart";
 import "package:photos/ui/collections/button/uncategorized_button.dart";
+import "package:photos/ui/collections/collections_grid_view_horizontal.dart";
+import "package:photos/ui/collections/collections_vertical_grid.dart";
 import 'package:photos/ui/collections/device_folders_grid_view_widget.dart';
 import 'package:photos/ui/collections/remote_collections_grid_view_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -26,6 +28,7 @@ import 'package:photos/ui/tabs/section_title.dart';
 import 'package:photos/ui/viewer/actions/delete_empty_albums.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/local_settings.dart';
+import "package:photos/utils/navigation_util.dart";
 
 class UserCollectionsTab extends StatefulWidget {
   const UserCollectionsTab({Key? key}) : super(key: key);
@@ -157,12 +160,12 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 SectionTitle(titleWithBrand: getOnEnteSection(context)),
-                _sortMenu(),
+                _sortMenu(collections),
               ],
             ),
             DeleteEmptyAlbums(collections ?? []),
             Configuration.instance.hasConfiguredAccount()
-                ? RemoteCollectionsGridViewWidget(collections)
+                ? CollectionsGridViewHorizontal(collections)
                 : const EmptyState(),
             const Divider(),
             const SizedBox(height: 16),
@@ -187,7 +190,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     );
   }
 
-  Widget _sortMenu() {
+  Widget _sortMenu(List<Collection>? collections) {
     Text sortOptionText(AlbumSortKey key) {
       String text = key.toString();
       switch (key) {
@@ -210,33 +213,55 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     }
 
     return Padding(
-      padding: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.only(right: 4),
       child: Theme(
         data: Theme.of(context).copyWith(
           highlightColor: Colors.transparent,
           splashColor: Colors.transparent,
         ),
-        child: PopupMenuButton(
-          offset: const Offset(10, 50),
-          initialValue: sortKey?.index ?? 0,
-          child: const IconButtonWidget(
-            icon: Icons.sort_outlined,
-            iconButtonType: IconButtonType.secondary,
-            disableGestureDetector: true,
-          ),
-          onSelected: (int index) async {
-            sortKey = AlbumSortKey.values[index];
-            await LocalSettings.instance.setAlbumSortKey(sortKey!);
-            setState(() {});
-          },
-          itemBuilder: (context) {
-            return List.generate(AlbumSortKey.values.length, (index) {
-              return PopupMenuItem(
-                value: index,
-                child: sortOptionText(AlbumSortKey.values[index]),
-              );
-            });
-          },
+        child: Row(
+          children: [
+            PopupMenuButton(
+              offset: const Offset(10, 50),
+              initialValue: sortKey?.index ?? 0,
+              child: const IconButtonWidget(
+                icon: Icons.sort_outlined,
+                iconButtonType: IconButtonType.secondary,
+                disableGestureDetector: true,
+              ),
+              onSelected: (int index) async {
+                sortKey = AlbumSortKey.values[index];
+                await LocalSettings.instance.setAlbumSortKey(sortKey!);
+                setState(() {});
+              },
+              itemBuilder: (context) {
+                return List.generate(AlbumSortKey.values.length, (index) {
+                  return PopupMenuItem(
+                    value: index,
+                    child: sortOptionText(AlbumSortKey.values[index]),
+                  );
+                });
+              },
+            ),
+            IconButtonWidget(
+              icon: Icons.chevron_right,
+              iconButtonType: IconButtonType.secondary,
+              onTap: () {
+                unawaited(
+                  routeToPage(
+                    context,
+                    CollectionVerticalGrid(
+                      collections ?? [],
+                      appTitle: SectionTitle(
+                        titleWithBrand: getOnEnteSection(context),
+                        skipMargin: true,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            )
+          ],
         ),
       ),
     );

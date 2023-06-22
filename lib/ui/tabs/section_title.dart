@@ -7,10 +7,12 @@ import "package:styled_text/styled_text.dart";
 class SectionTitle extends StatelessWidget {
   final String? title;
   final Widget? titleWithBrand;
+  final bool skipMargin;
 
   const SectionTitle({
     this.title,
     this.titleWithBrand,
+    this.skipMargin = false,
     Key? key,
   }) : super(key: key);
 
@@ -29,7 +31,7 @@ class SectionTitle extends StatelessWidget {
       child = const SizedBox.shrink();
     }
     return Container(
-      margin: const EdgeInsets.only(left: 16),
+      margin: skipMargin ? null : const EdgeInsets.only(left: 16),
       child: Column(
         children: [
           Align(

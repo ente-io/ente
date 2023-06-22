@@ -1,30 +1,38 @@
-import 'dart:math';
+import "dart:math";
 
 import 'package:flutter/material.dart';
 import "package:photos/models/collection.dart";
 import "package:photos/ui/collections/album/row_item.dart";
-import 'package:photos/ui/collections/create_new_album_widget.dart';
 
-class RemoteCollectionsGridViewWidget extends StatelessWidget {
-  /*
-  Aspect ratio 1:1 Max width 224 Fixed gap 8
-  Width changes dynamically with screen width such that we can fit 2 in one row.
-  Keep the width integral (center the albums to distribute excess pixels)
-   */
+class CollectionVerticalGridView extends StatelessWidget {
   static const maxThumbnailWidth = 224.0;
   static const fixedGapBetweenAlbum = 8.0;
   static const minGapForHorizontalPadding = 8.0;
   static const collectionItemsToPreload = 20;
 
   final List<Collection>? collections;
+  final Widget? appTitle;
 
-  const RemoteCollectionsGridViewWidget(
+  const CollectionVerticalGridView(
     this.collections, {
+    this.appTitle,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        title: appTitle,
+      ),
+      body: SafeArea(
+        child: _getBody(context),
+      ),
+    );
+  }
+
+  Widget _getBody(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final int albumsCountInOneRow = max(screenWidth ~/ maxThumbnailWidth, 2);
     final double gapBetweenAlbums =
@@ -41,21 +49,16 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: GridView.builder(
-        shrinkWrap: true,
         physics: const ScrollPhysics(),
         // to disable GridView's scrolling
         itemBuilder: (context, index) {
-          if (index < collections!.length) {
-            return AlbumRowItemWidget(
-              collections![index],
-              sideOfThumbnail,
-              shouldRender: index < collectionItemsToPreload,
-            );
-          } else {
-            return const CreateNewAlbumWidget();
-          }
+          return AlbumRowItemWidget(
+            collections![index],
+            sideOfThumbnail,
+            shouldRender: index < collectionItemsToPreload,
+          );
         },
-        itemCount: collections!.length + 1,
+        itemCount: collections!.length,
         // To include the + button
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInOneRow,

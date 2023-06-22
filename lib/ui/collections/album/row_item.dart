@@ -52,9 +52,11 @@ class AlbumRowItemWidget extends StatelessWidget {
                         final String heroTag = tagPrefix + thumbnail.tag;
                         return Hero(
                           tag: heroTag,
-                          child: CollectionItemThumbnailWidget(
-                            c: CollectionWithThumbnail(c, thumbnail),
-                            heroTag: heroTag,
+                          child: ThumbnailWidget(
+                            thumbnail,
+                            shouldShowArchiveStatus: c.isArchived(),
+                            showFavForAlbumOnly: true,
+                            key: Key(heroTag),
                           ),
                         );
                       } else {

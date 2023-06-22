@@ -11,23 +11,25 @@ class CreateNewAlbumWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(30, 30, 30, 54),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.background,
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 2,
-              spreadRadius: 0,
-              offset: const Offset(0, 0),
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.3),
-            )
-          ],
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Icon(
-          Icons.add,
-          color: Theme.of(context).iconTheme.color!.withOpacity(0.25),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.background,
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 2,
+                spreadRadius: 0,
+                offset: const Offset(0, 0),
+                color: Theme.of(context).iconTheme.color!.withOpacity(0.3),
+              )
+            ],
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Icon(
+            Icons.add,
+            color: Theme.of(context).iconTheme.color!.withOpacity(0.25),
+          ),
         ),
       ),
       onTap: () async {
