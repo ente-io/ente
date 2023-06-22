@@ -1,20 +1,34 @@
 import { Box, DialogProps } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { AppContext } from 'pages/_app';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { logError } from 'utils/sentry';
+import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 
 // import EnableMapDialog from './EnableMapDialog';
 import ManageMapEnabled from './MangeMapEnabled';
 import EnableMap from './EnableMap';
 
 const MapSettings = ({ open, onClose, onRootClose }) => {
-    const { mapEnabled, updateMapEnabled, somethingWentWrong } =
-        useContext(AppContext);
+    const { somethingWentWrong } = useContext(AppContext);
+
+    const storedMapEnabled = getData(LS_KEYS.MAPENABLED);
+    const initialMapEnabled =
+        storedMapEnabled !== null ? storedMapEnabled : false;
+    const [mapEnabled, setMapEnabled] = useState(initialMapEnabled);
+
+    const updateMapEnabled = (enabled) => {
+        try {
+            setMapEnabled(enabled);
+            setData(LS_KEYS.MAPENABLED, enabled);
+        } catch (e) {
+            logError(e, 'Error while updating mapEnabled');
+        }
+    };
 
     const disableMap = async () => {
         try {
-            await updateMapEnabled(false);
+            updateMapEnabled(false);
             onClose();
         } catch (e) {
             logError(e, 'Disable Map failed');
@@ -23,7 +37,7 @@ const MapSettings = ({ open, onClose, onRootClose }) => {
     };
     const enableMap = async () => {
         try {
-            await updateMapEnabled(true);
+            updateMapEnabled(true);
             onClose();
         } catch (e) {
             logError(e, 'Enable Map failed');
