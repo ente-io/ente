@@ -1179,8 +1179,7 @@ class FilesDB {
 
   Future<List<File>> getLatestCollectionFiles() async {
     final enteWatch = EnteWatch("getLatestCollectionFiles")
-      ..start()
-      ..log("start");
+      ..start();
     debugPrint("Fetching latestCollectionFiles from db");
     const String query = '''
       SELECT $filesTable.*
@@ -1215,13 +1214,14 @@ class FilesDB {
       collectionMap[file.collectionID!] = file;
     }
     final result = collectionMap.values.toList();
-    enteWatch.log("end");
+    enteWatch.log("query done");
     return result;
   }
 
   // getCollectionLatestFileTime returns map of collectionID to the max
   // creationTime of the files in the collection.
   Future<Map<int, int>> getCollectionIDToMaxCreationTime() async {
+    final enteWatch = EnteWatch("getCollectionIDToMaxCreationTime")..start();
     final db = await instance.database;
     final rows = await db.rawQuery(
       '''
@@ -1238,6 +1238,7 @@ class FilesDB {
     for (final row in rows) {
       result[row[columnCollectionID] as int] = row['max_creation_time'] as int;
     }
+    enteWatch.log("query done");
     return result;
   }
 
