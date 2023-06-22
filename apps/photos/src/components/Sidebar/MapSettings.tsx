@@ -1,7 +1,7 @@
 import { Box, DialogProps } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { AppContext } from 'pages/_app';
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 
@@ -12,19 +12,28 @@ import EnableMap from './EnableMap';
 const MapSettings = ({ open, onClose, onRootClose }) => {
     const { somethingWentWrong } = useContext(AppContext);
 
-    const storedMapEnabled = getData(LS_KEYS.MAPENABLED);
-    const initialMapEnabled =
-        storedMapEnabled !== null ? storedMapEnabled : false;
-    const [mapEnabled, setMapEnabled] = useState(initialMapEnabled);
+    const [mapEnabled, setMapEnabled] = useState(false);
+
+    useEffect(() => {
+        const storedMapEnabled = getData(LS_KEYS.MAPENABLED);
+        const initialMapEnabled =
+            storedMapEnabled !== null ? storedMapEnabled : false;
+        setMapEnabled(initialMapEnabled.mapEnabled);
+    }, []);
+
+    useEffect(() => {
+        setData(LS_KEYS.MAPENABLED, { mapEnabled });
+    }, [mapEnabled]);
 
     const updateMapEnabled = (enabled) => {
         try {
             setMapEnabled(enabled);
-            setData(LS_KEYS.MAPENABLED, enabled);
         } catch (e) {
             logError(e, 'Error while updating mapEnabled');
         }
     };
+
+    console.log('MAp enabled from MapSetting', mapEnabled);
 
     const disableMap = async () => {
         try {
