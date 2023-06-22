@@ -1,6 +1,7 @@
 import "dart:math";
 
 import 'package:flutter/material.dart';
+import "package:photos/theme/ente_theme.dart";
 
 class PlaceHolderGridViewWidget extends StatelessWidget {
   const PlaceHolderGridViewWidget(
@@ -17,6 +18,7 @@ class PlaceHolderGridViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color faintColor = getEnteColorScheme(context).fillFaint;
     final int limitCount = min(count, columns * 5);
     final key = '$limitCount:$columns';
     if (!_gridViewCache.containsKey(key)) {
@@ -25,13 +27,13 @@ class PlaceHolderGridViewWidget extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
-          return Container(color: Colors.transparent);
+          return Container(color: faintColor);
         },
         itemCount: limitCount,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columns,
-          crossAxisSpacing: 2,
-          mainAxisSpacing: 2,
+          crossAxisSpacing: crossAxisSpacing,
+          mainAxisSpacing: mainAxisSpacing,
         ),
       );
     }
