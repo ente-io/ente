@@ -104,35 +104,26 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.add(
       ChangeLogEntry(
-        "Collages ✨",
-        'Create collages out of your favorite photos!\n\nSelect your photos, '
-            'and click on "Create collage" to build a single frame that captures your whole memory.',
+        "Map View ✨",
+        'You can now explore the photos you\'ve taken around the world!!\n'
+            '\nClick on the Map icon on the Search screen to view your photos'
+            ' laid out on a map.',
       ),
     );
 
     items.add(
       ChangeLogEntry(
-        "Album sort order",
-        'You can now choose how photos within your albums are ordered – '
-            'newest or oldest first.\n\nThis is useful for albums of trips '
-            'and events, where you wish to see your stories unfold along '
-            'their original timelines.\n\nClick on the overflow menu within '
-            'an album to configure how it\'s sorted.',
+        "Cover Photos ✨",
+        'You can now set cover photos for your albums.\n\nOpen an album, and '
+            'click on the overflow menu on the top right corner to pick your favorite memory from that album.',
       ),
     );
 
     items.add(
       ChangeLogEntry(
-        "Shared album improvements",
-        'Photos in albums that are shared with you will now be shown in your home gallery. You can hide them by simply archiving the shared album.',
-      ),
-    );
-    //You can now specify a custom radius while creating Location tags.
-    items.add(
-      ChangeLogEntry(
-        "Performance improvements",
-        "We've worked super hard to improve how smoothly our home gallery "
-            "scrolls. Skimming through your memories should be a lot more enjoyable now.",
+        "Improvements",
+        "This release contains massive improvements to how smoothly our "
+            "gallery scrolls. More improvements are on the way!",
         isFeature: false,
       ),
     );
