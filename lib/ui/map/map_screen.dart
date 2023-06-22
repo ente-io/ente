@@ -40,7 +40,7 @@ class _MapScreenState extends State<MapScreen> {
       StreamController<List<File>>.broadcast();
   MapController mapController = MapController();
   bool isLoading = true;
-  double initialZoom = 4.0;
+  double initialZoom = 4.5;
   double maxZoom = 18.0;
   double minZoom = 2.8;
   int debounceDuration = 500;
