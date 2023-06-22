@@ -33,7 +33,6 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  GlobalKey bottomSheetKey = GlobalKey();
   List<ImageMarker> imageMarkers = [];
   List<File> allImages = [];
   StreamController<List<File>> visibleImages =
@@ -272,8 +271,8 @@ class _MapScreenState extends State<MapScreen> {
                         ),
                       );
                     }
-                    //Be very careful when changing the height of the grid. It
-                    //the height should be exactly how much the grid occupies.
+                    //Be very careful when changing the height of the grid. The
+                    //height should be exactly how much the grid occupies.
                     //Do not add padding around the grid.
                     //Doing these will cause unexpected scroll behaviour. This
                     //is an issue with the package that is used here
@@ -294,7 +293,6 @@ class _MapScreenState extends State<MapScreen> {
                           crossAxisSpacing: gridCrossAxisSpacing,
                           mainAxisSpacing: gridMainAxisSpacing,
                         ),
-                        // shrinkWrap: true,
                         itemBuilder: (context, index) {
                           final image = images[index];
                           return ImageTile(
