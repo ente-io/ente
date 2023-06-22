@@ -55,9 +55,9 @@ class CollectionsService {
   final _cachedKeys = <int, Uint8List>{};
   final _cachedUserIdToUser = <int, User>{};
   Collection? cachedDefaultHiddenCollection;
-  Future<List<File>>? _cachedLatestFiles;
   Future<Map<int, int>>? _collectionIDToNewestFileTime;
   Collection? cachedUncategorizedCollection;
+  final Map<String, File> _coverCache = <String, File>{};
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
@@ -78,8 +78,12 @@ class CollectionsService {
       _cacheCollectionAttributes(collection);
     }
     Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
-      _cachedLatestFiles = null;
       _collectionIDToNewestFileTime = null;
+      if (event.collectionID != null) {
+        _coverCache.removeWhere(
+          (key, value) => key.startsWith(event.collectionID!.toString()),
+        );
+      }
     });
   }
 
@@ -219,8 +223,6 @@ class CollectionsService {
         _filesDB.getCollectionIDToMaxCreationTime();
     return _collectionIDToNewestFileTime!;
   }
-
-  final Map<String, File> _coverCache = <String, File>{};
 
   Future<File?> getCover(Collection c) async {
     final int localSyncTime = getCollectionSyncTime(c.id);
