@@ -13,7 +13,6 @@ import 'package:photos/extensions/list.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/remote_sync_service.dart";
 import "package:photos/ui/collections/button/archived_button.dart";
 import "package:photos/ui/collections/button/hidden_button.dart";
 import "package:photos/ui/collections/button/trash_button.dart";
@@ -136,8 +135,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   Widget _getCollectionsGalleryWidget(
     List<Collection>? collections,
   ) {
-    final bool showDeleteAlbumsButton =
-        RemoteSyncService.instance.isFirstRemoteSyncDone();
     final TextStyle trashAndHiddenTextStyle =
         Theme.of(context).textTheme.titleMedium!.copyWith(
               color: Theme.of(context)
@@ -163,12 +160,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 _sortMenu(),
               ],
             ),
-            showDeleteAlbumsButton
-                ? const Padding(
-                    padding: EdgeInsets.only(top: 2, left: 8.5, right: 48),
-                    child: DeleteEmptyAlbums(),
-                  )
-                : const SizedBox.shrink(),
+            DeleteEmptyAlbums(collections ?? []),
             Configuration.instance.hasConfiguredAccount()
                 ? RemoteCollectionsGridViewWidget(collections)
                 : const EmptyState(),

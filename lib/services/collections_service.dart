@@ -214,11 +214,6 @@ class CollectionsService {
         0;
   }
 
-  Future<List<File>> _getLatestCollectionFiles() {
-    _cachedLatestFiles ??= _filesDB.getLatestCollectionFiles();
-    return _cachedLatestFiles!;
-  }
-
   Future<Map<int, int>> getCollectionIDToNewestFileTime() {
     _collectionIDToNewestFileTime ??=
         _filesDB.getCollectionIDToMaxCreationTime();
