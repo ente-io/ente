@@ -27,6 +27,7 @@ import "package:photos/ui/map/map_screen.dart";
 import 'package:photos/ui/sharing/album_participants_page.dart';
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
+import "package:photos/ui/viewer/gallery/pick_cover_photo.dart";
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -460,6 +461,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               await _leaveAlbum(context);
             } else if (value == AlbumPopupAction.freeUpSpace) {
               await _deleteBackedUpFiles(context);
+            } else if (value == AlbumPopupAction.setCover) {
+              await setCoverPhoto(context);
             } else if (value == AlbumPopupAction.sort) {
               await _showSortOption(context);
             } else if (value == AlbumPopupAction.sharedArchive) {
@@ -485,6 +488,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
 
     return actions;
+  }
+
+  Future<void> setCoverPhoto(BuildContext context) async {
+    final file = await showPickCoverPhotoSheet(context, widget.collection!);
+    if (file != null) {
+      changeCoverPhoto(context, widget.collection!, file);
+    }
   }
 
   Future<void> showOnMap() async {

@@ -25,4 +25,5 @@ enum EventType {
   unarchived,
   hide,
   unhide,
+  coverChanged,
 }

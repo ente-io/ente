@@ -3,6 +3,8 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/events/collection_meta_event.dart";
+import "package:photos/events/collection_updated_event.dart";
+import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
@@ -98,6 +100,30 @@ Future<void> changeSortOrder(
     );
   } catch (e, s) {
     _logger.severe("failed to update collection visibility", e, s);
+    showShortToast(context, S.of(context).somethingWentWrong);
+    rethrow;
+  }
+}
+
+Future<void> changeCoverPhoto(
+  BuildContext context,
+  Collection collection,
+  File file,
+) async {
+  try {
+    final Map<String, dynamic> update = {"coverID": file.uploadedFileID};
+    await CollectionsService.instance
+        .updatePublicMagicMetadata(collection, update);
+    Bus.instance.fire(
+      CollectionUpdatedEvent(
+        collection.id,
+        <File>[],
+        "cover_change",
+        type: EventType.coverChanged,
+      ),
+    );
+  } catch (e, s) {
+    _logger.severe("failed to update cover", e, s);
     showShortToast(context, S.of(context).somethingWentWrong);
     rethrow;
   }
