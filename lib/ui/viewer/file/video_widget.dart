@@ -181,7 +181,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         ),
         Center(
           child: SizedBox.fromSize(
-            size: const Size.square(30),
+            size: const Size.square(20),
             child: _progress == null || _progress == 1
                 ? const CupertinoActivityIndicator(
                     color: Colors.white,

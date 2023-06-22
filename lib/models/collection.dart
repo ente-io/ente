@@ -130,6 +130,25 @@ class Collection {
     return (owner?.id ?? 0) == userID;
   }
 
+  CollectionParticipantRole getRole(int userID) {
+    if (isOwner(userID)) {
+      return CollectionParticipantRole.owner;
+    }
+    if (sharees == null) {
+      return CollectionParticipantRole.unknown;
+    }
+    for (final User? u in sharees!) {
+      if (u != null && u.id == userID) {
+        if (u.isViewer) {
+          return CollectionParticipantRole.viewer;
+        } else if (u.isCollaborator) {
+          return CollectionParticipantRole.collaborator;
+        }
+      }
+    }
+    return CollectionParticipantRole.unknown;
+  }
+
   // canLinkToDevicePath returns true if the collection can be linked to local
   // device album based on path. The path is nothing but the name of the device
   // album.
