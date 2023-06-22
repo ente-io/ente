@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:photos/models/collection_items.dart';
+import "package:photos/models/collection.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import 'package:photos/ui/collections/create_new_album_widget.dart';
 
@@ -16,7 +16,7 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
   static const minGapForHorizontalPadding = 8.0;
   static const collectionItemsToPreload = 20;
 
-  final List<CollectionWithThumbnail>? collections;
+  final List<Collection>? collections;
 
   const RemoteCollectionsGridViewWidget(
     this.collections, {
@@ -47,7 +47,7 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index < collections!.length) {
             return AlbumRowItemWidget(
-              collections![index].collection,
+              collections![index],
               sideOfThumbnail,
               shouldRender: index < collectionItemsToPreload,
             );

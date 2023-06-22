@@ -26,7 +26,6 @@ import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
-import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import "package:photos/models/metadata/collection_magic.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -57,6 +56,7 @@ class CollectionsService {
   final _cachedUserIdToUser = <int, User>{};
   Collection? cachedDefaultHiddenCollection;
   Future<List<File>>? _cachedLatestFiles;
+  Future<Map<int, int>>? _collectionIDToNewestFileTime;
   Collection? cachedUncategorizedCollection;
 
   CollectionsService._privateConstructor() {
@@ -79,6 +79,7 @@ class CollectionsService {
     }
     Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _cachedLatestFiles = null;
+      _collectionIDToNewestFileTime = null;
     });
   }
 
@@ -218,6 +219,12 @@ class CollectionsService {
     return _cachedLatestFiles!;
   }
 
+  Future<Map<int, int>> getCollectionIDToNewestFileTime() {
+    _collectionIDToNewestFileTime ??=
+        _filesDB.getCollectionIDToMaxCreationTime();
+    return _collectionIDToNewestFileTime!;
+  }
+
   final Map<String, File> _coverCache = <String, File>{};
 
   Future<File?> getCover(Collection c) async {
@@ -246,12 +253,6 @@ class CollectionsService {
       return Future.value(coverFile);
     }
     return null;
-  }
-
-  File? cachedCover(Collection c) {
-    final int localSyncTime = getCollectionSyncTime(c.id);
-    final String coverKey = '${c.id}_${localSyncTime}_${c.updationTime}';
-    return _coverCache[coverKey];
   }
 
   Future<bool> setCollectionSyncTime(int collectionID, int? time) async {
@@ -321,41 +322,6 @@ class CollectionsService {
           id: userID,
           email: "unknown@unknown.com",
         );
-  }
-
-  @Deprecated("Use getCollectionsForUI and getCover instead")
-  Future<List<CollectionWithThumbnail>> getCollectionsWithThumbnails({
-    bool includedOwnedByOthers = false,
-    // includeCollabCollections will include collections where the current user
-    // is added as a collaborator
-    bool includeCollabCollections = false,
-  }) async {
-    final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
-    final usersCollection = getActiveCollections();
-    // remove any hidden collection to avoid accidental rendering on UI
-    usersCollection.removeWhere((element) => element.isHidden());
-    if (!includedOwnedByOthers) {
-      final userID = Configuration.instance.getUserID();
-      if (includeCollabCollections) {
-        usersCollection.removeWhere(
-          (c) =>
-              (c.owner?.id != userID) &&
-              (c.getSharees().any((u) => (u.id ?? -1) == userID && u.isViewer)),
-        );
-      } else {
-        usersCollection.removeWhere((c) => c.owner?.id != userID);
-      }
-    }
-    final latestCollectionFiles = await _getLatestCollectionFiles();
-    final Map<int, File> collectionToThumbnailMap = Map.fromEntries(
-      latestCollectionFiles.map((e) => MapEntry(e.collectionID!, e)),
-    );
-
-    for (final c in usersCollection) {
-      final File? thumbnail = collectionToThumbnailMap[c.id];
-      collectionsWithThumbnail.add(CollectionWithThumbnail(c, thumbnail));
-    }
-    return collectionsWithThumbnail;
   }
 
   Future<List<User>> getSharees(int collectionID) {
