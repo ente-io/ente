@@ -223,12 +223,12 @@ class _MapScreenState extends State<MapScreen> {
             ),
             bottomSheet: InteractiveBottomSheet(
               options: InteractiveBottomSheetOptions(
-                backgroundColor: colorScheme.backgroundBase,
+                backgroundColor: colorScheme.backgroundElevated,
                 maxSize: 0.8,
               ),
               draggableAreaOptions: DraggableAreaOptions(
                 topBorderRadius: 12,
-                backgroundColor: colorScheme.backgroundBase,
+                backgroundColor: colorScheme.backgroundElevated2,
                 indicatorColor: colorScheme.fillBase,
                 height: bottomSheetDraggableAreaHeight,
                 indicatorHeight: 4,
