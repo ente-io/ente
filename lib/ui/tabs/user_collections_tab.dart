@@ -13,6 +13,7 @@ import 'package:photos/extensions/list.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/favorites_service.dart";
 import "package:photos/ui/collections/button/archived_button.dart";
 import "package:photos/ui/collections/button/hidden_button.dart";
 import "package:photos/ui/collections/button/trash_button.dart";
@@ -93,12 +94,11 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
       (element) => element.type == CollectionType.favorites,
     );
 
-    // Hide fav collection if it's empty and not shared
-    // favMathResult.matched.removeWhere(
-    //   (element) =>
-    //       element.thumbnail == null &&
-    //       (element.collection.publicURLs?.isEmpty ?? false),
-    // );
+    // Hide fav collection if it's empty
+    if (!FavoritesService.instance.hasFavorites()) {
+      favMathResult.matched.clear();
+    }
+
     late Map<int, int> collectionIDToNewestPhotoTime;
     if (sortKey == AlbumSortKey.newestPhoto) {
       collectionIDToNewestPhotoTime =
