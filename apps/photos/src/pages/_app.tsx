@@ -101,6 +101,8 @@ type AppContextType = {
     resetSharedFiles: () => void;
     redirectURL: string;
     setRedirectURL: (url: string) => void;
+    mapEnabled: boolean;
+    updateMapEnabled: (enabled: boolean) => Promise<void>;
     mlSearchEnabled: boolean;
     updateMlSearchEnabled: (enabled: boolean) => Promise<void>;
     startLoading: () => void;
@@ -147,6 +149,7 @@ export default function App(props) {
     const [redirectName, setRedirectName] = useState<string>(null);
     const [redirectURL, setRedirectURL] = useState(null);
     const [mlSearchEnabled, setMlSearchEnabled] = useState(false);
+    const [mapEnabled, setMapEnabled] = useState(false);
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
@@ -382,6 +385,15 @@ export default function App(props) {
     }, [notificationAttributes]);
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
+
+    const updateMapEnabled = async (enabled: boolean) => {
+        try {
+            setMapEnabled(enabled);
+        } catch (e) {
+            logError(e, 'Error while updating mapEnabled');
+        }
+    };
+
     const updateMlSearchEnabled = async (enabled: boolean) => {
         try {
             const mlSearchConfig = await getMLSearchConfig();
@@ -471,6 +483,8 @@ export default function App(props) {
                 <AppContext.Provider
                     value={{
                         showNavBar,
+                        mapEnabled,
+                        updateMapEnabled,
                         mlSearchEnabled,
                         updateMlSearchEnabled,
                         sharedFiles,
