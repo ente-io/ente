@@ -5283,6 +5283,16 @@ class S {
     );
   }
 
+  /// `Set cover`
+  String get setCover {
+    return Intl.message(
+      'Set cover',
+      name: 'setCover',
+      desc: 'Text to set cover photo for an album',
+      args: [],
+    );
+  }
+
   /// `Sort by`
   String get sortAlbumsBy {
     return Intl.message(

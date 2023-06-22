@@ -61,7 +61,8 @@ enum AlbumPopupAction {
   sharedArchive,
   sort,
   leave,
-  freeUpSpace
+  freeUpSpace,
+  setCover,
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -290,6 +291,20 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   padding: EdgeInsets.all(8),
                 ),
                 Text(S.of(context).renameAlbum),
+              ],
+            ),
+          ),
+        );
+        items.add(
+          PopupMenuItem(
+            value: AlbumPopupAction.setCover,
+            child: Row(
+              children: [
+                const Icon(Icons.image_outlined),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(S.of(context).setCover),
               ],
             ),
           ),

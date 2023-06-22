@@ -753,6 +753,10 @@
   },
   "deleteAll": "Delete All",
   "renameAlbum": "Rename album",
+  "setCover" : "Set cover",
+  "@setCover": {
+    "description": "Text to set cover photo for an album"
+  },
   "sortAlbumsBy": "Sort by",
   "sortNewestFirst": "Newest first",
   "sortOldestFirst": "Oldest first",
