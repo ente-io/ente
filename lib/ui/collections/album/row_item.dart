@@ -64,40 +64,52 @@ class AlbumRowItemWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          Row(
-            children: [
-              Container(
-                constraints: BoxConstraints(maxWidth: sideOfThumbnail - 40),
-                child: Text(
-                  c.displayName,
-                  style: enteTextTheme.small,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (showFileCount)
+          SizedBox(
+            width: sideOfThumbnail,
+            child: Row(
+              children: [
                 FutureBuilder<int>(
-                  future: FilesDB.instance.collectionFileCount(c.id),
+                  future: showFileCount
+                      ? FilesDB.instance.collectionFileCount(c.id)
+                      : Future.value(0),
                   builder: (context, snapshot) {
                     if (snapshot.hasData && snapshot.data! > 0) {
-                      return RichText(
-                        text: TextSpan(
-                          style: enteTextTheme.smallMuted,
-                          children: [
-                            const TextSpan(text: "  \u2022  "),
-                            TextSpan(
-                              text: NumberFormat().format(snapshot.data),
+                      final String textCount =
+                          NumberFormat().format(snapshot.data);
+                      return Row(
+                        children: [
+                          Container(
+                            constraints: BoxConstraints(
+                              maxWidth: sideOfThumbnail -
+                                  ((textCount.length + 3) * 9),
                             ),
-                          ],
-                        ),
+                            child: Text(
+                              c.displayName,
+                              style: enteTextTheme.small,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          RichText(
+                            text: TextSpan(
+                              style: enteTextTheme.smallMuted,
+                              children: [
+                                TextSpan(text: '  \u2022  $textCount'),
+                              ],
+                            ),
+                          )
+                        ],
                       );
                     } else {
-                      return const SizedBox.shrink();
+                      return Text(
+                        c.displayName,
+                        style: enteTextTheme.small,
+                        overflow: TextOverflow.ellipsis,
+                      );
                     }
                   },
                 )
-              else
-                const SizedBox.shrink(),
-            ],
+              ],
+            ),
           ),
         ],
       ),
