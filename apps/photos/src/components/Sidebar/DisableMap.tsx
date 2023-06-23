@@ -8,25 +8,17 @@ export default function EnableMap({ onClose, disableMap, onRootClose }) {
         <Stack spacing={'4px'} py={'12px'}>
             <Titlebar
                 onClose={onClose}
-                title={t('Disable Maps?')}
+                title={t('DISABLE_MAPS')}
                 onRootClose={onRootClose}
             />
             <Stack py={'20px'} px={'8px'} spacing={'32px'}>
                 <Box px={'8px'}>
                     {' '}
                     <Typography color="text.muted">
-                        <Trans
-                            i18nKey={
-                                'This will disable the display of your photos on a world map.'
-                            }
-                        />
+                        <Trans i18nKey={'DISABLE_MAP_DESCRIPTION_1'} />
                         <br />
                         <br />
-                        <Trans
-                            i18nKey={
-                                'You can enable this feature anytime from Settings.'
-                            }
-                        />
+                        <Trans i18nKey={'DISABLE_MAP_DESCRIPTION_2'} />
                     </Typography>
                 </Box>
                 <Stack px={'8px'} spacing={'8px'}>
@@ -37,7 +29,7 @@ export default function EnableMap({ onClose, disableMap, onRootClose }) {
                         {t('DISABLE')}
                     </Button>
                     <Button color={'secondary'} size="large" onClick={onClose}>
-                        {t('Cancel')}
+                        {t('CANCEL')}
                     </Button>
                 </Stack>
             </Stack>

@@ -43,7 +43,7 @@ export default function AdvancedMapSettings({ open, onClose, onRootClose }) {
             <Stack spacing={'4px'} py={'12px'}>
                 <Titlebar
                     onClose={onClose}
-                    title={t('Map')}
+                    title={t('MAP')}
                     onRootClose={handleRootClose}
                 />
 
@@ -55,7 +55,7 @@ export default function AdvancedMapSettings({ open, onClose, onRootClose }) {
                                     onClick={openMapSettings}
                                     variant="toggle"
                                     checked={mapEnabledToggle}
-                                    label={t('Map Settings')}
+                                    label={t('MAP_SETTINGS')}
                                 />
                             </MenuItemGroup>
                         </Box>

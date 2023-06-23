@@ -8,34 +8,22 @@ export default function EnableMap({ onClose, enableMap, onRootClose }) {
         <Stack spacing={'4px'} py={'12px'}>
             <Titlebar
                 onClose={onClose}
-                title={t('Enable Maps?')}
+                title={t('ENABLE_MAPS')}
                 onRootClose={onRootClose}
             />
             <Stack py={'20px'} px={'8px'} spacing={'32px'}>
                 <Box px={'8px'}>
                     {' '}
                     <Typography color="text.muted">
-                        <Trans
-                            i18nKey={
-                                'This will show your photos on a worldmap.'
-                            }
-                        />
+                        <Trans i18nKey={'ENABLE_MAP_DESCRIPTION_1'} />
                         <br />
                         <br />
 
-                        <Trans
-                            i18nKey={
-                                'The map is hosted by OpenStreetMap, and the exact locations of your photos are never shared.'
-                            }
-                        />
+                        <Trans i18nKey={'ENABLE_MAP_DESCRIPTION_2'} />
                         <br />
                         <br />
 
-                        <Trans
-                            i18nKey={
-                                'You can disable this feature anytime from Settings.'
-                            }
-                        />
+                        <Trans i18nKey={'ENABLE_MAP_DESCRIPTION_3'} />
                     </Typography>
                 </Box>
                 <Stack px={'8px'} spacing={'8px'}>
@@ -43,7 +31,7 @@ export default function EnableMap({ onClose, enableMap, onRootClose }) {
                         {t('ENABLE')}
                     </Button>
                     <Button color={'secondary'} size="large" onClick={onClose}>
-                        {t('Cancel')}
+                        {t('CANCEL')}
                     </Button>
                 </Stack>
             </Stack>
