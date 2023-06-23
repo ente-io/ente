@@ -5,12 +5,12 @@ import "package:photos/models/collection.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 
 class CollectionVerticalGridView extends StatelessWidget {
-  static const maxThumbnailWidth = 224.0;
-  static const fixedGapBetweenAlbum = 8.0;
-  static const minGapForHorizontalPadding = 8.0;
+  static const maxThumbnailWidth = 160.0;
 
   final List<Collection>? collections;
   final Widget? appTitle;
+
+  final double gapBetweenAlbums = 1.0;
 
   const CollectionVerticalGridView(
     this.collections, {
@@ -33,37 +33,28 @@ class CollectionVerticalGridView extends StatelessWidget {
 
   Widget _getBody(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    final int albumsCountInOneRow = max(screenWidth ~/ maxThumbnailWidth, 2);
-    final double gapBetweenAlbums =
-        (albumsCountInOneRow - 1) * fixedGapBetweenAlbum;
-    // gapOnSizeOfAlbums will be
-    final double gapOnSizeOfAlbums = minGapForHorizontalPadding +
-        (screenWidth - gapBetweenAlbums - (2 * minGapForHorizontalPadding)) %
-            albumsCountInOneRow;
-
-    final double sideOfThumbnail =
-        (screenWidth - gapOnSizeOfAlbums - gapBetweenAlbums) /
-            albumsCountInOneRow;
+    final int albumsCountInOneRow =
+        max(screenWidth ~/ (maxThumbnailWidth + 24), 2);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.only(top: 12, left: 12, right: 12, bottom: 24),
       child: GridView.builder(
         physics: const ScrollPhysics(),
         // to disable GridView's scrolling
         itemBuilder: (context, index) {
           return AlbumRowItemWidget(
             collections![index],
-            sideOfThumbnail,
+            maxThumbnailWidth,
           );
         },
         itemCount: collections!.length,
         // To include the + button
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInOneRow,
-          mainAxisSpacing: 12,
+          mainAxisSpacing: gapBetweenAlbums,
           crossAxisSpacing: gapBetweenAlbums,
-          childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 46),
-        ), //24 is height of album title
+          childAspectRatio: maxThumbnailWidth / (maxThumbnailWidth + 24),
+        ),
       ),
     );
   }

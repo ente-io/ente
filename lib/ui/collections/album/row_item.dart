@@ -74,28 +74,29 @@ class AlbumRowItemWidget extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              showFileCount
-                  ? FutureBuilder<int>(
-                      future: FilesDB.instance.collectionFileCount(c.id),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData && snapshot.data! > 0) {
-                          return RichText(
-                            text: TextSpan(
-                              style: enteTextTheme.smallMuted,
-                              children: [
-                                const TextSpan(text: "  \u2022  "),
-                                TextSpan(
-                                  text: NumberFormat().format(snapshot.data),
-                                ),
-                              ],
+              if (showFileCount)
+                FutureBuilder<int>(
+                  future: FilesDB.instance.collectionFileCount(c.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data! > 0) {
+                      return RichText(
+                        text: TextSpan(
+                          style: enteTextTheme.smallMuted,
+                          children: [
+                            const TextSpan(text: "  \u2022  "),
+                            TextSpan(
+                              text: NumberFormat().format(snapshot.data),
                             ),
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      },
-                    )
-                  : const SizedBox.shrink(),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return const SizedBox.shrink();
+                    }
+                  },
+                )
+              else
+                const SizedBox.shrink(),
             ],
           ),
         ],

@@ -4,14 +4,7 @@ import "package:photos/ui/collections/album/row_item.dart";
 import 'package:photos/ui/collections/create_new_album_widget.dart';
 
 class CollectionsGridViewHorizontal extends StatelessWidget {
-  /*
-  Aspect ratio 1:1 Max width 224 Fixed gap 8
-  Width changes dynamically with screen width such that we can fit 2 in one row.
-  Keep the width integral (center the albums to distribute excess pixels)
-   */
-  static const maxThumbnailWidth = 224.0;
-  static const fixedGapBetweenAlbum = 60.0;
-  static const minGapForHorizontalPadding = 8.0;
+  static const maxThumbnailWidth = 160.0;
 
   final List<Collection>? collections;
 
@@ -22,13 +15,8 @@ class CollectionsGridViewHorizontal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    double thumSize = (screenWidth - fixedGapBetweenAlbum) / 2;
-    if (thumSize > maxThumbnailWidth) {
-      thumSize = maxThumbnailWidth;
-    }
     return SizedBox(
-      height: thumSize * 2 + 100,
+      height: maxThumbnailWidth * 2 + 80,
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
         scrollDirection: Axis.horizontal,
@@ -41,26 +29,28 @@ class CollectionsGridViewHorizontal extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8.0,
-                    vertical: 8.0,
+                    vertical: 12.0,
                   ),
                   child: AlbumRowItemWidget(
                     collections![firstIndex],
-                    thumSize,
+                    maxThumbnailWidth,
                   ),
                 ),
               if (secondIndex < collections!.length)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                  ),
                   child: AlbumRowItemWidget(
                     collections![secondIndex],
-                    thumSize,
+                    maxThumbnailWidth,
                   ),
                 ),
               if (secondIndex >= collections!.length)
-                SizedBox(
-                  width: thumSize,
-                  height: thumSize,
-                  child: const CreateNewAlbumWidget(),
+                const SizedBox(
+                  width: maxThumbnailWidth,
+                  height: maxThumbnailWidth,
+                  child: CreateNewAlbumWidget(),
                 ),
             ],
           );
