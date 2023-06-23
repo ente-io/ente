@@ -15,14 +15,12 @@ import 'package:photos/utils/navigation_util.dart';
 class AlbumRowItemWidget extends StatelessWidget {
   final Collection c;
   final double sideOfThumbnail;
-  final bool shouldRender;
   final bool showFileCount;
   static const tagPrefix = "collection";
 
   AlbumRowItemWidget(
     this.c,
     this.sideOfThumbnail, {
-    this.shouldRender = false,
     this.showFileCount = true,
     Key? key,
   }) : super(key: Key(c.id.toString()));

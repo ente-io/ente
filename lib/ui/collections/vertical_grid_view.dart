@@ -8,7 +8,6 @@ class CollectionVerticalGridView extends StatelessWidget {
   static const maxThumbnailWidth = 224.0;
   static const fixedGapBetweenAlbum = 8.0;
   static const minGapForHorizontalPadding = 8.0;
-  static const collectionItemsToPreload = 20;
 
   final List<Collection>? collections;
   final Widget? appTitle;
@@ -55,7 +54,6 @@ class CollectionVerticalGridView extends StatelessWidget {
           return AlbumRowItemWidget(
             collections![index],
             sideOfThumbnail,
-            shouldRender: index < collectionItemsToPreload,
           );
         },
         itemCount: collections!.length,
