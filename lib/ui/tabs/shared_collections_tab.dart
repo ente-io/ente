@@ -106,9 +106,6 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                         return AlbumRowItemWidget(
                           collections.incoming[index],
                           maxThumbnailWidth,
-                          tagPrefix: ""
-                              "shared_collection",
-                          isIncomingAlbum: true,
                         );
                       },
                       itemCount: collections.incoming.length,

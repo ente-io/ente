@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
+import "package:photos/core/configuration.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
@@ -17,23 +18,18 @@ class AlbumRowItemWidget extends StatelessWidget {
   final Collection c;
   final double sideOfThumbnail;
   final bool showFileCount;
-  final String tagPrefix;
-
-  // Set it to true if the album is shared with user.
-  // Based on this, we will show the shared album owner's avatar.
-  final bool isIncomingAlbum;
 
   const AlbumRowItemWidget(
     this.c,
     this.sideOfThumbnail, {
     super.key,
     this.showFileCount = true,
-    this.tagPrefix = "collection",
-    this.isIncomingAlbum = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool isOwner = c.isOwner(Configuration.instance.getUserID()!);
+    final String tagPrefix = isOwner ? "collection" : "shared_collection";
     final enteTextTheme = getEnteTextTheme(context);
     return GestureDetector(
       child: Column(
@@ -58,9 +54,9 @@ class AlbumRowItemWidget extends StatelessWidget {
                               tag: heroTag,
                               child: ThumbnailWidget(
                                 thumbnail,
-                                shouldShowArchiveStatus: isIncomingAlbum
-                                    ? c.hasShareeArchived()
-                                    : c.isArchived(),
+                                shouldShowArchiveStatus: isOwner
+                                    ? c.isArchived()
+                                    : c.hasShareeArchived(),
                                 showFavForAlbumOnly: true,
                                 shouldShowSyncStatus: false,
                                 key: Key(heroTag),
@@ -71,7 +67,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                           }
                         },
                       ),
-                      if (isIncomingAlbum)
+                      if (!isOwner)
                         Align(
                           alignment: Alignment.bottomRight,
                           child: Padding(
@@ -141,9 +137,11 @@ class AlbumRowItemWidget extends StatelessWidget {
           CollectionPage(
             CollectionWithThumbnail(c, thumbnail),
             tagPrefix: tagPrefix,
-            appBarType: (c.type == CollectionType.favorites
-                ? GalleryType.favorite
-                : GalleryType.ownedCollection),
+            appBarType: isOwner
+                ? (c.type == CollectionType.favorites
+                    ? GalleryType.favorite
+                    : GalleryType.ownedCollection)
+                : GalleryType.sharedCollection,
           ),
         );
       },
