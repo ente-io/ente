@@ -65,7 +65,6 @@ class _DeviceFoldersGridViewWidgetState
                       child: EmptyState(),
                     )
                   : ListView.builder(
-                      shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                       physics: const ScrollPhysics(),
