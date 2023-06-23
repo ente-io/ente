@@ -1261,7 +1261,7 @@ export async function unhideToCollection(
     }
 }
 
-export const userIdtoEmail = async () => {
+export const userIdtoEmail = async (): Promise<Map<number, string>> => {
     try {
         const collection = await getLocalCollections();
         const user: User = getData(LS_KEYS.USER);
