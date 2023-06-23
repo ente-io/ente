@@ -16,12 +16,13 @@ class AlbumRowItemWidget extends StatelessWidget {
   final Collection c;
   final double sideOfThumbnail;
   final bool showFileCount;
-  static const tagPrefix = "collection";
+  final String tagPrefix;
 
   AlbumRowItemWidget(
     this.c,
     this.sideOfThumbnail, {
     this.showFileCount = true,
+    this.tagPrefix = "collection",
     Key? key,
   }) : super(key: Key(c.id.toString()));
 
@@ -51,6 +52,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                             thumbnail,
                             shouldShowArchiveStatus: c.isArchived(),
                             showFavForAlbumOnly: true,
+                            shouldShowSyncStatus: false,
                             key: Key(heroTag),
                           ),
                         );
@@ -66,49 +68,44 @@ class AlbumRowItemWidget extends StatelessWidget {
           const SizedBox(height: 4),
           SizedBox(
             width: sideOfThumbnail,
-            child: Row(
-              children: [
-                FutureBuilder<int>(
-                  future: showFileCount
-                      ? FilesDB.instance.collectionFileCount(c.id)
-                      : Future.value(0),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData && snapshot.data! > 0) {
-                      final String textCount =
-                          NumberFormat().format(snapshot.data);
-                      return Row(
-                        children: [
-                          Container(
-                            constraints: BoxConstraints(
-                              maxWidth: sideOfThumbnail -
-                                  ((textCount.length + 3) * 9),
-                            ),
-                            child: Text(
-                              c.displayName,
-                              style: enteTextTheme.small,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          RichText(
-                            text: TextSpan(
-                              style: enteTextTheme.smallMuted,
-                              children: [
-                                TextSpan(text: '  \u2022  $textCount'),
-                              ],
-                            ),
-                          )
-                        ],
-                      );
-                    } else {
-                      return Text(
-                        c.displayName,
-                        style: enteTextTheme.small,
-                        overflow: TextOverflow.ellipsis,
-                      );
-                    }
-                  },
-                )
-              ],
+            child: FutureBuilder<int>(
+              future: showFileCount
+                  ? FilesDB.instance.collectionFileCount(c.id)
+                  : Future.value(0),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data! > 0) {
+                  final String textCount = NumberFormat().format(snapshot.data);
+                  return Row(
+                    children: [
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth:
+                              sideOfThumbnail - ((textCount.length + 3) * 10),
+                        ),
+                        child: Text(
+                          c.displayName,
+                          style: enteTextTheme.small,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      RichText(
+                        text: TextSpan(
+                          style: enteTextTheme.smallMuted,
+                          children: [
+                            TextSpan(text: '  \u2022  $textCount'),
+                          ],
+                        ),
+                      )
+                    ],
+                  );
+                } else {
+                  return Text(
+                    c.displayName,
+                    style: enteTextTheme.small,
+                    overflow: TextOverflow.ellipsis,
+                  );
+                }
+              },
             ),
           ),
         ],
