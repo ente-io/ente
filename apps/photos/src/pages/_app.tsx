@@ -55,7 +55,7 @@ import {
 } from 'types/Notification';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import { AppUpdateInfo } from 'types/electron';
-import { getSentryUserID } from 'utils/user';
+import { getSentryUserID, testSRP } from 'utils/user';
 import { User } from 'types/user';
 import { SetTheme } from 'types/theme';
 import { useLocalState } from 'hooks/useLocalState';
@@ -170,6 +170,10 @@ export default function App(props) {
 
     const { name: appName, title: appTitle } = useMemo(() => {
         return getAppNameAndTitle();
+    }, []);
+
+    useEffect(() => {
+        testSRP();
     }, []);
 
     useEffect(() => {

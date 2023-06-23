@@ -271,7 +271,7 @@ export const generateSRPAttributes = async (
         Buffer.from(password)
     );
 
-    const srpVerifier = srpVerifierBuffer.toString('base64');
+    const srpVerifier = convertBufferToBase64(srpVerifierBuffer);
     addLocalLog(
         () =>
             `finished generateSRPAttributes , srpSalt ${srpSalt} , srpVerifier ${srpVerifier} email ${email}`
