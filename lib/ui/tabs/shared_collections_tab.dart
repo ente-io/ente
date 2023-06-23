@@ -12,11 +12,14 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/ui/collections/album/row_item.dart";
+import "package:photos/ui/collections/horizontal_grid_view.dart";
+import "package:photos/ui/collections/vertical_grid_view.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/empty_state.dart";
 import "package:photos/ui/tabs/shared/outgoing_album_item.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class SharedCollectionsTab extends StatefulWidget {
   const SharedCollectionsTab({Key? key}) : super(key: key);
@@ -93,31 +96,31 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         child: Column(
           children: [
             const SizedBox(height: 12),
-            SectionTitle(title: S.of(context).sharedWithMe),
-            const SizedBox(height: 12),
-            collections.incoming.isNotEmpty
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return AlbumRowItemWidget(
-                          collections.incoming[index],
-                          maxThumbnailWidth,
+            SectionTitleRow(
+              SectionTitle(title: S.of(context).sharedWithMe),
+              trailingWidget: collections.incoming.isNotEmpty
+                  ? IconButtonWidget(
+                      icon: Icons.chevron_right,
+                      iconButtonType: IconButtonType.secondary,
+                      onTap: () {
+                        unawaited(
+                          routeToPage(
+                            context,
+                            CollectionVerticalGridView(
+                              collections.incoming,
+                              appTitle: SectionTitle(
+                                title: S.of(context).sharedWithMe,
+                              ),
+                            ),
+                          ),
                         );
                       },
-                      itemCount: collections.incoming.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: albumsCountInOneRow,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: crossAxisSpacingOfGrid,
-                        childAspectRatio:
-                            sideOfThumbnail / (sideOfThumbnail + 24),
-                      ), //24 is height of album title
-                    ),
-                  )
+                    )
+                  : null,
+            ),
+            const SizedBox(height: 12),
+            collections.incoming.isNotEmpty
+                ? CollectionsHorizontalGridView(collections.incoming)
                 : const IncomingAlbumEmptyState(),
             const SizedBox(height: 16),
             SectionTitle(title: S.of(context).sharedByMe),

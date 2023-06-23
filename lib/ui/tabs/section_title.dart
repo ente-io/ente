@@ -7,11 +7,13 @@ import "package:styled_text/styled_text.dart";
 class SectionTitle extends StatelessWidget {
   final String? title;
   final Widget? titleWithBrand;
+  final EdgeInsetsGeometry? padding;
 
   const SectionTitle({
     this.title,
     this.titleWithBrand,
     Key? key,
+    this.padding,
   }) : super(key: key);
 
   @override
@@ -28,7 +30,11 @@ class SectionTitle extends StatelessWidget {
     } else {
       child = const SizedBox.shrink();
     }
-    return child;
+    return Container(
+      alignment: Alignment.centerLeft,
+      padding: padding,
+      child: child,
+    );
   }
 }
 
