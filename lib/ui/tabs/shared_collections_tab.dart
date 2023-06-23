@@ -12,10 +12,10 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/ui/collections/album/row_item.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/empty_state.dart";
-import "package:photos/ui/tabs/shared/incoming_album_item.dart";
 import "package:photos/ui/tabs/shared/outgoing_album_item.dart";
 
 class SharedCollectionsTab extends StatefulWidget {
@@ -78,6 +78,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   }
 
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
+    const maxThumbnailWidth = 160.0;
     const double horizontalPaddingOfGridRow = 16;
     const double crossAxisSpacingOfGrid = 9;
     final Size size = MediaQuery.of(context).size;
@@ -102,9 +103,16 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                       scrollDirection: Axis.vertical,
                       physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
-                        return IncomingAlbumItem(
+                        return AlbumRowItemWidget(
                           collections.incoming[index],
+                          maxThumbnailWidth,
+                          tagPrefix: ""
+                              "shared_collection",
+                          isIncomingAlbum: true,
                         );
+                        // return IncomingAlbumItem(
+                        //   collections.incoming[index],
+                        // );
                       },
                       itemCount: collections.incoming.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

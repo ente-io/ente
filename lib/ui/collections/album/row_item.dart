@@ -7,6 +7,7 @@ import "package:photos/models/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/services/collections_service.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/sharing/user_avator_widget.dart";
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
@@ -18,13 +19,18 @@ class AlbumRowItemWidget extends StatelessWidget {
   final bool showFileCount;
   final String tagPrefix;
 
-  AlbumRowItemWidget(
+  // Set it to true if the album is shared with user.
+  // Based on this, we will show the shared album owner's avatar.
+  final bool isIncomingAlbum;
+
+  const AlbumRowItemWidget(
     this.c,
     this.sideOfThumbnail, {
+    super.key,
     this.showFileCount = true,
     this.tagPrefix = "collection",
-    Key? key,
-  }) : super(key: Key(c.id.toString()));
+    this.isIncomingAlbum = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,26 +46,44 @@ class AlbumRowItemWidget extends StatelessWidget {
                 child: SizedBox(
                   height: sideOfThumbnail,
                   width: sideOfThumbnail,
-                  child: FutureBuilder<File?>(
-                    future: CollectionsService.instance.getCover(c),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        final thumbnail = snapshot.data!;
-                        final String heroTag = tagPrefix + thumbnail.tag;
-                        return Hero(
-                          tag: heroTag,
-                          child: ThumbnailWidget(
-                            thumbnail,
-                            shouldShowArchiveStatus: c.isArchived(),
-                            showFavForAlbumOnly: true,
-                            shouldShowSyncStatus: false,
-                            key: Key(heroTag),
+                  child: Stack(
+                    children: [
+                      FutureBuilder<File?>(
+                        future: CollectionsService.instance.getCover(c),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final thumbnail = snapshot.data!;
+                            final String heroTag = tagPrefix + thumbnail.tag;
+                            return Hero(
+                              tag: heroTag,
+                              child: ThumbnailWidget(
+                                thumbnail,
+                                shouldShowArchiveStatus: isIncomingAlbum
+                                    ? c.hasShareeArchived()
+                                    : c.isArchived(),
+                                showFavForAlbumOnly: true,
+                                shouldShowSyncStatus: false,
+                                key: Key(heroTag),
+                              ),
+                            );
+                          } else {
+                            return const NoThumbnailWidget();
+                          }
+                        },
+                      ),
+                      if (isIncomingAlbum)
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.only(right: 8.0, bottom: 8.0),
+                            child: UserAvatarWidget(
+                              c.owner!,
+                              thumbnailView: true,
+                            ),
                           ),
-                        );
-                      } else {
-                        return const NoThumbnailWidget();
-                      }
-                    },
+                        ),
+                    ],
                   ),
                 ),
               ),
