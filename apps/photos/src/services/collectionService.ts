@@ -1266,7 +1266,6 @@ export const userIdtoEmail = async () => {
         const collection = await getLocalCollections();
         const user: User = getData(LS_KEYS.USER);
         const emailMapping = new Map<number, string>();
-        // const emailMapping: { [key: number]: string } = {};
         collection.map((item) => {
             const { owner } = item;
             const { sharees } = item;
@@ -1284,7 +1283,8 @@ export const userIdtoEmail = async () => {
         });
         const userIdToEmail = emailMapping;
         return userIdToEmail;
-    } catch (error) {
-        console.error('Error Mapping UserId to email:', error);
+    } catch (e) {
+        logError('Error Mapping UserId to email:', e);
+        throw e;
     }
 };

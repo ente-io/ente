@@ -20,8 +20,6 @@ import {
 import { FILE_TYPE } from 'constants/file';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 import AvatarCircle from './AvatarIcon';
-// import { userIdtoEmail } from 'services/collectionService';
-// import { avatarColors } from 'themes/userAvatar';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
@@ -220,7 +218,6 @@ const Cont = styled('div')<{ disabled: boolean }>`
 
 export default function PreviewCard(props: IProps) {
     const { thumbs } = useContext(GalleryContext);
-    // const { idToMail } = useContext(GalleryContext);
 
     const {
         file,
@@ -337,53 +334,7 @@ export default function PreviewCard(props: IProps) {
         }
     };
 
-    // const [colorCode, setColorCode] = useState('');
-    // const [userLetter, setUserLetter] = useState('');
-
     const user: User = getData(LS_KEYS.USER);
-
-    // useEffect(() => {
-    //     const avatarEnabledFiles = async (file: EnteFile) => {
-    //         let email: string;
-
-    //         // checking cache
-    //         if (idToMail.has(file.ownerID)) {
-    //             email = idToMail.get(file.ownerID);
-    //         } else {
-    //             const userIdEmail = userIdtoEmail();
-    //             const idEmailMap = await userIdEmail;
-    //             email = idEmailMap.get(file.ownerID);
-    //             if (email) {
-    //                 idToMail.set(file.ownerID, email);
-    //             }
-    //         }
-
-    //         if (file.ownerID !== user.id && idToMail.has(file.ownerID)) {
-    //             setUserLetter(email?.charAt(0)?.toUpperCase());
-
-    //             const colorIndex = file.ownerID % avatarColors.length;
-    //             const colorCode = avatarColors[colorIndex];
-    //             setColorCode(colorCode);
-    //         } else if (
-    //             file.ownerID === user.id &&
-    //             file.pubMagicMetadata?.data?.uploaderName
-    //         ) {
-    //             const uploaderName = file.pubMagicMetadata?.data?.uploaderName;
-    //             setUserLetter(uploaderName?.charAt(0)?.toUpperCase());
-    //             const colorCode = '#000000';
-    //             setColorCode(colorCode);
-    //         }
-    //     };
-
-    //     if (file.ownerID !== user.id) {
-    //         avatarEnabledFiles(file);
-    //     } else if (
-    //         file.ownerID === user.id &&
-    //         file.pubMagicMetadata?.data?.uploaderName
-    //     ) {
-    //         avatarEnabledFiles(file);
-    //     }
-    // }, []);
 
     return (
         <Cont

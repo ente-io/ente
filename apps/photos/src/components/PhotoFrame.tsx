@@ -16,7 +16,6 @@ import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
-
 import PhotoSwipe from 'photoswipe';
 import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
 
@@ -329,7 +328,6 @@ const PhotoFrame = ({
             )(!checked);
         }
     };
-
     const getThumbnail = (
         item: EnteFile,
         index: number,
