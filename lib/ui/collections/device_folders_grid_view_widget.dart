@@ -50,42 +50,39 @@ class _DeviceFoldersGridViewWidgetState
   Widget build(BuildContext context) {
     debugPrint("${(DeviceFoldersGridViewWidget).toString()} - $_loadReason");
     final logger = Logger((_DeviceFoldersGridViewWidgetState).toString());
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: SizedBox(
-        height: 170,
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: FutureBuilder<List<DeviceCollection>>(
-            future: FilesDB.instance
-                .getDeviceCollections(includeCoverThumbnail: true),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return snapshot.data!.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.all(22),
-                        child: EmptyState(),
-                      )
-                    : ListView.builder(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
-                        physics: const ScrollPhysics(),
-                        // to disable GridView's scrolling
-                        itemBuilder: (context, index) {
-                          final deviceCollection = snapshot.data![index];
-                          return DeviceFolderIcon(deviceCollection);
-                        },
-                        itemCount: snapshot.data!.length,
-                      );
-              } else if (snapshot.hasError) {
-                logger.severe("failed to load device gallery", snapshot.error);
-                return Text(S.of(context).failedToLoadAlbums);
-              } else {
-                return const EnteLoadingWidget();
-              }
-            },
-          ),
+    return SizedBox(
+      height: 170,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: FutureBuilder<List<DeviceCollection>>(
+          future: FilesDB.instance
+              .getDeviceCollections(includeCoverThumbnail: true),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return snapshot.data!.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.all(22),
+                      child: EmptyState(),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      physics: const ScrollPhysics(),
+                      // to disable GridView's scrolling
+                      itemBuilder: (context, index) {
+                        final deviceCollection = snapshot.data![index];
+                        return DeviceFolderIcon(deviceCollection);
+                      },
+                      itemCount: snapshot.data!.length,
+                    );
+            } else if (snapshot.hasError) {
+              logger.severe("failed to load device gallery", snapshot.error);
+              return Text(S.of(context).failedToLoadAlbums);
+            } else {
+              return const EnteLoadingWidget();
+            }
+          },
         ),
       ),
     );
