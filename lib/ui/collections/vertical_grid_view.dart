@@ -5,12 +5,12 @@ import "package:photos/models/collection.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 
 class CollectionVerticalGridView extends StatelessWidget {
-  static const maxThumbnailWidth = 160.0;
-
   final List<Collection>? collections;
   final Widget? appTitle;
-
-  final double gapBetweenAlbums = 1.0;
+  final double gapBetweenAlbums = 0.0;
+  static const maxThumbnailWidth = 160.0;
+  // This includes the name, count and padding below the thumbnail
+  static const albumBottomInfoHeight = 21.0;
 
   const CollectionVerticalGridView(
     this.collections, {
@@ -33,27 +33,31 @@ class CollectionVerticalGridView extends StatelessWidget {
 
   Widget _getBody(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    final int albumsCountInOneRow =
-        max(screenWidth ~/ (maxThumbnailWidth + 24), 2);
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 12, left: 12, right: 12, bottom: 24),
-      child: GridView.builder(
-        physics: const ScrollPhysics(),
-        // to disable GridView's scrolling
-        itemBuilder: (context, index) {
-          return AlbumRowItemWidget(
-            collections![index],
-            maxThumbnailWidth,
-          );
-        },
-        itemCount: collections!.length,
-        // To include the + button
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: albumsCountInOneRow,
-          mainAxisSpacing: gapBetweenAlbums,
-          crossAxisSpacing: gapBetweenAlbums,
-          childAspectRatio: maxThumbnailWidth / (maxThumbnailWidth + 24),
+    const double horizontalPadding = 20;
+    final int albumsCountInOneRow =
+        max(screenWidth ~/ (maxThumbnailWidth + horizontalPadding), 2);
+    const double gapBetweenAlbumsInRow = 16.0;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
+        child: GridView.builder(
+          physics: const ScrollPhysics(),
+          itemBuilder: (context, index) {
+            return AlbumRowItemWidget(
+              collections![index],
+              maxThumbnailWidth,
+            );
+          },
+          itemCount: collections!.length,
+          // To include the + button
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: albumsCountInOneRow,
+            crossAxisSpacing: gapBetweenAlbumsInRow,
+            childAspectRatio:
+                maxThumbnailWidth / (maxThumbnailWidth + albumBottomInfoHeight),
+          ),
         ),
       ),
     );
