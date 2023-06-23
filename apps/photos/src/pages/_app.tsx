@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import AppNavbar from 'components/Navbar/app';
 import { t } from 'i18next';
+
 import { useRouter } from 'next/router';
 import { Overlay } from 'components/Container';
 import 'bootstrap/dist/css/bootstrap.min.css';
