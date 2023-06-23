@@ -91,24 +91,21 @@ class MapPullUpGallery extends StatelessWidget {
                         );
                       }
 
-                      return Expanded(
-                        child: Gallery(
-                          asyncLoader: (
-                            creationStartTime,
-                            creationEndTime, {
-                            limit,
-                            asc,
-                          }) async {
-                            FileLoadResult result;
-                            result = FileLoadResult(images, false);
-                            return result;
-                          },
-                          reloadEvent:
-                              Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                          tagPrefix: "map_gallery",
-                          showSelectAllByDefault: true,
-                          selectedFiles: SelectedFiles(),
-                        ),
+                      return Gallery(
+                        asyncLoader: (
+                          creationStartTime,
+                          creationEndTime, {
+                          limit,
+                          asc,
+                        }) async {
+                          FileLoadResult result;
+                          result = FileLoadResult(images, false);
+                          return result;
+                        },
+                        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                        tagPrefix: "map_gallery",
+                        showSelectAllByDefault: true,
+                        selectedFiles: SelectedFiles(),
                       );
                     },
                   ),
