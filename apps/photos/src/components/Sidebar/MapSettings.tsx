@@ -4,10 +4,8 @@ import { AppContext } from 'pages/_app';
 import { useContext, useState, useEffect } from 'react';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-
-// import EnableMapDialog from './EnableMapDialog';
-import ManageMapEnabled from './MangeMapEnabled';
 import EnableMap from './EnableMap';
+import DisableMap from './DisableMap';
 
 const MapSettings = ({ open, onClose, onRootClose }) => {
     const { somethingWentWrong } = useContext(AppContext);
@@ -76,7 +74,7 @@ const MapSettings = ({ open, onClose, onRootClose }) => {
                     sx: { '&&&': { backgroundColor: 'transparent' } },
                 }}>
                 {mapEnabled ? (
-                    <ManageMapEnabled
+                    <DisableMap
                         onClose={onClose}
                         disableMap={disableMap}
                         onRootClose={handleRootClose}

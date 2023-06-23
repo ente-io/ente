@@ -3,12 +3,12 @@ import Titlebar from 'components/Titlebar';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
-export default function EnableMap({ onClose, enableMap, onRootClose }) {
+export default function EnableMap({ onClose, disableMap, onRootClose }) {
     return (
         <Stack spacing={'4px'} py={'12px'}>
             <Titlebar
                 onClose={onClose}
-                title={t('Enable Maps?')}
+                title={t('Disable Maps?')}
                 onRootClose={onRootClose}
             />
             <Stack py={'20px'} px={'8px'} spacing={'32px'}>
@@ -17,30 +17,24 @@ export default function EnableMap({ onClose, enableMap, onRootClose }) {
                     <Typography color="text.muted">
                         <Trans
                             i18nKey={
-                                'This will show your photos on a worldmap.'
+                                'This will disable the display of your photos on a world map.'
                             }
                         />
                         <br />
                         <br />
-
                         <Trans
                             i18nKey={
-                                'The map is hosted by OpenStreetMap, and the exact locations of your photos are never shared.'
-                            }
-                        />
-                        <br />
-                        <br />
-
-                        <Trans
-                            i18nKey={
-                                'You can disable this feature anytime from Settings.'
+                                'You can enable this feature anytime from Settings.'
                             }
                         />
                     </Typography>
                 </Box>
                 <Stack px={'8px'} spacing={'8px'}>
-                    <Button color={'accent'} size="large" onClick={enableMap}>
-                        {t('ENABLE')}
+                    <Button
+                        color={'critical'}
+                        size="large"
+                        onClick={disableMap}>
+                        {t('DISABLE')}
                     </Button>
                     <Button color={'secondary'} size="large" onClick={onClose}>
                         {t('Cancel')}
