@@ -5,10 +5,13 @@ import { EnteDrawer } from 'components/EnteDrawer';
 import MLSearchSettings from 'components/MachineLearning/MLSearchSettings';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import Titlebar from 'components/Titlebar';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { t } from 'i18next';
+import { LS_KEYS, setData } from 'utils/storage/localStorage';
+
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
+import { getMapEnabledStatus } from 'services/userService';
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
     const [mlSearchSettingsView, setMlSearchSettingsView] = useState(false);
@@ -28,6 +31,15 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
             onClose();
         }
     };
+
+    useEffect(() => {
+        const main = async () => {
+            const remoteMapValue = await getMapEnabledStatus();
+            const mapEnabled = remoteMapValue;
+            setData(LS_KEYS.MAPENABLED, { mapEnabled });
+        };
+        main();
+    }, []);
 
     return (
         <EnteDrawer

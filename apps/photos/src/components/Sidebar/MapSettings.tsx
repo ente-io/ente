@@ -6,6 +6,7 @@ import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import EnableMap from './EnableMap';
 import DisableMap from './DisableMap';
+import { updateMapEnabledStatus } from 'services/userService';
 
 const MapSettings = ({ open, onClose, onRootClose }) => {
     const { somethingWentWrong } = useContext(AppContext);
@@ -13,14 +14,18 @@ const MapSettings = ({ open, onClose, onRootClose }) => {
     const [mapEnabled, setMapEnabled] = useState(false);
 
     useEffect(() => {
-        const storedMapEnabled = getData(LS_KEYS.MAPENABLED);
-        const initialMapEnabled =
-            storedMapEnabled !== null ? storedMapEnabled : false;
-        setMapEnabled(initialMapEnabled.mapEnabled);
+        const main = async () => {
+            const storedMapEnabled = getData(LS_KEYS.MAPENABLED);
+            const initialMapEnabled =
+                storedMapEnabled !== null ? storedMapEnabled.mapEnabled : false;
+            setMapEnabled(initialMapEnabled);
+        };
+        main();
     }, []);
 
     useEffect(() => {
         setData(LS_KEYS.MAPENABLED, { mapEnabled });
+        updateMapEnabledStatus(mapEnabled);
     }, [mapEnabled]);
 
     const updateMapEnabled = (enabled) => {
@@ -30,8 +35,6 @@ const MapSettings = ({ open, onClose, onRootClose }) => {
             logError(e, 'Error while updating mapEnabled');
         }
     };
-
-    console.log('MAp enabled from MapSetting', mapEnabled);
 
     const disableMap = async () => {
         try {
