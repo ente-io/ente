@@ -4,7 +4,6 @@ import "dart:isolate";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import "package:interactive_bottom_sheet/interactive_bottom_sheet.dart";
 import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file.dart";
@@ -47,11 +46,6 @@ class _MapScreenState extends State<MapScreen> {
   final Logger _logger = Logger("_MapScreenState");
   StreamSubscription? _mapMoveSubscription;
   Isolate? isolate;
-  double heightOfBottomSheetContent = 100;
-  static const gridCrossAxisSpacing = 4.0;
-  static const gridMainAxisSpacing = 4.0;
-  static const gridPadding = 2.0;
-  static const gridCrossAxisCount = 4;
   static const bottomSheetDraggableAreaHeight = 32.0;
 
   @override
@@ -174,7 +168,6 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     return Container(
       color: colorScheme.backgroundBase,
@@ -220,72 +213,103 @@ class _MapScreenState extends State<MapScreen> {
                     : const SizedBox.shrink(),
               ],
             ),
-            bottomSheet: InteractiveBottomSheet(
-              options: InteractiveBottomSheetOptions(
-                backgroundColor: colorScheme.backgroundElevated,
-                maxSize: 0.8,
+            bottomSheet: MapPullUpGallery(
+              visibleImages,
+              bottomSheetDraggableAreaHeight,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class MapPullUpGallery extends StatelessWidget {
+  final StreamController<List<File>> visibleImages;
+  final double bottomSheetDraggableAreaHeight;
+  static const gridCrossAxisSpacing = 4.0;
+  static const gridMainAxisSpacing = 4.0;
+  static const gridPadding = 2.0;
+  static const gridCrossAxisCount = 4;
+  const MapPullUpGallery(
+    this.visibleImages,
+    this.bottomSheetDraggableAreaHeight, {
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final Logger logger = Logger("_MapPullUpGalleryState");
+    final textTheme = getEnteTextTheme(context);
+    const double initialChildSize = 0.25;
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: initialChildSize,
+      minChildSize: initialChildSize,
+      maxChildSize: 0.8,
+      snap: true,
+      snapSizes: const [0.5],
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            color: getEnteColorScheme(context).backgroundElevated,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              DraggableHeader(
+                scrollController: scrollController,
+                bottomSheetDraggableAreaHeight: bottomSheetDraggableAreaHeight,
               ),
-              draggableAreaOptions: DraggableAreaOptions(
-                topBorderRadius: 12,
-                backgroundColor: colorScheme.backgroundElevated2,
-                indicatorColor: colorScheme.fillBase,
-                height: bottomSheetDraggableAreaHeight,
-                indicatorHeight: 4,
-              ),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                switchInCurve: Curves.easeInOutExpo,
-                switchOutCurve: Curves.easeInOutExpo,
-                child: StreamBuilder<List<File>>(
-                  stream: visibleImages.stream,
-                  builder: (
-                    BuildContext context,
-                    AsyncSnapshot<List<File>> snapshot,
-                  ) {
-                    if (!snapshot.hasData) {
-                      return SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.2,
-                        child: const EnteLoadingWidget(),
-                      );
-                    }
-                    final images = snapshot.data!;
-                    _logger.info("Visible images: ${images.length}");
-                    if (images.isEmpty) {
-                      return SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.2,
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "No photos found here",
-                                style: textTheme.large,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "Zoom out to see photos",
-                                style: textTheme.smallFaint,
-                              )
-                            ],
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  switchInCurve: Curves.easeInOutExpo,
+                  switchOutCurve: Curves.easeInOutExpo,
+                  child: StreamBuilder<List<File>>(
+                    stream: visibleImages.stream,
+                    builder: (
+                      BuildContext context,
+                      AsyncSnapshot<List<File>> snapshot,
+                    ) {
+                      if (!snapshot.hasData) {
+                        return SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.2,
+                          child: const EnteLoadingWidget(),
+                        );
+                      }
+                      final images = snapshot.data!;
+                      logger.info("Visible images: ${images.length}");
+                      if (images.isEmpty) {
+                        return SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.2,
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "No photos found here",
+                                  style: textTheme.large,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  "Zoom out to see photos",
+                                  style: textTheme.smallFaint,
+                                )
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                    //Be very careful when changing the height of the grid. The
-                    //height should be exactly how much the grid occupies.
-                    //Do not add padding around the grid.
-                    //Doing these will cause unexpected scroll behaviour. This
-                    //is an issue with the package that is used here
-                    //(InteractiveBottomSheet)
-                    return ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: maxHeightOfGrid(images.length),
-                      ),
-                      child: GridView.builder(
+                        );
+                      }
+
+                      return GridView.builder(
                         itemCount: images.length,
                         scrollDirection: Axis.vertical,
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: gridPadding),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: gridPadding,
+                        ),
                         physics: const BouncingScrollPhysics(),
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
@@ -301,26 +325,49 @@ class _MapScreenState extends State<MapScreen> {
                             index: index,
                           );
                         },
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class DraggableHeader extends StatelessWidget {
+  const DraggableHeader({
+    Key? key,
+    required this.scrollController,
+    required this.bottomSheetDraggableAreaHeight,
+  }) : super(key: key);
+  static const indicatorHeight = 4.0;
+  final ScrollController scrollController;
+  final double bottomSheetDraggableAreaHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
+      controller: scrollController,
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: bottomSheetDraggableAreaHeight / 2 - indicatorHeight / 2,
+          ),
+          child: Container(
+            height: indicatorHeight,
+            width: 72,
+            decoration: BoxDecoration(
+              color: getEnteColorScheme(context).fillBase,
+              borderRadius: const BorderRadius.all(Radius.circular(2)),
             ),
           ),
         ),
       ),
     );
-  }
-
-  double maxHeightOfGrid(int imageCount) {
-    final rowHeight = ((MediaQuery.of(context).size.width -
-                (gridPadding * 2 +
-                    gridCrossAxisSpacing * (gridCrossAxisCount - 1))) /
-            gridCrossAxisCount) +
-        gridMainAxisSpacing;
-    final rowCount = (imageCount / gridCrossAxisCount).ceilToDouble();
-
-    return rowCount * rowHeight;
   }
 }

@@ -79,7 +79,6 @@ dependencies:
   image: ^3.0.2
   image_editor: ^1.3.0
   in_app_purchase: ^3.0.7
-  interactive_bottom_sheet: ^0.1.2
   intl: ^0.17.0
   json_annotation: ^4.8.0
   latlong2: ^0.8.1
