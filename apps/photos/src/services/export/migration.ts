@@ -76,6 +76,15 @@ export async function migrateExport(
             });
             addLogLine('migration to version 3 complete');
         }
+
+        if (exportRecord.version === 3) {
+            addLogLine('migrating export to version 4');
+            await migrationV3ToV4(exportDir, exportRecord as ExportRecord);
+            exportRecord = await exportService.updateExportRecord(exportDir, {
+                version: 4,
+            });
+            addLogLine('migration to version 4 complete');
+        }
         addLogLine(`Record at latest version`);
     } catch (e) {
         logError(e, 'export record migration failed');
@@ -135,10 +144,7 @@ async function migrationV2ToV3(
     );
 
     const collectionExportNames =
-        await getCollectionExportNamesFromExportedCollectionPaths(
-            exportDir,
-            exportRecord
-        );
+        await getCollectionExportNamesFromExportedCollectionPaths(exportRecord);
 
     const fileExportNames = await getFileExportNamesFromExportedFiles(
         exportRecord,
@@ -153,6 +159,21 @@ async function migrationV2ToV3(
         fileExportNames,
         collectionExportNames,
     };
+    await exportService.updateExportRecord(exportDir, updatedExportRecord);
+}
+
+async function migrationV3ToV4(exportDir: string, exportRecord: ExportRecord) {
+    if (!exportRecord?.collectionExportNames) {
+        return;
+    }
+
+    const collectionExportNames = reMigrateCollectionExportNames(exportRecord);
+
+    const updatedExportRecord: ExportRecord = {
+        ...exportRecord,
+        collectionExportNames,
+    };
+
     await exportService.updateExportRecord(exportDir, updatedExportRecord);
 }
 
@@ -250,7 +271,6 @@ async function removeDeprecatedExportRecordProperties(
 }
 
 async function getCollectionExportNamesFromExportedCollectionPaths(
-    exportDir: string,
     exportRecord: ExportRecordV2
 ): Promise<CollectionExportNames> {
     if (!exportRecord.exportedCollectionPaths) {
@@ -258,7 +278,12 @@ async function getCollectionExportNamesFromExportedCollectionPaths(
     }
     const exportedCollectionNames = Object.fromEntries(
         Object.entries(exportRecord.exportedCollectionPaths).map(
-            ([key, value]) => [key, value.replace(exportDir, '').slice(1)]
+            ([key, exportedCollectionPath]) => {
+                const exportedCollectionName = exportedCollectionPath
+                    .split('/')
+                    .pop();
+                return [key, exportedCollectionName];
+            }
         )
     );
     return exportedCollectionNames;
@@ -342,6 +367,22 @@ async function getFileExportNamesFromExportedFiles(
         });
     }
     return exportedFileNames;
+}
+
+function reMigrateCollectionExportNames(
+    exportRecord: ExportRecord
+): CollectionExportNames {
+    const exportedCollectionNames = Object.fromEntries(
+        Object.entries(exportRecord.collectionExportNames).map(
+            ([key, exportedCollectionPath]) => {
+                const exportedCollectionName = exportedCollectionPath
+                    .split('/')
+                    .pop();
+                return [key, exportedCollectionName];
+            }
+        )
+    );
+    return exportedCollectionNames;
 }
 
 async function addCollectionExportedRecordV1(
