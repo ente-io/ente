@@ -7,12 +7,10 @@ import "package:styled_text/styled_text.dart";
 class SectionTitle extends StatelessWidget {
   final String? title;
   final Widget? titleWithBrand;
-  final bool skipMargin;
 
   const SectionTitle({
     this.title,
     this.titleWithBrand,
-    this.skipMargin = false,
     Key? key,
   }) : super(key: key);
 
@@ -42,7 +40,7 @@ class SectionTitleRow extends StatelessWidget {
   const SectionTitleRow(
     this.title, {
     this.trailingWidget,
-    this.padding = const EdgeInsets.only(left: 4, right: 4),
+    this.padding = const EdgeInsets.only(left: 4, right: 0),
     super.key,
   });
 

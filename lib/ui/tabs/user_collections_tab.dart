@@ -250,6 +250,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               );
               if (selectedValue != null) {
                 sortKey = AlbumSortKey.values[selectedValue];
+                ;
                 await LocalSettings.instance.setAlbumSortKey(sortKey!);
                 setState(() {});
               }
@@ -270,7 +271,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                     collections,
                     appTitle: SectionTitle(
                       titleWithBrand: getOnEnteSection(context),
-                      skipMargin: true,
                     ),
                   ),
                 ),
