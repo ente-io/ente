@@ -27,7 +27,6 @@ class AlbumRowItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteColorScheme = getEnteColorScheme(context);
     final enteTextTheme = getEnteTextTheme(context);
     return GestureDetector(
       child: Column(
@@ -64,33 +63,35 @@ class AlbumRowItemWidget extends StatelessWidget {
               ),
             ],
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 4),
+          Row(
             children: [
-              const SizedBox(height: 2),
-              Text(
-                (c.displayName).trim(),
-                style: enteTextTheme.small,
-                overflow: TextOverflow.ellipsis,
+              Container(
+                constraints: BoxConstraints(maxWidth: sideOfThumbnail - 40),
+                child: Text(
+                  c.displayName,
+                  style: enteTextTheme.small,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               showFileCount
                   ? FutureBuilder<int>(
                       future: FilesDB.instance.collectionFileCount(c.id),
                       builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return Text(
-                            NumberFormat().format(snapshot.data),
-                            style: enteTextTheme.small.copyWith(
-                              color: enteColorScheme.textMuted,
+                        if (snapshot.hasData && snapshot.data! > 0) {
+                          return RichText(
+                            text: TextSpan(
+                              style: enteTextTheme.smallMuted,
+                              children: [
+                                const TextSpan(text: "  \u2022  "),
+                                TextSpan(
+                                  text: NumberFormat().format(snapshot.data),
+                                ),
+                              ],
                             ),
                           );
                         } else {
-                          return Text(
-                            "",
-                            style: enteTextTheme.small.copyWith(
-                              color: enteColorScheme.textMuted,
-                            ),
-                          );
+                          return const SizedBox.shrink();
                         }
                       },
                     )
