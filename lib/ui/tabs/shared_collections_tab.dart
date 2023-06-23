@@ -110,9 +110,6 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                               "shared_collection",
                           isIncomingAlbum: true,
                         );
-                        // return IncomingAlbumItem(
-                        //   collections.incoming[index],
-                        // );
                       },
                       itemCount: collections.incoming.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

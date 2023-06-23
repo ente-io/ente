@@ -31,15 +31,9 @@ class SectionTitle extends StatelessWidget {
       child = const SizedBox.shrink();
     }
     return Container(
-      margin: skipMargin ? null : const EdgeInsets.only(left: 16),
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: child,
-          ),
-        ],
-      ),
+      padding: EdgeInsets.only(left: skipMargin ? 0 : 12),
+      alignment: Alignment.centerLeft,
+      child: child,
     );
   }
 }

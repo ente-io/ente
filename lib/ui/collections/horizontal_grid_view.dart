@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
 import "package:photos/models/collection.dart";
 import "package:photos/ui/collections/album/row_item.dart";
-import 'package:photos/ui/collections/create_new_album_widget.dart';
 
-class CollectionsGridViewHorizontal extends StatelessWidget {
+class CollectionsHorizontalGridView extends StatelessWidget {
   static const maxThumbnailWidth = 160.0;
+  static const albumNameSectionHeight = 21.0;
+  static const rowItemBottomPadding = 12.0;
 
   final List<Collection>? collections;
+  final EdgeInsetsGeometry? padding;
 
-  const CollectionsGridViewHorizontal(
+  const CollectionsHorizontalGridView(
     this.collections, {
+    this.padding = const EdgeInsets.fromLTRB(8, 0, 8, 0),
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    const double sizeBoxHeight =
+        (maxThumbnailWidth + albumNameSectionHeight + rowItemBottomPadding) * 2;
+
     return SizedBox(
-      height: maxThumbnailWidth * 2 + 80,
+      height: sizeBoxHeight,
       child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+        padding: padding,
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) {
           final int firstIndex = index * 2;
@@ -27,9 +33,9 @@ class CollectionsGridViewHorizontal extends StatelessWidget {
             children: [
               if (firstIndex < collections!.length)
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0,
-                    vertical: 12.0,
+                  padding: const EdgeInsets.only(
+                    right: 8.0,
+                    bottom: rowItemBottomPadding,
                   ),
                   child: AlbumRowItemWidget(
                     collections![firstIndex],
@@ -38,25 +44,19 @@ class CollectionsGridViewHorizontal extends StatelessWidget {
                 ),
               if (secondIndex < collections!.length)
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0,
+                  padding: const EdgeInsets.only(
+                    right: 8.0,
+                    bottom: rowItemBottomPadding,
                   ),
                   child: AlbumRowItemWidget(
                     collections![secondIndex],
                     maxThumbnailWidth,
                   ),
                 ),
-              if (secondIndex >= collections!.length)
-                const SizedBox(
-                  width: maxThumbnailWidth,
-                  height: maxThumbnailWidth,
-                  child: CreateNewAlbumWidget(),
-                ),
             ],
           );
         },
-        itemCount:
-            (collections!.length / 2).ceil() + ((collections!.length + 1) % 2),
+        itemCount: (collections!.length / 2).ceil(),
       ),
     );
   }
