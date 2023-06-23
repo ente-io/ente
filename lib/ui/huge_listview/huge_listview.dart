@@ -131,51 +131,46 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
       return widget.emptyResultBuilder!(context);
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return DraggableScrollbar(
-          key: scrollKey,
-          totalCount: widget.totalCount,
-          initialScrollIndex: widget.startIndex,
-          onChange: (position) {
-            final int currentIndex = _currentFirst();
-            final int floorIndex = (position * widget.totalCount).floor();
-            final int cielIndex = (position * widget.totalCount).ceil();
-            int nextIndexToJump;
-            if (floorIndex != currentIndex && floorIndex > currentIndex) {
-              nextIndexToJump = floorIndex;
-            } else if (cielIndex != currentIndex && cielIndex < currentIndex) {
-              nextIndexToJump = floorIndex;
-            } else {
-              return;
-            }
-            if (lastIndexJump != nextIndexToJump) {
-              lastIndexJump = nextIndexToJump;
-              widget.controller?.jumpTo(index: nextIndexToJump);
-            }
-          },
-          labelTextBuilder: widget.labelTextBuilder,
-          backgroundColor: widget.thumbBackgroundColor,
-          drawColor: widget.thumbDrawColor,
-          heightScrollThumb: widget.thumbHeight,
-          bottomSafeArea: widget.bottomSafeArea,
-          currentFirstIndex: _currentFirst(),
-          isEnabled: widget.isDraggableScrollbarEnabled,
-          padding: widget.thumbPadding,
-          child: ScrollablePositionedList.builder(
-            physics: widget.disableScroll
-                ? const NeverScrollableScrollPhysics()
-                : null,
-            itemScrollController: widget.controller,
-            itemPositionsListener: listener,
-            initialScrollIndex: widget.startIndex,
-            itemCount: max(widget.totalCount, 0),
-            itemBuilder: (context, index) {
-              return widget.itemBuilder(context, index);
-            },
-          ),
-        );
+    return DraggableScrollbar(
+      key: scrollKey,
+      totalCount: widget.totalCount,
+      initialScrollIndex: widget.startIndex,
+      onChange: (position) {
+        final int currentIndex = _currentFirst();
+        final int floorIndex = (position * widget.totalCount).floor();
+        final int cielIndex = (position * widget.totalCount).ceil();
+        int nextIndexToJump;
+        if (floorIndex != currentIndex && floorIndex > currentIndex) {
+          nextIndexToJump = floorIndex;
+        } else if (cielIndex != currentIndex && cielIndex < currentIndex) {
+          nextIndexToJump = floorIndex;
+        } else {
+          return;
+        }
+        if (lastIndexJump != nextIndexToJump) {
+          lastIndexJump = nextIndexToJump;
+          widget.controller?.jumpTo(index: nextIndexToJump);
+        }
       },
+      labelTextBuilder: widget.labelTextBuilder,
+      backgroundColor: widget.thumbBackgroundColor,
+      drawColor: widget.thumbDrawColor,
+      heightScrollThumb: widget.thumbHeight,
+      bottomSafeArea: widget.bottomSafeArea,
+      currentFirstIndex: _currentFirst(),
+      isEnabled: widget.isDraggableScrollbarEnabled,
+      padding: widget.thumbPadding,
+      child: ScrollablePositionedList.builder(
+        physics:
+            widget.disableScroll ? const NeverScrollableScrollPhysics() : null,
+        itemScrollController: widget.controller,
+        itemPositionsListener: listener,
+        initialScrollIndex: widget.startIndex,
+        itemCount: max(widget.totalCount, 0),
+        itemBuilder: (context, index) {
+          return widget.itemBuilder(context, index);
+        },
+      ),
     );
   }
 
