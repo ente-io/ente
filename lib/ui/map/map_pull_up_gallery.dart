@@ -12,13 +12,14 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
 class MapPullUpGallery extends StatelessWidget {
+  final _selectedFiles = SelectedFiles();
   final StreamController<List<File>> visibleImages;
   final double bottomSheetDraggableAreaHeight;
   static const gridCrossAxisSpacing = 4.0;
   static const gridMainAxisSpacing = 4.0;
   static const gridPadding = 2.0;
   static const gridCrossAxisCount = 4;
-  const MapPullUpGallery(
+  MapPullUpGallery(
     this.visibleImages,
     this.bottomSheetDraggableAreaHeight, {
     Key? key,
@@ -105,7 +106,8 @@ class MapPullUpGallery extends StatelessWidget {
                         reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
                         tagPrefix: "map_gallery",
                         showSelectAllByDefault: true,
-                        selectedFiles: SelectedFiles(),
+                        selectedFiles: _selectedFiles,
+                        isScrollablePositionedList: false,
                       );
                     },
                   ),

@@ -40,6 +40,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
   final String logTag;
   final Logger logger;
   final bool showSelectAllByDefault;
+  final bool isScrollablePositionedList;
 
   const MultipleGroupsGalleryView({
     required this.hugeListViewKey,
@@ -60,6 +61,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
     required this.logTag,
     required this.logger,
     required this.showSelectAllByDefault,
+    required this.isScrollablePositionedList,
     super.key,
   });
 
@@ -72,6 +74,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
       totalCount: groupedFiles.length,
       isDraggableScrollbarEnabled: groupedFiles.length > 10,
       disableScroll: disableScroll,
+      isScrollablePositionedList: isScrollablePositionedList,
       waitBuilder: (_) {
         return const EnteLoadingWidget();
       },
