@@ -30,11 +30,42 @@ class SectionTitle extends StatelessWidget {
     } else {
       child = const SizedBox.shrink();
     }
-    return Container(
-      padding: EdgeInsets.only(left: skipMargin ? 0 : 12),
-      alignment: Alignment.centerLeft,
-      child: child,
-    );
+    return child;
+  }
+}
+
+class SectionTitleRow extends StatelessWidget {
+  final SectionTitle title;
+  final Widget? trailingWidget;
+  final EdgeInsetsGeometry? padding;
+
+  const SectionTitleRow(
+    this.title, {
+    this.trailingWidget,
+    this.padding = const EdgeInsets.only(left: 4, right: 4),
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (trailingWidget != null) {
+      return Container(
+        padding: padding,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(alignment: Alignment.centerLeft, child: title),
+            trailingWidget!,
+          ],
+        ),
+      );
+    } else {
+      return Container(
+        alignment: Alignment.centerLeft,
+        padding: padding,
+        child: title,
+      );
+    }
   }
 }
 

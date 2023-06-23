@@ -166,15 +166,14 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               ),
             ),
             const SizedBox(height: 12),
-            SectionTitle(title: S.of(context).onDevice),
+            SectionTitleRow(
+              SectionTitle(title: S.of(context).onDevice),
+            ),
             const SizedBox(height: 12),
             const DeviceFoldersGridViewWidget(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SectionTitle(titleWithBrand: getOnEnteSection(context)),
-                _sortMenu(collections),
-              ],
+            SectionTitleRow(
+              SectionTitle(titleWithBrand: getOnEnteSection(context)),
+              trailingWidget: _sortMenu(collections),
             ),
             DeleteEmptyAlbums(collections ?? []),
             Configuration.instance.hasConfiguredAccount()
@@ -225,63 +224,60 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 4),
-      child: Theme(
-        data: Theme.of(context).copyWith(
-          highlightColor: Colors.transparent,
-          splashColor: Colors.transparent,
-        ),
-        child: Row(
-          children: [
-            GestureDetector(
-              onTapDown: (TapDownDetails details) async {
-                final int? selectedValue = await showMenu<int>(
-                  context: context,
-                  position: RelativeRect.fromLTRB(
-                    details.globalPosition.dx,
-                    details.globalPosition.dy,
-                    details.globalPosition.dx,
-                    details.globalPosition.dy + 50,
-                  ),
-                  items: List.generate(AlbumSortKey.values.length, (index) {
-                    return PopupMenuItem(
-                      value: index,
-                      child: sortOptionText(AlbumSortKey.values[index]),
-                    );
-                  }),
-                );
-                if (selectedValue != null) {
-                  sortKey = AlbumSortKey.values[selectedValue];
-                  await LocalSettings.instance.setAlbumSortKey(sortKey!);
-                  setState(() {});
-                }
-              },
-              child: const IconButtonWidget(
-                icon: Icons.sort_outlined,
-                iconButtonType: IconButtonType.secondary,
-              ),
-            ),
-            IconButtonWidget(
-              icon: Icons.chevron_right,
+    return Theme(
+      data: Theme.of(context).copyWith(
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTapDown: (TapDownDetails details) async {
+              final int? selectedValue = await showMenu<int>(
+                context: context,
+                position: RelativeRect.fromLTRB(
+                  details.globalPosition.dx,
+                  details.globalPosition.dy,
+                  details.globalPosition.dx,
+                  details.globalPosition.dy + 50,
+                ),
+                items: List.generate(AlbumSortKey.values.length, (index) {
+                  return PopupMenuItem(
+                    value: index,
+                    child: sortOptionText(AlbumSortKey.values[index]),
+                  );
+                }),
+              );
+              if (selectedValue != null) {
+                sortKey = AlbumSortKey.values[selectedValue];
+                await LocalSettings.instance.setAlbumSortKey(sortKey!);
+                setState(() {});
+              }
+            },
+            child: const IconButtonWidget(
+              icon: Icons.sort_outlined,
               iconButtonType: IconButtonType.secondary,
-              onTap: () {
-                unawaited(
-                  routeToPage(
-                    context,
-                    CollectionVerticalGridView(
-                      collections,
-                      appTitle: SectionTitle(
-                        titleWithBrand: getOnEnteSection(context),
-                        skipMargin: true,
-                      ),
+            ),
+          ),
+          IconButtonWidget(
+            icon: Icons.chevron_right,
+            iconButtonType: IconButtonType.secondary,
+            onTap: () {
+              unawaited(
+                routeToPage(
+                  context,
+                  CollectionVerticalGridView(
+                    collections,
+                    appTitle: SectionTitle(
+                      titleWithBrand: getOnEnteSection(context),
+                      skipMargin: true,
                     ),
                   ),
-                );
-              },
-            )
-          ],
-        ),
+                ),
+              );
+            },
+          )
+        ],
       ),
     );
   }
