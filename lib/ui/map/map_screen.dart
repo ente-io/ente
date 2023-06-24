@@ -169,6 +169,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final bottomUnsafeArea = MediaQuery.of(context).padding.bottom;
     return Container(
       color: colorScheme.backgroundBase,
       child: Theme(
@@ -184,7 +185,8 @@ class _MapScreenState extends State<MapScreen> {
                 builder: (context, constrains) {
                   return SizedBox(
                     height: constrains.maxHeight * 0.75 +
-                        bottomSheetDraggableAreaHeight,
+                        bottomSheetDraggableAreaHeight -
+                        bottomUnsafeArea,
                     child: MapView(
                       key: ValueKey(
                         'image-marker-count-${imageMarkers.length}',
@@ -214,6 +216,7 @@ class _MapScreenState extends State<MapScreen> {
           bottomSheet: MapPullUpGallery(
             visibleImages,
             bottomSheetDraggableAreaHeight,
+            bottomUnsafeArea,
           ),
         ),
       ),

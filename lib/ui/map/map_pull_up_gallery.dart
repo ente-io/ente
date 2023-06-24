@@ -16,6 +16,7 @@ import "package:photos/ui/viewer/gallery/gallery.dart";
 class MapPullUpGallery extends StatelessWidget {
   final _selectedFiles = SelectedFiles();
   final StreamController<List<File>> visibleImages;
+  final double bottomUnsafeArea;
   final double bottomSheetDraggableAreaHeight;
   static const gridCrossAxisSpacing = 4.0;
   static const gridMainAxisSpacing = 4.0;
@@ -23,14 +24,17 @@ class MapPullUpGallery extends StatelessWidget {
   static const gridCrossAxisCount = 4;
   MapPullUpGallery(
     this.visibleImages,
-    this.bottomSheetDraggableAreaHeight, {
+    this.bottomSheetDraggableAreaHeight,
+    this.bottomUnsafeArea, {
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final Logger logger = Logger("_MapPullUpGalleryState");
-    const double initialChildSize = 0.25;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final unsafeAreaProportion = bottomUnsafeArea / screenHeight;
+    final double initialChildSize = 0.25 + unsafeAreaProportion;
 
     Widget? cachedScrollableContent;
 
@@ -87,8 +91,10 @@ class MapPullUpGallery extends StatelessWidget {
                       child: const EnteLoadingWidget(),
                     );
                   }
+
                   final images = snapshot.data!;
                   logger.info("Visible images: ${images.length}");
+
                   if (images.isEmpty) {
                     return SizedBox(
                       height: MediaQuery.of(context).size.height * 0.2,
