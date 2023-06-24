@@ -8,6 +8,7 @@ import "package:photos/models/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/services/collections_service.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -67,6 +68,10 @@ class AlbumRowItemWidget extends StatelessWidget {
                           }
                         },
                       ),
+                      if (isOwner && c.hasSharees)
+                        AlbumSharesIcons(
+                          sharees: c.getSharees(),
+                        ),
                       if (!isOwner)
                         Align(
                           alignment: Alignment.bottomRight,
