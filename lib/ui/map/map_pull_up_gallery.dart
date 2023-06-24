@@ -6,9 +6,11 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
+import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
 class MapPullUpGallery extends StatelessWidget {
@@ -109,22 +111,31 @@ class MapPullUpGallery extends StatelessWidget {
                     );
                   }
 
-                  return Gallery(
-                    asyncLoader: (
-                      creationStartTime,
-                      creationEndTime, {
-                      limit,
-                      asc,
-                    }) async {
-                      FileLoadResult result;
-                      result = FileLoadResult(images, false);
-                      return result;
-                    },
-                    reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                    tagPrefix: "map_gallery",
-                    showSelectAllByDefault: true,
-                    selectedFiles: _selectedFiles,
-                    isScrollablePositionedList: false,
+                  return Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      Gallery(
+                        asyncLoader: (
+                          creationStartTime,
+                          creationEndTime, {
+                          limit,
+                          asc,
+                        }) async {
+                          FileLoadResult result;
+                          result = FileLoadResult(images, false);
+                          return result;
+                        },
+                        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                        tagPrefix: "map_gallery",
+                        showSelectAllByDefault: true,
+                        selectedFiles: _selectedFiles,
+                        isScrollablePositionedList: false,
+                      ),
+                      FileSelectionOverlayBar(
+                        GalleryType.searchResults,
+                        _selectedFiles,
+                      )
+                    ],
                   );
                 },
               ),
