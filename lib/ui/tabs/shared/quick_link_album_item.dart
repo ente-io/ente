@@ -1,11 +1,14 @@
 import "package:flutter/material.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection.dart";
 import "package:photos/models/collection_items.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/services/collections_service.dart";
-import 'package:photos/theme/colors.dart';
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -19,32 +22,6 @@ class QuickLinkAlbumItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shareesName = <String>[];
-    if (c.hasSharees) {
-      for (int index = 0; index < c.sharees!.length; index++) {
-        final sharee = c.sharees![index]!;
-        final String name =
-            (sharee.name?.isNotEmpty ?? false) ? sharee.name! : sharee.email;
-        if (index < 2) {
-          shareesName.add(name);
-        } else {
-          final remaining = c.sharees!.length - index;
-          if (remaining == 1) {
-            // If it's the last sharee
-            shareesName.add(name);
-          } else {
-            shareesName.add(
-              "and " +
-                  remaining.toString() +
-                  " other" +
-                  (remaining > 1 ? "s" : ""),
-            );
-          }
-          break;
-        }
-      }
-    }
-
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -80,39 +57,58 @@ class QuickLinkAlbumItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        c.displayName,
-                        style: const TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                      const Padding(padding: EdgeInsets.all(2)),
-                      c.hasLink
-                          ? (c.publicURLs!.first!.isExpired
-                              ? const Icon(
-                                  Icons.link,
-                                  color: warning500,
-                                )
-                              : const Icon(Icons.link))
-                          : const SizedBox.shrink(),
-                    ],
+                  Text(
+                    c.displayName,
+                    style: getEnteTextTheme(context).body,
                   ),
-                  shareesName.isEmpty
-                      ? const SizedBox.shrink()
-                      : Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-                          child: Text(
-                            S.of(context).sharedWith(shareesName.join(", ")),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context).primaryColorLight,
-                            ),
-                            textAlign: TextAlign.left,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                    child: FutureBuilder<int>(
+                      future: FilesDB.instance.collectionFileCount(c.id),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasError) {
+                          // final String textCount = NumberFormat().format(snapshot.data);
+                          return Row(
+                            children: [
+                              (!snapshot.hasData)
+                                  ? const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 16.0,
+                                      ),
+                                      child: EnteLoadingWidget(size: 10),
+                                    )
+                                  : Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 8.0),
+                                      child: Text(
+                                        S.of(context).itemCount(snapshot.data!),
+                                        style: getEnteTextTheme(context)
+                                            .smallMuted,
+                                      ),
+                                    ),
+                              const SizedBox(width: 6),
+                              c.hasLink
+                                  ? (c.publicURLs!.first!.isExpired
+                                      ? const Icon(
+                                          Icons.link_outlined,
+                                          color: warning500,
+                                        )
+                                      : Icon(
+                                          Icons.link_outlined,
+                                          color: getEnteColorScheme(context)
+                                              .strokeMuted,
+                                        ))
+                                  : const SizedBox.shrink(),
+                            ],
+                          );
+                        } else if (snapshot.hasError) {
+                          return Text(S.of(context).somethingWentWrong);
+                        } else {
+                          return const EnteLoadingWidget(size: 10);
+                        }
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
