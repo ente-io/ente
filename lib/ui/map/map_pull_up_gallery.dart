@@ -160,20 +160,28 @@ class DraggableHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return SingleChildScrollView(
       physics: const ClampingScrollPhysics(),
       controller: scrollController,
-      child: Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: bottomSheetDraggableAreaHeight / 2 - indicatorHeight / 2,
-          ),
-          child: Container(
-            height: indicatorHeight,
-            width: 72,
-            decoration: BoxDecoration(
-              color: getEnteColorScheme(context).fillBase,
-              borderRadius: const BorderRadius.all(Radius.circular(2)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          color: colorScheme.backgroundElevated2,
+        ),
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical:
+                  bottomSheetDraggableAreaHeight / 2 - indicatorHeight / 2,
+            ),
+            child: Container(
+              height: indicatorHeight,
+              width: 72,
+              decoration: BoxDecoration(
+                color: colorScheme.fillBase,
+                borderRadius: const BorderRadius.all(Radius.circular(2)),
+              ),
             ),
           ),
         ),

@@ -171,52 +171,49 @@ class _MapScreenState extends State<MapScreen> {
     final colorScheme = getEnteColorScheme(context);
     return Container(
       color: colorScheme.backgroundBase,
-      child: SafeArea(
-        top: false,
-        child: Theme(
-          data: Theme.of(context).copyWith(
-            bottomSheetTheme: const BottomSheetThemeData(
-              backgroundColor: Colors.transparent,
-            ),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          bottomSheetTheme: const BottomSheetThemeData(
+            backgroundColor: Colors.transparent,
           ),
-          child: Scaffold(
-            body: Stack(
-              children: [
-                LayoutBuilder(
-                  builder: (context, constrains) {
-                    return SizedBox(
-                      height: constrains.maxHeight * 0.75 +
-                          bottomSheetDraggableAreaHeight,
-                      child: MapView(
-                        key: ValueKey(
-                          'image-marker-count-${imageMarkers.length}',
-                        ),
-                        controller: mapController,
-                        imageMarkers: imageMarkers,
-                        updateVisibleImages: calculateVisibleMarkers,
-                        center: center,
-                        initialZoom: initialZoom,
-                        minZoom: minZoom,
-                        maxZoom: maxZoom,
-                        debounceDuration: debounceDuration,
-                        bottomSheetDraggableAreaHeight:
-                            bottomSheetDraggableAreaHeight,
+        ),
+        child: Scaffold(
+          body: Stack(
+            children: [
+              LayoutBuilder(
+                builder: (context, constrains) {
+                  return SizedBox(
+                    height: constrains.maxHeight * 0.75 +
+                        bottomSheetDraggableAreaHeight,
+                    child: MapView(
+                      key: ValueKey(
+                        'image-marker-count-${imageMarkers.length}',
                       ),
-                    );
-                  },
-                ),
-                isLoading
-                    ? EnteLoadingWidget(
-                        size: 28,
-                        color: getEnteColorScheme(context).primary700,
-                      )
-                    : const SizedBox.shrink(),
-              ],
-            ),
-            bottomSheet: MapPullUpGallery(
-              visibleImages,
-              bottomSheetDraggableAreaHeight,
-            ),
+                      controller: mapController,
+                      imageMarkers: imageMarkers,
+                      updateVisibleImages: calculateVisibleMarkers,
+                      center: center,
+                      initialZoom: initialZoom,
+                      minZoom: minZoom,
+                      maxZoom: maxZoom,
+                      debounceDuration: debounceDuration,
+                      bottomSheetDraggableAreaHeight:
+                          bottomSheetDraggableAreaHeight,
+                    ),
+                  );
+                },
+              ),
+              isLoading
+                  ? EnteLoadingWidget(
+                      size: 28,
+                      color: getEnteColorScheme(context).primary700,
+                    )
+                  : const SizedBox.shrink(),
+            ],
+          ),
+          bottomSheet: MapPullUpGallery(
+            visibleImages,
+            bottomSheetDraggableAreaHeight,
           ),
         ),
       ),
