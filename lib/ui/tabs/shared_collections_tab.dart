@@ -12,6 +12,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/horizontal_grid_view.dart";
 import "package:photos/ui/collections/vertical_grid_view.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -130,16 +131,25 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
             ),
             const SizedBox(height: 4),
             collections.outgoing.isNotEmpty
-                ? ListView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.only(bottom: 12),
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return OutgoingAlbumItem(
-                        c: collections.outgoing[index],
-                      );
-                    },
-                    itemCount: collections.outgoing.length,
+                ? SizedBox(
+                    height: maxThumbnailWidth + 48,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 8,
+                      ),
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: AlbumRowItemWidget(
+                            collections.outgoing[index],
+                            maxThumbnailWidth,
+                          ),
+                        );
+                      },
+                      itemCount: collections.outgoing.length,
+                    ),
                   )
                 : const OutgoingAlbumEmptyState(),
             if (hasQuickLinks) const SizedBox(height: 12),
