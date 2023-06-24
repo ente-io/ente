@@ -128,6 +128,25 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
             const SizedBox(height: 16),
             SectionTitleRow(
               SectionTitle(title: S.of(context).sharedByMe),
+              trailingWidget: collections.outgoing.isNotEmpty
+                  ? IconButtonWidget(
+                      icon: Icons.chevron_right,
+                      iconButtonType: IconButtonType.secondary,
+                      onTap: () {
+                        unawaited(
+                          routeToPage(
+                            context,
+                            CollectionVerticalGridView(
+                              collections.outgoing,
+                              appTitle: SectionTitle(
+                                title: S.of(context).sharedByMe,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : null,
             ),
             const SizedBox(height: 4),
             collections.outgoing.isNotEmpty
