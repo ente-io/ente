@@ -94,6 +94,8 @@ class MapPullUpGallery extends StatelessWidget {
 
                   final images = snapshot.data!;
                   logger.info("Visible images: ${images.length}");
+                  //To retain only selected files that are in view (visible)
+                  _selectedFiles.files.retainAll(images.toSet());
 
                   if (images.isEmpty) {
                     return SizedBox(
