@@ -7,6 +7,7 @@ import 'package:photos/models/collection_items.dart';
 import "package:photos/models/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/services/collections_service.dart";
+import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
@@ -68,9 +69,33 @@ class AlbumRowItemWidget extends StatelessWidget {
                           }
                         },
                       ),
-                      if (isOwner && c.hasSharees)
-                        AlbumSharesIcons(
-                          sharees: c.getSharees(),
+                      if (isOwner && (c.hasSharees || c.hasLink))
+                        if (c.hasSharees)
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: AlbumSharesIcons(
+                              sharees: c.getSharees(),
+                            ),
+                          ),
+                      if (isOwner && c.hasLink)
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              top: 4.0,
+                              left: 10.0,
+                              right: 10.0,
+                            ),
+                            child: c.publicURLs!.first!.isExpired
+                                ? const Icon(
+                                    Icons.link,
+                                    color: warning500,
+                                  )
+                                : const Icon(
+                                    Icons.link,
+                                    color: strokeBaseDark,
+                                  ),
+                          ),
                         ),
                       if (!isOwner)
                         Align(
