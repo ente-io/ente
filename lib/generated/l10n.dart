@@ -7292,6 +7292,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Quick links`
+  String get quickLinks {
+    return Intl.message(
+      'Quick links',
+      name: 'quickLinks',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

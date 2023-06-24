@@ -62,6 +62,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if ((snapshot.data?.incoming.length ?? 0) == 0 &&
+              (snapshot.data?.quickLinks.length ?? 0) == 0 &&
               (snapshot.data?.outgoing.length ?? 0) == 0) {
             return const Center(child: SharedEmptyStateWidget());
           }
@@ -90,6 +91,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         (albumsCountInOneRow - 1) * crossAxisSpacingOfGrid;
     final double sideOfThumbnail = (size.width / albumsCountInOneRow) -
         (totalWhiteSpaceOfRow / albumsCountInOneRow);
+    final bool hasQuickLinks = collections.quickLinks.isNotEmpty;
     return SingleChildScrollView(
       child: Container(
         margin: const EdgeInsets.only(bottom: 50),
@@ -118,13 +120,15 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     )
                   : null,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 4),
             collections.incoming.isNotEmpty
                 ? CollectionsHorizontalGridView(collections.incoming)
                 : const IncomingAlbumEmptyState(),
             const SizedBox(height: 16),
-            SectionTitle(title: S.of(context).sharedByMe),
-            const SizedBox(height: 12),
+            SectionTitleRow(
+              SectionTitle(title: S.of(context).sharedByMe),
+            ),
+            const SizedBox(height: 4),
             collections.outgoing.isNotEmpty
                 ? ListView.builder(
                     shrinkWrap: true,
@@ -138,6 +142,22 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     itemCount: collections.outgoing.length,
                   )
                 : const OutgoingAlbumEmptyState(),
+            if (hasQuickLinks) const SizedBox(height: 12),
+            if (hasQuickLinks)
+              SectionTitleRow(SectionTitle(title: S.of(context).quickLinks)),
+            if (hasQuickLinks) const SizedBox(height: 4),
+            if (hasQuickLinks)
+              ListView.builder(
+                shrinkWrap: true,
+                padding: const EdgeInsets.only(bottom: 12),
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return OutgoingAlbumItem(
+                    c: collections.quickLinks[index],
+                  );
+                },
+                itemCount: collections.quickLinks.length,
+              ),
             const SizedBox(height: 32),
           ],
         ),
@@ -148,31 +168,24 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   SharedCollections _getSharedCollections() {
     final List<Collection> outgoing = [];
     final List<Collection> incoming = [];
+    final List<Collection> quickLinks = [];
     final List<Collection> collections =
         CollectionsService.instance.getCollectionsForUI(includedShared: true);
     for (final c in collections) {
       if (c.owner!.id == Configuration.instance.getUserID()) {
-        if (c.hasSharees || c.hasLink || c.isSharedFilesCollection()) {
+        if (c.hasSharees || c.hasLink && !c.isSharedFilesCollection()) {
           outgoing.add(c);
+        } else if (c.isSharedFilesCollection()) {
+          quickLinks.add(c);
         }
       } else {
         incoming.add(c);
       }
     }
-    outgoing.sort((first, second) {
-      if (second.isSharedFilesCollection() == first.isSharedFilesCollection()) {
-        return second.updationTime.compareTo(first.updationTime);
-      } else {
-        if (first.isSharedFilesCollection()) {
-          return 1;
-        }
-        return -1;
-      }
-    });
     incoming.sort((first, second) {
       return second.updationTime.compareTo(first.updationTime);
     });
-    return SharedCollections(outgoing, incoming);
+    return SharedCollections(outgoing, incoming, quickLinks);
   }
 
   @override
