@@ -32,6 +32,8 @@ class _DeviceFolderVerticalGridViewState
   StreamSubscription<BackupFoldersUpdatedEvent>? _backupFoldersUpdatedEvent;
   StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
   String _loadReason = "init";
+  static const horizontalPadding = 20.0;
+  static const thumbnailSize = 120.0;
 
   @override
   void initState() {
@@ -64,8 +66,6 @@ class _DeviceFolderVerticalGridViewState
   }
 
   Widget _getBody(BuildContext context) {
-    const horizontalPadding = 20.0;
-    const deviceAlbumThumbnailWidth = 120.0;
     debugPrint("${(DeviceFolderVerticalGridView).toString()} - $_loadReason");
     final logger = Logger((_DeviceFolderVerticalGridViewState).toString());
     return SafeArea(
@@ -76,9 +76,8 @@ class _DeviceFolderVerticalGridViewState
           if (snapshot.hasData) {
             final double screenWidth = MediaQuery.of(context).size.width;
 
-            final int albumsCountInOneRow = max(
-                screenWidth ~/ (deviceAlbumThumbnailWidth + horizontalPadding),
-                2);
+            final int crossAxisItemCount =
+                max(screenWidth ~/ (thumbnailSize + horizontalPadding), 2);
             return snapshot.data!.isEmpty
                 ? const EmptyState()
                 : Padding(
@@ -94,10 +93,9 @@ class _DeviceFolderVerticalGridViewState
                       itemCount: snapshot.data!.length,
                       // To include the + button
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: albumsCountInOneRow,
+                        crossAxisCount: crossAxisItemCount,
                         crossAxisSpacing: 16.0,
-                        childAspectRatio: deviceAlbumThumbnailWidth /
-                            (deviceAlbumThumbnailWidth + 10),
+                        childAspectRatio: thumbnailSize / (thumbnailSize + 10),
                       ),
                     ),
                   );
