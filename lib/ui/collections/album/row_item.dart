@@ -20,18 +20,21 @@ class AlbumRowItemWidget extends StatelessWidget {
   final Collection c;
   final double sideOfThumbnail;
   final bool showFileCount;
+  final String tag;
 
   const AlbumRowItemWidget(
     this.c,
     this.sideOfThumbnail, {
     super.key,
     this.showFileCount = true,
+    this.tag = "",
   });
 
   @override
   Widget build(BuildContext context) {
     final bool isOwner = c.isOwner(Configuration.instance.getUserID()!);
-    final String tagPrefix = isOwner ? "collection" : "shared_collection";
+    final String tagPrefix =  (isOwner ? "collection" : "shared_collection")
+        + tag;
     final enteTextTheme = getEnteTextTheme(context);
     return GestureDetector(
       child: Column(

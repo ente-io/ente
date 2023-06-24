@@ -164,6 +164,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                           child: AlbumRowItemWidget(
                             collections.outgoing[index],
                             maxThumbnailWidth,
+                            tag: "outgoing",
                           ),
                         );
                       },
