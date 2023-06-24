@@ -203,6 +203,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Stack(
+            alignment: Alignment.bottomCenter,
             children: [
               Gallery(
                 loadingWidget: Column(

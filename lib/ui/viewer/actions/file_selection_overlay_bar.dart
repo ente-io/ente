@@ -37,7 +37,7 @@ class FileSelectionOverlayBar extends StatefulWidget {
 
 class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   final GlobalKey shareButtonKey = GlobalKey();
-  final ValueNotifier<double> _bottomPosition = ValueNotifier(-150.0);
+  final ValueNotifier<bool> _hasSelectedFilesNotifier = ValueNotifier(false);
   late bool showDeleteOption;
 
   @override
@@ -127,15 +127,17 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       ),
     );
     return ValueListenableBuilder(
-      valueListenable: _bottomPosition,
+      valueListenable: _hasSelectedFilesNotifier,
       builder: (context, value, child) {
-        return AnimatedPositioned(
-          curve: Curves.easeInOutExpo,
-          bottom: _bottomPosition.value,
-          right: 0,
-          left: 0,
+        return AnimatedCrossFade(
+          firstCurve: Curves.easeInOutExpo,
+          secondCurve: Curves.easeInOutExpo,
+          sizeCurve: Curves.easeInOutExpo,
+          crossFadeState: _hasSelectedFilesNotifier.value
+              ? CrossFadeState.showFirst
+              : CrossFadeState.showSecond,
           duration: const Duration(milliseconds: 400),
-          child: BottomActionBarWidget(
+          firstChild: BottomActionBarWidget(
             selectedFiles: widget.selectedFiles,
             hasSmallerBottomPadding: true,
             type: widget.galleryType,
@@ -155,6 +157,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
             iconButtons: iconsButton,
             backgroundColor: widget.backgroundColor,
           ),
+          secondChild: const SizedBox(width: double.infinity),
         );
       },
     );
@@ -170,8 +173,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   _selectedFilesListener() {
-    widget.selectedFiles.files.isNotEmpty
-        ? _bottomPosition.value = 0.0
-        : _bottomPosition.value = -150.0;
+    _hasSelectedFilesNotifier.value = widget.selectedFiles.files.isNotEmpty;
   }
 }
