@@ -7,10 +7,12 @@ import "package:photos/ui/collections/album/row_item.dart";
 class CollectionVerticalGridView extends StatelessWidget {
   final List<Collection>? collections;
   final Widget? appTitle;
-  final double gapBetweenAlbums = 0.0;
   static const maxThumbnailWidth = 160.0;
+
   // This includes the name, count and padding below the thumbnail
   static const albumBottomInfoHeight = 21.0;
+  static const double horizontalPadding = 20;
+  static const double gapBetweenAlbumsInRow = 16.0;
 
   const CollectionVerticalGridView(
     this.collections, {
@@ -34,10 +36,8 @@ class CollectionVerticalGridView extends StatelessWidget {
   Widget _getBody(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
 
-    const double horizontalPadding = 20;
     final int albumsCountInOneRow =
         max(screenWidth ~/ (maxThumbnailWidth + horizontalPadding), 2);
-    const double gapBetweenAlbumsInRow = 16.0;
 
     return SafeArea(
       child: Padding(
