@@ -21,6 +21,7 @@ import "package:photos/ui/collections/button/trash_button.dart";
 import "package:photos/ui/collections/button/uncategorized_button.dart";
 import "package:photos/ui/collections/create_new_album_widget.dart";
 import "package:photos/ui/collections/device/device_folders_grid_view.dart";
+import "package:photos/ui/collections/device/device_folders_vertical_grid_view.dart";
 import 'package:photos/ui/collections/horizontal_grid_view.dart';
 import "package:photos/ui/collections/vertical_grid_view.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -165,11 +166,26 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 ],
               ),
             ),
-            const SizedBox(height: 12),
             SectionTitleRow(
               SectionTitle(title: S.of(context).onDevice),
+              trailingWidget: IconButtonWidget(
+                icon: Icons.chevron_right,
+                iconButtonType: IconButtonType.secondary,
+                onTap: () {
+                  unawaited(
+                    routeToPage(
+                      context,
+                      DeviceFolderVerticalGridView(
+                        appTitle: SectionTitle(
+                          titleWithBrand:
+                              SectionTitle(title: S.of(context).onDevice),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
-            const SizedBox(height: 12),
             const DeviceFoldersGridView(),
             SectionTitleRow(
               SectionTitle(titleWithBrand: getOnEnteSection(context)),
