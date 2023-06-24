@@ -13,8 +13,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
-class MapPullUpGallery extends StatelessWidget {
-  final _selectedFiles = SelectedFiles();
+class MapPullUpGallery extends StatefulWidget {
   final StreamController<List<File>> visibleImages;
   final double bottomUnsafeArea;
   final double bottomSheetDraggableAreaHeight;
@@ -22,7 +21,7 @@ class MapPullUpGallery extends StatelessWidget {
   static const gridMainAxisSpacing = 4.0;
   static const gridPadding = 2.0;
   static const gridCrossAxisCount = 4;
-  MapPullUpGallery(
+  const MapPullUpGallery(
     this.visibleImages,
     this.bottomSheetDraggableAreaHeight,
     this.bottomUnsafeArea, {
@@ -30,28 +29,45 @@ class MapPullUpGallery extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<MapPullUpGallery> createState() => _MapPullUpGalleryState();
+}
+
+class _MapPullUpGalleryState extends State<MapPullUpGallery> {
+  final _selectedFiles = SelectedFiles();
+
+  @override
   Widget build(BuildContext context) {
     final Logger logger = Logger("_MapPullUpGalleryState");
     final screenHeight = MediaQuery.of(context).size.height;
-    final unsafeAreaProportion = bottomUnsafeArea / screenHeight;
+    final unsafeAreaProportion = widget.bottomUnsafeArea / screenHeight;
     final double initialChildSize = 0.25 + unsafeAreaProportion;
 
     Widget? cachedScrollableContent;
 
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: initialChildSize,
-      minChildSize: initialChildSize,
-      maxChildSize: 0.8,
-      snap: true,
-      snapSizes: const [0.5],
-      builder: (context, scrollController) {
-        //Must use cached widget here to avoid rebuilds when DraggableScrollableSheet
-        //is snapped to it's initialChildSize
-        cachedScrollableContent ??=
-            cacheScrollableContent(scrollController, context, logger);
-        return cachedScrollableContent!;
-      },
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: initialChildSize,
+          minChildSize: initialChildSize,
+          maxChildSize: 0.8,
+          snap: true,
+          snapSizes: const [0.5],
+          builder: (context, scrollController) {
+            //Must use cached widget here to avoid rebuilds when DraggableScrollableSheet
+            //is snapped to it's initialChildSize
+            cachedScrollableContent ??=
+                cacheScrollableContent(scrollController, context, logger);
+            return cachedScrollableContent!;
+          },
+        ),
+        FileSelectionOverlayBar(
+          GalleryType.searchResults,
+          _selectedFiles,
+          backgroundColor: getEnteColorScheme(context).backgroundElevated2,
+        ),
+      ],
     );
   }
 
@@ -72,7 +88,8 @@ class MapPullUpGallery extends StatelessWidget {
         children: [
           DraggableHeader(
             scrollController: scrollController,
-            bottomSheetDraggableAreaHeight: bottomSheetDraggableAreaHeight,
+            bottomSheetDraggableAreaHeight:
+                widget.bottomSheetDraggableAreaHeight,
           ),
           Expanded(
             child: AnimatedSwitcher(
@@ -80,7 +97,7 @@ class MapPullUpGallery extends StatelessWidget {
               switchInCurve: Curves.easeInOutExpo,
               switchOutCurve: Curves.easeInOutExpo,
               child: StreamBuilder<List<File>>(
-                stream: visibleImages.stream,
+                stream: widget.visibleImages.stream,
                 builder: (
                   BuildContext context,
                   AsyncSnapshot<List<File>> snapshot,
@@ -119,32 +136,22 @@ class MapPullUpGallery extends StatelessWidget {
                     );
                   }
 
-                  return Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      Gallery(
-                        asyncLoader: (
-                          creationStartTime,
-                          creationEndTime, {
-                          limit,
-                          asc,
-                        }) async {
-                          FileLoadResult result;
-                          result = FileLoadResult(images, false);
-                          return result;
-                        },
-                        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                        tagPrefix: "map_gallery",
-                        showSelectAllByDefault: true,
-                        selectedFiles: _selectedFiles,
-                        isScrollablePositionedList: false,
-                      ),
-                      FileSelectionOverlayBar(
-                        GalleryType.searchResults,
-                        _selectedFiles,
-                        backgroundColor: colorScheme.backgroundElevated2,
-                      )
-                    ],
+                  return Gallery(
+                    asyncLoader: (
+                      creationStartTime,
+                      creationEndTime, {
+                      limit,
+                      asc,
+                    }) async {
+                      FileLoadResult result;
+                      result = FileLoadResult(images, false);
+                      return result;
+                    },
+                    reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                    tagPrefix: "map_gallery",
+                    showSelectAllByDefault: true,
+                    selectedFiles: _selectedFiles,
+                    isScrollablePositionedList: false,
                   );
                 },
               ),

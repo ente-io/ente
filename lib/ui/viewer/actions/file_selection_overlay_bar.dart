@@ -42,9 +42,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   @override
   void initState() {
+    super.initState();
     showDeleteOption = widget.galleryType.showDeleteIconOption();
     widget.selectedFiles.addListener(_selectedFilesListener);
-    super.initState();
   }
 
   @override
