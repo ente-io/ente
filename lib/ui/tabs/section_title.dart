@@ -46,7 +46,7 @@ class SectionTitleRow extends StatelessWidget {
   const SectionTitleRow(
     this.title, {
     this.trailingWidget,
-    this.padding = const EdgeInsets.only(left: 4, right: 0),
+    this.padding = const EdgeInsets.only(left: 12, right: 0),
     super.key,
   });
 
