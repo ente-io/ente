@@ -20,13 +20,8 @@ class NotificationService {
         InitializationSettings(
       android: initializationSettingsAndroid,
     );
-    await _flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onSelectNotification: selectNotification,
-    );
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
-
-  Future selectNotification(String? payload) async {}
 
   Future<void> showNotification(String title, String message) async {
     if (!Platform.isAndroid) {
