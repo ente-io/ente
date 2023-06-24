@@ -60,7 +60,7 @@
         "0": "Preparing to upload",
         "1": "Reading google metadata files",
         "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} files metadata extracted",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} files backed up",
+        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} files processed",
         "4": "Cancelling remaining uploads",
         "5": "Backup complete"
     },

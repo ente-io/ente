@@ -692,6 +692,7 @@ function PhotoViewer(props: Iprops) {
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={props.fileToCollectionsMap}
                 collectionNameMap={props.collectionNameMap}
+                closePhotoViewer={handleClose}
             />
         </>
     );

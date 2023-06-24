@@ -1,10 +1,9 @@
-import { Box, styled } from '@mui/material';
+import { Button, ButtonProps, styled } from '@mui/material';
 import { CSSProperties } from '@mui/material/styles/createTypography';
 
-export const Chip = styled(Box)(({ theme }) => ({
+export const Chip = styled((props: ButtonProps) => (
+    <Button color="secondary" {...props} />
+))(({ theme }) => ({
     ...(theme.typography.small as CSSProperties),
-    padding: '8px 12px',
-    borderRadius: '4px',
-    backgroundColor: theme.colors.fill.faint,
-    fontWeight: 'bold',
+    padding: '8px',
 }));
