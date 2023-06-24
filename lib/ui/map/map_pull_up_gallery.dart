@@ -28,8 +28,9 @@ class MapPullUpGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Logger logger = Logger("_MapPullUpGalleryState");
-    final textTheme = getEnteTextTheme(context);
     const double initialChildSize = 0.25;
+
+    Widget? cachedScrollableContent;
 
     return DraggableScrollableSheet(
       expand: false,
@@ -39,84 +40,98 @@ class MapPullUpGallery extends StatelessWidget {
       snap: true,
       snapSizes: const [0.5],
       builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            color: getEnteColorScheme(context).backgroundElevated,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              DraggableHeader(
-                scrollController: scrollController,
-                bottomSheetDraggableAreaHeight: bottomSheetDraggableAreaHeight,
-              ),
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  switchInCurve: Curves.easeInOutExpo,
-                  switchOutCurve: Curves.easeInOutExpo,
-                  child: StreamBuilder<List<File>>(
-                    stream: visibleImages.stream,
-                    builder: (
-                      BuildContext context,
-                      AsyncSnapshot<List<File>> snapshot,
-                    ) {
-                      if (!snapshot.hasData) {
-                        return SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.2,
-                          child: const EnteLoadingWidget(),
-                        );
-                      }
-                      final images = snapshot.data!;
-                      logger.info("Visible images: ${images.length}");
-                      if (images.isEmpty) {
-                        return SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.2,
-                          child: Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  "No photos found here",
-                                  style: textTheme.large,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  "Zoom out to see photos",
-                                  style: textTheme.smallFaint,
-                                )
-                              ],
-                            ),
-                          ),
-                        );
-                      }
-
-                      return Gallery(
-                        asyncLoader: (
-                          creationStartTime,
-                          creationEndTime, {
-                          limit,
-                          asc,
-                        }) async {
-                          FileLoadResult result;
-                          result = FileLoadResult(images, false);
-                          return result;
-                        },
-                        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                        tagPrefix: "map_gallery",
-                        showSelectAllByDefault: true,
-                        selectedFiles: _selectedFiles,
-                        isScrollablePositionedList: false,
-                      );
-                    },
-                  ),
-                ),
-              )
-            ],
-          ),
-        );
+        //Must use cached widget here to avoid rebuilds when DraggableScrollableSheet
+        //is snapped to it's initialChildSize
+        cachedScrollableContent ??=
+            cacheScrollableContent(scrollController, context, logger);
+        return cachedScrollableContent!;
       },
+    );
+  }
+
+  Widget cacheScrollableContent(
+    ScrollController scrollController,
+    BuildContext context,
+    logger,
+  ) {
+    final textTheme = getEnteTextTheme(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+        color: getEnteColorScheme(context).backgroundElevated,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          DraggableHeader(
+            scrollController: scrollController,
+            bottomSheetDraggableAreaHeight: bottomSheetDraggableAreaHeight,
+          ),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              switchInCurve: Curves.easeInOutExpo,
+              switchOutCurve: Curves.easeInOutExpo,
+              child: StreamBuilder<List<File>>(
+                stream: visibleImages.stream,
+                builder: (
+                  BuildContext context,
+                  AsyncSnapshot<List<File>> snapshot,
+                ) {
+                  if (!snapshot.hasData) {
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      child: const EnteLoadingWidget(),
+                    );
+                  }
+                  final images = snapshot.data!;
+                  logger.info("Visible images: ${images.length}");
+                  if (images.isEmpty) {
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "No photos found here",
+                              style: textTheme.large,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Zoom out to see photos",
+                              style: textTheme.smallFaint,
+                            )
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Gallery(
+                    asyncLoader: (
+                      creationStartTime,
+                      creationEndTime, {
+                      limit,
+                      asc,
+                    }) async {
+                      FileLoadResult result;
+                      result = FileLoadResult(images, false);
+                      return result;
+                    },
+                    reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                    tagPrefix: "map_gallery",
+                    showSelectAllByDefault: true,
+                    selectedFiles: _selectedFiles,
+                    isScrollablePositionedList: false,
+                  );
+                },
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 }
