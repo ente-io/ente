@@ -19,7 +19,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/empty_state.dart";
-import "package:photos/ui/tabs/shared/outgoing_album_item.dart";
+import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class SharedCollectionsTab extends StatefulWidget {
@@ -181,7 +181,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                 padding: const EdgeInsets.only(bottom: 12),
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
-                  return OutgoingAlbumItem(
+                  return QuickLinkAlbumItem(
                     c: collections.quickLinks[index],
                   );
                 },

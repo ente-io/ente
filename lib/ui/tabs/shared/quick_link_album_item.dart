@@ -11,11 +11,11 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class OutgoingAlbumItem extends StatelessWidget {
+class QuickLinkAlbumItem extends StatelessWidget {
   final Collection c;
   static const heroTagPrefix = "outgoing_collection";
 
-  const OutgoingAlbumItem({super.key, required this.c});
+  const QuickLinkAlbumItem({super.key, required this.c});
 
   @override
   Widget build(BuildContext context) {
