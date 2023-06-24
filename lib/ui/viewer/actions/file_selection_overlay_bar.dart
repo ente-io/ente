@@ -19,12 +19,14 @@ class FileSelectionOverlayBar extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final Collection? collection;
   final DeviceCollection? deviceCollection;
+  final Color? backgroundColor;
 
   const FileSelectionOverlayBar(
     this.galleryType,
     this.selectedFiles, {
     this.collection,
     this.deviceCollection,
+    this.backgroundColor,
     Key? key,
   }) : super(key: key);
 
@@ -151,6 +153,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
               }
             },
             iconButtons: iconsButton,
+            backgroundColor: widget.backgroundColor,
           ),
         );
       },

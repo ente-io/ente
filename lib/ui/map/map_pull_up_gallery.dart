@@ -57,11 +57,11 @@ class MapPullUpGallery extends StatelessWidget {
     logger,
   ) {
     final textTheme = getEnteTextTheme(context);
-
+    final colorScheme = getEnteColorScheme(context);
     return Container(
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-        color: getEnteColorScheme(context).backgroundElevated,
+        color: colorScheme.backgroundElevated,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -134,6 +134,7 @@ class MapPullUpGallery extends StatelessWidget {
                       FileSelectionOverlayBar(
                         GalleryType.searchResults,
                         _selectedFiles,
+                        backgroundColor: colorScheme.backgroundElevated2,
                       )
                     ],
                   );
