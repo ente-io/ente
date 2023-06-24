@@ -297,6 +297,7 @@ class UploadManager {
                 fileWithCollection.localID,
                 finalUploadResult
             );
+            UIService.increaseFileUploaded();
             UploadService.reducePendingUploadCount();
         }
     }

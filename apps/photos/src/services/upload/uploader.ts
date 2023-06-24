@@ -94,7 +94,7 @@ export default async function uploader(
                 };
             } else {
                 addLogLine(
-                    `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize}`
+                    `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize} ,adding symlink`
                 );
                 // any of the matching file can used to add a symlink
                 const resultFile = Object.assign({}, matchingExistingFiles[0]);
@@ -158,7 +158,6 @@ export default async function uploader(
 
         const uploadedFile = await UploadService.uploadFile(uploadFile);
 
-        UIService.increaseFileUploaded();
         addLogLine(`${fileNameSize} successfully uploaded`);
 
         return {
