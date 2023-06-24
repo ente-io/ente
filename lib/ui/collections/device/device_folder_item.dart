@@ -6,9 +6,9 @@ import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/device_folder_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class DeviceFolderIcon extends StatelessWidget {
+class DeviceFolderItem extends StatelessWidget {
   final DeviceCollection deviceCollection;
-  const DeviceFolderIcon(
+  const DeviceFolderItem(
     this.deviceCollection, {
     Key? key,
   }) : super(key: key);

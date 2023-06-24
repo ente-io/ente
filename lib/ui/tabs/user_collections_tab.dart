@@ -20,7 +20,7 @@ import "package:photos/ui/collections/button/hidden_button.dart";
 import "package:photos/ui/collections/button/trash_button.dart";
 import "package:photos/ui/collections/button/uncategorized_button.dart";
 import "package:photos/ui/collections/create_new_album_widget.dart";
-import 'package:photos/ui/collections/device/device_folders_grid_view_widget.dart';
+import "package:photos/ui/collections/device/device_folders_grid_view.dart";
 import 'package:photos/ui/collections/horizontal_grid_view.dart';
 import "package:photos/ui/collections/vertical_grid_view.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -170,7 +170,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               SectionTitle(title: S.of(context).onDevice),
             ),
             const SizedBox(height: 12),
-            const DeviceFoldersGridViewWidget(),
+            const DeviceFoldersGridView(),
             SectionTitleRow(
               SectionTitle(titleWithBrand: getOnEnteSection(context)),
               trailingWidget: _sortMenu(collections),

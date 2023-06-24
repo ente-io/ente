@@ -9,22 +9,20 @@ import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
-import 'package:photos/ui/collections/device/device_folder_icon_widget.dart';
+import "package:photos/ui/collections/device/device_folder_item.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 
-class DeviceFoldersGridViewWidget extends StatefulWidget {
-  const DeviceFoldersGridViewWidget({
+class DeviceFoldersGridView extends StatefulWidget {
+  const DeviceFoldersGridView({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<DeviceFoldersGridViewWidget> createState() =>
-      _DeviceFoldersGridViewWidgetState();
+  State<DeviceFoldersGridView> createState() => _DeviceFoldersGridViewState();
 }
 
-class _DeviceFoldersGridViewWidgetState
-    extends State<DeviceFoldersGridViewWidget> {
+class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
   StreamSubscription<BackupFoldersUpdatedEvent>? _backupFoldersUpdatedEvent;
   StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
   String _loadReason = "init";
@@ -48,8 +46,8 @@ class _DeviceFoldersGridViewWidgetState
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("${(DeviceFoldersGridViewWidget).toString()} - $_loadReason");
-    final logger = Logger((_DeviceFoldersGridViewWidgetState).toString());
+    debugPrint("${(DeviceFoldersGridView).toString()} - $_loadReason");
+    final logger = Logger((_DeviceFoldersGridViewState).toString());
     return SizedBox(
       height: 170,
       child: Align(
@@ -71,7 +69,7 @@ class _DeviceFoldersGridViewWidgetState
                       // to disable GridView's scrolling
                       itemBuilder: (context, index) {
                         final deviceCollection = snapshot.data![index];
-                        return DeviceFolderIcon(deviceCollection);
+                        return DeviceFolderItem(deviceCollection);
                       },
                       itemCount: snapshot.data!.length,
                     );
