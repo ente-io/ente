@@ -627,6 +627,23 @@ class FilesDB {
     return files;
   }
 
+  Future<List<File>> getNewFilesInCollection(
+    int collectionID,
+    int updationTime,
+  ) async {
+    final db = await instance.database;
+    const String whereClause =
+        '$columnCollectionID = ? AND $columnUpdationTime > ?';
+    final List<Object> whereArgs = [collectionID, updationTime];
+    final results = await db.query(
+      filesTable,
+      where: whereClause,
+      whereArgs: whereArgs,
+    );
+    final files = convertToFiles(results);
+    return files;
+  }
+
   Future<FileLoadResult> getFilesInCollections(
     List<int> collectionIDs,
     int startTime,

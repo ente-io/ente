@@ -185,24 +185,19 @@ class RemoteSyncService {
       await _markResetSyncTimeAsDone();
     }
 
-    await _syncUpdatedCollections();
-    unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
-  }
-
-  Future<void> _syncUpdatedCollections() async {
     final idsToRemoteUpdationTimeMap =
         await _collectionsService.getCollectionIDsToBeSynced();
+    await _syncUpdatedCollections(idsToRemoteUpdationTimeMap);
+    unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
+    unawaited(_notifyNewFiles(idsToRemoteUpdationTimeMap.keys.toList()));
+  }
+
+  Future<void> _syncUpdatedCollections(final idsToRemoteUpdationTimeMap) async {
     for (final cid in idsToRemoteUpdationTimeMap.keys) {
       final newSharedFiles = await _syncCollectionDiff(
         cid,
         _collectionsService.getCollectionSyncTime(cid),
       );
-      if (newSharedFiles > 0 && _shouldShowNotification(cid)) {
-        NotificationService.instance.showNotification(
-          _collectionsService.getCollectionByID(cid)!.displayName,
-          newSharedFiles.toString() + " new 📸",
-        );
-      }
       // update syncTime for the collection in sharedPrefs. Note: the
       // syncTime can change on remote but we might not get a diff for the
       // collection if there are not changes in the file, but the collection
@@ -876,7 +871,29 @@ class RemoteSyncService {
     // TODO: Add option to opt out of notifications for a specific collection
     // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
     return NotificationService.instance
-            .shouldShowNotificationsForSharedPhotos() &&
-        !AppLifecycleService.instance.isForeground;
+        .shouldShowNotificationsForSharedPhotos();
+    // TODO: && !AppLifecycleService.instance.isForeground;
+  }
+
+  Future<void> _notifyNewFiles(List<int> collectionIDs) async {
+    final userID = Configuration.instance.getUserID();
+    final appOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
+    for (final collectionID in collectionIDs) {
+      final collection = _collectionsService.getCollectionByID(collectionID);
+      final files =
+          await _db.getNewFilesInCollection(collectionID, appOpenTime);
+      final sharedFileCount =
+          files.where((file) => file.ownerID != userID).length;
+      final collectedFileCount = files
+          .where((file) => file.pubMagicMetadata!.uploaderName != null)
+          .length;
+      final totalCount = sharedFileCount + collectedFileCount;
+      if (totalCount > 0 && _shouldShowNotification(collectionID)) {
+        NotificationService.instance.showNotification(
+          collection!.displayName,
+          totalCount.toString() + " new 📸",
+        );
+      }
+    }
   }
 }
