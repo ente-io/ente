@@ -193,7 +193,7 @@ class RemoteSyncService {
 
   Future<void> _syncUpdatedCollections(final idsToRemoteUpdationTimeMap) async {
     for (final cid in idsToRemoteUpdationTimeMap.keys) {
-      final newSharedFiles = await _syncCollectionDiff(
+      await _syncCollectionDiff(
         cid,
         _collectionsService.getCollectionSyncTime(cid),
       );
