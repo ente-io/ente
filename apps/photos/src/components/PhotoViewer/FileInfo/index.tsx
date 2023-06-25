@@ -170,6 +170,7 @@ export function FileInfo({
     }
     const onCollectionChipClick = (collectionID) => {
         galleryContext.setActiveCollection(collectionID);
+        galleryContext.setIsInSearchMode(false);
         closePhotoViewer();
     };
 

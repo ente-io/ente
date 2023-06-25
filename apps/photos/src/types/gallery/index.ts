@@ -33,6 +33,7 @@ export type GalleryContextType = {
     setActiveCollection: (collection: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setBlockingLoad: (value: boolean) => void;
+    setIsInSearchMode: (value: boolean) => void;
     photoListHeader: TimeStampListItem;
     openExportModal: () => void;
     authenticateUser: (callback: () => void) => void;
