@@ -892,6 +892,7 @@ class RemoteSyncService {
         NotificationService.instance.showNotification(
           collection!.displayName,
           totalCount.toString() + " new 📸",
+          identifier: "collection:" + collectionID.toString(),
         );
       }
     }

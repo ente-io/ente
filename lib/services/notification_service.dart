@@ -69,23 +69,27 @@ class NotificationService {
     );
   }
 
-  Future<void> showNotification(String title, String message) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'io.ente.photos',
+  Future<void> showNotification(
+    String title,
+    String message, {
+    String identifier = "io.ente.photos",
+  }) async {
+    final androidSpecs = AndroidNotificationDetails(
+      identifier,
       'ente',
       channelDescription: 'ente alerts',
       importance: Importance.max,
       priority: Priority.high,
       showWhen: false,
     );
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
+    final iosSpecs = DarwinNotificationDetails(threadIdentifier: identifier);
+    final platformChannelSpecs =
+        NotificationDetails(android: androidSpecs, iOS: iosSpecs);
     await _flutterLocalNotificationsPlugin.show(
       0,
       title,
       message,
-      platformChannelSpecifics,
+      platformChannelSpecs,
     );
   }
 }
