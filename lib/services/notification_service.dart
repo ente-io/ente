@@ -8,6 +8,7 @@ class NotificationService {
       NotificationService._privateConstructor();
   static const String keyGrantedNotificationPermission =
       "notification_permission_granted";
+  static const String keyShouldShowNotifications = "notifications_enabled";
 
   NotificationService._privateConstructor();
 
@@ -25,7 +26,13 @@ class NotificationService {
       iOS: iosSettings,
     );
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
-    if (Platform.isIOS && !_hasGrantedPermissions()) {
+    if (!hasGrantedPermissions()) {
+      await requestPermissions();
+    }
+  }
+
+  Future<void> requestPermissions() async {
+    if (Platform.isIOS) {
       final result = await _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>()
@@ -33,15 +40,27 @@ class NotificationService {
             sound: true,
             alert: true,
           );
-      if (result != null && result) {
-        _preferences.setBool(keyGrantedNotificationPermission, true);
+      if (result != null) {
+        _preferences.setBool(keyGrantedNotificationPermission, result);
       }
     }
   }
 
-  bool _hasGrantedPermissions() {
+  bool hasGrantedPermissions() {
+    if (Platform.isAndroid) {
+      return true;
+    }
     final result = _preferences.getBool(keyGrantedNotificationPermission);
     return result ?? false;
+  }
+
+  bool shouldShowNotifications() {
+    final result = _preferences.getBool(keyShouldShowNotifications);
+    return result ?? true;
+  }
+
+  Future<void> setShouldShowNotifications(bool value) {
+    return _preferences.setBool(keyShouldShowNotifications, value);
   }
 
   Future<void> showNotification(String title, String message) async {
