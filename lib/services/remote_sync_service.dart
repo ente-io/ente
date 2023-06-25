@@ -197,7 +197,7 @@ class RemoteSyncService {
         cid,
         _collectionsService.getCollectionSyncTime(cid),
       );
-      if (newSharedFiles > 0) {
+      if (newSharedFiles > 0 && _shouldShowNotification(cid)) {
         NotificationService.instance.showNotification(
           _collectionsService.getCollectionByID(cid)!.displayName,
           newSharedFiles.toString() + " new 📸",
@@ -870,5 +870,13 @@ class RemoteSyncService {
         return -1;
       }
     });
+  }
+
+  bool _shouldShowNotification(int collectionID) {
+    // TODO: Add option to opt out of notifications for a specific collection
+    // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
+    return NotificationService.instance
+            .shouldShowNotificationsForSharedPhotos() &&
+        !AppLifecycleService.instance.isForeground;
   }
 }
