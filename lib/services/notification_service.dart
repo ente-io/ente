@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import "package:photos/services/remote_sync_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class NotificationService {
@@ -27,7 +28,8 @@ class NotificationService {
       iOS: iosSettings,
     );
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
-    if (!hasGrantedPermissions()) {
+    if (!hasGrantedPermissions() &&
+        RemoteSyncService.instance.isFirstRemoteSyncDone()) {
       await requestPermissions();
     }
   }
@@ -44,13 +46,12 @@ class NotificationService {
       if (result != null) {
         _preferences.setBool(keyGrantedNotificationPermission, result);
       }
+    } else {
+      _preferences.setBool(keyGrantedNotificationPermission, true);
     }
   }
 
   bool hasGrantedPermissions() {
-    if (Platform.isAndroid) {
-      return true;
-    }
     final result = _preferences.getBool(keyGrantedNotificationPermission);
     return result ?? false;
   }
