@@ -8,7 +8,8 @@ class NotificationService {
       NotificationService._privateConstructor();
   static const String keyGrantedNotificationPermission =
       "notification_permission_granted";
-  static const String keyShouldShowNotifications = "notifications_enabled";
+  static const String keyShouldShowNotificationsForSharedPhotos =
+      "notifications_enabled_shared_photos";
 
   NotificationService._privateConstructor();
 
@@ -54,13 +55,17 @@ class NotificationService {
     return result ?? false;
   }
 
-  bool shouldShowNotifications() {
-    final result = _preferences.getBool(keyShouldShowNotifications);
+  bool shouldShowNotificationsForSharedPhotos() {
+    final result =
+        _preferences.getBool(keyShouldShowNotificationsForSharedPhotos);
     return result ?? true;
   }
 
-  Future<void> setShouldShowNotifications(bool value) {
-    return _preferences.setBool(keyShouldShowNotifications, value);
+  Future<void> setShouldShowNotificationsForSharedPhotos(bool value) {
+    return _preferences.setBool(
+      keyShouldShowNotificationsForSharedPhotos,
+      value,
+    );
   }
 
   Future<void> showNotification(String title, String message) async {
