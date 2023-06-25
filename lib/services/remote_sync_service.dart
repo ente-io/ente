@@ -18,6 +18,7 @@ import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/device_collection.dart';
+import "package:photos/models/diff_result.dart";
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/upload_strategy.dart';
@@ -26,6 +27,7 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
+import "package:photos/services/notification_service.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
@@ -170,7 +172,7 @@ class RemoteSyncService {
     _logger.info("Pulling remote diff");
     final isFirstSync = !_collectionsService.hasSyncedCollections();
     if (isFirstSync && !_isExistingSyncSilent) {
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
     }
     await _collectionsService.sync();
     // check and reset user's collection syncTime in past for older clients
@@ -191,10 +193,16 @@ class RemoteSyncService {
     final idsToRemoteUpdationTimeMap =
         await _collectionsService.getCollectionIDsToBeSynced();
     for (final cid in idsToRemoteUpdationTimeMap.keys) {
-      await _syncCollectionDiff(
+      final newSharedFiles = await _syncCollectionDiff(
         cid,
         _collectionsService.getCollectionSyncTime(cid),
       );
+      if (newSharedFiles > 0) {
+        NotificationService.instance.showNotification(
+          _collectionsService.getCollectionByID(cid)!.displayName,
+          newSharedFiles.toString() + " new 📸",
+        );
+      }
       // update syncTime for the collection in sharedPrefs. Note: the
       // syncTime can change on remote but we might not get a diff for the
       // collection if there are not changes in the file, but the collection
@@ -216,7 +224,9 @@ class RemoteSyncService {
     }
   }
 
-  Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
+  // Syncs the diff within the collection and returns the number of items
+  // added to a shared collection sinceTime
+  Future<int> _syncCollectionDiff(int collectionID, int sinceTime) async {
     _logger.info(
       "Syncing collection #" +
           collectionID.toString() +
@@ -230,8 +240,10 @@ class RemoteSyncService {
     if (diff.deletedFiles.isNotEmpty) {
       await _syncCollectionDiffDelete(diff, collectionID);
     }
+    int newSharedFiles = 0;
     if (diff.updatedFiles.isNotEmpty) {
-      await _storeDiff(diff.updatedFiles, collectionID);
+      final result = await _storeDiff(diff.updatedFiles, collectionID);
+      newSharedFiles = result.sharedFileNew;
       _logger.info(
         "Updated " +
             diff.updatedFiles.length.toString() +
@@ -260,13 +272,15 @@ class RemoteSyncService {
       );
     }
     if (diff.hasMore) {
-      return await _syncCollectionDiff(
-        collectionID,
-        _collectionsService.getCollectionSyncTime(collectionID),
-      );
+      return newSharedFiles +
+          await _syncCollectionDiff(
+            collectionID,
+            _collectionsService.getCollectionSyncTime(collectionID),
+          );
     } else {
       _logger.info("Collection #" + collectionID.toString() + " synced");
     }
+    return newSharedFiles;
   }
 
   Future<void> _syncCollectionDiffDelete(Diff diff, int collectionID) async {
@@ -637,7 +651,7 @@ class RemoteSyncService {
       [Existing]
     ]
    */
-  Future _storeDiff(List<File> diff, int collectionID) async {
+  Future<DiffResult> _storeDiff(List<File> diff, int collectionID) async {
     int sharedFileNew = 0,
         sharedFileUpdated = 0,
         localUploadedFromDevice = 0,
@@ -770,6 +784,13 @@ class RemoteSyncService {
       // 'force reload home gallery'
       Bus.instance.fire(ForceReloadHomeGalleryEvent("remoteSync"));
     }
+    return DiffResult(
+      sharedFileNew,
+      sharedFileUpdated,
+      localUploadedFromDevice,
+      localButUpdatedOnDevice,
+      remoteNewFile,
+    );
   }
 
   bool _shouldClearCache(File remoteFile, File existingFile) {

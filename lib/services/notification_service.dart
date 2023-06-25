@@ -45,9 +45,6 @@ class NotificationService {
   }
 
   Future<void> showNotification(String title, String message) async {
-    if (!Platform.isAndroid) {
-      return;
-    }
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       'io.ente.photos',
