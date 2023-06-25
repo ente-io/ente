@@ -28,15 +28,15 @@ class AppLifecycleService {
 
   void onAppInForeground(String reason) {
     _logger.info("App in foreground via $reason");
-    _preferences.setInt(
-      keyLastAppOpenTime,
-      DateTime.now().microsecondsSinceEpoch,
-    );
     isForeground = true;
   }
 
   void onAppInBackground(String reason) {
     _logger.info("App in background $reason");
+    _preferences.setInt(
+      keyLastAppOpenTime,
+      DateTime.now().microsecondsSinceEpoch,
+    );
     isForeground = false;
   }
 
