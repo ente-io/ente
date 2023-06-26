@@ -73,6 +73,7 @@ class GalleryFileWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(1),
             child: Hero(
               tag: heroTag,
+              transitionOnUserGestures: true,
               child: isFileSelected
                   ? ColorFiltered(
                       colorFilter: ColorFilter.mode(

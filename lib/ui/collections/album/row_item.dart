@@ -33,8 +33,8 @@ class AlbumRowItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isOwner = c.isOwner(Configuration.instance.getUserID()!);
-    final String tagPrefix =  (isOwner ? "collection" : "shared_collection")
-        + tag;
+    final String tagPrefix =
+        (isOwner ? "collection" : "shared_collection") + tag;
     final enteTextTheme = getEnteTextTheme(context);
     return GestureDetector(
       child: Column(
@@ -57,6 +57,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                             final String heroTag = tagPrefix + thumbnail.tag;
                             return Hero(
                               tag: heroTag,
+                              transitionOnUserGestures: true,
                               child: ThumbnailWidget(
                                 thumbnail,
                                 shouldShowArchiveStatus: isOwner
