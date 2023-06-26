@@ -17,8 +17,8 @@ class AppLifecycleService {
 
   AppLifecycleService._privateConstructor();
 
-  Future<void> init() async {
-    _preferences = await SharedPreferences.getInstance();
+  void init(SharedPreferences preferences) {
+    _preferences = preferences;
   }
 
   void setMediaExtensionAction(MediaExtentionAction mediaExtensionAction) {

@@ -150,7 +150,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   final SharedPreferences preferences = await SharedPreferences.getInstance();
   await _logFGHeartBeatInfo();
   _scheduleHeartBeat(preferences, isBackground);
-  await AppLifecycleService.instance.init();
+  AppLifecycleService.instance.init(preferences);
   if (isBackground) {
     AppLifecycleService.instance.onAppInBackground('init via: $via');
   } else {
@@ -187,7 +187,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       );
     });
   }
-  await NotificationService.instance.init();
+  await NotificationService.instance.init(preferences);
   FeatureFlagService.instance.init();
 
   // Can not including existing tf/ml binaries as they are not being built

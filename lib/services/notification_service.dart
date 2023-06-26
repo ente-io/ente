@@ -18,8 +18,8 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  Future<void> init() async {
-    _preferences = await SharedPreferences.getInstance();
+  Future<void> init(SharedPreferences preferences) async {
+    _preferences = preferences;
     const androidSettings = AndroidInitializationSettings('notification_icon');
     const iosSettings = DarwinInitializationSettings();
     const InitializationSettings initializationSettings =
