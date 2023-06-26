@@ -1285,6 +1285,7 @@ export const userIdtoEmail = async (): Promise<Map<number, string>> => {
         return userIdToEmail;
     } catch (e) {
         logError('Error Mapping UserId to email:', e);
+        return new Map<number, string>();
         throw e;
     }
 };
