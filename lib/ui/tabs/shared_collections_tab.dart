@@ -101,6 +101,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                             context,
                             CollectionVerticalGridView(
                               collections.incoming,
+                              tag: "incoming",
                               appTitle: SectionTitle(
                                 title: S.of(context).sharedWithMe,
                               ),
@@ -148,6 +149,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                             context,
                             CollectionVerticalGridView(
                               collections.outgoing,
+                              tag: "outgoing",
                               appTitle: SectionTitle(
                                 title: S.of(context).sharedByMe,
                               ),

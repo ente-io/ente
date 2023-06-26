@@ -7,6 +7,7 @@ import "package:photos/ui/collections/album/row_item.dart";
 class CollectionVerticalGridView extends StatelessWidget {
   final List<Collection>? collections;
   final Widget? appTitle;
+  final String tag;
   static const maxThumbnailWidth = 160.0;
 
   // This includes the name, count and padding below the thumbnail
@@ -17,6 +18,7 @@ class CollectionVerticalGridView extends StatelessWidget {
   const CollectionVerticalGridView(
     this.collections, {
     this.appTitle,
+    this.tag = "",
     Key? key,
   }) : super(key: key);
 
@@ -48,6 +50,7 @@ class CollectionVerticalGridView extends StatelessWidget {
             return AlbumRowItemWidget(
               collections![index],
               maxThumbnailWidth,
+              tag: tag,
             );
           },
           itemCount: collections!.length,
