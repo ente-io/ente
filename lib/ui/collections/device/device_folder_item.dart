@@ -34,6 +34,7 @@ class DeviceFolderItem extends StatelessWidget {
                     tag: "device_folder:" +
                         deviceCollection.name +
                         deviceCollection.thumbnail!.tag,
+                    transitionOnUserGestures: true,
                     child: Stack(
                       children: [
                         ThumbnailWidget(
