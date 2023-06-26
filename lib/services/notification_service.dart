@@ -35,19 +35,23 @@ class NotificationService {
   }
 
   Future<void> requestPermissions() async {
+    bool? result;
     if (Platform.isIOS) {
-      final result = await _flutterLocalNotificationsPlugin
+      result = await _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions(
             sound: true,
             alert: true,
           );
-      if (result != null) {
-        _preferences.setBool(keyGrantedNotificationPermission, result);
-      }
     } else {
-      _preferences.setBool(keyGrantedNotificationPermission, true);
+      result = await _flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestPermission();
+    }
+    if (result != null) {
+      _preferences.setBool(keyGrantedNotificationPermission, result);
     }
   }
 
