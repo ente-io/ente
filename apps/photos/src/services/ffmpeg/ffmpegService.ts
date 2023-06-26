@@ -90,7 +90,8 @@ export async function convertToMP4(file: File | ElectronFile) {
                 OUTPUT_PATH_PLACEHOLDER,
             ],
             file,
-            'output.mp4'
+            'output.mp4',
+            true
         );
     } catch (e) {
         logError(e, 'ffmpeg convertToMP4 failed');

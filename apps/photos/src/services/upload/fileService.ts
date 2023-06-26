@@ -2,12 +2,12 @@ import { MULTIPART_PART_SIZE, FILE_READER_CHUNK_SIZE } from 'constants/upload';
 import {
     FileTypeInfo,
     FileInMemory,
-    Metadata,
     EncryptedFile,
     FileWithMetadata,
     ParsedMetadataJSONMap,
     DataStream,
     ElectronFile,
+    ExtractMetadataResult,
 } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -74,13 +74,14 @@ export async function extractFileMetadata(
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
     rawFile: File | ElectronFile
-) {
+): Promise<ExtractMetadataResult> {
     const originalName = getFileOriginalName(rawFile);
     const googleMetadata =
         parsedMetadataJSONMap.get(
             getMetadataJSONMapKey(collectionID, originalName)
         ) ?? {};
-    const extractedMetadata: Metadata = await extractMetadata(
+
+    const { metadata, publicMagicMetadata } = await extractMetadata(
         worker,
         rawFile,
         fileTypeInfo
@@ -90,9 +91,9 @@ export async function extractFileMetadata(
         if (!value) {
             continue;
         }
-        extractedMetadata[key] = value;
+        metadata[key] = value;
     }
-    return extractedMetadata;
+    return { metadata, publicMagicMetadata };
 }
 
 export async function encryptFile(

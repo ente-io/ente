@@ -42,11 +42,7 @@ import {
     DUMMY_UNCATEGORIZED_SECTION,
     HIDDEN_SECTION,
 } from 'constants/collection';
-import {
-    NEW_COLLECTION_MAGIC_METADATA,
-    SUB_TYPE,
-    UpdateMagicMetadataRequest,
-} from 'types/magicMetadata';
+import { SUB_TYPE, UpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
 import { User } from 'types/user';
 import {
@@ -72,7 +68,7 @@ const COLLECTION_TABLE = 'collections';
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
 
 const UNCATEGORIZED_COLLECTION_NAME = 'Uncategorized';
-const HIDDEN_COLLECTION_NAME = '.hidden';
+export const HIDDEN_COLLECTION_NAME = '.hidden';
 const FAVORITE_COLLECTION_NAME = 'Favorites';
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>
@@ -336,11 +332,7 @@ const createCollection = async (
             await cryptoWorker.encryptUTF8(collectionName, collectionKey);
         let encryptedMagicMetadata: EncryptedMagicMetadata;
         if (magicMetadataProps) {
-            const magicMetadata = await updateMagicMetadata(
-                NEW_COLLECTION_MAGIC_METADATA,
-                null,
-                magicMetadataProps
-            );
+            const magicMetadata = await updateMagicMetadata(magicMetadataProps);
             const { file: encryptedMagicMetadataProps } =
                 await cryptoWorker.encryptMetadata(
                     magicMetadataProps,
@@ -1268,3 +1260,32 @@ export async function unhideToCollection(
         throw e;
     }
 }
+
+export const userIdtoEmail = async (): Promise<Map<number, string>> => {
+    try {
+        const collection = await getLocalCollections();
+        const user: User = getData(LS_KEYS.USER);
+        const emailMapping = new Map<number, string>();
+        collection.map((item) => {
+            const { owner } = item;
+            const { sharees } = item;
+
+            if (user.id !== owner.id && owner.email) {
+                emailMapping.set(owner.id, owner.email);
+            }
+
+            if (sharees) {
+                sharees.map((item) => {
+                    if (item.id !== user.id)
+                        emailMapping.set(item.id, item.email);
+                });
+            }
+        });
+        const userIdToEmail = emailMapping;
+        return userIdToEmail;
+    } catch (e) {
+        logError('Error Mapping UserId to email:', e);
+        return new Map<number, string>();
+        throw e;
+    }
+};

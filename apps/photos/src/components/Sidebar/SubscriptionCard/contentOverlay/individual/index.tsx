@@ -17,7 +17,10 @@ export function IndividualSubscriptionCardContent({ userDetails }: Iprops) {
             <IndividualUsageSection
                 usage={userDetails.usage}
                 fileCount={userDetails.fileCount}
-                storage={userDetails.subscription.storage}
+                storage={
+                    userDetails.subscription.storage +
+                    (userDetails.storageBonus ?? 0)
+                }
             />
         </>
     );

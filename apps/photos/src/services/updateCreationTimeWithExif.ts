@@ -19,6 +19,7 @@ const EXIF_TIME_TAGS = [
     'CreateDate',
     'ModifyDate',
     'DateCreated',
+    'MetadataDate',
 ];
 
 export async function updateCreationTimeWithExif(
@@ -55,10 +56,16 @@ export async function updateCreationTimeWithExif(
                         correctCreationTime = getUnixTimeInMicroSeconds(
                             exifData?.DateTimeOriginal ?? exifData?.DateCreated
                         );
-                    } else {
+                    } else if (fixOption === FIX_OPTIONS.DATE_TIME_DIGITIZED) {
                         correctCreationTime = getUnixTimeInMicroSeconds(
                             exifData?.CreateDate
                         );
+                    } else if (fixOption === FIX_OPTIONS.METADATA_DATE) {
+                        correctCreationTime = getUnixTimeInMicroSeconds(
+                            exifData?.MetadataDate
+                        );
+                    } else {
+                        throw new Error('Invalid fix option');
                     }
                 }
                 if (

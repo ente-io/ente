@@ -120,6 +120,7 @@ import { IsArchived } from 'utils/magicMetadata';
 import { isSameDayAnyYear, isInsideLocationTag } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
+import { userIdtoEmail } from 'services/collectionService';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -137,10 +138,12 @@ const defaultGalleryContext: GalleryContextType = {
     setActiveCollection: () => null,
     syncWithRemote: () => null,
     setBlockingLoad: () => null,
+    setIsInSearchMode: () => null,
     photoListHeader: null,
     openExportModal: () => null,
     authenticateUser: () => null,
     user: null,
+    idToMail: new Map(),
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -312,6 +315,27 @@ export default function Gallery() {
         setDerivativeState(user, collections, files, trashedFiles, hiddenFiles);
     }, [collections, files, hiddenFiles, trashedFiles, user]);
 
+    const { idToMail } = useContext(GalleryContext);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!collections) {
+                return;
+            }
+
+            const userIdEmail = await userIdtoEmail();
+            const idEmailMap = userIdEmail;
+
+            idToMail.clear(); // Clear the existing map
+
+            // Update idToMail with idEmailMap values
+            for (const [id, email] of idEmailMap) {
+                idToMail.set(id, email);
+            }
+        };
+        fetchData();
+    }, [collections]);
+
     useEffect(() => {
         collectionSelectorAttributes && setCollectionSelectorView(true);
     }, [collectionSelectorAttributes]);
@@ -343,7 +367,13 @@ export default function Gallery() {
             }
         }
         const href = `/gallery${collectionURL}`;
-        router.push(href, undefined, { shallow: true });
+        const delayRouteChange = () => {
+            setTimeout(() => {
+                router.push(href, undefined, { shallow: true });
+            }, 1000);
+        };
+
+        delayRouteChange();
     }, [activeCollection]);
 
     useEffect(() => {
@@ -596,7 +626,6 @@ export default function Gallery() {
         setFavItemIds(favItemIds);
         const archivedCollections = getArchivedCollections(collections);
         setArchivedCollections(archivedCollections);
-
         const collectionSummaries = await getCollectionSummaries(
             user,
             collections,
@@ -843,6 +872,7 @@ export default function Gallery() {
                 setActiveCollection,
                 syncWithRemote,
                 setBlockingLoad,
+                setIsInSearchMode,
                 photoListHeader,
                 openExportModal,
                 authenticateUser,

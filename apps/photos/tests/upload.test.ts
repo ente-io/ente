@@ -23,6 +23,7 @@ export async function testUpload() {
         await thumbnailGenerationFailedFilesCheck(expectedState);
         await livePhotoClubbingCheck(expectedState);
         await exifDataParsingCheck(expectedState);
+        await fileDimensionExtractionCheck(expectedState);
         await googleMetadataReadingCheck(expectedState);
         await totalFileCountCheck(expectedState);
     } catch (e) {
@@ -208,6 +209,33 @@ async function exifDataParsingCheck(expectedState) {
         }
     });
     console.log('exif data parsing check passed ✅');
+}
+
+async function fileDimensionExtractionCheck(expectedState) {
+    const files = await getLocalFiles();
+    Object.entries(expectedState['file_dimensions']).map(
+        ([fileName, dimensions]) => {
+            const matchingFile = files.find(
+                (file) => file.metadata.title === fileName
+            );
+            if (!matchingFile) {
+                throw Error(
+                    `fileDimensionExtractionCheck failed , ${fileName} missing`
+                );
+            }
+            if (
+                dimensions['width'] &&
+                dimensions['width'] !== matchingFile.pubMagicMetadata.data.w &&
+                dimensions['height'] &&
+                dimensions['height'] !== matchingFile.pubMagicMetadata.data.h
+            ) {
+                throw Error(`fileDimensionExtractionCheck failed ❌ ,
+                                for ${fileName}
+                                expected: ${dimensions['width']} x ${dimensions['height']} got: ${matchingFile.pubMagicMetadata.data.w} x ${matchingFile.pubMagicMetadata.data.h}`);
+            }
+        }
+    );
+    console.log('file dimension extraction check passed ✅');
 }
 
 async function googleMetadataReadingCheck(expectedState) {

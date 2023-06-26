@@ -340,6 +340,7 @@
     "CAPTION_CHARACTER_LIMIT": "Máximo 5000 caracteres",
     "DATE_TIME_ORIGINAL": "EXIF: Fecha original",
     "DATE_TIME_DIGITIZED": "EXIF: Fecha Digitalizado",
+    "METADATA_DATE": "",
     "CUSTOM_TIME": "Hora personalizada",
     "REOPEN_PLAN_SELECTOR_MODAL": "Reabrir planes",
     "OPEN_PLAN_SELECTOR_MODAL_FAILED": "Error al abrir los planes",
@@ -526,5 +527,7 @@
     "UNHIDE_TO_COLLECTION": "",
     "SORT_BY": "",
     "NEWEST_FIRST": "",
-    "OLDEST_FIRST": ""
+    "OLDEST_FIRST": "",
+    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "",
+    "SELECT_COLLECTION": ""
 }

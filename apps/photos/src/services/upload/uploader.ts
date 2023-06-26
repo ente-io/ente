@@ -20,7 +20,6 @@ import uploadCancelService from './uploadCancelService';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import uploadService from './uploadService';
-import { FilePublicMagicMetadata } from 'types/magicMetadata';
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
@@ -55,12 +54,13 @@ export default async function uploader(
         );
 
         addLogLine(`extracting  metadata ${fileNameSize}`);
-        const metadata = await UploadService.extractAssetMetadata(
-            worker,
-            uploadAsset,
-            collection.id,
-            fileTypeInfo
-        );
+        const { metadata, publicMagicMetadata } =
+            await UploadService.extractAssetMetadata(
+                worker,
+                uploadAsset,
+                collection.id,
+                fileTypeInfo
+            );
 
         const matchingExistingFiles = findMatchingExistingFiles(
             existingFiles,
@@ -94,7 +94,7 @@ export default async function uploader(
                 };
             } else {
                 addLogLine(
-                    `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize}`
+                    `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize} ,adding symlink`
                 );
                 // any of the matching file can used to add a symlink
                 const resultFile = Object.assign({}, matchingExistingFiles[0]);
@@ -116,12 +116,13 @@ export default async function uploader(
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }
-        let pubMagicMetadata: FilePublicMagicMetadata;
-        if (uploaderName) {
-            pubMagicMetadata = await uploadService.constructPublicMagicMetadata(
-                { uploaderName }
-            );
-        }
+
+        const pubMagicMetadata =
+            await uploadService.constructPublicMagicMetadata({
+                ...publicMagicMetadata,
+                uploaderName,
+            });
+
         const fileWithMetadata: FileWithMetadata = {
             localID,
             filedata: file.filedata,
@@ -157,7 +158,6 @@ export default async function uploader(
 
         const uploadedFile = await UploadService.uploadFile(uploadFile);
 
-        UIService.increaseFileUploaded();
         addLogLine(`${fileNameSize} successfully uploaded`);
 
         return {

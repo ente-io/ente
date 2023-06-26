@@ -1,6 +1,6 @@
-import SingleInputFormEmailShare, {
-    SingleInputFormEmailShareProps,
-} from 'components/SingleInputFormEmailShare';
+import SingleInputAutocomplete, {
+    SingleInputAutocompleteProps,
+} from 'components/SingleInputAutocomplete';
 import { GalleryContext } from 'pages/gallery';
 import React, { useContext, useState, useEffect } from 'react';
 import { t } from 'i18next';
@@ -10,6 +10,7 @@ import { handleSharingErrors } from 'utils/error/ui';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CollectionShareSharees } from './sharees';
 import { getLocalCollections } from 'services/collectionService';
+import { getLocalFamilyData } from 'utils/user/family';
 
 export default function EmailShare({ collection }) {
     const galleryContext = useContext(GalleryContext);
@@ -19,16 +20,25 @@ export default function EmailShare({ collection }) {
     useEffect(() => {
         const getUpdatedOptionsList = async () => {
             const ownerUser: User = getData(LS_KEYS.USER);
-            const collection_list = getLocalCollections();
-            const result = await collection_list;
+            const collectionList = getLocalCollections();
+            const familyList = getLocalFamilyData();
+            const result = await collectionList;
             const emails = result.flatMap((item) => {
-                const shareeEmails = item.sharees.map((sharee) => sharee.email);
-                if (item.owner.email) {
-                    return [...shareeEmails, item.owner.email];
+                if (item.owner.email && item.owner.id !== ownerUser.id) {
+                    return [item.owner.email];
                 } else {
+                    const shareeEmails = item.sharees.map(
+                        (sharee) => sharee.email
+                    );
                     return shareeEmails;
                 }
             });
+
+            // adding family members
+            if (familyList) {
+                const family = familyList.members.map((member) => member.email);
+                emails.push(...family);
+            }
 
             updatedList = Array.from(new Set(emails));
 
@@ -47,7 +57,7 @@ export default function EmailShare({ collection }) {
         getUpdatedOptionsList();
     }, []);
 
-    const collectionShare: SingleInputFormEmailShareProps['callback'] = async (
+    const collectionShare: SingleInputAutocompleteProps['callback'] = async (
         email,
         setFieldError,
         resetForm
@@ -72,7 +82,7 @@ export default function EmailShare({ collection }) {
     };
     return (
         <>
-            <SingleInputFormEmailShare
+            <SingleInputAutocomplete
                 callback={collectionShare}
                 optionsList={updatedOptionsList}
                 placeholder={t('ENTER_EMAIL')}

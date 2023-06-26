@@ -15,8 +15,11 @@ type ParsedEXIFData = Record<string, any> &
         CreateDate: Date;
         ModifyDate: Date;
         DateCreated: Date;
+        MetadataDate: Date;
         latitude: number;
         longitude: number;
+        imageWidth: number;
+        imageHeight: number;
     }>;
 
 type RawEXIFData = Record<string, any> &
@@ -25,10 +28,13 @@ type RawEXIFData = Record<string, any> &
         CreateDate: string;
         ModifyDate: string;
         DateCreated: string;
+        MetadataDate: string;
         GPSLatitude: number[];
         GPSLongitude: number[];
         GPSLatitudeRef: string;
         GPSLongitudeRef: string;
+        ImageWidth: number;
+        ImageHeight: number;
     }>;
 
 export async function getParsedExifData(
@@ -76,8 +82,20 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     if (!exifData) {
         return null;
     }
-    const { DateTimeOriginal, CreateDate, ModifyDate, DateCreated, ...rest } =
-        exifData;
+    const {
+        DateTimeOriginal,
+        CreateDate,
+        ModifyDate,
+        DateCreated,
+        ImageHeight,
+        ImageWidth,
+        ExifImageHeight,
+        ExifImageWidth,
+        PixelXDimension,
+        PixelYDimension,
+        MetadataDate,
+        ...rest
+    } = exifData;
     const parsedExif: ParsedEXIFData = { ...rest };
     if (DateTimeOriginal) {
         parsedExif.DateTimeOriginal = parseEXIFDate(exifData.DateTimeOriginal);
@@ -91,6 +109,9 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
     if (DateCreated) {
         parsedExif.DateCreated = parseEXIFDate(exifData.DateCreated);
     }
+    if (MetadataDate) {
+        parsedExif.MetadataDate = parseEXIFDate(exifData.MetadataDate);
+    }
     if (exifData.GPSLatitude && exifData.GPSLongitude) {
         const parsedLocation = parseEXIFLocation(
             exifData.GPSLatitude,
@@ -100,6 +121,55 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
         );
         parsedExif.latitude = parsedLocation.latitude;
         parsedExif.longitude = parsedLocation.longitude;
+    }
+    if (ImageWidth && ImageHeight) {
+        if (typeof ImageWidth === 'number' && typeof ImageHeight === 'number') {
+            parsedExif.imageWidth = ImageWidth;
+            parsedExif.imageHeight = ImageHeight;
+        } else {
+            logError(
+                new Error('ImageWidth or ImageHeight is not a number'),
+                'Image dimension parsing failed',
+                {
+                    ImageWidth,
+                    ImageHeight,
+                }
+            );
+        }
+    } else if (ExifImageWidth && ExifImageHeight) {
+        if (
+            typeof ExifImageWidth === 'number' &&
+            typeof ExifImageHeight === 'number'
+        ) {
+            parsedExif.imageWidth = ExifImageWidth;
+            parsedExif.imageHeight = ExifImageHeight;
+        } else {
+            logError(
+                new Error('ExifImageWidth or ExifImageHeight is not a number'),
+                'Image dimension parsing failed',
+                {
+                    ExifImageWidth,
+                    ExifImageHeight,
+                }
+            );
+        }
+    } else if (PixelXDimension && PixelYDimension) {
+        if (
+            typeof PixelXDimension === 'number' &&
+            typeof PixelYDimension === 'number'
+        ) {
+            parsedExif.imageWidth = PixelXDimension;
+            parsedExif.imageHeight = PixelYDimension;
+        } else {
+            logError(
+                new Error('PixelXDimension or PixelYDimension is not a number'),
+                'Image dimension parsing failed',
+                {
+                    PixelXDimension,
+                    PixelYDimension,
+                }
+            );
+        }
     }
     return parsedExif;
 }
@@ -230,6 +300,7 @@ export function getEXIFTime(exifData: ParsedEXIFData): number {
         exifData.DateTimeOriginal ??
         exifData.DateCreated ??
         exifData.CreateDate ??
+        exifData.MetadataDate ??
         exifData.ModifyDate;
     if (!dateTime) {
         return null;

@@ -62,7 +62,10 @@ export interface ElectronAPIs {
     openDiskCache: (cacheName: string) => Promise<LimitedCache>;
     deleteDiskCache: (cacheName: string) => Promise<boolean>;
     logToDisk: (msg: string) => void;
-    convertHEIC(fileData: Uint8Array): Promise<Uint8Array>;
+    convertToJPEG: (
+        fileData: Uint8Array,
+        filename: string
+    ) => Promise<Uint8Array>;
     openLogDirectory: () => void;
     registerUpdateEventListener: (
         showUpdateDialog: (updateInfo: AppUpdateInfo) => void
@@ -74,7 +77,8 @@ export interface ElectronAPIs {
     runFFmpegCmd: (
         cmd: string[],
         inputFile: File | ElectronFile,
-        outputFileName: string
+        outputFileName: string,
+        dontTimeout?: boolean
     ) => Promise<File>;
     muteUpdateNotification: (version: string) => void;
     generateImageThumbnail: (

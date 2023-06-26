@@ -42,6 +42,7 @@ import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import { t } from 'i18next';
 import { getParsedExifData } from 'services/upload/exifService';
 import { getFileType } from 'services/typeDetectionService';
+import { ConversionFailedNotification } from './styledComponents/ConversionFailedNotification';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -75,6 +76,7 @@ interface Iprops {
     isHiddenCollection: boolean;
     enableDownload: boolean;
     isSourceLoaded: boolean;
+    conversionFailed: boolean;
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
 }
@@ -84,7 +86,7 @@ function PhotoViewer(props: Iprops) {
     const [photoSwipe, setPhotoSwipe] =
         useState<Photoswipe<Photoswipe.Options>>();
 
-    const { isOpen, items, isSourceLoaded } = props;
+    const { isOpen, items, isSourceLoaded, conversionFailed } = props;
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
     const [exif, setExif] =
@@ -179,7 +181,8 @@ function PhotoViewer(props: Iprops) {
     useEffect(() => {
         if (!isOpen) return;
         const item = items[photoSwipe?.getCurrentIndex()];
-        if (item && item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        if (!item) return;
+        if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             const getVideoAndImage = () => {
                 const video = document.getElementById(
                     `live-photo-video-${item.id}`
@@ -213,32 +216,25 @@ function PhotoViewer(props: Iprops) {
                     loading: true,
                 });
             }
-
-            const downloadLivePhotoBtn = document.getElementById(
-                `download-btn-${item.id}`
-            ) as HTMLButtonElement;
-            if (downloadLivePhotoBtn) {
-                const downloadLivePhoto = () => {
-                    downloadFileHelper(photoSwipe.currItem);
-                };
-
-                downloadLivePhotoBtn.addEventListener(
-                    'click',
-                    downloadLivePhoto
-                );
-                return () => {
-                    downloadLivePhotoBtn.removeEventListener(
-                        'click',
-                        downloadLivePhoto
-                    );
-                    setLivePhotoBtnOptions(defaultLivePhotoDefaultOptions);
-                };
-            }
-
-            return () => {
-                setLivePhotoBtnOptions(defaultLivePhotoDefaultOptions);
-            };
         }
+
+        const downloadLivePhotoBtn = document.getElementById(
+            `download-btn-${item.id}`
+        ) as HTMLButtonElement;
+        const downloadFile = () => {
+            downloadFileHelper(photoSwipe.currItem);
+        };
+
+        if (downloadLivePhotoBtn) {
+            downloadLivePhotoBtn.addEventListener('click', downloadFile);
+        }
+
+        return () => {
+            if (downloadLivePhotoBtn) {
+                downloadLivePhotoBtn.removeEventListener('click', downloadFile);
+            }
+            setLivePhotoBtnOptions(defaultLivePhotoDefaultOptions);
+        };
     }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
 
     useEffect(() => {
@@ -559,6 +555,14 @@ function PhotoViewer(props: Iprops) {
                             {livePhotoBtnHTML} {t('LIVE')}
                         </LivePhotoBtn>
                     )}
+                    {conversionFailed && (
+                        <ConversionFailedNotification
+                            onClick={() =>
+                                downloadFileHelper(photoSwipe.currItem)
+                            }
+                        />
+                    )}
+
                     <div className="pswp__container">
                         <div className="pswp__item" />
                         <div className="pswp__item" />
@@ -688,6 +692,7 @@ function PhotoViewer(props: Iprops) {
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={props.fileToCollectionsMap}
                 collectionNameMap={props.collectionNameMap}
+                closePhotoViewer={handleClose}
             />
         </>
     );

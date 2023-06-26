@@ -340,6 +340,7 @@
     "CAPTION_CHARACTER_LIMIT": "5000个字符上限",
     "DATE_TIME_ORIGINAL": "EXIF：日期 时间 原始文件",
     "DATE_TIME_DIGITIZED": "EXIF:日期 时间 数字化",
+    "METADATA_DATE": "",
     "CUSTOM_TIME": "自定义时间",
     "REOPEN_PLAN_SELECTOR_MODAL": "重新启动计划",
     "OPEN_PLAN_SELECTOR_MODAL_FAILED": "未能打开计划",
@@ -526,5 +527,7 @@
     "UNHIDE_TO_COLLECTION": "取消隐藏到相册",
     "SORT_BY": "",
     "NEWEST_FIRST": "",
-    "OLDEST_FIRST": ""
+    "OLDEST_FIRST": "",
+    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "",
+    "SELECT_COLLECTION": ""
 }

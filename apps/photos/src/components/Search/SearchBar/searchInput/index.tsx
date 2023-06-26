@@ -1,7 +1,13 @@
 import { IconButton } from '@mui/material';
 import debounce from 'debounce-promise';
 import { AppContext } from 'pages/_app';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
 import {
     getAutoCompleteSuggestions,
     getDefaultOptions,
@@ -19,6 +25,7 @@ import { SearchInputWrapper } from '../styledComponents';
 import MenuWithPeople from './MenuWithPeople';
 import { Person, Thing, WordGroup } from 'types/machineLearning';
 import { t } from 'i18next';
+import memoize from 'memoize-one';
 import { LocationTagData } from 'types/entity';
 
 interface Iprops {
@@ -29,6 +36,12 @@ interface Iprops {
     collections: Collection[];
     setActiveCollection: (id: number) => void;
 }
+
+const createComponents = memoize((Option, ValueContainer, Menu) => ({
+    Option,
+    ValueContainer,
+    Menu,
+}));
 
 export default function SearchInput(props: Iprops) {
     const selectRef = useRef(null);
@@ -119,22 +132,30 @@ export default function SearchInput(props: Iprops) {
     const handleOnFocus = () => {
         refreshDefaultOptions();
     };
+
+    const MemoizedMenuWithPeople = useCallback(
+        (props) => (
+            <MenuWithPeople
+                {...props}
+                setValue={setValue}
+                selectRef={selectRef}
+            />
+        ),
+        [setValue, selectRef]
+    );
+
+    const components = createComponents(
+        OptionWithInfo,
+        ValueContainerWithIcon,
+        MemoizedMenuWithPeople
+    );
+
     return (
         <SearchInputWrapper isOpen={props.isOpen}>
             <AsyncSelect
                 ref={selectRef}
                 value={value}
-                components={{
-                    Option: OptionWithInfo,
-                    ValueContainer: ValueContainerWithIcon,
-                    Menu: (props) => (
-                        <MenuWithPeople
-                            {...props}
-                            setValue={setValue}
-                            selectRef={selectRef}
-                        />
-                    ),
-                }}
+                components={components}
                 placeholder={<span>{t('SEARCH_HINT')}</span>}
                 loadOptions={getOptions}
                 onChange={handleChange}

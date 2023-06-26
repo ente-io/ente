@@ -8,6 +8,7 @@ import {
     FileTypeInfo,
     ParsedExtractedMetadata,
     ElectronFile,
+    ExtractMetadataResult as ExtractMetadataResult,
 } from 'types/upload';
 import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import { getVideoMetadata } from './videoMetadataService';
@@ -19,6 +20,7 @@ import {
 import { getFileHash } from './hashService';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { FilePublicMagicMetadataProps } from 'types/file';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
@@ -40,13 +42,20 @@ const EXIF_TAGS_NEEDED = [
     'GPSLatitudeRef',
     'GPSLongitudeRef',
     'DateCreated',
+    'ExifImageWidth',
+    'ExifImageHeight',
+    'ImageWidth',
+    'ImageHeight',
+    'PixelXDimension',
+    'PixelYDimension',
+    'MetadataDate',
 ];
 
 export async function extractMetadata(
     worker: Remote<DedicatedCryptoWorker>,
     receivedFile: File | ElectronFile,
     fileTypeInfo: FileTypeInfo
-) {
+): Promise<ExtractMetadataResult> {
     let extractedMetadata: ParsedExtractedMetadata = NULL_EXTRACTED_METADATA;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
         extractedMetadata = await getImageMetadata(receivedFile, fileTypeInfo);
@@ -67,7 +76,11 @@ export async function extractMetadata(
         fileType: fileTypeInfo.fileType,
         hash: fileHash,
     };
-    return metadata;
+    const publicMagicMetadata: FilePublicMagicMetadataProps = {
+        w: extractedMetadata.width,
+        h: extractedMetadata.height,
+    };
+    return { metadata, publicMagicMetadata };
 }
 
 export async function getImageMetadata(
@@ -90,9 +103,12 @@ export async function getImageMetadata(
             fileTypeInfo,
             EXIF_TAGS_NEEDED
         );
+
         imageMetadata = {
             location: getEXIFLocation(exifData),
             creationTime: getEXIFTime(exifData),
+            width: exifData?.imageWidth ?? null,
+            height: exifData?.imageHeight ?? null,
         };
     } catch (e) {
         logError(e, 'getExifData failed');

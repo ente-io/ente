@@ -3,7 +3,6 @@ import { Formik, FormikHelpers, FormikState } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
 import TextField from '@mui/material/TextField';
-// import ShowHidePassword from './Form/ShowHidePassword';
 import { FlexWrapper } from './Container';
 import { Button, FormHelperText } from '@mui/material';
 import { t } from 'i18next';
@@ -12,7 +11,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 interface formValues {
     inputValue: string;
 }
-export interface SingleInputFormEmailShareProps {
+export interface SingleInputAutocompleteProps {
     callback: (
         inputValue: string,
         setFieldError: (errorMessage: string) => void,
@@ -34,8 +33,8 @@ export interface SingleInputFormEmailShareProps {
     optionsList?: string[];
 }
 
-export default function SingleInputFormEmailShare(
-    props: SingleInputFormEmailShareProps
+export default function SingleInputAutocomplete(
+    props: SingleInputAutocompleteProps
 ) {
     const [selectedOptions, setSelectedOptions] = useState([]);
 
@@ -43,7 +42,6 @@ export default function SingleInputFormEmailShare(
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
 
     const [loading, SetLoading] = useState(false);
-    // const [showPassword, setShowPassword] = useState(false);
 
     const submitForm = async (
         values: formValues,
@@ -63,23 +61,9 @@ export default function SingleInputFormEmailShare(
         SetLoading(false);
     };
 
-    // const handleClickShowPassword = () => {
-    //     setShowPassword(!showPassword);
-    // };
-
-    // const handleMouseDownPassword = (
-    //     event: React.MouseEvent<HTMLButtonElement>
-    // ) => {
-    //     event.preventDefault();
-    // };
-
     const validationSchema = useMemo(() => {
         switch (props.fieldType) {
             case 'text':
-                return Yup.object().shape({
-                    inputValue: Yup.string().required(t('REQUIRED')),
-                });
-            case 'password':
                 return Yup.object().shape({
                     inputValue: Yup.string().required(t('REQUIRED')),
                 });
@@ -102,7 +86,7 @@ export default function SingleInputFormEmailShare(
             {({
                 values,
                 errors,
-
+                handleChange,
                 handleSubmit,
                 setFieldValue,
             }) => (
@@ -129,12 +113,14 @@ export default function SingleInputFormEmailShare(
                                 fullWidth
                                 type={props.fieldType}
                                 id={props.fieldType}
+                                onChange={handleChange('inputValue')}
                                 name={props.fieldType}
                                 {...(props.hiddenLabel
                                     ? { placeholder: props.placeholder }
                                     : { label: props.placeholder })}
                                 error={Boolean(errors.inputValue)}
                                 helperText={errors.inputValue}
+                                value={values.inputValue}
                                 disabled={loading}
                                 autoFocus={!props.disableAutoFocus}
                                 autoComplete={props.autoComplete}

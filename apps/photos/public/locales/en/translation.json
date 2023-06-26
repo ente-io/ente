@@ -60,7 +60,7 @@
         "0": "Preparing to upload",
         "1": "Reading google metadata files",
         "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} files metadata extracted",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} files backed up",
+        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} files processed",
         "4": "Cancelling remaining uploads",
         "5": "Backup complete"
     },
@@ -340,6 +340,7 @@
     "CAPTION_CHARACTER_LIMIT": "5000 characters max",
     "DATE_TIME_ORIGINAL": "EXIF:DateTimeOriginal",
     "DATE_TIME_DIGITIZED": "EXIF:DateTimeDigitized",
+    "METADATA_DATE": "EXIF:MetadataDate",
     "CUSTOM_TIME": "Custom time",
     "REOPEN_PLAN_SELECTOR_MODAL": "Re-open plans",
     "OPEN_PLAN_SELECTOR_MODAL_FAILED": "Failed to open plans",
@@ -520,11 +521,13 @@
     "at": "at",
     "AUTH_NEXT": "next",
     "AUTH_DOWNLOAD_MOBILE_APP": "Download our mobile app to manage your secrets",
-    "HIDDEN":"Hidden",
-    "HIDE":"Hide",
-    "UNHIDE":"Unhide",
-    "UNHIDE_TO_COLLECTION":"Unhide to album",
-    "SORT_BY":"Sort by",
-    "NEWEST_FIRST":"Newest first",
-    "OLDEST_FIRST":"Oldest first"
+    "HIDDEN": "Hidden",
+    "HIDE": "Hide",
+    "UNHIDE": "Unhide",
+    "UNHIDE_TO_COLLECTION": "Unhide to album",
+    "SORT_BY": "Sort by",
+    "NEWEST_FIRST": "Newest first",
+    "OLDEST_FIRST": "Oldest first",
+    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "This file could not be previewed. Click here to download the original.",
+    "SELECT_COLLECTION":"Select album"
 }

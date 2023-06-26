@@ -340,6 +340,7 @@
     "CAPTION_CHARACTER_LIMIT": "5000 tekens max",
     "DATE_TIME_ORIGINAL": "EXIF:DatumTijdOrigineel",
     "DATE_TIME_DIGITIZED": "EXIF:DatumTijdDigitaliseerd",
+    "METADATA_DATE": "EXIF:MetadataDatum",
     "CUSTOM_TIME": "Aangepaste tijd",
     "REOPEN_PLAN_SELECTOR_MODAL": "Abonnementen heropenen",
     "OPEN_PLAN_SELECTOR_MODAL_FAILED": "Kon abonnementen niet openen",
@@ -526,5 +527,7 @@
     "UNHIDE_TO_COLLECTION": "Zichtbaar maken in album",
     "SORT_BY": "Sorteren op",
     "NEWEST_FIRST": "Nieuwste eerst",
-    "OLDEST_FIRST": "Oudste eerst"
+    "OLDEST_FIRST": "Oudste eerst",
+    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "Dit bestand kan niet worden bekeken in de app, klik hier om het origineel te downloaden",
+    "SELECT_COLLECTION": ""
 }

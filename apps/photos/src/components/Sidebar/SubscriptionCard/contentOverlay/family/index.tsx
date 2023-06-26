@@ -29,7 +29,10 @@ export function FamilySubscriptionCardContent({ userDetails }: Iprops) {
                 userUsage={userDetails.usage}
                 fileCount={userDetails.fileCount}
                 totalUsage={totalUsage}
-                totalStorage={userDetails.familyData.storage}
+                totalStorage={
+                    userDetails.familyData.storage +
+                    (userDetails.storageBonus ?? 0)
+                }
             />
         </>
     );

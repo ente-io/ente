@@ -30,12 +30,9 @@ export interface SingleInputFormProps {
     autoComplete?: string;
     blockButton?: boolean;
     hiddenLabel?: boolean;
-    optionsList?: string[];
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
-    const [selectedOptions, setSelectedOptions] = useState([]);
-
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
 
@@ -52,11 +49,6 @@ export default function SingleInputForm(props: SingleInputFormProps) {
             (message) => setFieldError('inputValue', message),
             resetForm
         );
-
-        if (props.optionsList && props.optionsList.length > 0) {
-            setSelectedOptions([...selectedOptions, values.inputValue]);
-        }
-
         SetLoading(false);
     };
 
@@ -130,7 +122,6 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                             ),
                         }}
                     />
-
                     <FormHelperText
                         sx={{
                             position: 'relative',
