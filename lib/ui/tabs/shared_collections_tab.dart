@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -13,7 +12,6 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/ui/collections/album/row_item.dart";
-import "package:photos/ui/collections/horizontal_grid_view.dart";
 import "package:photos/ui/collections/vertical_grid_view.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -84,14 +82,6 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
 
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
     const maxThumbnailWidth = 160.0;
-    const double horizontalPaddingOfGridRow = 16;
-    const double crossAxisSpacingOfGrid = 9;
-    final Size size = MediaQuery.of(context).size;
-    final int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
-    final double totalWhiteSpaceOfRow = (horizontalPaddingOfGridRow * 2) +
-        (albumsCountInOneRow - 1) * crossAxisSpacingOfGrid;
-    final double sideOfThumbnail = (size.width / albumsCountInOneRow) -
-        (totalWhiteSpaceOfRow / albumsCountInOneRow);
     final bool hasQuickLinks = collections.quickLinks.isNotEmpty;
     return SingleChildScrollView(
       child: Container(
@@ -123,7 +113,27 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
             ),
             const SizedBox(height: 4),
             collections.incoming.isNotEmpty
-                ? CollectionsHorizontalGridView(collections.incoming)
+                ? SizedBox(
+                    height: maxThumbnailWidth + 48,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 8,
+                      ),
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: AlbumRowItemWidget(
+                            collections.incoming[index],
+                            maxThumbnailWidth,
+                            tag: "incoming",
+                          ),
+                        );
+                      },
+                      itemCount: collections.incoming.length,
+                    ),
+                  )
                 : const IncomingAlbumEmptyState(),
             const SizedBox(height: 16),
             SectionTitleRow(
@@ -155,7 +165,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
-                        vertical: 8,
+                        vertical: 2,
                       ),
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (context, index) {
