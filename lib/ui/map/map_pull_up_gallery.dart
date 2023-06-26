@@ -143,6 +143,7 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                   }
 
                   return Gallery(
+                    key: ValueKey(images),
                     asyncLoader: (
                       creationStartTime,
                       creationEndTime, {

@@ -1,5 +1,3 @@
-import "dart:async";
-
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart";
@@ -10,6 +8,7 @@ import 'package:photos/ui/map/map_gallery_tile.dart';
 import 'package:photos/ui/map/map_gallery_tile_badge.dart';
 import "package:photos/ui/map/map_marker.dart";
 import "package:photos/ui/map/tile/layers.dart";
+import "package:photos/utils/debouncer.dart";
 
 class MapView extends StatefulWidget {
   final List<ImageMarker> imageMarkers;
@@ -40,9 +39,10 @@ class MapView extends StatefulWidget {
 }
 
 class _MapViewState extends State<MapView> {
-  Timer? _debounceTimer;
   bool _isDebouncing = false;
   late List<Marker> _markers;
+  final _debouncer =
+      Debouncer(const Duration(milliseconds: 300), executionInterval: 750);
 
   @override
   void initState() {
@@ -52,23 +52,16 @@ class _MapViewState extends State<MapView> {
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
-    _debounceTimer = null;
     super.dispose();
   }
 
   void onChange(LatLngBounds bounds) {
-    if (!_isDebouncing) {
-      _isDebouncing = true;
-      _debounceTimer?.cancel();
-      _debounceTimer = Timer(
-        Duration(milliseconds: widget.debounceDuration),
-        () {
-          widget.updateVisibleImages(bounds);
-          _isDebouncing = false;
-        },
-      );
-    }
+    _debouncer.run(
+      () async {
+        widget.updateVisibleImages(bounds);
+        _isDebouncing = false;
+      },
+    );
   }
 
   @override
