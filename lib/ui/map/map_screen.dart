@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:isolate";
 
+import "package:collection/collection.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -47,6 +48,7 @@ class _MapScreenState extends State<MapScreen> {
   StreamSubscription? _mapMoveSubscription;
   Isolate? isolate;
   static const bottomSheetDraggableAreaHeight = 32.0;
+  List<File>? prevMessage;
 
   @override
   void initState() {
@@ -139,7 +141,11 @@ class _MapScreenState extends State<MapScreen> {
 
     _mapMoveSubscription = receivePort.listen((dynamic message) async {
       if (message is List<File>) {
-        visibleImages.sink.add(message);
+        if (!message.equals(prevMessage ?? [])) {
+          visibleImages.sink.add(message);
+        }
+
+        prevMessage = message;
       } else {
         _mapMoveSubscription?.cancel();
         isolate?.kill();
