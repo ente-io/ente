@@ -857,7 +857,8 @@ class RemoteSyncService {
     // TODO: Add option to opt out of notifications for a specific collection
     // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
     return NotificationService.instance
-        .shouldShowNotificationsForSharedPhotos();
+            .shouldShowNotificationsForSharedPhotos() &&
+        isFirstRemoteSyncDone();
     // TODO: && !AppLifecycleService.instance.isForeground;
   }
 
