@@ -15,7 +15,7 @@ class NotificationService {
   NotificationService._privateConstructor();
 
   late SharedPreferences _preferences;
-  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
@@ -27,7 +27,7 @@ class NotificationService {
       android: androidSettings,
       iOS: iosSettings,
     );
-    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await _notificationsPlugin.initialize(initializationSettings);
     if (!hasGrantedPermissions() &&
         RemoteSyncService.instance.isFirstRemoteSyncDone()) {
       await requestPermissions();
@@ -37,7 +37,7 @@ class NotificationService {
   Future<void> requestPermissions() async {
     bool? result;
     if (Platform.isIOS) {
-      result = await _flutterLocalNotificationsPlugin
+      result = await _notificationsPlugin
           .resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>()
           ?.requestPermissions(
@@ -45,7 +45,7 @@ class NotificationService {
             alert: true,
           );
     } else {
-      result = await _flutterLocalNotificationsPlugin
+      result = await _notificationsPlugin
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.requestPermission();
@@ -89,7 +89,7 @@ class NotificationService {
     final iosSpecs = DarwinNotificationDetails(threadIdentifier: identifier);
     final platformChannelSpecs =
         NotificationDetails(android: androidSpecs, iOS: iosSpecs);
-    await _flutterLocalNotificationsPlugin.show(
+    await _notificationsPlugin.show(
       0,
       title,
       message,
