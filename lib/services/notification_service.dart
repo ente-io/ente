@@ -76,21 +76,22 @@ class NotificationService {
   Future<void> showNotification(
     String title,
     String message, {
-    String identifier = "io.ente.photos",
+    String channelID = "io.ente.photos",
+    String channelName = "ente",
   }) async {
     final androidSpecs = AndroidNotificationDetails(
-      identifier,
-      'ente',
+      channelID,
+      channelName,
       channelDescription: 'ente alerts',
       importance: Importance.max,
       priority: Priority.high,
       showWhen: false,
     );
-    final iosSpecs = DarwinNotificationDetails(threadIdentifier: identifier);
+    final iosSpecs = DarwinNotificationDetails(threadIdentifier: channelID);
     final platformChannelSpecs =
         NotificationDetails(android: androidSpecs, iOS: iosSpecs);
     await _notificationsPlugin.show(
-      0,
+      channelName.hashCode,
       title,
       message,
       platformChannelSpecs,
