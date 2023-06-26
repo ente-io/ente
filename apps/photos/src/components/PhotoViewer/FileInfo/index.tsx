@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { RenderFileName } from './RenderFileName';
 import { RenderCreationTime } from './RenderCreationTime';
-import { Box, DialogProps, Link, Stack, styled } from '@mui/material';
+import { Box, DialogProps, Stack, styled } from '@mui/material';
 import { getEXIFLocation } from 'services/upload/exifService';
 import { RenderCaption } from './RenderCaption';
 import CopyButton from 'components/CodeBlock/CopyButton';
@@ -21,6 +21,7 @@ import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
 import TextSnippetOutlined from '@mui/icons-material/TextSnippetOutlined';
 import FolderOutlined from '@mui/icons-material/FolderOutlined';
 import BackupOutlined from '@mui/icons-material/BackupOutlined';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 import {
     PhotoPeopleList,
@@ -98,6 +99,7 @@ export function FileInfo({
     const [showExif, setShowExif] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [updateMLDataIndex, setUpdateMLDataIndex] = useState(0);
+    const [showMap, setShowMap] = useState('false');
 
     const openExif = () => setShowExif(true);
     const closeExif = () => setShowExif(false);
@@ -166,6 +168,13 @@ export function FileInfo({
         setParsedExifData(parsedExifData);
     }, [exif]);
 
+    useEffect(() => {
+        const mapEnabled = getData(LS_KEYS.MAPENABLED);
+        if (mapEnabled !== null) {
+            setShowMap(mapEnabled.mapEnabled);
+        }
+    }, [file, showInfo]);
+
     if (!file) {
         return <></>;
     }
@@ -216,14 +225,7 @@ export function FileInfo({
                         <InfoItem
                             icon={<LocationOnOutlined />}
                             title={t('LOCATION')}
-                            caption={
-                                <Link
-                                    href={getOpenStreetMapLink(location)}
-                                    target="_blank"
-                                    sx={{ fontWeight: 'bold' }}>
-                                    {t('SHOW_ON_MAP')}
-                                </Link>
-                            }
+                            caption={!showMap && t('ENABLE_MAP_INSTRUCTION')}
                             customEndButton={
                                 <CopyButton
                                     code={getOpenStreetMapLink(location)}
@@ -232,7 +234,7 @@ export function FileInfo({
                                 />
                             }
                         />
-                        <MapBox location={location} />
+                        {showMap && <MapBox location={location} />}
                     </div>
                 )}
                 <InfoItem
