@@ -858,8 +858,8 @@ class RemoteSyncService {
     // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
     return NotificationService.instance
             .shouldShowNotificationsForSharedPhotos() &&
-        isFirstRemoteSyncDone();
-    // TODO: && !AppLifecycleService.instance.isForeground;
+        isFirstRemoteSyncDone() &&
+        !AppLifecycleService.instance.isForeground;
   }
 
   Future<void> _notifyNewFiles(List<int> collectionIDs) async {
