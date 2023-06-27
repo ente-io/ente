@@ -219,7 +219,7 @@ export function FileInfo({
                 )}
 
                 {location && (
-                    <div>
+                    <>
                         <InfoItem
                             icon={<LocationOnOutlined />}
                             title={t('LOCATION')}
@@ -233,7 +233,7 @@ export function FileInfo({
                             }
                         />
                         {showMap && <MapBox location={location} />}
-                    </div>
+                    </>
                 )}
                 <InfoItem
                     icon={<TextSnippetOutlined />}
