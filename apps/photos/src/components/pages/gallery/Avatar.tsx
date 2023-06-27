@@ -1,7 +1,6 @@
 import React, { useState, useContext, useLayoutEffect } from 'react';
 import { EnteFile } from 'types/file';
 import { GalleryContext } from 'pages/gallery';
-import darkThemeColors from 'themes/colors/dark';
 import { styled } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { logError } from 'utils/sentry';
@@ -43,7 +42,7 @@ const Avatar: React.FC<AvatarProps> = ({ file }) => {
                 }
                 const colorIndex =
                     file.ownerID % theme.colors.avatarColors.length;
-                const colorCode = darkThemeColors.avatarColors[colorIndex];
+                const colorCode = theme.colors.avatarColors[colorIndex];
                 setUserLetter(email[0].toUpperCase());
                 setColorCode(colorCode);
             } else if (file.ownerID === user.id) {
