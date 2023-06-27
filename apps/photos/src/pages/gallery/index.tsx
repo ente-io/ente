@@ -8,7 +8,6 @@ import {
 } from 'react';
 import { useRouter } from 'next/router';
 import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import { getMapEnabledStatus } from 'services/userService';
 import {
     getLocalFiles,
     syncFiles,
@@ -106,7 +105,7 @@ import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 import UploadInputs from 'components/UploadSelectorInputs';
 import useFileInput from 'hooks/useFileInput';
 import { User } from 'types/user';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
 import { checkConnectivity } from 'utils/common';
 import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
@@ -387,15 +386,6 @@ export default function Gallery() {
             );
         }
     }, [router.isReady]);
-
-    useEffect(() => {
-        const main = async () => {
-            const remoteMapValue = await getMapEnabledStatus();
-            const mapEnabled = remoteMapValue;
-            setData(LS_KEYS.MAPENABLED, { mapEnabled });
-        };
-        main();
-    }, []);
 
     useEffect(() => {
         if (isInSearchMode && searchResultSummary) {

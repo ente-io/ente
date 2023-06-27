@@ -7,20 +7,19 @@ import { useState } from 'react';
 import { t } from 'i18next';
 
 import AdvancedSettings from '../AdvancedSettings';
-import AdvancedMapSettings from '../AdvancedMapSetting';
+import MapSettings from '../MapSetting';
 import { LanguageSelector } from './LanguageSelector';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 
 export default function Preferences({ open, onClose, onRootClose }) {
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
-    const [advancedMapSettingsView, setAdvancedMapSettingsView] =
-        useState(false);
+    const [mapSettingsView, setMapSettingsView] = useState(false);
 
     const openAdvancedSettings = () => setAdvancedSettingsView(true);
     const closeAdvancedSettings = () => setAdvancedSettingsView(false);
 
-    const openAdvancedMapSettings = () => setAdvancedMapSettingsView(true);
-    const closeAdvancedMapSettings = () => setAdvancedMapSettingsView(false);
+    const openMapSettings = () => setMapSettingsView(true);
+    const closeMapSettings = () => setMapSettingsView(false);
 
     const handleRootClose = () => {
         onClose();
@@ -60,9 +59,9 @@ export default function Preferences({ open, onClose, onRootClose }) {
                             />
                         )}
                         <EnteMenuItem
-                            onClick={openAdvancedMapSettings}
+                            onClick={openMapSettings}
                             endIcon={<ChevronRight />}
-                            label={t('Map')}
+                            label={t('MAP')}
                         />
                     </Stack>
                 </Box>
@@ -72,9 +71,9 @@ export default function Preferences({ open, onClose, onRootClose }) {
                 onClose={closeAdvancedSettings}
                 onRootClose={onRootClose}
             />
-            <AdvancedMapSettings
-                open={advancedMapSettingsView}
-                onClose={closeAdvancedMapSettings}
+            <MapSettings
+                open={mapSettingsView}
+                onClose={closeMapSettings}
                 onRootClose={onRootClose}
             />
         </EnteDrawer>
