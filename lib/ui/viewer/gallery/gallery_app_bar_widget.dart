@@ -64,6 +64,7 @@ enum AlbumPopupAction {
   leave,
   freeUpSpace,
   setCover,
+  addPhotos,
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -259,12 +260,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getDefaultActions(BuildContext context) {
     final List<Widget> actions = <Widget>[];
-    if (widget.selectedFiles.files.isNotEmpty) {
+    // If the user has selected files, don't show any actions
+    if (widget.selectedFiles.files.isNotEmpty ||
+        !Configuration.instance.hasConfiguredAccount()) {
       return actions;
     }
-    if (Configuration.instance.hasConfiguredAccount() &&
-        widget.selectedFiles.files.isEmpty &&
-        (widget.type == GalleryType.ownedCollection ||
+    if ((widget.type == GalleryType.ownedCollection ||
             widget.type == GalleryType.sharedCollection) &&
         widget.collection?.type != CollectionType.favorites) {
       actions.add(
