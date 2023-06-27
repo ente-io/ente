@@ -41,9 +41,9 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         } else {
           routeToPage(
             context,
-            const BackupFolderSelectionPage(
+            BackupFolderSelectionPage(
               isOnboarding: true,
-              buttonText: "Start backup",
+              buttonText: S.of(context).startBackup,
             ),
           );
         }
