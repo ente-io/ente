@@ -562,6 +562,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enteCanEncryptAndPreserveFilesOnlyIfYouGrant":
             MessageLookupByLibrary.simpleMessage(
                 "ente can encrypt and preserve files only if you grant access to them"),
+        "entePhotosPerm": MessageLookupByLibrary.simpleMessage(
+            "ente <i>needs permission to</i> preserve your photos"),
         "enteSubscriptionPitch": MessageLookupByLibrary.simpleMessage(
             "ente preserves your memories, so they\'re always available to you, even if you lose your device."),
         "enteSubscriptionShareWithFamily": MessageLookupByLibrary.simpleMessage(

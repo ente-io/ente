@@ -300,6 +300,16 @@ class S {
     );
   }
 
+  /// `ente <i>needs permission to</i> preserve your photos`
+  String get entePhotosPerm {
+    return Intl.message(
+      'ente <i>needs permission to</i> preserve your photos',
+      name: 'entePhotosPerm',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Ok`
   String get ok {
     return Intl.message(

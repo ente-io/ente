@@ -24,6 +24,7 @@
   "sendEmail": "Send email",
   "deleteRequestSLAText": "Your request will be processed within 72 hours.",
   "deleteEmailRequest": "Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address.",
+  "entePhotosPerm": "ente <i>needs permission to</i> preserve your photos",
   "ok": "Ok",
   "createAccount": "Create account",
   "createNewAccount": "Create new account",
