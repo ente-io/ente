@@ -27,7 +27,8 @@ import "package:photos/ui/map/map_screen.dart";
 import 'package:photos/ui/sharing/album_participants_page.dart';
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
-import "package:photos/ui/viewer/gallery/pick_cover_photo.dart";
+import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
+import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -265,9 +266,26 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         !Configuration.instance.hasConfiguredAccount()) {
       return actions;
     }
+    final int userID = Configuration.instance.getUserID()!;
     if ((widget.type == GalleryType.ownedCollection ||
             widget.type == GalleryType.sharedCollection) &&
         widget.collection?.type != CollectionType.favorites) {
+      final bool canAddFiles = widget.type == GalleryType.ownedCollection ||
+          widget.collection!.getRole(userID) ==
+              CollectionParticipantRole.collaborator;
+      if (canAddFiles) {
+        actions.add(
+          Tooltip(
+            message: "AddFiles",
+            child: IconButton(
+              icon: const Icon(Icons.add_photo_alternate_outlined),
+              onPressed: () async {
+                await _showShareCollectionDialog();
+              },
+            ),
+          ),
+        );
+      }
       actions.add(
         Tooltip(
           message: "Share",
@@ -573,7 +591,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
   }
 
-  Future<void> _showShareCollectionDialog() async {
+  Future<void> _showAddPhotoDialog() async {
     final collection = widget.collection;
     try {
       if (collection == null ||
@@ -598,6 +616,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           ),
         );
       }
+    } catch (e, s) {
+      _logger.severe(e, s);
+      showGenericErrorDialog(context: context);
+    }
+  }
+
+  Future<void> _showShareCollectionDialog() async {
+    final collection = widget.collection;
+    try {
+      final result = await showAddPhotosSheet(context, collection!);
     } catch (e, s) {
       _logger.severe(e, s);
       showGenericErrorDialog(context: context);
