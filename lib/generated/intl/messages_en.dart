@@ -53,6 +53,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m10(provider) =>
       "Please contact us at support@ente.io to manage your ${provider} subscription.";
 
+  static String m63(count) =>
+      "{count, plural, Delete one{${count} item} other{${count} items}}";
+
   static String m11(currentlyDeleting, totalCount) =>
       "Deleting ${currentlyDeleting} / ${totalCount}";
 
@@ -64,6 +67,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m14(count, storageSaved) =>
       "Your have cleaned up ${Intl.plural(count, one: '${count} duplicate file', other: '${count} duplicate files')}, saving (${storageSaved}!)";
+
+  static String m64(count, formattedSize) =>
+      "${count} files, ${formattedSize} each";
 
   static String m15(newEmail) => "Email changed to ${newEmail}";
 
@@ -480,6 +486,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete from device"),
         "deleteFromEnte":
             MessageLookupByLibrary.simpleMessage("Delete from ente"),
+        "deleteItemCount": m63,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Delete location"),
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Delete photos"),
@@ -537,6 +544,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "downloading": MessageLookupByLibrary.simpleMessage("Downloading..."),
         "dropSupportEmail": m13,
         "duplicateFileCountWithStorageSaved": m14,
+        "duplicateItemsGroup": m64,
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Edit location"),
