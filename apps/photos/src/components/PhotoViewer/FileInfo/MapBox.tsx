@@ -1,16 +1,20 @@
 import { useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import { runningInBrowser } from 'utils/common';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css'; // Re-uses images from ~leaflet package
 import * as L from 'leaflet';
-runningInBrowser() ? require('leaflet-defaulticon-compatibility') : null;
+import 'leaflet-defaulticon-compatibility';
+import { styled } from '@mui/material';
 
 const LAYER_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 const LAYER_TILE_ATTRIBUTION =
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 const MAP_CONTAINER_ID = 'map-container';
 const ZOOM_LEVEL = 16;
+
+const MapBoxContainer = styled('div')`
+    height: 200px;
+    width: 100%;
+`;
 
 interface MapBoxProps {
     location: { latitude: number; longitude: number };
@@ -30,11 +34,7 @@ const MapBox: React.FC<MapBoxProps> = ({ location }) => {
         }
     }, []);
 
-    return (
-        <div
-            id={MAP_CONTAINER_ID}
-            style={{ height: '200px', width: '100%' }}></div>
-    );
+    return <MapBoxContainer id={MAP_CONTAINER_ID} />;
 };
 
-export default dynamic(() => Promise.resolve(MapBox), { ssr: false });
+export default MapBox;
