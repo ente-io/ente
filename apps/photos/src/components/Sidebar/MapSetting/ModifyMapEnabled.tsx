@@ -1,33 +1,25 @@
 import { Box, DialogProps } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { AppContext } from 'pages/_app';
-import { useContext, useState, useEffect } from 'react';
+import { useContext } from 'react';
 import { logError } from 'utils/sentry';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import EnableMap from '../EnableMap';
 import DisableMap from '../DisableMap';
 import { updateMapEnabledStatus } from 'services/userService';
 
-const ModifyMapEnabled = ({ open, onClose, onRootClose }) => {
+const ModifyMapEnabled = ({
+    open,
+    onClose,
+    onRootClose,
+    mapEnabled,
+    setMapEnabled,
+}) => {
     const { somethingWentWrong } = useContext(AppContext);
 
-    const [mapEnabled, setMapEnabled] = useState(false);
-
-    useEffect(() => {
-        const main = async () => {
-            const storedMapEnabled = getData(LS_KEYS.MAPENABLED);
-            const initialMapEnabled =
-                storedMapEnabled !== null ? storedMapEnabled.mapEnabled : false;
-            setMapEnabled(initialMapEnabled);
-        };
-        main();
-    }, []);
-
-    const updateMapEnabled = (enabled) => {
+    const updateMapEnabled = async (enabled: boolean) => {
         try {
-            updateMapEnabledStatus(mapEnabled);
+            await updateMapEnabledStatus(enabled);
             setMapEnabled(enabled);
-            setData(LS_KEYS.MAPENABLED, { mapEnabled });
         } catch (e) {
             logError(e, 'Error while updating mapEnabled');
         }
@@ -35,7 +27,7 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose }) => {
 
     const disableMap = async () => {
         try {
-            updateMapEnabled(false);
+            await updateMapEnabled(false);
             onClose();
         } catch (e) {
             logError(e, 'Disable Map failed');
@@ -45,7 +37,7 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose }) => {
 
     const enableMap = async () => {
         try {
-            updateMapEnabled(true);
+            await updateMapEnabled(true);
             onClose();
         } catch (e) {
             logError(e, 'Enable Map failed');

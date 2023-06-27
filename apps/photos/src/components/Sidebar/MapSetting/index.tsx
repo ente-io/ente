@@ -6,19 +6,30 @@ import { t } from 'i18next';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import ModifyMapEnabled from './ModifyMapEnabled';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { LS_KEYS } from 'utils/storage/localStorage';
+import { useLocalState } from 'hooks/useLocalState';
+import { getMapEnabledStatus } from 'services/userService';
 
 export default function MapSettings({ open, onClose, onRootClose }) {
     const [modifyMapEnabledView, setModifyMapEnabledView] = useState(false);
-    const [mapEnabledToggle, setMapEnabledToggle] = useState(false);
+    const [mapEnabled, setMapEnabled] = useLocalState(
+        LS_KEYS.MAP_ENABLED,
+        false
+    );
 
     const openModifyMapEnabled = () => setModifyMapEnabledView(true);
     const closeModifyMapEnabled = () => setModifyMapEnabledView(false);
 
     useEffect(() => {
-        const mapEnabledValue = getData(LS_KEYS.MAPENABLED);
-        setMapEnabledToggle(mapEnabledValue.mapEnabled);
-    }, [modifyMapEnabledView]);
+        if (!open) {
+            return;
+        }
+        const main = async () => {
+            const remoteMapValue = await getMapEnabledStatus();
+            setMapEnabled(remoteMapValue);
+        };
+        main();
+    }, [open]);
 
     const handleRootClose = () => {
         onClose();
@@ -55,7 +66,7 @@ export default function MapSettings({ open, onClose, onRootClose }) {
                                 <EnteMenuItem
                                     onClick={openModifyMapEnabled}
                                     variant="toggle"
-                                    checked={mapEnabledToggle}
+                                    checked={mapEnabled}
                                     label={t('MAP_SETTINGS')}
                                 />
                             </MenuItemGroup>
@@ -65,6 +76,8 @@ export default function MapSettings({ open, onClose, onRootClose }) {
             </Stack>
             <ModifyMapEnabled
                 open={modifyMapEnabledView}
+                mapEnabled={mapEnabled}
+                setMapEnabled={setMapEnabled}
                 onClose={closeModifyMapEnabled}
                 onRootClose={handleRootClose}
             />
