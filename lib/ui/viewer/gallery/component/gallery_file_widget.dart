@@ -114,7 +114,10 @@ class GalleryFileWidget extends StatelessWidget {
   }
 
   void _onTapNoSelectionLimit(BuildContext context, File file) async {
-    if (selectedFiles?.files.isNotEmpty ?? false) {
+    final bool shouldToggleSelection =
+        (selectedFiles?.files.isNotEmpty ?? false) ||
+            GalleryContextState.of(context)!.inSelectionMode;
+    if (shouldToggleSelection) {
       _toggleFileSelection(file);
     } else {
       if (AppLifecycleService.instance.mediaExtensionAction.action ==

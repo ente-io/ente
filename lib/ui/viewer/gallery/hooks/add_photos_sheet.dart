@@ -83,6 +83,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                         ),
                         Expanded(
                           child: Gallery(
+                            inSelectionMode: true,
                             asyncLoader: (
                               creationStartTime,
                               creationEndTime, {
