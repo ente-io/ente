@@ -2,11 +2,6 @@ const cp = require('child_process');
 const { getIsSentryEnabled } = require('./sentryConfigUtil');
 
 module.exports = {
-    COOP_COEP_HEADERS: {
-        // 'Cross-Origin-Opener-Policy': 'same-origin',
-        // 'Cross-Origin-Embedder-Policy': 'require-corp',
-    },
-
     WEB_SECURITY_HEADERS: {
         'Strict-Transport-Security': '  max-age=63072000',
         'X-Content-Type-Options': 'nosniff',
