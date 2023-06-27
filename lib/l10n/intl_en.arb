@@ -24,6 +24,7 @@
   "sendEmail": "Send email",
   "deleteRequestSLAText": "Your request will be processed within 72 hours.",
   "deleteEmailRequest": "Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address.",
+  "entePhotosPerm": "ente <i>needs permission to</i> preserve your photos",
   "ok": "Ok",
   "createAccount": "Create account",
   "createNewAccount": "Create new account",
@@ -417,6 +418,22 @@
   "skip": "Skip",
   "updatingFolderSelection": "Updating folder selection...",
   "itemCount": "{count, plural, one{{count} item} other{{count} items}}",
+  "deleteItemCount": "{count, plural, Delete one{{count} item} other{{count} items}}",
+  "duplicateItemsGroup": "{count} files, {formattedSize} each",
+  "@duplicateItemsGroup" : {
+    "description": "Display the number of duplicate files and their size",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "formattedSize": {
+        "example": "2.3 MB",
+        "type": "String"
+      }
+    }
+  },
   "yearsAgo": "{count, plural, one{{count} year ago} other{{count} years ago}}",
   "backupSettings": "Backup settings",
   "backupOverMobileData": "Backup over mobile data",

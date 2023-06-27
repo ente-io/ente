@@ -300,6 +300,16 @@ class S {
     );
   }
 
+  /// `ente <i>needs permission to</i> preserve your photos`
+  String get entePhotosPerm {
+    return Intl.message(
+      'ente <i>needs permission to</i> preserve your photos',
+      name: 'entePhotosPerm',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Ok`
   String get ok {
     return Intl.message(
@@ -2905,6 +2915,26 @@ class S {
       name: 'itemCount',
       desc: '',
       args: [count],
+    );
+  }
+
+  /// `{count, plural, Delete one{{count} item} other{{count} items}}`
+  String deleteItemCount(Object count) {
+    return Intl.message(
+      '{count, plural, Delete one{$count item} other{$count items}}',
+      name: 'deleteItemCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count} files, {formattedSize} each`
+  String duplicateItemsGroup(int count, String formattedSize) {
+    return Intl.message(
+      '$count files, $formattedSize each',
+      name: 'duplicateItemsGroup',
+      desc: 'Display the number of duplicate files and their size',
+      args: [count, formattedSize],
     );
   }
 
