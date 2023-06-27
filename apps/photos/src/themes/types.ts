@@ -111,6 +111,7 @@ declare module '@mui/material/styles' {
         blur: BlurStrength;
         white: Omit<Strength, 'faint'>;
         black: Omit<Strength, 'faint'>;
+        avatarColors: AvatarColors;
     }
 
     interface ThemeColorsOptions {
@@ -126,6 +127,7 @@ declare module '@mui/material/styles' {
         blur?: Partial<BlurStrength>;
         white?: Partial<Omit<Strength, 'faint'>>;
         black?: Partial<Omit<Strength, 'faint'>>;
+        avatarColors?: Partial<AvatarColors>;
     }
 
     interface ColorStrength {
@@ -192,5 +194,7 @@ declare module '@mui/material/styles' {
         muted: number;
         faint: number;
     }
+
+    type AvatarColors = Array<string>;
 }
 export {};

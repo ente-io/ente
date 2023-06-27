@@ -1,10 +1,6 @@
 import { FixedColors, ThemeColorsOptions } from '@mui/material';
 
-interface ExtendedThemeColorsOptions extends ThemeColorsOptions {
-    avatarColors: string[];
-}
-
-const darkThemeColors: Omit<ExtendedThemeColorsOptions, keyof FixedColors> = {
+const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
     background: {
         base: '#000000',
         elevated: '#1b1b1b',
