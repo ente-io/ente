@@ -375,7 +375,7 @@ export default function PreviewCard(props: IProps) {
                 (file.ownerID === user.id &&
                     file.pubMagicMetadata?.data?.uploaderName)) && (
                 <AvatarOverlay>
-                    <Avatar file={file}></Avatar>
+                    <Avatar file={file} />
                 </AvatarOverlay>
             )}
 

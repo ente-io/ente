@@ -26,7 +26,7 @@ const AvatarBase = styled('div')<{ colorCode: string; size: number }>`
 `;
 
 const Avatar: React.FC<AvatarProps> = ({ file }) => {
-    const { idToMail, user } = useContext(GalleryContext);
+    const { userIDToEmailMap, user } = useContext(GalleryContext);
     const theme = useTheme();
 
     const [colorCode, setColorCode] = useState('');
@@ -36,21 +36,36 @@ const Avatar: React.FC<AvatarProps> = ({ file }) => {
         try {
             if (file.ownerID !== user.id) {
                 // getting email from in-memory id-email map
-                const email = idToMail.get(file.ownerID);
+                const email = userIDToEmailMap.get(file.ownerID);
+                if (!email) {
+                    logError(Error(), 'email not found in userIDToEmailMap');
+                    return;
+                }
                 const colorIndex =
                     file.ownerID % theme.colors.avatarColors.length;
                 const colorCode = darkThemeColors.avatarColors[colorIndex];
-                setUserLetter(email?.charAt(0)?.toUpperCase());
+                setUserLetter(email[0].toUpperCase());
                 setColorCode(colorCode);
             } else if (file.ownerID === user.id) {
                 const uploaderName = file.pubMagicMetadata.data.uploaderName;
-                setUserLetter(uploaderName?.charAt(0)?.toUpperCase());
+                if (!uploaderName) {
+                    logError(
+                        Error(),
+                        'uploaderName not found in file.pubMagicMetadata.data'
+                    );
+                    return;
+                }
+                setUserLetter(uploaderName[0].toUpperCase());
                 setColorCode(PUBLIC_COLLECTED_FILES_AVATAR_COLOR_CODE);
             }
         } catch (err) {
             logError(err, 'AvatarIcon.tsx - useLayoutEffect failed');
         }
     }, []);
+
+    if (!colorCode || !userLetter) {
+        return <></>;
+    }
 
     return (
         <AvatarBase size={18} colorCode={colorCode}>
