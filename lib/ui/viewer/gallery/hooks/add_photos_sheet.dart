@@ -58,6 +58,8 @@ class AddPhotosPhotoWidget extends StatelessWidget {
     });
     final Set<int> hiddenCollectionIDs =
         CollectionsService.instance.getHiddenCollections();
+    // Hide the current collection files from suggestions
+    hiddenCollectionIDs.add(collection.id);
 
     return Padding(
       padding: const EdgeInsets.all(0),
