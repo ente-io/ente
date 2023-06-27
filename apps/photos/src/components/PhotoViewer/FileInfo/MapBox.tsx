@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { styled } from '@mui/material';
 import { runningInBrowser } from 'utils/common';
 
@@ -9,7 +9,6 @@ runningInBrowser() && require('leaflet-defaulticon-compatibility');
 const LAYER_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 const LAYER_TILE_ATTRIBUTION =
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-const MAP_CONTAINER_ID = 'map-container';
 const ZOOM_LEVEL = 16;
 
 const MapBoxContainer = styled('div')`
@@ -22,6 +21,7 @@ interface MapBoxProps {
 }
 
 const MapBox: React.FC<MapBoxProps> = ({ location }) => {
+    const mapBoxContainerRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const main = async () => {
             const L = await import('leaflet');
@@ -29,7 +29,7 @@ const MapBox: React.FC<MapBoxProps> = ({ location }) => {
                 location.latitude,
                 location.longitude,
             ];
-            const mapContainer = document.getElementById(MAP_CONTAINER_ID);
+            const mapContainer = mapBoxContainerRef.current;
 
             if (mapContainer && !mapContainer.hasChildNodes()) {
                 const map = L.map(mapContainer).setView(position, ZOOM_LEVEL);
@@ -42,7 +42,7 @@ const MapBox: React.FC<MapBoxProps> = ({ location }) => {
         main();
     }, []);
 
-    return <MapBoxContainer id={MAP_CONTAINER_ID} />;
+    return <MapBoxContainer ref={mapBoxContainerRef} />;
 };
 
 export default MapBox;
