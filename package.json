@@ -17,10 +17,7 @@
         "start": "turbo run start",
         "prepare": "husky install"
     },
-    "dependencies": {
-        "leaflet": "^1.9.4",
-        "leaflet-defaulticon-compatibility": "^0.1.1"
-    },
+    "dependencies": {},
     "devDependencies": {
         "eslint": "^8.28.0",
         "husky": "^7.0.1",
