@@ -21,7 +21,6 @@ import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
 import TextSnippetOutlined from '@mui/icons-material/TextSnippetOutlined';
 import FolderOutlined from '@mui/icons-material/FolderOutlined';
 import BackupOutlined from '@mui/icons-material/BackupOutlined';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 import {
     PhotoPeopleList,
@@ -34,6 +33,7 @@ import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
 import { AppContext } from 'pages/_app';
 import { t } from 'i18next';
 import { GalleryContext } from 'pages/gallery';
+import { getMapEnabled } from 'utils/storage';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
@@ -99,7 +99,7 @@ export function FileInfo({
     const [showExif, setShowExif] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [updateMLDataIndex, setUpdateMLDataIndex] = useState(0);
-    const [showMap, setShowMap] = useState('false');
+    const [showMap, setShowMap] = useState(false);
 
     const openExif = () => setShowExif(true);
     const closeExif = () => setShowExif(false);
@@ -169,10 +169,8 @@ export function FileInfo({
     }, [exif]);
 
     useEffect(() => {
-        const mapEnabled = getData(LS_KEYS.MAPENABLED);
-        if (mapEnabled !== null) {
-            setShowMap(mapEnabled.mapEnabled);
-        }
+        const mapEnabled = getMapEnabled();
+        setShowMap(mapEnabled);
     }, [file, showInfo]);
 
     if (!file) {

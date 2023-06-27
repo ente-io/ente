@@ -37,6 +37,7 @@ import {
     justSignedUp,
     setIsFirstLogin,
     setJustSignedUp,
+    setMapEnabled,
 } from 'utils/storage';
 import {
     getMapEnabledStatus,
@@ -109,7 +110,7 @@ import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 import UploadInputs from 'components/UploadSelectorInputs';
 import useFileInput from 'hooks/useFileInput';
 import { User } from 'types/user';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
 import { checkConnectivity } from 'utils/common';
 import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
@@ -593,9 +594,7 @@ export default function Gallery() {
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             const mapEnabled = await getMapEnabledStatus();
-            setData(LS_KEYS.MAP_ENABLED, {
-                value: mapEnabled,
-            });
+            setMapEnabled(mapEnabled);
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
