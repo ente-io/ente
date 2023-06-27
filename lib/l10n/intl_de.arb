@@ -219,6 +219,16 @@
   "after1Month": "Nach 1 Monat",
   "after1Year": "Nach 1 Jahr",
   "manageParticipants": "Verwalten",
+  "albumParticipantsCount": "{count, plural, one {}=0 {Keine Teilnehmer} =1 {1 Teilnehmer} other {{count} Teilnehmer}}",
+  "@albumParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    },
+    "description": "Number of participants in an album, including the album owner."
+  },
   "collabLinkSectionDescription": "Erstelle einen Link, um anderen zu ermöglichen, Fotos in deinem geteilten Album hinzuzufügen und zu sehen - ohne dass diese ein Konto von ente.io oder die App benötigen. Ideal, um Fotos von Events zu sammeln.",
   "collectPhotos": "Fotos sammeln",
   "collaborativeLink": "Gemeinschaftlicher Link",
@@ -361,6 +371,10 @@
       "count": {
         "example": "1",
         "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
       }
     }
   },
@@ -431,6 +445,7 @@
   "installManually": "Manuell installieren",
   "criticalUpdateAvailable": "Kritisches Update ist verfügbar!",
   "updateAvailable": "Update verfügbar",
+  "ignoreUpdate": "Ignorieren",
   "downloading": "Wird heruntergeladen...",
   "theDownloadCouldNotBeCompleted": "Der Download konnte nicht abgeschlossen werden",
   "retry": "Erneut versuchen",
@@ -621,6 +636,11 @@
   "yourSubscriptionHasExpired": "Dein Abonnement ist abgelaufen",
   "storageLimitExceeded": "Speichergrenze überschritten",
   "upgrade": "Upgrade",
+  "raiseTicket": "Ticket erstellen",
+  "@raiseTicket": {
+    "description": "Button text for raising a support tickets in case of unhandled errors during backup",
+    "type": "text"
+  },
   "backupFailed": "Sicherung fehlgeschlagen",
   "couldNotBackUpTryLater": "Deine Daten konnten nicht gesichert werden.\nWir versuchen es später erneut.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "ente kann Dateien nur verschlüsselt sichern, wenn du uns darauf Zugriff gewährst",
@@ -639,29 +659,78 @@
     "type": "text"
   },
   "onDevice": "Auf dem Gerät",
+  "@onEnte": {
+    "description": "The text displayed above albums backed up to ente",
+    "type": "text"
+  },
+  "onEnte": "Auf <branding>ente</branding>",
   "name": "Name",
   "newest": "Zuletzt",
   "lastUpdated": "Zuletzt aktualisiert",
   "deleteEmptyAlbums": "Leere Alben löschen",
   "deleteEmptyAlbumsWithQuestionMark": "Leere Alben löschen?",
   "deleteAlbumsDialogBody": "Damit werden alle leeren Alben gelöscht. Dies ist nützlich, wenn du das Durcheinander in deiner Albenliste verringern möchtest.",
+  "deleteProgress": "Lösche {currentlyDeleting} / {totalCount}",
+  "permanentlyDelete": "Dauerhaft löschen",
+  "canOnlyCreateLinkForFilesOwnedByYou": "Sie können nur Links für Dateien erstellen, die Ihnen gehören",
+  "publicLinkCreated": "Öffentlicher Link erstellt",
+  "youCanManageYourLinksInTheShareTab": "Sie können Ihre Links im \"Teilen\"-Tab verwalten.",
+  "linkCopiedToClipboard": "Link in Zwischenablage kopiert",
   "restore": "Wiederherstellen",
   "@restore": {
     "description": "Display text for an action which triggers a restore of item from trash",
     "type": "text"
   },
   "moveToAlbum": "Zum Album verschieben",
+  "unhide": "Einblenden",
   "unarchive": "Dearchivieren",
   "favorite": "Favorit",
+  "removeFromFavorite": "Aus Favoriten entfernen",
   "shareLink": "Link teilen",
+  "createCollage": "Collage erstellen",
+  "saveCollage": "Collage speichern",
+  "collageSaved": "Collage in Galerie gespeichert",
+  "collageLayout": "Layout",
   "addToEnte": "Zu ente hinzufügen",
   "addToAlbum": "Zum Album hinzufügen",
   "delete": "Löschen",
+  "hide": "Ausblenden",
+  "itemSelectedCount": "{count} ausgewählt",
+  "@itemSelectedCount": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
   "share": "Teilen",
+  "unhideToAlbum": "Im Album anzeigen",
+  "restoreToAlbum": "Album wiederherstellen",
+  "moveItem": "{count, plural, one{# Element} other{# Elemente}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, one {Füge ein Element hinzu} other {Füge # Elemente hinzu}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
+  "createOrSelectAlbum": "Album erstellen oder auswählen",
+  "selectAlbum": "Album auswählen",
   "searchByAlbumNameHint": "Name des Albums",
   "albumTitle": "Albumtitel",
   "enterAlbumName": "Albumname eingeben",
   "restoringFiles": "Dateien werden wiederhergestellt...",
+  "movingFilesToAlbum": "Verschiebe Dateien in Album...",
+  "unhidingFilesToAlbum": "Dateien im Album anzeigen",
+  "canNotUploadToAlbumsOwnedByOthers": "Kann nicht auf Alben anderer Personen hochladen",
+  "uploadingFilesToAlbum": "Dateien werden ins Album hochgeladen...",
+  "addedSuccessfullyTo": "Erfolgreich zu  {albumName} hinzugefügt",
+  "movedSuccessfullyTo": "Erfolgreich zu {albumName} hinzugefügt",
+  "thisAlbumAlreadyHDACollaborativeLink": "Dieses Album hat bereits einen kollaborativen Link",
+  "collaborativeLinkCreatedFor": "Kollaborativer Link für {albumName} erstellt",
+  "askYourLovedOnesToShare": "Bitte deine Liebsten ums teilen",
   "invite": "Einladen",
   "shareYourFirstAlbum": "Teile dein erstes Album",
   "sharedWith": "Geteilt mit {emailIDs}",
@@ -670,7 +739,26 @@
   "doubleYourStorage": "Speicherplatz verdoppeln",
   "referFriendsAnd2xYourPlan": "Begeistere Freunde für uns und verdopple deinen Speicher",
   "shareAlbumHint": "Öffne ein Album und tippe auf den Teilen-Button oben rechts, um zu teilen.",
+  "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elemente zeigen die Anzahl der Tage bis zum dauerhaften Löschen an",
+  "trashDaysLeft": "{count, plural, =0 {} =1 {1 Tag} other {{count} Tage}}",
+  "@trashDaysLeft": {
+    "description": "Text to indicate number of days remaining before permanent deletion",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
+  "deleteAll": "Alle löschen",
   "renameAlbum": "Album umbenennen",
+  "setCover": "Titelbild festlegen",
+  "@setCover": {
+    "description": "Text to set cover photo for an album"
+  },
+  "sortAlbumsBy": "Sortieren nach",
+  "sortNewestFirst": "Neueste zuerst",
+  "sortOldestFirst": "Älteste zuerst",
   "rename": "Umbenennen",
   "leaveSharedAlbum": "Geteiltes Album verlassen?",
   "leaveAlbum": "Album verlassen",
@@ -682,27 +770,114 @@
   "deviceFilesAutoUploading": "Dateien, die zu diesem Album hinzugefügt werden, werden automatisch zu ente hochgeladen.",
   "turnOnBackupForAutoUpload": "Aktiviere die Sicherung, um automatisch neu hinzugefügte Dateien dieses Ordners auf ente hochzuladen.",
   "noHiddenPhotosOrVideos": "Keine versteckten Fotos oder Videos",
+  "toHideAPhotoOrVideo": "Foto oder Video verstecken",
+  "openTheItem": "• Element öffnen",
+  "clickOnTheOverflowMenu": "• Klicken Sie auf das Überlaufmenü",
+  "click": "• Klick",
   "nothingToSeeHere": "Hier gibt es nichts zu sehen! 👀",
   "unarchiveAlbum": "Album dearchivieren",
   "archiveAlbum": "Album archivieren",
+  "calculating": "Wird berechnet...",
   "pleaseWaitDeletingAlbum": "Bitte warten, Album wird gelöscht",
+  "searchHintText": "Alben, Monate, Tage, Jahre, ...",
+  "searchByExamples": "• Albumnamen (z.B. \"Kamera\")\n• Dateitypen (z.B. \"Videos\", \".gif\")\n• Jahre und Monate (z.B. \"2022\", \"Januar\")\n• Feiertage (z.B. \"Weihnachten\")\n• Fotobeschreibungen (z.B. \"#fun\")",
+  "youCanTrySearchingForADifferentQuery": "Sie können versuchen, nach einer anderen Abfrage suchen.",
   "noResultsFound": "Keine Ergebnisse gefunden",
+  "addedBy": "Von {emailOrName} hinzugefügt",
   "loadingExifData": "Lade Exif-Daten...",
   "viewAllExifData": "Alle Exif-Daten anzeigen",
   "noExifData": "Keine Exif-Daten",
   "thisImageHasNoExifData": "Dieses Bild hat keine Exif-Daten",
   "exif": "EXIF",
   "noResults": "Keine Ergebnisse",
+  "weDontSupportEditingPhotosAndAlbumsThatYouDont": "Wir unterstützen keine Bearbeitung von Fotos und Alben, die du noch nicht besitzt",
+  "failedToFetchOriginalForEdit": "Fehler beim Abrufen des Originals zur Bearbeitung",
   "close": "Schließen",
   "setAs": "Festlegen als",
   "fileSavedToGallery": "Datei in Galerie gespeichert",
+  "fileFailedToSaveToGallery": "Fehler beim Speichern der Datei in der Galerie",
   "download": "Herunterladen",
+  "pressAndHoldToPlayVideo": "Gedrückt halten, um Video abzuspielen",
   "downloadFailed": "Herunterladen fehlgeschlagen",
+  "deduplicateFiles": "Dateien duplizieren",
+  "deselectAll": "Alle abwählen",
+  "reviewDeduplicateItems": "Bitte überprüfe und lösche die Elemente, die du für Duplikate hältst.",
+  "clubByCaptureTime": "Nach Aufnahmezeit gruppieren",
+  "clubByFileName": "Nach Dateiname gruppieren",
+  "count": "Anzahl",
+  "totalSize": "Gesamtgröße",
+  "time": "Zeit",
+  "longpressOnAnItemToViewInFullscreen": "Drücken Sie lange auf ein Element, um es im Vollbildmodus anzuzeigen",
+  "decryptingVideo": "Entschlüssele Video …",
   "authToViewYourMemories": "Bitte authentifizieren, um deine Erinnerungsstücke anzusehen",
+  "unlock": "Jetzt freischalten",
+  "freeUpSpace": "Speicherplatz freigeben",
+  "freeUpSpaceSaving": "{count, plural, one {Es kann vom Gerät gelöscht werden, um {formattedSize} freizugeben} other {Sie können vom Gerät gelöscht werden, um {formattedSize} freizugeben}}",
+  "filesBackedUpInAlbum": "{count, plural, one {1 Datei} other {{formattedNumber} Dateien}} in diesem Album wurde(n) sicher gespeichert",
+  "@filesBackedUpInAlbum": {
+    "description": "Text to tell user how many files have been backed up in the album",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "filesBackedUpFromDevice": "{count, plural, one {1 Datei} other {{formattedNumber} Dateien}} auf diesem Gerät wurde(n) sicher gespeichert",
+  "@filesBackedUpFromDevice": {
+    "description": "Text to tell user how many files have been backed up from this device",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Sie können immer noch {count, plural, one {darauf} other {auf sie}} auf ente zugreifen, solange Sie ein aktives Abonnement haben",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      }
+    }
+  },
+  "freeUpAmount": "{sizeInMBorGB} freigeben",
+  "thisEmailIsAlreadyInUse": "Diese E-Mail-Adresse wird bereits verwendet",
+  "incorrectCode": "Falscher Code",
+  "authenticationFailedPleaseTryAgain": "Authentifizierung fehlgeschlagen, versuchen Sie es bitte erneut",
+  "verificationFailedPleaseTryAgain": "Verifizierung fehlgeschlagen, bitte versuchen Sie es erneut",
+  "authenticating": "Authentifiziere …",
+  "authenticationSuccessful": "Authentifizierung erfogreich!",
+  "incorrectRecoveryKey": "Falscher Wiederherstellungs-Schlüssel",
+  "theRecoveryKeyYouEnteredIsIncorrect": "Der eingegebene Schlüssel ist ungültig",
   "twofactorAuthenticationSuccessfullyReset": "Zwei-Faktor-Authentifizierung (2FA) erfolgreich zurückgesetzt",
+  "pleaseVerifyTheCodeYouHaveEntered": "Bitte bestätigen Sie den eingegebenen Code",
+  "pleaseContactSupportIfTheProblemPersists": "Bitte wenden Sie sich an den Support, falls das Problem weiterhin besteht",
   "twofactorAuthenticationHasBeenDisabled": "Zwei-Faktor-Authentifizierung (2FA) wurde deaktiviert",
+  "sorryTheCodeYouveEnteredIsIncorrect": "Leider ist der eingegebene Code falsch",
+  "yourVerificationCodeHasExpired": "Ihr Bestätigungscode ist abgelaufen",
+  "emailChangedTo": "E-Mail-Adresse geändert zu {newEmail}",
+  "verifying": "Verifiziere …",
   "disablingTwofactorAuthentication": "Zwei-Faktor-Authentifizierung (2FA) wird deaktiviert...",
   "allMemoriesPreserved": "Alle Erinnerungsstücke gesichert",
+  "loadingGallery": "Lade Galerie …",
+  "syncing": "Synchronisiere …",
+  "encryptingBackup": "Verschlüssele Sicherung …",
+  "syncStopped": "Synchronisierung angehalten",
   "syncProgress": "{completed}/{total} Erinnerungsstücke gesichert",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -715,13 +890,172 @@
       }
     }
   },
+  "archiving": "Archiviere …",
+  "unarchiving": "Dearchiviere …",
+  "successfullyArchived": "Erfolgreich archiviert",
+  "successfullyUnarchived": "Erfolgreich dearchiviert",
+  "renameFile": "Datei umbenennen",
+  "enterFileName": "Dateinamen eingeben",
+  "filesDeleted": "Dateien gelöscht",
+  "selectedFilesAreNotOnEnte": "Ausgewählte Dateien sind nicht auf ente",
+  "thisActionCannotBeUndone": "Diese Aktion kann nicht rückgängig gemacht werden",
+  "emptyTrash": "Papierkorb leeren?",
+  "permDeleteWarning": "Alle Elemente im Papierkorb werden dauerhaft gelöscht\n\nDiese Aktion kann nicht rückgängig gemacht werden",
+  "empty": "Leeren",
+  "couldNotFreeUpSpace": "Konnte Speicherplatz nicht freigeben",
+  "permanentlyDeleteFromDevice": "Endgültig vom Gerät löschen?",
+  "someOfTheFilesYouAreTryingToDeleteAre": "Einige der Dateien, die Sie löschen möchten, sind nur auf Ihrem Gerät verfügbar und können nicht wiederhergestellt werden, wenn sie gelöscht wurden",
+  "theyWillBeDeletedFromAllAlbums": "Sie werden aus allen Alben gelöscht.",
+  "someItemsAreInBothEnteAndYourDevice": "Einige Elemente sind sowohl auf ente als auch auf Ihrem Gerät.",
+  "selectedItemsWillBeDeletedFromAllAlbumsAndMoved": "Ausgewählte Elemente werden aus allen Alben gelöscht und in den Papierkorb verschoben.",
+  "theseItemsWillBeDeletedFromYourDevice": "Diese Elemente werden von deinem Gerät gelöscht.",
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Etwas ist schiefgelaufen. Bitte versuche es später noch einmal. Sollte der Fehler weiter bestehen, kontaktiere unser Supportteam.",
+  "error": "Fehler",
+  "tempErrorContactSupportIfPersists": "Etwas ist schiefgelaufen. Bitte versuche es später noch einmal. Sollte der Fehler weiter bestehen, kontaktiere unser Supportteam.",
+  "cachedData": "Daten im Cache",
+  "clearCaches": "Cache löschen",
+  "remoteImages": "Grafiken aus externen Quellen",
+  "remoteVideos": "Videos aus externen Quellen",
+  "remoteThumbnails": "Vorschaubilder aus externen Quellen",
+  "pendingSync": "Synchronisation anstehend",
+  "localGallery": "Lokale Galerie",
+  "todaysLogs": "Heutiges Protokoll",
+  "viewLogs": "Protokolle anzeigen",
+  "logsDialogBody": "Dies wird über Logs gesendet, um uns zu helfen, Ihr Problem zu beheben. Bitte beachten Sie, dass Dateinamen aufgenommen werden, um Probleme mit bestimmten Dateien zu beheben.",
+  "preparingLogs": "Protokolle werden vorbereitet...",
+  "emailYourLogs": "Protokolle per E-Mail senden",
+  "pleaseSendTheLogsTo": "Bitte sende die Protokolle an {toEmail}",
+  "copyEmailAddress": "E-Mail-Adresse kopieren",
+  "exportLogs": "Protokolle exportieren",
+  "pleaseEmailUsAt": "Bitte sende uns eine E-Mail an {toEmail}",
+  "dismiss": "Verwerfen",
+  "didYouKnow": "Schon gewusst?",
+  "loadingMessage": "Fotos werden geladen...",
+  "loadMessage1": "Du kannst dein Abonnement mit deiner Familie teilen",
   "loadMessage2": "Wir haben bereits mehr als 10 Millionen Erinnerungsstücke gesichert",
+  "loadMessage3": "Wir behalten 3 Kopien Ihrer Daten, eine in einem unterirdischen Schutzbunker",
+  "loadMessage4": "Alle unsere Apps sind Open-Source",
+  "loadMessage5": "Unser Quellcode und unsere Kryptografie wurden extern geprüft",
+  "loadMessage6": "Du kannst Links zu deinen Alben mit deinen Geliebten teilen",
+  "loadMessage7": "Unsere mobilen Apps laufen im Hintergrund, um neue Fotos zu verschlüsseln und zu sichern",
+  "loadMessage8": "web.ente.io hat einen Spitzen-Uploader",
+  "loadMessage9": "Wir verwenden Xchacha20Poly1305, um Ihre Daten sicher zu verschlüsseln",
+  "language": "Sprache",
+  "selectLanguage": "Sprache auswählen",
+  "locationName": "Standortname",
+  "addLocation": "Ort hinzufügen",
+  "groupNearbyPhotos": "Fotos in der Nähe gruppieren",
+  "location": "Standort",
+  "kiloMeterUnit": "km",
+  "addLocationButton": "Hinzufügen",
+  "radius": "Umkreis",
+  "locationTagFeatureDescription": "Ein Standort-Tag gruppiert alle Fotos, die in einem Radius eines Fotos aufgenommen wurden",
   "galleryMemoryLimitInfo": "Bis zu 1000 Erinnerungsstücke angezeigt in der Galerie",
+  "save": "Speichern",
+  "centerPoint": "Mittelpunkt",
+  "pickCenterPoint": "Mittelpunkt auswählen",
+  "useSelectedPhoto": "Ausgewähltes Foto verwenden",
+  "edit": "Bearbeiten",
+  "deleteLocation": "Standort löschen",
+  "rotateLeft": "Nach links drehen",
+  "flip": "Spiegeln",
   "rotateRight": "Nach rechts drehen",
   "saveCopy": "Kopie speichern",
+  "light": "Hell",
   "color": "Farbe",
   "yesDiscardChanges": "Ja, Änderungen verwerfen",
   "doYouWantToDiscardTheEditsYouHaveMade": "Möchtest du deine Änderungen verwerfen?",
   "saving": "Speichern...",
-  "editsSaved": "Änderungen gespeichert"
+  "editsSaved": "Änderungen gespeichert",
+  "oopsCouldNotSaveEdits": "Hoppla, die Änderungen konnten nicht gespeichert werden",
+  "distanceInKMUnit": "km",
+  "@distanceInKMUnit": {
+    "description": "Unit for distance in km"
+  },
+  "dayToday": "Heute",
+  "dayYesterday": "Gestern",
+  "storage": "Speicherplatz",
+  "usedSpace": "Belegter Speicherplatz",
+  "storageBreakupFamily": "Familie",
+  "storageBreakupYou": "Sie",
+  "@storageBreakupYou": {
+    "description": "Label to indicate how much storage you are using when you are part of a family plan"
+  },
+  "storageUsageInfo": "{usedAmount} {usedStorageUnit} von {totalAmount} {totalStorageUnit} verwendet",
+  "@storageUsageInfo": {
+    "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
+  },
+  "freeStorageSpace": "{freeAmount} {storageUnit} kostenlos",
+  "appVersion": "Version: {versionValue}",
+  "verifyIDLabel": "Überprüfen",
+  "fileInfoAddDescHint": "Beschreibung hinzufügen …",
+  "editLocationTagTitle": "Standort bearbeiten",
+  "setLabel": "Festlegen",
+  "@setLabel": {
+    "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
+  },
+  "setRadius": "Radius festlegen",
+  "familyPlanPortalTitle": "Familie",
+  "familyPlanOverview": "Fügen Sie 5 Familienmitglieder zu Ihrem bestehenden Abo hinzu, ohne extra zu bezahlen.\n\nJedes Mitglied erhält einen eigenen privaten Raum und kann die Dateien von anderen nicht sehen, wenn sie nicht freigegeben werden.\n\nFamilien-Abos sind für Kunden verfügbar, die ein kostenpflichtiges ente Abonnement haben.\n\nMelden Sie sich jetzt an, um loszulegen!",
+  "androidBiometricHint": "Identität verifizieren",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Nicht erkannt. Versuchen Sie es erneut.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Erfolgreich",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Abbrechen",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Authentifizierung erforderlich",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Biometrie erforderlich",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Geräteanmeldeinformationen erforderlich",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Geräteanmeldeinformationen erforderlich",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Zu den Einstellungen",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "Auf Ihrem Gerät ist keine biometrische Authentifizierung eingerichtet. Gehen Sie „Einstellungen“ > „Sicherheit“, um die biometrische Authentifizierung hinzuzufügen.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "Die biometrische Authentifizierung ist deaktiviert. Bitte sperren und entsperren Sie Ihren Bildschirm, um sie zu aktivieren.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSGoToSettingsDescription": "Auf Ihrem Gerät ist keine biometrische Authentifizierung eingerichtet. Bitte aktivieren Sie entweder Touch ID oder Face ID auf Ihrem Telefon.",
+  "@iOSGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "OK",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "openstreetmapContributors": "OpenStreetMap-Beitragende",
+  "hostedAtOsmFrance": "Gehostet bei OSM France",
+  "map": "Karte",
+  "@map": {
+    "description": "Label for the map view"
+  },
+  "maps": "Karten",
+  "enableMaps": "Karten aktivieren",
+  "enableMapsDesc": "Dies zeigt Ihre Fotos auf einer Weltkarte.\n\nDiese Karte wird von OpenStreetMap gehostet und die genauen Standorte Ihrer Fotos werden niemals geteilt.\n\nSie können diese Funktion jederzeit in den Einstellungen deaktivieren."
 }
