@@ -19,7 +19,7 @@ import {
 } from 'components/PlaceholderThumbnails';
 import { FILE_TYPE } from 'constants/file';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
-import AvatarCircle from './AvatarIcon';
+import Avatar from './Avatar';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
@@ -375,7 +375,7 @@ export default function PreviewCard(props: IProps) {
                 (file.ownerID === user.id &&
                     file.pubMagicMetadata?.data?.uploaderName)) && (
                 <AvatarOverlay>
-                    <AvatarCircle file={file}></AvatarCircle>
+                    <Avatar file={file}></Avatar>
                 </AvatarOverlay>
             )}
 
