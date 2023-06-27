@@ -6,19 +6,20 @@ import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection.dart";
-import "package:photos/models/file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/actions/collection/collection_file_actions.dart";
+import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
-Future<List<File>?> showAddPhotosSheet(
+Future<dynamic> showAddPhotosSheet(
   BuildContext context,
   Collection collection,
 ) async {
@@ -108,6 +109,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                             tagPrefix: "pick_add_photos_gallery",
                             selectedFiles: selectedFiles,
                             showSelectAllByDefault: true,
+                            sortAsyncFn: () => false,
                           ),
                         ),
                       ],
@@ -140,6 +142,15 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                                   labelText: S.of(context).addSelected,
                                   onTap: () async {
                                     final selectedFile = selectedFiles.files;
+                                    final ca = CollectionActions(
+                                      CollectionsService.instance,
+                                    );
+                                    await ca.addToCollection(
+                                      context,
+                                      collection.id,
+                                      false,
+                                      selectedFiles: selectedFile.toList(),
+                                    );
                                     Navigator.pop(context, selectedFile);
                                   },
                                 ),

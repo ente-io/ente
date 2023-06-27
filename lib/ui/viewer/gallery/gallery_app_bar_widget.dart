@@ -276,11 +276,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (canAddFiles) {
         actions.add(
           Tooltip(
-            message: "AddFiles",
+            message: "Add Files",
             child: IconButton(
               icon: const Icon(Icons.add_photo_alternate_outlined),
               onPressed: () async {
-                await _showShareCollectionDialog();
+                await _showAddPhotoDialog(context);
               },
             ),
           ),
@@ -591,7 +591,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
   }
 
-  Future<void> _showAddPhotoDialog() async {
+  Future<void> _showShareCollectionDialog() async {
     final collection = widget.collection;
     try {
       if (collection == null ||
@@ -622,13 +622,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
   }
 
-  Future<void> _showShareCollectionDialog() async {
+  Future<void> _showAddPhotoDialog(BuildContext bContext) async {
     final collection = widget.collection;
     try {
-      final result = await showAddPhotosSheet(context, collection!);
+      final result = await showAddPhotosSheet(bContext, collection!);
+      debugPrint("fileSelectionDone");
     } catch (e, s) {
       _logger.severe(e, s);
-      showGenericErrorDialog(context: context);
+      showGenericErrorDialog(context: bContext);
     }
   }
 }
