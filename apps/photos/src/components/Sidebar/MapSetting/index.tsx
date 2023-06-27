@@ -5,15 +5,20 @@ import { useEffect, useState } from 'react';
 import { t } from 'i18next';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
-import MapSettings from './MapSettings';
+import ModifyMapEnabled from './ModifyMapEnabled';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
-export default function AdvancedMapSettings({ open, onClose, onRootClose }) {
-    const [mapSettingsView, setMapSettingsView] = useState(false);
+export default function MapSettings({ open, onClose, onRootClose }) {
+    const [modifyMapEnabledView, setModifyMapEnabledView] = useState(false);
     const [mapEnabledToggle, setMapEnabledToggle] = useState(false);
 
-    const openMapSettings = () => setMapSettingsView(true);
-    const closeMapSettings = () => setMapSettingsView(false);
+    const openModifyMapEnabled = () => setModifyMapEnabledView(true);
+    const closeModifyMapEnabled = () => setModifyMapEnabledView(false);
+
+    useEffect(() => {
+        const mapEnabledValue = getData(LS_KEYS.MAPENABLED);
+        setMapEnabledToggle(mapEnabledValue.mapEnabled);
+    }, [modifyMapEnabledView]);
 
     const handleRootClose = () => {
         onClose();
@@ -27,10 +32,6 @@ export default function AdvancedMapSettings({ open, onClose, onRootClose }) {
             onClose();
         }
     };
-    useEffect(() => {
-        const mapEnabledValue = getData(LS_KEYS.MAPENABLED);
-        setMapEnabledToggle(mapEnabledValue.mapEnabled);
-    }, [mapSettingsView]);
 
     return (
         <EnteDrawer
@@ -52,7 +53,7 @@ export default function AdvancedMapSettings({ open, onClose, onRootClose }) {
                         <Box>
                             <MenuItemGroup>
                                 <EnteMenuItem
-                                    onClick={openMapSettings}
+                                    onClick={openModifyMapEnabled}
                                     variant="toggle"
                                     checked={mapEnabledToggle}
                                     label={t('MAP_SETTINGS')}
@@ -62,9 +63,9 @@ export default function AdvancedMapSettings({ open, onClose, onRootClose }) {
                     </Stack>
                 </Box>
             </Stack>
-            <MapSettings
-                open={mapSettingsView}
-                onClose={closeMapSettings}
+            <ModifyMapEnabled
+                open={modifyMapEnabledView}
+                onClose={closeModifyMapEnabled}
                 onRootClose={handleRootClose}
             />
         </EnteDrawer>

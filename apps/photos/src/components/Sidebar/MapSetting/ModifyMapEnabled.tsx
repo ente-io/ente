@@ -4,11 +4,11 @@ import { AppContext } from 'pages/_app';
 import { useContext, useState, useEffect } from 'react';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import EnableMap from './EnableMap';
-import DisableMap from './DisableMap';
+import EnableMap from '../EnableMap';
+import DisableMap from '../DisableMap';
 import { updateMapEnabledStatus } from 'services/userService';
 
-const MapSettings = ({ open, onClose, onRootClose }) => {
+const ModifyMapEnabled = ({ open, onClose, onRootClose }) => {
     const { somethingWentWrong } = useContext(AppContext);
 
     const [mapEnabled, setMapEnabled] = useState(false);
@@ -23,14 +23,11 @@ const MapSettings = ({ open, onClose, onRootClose }) => {
         main();
     }, []);
 
-    useEffect(() => {
-        setData(LS_KEYS.MAPENABLED, { mapEnabled });
-        updateMapEnabledStatus(mapEnabled);
-    }, [mapEnabled]);
-
     const updateMapEnabled = (enabled) => {
         try {
+            updateMapEnabledStatus(mapEnabled);
             setMapEnabled(enabled);
+            setData(LS_KEYS.MAPENABLED, { mapEnabled });
         } catch (e) {
             logError(e, 'Error while updating mapEnabled');
         }
@@ -45,6 +42,7 @@ const MapSettings = ({ open, onClose, onRootClose }) => {
             somethingWentWrong();
         }
     };
+
     const enableMap = async () => {
         try {
             updateMapEnabled(true);
@@ -59,6 +57,7 @@ const MapSettings = ({ open, onClose, onRootClose }) => {
         onClose();
         onRootClose();
     };
+
     const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
         if (reason === 'backdropClick') {
             handleRootClose();
@@ -66,6 +65,7 @@ const MapSettings = ({ open, onClose, onRootClose }) => {
             onClose();
         }
     };
+
     return (
         <Box>
             <EnteDrawer
@@ -94,4 +94,4 @@ const MapSettings = ({ open, onClose, onRootClose }) => {
     );
 };
 
-export default MapSettings;
+export default ModifyMapEnabled;
