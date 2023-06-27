@@ -37,7 +37,7 @@ export type GalleryContextType = {
     openExportModal: () => void;
     authenticateUser: (callback: () => void) => void;
     user: User;
-    idToMail: Map<number, string>;
+    userIDToEmailMap: Map<number, string>;
 };
 
 export enum CollectionSelectorIntent {
