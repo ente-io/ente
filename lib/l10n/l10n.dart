@@ -12,6 +12,7 @@ extension AppLocalizationsX on BuildContext {
 const List<Locale> appSupportedLocales = <Locale>[
   Locale('en'),
   Locale('es'),
+  Locale('de'),
   Locale('it'),
   Locale("nl"),
   Locale("zh", "CN"),
