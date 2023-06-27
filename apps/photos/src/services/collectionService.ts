@@ -1269,13 +1269,10 @@ export const constructUserIDToEmailMap = async (): Promise<
         const user: User = getData(LS_KEYS.USER);
         const userIDToEmail = new Map<number, string>();
         collection.map((item) => {
-            const { owner } = item;
-            const { sharees } = item;
-
+            const { owner, sharees } = item;
             if (user.id !== owner.id && owner.email) {
                 userIDToEmail.set(owner.id, owner.email);
             }
-
             if (sharees) {
                 sharees.map((item) => {
                     if (item.id !== user.id)
