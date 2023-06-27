@@ -236,7 +236,7 @@
     "MAP_SETTINGS":"Map Settings",
     "ENABLE_MAPS":"Enable Maps?",
     "DISABLE_MAPS":"Disable Maps?",
-    "ENABLE_MAP_DESCRIPTION_1":"This will show your photos on a worldmap.",
+    "ENABLE_MAP_DESCRIPTION_1":"This will show your photos on a world map.",
     "ENABLE_MAP_DESCRIPTION_2":"The map is hosted by OpenStreetMap, and the exact locations of your photos are never shared.",
     "ENABLE_MAP_DESCRIPTION_3":"You can disable this feature anytime from Settings.",
     "DISABLE_MAP_DESCRIPTION_1":"This will disable the display of your photos on a world map.",
