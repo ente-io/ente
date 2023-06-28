@@ -379,6 +379,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.4"
+  defer_pointer:
+    dependency: "direct main"
+    description:
+      name: defer_pointer
+      sha256: d69e6f8c1d0f052d2616cc1db3782e0ea73f42e4c6f6122fd1a548dfe79faf02
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   device_info:
     dependency: "direct main"
     description:
@@ -1014,14 +1022,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  interactive_bottom_sheet:
-    dependency: "direct main"
-    description:
-      name: interactive_bottom_sheet
-      sha256: fa805f73e3e21575dddc4a6686f6b4f209a5c2f3b47ecc62a35cde9640ee2fbc
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.2"
   intl:
     dependency: "direct main"
     description:
