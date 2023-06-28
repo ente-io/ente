@@ -7322,6 +7322,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Add photos`
+  String get addPhotos {
+    return Intl.message(
+      'Add photos',
+      name: 'addPhotos',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

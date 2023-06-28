@@ -5,6 +5,7 @@ import 'package:photos/db/files_db.dart';
 import "package:photos/events/collection_meta_event.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
@@ -93,9 +94,9 @@ class CollectionPage extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ButtonWidget(
-                  buttonType: ButtonType.primary,
+                  buttonType: ButtonType.secondary,
                   buttonSize: ButtonSize.small,
-                  labelText: "Add photos",
+                  labelText: S.of(context).addPhotos,
                   icon: Icons.add_photo_alternate_outlined,
                   shouldSurfaceExecutionStates: false,
                   onTap: () async {
