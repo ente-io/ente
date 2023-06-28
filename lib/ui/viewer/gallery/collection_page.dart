@@ -12,10 +12,14 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
+import "package:photos/utils/dialog_util.dart";
 
 class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
@@ -36,7 +40,7 @@ class CollectionPage extends StatelessWidget {
   final GlobalKey shareButtonKey = GlobalKey();
 
   @override
-  Widget build(Object context) {
+  Widget build(BuildContext context) {
     if (hasVerifiedLock == false && c.collection.isHidden()) {
       return const EmptyState();
     }
@@ -84,6 +88,27 @@ class CollectionPage extends StatelessWidget {
       albumName: c.collection.displayName,
       sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
       showSelectAllByDefault: galleryType != GalleryType.sharedCollection,
+      emptyState: galleryType == GalleryType.ownedCollection
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ButtonWidget(
+                  buttonType: ButtonType.primary,
+                  buttonSize: ButtonSize.small,
+                  labelText: "Add photos",
+                  icon: Icons.add_photo_alternate_outlined,
+                  shouldSurfaceExecutionStates: false,
+                  onTap: () async {
+                    try {
+                      await showAddPhotosSheet(context, c.collection);
+                    } catch (e, s) {
+                      showGenericErrorDialog(context: context);
+                    }
+                  },
+                ),
+              ),
+            )
+          : const EmptyState(),
     );
     return Scaffold(
       appBar: PreferredSize(
