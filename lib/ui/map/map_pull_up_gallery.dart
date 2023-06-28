@@ -124,22 +124,25 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                   });
 
                   if (images.isEmpty) {
-                    return SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.2,
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              "No photos found here",
-                              style: textTheme.large,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "Zoom out to see photos",
-                              style: textTheme.smallFaint,
-                            )
-                          ],
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.2,
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "No photos found here",
+                                style: textTheme.large,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Zoom out to see photos",
+                                style: textTheme.smallFaint,
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     );
