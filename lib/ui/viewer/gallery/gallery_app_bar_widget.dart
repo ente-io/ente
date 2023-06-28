@@ -625,8 +625,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   Future<void> _showAddPhotoDialog(BuildContext bContext) async {
     final collection = widget.collection;
     try {
-      final result = await showAddPhotosSheet(bContext, collection!);
-      debugPrint("fileSelectionDone");
+      await showAddPhotosSheet(bContext, collection!);
     } catch (e, s) {
       _logger.severe(e, s);
       showGenericErrorDialog(context: bContext);

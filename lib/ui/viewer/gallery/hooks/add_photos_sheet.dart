@@ -176,12 +176,12 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                           ButtonWidget(
                             buttonType: ButtonType.secondary,
                             buttonAction: ButtonAction.second,
-                            labelText: "Add from device",
+                            labelText: S.of(context).addFromDevice,
                             onTap: () async {
                               final ImagePicker picker = ImagePicker();
                               final pickedFiles =
                                   await picker.pickMultipleMedia();
-                              if(pickedFiles.isNotEmpty) {
+                              if (pickedFiles.isNotEmpty) {
                                 for (XFile f in pickedFiles) {
                                   // print XFile f details
                                   debugPrint(f.name);

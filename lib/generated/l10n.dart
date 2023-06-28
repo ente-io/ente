@@ -7312,6 +7312,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Add from device`
+  String get addFromDevice {
+    return Intl.message(
+      'Add from device',
+      name: 'addFromDevice',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
