@@ -10,6 +10,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import "package:photos/services/collections_service.dart";
 import 'package:photos/services/favorites_service.dart';
+import "package:photos/services/hidden_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/remote_sync_service.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -18,6 +19,7 @@ import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/file_uploader.dart";
 import "package:photos/utils/share_util.dart";
 import 'package:photos/utils/toast_util.dart';
 import "package:receive_sharing_intent/receive_sharing_intent.dart";
@@ -83,7 +85,7 @@ extension CollectionFileActions on CollectionActions {
     List<SharedMediaFile>? sharedFiles,
     List<XFile>? pickedFiles,
   }) async {
-    final dialog = showProgressDialog
+    ProgressDialog? dialog = showProgressDialog
         ? createProgressDialog(
             context,
             S.of(context).uploadingFilesToAlbum,
@@ -139,9 +141,23 @@ extension CollectionFileActions on CollectionActions {
         final Collection? c =
             CollectionsService.instance.getCollectionByID(collectionID);
         if (c != null && c.owner!.id != currentUserID) {
-          showToast(context, S.of(context).canNotUploadToAlbumsOwnedByOthers);
-          await dialog?.hide();
-          return false;
+          if (!showProgressDialog) {
+            dialog = createProgressDialog(
+              context,
+              S.of(context).uploadingFilesToAlbum,
+              isDismissible: true,
+            );
+            await dialog.show();
+          }
+          final Collection uncat =
+              await CollectionsService.instance.getUncategorizedCollection();
+          for (File unuploadedFile in filesPendingUpload) {
+            final uploadedFile = await FileUploader.instance.forceUpload(
+              unuploadedFile,
+              uncat.id,
+            );
+            files.add(uploadedFile);
+          }
         } else {
           // filesPendingUpload might be getting ignored during auto-upload
           // because the user deleted these files from ente in the past.

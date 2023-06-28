@@ -24,7 +24,6 @@ import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
-
 import 'package:photos/models/upload_url.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/file_magic_service.dart";
@@ -296,20 +295,26 @@ class FileUploader {
     }
   }
 
+  Future<File> forceUpload(File file, int collectionID) async {
+    return _tryToUpload(file, collectionID, true);
+  }
+
   Future<File> _tryToUpload(
     File file,
     int collectionID,
     bool forcedUpload,
   ) async {
     await checkNetworkForUpload(isForceUpload: forcedUpload);
-    final fileOnDisk = await FilesDB.instance.getFile(file.generatedID!);
-    final wasAlreadyUploaded = fileOnDisk != null &&
-        fileOnDisk.uploadedFileID != null &&
-        (fileOnDisk.updationTime ?? -1) != -1 &&
-        (fileOnDisk.collectionID ?? -1) == collectionID;
-    if (wasAlreadyUploaded) {
-      debugPrint("File is already uploaded ${fileOnDisk.tag}");
-      return fileOnDisk;
+    if (!forcedUpload) {
+      final fileOnDisk = await FilesDB.instance.getFile(file.generatedID!);
+      final wasAlreadyUploaded = fileOnDisk != null &&
+          fileOnDisk.uploadedFileID != null &&
+          (fileOnDisk.updationTime ?? -1) != -1 &&
+          (fileOnDisk.collectionID ?? -1) == collectionID;
+      if (wasAlreadyUploaded) {
+        debugPrint("File is already uploaded ${fileOnDisk.tag}");
+        return fileOnDisk;
+      }
     }
     if ((file.localID ?? '') == '') {
       _logger.severe('Trying to upload file with missing localID');
@@ -590,7 +595,9 @@ class FileUploader {
         "\n existing: ${sameLocalSameCollection.tag}",
       );
       // should delete the fileToUploadEntry
-      await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
+      if (fileToUpload.generatedID != null) {
+        await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
+      }
 
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
@@ -619,7 +626,11 @@ class FileUploader {
         fileMissingLocal.uploadedFileID!,
         fileToUpload.localID!,
       );
-      await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
+      // For files selected from device, during collaborative upload, we don't
+      // insert entries in the FilesDB. So, we don't need to delete the entry
+      if (fileToUpload.generatedID != null) {
+        await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
+      }
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
           [fileToUpload],
@@ -848,7 +859,9 @@ class FileUploader {
 
   Future<UploadURL> _getUploadURL() async {
     if (_uploadURLs.isEmpty) {
-      await fetchUploadURLs(_queue.length);
+      // the queue is empty, fetch at least for one file to handle force uploads
+      // that are not in the queue. This is to also avoid
+      await fetchUploadURLs(max(_queue.length, 1));
     }
     try {
       return _uploadURLs.removeFirst();
