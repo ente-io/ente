@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
+import "package:image_picker/image_picker.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
@@ -78,6 +81,7 @@ extension CollectionFileActions on CollectionActions {
     bool showProgressDialog, {
     List<File>? selectedFiles,
     List<SharedMediaFile>? sharedFiles,
+    List<XFile>? pickedFiles,
   }) async {
     final dialog = showProgressDialog
         ? createProgressDialog(
@@ -95,6 +99,13 @@ extension CollectionFileActions on CollectionActions {
         filesPendingUpload.addAll(
           await convertIncomingSharedMediaToFile(
             sharedFiles,
+            collectionID,
+          ),
+        );
+      } else if (pickedFiles != null) {
+        filesPendingUpload.addAll(
+          await convertPickedFiles(
+            pickedFiles,
             collectionID,
           ),
         );
@@ -137,6 +148,13 @@ extension CollectionFileActions on CollectionActions {
           await IgnoredFilesService.instance
               .removeIgnoredMappings(filesPendingUpload);
           await FilesDB.instance.insertMultiple(filesPendingUpload);
+          Bus.instance.fire(
+            CollectionUpdatedEvent(
+              collectionID,
+              filesPendingUpload,
+              "pendingFilesAdd",
+            ),
+          );
         }
       }
       if (files.isNotEmpty) {

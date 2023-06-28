@@ -1,6 +1,7 @@
 import "dart:math";
 
 import "package:flutter/material.dart";
+import "package:image_picker/image_picker.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
@@ -71,13 +72,25 @@ class AddPhotosPhotoWidget extends StatelessWidget {
               maxWidth: min(428, MediaQuery.of(context).size.width),
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
+              padding: const EdgeInsets.fromLTRB(0, 4, 0, 8),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Expanded(
                     child: Column(
                       children: [
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.close,
+                              color: getEnteColorScheme(context).strokeFaint,
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ),
                         BottomOfTitleBarWidget(
                           title: TitleBarTitleWidget(
                             title: S.of(context).addMore,
@@ -139,8 +152,8 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                                 switchOutCurve: Curves.easeInOutExpo,
                                 child: ButtonWidget(
                                   key: ValueKey(value),
-                                  isDisabled: !value,
-                                  buttonType: ButtonType.neutral,
+                                  // isDisabled: !value,
+                                  buttonType: ButtonType.primary,
                                   labelText: S.of(context).addSelected,
                                   onTap: () async {
                                     final selectedFile = selectedFiles.files;
@@ -162,9 +175,29 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                           const SizedBox(height: 8),
                           ButtonWidget(
                             buttonType: ButtonType.secondary,
-                            buttonAction: ButtonAction.cancel,
-                            labelText: S.of(context).cancel,
+                            buttonAction: ButtonAction.second,
+                            labelText: "Add from device",
                             onTap: () async {
+                              final ImagePicker picker = ImagePicker();
+                              final pickedFiles =
+                                  await picker.pickMultipleMedia();
+                              if(pickedFiles.isNotEmpty) {
+                                for (XFile f in pickedFiles) {
+                                  // print XFile f details
+                                  debugPrint(f.name);
+                                  debugPrint(f.path);
+                                  debugPrint(f.mimeType);
+                                }
+                                final ca = CollectionActions(
+                                  CollectionsService.instance,
+                                );
+                                await ca.addToCollection(
+                                  context,
+                                  collection.id,
+                                  false,
+                                  pickedFiles: pickedFiles,
+                                );
+                              }
                               Navigator.of(context).pop();
                             },
                           ),
