@@ -418,7 +418,7 @@
   "skip": "Skip",
   "updatingFolderSelection": "Updating folder selection...",
   "itemCount": "{count, plural, one{{count} item} other{{count} items}}",
-  "deleteItemCount": "{count, plural, Delete one{{count} item} other{{count} items}}",
+  "deleteItemCount": "{count, plural, =1 {Delete {count} item} other {Delete {count} items}}",
   "duplicateItemsGroup": "{count} files, {formattedSize} each",
   "@duplicateItemsGroup" : {
     "description": "Display the number of duplicate files and their size",
