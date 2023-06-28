@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { RenderFileName } from './RenderFileName';
 import { RenderCreationTime } from './RenderCreationTime';
-import { Box, DialogProps, Stack, styled } from '@mui/material';
+import { Box, DialogProps, Link, Stack, styled } from '@mui/material';
 import { getEXIFLocation } from 'services/upload/exifService';
 import { RenderCaption } from './RenderCaption';
 import CopyButton from 'components/CodeBlock/CopyButton';
@@ -223,7 +223,18 @@ export function FileInfo({
                         <InfoItem
                             icon={<LocationOnOutlined />}
                             title={t('LOCATION')}
-                            caption={!showMap && t('ENABLE_MAP_INSTRUCTION')}
+                            caption={
+                                !showMap ? (
+                                    t('ENABLE_MAP_INSTRUCTION')
+                                ) : (
+                                    <Link
+                                        href={getOpenStreetMapLink(location)}
+                                        target="_blank"
+                                        sx={{ fontWeight: 'bold' }}>
+                                        {t('SHOW_ON_MAP')}
+                                    </Link>
+                                )
+                            }
                             customEndButton={
                                 <CopyButton
                                     code={getOpenStreetMapLink(location)}
@@ -232,7 +243,8 @@ export function FileInfo({
                                 />
                             }
                         />
-                        {showMap && <MapBox location={location} />}
+
+                        <MapBox location={location} showMap={showMap} />
                     </>
                 )}
                 <InfoItem
