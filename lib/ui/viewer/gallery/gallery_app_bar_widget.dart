@@ -134,6 +134,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       submitButtonLabel: S.of(context).rename,
       hintText: S.of(context).enterAlbumName,
       alwaysShowSuccessState: true,
+      initialValue: widget.collection?.displayName ?? "",
       textCapitalization: TextCapitalization.words,
       onSubmit: (String text) async {
         // indicates user cancelled the rename request
