@@ -137,7 +137,7 @@ dependencies:
       url: https://github.com/ente-io/packages.git
       ref: android_video_roation_fix
       path: packages/video_player/video_player/
-  video_thumbnail: ^0.4.3
+  video_thumbnail: ^0.5.3
   visibility_detector: ^0.3.3
   wakelock: ^0.6.2
   wallpaper_manager_flutter: ^0.0.2

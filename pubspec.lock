@@ -2219,10 +2219,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_thumbnail
-      sha256: "005bf7898bf6cddbf5f079e2618f3d3cb83dd2712714f0042b5a018c2b32e7d6"
+      sha256: "3455c189d3f0bb4e3fc2236475aa84fe598b9b2d0e08f43b9761f5bc44210016"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.6"
+    version: "0.5.3"
   visibility_detector:
     dependency: "direct main"
     description:
