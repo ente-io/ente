@@ -4,6 +4,7 @@ import "package:defer_pointer/defer_pointer.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
@@ -157,6 +158,10 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                       return result;
                     },
                     reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                    removalEventTypes: const {
+                      EventType.deletedFromRemote,
+                      EventType.deletedFromEverywhere,
+                    },
                     tagPrefix: "map_gallery",
                     showSelectAllByDefault: true,
                     selectedFiles: _selectedFiles,
