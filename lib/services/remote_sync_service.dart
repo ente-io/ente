@@ -881,6 +881,7 @@ class RemoteSyncService {
           totalCount.toString() + " new 📸",
           channelID: "collection:" + collectionID.toString(),
           channelName: collection.displayName,
+          payload: "ente://collection/?collectionID=" + collectionID.toString(),
         );
       }
     }

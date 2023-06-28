@@ -18,8 +18,13 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  Future<void> init(SharedPreferences preferences) async {
-    _preferences = preferences;
+  Future<void> init(
+    void Function(
+      NotificationResponse notificationResponse,
+    )
+        onNotificationTapped,
+  ) async {
+    _preferences = await SharedPreferences.getInstance();
     const androidSettings = AndroidInitializationSettings('notification_icon');
     const iosSettings = DarwinInitializationSettings();
     const InitializationSettings initializationSettings =
@@ -27,7 +32,18 @@ class NotificationService {
       android: androidSettings,
       iOS: iosSettings,
     );
-    await _notificationsPlugin.initialize(initializationSettings);
+    await _notificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: onNotificationTapped,
+    );
+
+    final launchDetails =
+        await _notificationsPlugin.getNotificationAppLaunchDetails();
+    if (launchDetails != null &&
+        launchDetails.didNotificationLaunchApp &&
+        launchDetails.notificationResponse != null) {
+      onNotificationTapped(launchDetails.notificationResponse!);
+    }
     if (!hasGrantedPermissions() &&
         RemoteSyncService.instance.isFirstRemoteSyncDone()) {
       await requestPermissions();
@@ -78,6 +94,7 @@ class NotificationService {
     String message, {
     String channelID = "io.ente.photos",
     String channelName = "ente",
+    String payload = "ente://home",
   }) async {
     final androidSpecs = AndroidNotificationDetails(
       channelID,
@@ -95,6 +112,7 @@ class NotificationService {
       title,
       message,
       platformChannelSpecs,
+      payload: payload,
     );
   }
 }
