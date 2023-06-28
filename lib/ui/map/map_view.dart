@@ -39,7 +39,6 @@ class MapView extends StatefulWidget {
 }
 
 class _MapViewState extends State<MapView> {
-  bool _isDebouncing = false;
   late List<Marker> _markers;
   final _debouncer =
       Debouncer(const Duration(milliseconds: 300), executionInterval: 750);
@@ -59,7 +58,6 @@ class _MapViewState extends State<MapView> {
     _debouncer.run(
       () async {
         widget.updateVisibleImages(bounds);
-        _isDebouncing = false;
       },
     );
   }
@@ -107,9 +105,7 @@ class _MapViewState extends State<MapView> {
                 ),
                 markers: _markers,
                 onClusterTap: (_) {
-                  if (!_isDebouncing) {
-                    onChange(widget.controller.bounds!);
-                  }
+                  onChange(widget.controller.bounds!);
                 },
                 builder: (context, List<Marker> markers) {
                   final index = int.parse(
