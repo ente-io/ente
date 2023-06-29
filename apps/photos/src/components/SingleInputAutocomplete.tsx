@@ -80,10 +80,6 @@ export default function SingleInputAutocomplete(
         }
     }, [props.fieldType]);
 
-    const changeShareExpiryValue = (value: string) => async () => {
-        console.log('Test', value);
-    };
-
     return (
         <Formik<formValues>
             initialValues={{ inputValue: props.initialValue ?? '' }}
@@ -146,7 +142,9 @@ export default function SingleInputAutocomplete(
                                 <EnteMenuItem
                                     fontWeight="normal"
                                     key={item}
-                                    onClick={changeShareExpiryValue(item)}
+                                    onClick={() => {
+                                        setFieldValue('inputValue', item);
+                                    }}
                                     label={item}
                                 />
                                 {index !== props.optionsList.length - 1 && (
