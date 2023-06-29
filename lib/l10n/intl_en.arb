@@ -555,7 +555,7 @@
   "faqs": "FAQs",
   "renewsOn": "Renews on {endDate}",
   "freeTrialValidTill": "Free trial valid till {endDate}",
-  "playStoreFreeTrialValidTill": "Free trial valid till {endDate}. You can choose a paid plan afterwards.",
+  "playStoreFreeTrialValidTill": "Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.",
   "subWillBeCancelledOn": "Your subscription will be cancelled on {endDate}",
   "subscription": "Subscription",
   "paymentDetails": "Payment details",
