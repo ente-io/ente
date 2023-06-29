@@ -561,6 +561,10 @@ export default function Gallery() {
         archivedCollections,
     ]);
 
+    useEffect(() => {
+        return setupCtrlAHandler(filteredData);
+    }, [filteredData]);
+
     const fileToCollectionsMap = useMemoSingleThreaded(() => {
         return constructFileToCollectionMap(files);
     }, [files]);
@@ -625,6 +629,25 @@ export default function Gallery() {
         }
     };
 
+    const setupCtrlAHandler = (filteredData) => {
+        const ctrlAHandler = (e: KeyboardEvent) => {
+            // setup ctrl/cmd + a handler
+            if (
+                (e.ctrlKey || e.metaKey) &&
+                e.key.toLowerCase() === 'a' &&
+                !e.shiftKey &&
+                !e.altKey
+            ) {
+                e.preventDefault();
+                selectAll(filteredData);
+            }
+        };
+        document.addEventListener('keydown', ctrlAHandler);
+        return () => {
+            document.removeEventListener('keydown', ctrlAHandler);
+        };
+    };
+
     const setDerivativeState = async (
         user: User,
         collections: Collection[],
@@ -653,6 +676,23 @@ export default function Gallery() {
 
     const clearSelection = function () {
         setSelected({ ownCount: 0, count: 0, collectionID: 0 });
+    };
+
+    const selectAll = function (filteredData) {
+        const selected = {
+            ownCount: 0,
+            count: 0,
+            collectionID: activeCollection,
+        };
+
+        filteredData.forEach((item) => {
+            if (item.ownerID === user.id) {
+                selected.ownCount++;
+            }
+            selected.count++;
+            selected[item.id] = true;
+        });
+        setSelected(selected);
     };
 
     if (!collectionSummaries || !filteredData) {
