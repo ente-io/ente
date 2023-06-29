@@ -213,7 +213,7 @@
   "@custom": {
     "description": "Label for setting custom value for link expiry"
   },
-  "after1Hour": "Nach 1. Stunde",
+  "after1Hour": "Nach 1 Stunde",
   "after1Day": "Nach einem Tag",
   "after1Week": "Nach 1 Woche",
   "after1Month": "Nach 1 Monat",
