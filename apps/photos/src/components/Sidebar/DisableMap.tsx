@@ -13,12 +13,8 @@ export default function EnableMap({ onClose, disableMap, onRootClose }) {
             />
             <Stack py={'20px'} px={'8px'} spacing={'32px'}>
                 <Box px={'8px'}>
-                    {' '}
                     <Typography color="text.muted">
-                        <Trans i18nKey={'DISABLE_MAP_DESCRIPTION_1'} />
-                        <br />
-                        <br />
-                        <Trans i18nKey={'DISABLE_MAP_DESCRIPTION_2'} />
+                        <Trans i18nKey={'DISABLE_MAP_DESCRIPTION'} />
                     </Typography>
                 </Box>
                 <Stack px={'8px'} spacing={'8px'}>
