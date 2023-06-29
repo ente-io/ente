@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v0.7.71
 
 ### Added
 * #### Map View ✨
@@ -16,8 +16,10 @@
 
 ### Improvements
 
+* **Translations**: Add support for German language
 * This release contains massive improvements to how smoothly our gallery 
  scrolls. More improvements are on the way!
+
 
 
 ## 0.7.62
