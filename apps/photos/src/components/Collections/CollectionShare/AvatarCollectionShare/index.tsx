@@ -14,7 +14,7 @@ const AvatarBaseCollectionShare = styled('div')<{
 }>`
     width: ${({ size }) => `${size}px`};
     height: ${({ size }) => `${size}px`};
-    background-color: ${({ colorCode }) => `${colorCode}95`};
+    background-color: ${({ colorCode }) => `${colorCode}`};
     border-radius: 50%;
     display: flex;
     justify-content: center;
