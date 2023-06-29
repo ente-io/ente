@@ -7,14 +7,19 @@ import { useState } from 'react';
 import { t } from 'i18next';
 
 import AdvancedSettings from '../AdvancedSettings';
+import MapSettings from '../MapSetting';
 import { LanguageSelector } from './LanguageSelector';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 
 export default function Preferences({ open, onClose, onRootClose }) {
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
+    const [mapSettingsView, setMapSettingsView] = useState(false);
 
     const openAdvancedSettings = () => setAdvancedSettingsView(true);
     const closeAdvancedSettings = () => setAdvancedSettingsView(false);
+
+    const openMapSettings = () => setMapSettingsView(true);
+    const closeMapSettings = () => setMapSettingsView(false);
 
     const handleRootClose = () => {
         onClose();
@@ -53,12 +58,22 @@ export default function Preferences({ open, onClose, onRootClose }) {
                                 label={t('ADVANCED')}
                             />
                         )}
+                        <EnteMenuItem
+                            onClick={openMapSettings}
+                            endIcon={<ChevronRight />}
+                            label={t('MAP')}
+                        />
                     </Stack>
                 </Box>
             </Stack>
             <AdvancedSettings
                 open={advancedSettingsView}
                 onClose={closeAdvancedSettings}
+                onRootClose={onRootClose}
+            />
+            <MapSettings
+                open={mapSettingsView}
+                onClose={closeMapSettings}
                 onRootClose={onRootClose}
             />
         </EnteDrawer>

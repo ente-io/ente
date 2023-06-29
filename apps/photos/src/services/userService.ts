@@ -452,3 +452,44 @@ export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
         throw e;
     }
 };
+
+export const getMapEnabledStatus = async () => {
+    try {
+        const token = getToken();
+        const resp: AxiosResponse<GetRemoteStoreValueResponse> =
+            await HTTPService.get(
+                `${ENDPOINT}/remote-store`,
+                {
+                    key: 'mapEnabled',
+                    defaultValue: false,
+                },
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+        return resp.data.value === 'true';
+    } catch (e) {
+        logError(e, 'failed to get map enabled status');
+        throw e;
+    }
+};
+
+export const updateMapEnabledStatus = async (newStatus: boolean) => {
+    try {
+        const token = getToken();
+        await HTTPService.post(
+            `${ENDPOINT}/remote-store/update`,
+            {
+                key: 'mapEnabled',
+                value: newStatus.toString(),
+            },
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'failed to update map enabled status');
+        throw e;
+    }
+};
