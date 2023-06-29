@@ -42,6 +42,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   Widget build(BuildContext context) {
     _defaultSelection = S.of(context).selectReason;
     _dropdownValue ??= _defaultSelection;
+    final double dropDownTextSize = MediaQuery.of(context).size.width - 120;
 
     final colorScheme = getEnteColorScheme(context);
     return Scaffold(
@@ -90,11 +91,15 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       value: value,
                       enabled: value != _defaultSelection,
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        value,
-                        style: value != _defaultSelection
-                            ? getEnteTextTheme(context).small
-                            : getEnteTextTheme(context).smallMuted,
+                      child: SizedBox(
+                        width: dropDownTextSize,
+                        child: Text(
+                          value,
+                          style: value != _defaultSelection
+                              ? getEnteTextTheme(context).small
+                              : getEnteTextTheme(context).smallMuted,
+                          overflow: TextOverflow.visible,
+                        ),
                       ),
                     );
                   }).toList(),

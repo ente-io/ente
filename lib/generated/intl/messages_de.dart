@@ -229,7 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "advanced": MessageLookupByLibrary.simpleMessage("Erweitert"),
         "advancedSettings": MessageLookupByLibrary.simpleMessage("Erweitert"),
         "after1Day": MessageLookupByLibrary.simpleMessage("Nach einem Tag"),
-        "after1Hour": MessageLookupByLibrary.simpleMessage("Nach 1. Stunde"),
+        "after1Hour": MessageLookupByLibrary.simpleMessage("Nach 1 Stunde"),
         "after1Month": MessageLookupByLibrary.simpleMessage("Nach 1 Monat"),
         "after1Week": MessageLookupByLibrary.simpleMessage("Nach 1 Woche"),
         "after1Year": MessageLookupByLibrary.simpleMessage("Nach 1 Jahr"),
