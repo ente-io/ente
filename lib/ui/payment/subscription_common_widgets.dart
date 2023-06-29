@@ -3,6 +3,7 @@ import "package:intl/intl.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/subscription.dart';
+import "package:photos/services/update_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
@@ -101,7 +102,9 @@ class ValidityWidget extends StatelessWidget {
 
     var message = S.of(context).renewsOn(endDate);
     if (currentSubscription!.productID == freeProductID) {
-      message = S.of(context).freeTrialValidTill(endDate);
+      message = UpdateService.instance.isPlayStoreFlavor()
+          ? S.of(context).playStoreFreeTrialValidTill(endDate)
+          : S.of(context).freeTrialValidTill(endDate);
     } else if (currentSubscription!.attributes?.isCancelled ?? false) {
       message = S.of(context).subWillBeCancelledOn(endDate);
     }
