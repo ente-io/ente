@@ -179,6 +179,13 @@
   "resetPasswordTitle": "Réinitialiser le mot de passe",
   "encryptionKeys": "Clés de chiffrement",
   "passwordWarning": "Nous ne stockons pas ce mot de passe, donc si vous l'oubliez, <underline>nous ne pouvons pas déchiffrer vos données</underline>",
+  "enterPasswordToEncrypt": "Entrez un mot de passe que nous pouvons utiliser pour chiffrer vos données",
+  "enterNewPasswordToEncrypt": "Entrez un nouveau mot de passe que nous pouvons utiliser pour chiffrer vos données",
+  "passwordChangedSuccessfully": "Le mot de passe a été modifié avec succès",
+  "generatingEncryptionKeys": "Génération des clés de chiffrement...",
+  "continueLabel": "Continuer",
+  "insecureDevice": "Appareil non sécurisé",
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Désolé, nous n'avons pas pu générer de clés sécurisées sur cet appareil.\n\nVeuillez vous inscrire depuis un autre appareil.",
   "ackPasswordLostWarning": "Je comprends que si je perds mon mot de passe, je risque de perdre mes données puisque celles-ci sont <underline>chiffrées de bout en bout</underline>.",
   "loginTerms": "En cliquant sur \"Connexion\", j'accepte les <u-terms>conditions d'utilisation</u-terms> et la <u-policy>politique de confidentialité</u-policy>",
   "logInLabel": "Connexion",
@@ -234,5 +241,26 @@
   "sorry": "Désolé",
   "importFailureDesc": "Impossible d'analyser le fichier sélectionné.\nVeuillez écrire à support@ente.io si vous avez besoin d'aide !",
   "pendingSyncs": "Attention",
-  "pendingSyncsWarningBody": "Certains de vos codes n'ont pas été sauvegardés.\n\nVeuillez vous assurer que vous avez une sauvegarde de ces codes avant de vous déconnecter."
+  "pendingSyncsWarningBody": "Certains de vos codes n'ont pas été sauvegardés.\n\nVeuillez vous assurer que vous avez une sauvegarde de ces codes avant de vous déconnecter.",
+  "checkInboxAndSpamFolder": "Veuillez consulter votre boîte de courriels (et les spam) pour compléter la vérification",
+  "tapToEnterCode": "Appuyez pour entrer un code",
+  "resendEmail": "Renvoyer le courriel",
+  "weHaveSendEmailTo": "Nous avons envoyé un mail à <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "activeSessions": "Sessions actives",
+  "somethingWentWrongPleaseTryAgain": "Quelque chose s'est mal passé, veuillez recommencer",
+  "thisWillLogYouOutOfThisDevice": "Cela vous déconnectera de cet appareil !",
+  "thisWillLogYouOutOfTheFollowingDevice": "Cela vous déconnectera de l'appareil suivant :",
+  "terminateSession": "Quitter la session ?",
+  "terminate": "Quitter",
+  "thisDevice": "Cet appareil"
 }
