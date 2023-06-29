@@ -37,11 +37,10 @@ import {
     justSignedUp,
     setIsFirstLogin,
     setJustSignedUp,
-    setMapEnabled,
 } from 'utils/storage';
 import {
-    getMapEnabledStatus,
     isTokenValid,
+    syncMapEnabled,
     validateKey,
 } from 'services/userService';
 import { useDropzone } from 'react-dropzone';
@@ -585,8 +584,7 @@ export default function Gallery() {
             await syncHiddenFiles(hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
-            const mapEnabled = await getMapEnabledStatus();
-            setMapEnabled(mapEnabled);
+            await syncMapEnabled();
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
