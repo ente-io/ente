@@ -2918,10 +2918,12 @@ class S {
     );
   }
 
-  /// `{count, plural, Delete one{{count} item} other{{count} items}}`
-  String deleteItemCount(Object count) {
-    return Intl.message(
-      '{count, plural, Delete one{$count item} other{$count items}}',
+  /// `{count, plural, =1 {Delete {count} item} other {Delete {count} items}}`
+  String deleteItemCount(num count) {
+    return Intl.plural(
+      count,
+      one: 'Delete $count item',
+      other: 'Delete $count items',
       name: 'deleteItemCount',
       desc: '',
       args: [count],
