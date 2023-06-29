@@ -125,6 +125,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m34(reason) =>
       "Unfortunately your payment failed due to ${reason}";
 
+  static String m65(endDate) =>
+      "Free trial valid till ${endDate}. You can choose a paid plan afterwards.";
+
   static String m35(toEmail) => "Please email us at ${toEmail}";
 
   static String m36(toEmail) => "Please send the logs to \n${toEmail}";
@@ -881,6 +884,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Photos added by you will be removed from the album"),
         "pickCenterPoint":
             MessageLookupByLibrary.simpleMessage("Pick center point"),
+        "playStoreFreeTrialValidTill": m65,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore subscription"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
