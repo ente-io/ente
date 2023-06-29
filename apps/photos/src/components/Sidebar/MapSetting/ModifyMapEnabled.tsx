@@ -65,8 +65,10 @@ const ModifyMapEnabled = ({
                 transitionDuration={0}
                 open={open}
                 onClose={handleDrawerClose}
-                BackdropProps={{
-                    sx: { '&&&': { backgroundColor: 'transparent' } },
+                slotProps={{
+                    backdrop: {
+                        sx: { '&&&': { backgroundColor: 'transparent' } },
+                    },
                 }}>
                 {mapEnabled ? (
                     <DisableMap

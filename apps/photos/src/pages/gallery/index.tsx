@@ -125,7 +125,7 @@ import { IsArchived } from 'utils/magicMetadata';
 import { isSameDayAnyYear, isInsideLocationTag } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
-import { userIdtoEmail } from 'services/collectionService';
+import { constructUserIDToEmailMap } from 'services/collectionService';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -148,7 +148,7 @@ const defaultGalleryContext: GalleryContextType = {
     openExportModal: () => null,
     authenticateUser: () => null,
     user: null,
-    idToMail: new Map(),
+    userIDToEmailMap: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -224,6 +224,8 @@ export default function Gallery() {
         useContext(AppContext);
     const [collectionSummaries, setCollectionSummaries] =
         useState<CollectionSummaries>();
+    const [userIDToEmailMap, setUserIDToEmailMap] =
+        useState<Map<number, string>>(null);
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
@@ -320,23 +322,13 @@ export default function Gallery() {
         setDerivativeState(user, collections, files, trashedFiles, hiddenFiles);
     }, [collections, files, hiddenFiles, trashedFiles, user]);
 
-    const { idToMail } = useContext(GalleryContext);
-
     useEffect(() => {
         const fetchData = async () => {
             if (!collections) {
                 return;
             }
-
-            const userIdEmail = await userIdtoEmail();
-            const idEmailMap = userIdEmail;
-
-            idToMail.clear(); // Clear the existing map
-
-            // Update idToMail with idEmailMap values
-            for (const [id, email] of idEmailMap) {
-                idToMail.set(id, email);
-            }
+            const userIdToEmailMap = await constructUserIDToEmailMap();
+            setUserIDToEmailMap(userIdToEmailMap);
         };
         fetchData();
     }, [collections]);
@@ -883,6 +875,7 @@ export default function Gallery() {
                 photoListHeader,
                 openExportModal,
                 authenticateUser,
+                userIDToEmailMap,
                 user,
             }}>
             <FullScreenDropZone
