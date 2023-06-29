@@ -171,7 +171,7 @@ export function FileInfo({
     useEffect(() => {
         const mapEnabled = getMapEnabled();
         setShowMap(mapEnabled);
-    }, [file, showInfo]);
+    }, []);
 
     if (!file) {
         return <></>;

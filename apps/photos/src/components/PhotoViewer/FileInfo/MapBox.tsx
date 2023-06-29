@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { styled } from '@mui/material';
+import { Typography, styled } from '@mui/material';
 import { runningInBrowser } from 'utils/common';
-import { MapButton } from './MapButton';
 
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css'; // Re-uses images from ~leaflet package
@@ -19,15 +18,6 @@ const ZOOM_LEVEL = 16;
 const MapBoxContainer = styled('div')`
     height: 200px;
     width: 100%;
-`;
-const MapBoxEnableContainer = styled('div')`
-    position: relative;
-    height: 200px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(255, 255, 255, 0.09);
 `;
 
 interface MapBoxProps {
@@ -58,14 +48,9 @@ const MapBox: React.FC<MapBoxProps> = ({ location, showMap }) => {
 
     return (
         <>
-            {showMap && <MapBoxContainer ref={mapBoxContainerRef} />}
-            {!showMap && (
-                <>
-                    <MapBoxEnableContainer>
-                        <MapButton> {t('ENABLE_MAP')}</MapButton>
-                    </MapBoxEnableContainer>
-                </>
-            )}
+            <MapBoxContainer ref={showMap && mapBoxContainerRef}>
+                {showMap && <Typography> {t('ENABLE_MAP')}</Typography>}
+            </MapBoxContainer>
         </>
     );
 };
