@@ -4,9 +4,13 @@ import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
 import TextField from '@mui/material/TextField';
 import { FlexWrapper } from './Container';
-import { Button, FormHelperText } from '@mui/material';
+import { Button, FormHelperText, Stack } from '@mui/material';
 import { t } from 'i18next';
 import Autocomplete from '@mui/material/Autocomplete';
+import { MenuItemGroup } from './Menu/MenuItemGroup';
+import { EnteMenuItem } from './Menu/EnteMenuItem';
+import MenuItemDivider from './Menu/MenuItemDivider';
+import MenuSectionTitle from './Menu/MenuSectionTitle';
 
 interface formValues {
     inputValue: string;
@@ -76,6 +80,10 @@ export default function SingleInputAutocomplete(
         }
     }, [props.fieldType]);
 
+    const changeShareExpiryValue = (value: string) => async () => {
+        console.log('Test', value);
+    };
+
     return (
         <Formik<formValues>
             initialValues={{ inputValue: props.initialValue ?? '' }}
@@ -127,6 +135,26 @@ export default function SingleInputAutocomplete(
                             />
                         )}
                     />
+                    <Stack py={'10px'} px={'8px'}>
+                        {' '}
+                    </Stack>
+                    <MenuSectionTitle title={t('or add an existing one')} />
+
+                    <MenuItemGroup>
+                        {props.optionsList.map((item, index) => (
+                            <>
+                                <EnteMenuItem
+                                    fontWeight="normal"
+                                    key={item}
+                                    onClick={changeShareExpiryValue(item)}
+                                    label={item}
+                                />
+                                {index !== props.optionsList.length - 1 && (
+                                    <MenuItemDivider />
+                                )}
+                            </>
+                        ))}
+                    </MenuItemGroup>
 
                     <FormHelperText
                         sx={{
@@ -138,8 +166,22 @@ export default function SingleInputAutocomplete(
                         {props.caption}
                     </FormHelperText>
                     {props.hiddenPostInput}
+
+                    <Stack py={'20px'} px={'8px'} spacing={'8px'}>
+                        {' '}
+                    </Stack>
+
+                    <MenuSectionTitle
+                        title={t(
+                            'Collaborators can add photos and videos to the shared album.'
+                        )}
+                    />
+                    <Stack py={'5px'} px={'8px'}>
+                        {' '}
+                    </Stack>
+
                     <FlexWrapper
-                        justifyContent={'flex-end'}
+                        justifyContent={'center'}
                         flexWrap={
                             props.blockButton ? 'wrap-reverse' : 'nowrap'
                         }>
@@ -160,6 +202,7 @@ export default function SingleInputAutocomplete(
                                 {t('CANCEL')}
                             </Button>
                         )}
+
                         <SubmitButton
                             sx={{
                                 '&&&': {

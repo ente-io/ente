@@ -8,7 +8,7 @@ import { shareCollection } from 'services/collectionService';
 import { User } from 'types/user';
 import { handleSharingErrors } from 'utils/error/ui';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { CollectionShareSharees } from './sharees';
+// import { CollectionShareSharees } from './sharees';
 import { getLocalCollections } from 'services/collectionService';
 import { getLocalFamilyData } from 'utils/user/family';
 
@@ -80,6 +80,7 @@ export default function EmailShare({ collection }) {
             setFieldError(errorMessage);
         }
     };
+
     return (
         <>
             <SingleInputAutocomplete
@@ -87,14 +88,14 @@ export default function EmailShare({ collection }) {
                 optionsList={updatedOptionsList}
                 placeholder={t('ENTER_EMAIL')}
                 fieldType="email"
-                buttonText={t('SHARE')}
+                buttonText={t('Add Viewer')}
                 submitButtonProps={{
-                    size: 'medium',
+                    size: 'large',
                     sx: { mt: 1, mb: 2 },
                 }}
                 disableAutoFocus
             />
-            <CollectionShareSharees collection={collection} />
+            {/* <CollectionShareSharees collection={collection} /> */}
         </>
     );
 }
