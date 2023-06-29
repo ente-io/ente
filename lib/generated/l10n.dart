@@ -3844,6 +3844,16 @@ class S {
     );
   }
 
+  /// `Free trial valid till {endDate}. You can choose a paid plan afterwards.`
+  String playStoreFreeTrialValidTill(Object endDate) {
+    return Intl.message(
+      'Free trial valid till $endDate. You can choose a paid plan afterwards.',
+      name: 'playStoreFreeTrialValidTill',
+      desc: '',
+      args: [endDate],
+    );
+  }
+
   /// `Your subscription will be cancelled on {endDate}`
   String subWillBeCancelledOn(Object endDate) {
     return Intl.message(
