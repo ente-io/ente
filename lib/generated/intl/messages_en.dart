@@ -126,7 +126,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Unfortunately your payment failed due to ${reason}";
 
   static String m65(endDate) =>
-      "Free trial valid till ${endDate}. You can choose a paid plan afterwards.";
+      "Free trial valid till ${endDate}.\nYou can choose a paid plan afterwards.";
 
   static String m35(toEmail) => "Please email us at ${toEmail}";
 

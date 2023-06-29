@@ -113,6 +113,7 @@ class ValidityWidget extends StatelessWidget {
       child: Text(
         message,
         style: Theme.of(context).textTheme.bodySmall,
+        textAlign: TextAlign.center,
       ),
     );
   }
