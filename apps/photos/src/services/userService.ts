@@ -464,7 +464,7 @@ export const syncMapEnabled = async () => {
     }
 };
 
-const getMapEnabledStatus = async () => {
+export const getMapEnabledStatus = async () => {
     try {
         const token = getToken();
         const resp: AxiosResponse<GetRemoteStoreValueResponse> =
