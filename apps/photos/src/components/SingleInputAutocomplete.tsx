@@ -11,6 +11,7 @@ import { MenuItemGroup } from './Menu/MenuItemGroup';
 import { EnteMenuItem } from './Menu/EnteMenuItem';
 import MenuItemDivider from './Menu/MenuItemDivider';
 import MenuSectionTitle from './Menu/MenuSectionTitle';
+import AvatarCollectionShare from './Collections/CollectionShare/AvatarCollectionShare';
 
 interface formValues {
     inputValue: string;
@@ -140,12 +141,16 @@ export default function SingleInputAutocomplete(
                         {props.optionsList.map((item, index) => (
                             <>
                                 <EnteMenuItem
+                                    //
                                     fontWeight="normal"
                                     key={item}
                                     onClick={() => {
                                         setFieldValue('inputValue', item);
                                     }}
                                     label={item}
+                                    startIcon={
+                                        <AvatarCollectionShare email={item} />
+                                    }
                                 />
                                 {index !== props.optionsList.length - 1 && (
                                     <MenuItemDivider />
