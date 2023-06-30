@@ -91,7 +91,7 @@ export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
 
 export const A_SEC_IN_MICROSECONDS = 1e6;
 
-export const USE_CF_PROXY = false;
+export const USE_CF_PROXY = true;
 
 export const DEFAULT_IMPORT_SUGGESTION: ImportSuggestion = {
     rootFolderName: '',
