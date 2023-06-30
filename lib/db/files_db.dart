@@ -50,6 +50,7 @@ class FilesDB {
   static const columnCreationTime = 'creation_time';
   static const columnModificationTime = 'modification_time';
   static const columnUpdationTime = 'updation_time';
+  static const columnAddedTime = 'added_time';
   static const columnEncryptedKey = 'encrypted_key';
   static const columnKeyDecryptionNonce = 'key_decryption_nonce';
   static const columnFileDecryptionHeader = 'file_decryption_header';
@@ -82,6 +83,7 @@ class FilesDB {
     ...addFileSizeColumn(),
     ...updateIndexes(),
     ...createEntityDataTable(),
+    ...addAddedTime(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -367,6 +369,17 @@ class FilesDB {
     ];
   }
 
+  static List<String> addAddedTime() {
+    return [
+      '''
+        ALTER TABLE $filesTable ADD COLUMN $columnAddedTime INTEGER NOT NULL DEFAULT -1;
+      ''',
+      '''
+        CREATE INDEX IF NOT EXISTS added_time_index ON $filesTable($columnAddedTime);
+      '''
+    ];
+  }
+
   Future<void> clearTable() async {
     final db = await instance.database;
     await db.delete(filesTable);
@@ -629,12 +642,12 @@ class FilesDB {
 
   Future<List<File>> getNewFilesInCollection(
     int collectionID,
-    int updationTime,
+    int addedTime,
   ) async {
     final db = await instance.database;
     const String whereClause =
-        '$columnCollectionID = ? AND $columnUpdationTime > ?';
-    final List<Object> whereArgs = [collectionID, updationTime];
+        '$columnCollectionID = ? AND $columnAddedTime > ?';
+    final List<Object> whereArgs = [collectionID, addedTime];
     final results = await db.query(
       filesTable,
       where: whereClause,
@@ -1524,6 +1537,8 @@ class FilesDB {
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
+    row[columnAddedTime] =
+        file.addedTime ?? DateTime.now().microsecondsSinceEpoch;
     row[columnEncryptedKey] = file.encryptedKey;
     row[columnKeyDecryptionNonce] = file.keyDecryptionNonce;
     row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
@@ -1569,6 +1584,8 @@ class FilesDB {
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
+    row[columnAddedTime] =
+        file.addedTime ?? DateTime.now().microsecondsSinceEpoch;
     row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
     row[columnThumbnailDecryptionHeader] = file.thumbnailDecryptionHeader;
     row[columnMetadataDecryptionHeader] = file.metadataDecryptionHeader;
@@ -1614,6 +1631,7 @@ class FilesDB {
     file.creationTime = row[columnCreationTime];
     file.modificationTime = row[columnModificationTime];
     file.updationTime = row[columnUpdationTime] ?? -1;
+    file.addedTime = row[columnAddedTime];
     file.encryptedKey = row[columnEncryptedKey];
     file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
     file.fileDecryptionHeader = row[columnFileDecryptionHeader];
