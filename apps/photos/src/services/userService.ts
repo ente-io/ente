@@ -495,7 +495,7 @@ export const updateMapEnabledStatus = async (newStatus: boolean) => {
     }
 };
 
-export async function getDisableCFUploadProxyFlag() {
+export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
     try {
         const featureFlags = (
             await fetch('https://static.ente.io/feature_flags.json')
@@ -503,6 +503,6 @@ export async function getDisableCFUploadProxyFlag() {
         return featureFlags.disableCFUploadProxy;
     } catch (e) {
         logError(e, 'failed to get feature flags');
-        return undefined;
+        return false;
     }
 }
