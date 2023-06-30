@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
+import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -64,6 +66,7 @@ enum AlbumPopupAction {
   leave,
   freeUpSpace,
   setCover,
+  pinAlbum,
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -348,6 +351,31 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             ),
           ),
         );
+
+        items.add(
+          PopupMenuItem(
+            value: AlbumPopupAction.pinAlbum,
+            child: Row(
+              children: [
+                widget.collection!.isPinned
+                    ? const Icon(CupertinoIcons.pin_slash)
+                    : Transform.rotate(
+                        angle: 45 * math.pi / 180, // rotate by 45 degrees
+                        child: const Icon(CupertinoIcons.pin),
+                      ),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(
+                  widget.collection!.isPinned
+                      ? S.of(context).unpinAlbum
+                      : S.of(context).pinAlbum,
+                ),
+              ],
+            ),
+          ),
+        );
+
         items.add(
           PopupMenuItem(
             value: AlbumPopupAction.ownedArchive,
@@ -447,6 +475,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           onSelected: (AlbumPopupAction value) async {
             if (value == AlbumPopupAction.rename) {
               await _renameAlbum(context);
+            } else if (value == AlbumPopupAction.pinAlbum) {
+              await updateOrder(
+                context,
+                widget.collection!,
+                widget.collection!.isPinned ? 0 : 1,
+              );
+              if (mounted) setState(() {});
             } else if (value == AlbumPopupAction.ownedArchive) {
               await changeCollectionVisibility(
                 context,

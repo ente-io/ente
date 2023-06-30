@@ -884,6 +884,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Photos added by you will be removed from the album"),
         "pickCenterPoint":
             MessageLookupByLibrary.simpleMessage("Pick center point"),
+        "pinAlbum": MessageLookupByLibrary.simpleMessage("Pin album"),
         "playStoreFreeTrialValidTill": m65,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore subscription"),
@@ -1243,6 +1244,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unhidingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Unhiding files to album"),
         "unlock": MessageLookupByLibrary.simpleMessage("Unlock"),
+        "unpinAlbum": MessageLookupByLibrary.simpleMessage("Unpin album"),
         "unselectAll": MessageLookupByLibrary.simpleMessage("Unselect all"),
         "update": MessageLookupByLibrary.simpleMessage("Update"),
         "updateAvailable":
