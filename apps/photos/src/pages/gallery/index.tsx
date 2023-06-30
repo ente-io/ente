@@ -38,7 +38,11 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from 'utils/storage';
-import { isTokenValid, validateKey } from 'services/userService';
+import {
+    isTokenValid,
+    syncMapEnabled,
+    validateKey,
+} from 'services/userService';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
@@ -580,6 +584,7 @@ export default function Gallery() {
             await syncHiddenFiles(hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
+            await syncMapEnabled();
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:

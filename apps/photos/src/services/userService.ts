@@ -28,6 +28,7 @@ import { B64EncryptionResult } from 'types/crypto';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
 import { AxiosResponse } from 'axios';
 import { APPS, getAppName } from 'constants/apps';
+import { setLocalMapEnabled } from 'utils/storage';
 
 const ENDPOINT = getEndpoint();
 
@@ -449,6 +450,16 @@ export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
         );
     } catch (e) {
         logError(e, 'failed to update face search enabled status');
+        throw e;
+    }
+};
+
+export const syncMapEnabled = async () => {
+    try {
+        const status = await getMapEnabledStatus();
+        setLocalMapEnabled(status);
+    } catch (e) {
+        logError(e, 'failed to sync map enabled status');
         throw e;
     }
 };

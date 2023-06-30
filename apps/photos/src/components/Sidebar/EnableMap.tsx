@@ -3,7 +3,7 @@ import Titlebar from 'components/Titlebar';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
-const OPEN_STREET_MAP_LINK = 'https://www.openstreetmap.org/';
+export const OPEN_STREET_MAP_LINK = 'https://www.openstreetmap.org/';
 export default function EnableMap({ onClose, enableMap, onRootClose }) {
     return (
         <Stack spacing={'4px'} py={'12px'}>

@@ -5,25 +5,9 @@ import { useContext } from 'react';
 import { logError } from 'utils/sentry';
 import EnableMap from '../EnableMap';
 import DisableMap from '../DisableMap';
-import { updateMapEnabledStatus } from 'services/userService';
 
-const ModifyMapEnabled = ({
-    open,
-    onClose,
-    onRootClose,
-    mapEnabled,
-    setMapEnabled,
-}) => {
-    const { somethingWentWrong } = useContext(AppContext);
-
-    const updateMapEnabled = async (enabled: boolean) => {
-        try {
-            await updateMapEnabledStatus(enabled);
-            setMapEnabled(enabled);
-        } catch (e) {
-            logError(e, 'Error while updating mapEnabled');
-        }
-    };
+const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
+    const { somethingWentWrong, updateMapEnabled } = useContext(AppContext);
 
     const disableMap = async () => {
         try {

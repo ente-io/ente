@@ -2,11 +2,6 @@ const cp = require('child_process');
 const { getIsSentryEnabled } = require('./sentryConfigUtil');
 
 module.exports = {
-    COOP_COEP_HEADERS: {
-        'Cross-Origin-Opener-Policy': 'same-origin',
-        'Cross-Origin-Embedder-Policy': 'require-corp',
-    },
-
     WEB_SECURITY_HEADERS: {
         'Strict-Transport-Security': '  max-age=63072000',
         'X-Content-Type-Options': 'nosniff',
@@ -20,7 +15,7 @@ module.exports = {
         // self is safe enough
         'default-src': "'self'",
         // data to allow two factor qr code
-        'img-src': "'self' blob: data:",
+        'img-src': "'self' blob: data: https://*.openstreetmap.org",
         'media-src': "'self' blob:",
         'manifest-src': "'self'",
         'style-src': "'self' 'unsafe-inline'",
