@@ -62,7 +62,7 @@ export async function uploadStreamInParts(
             index
         );
         let eTag = null;
-        if (uploadService.getIsCFUploadProxyDisabled()) {
+        if (!uploadService.getIsCFUploadProxyDisabled()) {
             eTag = await UploadHttpClient.putFilePartV2(
                 fileUploadURL,
                 uploadChunk,
@@ -116,7 +116,7 @@ async function completeMultipartUpload(
         { CompleteMultipartUpload: { Part: partEtags } },
         options
     );
-    if (uploadService.getIsCFUploadProxyDisabled()) {
+    if (!uploadService.getIsCFUploadProxyDisabled()) {
         await UploadHttpClient.completeMultipartUploadV2(completeURL, body);
     } else {
         await UploadHttpClient.completeMultipartUpload(completeURL, body);

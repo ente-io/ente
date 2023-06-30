@@ -167,7 +167,7 @@ class UploadService {
                     file.localID
                 );
                 const fileUploadURL = await this.getUploadURL();
-                if (this.isCFUploadProxyDisabled) {
+                if (!this.isCFUploadProxyDisabled) {
                     fileObjectKey = await UploadHttpClient.putFileV2(
                         fileUploadURL,
                         file.file.encryptedData as Uint8Array,
@@ -183,7 +183,7 @@ class UploadService {
             }
             const thumbnailUploadURL = await this.getUploadURL();
             let thumbnailObjectKey: string = null;
-            if (this.isCFUploadProxyDisabled) {
+            if (!this.isCFUploadProxyDisabled) {
                 thumbnailObjectKey = await UploadHttpClient.putFileV2(
                     thumbnailUploadURL,
                     file.thumbnail.encryptedData,
