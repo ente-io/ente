@@ -33,6 +33,10 @@ import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
 import { AppContext } from 'pages/_app';
 import { t } from 'i18next';
 import { GalleryContext } from 'pages/gallery';
+import {
+    getMapDisableConfirmationDialog,
+    getMapEnableConfirmationDialog,
+} from 'utils/ui';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
@@ -175,6 +179,20 @@ export function FileInfo({
         closePhotoViewer();
     };
 
+    const openEnableMapConfirmationDialog = () =>
+        appContext.setDialogBoxAttributesV2(
+            getMapEnableConfirmationDialog(() =>
+                appContext.updateMapEnabled(true)
+            )
+        );
+
+    const openDisableMapConfirmationDialog = () =>
+        appContext.setDialogBoxAttributesV2(
+            getMapDisableConfirmationDialog(() =>
+                appContext.updateMapEnabled(false)
+            )
+        );
+
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
             <Titlebar onClose={handleCloseInfo} title={t('INFO')} backIsClose />
@@ -218,14 +236,24 @@ export function FileInfo({
                             title={t('LOCATION')}
                             caption={
                                 !appContext.mapEnabled ? (
-                                    t('ENABLE_MAP_INSTRUCTION')
-                                ) : (
                                     <Link
                                         href={getOpenStreetMapLink(location)}
                                         target="_blank"
                                         sx={{ fontWeight: 'bold' }}>
                                         {t('SHOW_ON_MAP')}
                                     </Link>
+                                ) : (
+                                    <LinkButton
+                                        onClick={
+                                            openDisableMapConfirmationDialog
+                                        }
+                                        sx={{
+                                            textDecoration: 'none',
+                                            color: 'text.muted',
+                                            fontWeight: 'bold',
+                                        }}>
+                                        {t('DISABLE_MAP')}
+                                    </LinkButton>
                                 )
                             }
                             customEndButton={
@@ -236,10 +264,13 @@ export function FileInfo({
                                 />
                             }
                         />
-
-                        {appContext.mapEnabled && (
-                            <MapBox location={location} />
-                        )}
+                        <MapBox
+                            location={location}
+                            mapEnabled={appContext.mapEnabled}
+                            openUpdateMapConfirmationDialog={
+                                openEnableMapConfirmationDialog
+                            }
+                        />
                     </>
                 )}
                 <InfoItem

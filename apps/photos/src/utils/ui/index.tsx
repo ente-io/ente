@@ -9,6 +9,8 @@ import InfoOutlined from '@mui/icons-material/InfoRounded';
 import { Trans } from 'react-i18next';
 import { Subscription } from 'types/billing';
 import { logoutUser } from 'services/userService';
+import { Link } from '@mui/material';
+import { OPEN_STREET_MAP_LINK } from 'components/Sidebar/EnableMap';
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
         title: t('DOWNLOAD_APP'),
@@ -128,4 +130,37 @@ export const getSessionExpiredMessage = (): DialogBoxAttributes => ({
         action: logoutUser,
         variant: 'accent',
     },
+});
+
+export const getMapEnableConfirmationDialog = (
+    enableMapHelper
+): DialogBoxAttributes => ({
+    title: t('ENABLE_MAPS'),
+    content: (
+        <Trans
+            i18nKey={'ENABLE_MAP_DESCRIPTION'}
+            components={{
+                a: <Link target="_blank" href={OPEN_STREET_MAP_LINK} />,
+            }}
+        />
+    ),
+    proceed: {
+        action: enableMapHelper,
+        text: t('ENABLE'),
+        variant: 'accent',
+    },
+    close: { text: t('CANCEL') },
+});
+
+export const getMapDisableConfirmationDialog = (
+    disableMapHelper
+): DialogBoxAttributes => ({
+    title: t('DISABLE_MAPS'),
+    content: <Trans i18nKey={'DISABLE_MAP_DESCRIPTION'} />,
+    proceed: {
+        action: disableMapHelper,
+        text: t('DISABLE'),
+        variant: 'accent',
+    },
+    close: { text: t('CANCEL') },
 });
