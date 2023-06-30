@@ -83,6 +83,7 @@ class HomeGalleryWidget extends StatelessWidget {
       scrollBottomSafeArea: bottomSafeArea + 180,
     );
     return Stack(
+      alignment: Alignment.bottomCenter,
       children: [
         gallery,
         FileSelectionOverlayBar(GalleryType.homepage, selectedFiles)

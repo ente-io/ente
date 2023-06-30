@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_map/plugin_api.dart";
 import "package:photos/extensions/list.dart";
+import "package:photos/theme/ente_theme.dart";
 
 // Credit: This code is based on the Rich Attribution widget from the flutter_map
 class MapAttributionWidget extends StatefulWidget {
@@ -123,14 +124,16 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => WidgetsBinding.instance.addPostFrameCallback(
-        (_) => setState(
-          () => persistentAttributionSize =
-              (persistentAttributionKey.currentContext!.findRenderObject()
-                      as RenderBox)
-                  .size,
-        ),
-      ),
+      (_) => WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(
+            () => persistentAttributionSize =
+                (persistentAttributionKey.currentContext!.findRenderObject()
+                        as RenderBox)
+                    .size,
+          );
+        }
+      }),
     );
   }
 
@@ -182,6 +185,7 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
                       icon: Icon(
                         Icons.info_outlined,
                         size: widget.permanentHeight,
+                        color: getEnteColorScheme(context).backgroundElevated,
                       ),
                     ))(
                 context,

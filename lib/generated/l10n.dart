@@ -300,6 +300,16 @@ class S {
     );
   }
 
+  /// `ente <i>needs permission to</i> preserve your photos`
+  String get entePhotosPerm {
+    return Intl.message(
+      'ente <i>needs permission to</i> preserve your photos',
+      name: 'entePhotosPerm',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Ok`
   String get ok {
     return Intl.message(
@@ -2908,6 +2918,28 @@ class S {
     );
   }
 
+  /// `{count, plural, =1 {Delete {count} item} other {Delete {count} items}}`
+  String deleteItemCount(num count) {
+    return Intl.plural(
+      count,
+      one: 'Delete $count item',
+      other: 'Delete $count items',
+      name: 'deleteItemCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count} files, {formattedSize} each`
+  String duplicateItemsGroup(int count, String formattedSize) {
+    return Intl.message(
+      '$count files, $formattedSize each',
+      name: 'duplicateItemsGroup',
+      desc: 'Display the number of duplicate files and their size',
+      args: [count, formattedSize],
+    );
+  }
+
   /// `{count, plural, one{{count} year ago} other{{count} years ago}}`
   String yearsAgo(num count) {
     return Intl.plural(
@@ -3837,6 +3869,16 @@ class S {
     return Intl.message(
       'Free trial valid till $endDate',
       name: 'freeTrialValidTill',
+      desc: '',
+      args: [endDate],
+    );
+  }
+
+  /// `Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.`
+  String playStoreFreeTrialValidTill(Object endDate) {
+    return Intl.message(
+      'Free trial valid till $endDate.\nYou can choose a paid plan afterwards.',
+      name: 'playStoreFreeTrialValidTill',
       desc: '',
       args: [endDate],
     );
@@ -7318,6 +7360,26 @@ class S {
     return Intl.message(
       'This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.',
       name: 'enableMapsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unpin album`
+  String get unpinAlbum {
+    return Intl.message(
+      'Unpin album',
+      name: 'unpinAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pin album`
+  String get pinAlbum {
+    return Intl.message(
+      'Pin album',
+      name: 'pinAlbum',
       desc: '',
       args: [],
     );

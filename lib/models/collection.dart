@@ -13,6 +13,7 @@ class Collection {
   final String? keyDecryptionNonce;
   @Deprecated("Use collectionName instead")
   String? name;
+
   // encryptedName & nameDecryptionNonce will be null for collections
   // created before we started encrypting collection name
   final String? encryptedName;
@@ -28,6 +29,7 @@ class Collection {
   // un-encrypted. decryptName will be value either decrypted value for
   // encryptedName or name itself.
   String? decryptedName;
+
   // decryptedPath will be null for collections now owned by user, deleted
   // collections, && collections which don't have a path. The path is used
   // to map local on-device album on mobile to remote collection on ente.
@@ -97,6 +99,8 @@ class Collection {
 
   // hasSharees returns true if the collection is shared with other ente users
   bool get hasSharees => sharees != null && sharees!.isNotEmpty;
+
+  bool get isPinned => (magicMetadata.order ?? 0) != 0;
 
   bool isHidden() {
     if (isDefaultHidden()) {

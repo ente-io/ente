@@ -17,6 +17,7 @@ class BottomActionBarWidget extends StatelessWidget {
   final VoidCallback? onCancel;
   final bool hasSmallerBottomPadding;
   final GalleryType type;
+  final Color? backgroundColor;
 
   BottomActionBarWidget({
     required this.expandedMenu,
@@ -26,6 +27,7 @@ class BottomActionBarWidget extends StatelessWidget {
     this.text,
     this.iconButtons,
     this.onCancel,
+    this.backgroundColor,
     super.key,
   });
 
@@ -42,7 +44,7 @@ class BottomActionBarWidget extends StatelessWidget {
         : 0;
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated,
+        color: backgroundColor ?? colorScheme.backgroundElevated2,
         boxShadow: shadowFloatFaintLight,
       ),
       padding: EdgeInsets.only(

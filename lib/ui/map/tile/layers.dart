@@ -34,7 +34,7 @@ class OSMFranceTileLayer extends StatelessWidget {
       fallbackUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       subdomains: const ['a', 'b', 'c'],
       tileProvider: CachedNetworkTileProvider(),
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color.fromARGB(255, 246, 246, 246),
       userAgentPackageName: _userAgent,
       panBuffer: 1,
     );

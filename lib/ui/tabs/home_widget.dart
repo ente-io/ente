@@ -14,6 +14,8 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
+import "package:photos/events/collection_updated_event.dart";
+import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
@@ -84,6 +86,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   StreamSubscription? _intentDataStreamSubscription;
   List<SharedMediaFile>? _sharedFiles;
   bool _shouldRenderCreateCollectionSheet = false;
+  bool _showShowBackupHook = false;
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -94,6 +97,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<SyncStatusUpdate> _firstImportEvent;
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
+  late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
 
   @override
   void initState() {
@@ -167,6 +171,18 @@ class _HomeWidgetState extends State<HomeWidget> {
         setState(() {});
       }
     });
+    _collectionUpdatedEvent = Bus.instance.on<CollectionUpdatedEvent>().listen(
+      (event) async {
+        // only reset state if backup hook is shown. This is to ensure that
+        // during first sync, we don't keep showing backup hook if user has
+        // files
+        if (mounted &&
+            _showShowBackupHook &&
+            event.type == EventType.addedOrUpdated) {
+          setState(() {});
+        }
+      },
+    );
     _initDeepLinks();
     UpdateService.instance.shouldUpdate().then((shouldUpdate) {
       if (shouldUpdate) {
@@ -243,6 +259,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _backupFoldersUpdatedEvent.cancel();
     _accountConfiguredEvent.cancel();
     _intentDataStreamSubscription?.cancel();
+    _collectionUpdatedEvent.cancel();
     super.dispose();
   }
 
@@ -353,7 +370,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     }
 
-    final bool showBackupFolderHook =
+    _showShowBackupHook =
         !Configuration.instance.hasSelectedAnyBackupFolder() &&
             !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
             CollectionsService.instance.getActiveCollections().isEmpty;
@@ -375,7 +392,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               openDrawer: Scaffold.of(context).openDrawer,
               physics: const BouncingScrollPhysics(),
               children: [
-                showBackupFolderHook
+                _showShowBackupHook
                     ? const StartBackupHookWidget(headerWidget: _headerWidget)
                     : HomeGalleryWidget(
                         header: _headerWidget,
