@@ -9,7 +9,6 @@ const {
     getGitSha,
     convertToNextHeaderFormat,
     buildCSPHeader,
-    COOP_COEP_HEADERS,
     WEB_SECURITY_HEADERS,
     CSP_DIRECTIVES,
     ALL_ROUTES,
@@ -64,7 +63,6 @@ module.exports = (phase) =>
                         // Apply these headers to all routes in your application....
                         source: ALL_ROUTES,
                         headers: convertToNextHeaderFormat({
-                            ...COOP_COEP_HEADERS,
                             ...WEB_SECURITY_HEADERS,
                             ...buildCSPHeader(CSP_DIRECTIVES),
                         }),
