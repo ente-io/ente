@@ -19,6 +19,7 @@ import {
     UserDetails,
     DeleteChallengeResponse,
     GetRemoteStoreValueResponse,
+    GetFeatureFlagResponse,
 } from 'types/user';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
@@ -493,3 +494,15 @@ export const updateMapEnabledStatus = async (newStatus: boolean) => {
         throw e;
     }
 };
+
+export async function getDisableCFUploadProxyFlag() {
+    try {
+        const featureFlags = (
+            await fetch('https://static.ente.io/feature_flags.json')
+        ).json() as GetFeatureFlagResponse;
+        return featureFlags.disableCFUploadProxy;
+    } catch (e) {
+        logError(e, 'failed to get feature flags');
+        return undefined;
+    }
+}
