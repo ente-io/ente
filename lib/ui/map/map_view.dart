@@ -101,7 +101,7 @@ class _MapViewState extends State<MapView> {
                 showPolygon: false,
                 size: const Size(75, 75),
                 fitBoundsOptions: const FitBoundsOptions(
-                  padding: EdgeInsets.all(1),
+                  padding: EdgeInsets.all(80),
                 ),
                 markers: _markers,
                 onClusterTap: (_) {

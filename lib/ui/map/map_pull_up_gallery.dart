@@ -148,27 +148,32 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                     );
                   }
 
-                  return Gallery(
-                    key: ValueKey(images),
-                    asyncLoader: (
-                      creationStartTime,
-                      creationEndTime, {
-                      limit,
-                      asc,
-                    }) async {
-                      FileLoadResult result;
-                      result = FileLoadResult(images, false);
-                      return result;
-                    },
-                    reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                    removalEventTypes: const {
-                      EventType.deletedFromRemote,
-                      EventType.deletedFromEverywhere,
-                    },
-                    tagPrefix: "map_gallery",
-                    showSelectAllByDefault: true,
-                    selectedFiles: _selectedFiles,
-                    isScrollablePositionedList: false,
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeInOutExpo,
+                    switchOutCurve: Curves.easeInOutExpo,
+                    child: Gallery(
+                      key: ValueKey(images),
+                      asyncLoader: (
+                        creationStartTime,
+                        creationEndTime, {
+                        limit,
+                        asc,
+                      }) async {
+                        FileLoadResult result;
+                        result = FileLoadResult(images, false);
+                        return result;
+                      },
+                      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                      removalEventTypes: const {
+                        EventType.deletedFromRemote,
+                        EventType.deletedFromEverywhere,
+                      },
+                      tagPrefix: "map_gallery",
+                      showSelectAllByDefault: true,
+                      selectedFiles: _selectedFiles,
+                      isScrollablePositionedList: false,
+                    ),
                   );
                 },
               ),
