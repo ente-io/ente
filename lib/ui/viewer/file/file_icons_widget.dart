@@ -80,6 +80,18 @@ class ArchiveOverlayIcon extends StatelessWidget {
   }
 }
 
+class PinOverlayIcon extends StatelessWidget {
+  const PinOverlayIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const _BottomRightOverlayIcon(
+      Icons.bookmark_add_outlined,
+      color: fixedStrokeMutedWhite,
+    );
+  }
+}
+
 class LivePhotoOverlayIcon extends StatelessWidget {
   const LivePhotoOverlayIcon({Key? key}) : super(key: key);
 

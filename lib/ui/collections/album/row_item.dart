@@ -161,6 +161,7 @@ class _CollectionItemThumbnailWidgetState
           ? ThumbnailWidget(
               widget.c.thumbnail,
               shouldShowArchiveStatus: widget.c.collection.isArchived(),
+              shouldShowPinIcon: widget.c.collection.isPinned,
               showFavForAlbumOnly: true,
               key: Key(widget.heroTag),
             )
