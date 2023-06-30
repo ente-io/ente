@@ -102,3 +102,7 @@ export interface UpdateRemoteStoreValueRequest {
     key: string;
     value: string;
 }
+
+export interface GetFeatureFlagResponse {
+    disableCFUploadProxy?: boolean;
+}

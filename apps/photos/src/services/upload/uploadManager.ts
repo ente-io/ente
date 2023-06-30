@@ -37,6 +37,7 @@ import {
     getPublicCollectionUID,
 } from 'services/publicCollectionService';
 import { getDedicatedCryptoWorker } from 'utils/comlink/ComlinkCryptoWorker';
+import { getDisableCFUploadProxyFlag } from 'services/userService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 
@@ -61,7 +62,8 @@ class UploadManager {
         publicCollectProps: PublicUploadProps
     ) {
         UIService.init(progressUpdater);
-        UploadService.init(publicCollectProps);
+        const isCFUploadProxyDisabled = await getDisableCFUploadProxyFlag();
+        UploadService.init(publicCollectProps, isCFUploadProxyDisabled);
         this.setFiles = setFiles;
         this.publicUploadProps = publicCollectProps;
     }

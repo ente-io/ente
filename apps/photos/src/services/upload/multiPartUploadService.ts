@@ -1,7 +1,6 @@
 import {
     FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
-    USE_CF_PROXY,
 } from 'constants/upload';
 import UIService from './uiService';
 import UploadHttpClient from './uploadHttpClient';
@@ -63,7 +62,7 @@ export async function uploadStreamInParts(
             index
         );
         let eTag = null;
-        if (USE_CF_PROXY) {
+        if (!uploadService.getIsCFUploadProxyDisabled()) {
             eTag = await UploadHttpClient.putFilePartV2(
                 fileUploadURL,
                 uploadChunk,
@@ -117,7 +116,7 @@ async function completeMultipartUpload(
         { CompleteMultipartUpload: { Part: partEtags } },
         options
     );
-    if (USE_CF_PROXY) {
+    if (!uploadService.getIsCFUploadProxyDisabled()) {
         await UploadHttpClient.completeMultipartUploadV2(completeURL, body);
     } else {
         await UploadHttpClient.completeMultipartUpload(completeURL, body);
