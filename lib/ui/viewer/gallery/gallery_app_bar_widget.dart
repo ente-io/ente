@@ -362,7 +362,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   padding: EdgeInsets.all(8),
                 ),
                 Text(
-                  widget.collection!.isPinned ? "Unpin album" : "Pin album",
+                  widget.collection!.isPinned
+                      ? S.of(context).unpinAlbum
+                      : S.of(context).pinAlbum,
                 ),
               ],
             ),
