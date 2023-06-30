@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
@@ -86,8 +88,9 @@ class PinOverlayIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const _BottomRightOverlayIcon(
-      Icons.bookmark_add_outlined,
+      CupertinoIcons.pin,
       color: fixedStrokeMutedWhite,
+      rotationAngle: 45 * math.pi / 180,
     );
   }
 }
@@ -255,9 +258,13 @@ class _BottomRightOverlayIcon extends StatelessWidget {
   /// smaller thumbnails).
   final double baseSize;
 
+  // Overridable rotation angle. Default is null, which means no rotation.
+  final double? rotationAngle;
+
   const _BottomRightOverlayIcon(
     this.icon, {
     Key? key,
+    this.rotationAngle,
     this.baseSize = 24,
     this.color = Colors.white, // fixed
   }) : super(key: key);
@@ -296,11 +303,20 @@ class _BottomRightOverlayIcon extends StatelessWidget {
             alignment: Alignment.bottomRight,
             child: Padding(
               padding: EdgeInsets.only(bottom: inset, right: inset),
-              child: Icon(
-                icon,
-                size: size,
-                color: color,
-              ),
+              child: rotationAngle == null
+                  ? Icon(
+                      icon,
+                      size: size,
+                      color: color,
+                    )
+                  : Transform.rotate(
+                      angle: rotationAngle!, // rotate by 45 degrees
+                      child: Icon(
+                        icon,
+                        size: size,
+                        color: color,
+                      ),
+                    ),
             ),
           ),
         );

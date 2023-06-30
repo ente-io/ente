@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
+import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -356,8 +358,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             child: Row(
               children: [
                 widget.collection!.isPinned
-                    ? const Icon(Icons.bookmark_remove_outlined)
-                    : const Icon(Icons.bookmark_add_outlined),
+                    ? const Icon(CupertinoIcons.pin_slash)
+                    : Transform.rotate(
+                        angle: 45 * math.pi / 180, // rotate by 45 degrees
+                        child: const Icon(CupertinoIcons.pin),
+                      ),
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
