@@ -45,7 +45,7 @@ export const getPublicCollectionThumbnailURL = (id: number) => {
 };
 
 export const getUploadEndpoint = () => {
-    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+    const endpoint = process.env.NEXT_PUBLIC_ENTE_UPLOAD_ENDPOINT;
     if (isDevDeployment() && endpoint) {
         return endpoint;
     }

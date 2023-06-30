@@ -11,7 +11,6 @@ import { getFileType } from 'services/typeDetectionService';
 import { getLocalTrashedFiles } from './trashService';
 import { UploadURL } from 'types/upload';
 import { S3FileAttributes } from 'types/file';
-import { USE_CF_PROXY } from 'constants/upload';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
@@ -112,20 +111,12 @@ export async function uploadThumbnail(
         updatedThumbnail,
         fileKey
     );
-    let thumbnailObjectKey: string = null;
-    if (USE_CF_PROXY) {
-        thumbnailObjectKey = await uploadHttpClient.putFileV2(
-            uploadURL,
-            encryptedThumbnail.encryptedData,
-            () => {}
-        );
-    } else {
-        thumbnailObjectKey = await uploadHttpClient.putFile(
-            uploadURL,
-            encryptedThumbnail.encryptedData,
-            () => {}
-        );
-    }
+    const thumbnailObjectKey = await uploadHttpClient.putFile(
+        uploadURL,
+        encryptedThumbnail.encryptedData,
+        () => {}
+    );
+
     return {
         objectKey: thumbnailObjectKey,
         decryptionHeader: encryptedThumbnail.decryptionHeader,

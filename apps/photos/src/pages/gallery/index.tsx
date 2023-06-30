@@ -38,7 +38,11 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from 'utils/storage';
-import { isTokenValid, validateKey } from 'services/userService';
+import {
+    isTokenValid,
+    syncMapEnabled,
+    validateKey,
+} from 'services/userService';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
@@ -120,6 +124,7 @@ import { IsArchived } from 'utils/magicMetadata';
 import { isSameDayAnyYear, isInsideLocationTag } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
+import { constructUserIDToEmailMap } from 'services/collectionService';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -137,10 +142,12 @@ const defaultGalleryContext: GalleryContextType = {
     setActiveCollection: () => null,
     syncWithRemote: () => null,
     setBlockingLoad: () => null,
+    setIsInSearchMode: () => null,
     photoListHeader: null,
     openExportModal: () => null,
     authenticateUser: () => null,
     user: null,
+    userIDToEmailMap: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -216,6 +223,8 @@ export default function Gallery() {
         useContext(AppContext);
     const [collectionSummaries, setCollectionSummaries] =
         useState<CollectionSummaries>();
+    const [userIDToEmailMap, setUserIDToEmailMap] =
+        useState<Map<number, string>>(null);
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
@@ -311,6 +320,17 @@ export default function Gallery() {
         }
         setDerivativeState(user, collections, files, trashedFiles, hiddenFiles);
     }, [collections, files, hiddenFiles, trashedFiles, user]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!collections) {
+                return;
+            }
+            const userIdToEmailMap = await constructUserIDToEmailMap();
+            setUserIDToEmailMap(userIdToEmailMap);
+        };
+        fetchData();
+    }, [collections]);
 
     useEffect(() => {
         collectionSelectorAttributes && setCollectionSelectorView(true);
@@ -564,6 +584,7 @@ export default function Gallery() {
             await syncHiddenFiles(hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
+            await syncMapEnabled();
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
@@ -602,7 +623,6 @@ export default function Gallery() {
         setFavItemIds(favItemIds);
         const archivedCollections = getArchivedCollections(collections);
         setArchivedCollections(archivedCollections);
-
         const collectionSummaries = await getCollectionSummaries(
             user,
             collections,
@@ -849,9 +869,11 @@ export default function Gallery() {
                 setActiveCollection,
                 syncWithRemote,
                 setBlockingLoad,
+                setIsInSearchMode,
                 photoListHeader,
                 openExportModal,
                 authenticateUser,
+                userIDToEmailMap,
                 user,
             }}>
             <FullScreenDropZone

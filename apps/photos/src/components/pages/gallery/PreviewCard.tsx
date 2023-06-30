@@ -19,6 +19,9 @@ import {
 } from 'components/PlaceholderThumbnails';
 import { FILE_TYPE } from 'constants/file';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
+import Avatar from './Avatar';
+import { User } from 'types/user';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 interface IProps {
     file: EnteFile;
@@ -106,6 +109,14 @@ export const HoverOverlay = styled('div')<{ checked: boolean }>`
     ${(props) =>
         !props.checked &&
         'background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))'};
+`;
+
+export const AvatarOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding-right: 5px;
+    padding-top: 5px;
 `;
 
 export const InSelectRangeOverLay = styled('div')<{ $active: boolean }>`
@@ -323,6 +334,8 @@ export default function PreviewCard(props: IProps) {
         }
     };
 
+    const user: User = getData(LS_KEYS.USER);
+
     return (
         <Cont
             key={`thumb-${file.id}-${props.showPlaceholder}`}
@@ -358,6 +371,14 @@ export default function PreviewCard(props: IProps) {
                 )
             )}
             <SelectedOverlay selected={selected} />
+            {(file.ownerID !== user.id ||
+                (file.ownerID === user.id &&
+                    file.pubMagicMetadata?.data?.uploaderName)) && (
+                <AvatarOverlay>
+                    <Avatar file={file} />
+                </AvatarOverlay>
+            )}
+
             <HoverOverlay checked={selected} />
             <InSelectRangeOverLay
                 $active={isRangeSelectActive && isInsSelectRange}

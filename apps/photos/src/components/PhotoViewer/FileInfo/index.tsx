@@ -7,6 +7,7 @@ import { RenderCaption } from './RenderCaption';
 import CopyButton from 'components/CodeBlock/CopyButton';
 import { formatDate, formatTime } from 'utils/time/format';
 import Titlebar from 'components/Titlebar';
+import MapBox from './MapBox';
 import InfoItem from './InfoItem';
 import { FlexWrapper } from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
@@ -32,6 +33,10 @@ import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
 import { AppContext } from 'pages/_app';
 import { t } from 'i18next';
 import { GalleryContext } from 'pages/gallery';
+import {
+    getMapDisableConfirmationDialog,
+    getMapEnableConfirmationDialog,
+} from 'utils/ui';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
@@ -170,8 +175,23 @@ export function FileInfo({
     }
     const onCollectionChipClick = (collectionID) => {
         galleryContext.setActiveCollection(collectionID);
+        galleryContext.setIsInSearchMode(false);
         closePhotoViewer();
     };
+
+    const openEnableMapConfirmationDialog = () =>
+        appContext.setDialogBoxAttributesV2(
+            getMapEnableConfirmationDialog(() =>
+                appContext.updateMapEnabled(true)
+            )
+        );
+
+    const openDisableMapConfirmationDialog = () =>
+        appContext.setDialogBoxAttributesV2(
+            getMapDisableConfirmationDialog(() =>
+                appContext.updateMapEnabled(false)
+            )
+        );
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
@@ -210,25 +230,48 @@ export function FileInfo({
                 )}
 
                 {location && (
-                    <InfoItem
-                        icon={<LocationOnOutlined />}
-                        title={t('LOCATION')}
-                        caption={
-                            <Link
-                                href={getOpenStreetMapLink(location)}
-                                target="_blank"
-                                sx={{ fontWeight: 'bold' }}>
-                                {t('SHOW_ON_MAP')}
-                            </Link>
-                        }
-                        customEndButton={
-                            <CopyButton
-                                code={getOpenStreetMapLink(location)}
-                                color="secondary"
-                                size="medium"
-                            />
-                        }
-                    />
+                    <>
+                        <InfoItem
+                            icon={<LocationOnOutlined />}
+                            title={t('LOCATION')}
+                            caption={
+                                !appContext.mapEnabled ? (
+                                    <Link
+                                        href={getOpenStreetMapLink(location)}
+                                        target="_blank"
+                                        sx={{ fontWeight: 'bold' }}>
+                                        {t('SHOW_ON_MAP')}
+                                    </Link>
+                                ) : (
+                                    <LinkButton
+                                        onClick={
+                                            openDisableMapConfirmationDialog
+                                        }
+                                        sx={{
+                                            textDecoration: 'none',
+                                            color: 'text.muted',
+                                            fontWeight: 'bold',
+                                        }}>
+                                        {t('DISABLE_MAP')}
+                                    </LinkButton>
+                                )
+                            }
+                            customEndButton={
+                                <CopyButton
+                                    code={getOpenStreetMapLink(location)}
+                                    color="secondary"
+                                    size="medium"
+                                />
+                            }
+                        />
+                        <MapBox
+                            location={location}
+                            mapEnabled={appContext.mapEnabled}
+                            openUpdateMapConfirmationDialog={
+                                openEnableMapConfirmationDialog
+                            }
+                        />
+                    </>
                 )}
                 <InfoItem
                     icon={<TextSnippetOutlined />}
