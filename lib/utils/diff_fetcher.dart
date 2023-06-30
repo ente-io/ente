@@ -53,6 +53,7 @@ class DiffFetcher {
               .getUploadedFile(file.uploadedFileID!, file.collectionID!);
           if (existingFile != null) {
             file.generatedID = existingFile.generatedID;
+            file.addedTime = existingFile.addedTime;
           }
         }
         file.ownerID = item["ownerID"];

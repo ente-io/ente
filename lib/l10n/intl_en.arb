@@ -507,6 +507,9 @@
   },
   "familyPlans": "Family plans",
   "referrals": "Referrals",
+  "notifications": "Notifications",
+  "sharedPhotoNotifications": "New shared photos",
+  "sharedPhotoNotificationsExplanation": "Receive notifications when someone adds a photo to a shared album that you're a part of",
   "advanced": "Advanced",
   "general": "General",
   "security": "Security",
@@ -659,7 +662,6 @@
     "description": "Button text for raising a support tickets in case of unhandled errors during backup",
     "type": "text"
   },
-
   "backupFailed": "Backup failed",
   "couldNotBackUpTryLater": "We could not backup your data.\nWe will retry later.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "ente can encrypt and preserve files only if you grant access to them",
@@ -771,7 +773,7 @@
   },
   "deleteAll": "Delete All",
   "renameAlbum": "Rename album",
-  "setCover" : "Set cover",
+  "setCover": "Set cover",
   "@setCover": {
     "description": "Text to set cover photo for an album"
   },
@@ -973,7 +975,7 @@
   "save": "Save",
   "centerPoint": "Center point",
   "pickCenterPoint": "Pick center point",
-  "useSelectedPhoto": "Use selected photo", 
+  "useSelectedPhoto": "Use selected photo",
   "edit": "Edit",
   "deleteLocation": "Delete location",
   "rotateLeft": "Rotate left",
@@ -1000,13 +1002,13 @@
   "@storageBreakupYou": {
     "description": "Label to indicate how much storage you are using when you are part of a family plan"
   },
-  "storageUsageInfo" : "{usedAmount} {usedStorageUnit} of {totalAmount} {totalStorageUnit} used",
-  "@storageUsageInfo" :{
+  "storageUsageInfo": "{usedAmount} {usedStorageUnit} of {totalAmount} {totalStorageUnit} used",
+  "@storageUsageInfo": {
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
-  "freeStorageSpace" : "{freeAmount} {storageUnit} free",
+  "freeStorageSpace": "{freeAmount} {storageUnit} free",
   "appVersion": "Version: {versionValue}",
-  "verifyIDLabel" : "Verify",
+  "verifyIDLabel": "Verify",
   "fileInfoAddDescHint": "Add a description...",
   "editLocationTagTitle": "Edit location",
   "setLabel": "Set",
@@ -1074,10 +1076,9 @@
   "@map": {
     "description": "Label for the map view"
   },
-  "maps" : "Maps",
+  "maps": "Maps",
   "enableMaps": "Enable Maps",
-  "enableMapsDesc" : "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.",
+  "enableMapsDesc": "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.",
   "unpinAlbum": "Unpin album",
   "pinAlbum": "Pin album"
 }
-

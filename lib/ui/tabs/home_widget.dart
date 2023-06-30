@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -22,11 +23,13 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection_items.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/entity_service.dart";
 import 'package:photos/services/local_sync_service.dart';
+import "package:photos/services/notification_service.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
@@ -48,7 +51,9 @@ import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings_page.dart';
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -204,6 +209,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         },
       ),
     );
+
+    NotificationService.instance.init(_onDidReceiveNotificationResponse);
 
     super.initState();
   }
@@ -491,5 +498,30 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
     // Do not show change dialog again
     UpdateService.instance.hideChangeLog().ignore();
+  }
+
+  void _onDidReceiveNotificationResponse(
+    NotificationResponse notificationResponse,
+  ) async {
+    final String? payload = notificationResponse.payload;
+    if (payload != null) {
+      debugPrint('notification payload: $payload');
+      final collectionID = Uri.parse(payload).queryParameters["collectionID"];
+      if (collectionID != null) {
+        final collection = CollectionsService.instance
+            .getCollectionByID(int.parse(collectionID))!;
+        final thumbnail =
+            await CollectionsService.instance.getCover(collection);
+        routeToPage(
+          context,
+          CollectionPage(
+            CollectionWithThumbnail(
+              collection,
+              thumbnail,
+            ),
+          ),
+        );
+      }
+    }
   }
 }

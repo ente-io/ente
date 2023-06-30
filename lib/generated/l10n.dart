@@ -3434,6 +3434,36 @@ class S {
     );
   }
 
+  /// `Notifications`
+  String get notifications {
+    return Intl.message(
+      'Notifications',
+      name: 'notifications',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New shared photos`
+  String get sharedPhotoNotifications {
+    return Intl.message(
+      'New shared photos',
+      name: 'sharedPhotoNotifications',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Receive notifications when someone adds a photo to a shared album that you're a part of`
+  String get sharedPhotoNotificationsExplanation {
+    return Intl.message(
+      'Receive notifications when someone adds a photo to a shared album that you\'re a part of',
+      name: 'sharedPhotoNotificationsExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Advanced`
   String get advanced {
     return Intl.message(

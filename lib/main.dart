@@ -29,7 +29,6 @@ import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/location_service.dart";
 import 'package:photos/services/memories_service.dart';
-import 'package:photos/services/notification_service.dart';
 import "package:photos/services/object_detection/object_detection_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
@@ -149,6 +148,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   final SharedPreferences preferences = await SharedPreferences.getInstance();
   await _logFGHeartBeatInfo();
   _scheduleHeartBeat(preferences, isBackground);
+  AppLifecycleService.instance.init(preferences);
   if (isBackground) {
     AppLifecycleService.instance.onAppInBackground('init via: $via');
   } else {
@@ -157,7 +157,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   // Start workers asynchronously. No need to wait for them to start
   Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode);
   CryptoUtil.init();
-  await NotificationService.instance.init();
   await NetworkClient.instance.init();
   await Configuration.instance.init();
   await UserService.instance.init();
