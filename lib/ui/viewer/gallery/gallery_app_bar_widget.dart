@@ -64,6 +64,7 @@ enum AlbumPopupAction {
   leave,
   freeUpSpace,
   setCover,
+  pinAlbum,
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -348,6 +349,26 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             ),
           ),
         );
+
+        items.add(
+          PopupMenuItem(
+            value: AlbumPopupAction.pinAlbum,
+            child: Row(
+              children: [
+                widget.collection!.isPinned
+                    ? const Icon(Icons.bookmark_remove_outlined)
+                    : const Icon(Icons.bookmark_add_outlined),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(
+                  widget.collection!.isPinned ? "Unpin album" : "Pin album",
+                ),
+              ],
+            ),
+          ),
+        );
+
         items.add(
           PopupMenuItem(
             value: AlbumPopupAction.ownedArchive,
@@ -447,6 +468,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           onSelected: (AlbumPopupAction value) async {
             if (value == AlbumPopupAction.rename) {
               await _renameAlbum(context);
+            } else if (value == AlbumPopupAction.pinAlbum) {
+              await updateOrder(
+                context,
+                widget.collection!,
+                widget.collection!.isPinned ? 0 : 1,
+              );
+              if (mounted) setState(() {});
             } else if (value == AlbumPopupAction.ownedArchive) {
               await changeCollectionVisibility(
                 context,
