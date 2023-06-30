@@ -623,7 +623,7 @@ class RemoteSyncService {
     );
   }
 
-  /* _storeDiff maps each remoteDiff file to existing
+  /* _storeDiff maps each remoteFile to existing
       entries in files table. When match is found, it compares both file to
       perform relevant actions like
       [1] Clear local cache when required (Both Shared and Owned files)
@@ -650,60 +650,60 @@ class RemoteSyncService {
     // this is required when same file is uploaded twice in the same
     // collection. Without this check, if both remote files are part of same
     // diff response, then we end up inserting one entry instead of two
-    // as we update the generatedID for remoteDiff to local file's genID
+    // as we update the generatedID for remoteFile to local file's genID
     final Set<int> alreadyClaimedLocalFilesGenID = {};
 
     final List<File> toBeInserted = [];
-    for (File remoteDiff in diff) {
+    for (File remoteFile in diff) {
       // existingFile will be either set to existing collectionID+localID or
       // to the unclaimed aka not already linked to any uploaded file.
       File? existingFile;
-      if (remoteDiff.generatedID != null) {
+      if (remoteFile.generatedID != null) {
         // Case [1] Check and clear local cache when uploadedFile already exist
         // Note: Existing file can be null here if it's replaced by the time we
         // reach here
-        existingFile = await _db.getFile(remoteDiff.generatedID!);
+        existingFile = await _db.getFile(remoteFile.generatedID!);
         if (existingFile != null &&
-            _shouldClearCache(remoteDiff, existingFile)) {
+            _shouldClearCache(remoteFile, existingFile)) {
           needsGalleryReload = true;
-          await clearCache(remoteDiff);
+          await clearCache(remoteFile);
         }
       }
 
       /* If file is not owned by the user, no further processing is required
       as Case [2,3,4] are only relevant to files owned by user
        */
-      if (userID != remoteDiff.ownerID) {
+      if (userID != remoteFile.ownerID) {
         if (existingFile == null) {
           sharedFileNew++;
-          remoteDiff.localID = null;
+          remoteFile.localID = null;
         } else {
           sharedFileUpdated++;
           // if user has downloaded the file on the device, avoid removing the
           // localID reference.
           // [Todo-fix: Excluded shared file's localIDs during syncALL]
-          remoteDiff.localID = existingFile.localID;
+          remoteFile.localID = existingFile.localID;
         }
-        toBeInserted.add(remoteDiff);
+        toBeInserted.add(remoteFile);
         // end processing for file here, move to next file now
         continue;
       }
 
-      // If remoteDiff is not already synced (i.e. existingFile is null), check
+      // If remoteFile is not already synced (i.e. existingFile is null), check
       // if the remoteFile was uploaded from this device.
       // Note: DeviceFolder is ignored for iOS during matching
-      if (existingFile == null && remoteDiff.localID != null) {
+      if (existingFile == null && remoteFile.localID != null) {
         final localFileEntries = await _db.getUnlinkedLocalMatchesForRemoteFile(
           userID,
-          remoteDiff.localID!,
-          remoteDiff.fileType,
-          title: remoteDiff.title ?? '',
-          deviceFolder: remoteDiff.deviceFolder ?? '',
+          remoteFile.localID!,
+          remoteFile.fileType,
+          title: remoteFile.title ?? '',
+          deviceFolder: remoteFile.deviceFolder ?? '',
         );
         if (localFileEntries.isEmpty) {
           // set remote file's localID as null because corresponding local file
           // does not exist [Case 2, do not retain localID of the remote file]
-          remoteDiff.localID = null;
+          remoteFile.localID = null;
         } else {
           // case 4: Check and schedule the file for update
           final int maxModificationTime = localFileEntries
@@ -719,11 +719,11 @@ class RemoteSyncService {
             for the adjustments or just if the asset has been modified ever.
             https://stackoverflow.com/a/50093266/546896
             */
-          if (maxModificationTime > remoteDiff.modificationTime! &&
+          if (maxModificationTime > remoteFile.modificationTime! &&
               Platform.isAndroid) {
             localButUpdatedOnDevice++;
             await FileUpdationDB.instance.insertMultiple(
-              [remoteDiff.localID!],
+              [remoteFile.localID!],
               FileUpdationDB.modificationTimeUpdated,
             );
           }
@@ -740,17 +740,17 @@ class RemoteSyncService {
             existingFile = localFileEntries.first;
             localUploadedFromDevice++;
             alreadyClaimedLocalFilesGenID.add(existingFile.generatedID!);
-            remoteDiff.generatedID = existingFile.generatedID;
+            remoteFile.generatedID = existingFile.generatedID;
           }
         }
       }
       if (existingFile != null &&
-          _shouldReloadHomeGallery(remoteDiff, existingFile)) {
+          _shouldReloadHomeGallery(remoteFile, existingFile)) {
         needsGalleryReload = true;
       } else {
         remoteNewFile++;
       }
-      toBeInserted.add(remoteDiff);
+      toBeInserted.add(remoteFile);
     }
     await _db.insertMultiple(toBeInserted);
     _logger.info(
