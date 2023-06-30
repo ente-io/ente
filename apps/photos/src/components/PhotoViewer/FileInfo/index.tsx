@@ -33,7 +33,6 @@ import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
 import { AppContext } from 'pages/_app';
 import { t } from 'i18next';
 import { GalleryContext } from 'pages/gallery';
-import { getMapEnabled } from 'utils/storage';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
@@ -99,7 +98,6 @@ export function FileInfo({
     const [showExif, setShowExif] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [updateMLDataIndex, setUpdateMLDataIndex] = useState(0);
-    const [showMap, setShowMap] = useState(false);
 
     const openExif = () => setShowExif(true);
     const closeExif = () => setShowExif(false);
@@ -168,11 +166,6 @@ export function FileInfo({
         setParsedExifData(parsedExifData);
     }, [exif]);
 
-    useEffect(() => {
-        const mapEnabled = getMapEnabled();
-        setShowMap(mapEnabled);
-    }, []);
-
     if (!file) {
         return <></>;
     }
@@ -224,7 +217,7 @@ export function FileInfo({
                             icon={<LocationOnOutlined />}
                             title={t('LOCATION')}
                             caption={
-                                !showMap ? (
+                                !appContext.mapEnabled ? (
                                     t('ENABLE_MAP_INSTRUCTION')
                                 ) : (
                                     <Link
@@ -244,7 +237,9 @@ export function FileInfo({
                             }
                         />
 
-                        <MapBox location={location} showMap={showMap} />
+                        {appContext.mapEnabled && (
+                            <MapBox location={location} />
+                        )}
                     </>
                 )}
                 <InfoItem

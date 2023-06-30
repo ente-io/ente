@@ -1,21 +1,17 @@
 import { Box, DialogProps, Stack } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import Titlebar from 'components/Titlebar';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { t } from 'i18next';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import ModifyMapEnabled from './ModifyMapEnabled';
-import { LS_KEYS } from 'utils/storage/localStorage';
-import { useLocalState } from 'hooks/useLocalState';
 import { getMapEnabledStatus } from 'services/userService';
+import { AppContext } from 'pages/_app';
 
 export default function MapSettings({ open, onClose, onRootClose }) {
+    const { mapEnabled, updateMapEnabled } = useContext(AppContext);
     const [modifyMapEnabledView, setModifyMapEnabledView] = useState(false);
-    const [mapEnabled, setMapEnabled] = useLocalState(
-        LS_KEYS.MAP_ENABLED,
-        false
-    );
 
     const openModifyMapEnabled = () => setModifyMapEnabledView(true);
     const closeModifyMapEnabled = () => setModifyMapEnabledView(false);
@@ -26,7 +22,7 @@ export default function MapSettings({ open, onClose, onRootClose }) {
         }
         const main = async () => {
             const remoteMapValue = await getMapEnabledStatus();
-            setMapEnabled(remoteMapValue);
+            updateMapEnabled(remoteMapValue);
         };
         main();
     }, [open]);
@@ -77,7 +73,6 @@ export default function MapSettings({ open, onClose, onRootClose }) {
             <ModifyMapEnabled
                 open={modifyMapEnabledView}
                 mapEnabled={mapEnabled}
-                setMapEnabled={setMapEnabled}
                 onClose={closeModifyMapEnabled}
                 onRootClose={handleRootClose}
             />

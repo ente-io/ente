@@ -27,10 +27,10 @@ export function getUserLocale(): Language {
     return getData(LS_KEYS.LOCALE)?.value;
 }
 
-export function getMapEnabled(): boolean {
+export function getLocalMapEnabled(): boolean {
     return getData(LS_KEYS.MAP_ENABLED)?.value ?? false;
 }
 
-export function setMapEnabled(value: boolean) {
+export function setLocalMapEnabled(value: boolean) {
     setData(LS_KEYS.MAP_ENABLED, { value });
 }

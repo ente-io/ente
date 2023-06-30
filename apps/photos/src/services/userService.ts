@@ -28,7 +28,7 @@ import { B64EncryptionResult } from 'types/crypto';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
 import { AxiosResponse } from 'axios';
 import { APPS, getAppName } from 'constants/apps';
-import { setMapEnabled } from 'utils/storage';
+import { setLocalMapEnabled } from 'utils/storage';
 
 const ENDPOINT = getEndpoint();
 
@@ -457,7 +457,7 @@ export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
 export const syncMapEnabled = async () => {
     try {
         const status = await getMapEnabledStatus();
-        setMapEnabled(status);
+        setLocalMapEnabled(status);
     } catch (e) {
         logError(e, 'failed to sync map enabled status');
         throw e;
