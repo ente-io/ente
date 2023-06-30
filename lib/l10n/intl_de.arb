@@ -708,11 +708,11 @@
   "share": "Teilen",
   "unhideToAlbum": "Im Album anzeigen",
   "restoreToAlbum": "Album wiederherstellen",
-  "moveItem": "{count, plural, one{# Element} other{# Elemente}}",
+  "moveItem": "{count, plural, one{Element verschieben} other{Elemente verschieben}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, one {Füge ein Element hinzu} other {Füge # Elemente hinzu}}",
+  "addItem": "{count, plural, one {Element hinzufügen} other {Elemente hinzufügen}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
