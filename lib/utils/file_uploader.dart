@@ -711,7 +711,7 @@ class FileUploader {
       if (userDetails == null) {
         return;
       }
-      // add 5MB to the free storage
+      // add k20MBStorageBuffer to the free storage
       final num freeStorage = userDetails.getFreeStorage() + k20MBStorageBuffer;
       final num fileSize = await fileToBeUploaded.length();
       if (fileSize > freeStorage) {
