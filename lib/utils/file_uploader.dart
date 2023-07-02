@@ -720,7 +720,11 @@ class FileUploader {
         throw StorageLimitExceededError();
       }
     } catch (e) {
-      _logger.severe('Error checking storage limit', e);
+      if (e is StorageLimitExceededError) {
+        rethrow;
+      } else {
+        _logger.severe('Error checking storage limit', e);
+      }
     }
   }
 
