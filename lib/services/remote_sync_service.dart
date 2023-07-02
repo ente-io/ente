@@ -26,6 +26,7 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
+import "package:photos/services/notification_service.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
@@ -170,7 +171,7 @@ class RemoteSyncService {
     _logger.info("Pulling remote diff");
     final isFirstSync = !_collectionsService.hasSyncedCollections();
     if (isFirstSync && !_isExistingSyncSilent) {
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
     }
     await _collectionsService.sync();
     // check and reset user's collection syncTime in past for older clients
@@ -183,13 +184,14 @@ class RemoteSyncService {
       await _markResetSyncTimeAsDone();
     }
 
-    await _syncUpdatedCollections();
-    unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
-  }
-
-  Future<void> _syncUpdatedCollections() async {
     final idsToRemoteUpdationTimeMap =
         await _collectionsService.getCollectionIDsToBeSynced();
+    await _syncUpdatedCollections(idsToRemoteUpdationTimeMap);
+    unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
+    unawaited(_notifyNewFiles(idsToRemoteUpdationTimeMap.keys.toList()));
+  }
+
+  Future<void> _syncUpdatedCollections(final idsToRemoteUpdationTimeMap) async {
     for (final cid in idsToRemoteUpdationTimeMap.keys) {
       await _syncCollectionDiff(
         cid,
@@ -621,7 +623,7 @@ class RemoteSyncService {
     );
   }
 
-  /* _storeDiff maps each remoteDiff file to existing
+  /* _storeDiff maps each remoteFile to existing
       entries in files table. When match is found, it compares both file to
       perform relevant actions like
       [1] Clear local cache when required (Both Shared and Owned files)
@@ -637,7 +639,7 @@ class RemoteSyncService {
       [Existing]
     ]
    */
-  Future _storeDiff(List<File> diff, int collectionID) async {
+  Future<void> _storeDiff(List<File> diff, int collectionID) async {
     int sharedFileNew = 0,
         sharedFileUpdated = 0,
         localUploadedFromDevice = 0,
@@ -648,60 +650,60 @@ class RemoteSyncService {
     // this is required when same file is uploaded twice in the same
     // collection. Without this check, if both remote files are part of same
     // diff response, then we end up inserting one entry instead of two
-    // as we update the generatedID for remoteDiff to local file's genID
+    // as we update the generatedID for remoteFile to local file's genID
     final Set<int> alreadyClaimedLocalFilesGenID = {};
 
     final List<File> toBeInserted = [];
-    for (File remoteDiff in diff) {
+    for (File remoteFile in diff) {
       // existingFile will be either set to existing collectionID+localID or
       // to the unclaimed aka not already linked to any uploaded file.
       File? existingFile;
-      if (remoteDiff.generatedID != null) {
+      if (remoteFile.generatedID != null) {
         // Case [1] Check and clear local cache when uploadedFile already exist
         // Note: Existing file can be null here if it's replaced by the time we
         // reach here
-        existingFile = await _db.getFile(remoteDiff.generatedID!);
+        existingFile = await _db.getFile(remoteFile.generatedID!);
         if (existingFile != null &&
-            _shouldClearCache(remoteDiff, existingFile)) {
+            _shouldClearCache(remoteFile, existingFile)) {
           needsGalleryReload = true;
-          await clearCache(remoteDiff);
+          await clearCache(remoteFile);
         }
       }
 
       /* If file is not owned by the user, no further processing is required
       as Case [2,3,4] are only relevant to files owned by user
        */
-      if (userID != remoteDiff.ownerID) {
+      if (userID != remoteFile.ownerID) {
         if (existingFile == null) {
           sharedFileNew++;
-          remoteDiff.localID = null;
+          remoteFile.localID = null;
         } else {
           sharedFileUpdated++;
           // if user has downloaded the file on the device, avoid removing the
           // localID reference.
           // [Todo-fix: Excluded shared file's localIDs during syncALL]
-          remoteDiff.localID = existingFile.localID;
+          remoteFile.localID = existingFile.localID;
         }
-        toBeInserted.add(remoteDiff);
+        toBeInserted.add(remoteFile);
         // end processing for file here, move to next file now
         continue;
       }
 
-      // If remoteDiff is not already synced (i.e. existingFile is null), check
+      // If remoteFile is not already synced (i.e. existingFile is null), check
       // if the remoteFile was uploaded from this device.
       // Note: DeviceFolder is ignored for iOS during matching
-      if (existingFile == null && remoteDiff.localID != null) {
+      if (existingFile == null && remoteFile.localID != null) {
         final localFileEntries = await _db.getUnlinkedLocalMatchesForRemoteFile(
           userID,
-          remoteDiff.localID!,
-          remoteDiff.fileType,
-          title: remoteDiff.title ?? '',
-          deviceFolder: remoteDiff.deviceFolder ?? '',
+          remoteFile.localID!,
+          remoteFile.fileType,
+          title: remoteFile.title ?? '',
+          deviceFolder: remoteFile.deviceFolder ?? '',
         );
         if (localFileEntries.isEmpty) {
           // set remote file's localID as null because corresponding local file
           // does not exist [Case 2, do not retain localID of the remote file]
-          remoteDiff.localID = null;
+          remoteFile.localID = null;
         } else {
           // case 4: Check and schedule the file for update
           final int maxModificationTime = localFileEntries
@@ -717,11 +719,11 @@ class RemoteSyncService {
             for the adjustments or just if the asset has been modified ever.
             https://stackoverflow.com/a/50093266/546896
             */
-          if (maxModificationTime > remoteDiff.modificationTime! &&
+          if (maxModificationTime > remoteFile.modificationTime! &&
               Platform.isAndroid) {
             localButUpdatedOnDevice++;
             await FileUpdationDB.instance.insertMultiple(
-              [remoteDiff.localID!],
+              [remoteFile.localID!],
               FileUpdationDB.modificationTimeUpdated,
             );
           }
@@ -738,17 +740,17 @@ class RemoteSyncService {
             existingFile = localFileEntries.first;
             localUploadedFromDevice++;
             alreadyClaimedLocalFilesGenID.add(existingFile.generatedID!);
-            remoteDiff.generatedID = existingFile.generatedID;
+            remoteFile.generatedID = existingFile.generatedID;
           }
         }
       }
       if (existingFile != null &&
-          _shouldReloadHomeGallery(remoteDiff, existingFile)) {
+          _shouldReloadHomeGallery(remoteFile, existingFile)) {
         needsGalleryReload = true;
       } else {
         remoteNewFile++;
       }
-      toBeInserted.add(remoteDiff);
+      toBeInserted.add(remoteFile);
     }
     await _db.insertMultiple(toBeInserted);
     _logger.info(
@@ -849,5 +851,39 @@ class RemoteSyncService {
         return -1;
       }
     });
+  }
+
+  bool _shouldShowNotification(int collectionID) {
+    // TODO: Add option to opt out of notifications for a specific collection
+    // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
+    return NotificationService.instance
+            .shouldShowNotificationsForSharedPhotos() &&
+        isFirstRemoteSyncDone() &&
+        !AppLifecycleService.instance.isForeground;
+  }
+
+  Future<void> _notifyNewFiles(List<int> collectionIDs) async {
+    final userID = Configuration.instance.getUserID();
+    final appOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
+    for (final collectionID in collectionIDs) {
+      final collection = _collectionsService.getCollectionByID(collectionID);
+      final files =
+          await _db.getNewFilesInCollection(collectionID, appOpenTime);
+      final sharedFileCount =
+          files.where((file) => file.ownerID != userID).length;
+      final collectedFileCount = files
+          .where((file) => file.pubMagicMetadata!.uploaderName != null)
+          .length;
+      final totalCount = sharedFileCount + collectedFileCount;
+      if (totalCount > 0 && _shouldShowNotification(collectionID)) {
+        NotificationService.instance.showNotification(
+          collection!.displayName,
+          totalCount.toString() + " new 📸",
+          channelID: "collection:" + collectionID.toString(),
+          channelName: collection.displayName,
+          payload: "ente://collection/?collectionID=" + collectionID.toString(),
+        );
+      }
+    }
   }
 }

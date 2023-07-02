@@ -26,6 +26,7 @@ class File extends EnteFile {
   int? creationTime;
   int? modificationTime;
   int? updationTime;
+  int? addedTime;
   Location? location;
   late FileType fileType;
   int? fileSubType;

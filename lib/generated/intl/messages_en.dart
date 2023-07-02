@@ -839,6 +839,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("No results found"),
         "nothingToSeeHere":
             MessageLookupByLibrary.simpleMessage("Nothing to see here! 👀"),
+        "notifications": MessageLookupByLibrary.simpleMessage("Notifications"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "onDevice": MessageLookupByLibrary.simpleMessage("On device"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
@@ -1093,6 +1094,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Create shared and collaborative albums with other ente users, including users on free plans."),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("Shared by me"),
+        "sharedPhotoNotifications":
+            MessageLookupByLibrary.simpleMessage("New shared photos"),
+        "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive notifications when someone adds a photo to a shared album that you\'re a part of"),
         "sharedWith": m47,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Shared with me"),
         "sharing": MessageLookupByLibrary.simpleMessage("Sharing..."),
