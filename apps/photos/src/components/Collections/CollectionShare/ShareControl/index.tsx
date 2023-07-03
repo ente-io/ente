@@ -34,23 +34,13 @@ export default function ShareControl({
 
     return (
         <>
-            {publicShareProp ? (
-                <ManageAddViewer
-                    publicShareProp={publicShareProp}
-                    setPublicShareProp={setPublicShareProp}
-                    collection={collection}
-                    publicShareUrl={publicShareUrl}
-                    onRootClose={onRootClose}
-                />
-            ) : (
-                <ManageAddViewer
-                    publicShareProp={publicShareProp}
-                    setPublicShareProp={setPublicShareProp}
-                    collection={collection}
-                    publicShareUrl={publicShareUrl}
-                    onRootClose={onRootClose}
-                />
-            )}
+            <ManageAddViewer
+                publicShareProp={publicShareProp}
+                setPublicShareProp={setPublicShareProp}
+                collection={collection}
+                publicShareUrl={publicShareUrl}
+                onRootClose={onRootClose}
+            />
             <ManageAddCollab
                 publicShareProp={publicShareProp}
                 setPublicShareProp={setPublicShareProp}

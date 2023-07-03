@@ -12,8 +12,9 @@ import { t } from 'i18next';
 import { DialogProps } from '@mui/material';
 import Titlebar from 'components/Titlebar';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import EmailShare from '../emailShare';
+// import EmailShare from '../emailShare';
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
+import ViewerEmailShare from './ViewerEmailShare';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -60,20 +61,7 @@ export default function ManageAddViewerOptions({
                             title={t('Add a new email')}
                             icon={<WorkspacesIcon />}
                         />
-                        <EmailShare collection={collection} />
-
-                        {/* <Stack spacing={3}></Stack> */}
-                        {/* {sharableLinkError && (
-                            <Typography
-                                textAlign={'center'}
-                                variant="small"
-                                sx={{
-                                    color: (theme) => theme.colors.danger.A700,
-                                    mt: 0.5,
-                                }}>
-                                {sharableLinkError}
-                            </Typography>
-                        )} */}
+                        <ViewerEmailShare collection={collection} />
                     </Stack>
                 </Stack>
             </EnteDrawer>

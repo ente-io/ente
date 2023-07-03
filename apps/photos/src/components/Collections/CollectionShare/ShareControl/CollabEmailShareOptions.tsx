@@ -1,22 +1,22 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Formik, FormikHelpers, FormikState } from 'formik';
 import * as Yup from 'yup';
-import SubmitButton from './SubmitButton';
+import SubmitButton from 'components/SubmitButton';
 import TextField from '@mui/material/TextField';
-import { FlexWrapper } from './Container';
+import { FlexWrapper } from 'components/Container';
 import { Button, FormHelperText, Stack } from '@mui/material';
 import { t } from 'i18next';
-import { MenuItemGroup } from './Menu/MenuItemGroup';
-import { EnteMenuItem } from './Menu/EnteMenuItem';
-import MenuItemDivider from './Menu/MenuItemDivider';
-import MenuSectionTitle from './Menu/MenuSectionTitle';
-import AvatarCollectionShare from './Collections/CollectionShare/AvatarCollectionShare';
+import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import MenuItemDivider from 'components/Menu/MenuItemDivider';
+import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
+import AvatarCollectionShare from '../AvatarCollectionShare';
 import DoneIcon from '@mui/icons-material/Done';
 
 interface formValues {
     inputValue: string;
 }
-export interface SingleInputAutocompleteProps {
+export interface CollabEmailShareOptionsProps {
     callback: (
         inputValue: string,
         setFieldError: (errorMessage: string) => void,
@@ -38,8 +38,8 @@ export interface SingleInputAutocompleteProps {
     optionsList?: string[];
 }
 
-export default function SingleInputAutocomplete(
-    props: SingleInputAutocompleteProps
+export default function CollabEmailShareOptions(
+    props: CollabEmailShareOptionsProps
 ) {
     console.log('OptionList Intial', props.optionsList);
     const [selectedOptions, setSelectedOptions] = useState([]);
