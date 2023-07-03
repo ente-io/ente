@@ -7302,6 +7302,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Select items to add`
+  String get selectItemsToAdd {
+    return Intl.message(
+      'Select items to add',
+      name: 'selectItemsToAdd',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add selected`
+  String get addSelected {
+    return Intl.message(
+      'Add selected',
+      name: 'addSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add from device`
+  String get addFromDevice {
+    return Intl.message(
+      'Add from device',
+      name: 'addFromDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add photos`
+  String get addPhotos {
+    return Intl.message(
+      'Add photos',
+      name: 'addPhotos',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

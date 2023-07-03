@@ -15,7 +15,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/huge_listview/huge_listview.dart';
 import "package:photos/ui/viewer/gallery/component/multiple_groups_gallery_view.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
-import "package:photos/ui/viewer/gallery/state/gallery_sort_order.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -45,6 +45,9 @@ class Gallery extends StatefulWidget {
   final Widget loadingWidget;
   final bool disableScroll;
   final bool limitSelectionToOne;
+  // When true, the gallery will be in selection mode. Tapping on any item
+  // will select if even when no other item is selected.
+  final bool inSelectionMode;
   final bool showSelectAllByDefault;
 
   // add a Function variable to get sort value in bool
@@ -67,6 +70,7 @@ class Gallery extends StatefulWidget {
     this.loadingWidget = const EnteLoadingWidget(),
     this.disableScroll = false,
     this.limitSelectionToOne = false,
+    this.inSelectionMode = false,
     this.sortAsyncFn,
     this.showSelectAllByDefault = true,
     Key? key,
@@ -221,8 +225,9 @@ class _GalleryState extends State<Gallery> {
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
     }
-    return GallerySortOrder(
+    return GalleryContextState(
       sortOrderAsc: _sortOrderAsc,
+      inSelectionMode: widget.inSelectionMode,
       child: MultipleGroupsGalleryView(
         hugeListViewKey: _hugeListViewKey,
         itemScroller: _itemScroller,

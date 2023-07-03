@@ -27,7 +27,8 @@ import "package:photos/ui/map/map_screen.dart";
 import 'package:photos/ui/sharing/album_participants_page.dart';
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
-import "package:photos/ui/viewer/gallery/pick_cover_photo.dart";
+import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
+import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -64,6 +65,7 @@ enum AlbumPopupAction {
   leave,
   freeUpSpace,
   setCover,
+  addPhotos,
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -132,6 +134,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       submitButtonLabel: S.of(context).rename,
       hintText: S.of(context).enterAlbumName,
       alwaysShowSuccessState: true,
+      initialValue: widget.collection?.displayName ?? "",
       textCapitalization: TextCapitalization.words,
       onSubmit: (String text) async {
         // indicates user cancelled the rename request
@@ -259,14 +262,31 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   List<Widget> _getDefaultActions(BuildContext context) {
     final List<Widget> actions = <Widget>[];
-    if (widget.selectedFiles.files.isNotEmpty) {
+    // If the user has selected files, don't show any actions
+    if (widget.selectedFiles.files.isNotEmpty ||
+        !Configuration.instance.hasConfiguredAccount()) {
       return actions;
     }
-    if (Configuration.instance.hasConfiguredAccount() &&
-        widget.selectedFiles.files.isEmpty &&
-        (widget.type == GalleryType.ownedCollection ||
+    final int userID = Configuration.instance.getUserID()!;
+    if ((widget.type == GalleryType.ownedCollection ||
             widget.type == GalleryType.sharedCollection) &&
         widget.collection?.type != CollectionType.favorites) {
+      final bool canAddFiles = widget.type == GalleryType.ownedCollection ||
+          widget.collection!.getRole(userID) ==
+              CollectionParticipantRole.collaborator;
+      if (canAddFiles) {
+        actions.add(
+          Tooltip(
+            message: "Add Files",
+            child: IconButton(
+              icon: const Icon(Icons.add_photo_alternate_outlined),
+              onPressed: () async {
+                await _showAddPhotoDialog(context);
+              },
+            ),
+          ),
+        );
+      }
       actions.add(
         Tooltip(
           message: "Share",
@@ -600,6 +620,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     } catch (e, s) {
       _logger.severe(e, s);
       showGenericErrorDialog(context: context);
+    }
+  }
+
+  Future<void> _showAddPhotoDialog(BuildContext bContext) async {
+    final collection = widget.collection;
+    try {
+      await showAddPhotosSheet(bContext, collection!);
+    } catch (e, s) {
+      _logger.severe(e, s);
+      showGenericErrorDialog(context: bContext);
     }
   }
 }
