@@ -8,8 +8,8 @@ import {
 } from 'types/magicMetadata';
 
 export enum COLLECTION_ROLE {
-    OWNER = 'OWNER',
     VIEWER = 'VIEWER',
+    OWNER = 'OWNER',
     COLLABORATOR = 'COLLABORATOR',
     UNKNOWN = 'UNKNOWN',
 }

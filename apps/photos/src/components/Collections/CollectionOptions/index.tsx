@@ -322,12 +322,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         downloadOptionText={t('DOWNLOAD_HIDDEN')}
                     />
                 ) : collectionSummaryType ===
-                  CollectionSummaryType.incomingShareCollaborator ? (
-                    <SharedCollectionOption
-                        handleCollectionAction={handleCollectionAction}
-                    />
-                ) : collectionSummaryType ===
-                  CollectionSummaryType.incomingShareViewer ? (
+                      CollectionSummaryType.incomingShareViewer ||
+                  collectionSummaryType ===
+                      CollectionSummaryType.incomingShareCollaborator ? (
                     <SharedCollectionOption
                         handleCollectionAction={handleCollectionAction}
                     />
