@@ -28,7 +28,8 @@ import {
     HIDE_FROM_COLLECTION_BAR_TYPES,
     OPTIONS_NOT_HAVING_COLLECTION_TYPES,
     SYSTEM_COLLECTION_TYPES,
-    SELECT_NOT_ALLOWED_COLLECTION,
+    MOVE_TO_NOT_ALLOWED_COLLECTION,
+    ADD_TO_NOT_ALLOWED_COLLECTION,
 } from 'constants/collection';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
@@ -237,8 +238,12 @@ export const hasNonSystemCollections = (
     return false;
 };
 
-export const isSelectAllowedCollection = (type: CollectionSummaryType) => {
-    return !SELECT_NOT_ALLOWED_COLLECTION.has(type);
+export const isMoveToAllowedCollection = (type: CollectionSummaryType) => {
+    return !MOVE_TO_NOT_ALLOWED_COLLECTION.has(type);
+};
+
+export const isAddToAllowedCollection = (type: CollectionSummaryType) => {
+    return !ADD_TO_NOT_ALLOWED_COLLECTION.has(type);
 };
 
 export const isSystemCollection = (type: CollectionSummaryType) => {
@@ -258,7 +263,8 @@ export const showDownloadQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.album ||
         type === CollectionSummaryType.uncategorized ||
         type === CollectionSummaryType.hidden ||
-        type === CollectionSummaryType.incomingShare ||
+        type === CollectionSummaryType.incomingShareViewer ||
+        type === CollectionSummaryType.incomingShareCollaborator ||
         type === CollectionSummaryType.outgoingShare ||
         type === CollectionSummaryType.sharedOnlyViaLink ||
         type === CollectionSummaryType.archived
