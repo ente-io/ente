@@ -76,8 +76,7 @@ class _DetailPageState extends State<DetailPage> {
   bool _hasLoadedTillStart = false;
   bool _hasLoadedTillEnd = false;
   bool _shouldHideAppBar = false;
-  GlobalKey<FadingAppBarState>? _appBarKey;
-  GlobalKey<FadingBottomBarState>? _bottomBarKey;
+  final _enableFullScreenNotifier = ValueNotifier(false);
 
   @override
   void initState() {
@@ -111,8 +110,6 @@ class _DetailPageState extends State<DetailPage> {
           _files!.length.toString() +
           " files .",
     );
-    _appBarKey = GlobalKey<FadingAppBarState>();
-    _bottomBarKey = GlobalKey<FadingBottomBarState>();
     return Scaffold(
       appBar: FadingAppBar(
         _files![_selectedIndex],
@@ -120,7 +117,7 @@ class _DetailPageState extends State<DetailPage> {
         Configuration.instance.getUserID(),
         100,
         widget.config.mode == DetailPageMode.full,
-        key: _appBarKey,
+        enableFullScreenNotifier: _enableFullScreenNotifier,
       ),
       extendBodyBehindAppBar: true,
       resizeToAvoidBottomInset: false,
@@ -134,7 +131,7 @@ class _DetailPageState extends State<DetailPage> {
               widget.config.mode == DetailPageMode.minimalistic,
               onFileRemoved: _onFileRemoved,
               userID: Configuration.instance.getUserID(),
-              key: _bottomBarKey,
+              enableFullScreenNotifier: _enableFullScreenNotifier,
             ),
           ],
         ),
@@ -192,13 +189,8 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   void _toggleFullScreen() {
-    if (_shouldHideAppBar) {
-      _appBarKey!.currentState!.hide();
-      _bottomBarKey!.currentState!.hide();
-    } else {
-      _appBarKey!.currentState!.show();
-      _bottomBarKey!.currentState!.show();
-    }
+    _enableFullScreenNotifier.value = !_enableFullScreenNotifier.value;
+
     Future.delayed(Duration.zero, () {
       SystemChrome.setEnabledSystemUIMode(
         //to hide status bar?
@@ -246,7 +238,7 @@ class _DetailPageState extends State<DetailPage> {
       final length = files.length;
       files.addAll(_files!);
       _files = files;
-      _pageController!.jumpToPage(length);
+      _pageController.jumpToPage(length);
       _selectedIndex = length;
     });
   }
