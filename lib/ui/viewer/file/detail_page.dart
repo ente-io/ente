@@ -70,7 +70,7 @@ class _DetailPageState extends State<DetailPage> {
   final _logger = Logger("DetailPageState");
   bool _shouldDisableScroll = false;
   List<File>? _files;
-  PageController? _pageController;
+  late PageController _pageController;
   int _selectedIndex = 0;
   bool _hasPageChanged = false;
   bool _hasLoadedTillStart = false;
@@ -87,11 +87,12 @@ class _DetailPageState extends State<DetailPage> {
     ]; // Make a copy since we append preceding and succeeding entries to this
     _selectedIndex = widget.config.selectedIndex;
     _preloadEntries();
+    _pageController = PageController(initialPage: _selectedIndex);
   }
 
   @override
   void dispose() {
-    // _pageController?.dispose();
+    _pageController.dispose();
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
@@ -138,15 +139,11 @@ class _DetailPageState extends State<DetailPage> {
           ],
         ),
       ),
-
-      // backgroundColor: Theme.of(context).colorScheme.onPrimary,
     );
   }
 
   Widget _buildPageView() {
     _logger.info("Building with " + _selectedIndex.toString());
-    // todo: perf.. do we always need to create new controller?
-    _pageController = PageController(initialPage: _selectedIndex);
     return PageView.builder(
       itemBuilder: (context, index) {
         final file = _files![index];
