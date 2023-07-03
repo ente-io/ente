@@ -6,12 +6,12 @@ import TextField from '@mui/material/TextField';
 import { FlexWrapper } from './Container';
 import { Button, FormHelperText, Stack } from '@mui/material';
 import { t } from 'i18next';
-import Autocomplete from '@mui/material/Autocomplete';
 import { MenuItemGroup } from './Menu/MenuItemGroup';
 import { EnteMenuItem } from './Menu/EnteMenuItem';
 import MenuItemDivider from './Menu/MenuItemDivider';
 import MenuSectionTitle from './Menu/MenuSectionTitle';
 import AvatarCollectionShare from './Collections/CollectionShare/AvatarCollectionShare';
+import DoneIcon from '@mui/icons-material/Done';
 
 interface formValues {
     inputValue: string;
@@ -42,7 +42,6 @@ export default function SingleInputAutocomplete(
     props: SingleInputAutocompleteProps
 ) {
     const [selectedOptions, setSelectedOptions] = useState([]);
-
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
 
@@ -60,8 +59,14 @@ export default function SingleInputAutocomplete(
         );
 
         if (props.optionsList && props.optionsList.length > 0) {
-            setSelectedOptions([...selectedOptions, values.inputValue]);
+            const updatedSelectedOptions = selectedOptions.includes(
+                values.inputValue
+            )
+                ? selectedOptions.filter((item) => item !== values.inputValue)
+                : [...selectedOptions, values.inputValue];
+            setSelectedOptions(updatedSelectedOptions);
         }
+        console.log('Final list:', selectedOptions);
 
         SetLoading(false);
     };
@@ -81,6 +86,15 @@ export default function SingleInputAutocomplete(
         }
     }, [props.fieldType]);
 
+    const handleEmailClick = (email: string, setFieldValue) => {
+        setFieldValue('inputValue', email);
+        const updatedSelectedOptions = selectedOptions.includes(email)
+            ? selectedOptions.filter((item) => item !== email)
+            : [...selectedOptions, email];
+        setSelectedOptions(updatedSelectedOptions);
+        console.log(selectedOptions);
+    };
+
     return (
         <Formik<formValues>
             initialValues={{ inputValue: props.initialValue ?? '' }}
@@ -98,40 +112,24 @@ export default function SingleInputAutocomplete(
                 <form noValidate onSubmit={handleSubmit}>
                     {props.hiddenPreInput}
 
-                    <Autocomplete
-                        id="free-solo-demo"
-                        filterSelectedOptions
-                        freeSolo
+                    <TextField
+                        hiddenLabel={props.hiddenLabel}
+                        fullWidth
+                        type={props.fieldType}
+                        id={props.fieldType}
+                        onChange={handleChange('inputValue')}
+                        name={props.fieldType}
+                        {...(props.hiddenLabel
+                            ? { placeholder: props.placeholder }
+                            : { label: props.placeholder })}
+                        error={Boolean(errors.inputValue)}
+                        helperText={errors.inputValue}
                         value={values.inputValue}
-                        options={props.optionsList
-                            .map((option) => option.toString())
-                            .filter(
-                                (option) => !selectedOptions.includes(option)
-                            )}
-                        onChange={(event, newValue) => {
-                            setFieldValue('inputValue', newValue);
-                        }}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                hiddenLabel={props.hiddenLabel}
-                                fullWidth
-                                type={props.fieldType}
-                                id={props.fieldType}
-                                onChange={handleChange('inputValue')}
-                                name={props.fieldType}
-                                {...(props.hiddenLabel
-                                    ? { placeholder: props.placeholder }
-                                    : { label: props.placeholder })}
-                                error={Boolean(errors.inputValue)}
-                                helperText={errors.inputValue}
-                                value={values.inputValue}
-                                disabled={loading}
-                                autoFocus={!props.disableAutoFocus}
-                                autoComplete={props.autoComplete}
-                            />
-                        )}
+                        disabled={loading}
+                        autoFocus={!props.disableAutoFocus}
+                        autoComplete={props.autoComplete}
                     />
+
                     <Stack py={'10px'} px={'8px'}>
                         {' '}
                     </Stack>
@@ -144,12 +142,17 @@ export default function SingleInputAutocomplete(
                                     //
                                     fontWeight="normal"
                                     key={item}
-                                    onClick={() => {
-                                        setFieldValue('inputValue', item);
-                                    }}
+                                    onClick={() =>
+                                        handleEmailClick(item, setFieldValue)
+                                    }
                                     label={item}
                                     startIcon={
                                         <AvatarCollectionShare email={item} />
+                                    }
+                                    endIcon={
+                                        selectedOptions.includes(item) ? (
+                                            <DoneIcon />
+                                        ) : null
                                     }
                                 />
                                 {index !== props.optionsList.length - 1 && (

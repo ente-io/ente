@@ -59,18 +59,6 @@ export default function ManageAddCollabOptions({
                             icon={<WorkspacesIcon />}
                         />
                         <EmailShare collection={collection} />
-                        {/* <Stack spacing={3}></Stack> */}
-                        {/* {sharableLinkError && (
-                            <Typography
-                                textAlign={'center'}
-                                variant="small"
-                                sx={{
-                                    color: (theme) => theme.colors.danger.A700,
-                                    mt: 0.5,
-                                }}>
-                                {sharableLinkError}
-                            </Typography>
-                        )} */}
                     </Stack>
                 </Stack>
             </EnteDrawer>
