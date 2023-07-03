@@ -65,6 +65,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                                     : c.hasShareeArchived(),
                                 showFavForAlbumOnly: true,
                                 shouldShowSyncStatus: false,
+                                shouldShowPinIcon: true,
                                 key: Key(heroTag),
                               ),
                             );

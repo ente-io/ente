@@ -13,7 +13,6 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/favorites_service.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/button/archived_button.dart";
 import "package:photos/ui/collections/button/hidden_button.dart";
 import "package:photos/ui/collections/button/trash_button.dart";
@@ -21,8 +20,8 @@ import "package:photos/ui/collections/button/uncategorized_button.dart";
 import "package:photos/ui/collections/create_new_album_widget.dart";
 import "package:photos/ui/collections/device/device_folders_grid_view.dart";
 import "package:photos/ui/collections/device/device_folders_vertical_grid_view.dart";
-import 'package:photos/ui/collections/horizontal_grid_view.dart';
 import "package:photos/ui/collections/vertical_grid_view.dart";
+import "package:photos/ui/collections/vertical_grid_view_flex_size.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/tabs/section_title.dart';
@@ -48,6 +47,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   AlbumSortKey? sortKey;
   String _loadReason = "init";
 
+  static const int _kOnEnteItemLimitCount = 8;
   @override
   void initState() {
     _localFilesSubscription =
@@ -145,7 +145,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                   .color!
                   .withOpacity(0.5),
             );
-    final enteTextTheme = getEnteTextTheme(context);
 
     return SingleChildScrollView(
       child: Container(
@@ -179,9 +178,12 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             ),
             DeleteEmptyAlbums(collections ?? []),
             Configuration.instance.hasConfiguredAccount()
-                ? CollectionsHorizontalGridView(collections)
+                ? CollectionsFlexiGridViewWidget(
+                    collections,
+                    displayLimitCount: _kOnEnteItemLimitCount,
+                  )
                 : const EmptyState(),
-            collections.length > 4
+            collections.length > _kOnEnteItemLimitCount
                 ? GestureDetector(
                     onTap: () {
                       unawaited(
@@ -198,7 +200,9 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                     },
                     child: SectionOptions(
                       SectionTitle(
-                          title: S.of(context).viewAll, mutedTitle: true),
+                        title: S.of(context).viewAll,
+                        mutedTitle: true,
+                      ),
                       trailingWidget: const IconButtonWidget(
                         icon: Icons.chevron_right,
                         iconButtonType: IconButtonType.secondary,
