@@ -24,6 +24,7 @@
   "sendEmail": "Invia email",
   "deleteRequestSLAText": "La tua richiesta verrà elaborata entro 72 ore.",
   "deleteEmailRequest": "Invia un'email a <warning>account-deletion@ente.io</warning> dal tuo indirizzo email registrato.",
+  "entePhotosPerm": "ente <i>necessita del permesso per</i> preservare le tue foto",
   "ok": "Ok",
   "createAccount": "Crea account",
   "createNewAccount": "Crea un nuovo account",
@@ -417,6 +418,22 @@
   "skip": "Salta",
   "updatingFolderSelection": "Aggiornamento della selezione delle cartelle...",
   "itemCount": "{count, plural, one{{count} elemento} other{{count} elementi}}",
+  "deleteItemCount": "{count, plural, one {}=1 {Elimina {count} elemento} other {Elimina {count} elementi}}",
+  "duplicateItemsGroup": "{count} file, {formattedSize} l'uno",
+  "@duplicateItemsGroup": {
+    "description": "Display the number of duplicate files and their size",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "formattedSize": {
+        "example": "2.3 MB",
+        "type": "String"
+      }
+    }
+  },
   "yearsAgo": "{count, plural, one{{count} anno fa} other{{count} anni fa}}",
   "backupSettings": "Impostazioni backup",
   "backupOverMobileData": "Backup su dati mobili",
@@ -490,6 +507,9 @@
   },
   "familyPlans": "Piano famiglia",
   "referrals": "Invita un Amico",
+  "notifications": "Notifiche",
+  "sharedPhotoNotifications": "Nuove foto condivise",
+  "sharedPhotoNotificationsExplanation": "Ricevi notifiche quando qualcuno aggiunge una foto a un album condiviso, di cui fai parte",
   "advanced": "Avanzate",
   "general": "Generali",
   "security": "Sicurezza",
@@ -538,6 +558,7 @@
   "faqs": "FAQ",
   "renewsOn": "Si rinnova il {endDate}",
   "freeTrialValidTill": "La prova gratuita termina il {endDate}",
+  "playStoreFreeTrialValidTill": "Prova gratuita valida fino al {endDate}.\nPuoi scegliere un piano a pagamento in seguito.",
   "subWillBeCancelledOn": "L'abbonamento verrà cancellato il {endDate}",
   "subscription": "Abbonamento",
   "paymentDetails": "Dettagli di Pagamento",
@@ -752,6 +773,10 @@
   },
   "deleteAll": "Elimina tutto",
   "renameAlbum": "Rinomina album",
+  "setCover": "Imposta copertina",
+  "@setCover": {
+    "description": "Text to set cover photo for an album"
+  },
   "sortAlbumsBy": "Ordina per",
   "sortNewestFirst": "Prima le più nuove",
   "sortOldestFirst": "Prima le più vecchie",
@@ -1044,5 +1069,16 @@
   "iOSOkButton": "OK",
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
-  }
+  },
+  "openstreetmapContributors": "Collaboratori di OpenStreetMap",
+  "hostedAtOsmFrance": "Ospitato presso OSM France",
+  "map": "Mappa",
+  "@map": {
+    "description": "Label for the map view"
+  },
+  "maps": "Mappe",
+  "enableMaps": "Abilita le Mappe",
+  "enableMapsDesc": "Questo mostrerà le tue foto su una mappa del mondo.\n\nQuesta mappa è ospitata da Open Street Map e le posizioni esatte delle tue foto non sono mai condivise.\n\nPuoi disabilitare questa funzionalità in qualsiasi momento, dalle Impostazioni.",
+  "unpinAlbum": "Non fissare album",
+  "pinAlbum": "Fissa l'album"
 }
