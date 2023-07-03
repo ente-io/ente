@@ -53,6 +53,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m10(provider) =>
       "Please contact us at support@ente.io to manage your ${provider} subscription.";
 
+  static String m63(count) =>
+      "${Intl.plural(count, one: 'Delete ${count} item', other: 'Delete ${count} items')}";
+
   static String m11(currentlyDeleting, totalCount) =>
       "Deleting ${currentlyDeleting} / ${totalCount}";
 
@@ -64,6 +67,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m14(count, storageSaved) =>
       "Your have cleaned up ${Intl.plural(count, one: '${count} duplicate file', other: '${count} duplicate files')}, saving (${storageSaved}!)";
+
+  static String m64(count, formattedSize) =>
+      "${count} files, ${formattedSize} each";
 
   static String m15(newEmail) => "Email changed to ${newEmail}";
 
@@ -118,6 +124,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m34(reason) =>
       "Unfortunately your payment failed due to ${reason}";
+
+  static String m65(endDate) =>
+      "Free trial valid till ${endDate}.\nYou can choose a paid plan afterwards.";
 
   static String m35(toEmail) => "Please email us at ${toEmail}";
 
@@ -484,6 +493,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete from device"),
         "deleteFromEnte":
             MessageLookupByLibrary.simpleMessage("Delete from ente"),
+        "deleteItemCount": m63,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Delete location"),
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Delete photos"),
@@ -541,6 +551,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "downloading": MessageLookupByLibrary.simpleMessage("Downloading..."),
         "dropSupportEmail": m13,
         "duplicateFileCountWithStorageSaved": m14,
+        "duplicateItemsGroup": m64,
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Edit location"),
@@ -566,6 +577,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enteCanEncryptAndPreserveFilesOnlyIfYouGrant":
             MessageLookupByLibrary.simpleMessage(
                 "ente can encrypt and preserve files only if you grant access to them"),
+        "entePhotosPerm": MessageLookupByLibrary.simpleMessage(
+            "ente <i>needs permission to</i> preserve your photos"),
         "enteSubscriptionPitch": MessageLookupByLibrary.simpleMessage(
             "ente preserves your memories, so they\'re always available to you, even if you lose your device."),
         "enteSubscriptionShareWithFamily": MessageLookupByLibrary.simpleMessage(
@@ -830,6 +843,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("No results found"),
         "nothingToSeeHere":
             MessageLookupByLibrary.simpleMessage("Nothing to see here! 👀"),
+        "notifications": MessageLookupByLibrary.simpleMessage("Notifications"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "onDevice": MessageLookupByLibrary.simpleMessage("On device"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
@@ -875,6 +889,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Photos added by you will be removed from the album"),
         "pickCenterPoint":
             MessageLookupByLibrary.simpleMessage("Pick center point"),
+        "pinAlbum": MessageLookupByLibrary.simpleMessage("Pin album"),
+        "playStoreFreeTrialValidTill": m65,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore subscription"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
@@ -1085,6 +1101,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Create shared and collaborative albums with other ente users, including users on free plans."),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("Shared by me"),
+        "sharedPhotoNotifications":
+            MessageLookupByLibrary.simpleMessage("New shared photos"),
+        "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive notifications when someone adds a photo to a shared album that you\'re a part of"),
         "sharedWith": m47,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Shared with me"),
         "sharing": MessageLookupByLibrary.simpleMessage("Sharing..."),
@@ -1236,6 +1256,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unhidingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Unhiding files to album"),
         "unlock": MessageLookupByLibrary.simpleMessage("Unlock"),
+        "unpinAlbum": MessageLookupByLibrary.simpleMessage("Unpin album"),
         "unselectAll": MessageLookupByLibrary.simpleMessage("Unselect all"),
         "update": MessageLookupByLibrary.simpleMessage("Update"),
         "updateAvailable":

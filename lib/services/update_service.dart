@@ -128,6 +128,13 @@ class UpdateService {
     return _packageInfo.packageName.startsWith("io.ente.photos.fdroid");
   }
 
+  bool isPlayStoreFlavor() {
+    if (Platform.isIOS) {
+      return false;
+    }
+    return !isIndependentFlavor() && !isFdroidFlavor();
+  }
+
   // getRateDetails returns details about the place
   Tuple2<String, String> getRateDetails() {
     if (isFdroidFlavor() || isIndependentFlavor()) {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/sync_service.dart';
+import "package:styled_text/styled_text.dart";
 
 class GrantPermissionsWidget extends StatelessWidget {
   const GrantPermissionsWidget({Key? key}) : super(key: key);
@@ -49,24 +50,20 @@ class GrantPermissionsWidget extends StatelessWidget {
               const SizedBox(height: 36),
               Padding(
                 padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
-                child: RichText(
-                  text: TextSpan(
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall!
-                        .copyWith(fontWeight: FontWeight.w700),
-                    children: [
-                      const TextSpan(text: 'ente '),
-                      TextSpan(
-                        text: "needs permission to ",
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall!
-                            .copyWith(fontWeight: FontWeight.w400),
-                      ),
-                      const TextSpan(text: 'preserve your photos'),
-                    ],
-                  ),
+                child: StyledText(
+                  text: S.of(context).entePhotosPerm,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall!
+                      .copyWith(fontWeight: FontWeight.w700),
+                  tags: {
+                    'i': StyledTextTag(
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall!
+                          .copyWith(fontWeight: FontWeight.w400),
+                    ),
+                  },
                 ),
               ),
             ],

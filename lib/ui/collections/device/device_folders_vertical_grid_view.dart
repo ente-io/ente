@@ -95,7 +95,7 @@ class _DeviceFolderVerticalGridViewState
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: crossAxisItemCount,
                         crossAxisSpacing: 16.0,
-                        childAspectRatio: thumbnailSize / (thumbnailSize + 10),
+                        childAspectRatio: thumbnailSize / (thumbnailSize + 22),
                       ),
                     ),
                   );

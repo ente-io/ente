@@ -300,6 +300,16 @@ class S {
     );
   }
 
+  /// `ente <i>needs permission to</i> preserve your photos`
+  String get entePhotosPerm {
+    return Intl.message(
+      'ente <i>needs permission to</i> preserve your photos',
+      name: 'entePhotosPerm',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Ok`
   String get ok {
     return Intl.message(
@@ -2908,6 +2918,28 @@ class S {
     );
   }
 
+  /// `{count, plural, =1 {Delete {count} item} other {Delete {count} items}}`
+  String deleteItemCount(num count) {
+    return Intl.plural(
+      count,
+      one: 'Delete $count item',
+      other: 'Delete $count items',
+      name: 'deleteItemCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count} files, {formattedSize} each`
+  String duplicateItemsGroup(int count, String formattedSize) {
+    return Intl.message(
+      '$count files, $formattedSize each',
+      name: 'duplicateItemsGroup',
+      desc: 'Display the number of duplicate files and their size',
+      args: [count, formattedSize],
+    );
+  }
+
   /// `{count, plural, one{{count} year ago} other{{count} years ago}}`
   String yearsAgo(num count) {
     return Intl.plural(
@@ -3402,6 +3434,36 @@ class S {
     );
   }
 
+  /// `Notifications`
+  String get notifications {
+    return Intl.message(
+      'Notifications',
+      name: 'notifications',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New shared photos`
+  String get sharedPhotoNotifications {
+    return Intl.message(
+      'New shared photos',
+      name: 'sharedPhotoNotifications',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Receive notifications when someone adds a photo to a shared album that you're a part of`
+  String get sharedPhotoNotificationsExplanation {
+    return Intl.message(
+      'Receive notifications when someone adds a photo to a shared album that you\'re a part of',
+      name: 'sharedPhotoNotificationsExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Advanced`
   String get advanced {
     return Intl.message(
@@ -3807,6 +3869,16 @@ class S {
     return Intl.message(
       'Free trial valid till $endDate',
       name: 'freeTrialValidTill',
+      desc: '',
+      args: [endDate],
+    );
+  }
+
+  /// `Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.`
+  String playStoreFreeTrialValidTill(Object endDate) {
+    return Intl.message(
+      'Free trial valid till $endDate.\nYou can choose a paid plan afterwards.',
+      name: 'playStoreFreeTrialValidTill',
       desc: '',
       args: [endDate],
     );
@@ -7338,6 +7410,26 @@ class S {
     return Intl.message(
       'Add photos',
       name: 'addPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unpin album`
+  String get unpinAlbum {
+    return Intl.message(
+      'Unpin album',
+      name: 'unpinAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pin album`
+  String get pinAlbum {
+    return Intl.message(
+      'Pin album',
+      name: 'pinAlbum',
       desc: '',
       args: [],
     );

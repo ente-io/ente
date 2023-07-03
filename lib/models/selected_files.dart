@@ -71,4 +71,11 @@ class SelectedFiles extends ChangeNotifier {
     files.clear();
     notifyListeners();
   }
+
+  /// Retains only the files that are present in the [images] set. Takes the
+  /// intersection of the two sets.
+  void filesToRetain(Set<File> images) {
+    files.retainAll(images);
+    notifyListeners();
+  }
 }

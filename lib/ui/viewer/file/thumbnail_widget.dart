@@ -24,6 +24,7 @@ class ThumbnailWidget extends StatefulWidget {
   final BoxFit fit;
   final bool shouldShowSyncStatus;
   final bool shouldShowArchiveStatus;
+  final bool shouldShowPinIcon;
   final bool showFavForAlbumOnly;
   final bool shouldShowLivePhotoOverlay;
   final Duration? diskLoadDeferDuration;
@@ -38,6 +39,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.shouldShowSyncStatus = true,
     this.shouldShowLivePhotoOverlay = false,
     this.shouldShowArchiveStatus = false,
+    this.shouldShowPinIcon = false,
     this.showFavForAlbumOnly = false,
     this.shouldShowOwnerAvatar = false,
     this.diskLoadDeferDuration,
@@ -181,6 +183,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     // todo: Move this icon overlay to the collection widget.
     if (widget.shouldShowArchiveStatus) {
       viewChildren.add(const ArchiveOverlayIcon());
+    }
+    if (widget.shouldShowPinIcon) {
+      viewChildren.add(const PinOverlayIcon());
     }
 
     return Stack(

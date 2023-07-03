@@ -1,19 +1,18 @@
 import "dart:async";
 import "dart:isolate";
-import "dart:math";
 
+import "package:collection/collection.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/file.dart";
-import "package:photos/models/location/location.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/map/image_marker.dart";
-import 'package:photos/ui/map/image_tile.dart';
 import "package:photos/ui/map/map_isolate.dart";
+import "package:photos/ui/map/map_pull_up_gallery.dart";
 import "package:photos/ui/map/map_view.dart";
 import "package:photos/utils/toast_util.dart";
 
@@ -40,14 +39,16 @@ class _MapScreenState extends State<MapScreen> {
       StreamController<List<File>>.broadcast();
   MapController mapController = MapController();
   bool isLoading = true;
-  double initialZoom = 4.0;
+  double initialZoom = 4.5;
   double maxZoom = 18.0;
-  double minZoom = 0.0;
+  double minZoom = 2.8;
   int debounceDuration = 500;
   LatLng center = LatLng(46.7286, 4.8614);
   final Logger _logger = Logger("_MapScreenState");
   StreamSubscription? _mapMoveSubscription;
   Isolate? isolate;
+  static const bottomSheetDraggableAreaHeight = 32.0;
+  List<File>? prevMessage;
 
   @override
   void initState() {
@@ -72,30 +73,21 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> processFiles(List<File> files) async {
-    late double minLat, maxLat, minLon, maxLon;
     final List<ImageMarker> tempMarkers = [];
     bool hasAnyLocation = false;
+    File? mostRecentFile;
     for (var file in files) {
-      if (kDebugMode && !file.hasLocation) {
-        final rand = Random();
-        file.location = Location(
-          latitude: 46.7286 + rand.nextDouble() * 0.1,
-          longitude: 4.8614 + rand.nextDouble() * 0.1,
-        );
-      }
       if (file.hasLocation && file.location != null) {
-        if (!hasAnyLocation) {
-          minLat = file.location!.latitude!;
-          minLon = file.location!.longitude!;
-          maxLat = file.location!.latitude!;
-          maxLon = file.location!.longitude!;
-          hasAnyLocation = true;
+        hasAnyLocation = true;
+
+        if (mostRecentFile == null) {
+          mostRecentFile = file;
         } else {
-          minLat = min(minLat, file.location!.latitude!);
-          minLon = min(minLon, file.location!.longitude!);
-          maxLat = max(maxLat, file.location!.latitude!);
-          maxLon = max(maxLon, file.location!.longitude!);
+          if ((mostRecentFile.creationTime ?? 0) < (file.creationTime ?? 0)) {
+            mostRecentFile = file;
+          }
         }
+
         tempMarkers.add(
           ImageMarker(
             latitude: file.location!.latitude!,
@@ -108,22 +100,12 @@ class _MapScreenState extends State<MapScreen> {
 
     if (hasAnyLocation) {
       center = LatLng(
-        minLat + (maxLat - minLat) / 2,
-        minLon + (maxLon - minLon) / 2,
+        mostRecentFile!.location!.latitude!,
+        mostRecentFile.location!.longitude!,
       );
-      final latRange = maxLat - minLat;
-      final lonRange = maxLon - minLon;
 
-      final latZoom = log(360.0 / latRange) / log(2);
-      final lonZoom = log(180.0 / lonRange) / log(2);
-
-      initialZoom = min(latZoom, lonZoom);
-      if (initialZoom <= minZoom) initialZoom = minZoom + 1;
-      if (initialZoom >= (maxZoom - 1)) initialZoom = maxZoom - 1;
       if (kDebugMode) {
         debugPrint("Info for map: center $center, initialZoom $initialZoom");
-        debugPrint("Info for map: minLat $minLat, maxLat $maxLat");
-        debugPrint("Info for map: minLon $minLon, maxLon $maxLon");
       }
     } else {
       showShortToast(context, "No images with location");
@@ -159,7 +141,11 @@ class _MapScreenState extends State<MapScreen> {
 
     _mapMoveSubscription = receivePort.listen((dynamic message) async {
       if (message is List<File>) {
-        visibleImages.sink.add(message);
+        if (!message.equals(prevMessage ?? [])) {
+          visibleImages.sink.add(message);
+        }
+
+        prevMessage = message;
       } else {
         _mapMoveSubscription?.cancel();
         isolate?.kill();
@@ -188,98 +174,42 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final bottomUnsafeArea = MediaQuery.of(context).padding.bottom;
     return Container(
       color: colorScheme.backgroundBase,
-      child: SafeArea(
-        top: false,
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          bottomSheetTheme: const BottomSheetThemeData(
+            backgroundColor: Colors.transparent,
+          ),
+        ),
         child: Scaffold(
           body: Stack(
             children: [
-              Column(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(6),
-                        bottomRight: Radius.circular(6),
+              LayoutBuilder(
+                builder: (context, constrains) {
+                  return SizedBox(
+                    height: constrains.maxHeight * 0.75 +
+                        bottomSheetDraggableAreaHeight -
+                        bottomUnsafeArea,
+                    child: MapView(
+                      key: ValueKey(
+                        'image-marker-count-${imageMarkers.length}',
                       ),
-                      child: MapView(
-                        key: ValueKey(
-                          'image-marker-count-${imageMarkers.length}',
-                        ),
-                        controller: mapController,
-                        imageMarkers: imageMarkers,
-                        updateVisibleImages: calculateVisibleMarkers,
-                        center: center,
-                        initialZoom: initialZoom,
-                        minZoom: minZoom,
-                        maxZoom: maxZoom,
-                        debounceDuration: debounceDuration,
-                      ),
+                      controller: mapController,
+                      imageMarkers: imageMarkers,
+                      updateVisibleImages: calculateVisibleMarkers,
+                      center: center,
+                      initialZoom: initialZoom,
+                      minZoom: minZoom,
+                      maxZoom: maxZoom,
+                      debounceDuration: debounceDuration,
+                      bottomSheetDraggableAreaHeight:
+                          bottomSheetDraggableAreaHeight,
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(2),
-                      topRight: Radius.circular(2),
-                    ),
-                    child: SizedBox(
-                      height: 116,
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        switchInCurve: Curves.easeInOutExpo,
-                        switchOutCurve: Curves.easeInOutExpo,
-                        child: StreamBuilder<List<File>>(
-                          stream: visibleImages.stream,
-                          builder: (
-                            BuildContext context,
-                            AsyncSnapshot<List<File>> snapshot,
-                          ) {
-                            if (!snapshot.hasData) {
-                              return const Text("Loading...");
-                            }
-                            final images = snapshot.data!;
-                            _logger.info("Visible images: ${images.length}");
-                            if (images.isEmpty) {
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "No photos found here",
-                                    style: textTheme.large,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "Zoom out to see photos",
-                                    style: textTheme.smallFaint,
-                                  )
-                                ],
-                              );
-                            }
-                            return ListView.builder(
-                              itemCount: images.length,
-                              scrollDirection: Axis.horizontal,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 2),
-                              physics: const BouncingScrollPhysics(),
-                              itemBuilder: (context, index) {
-                                final image = images[index];
-                                return ImageTile(
-                                  image: image,
-                                  visibleImages: images,
-                                  index: index,
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                  );
+                },
               ),
               isLoading
                   ? EnteLoadingWidget(
@@ -288,6 +218,11 @@ class _MapScreenState extends State<MapScreen> {
                     )
                   : const SizedBox.shrink(),
             ],
+          ),
+          bottomSheet: MapPullUpGallery(
+            visibleImages,
+            bottomSheetDraggableAreaHeight,
+            bottomUnsafeArea,
           ),
         ),
       ),

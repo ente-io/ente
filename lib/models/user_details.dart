@@ -43,14 +43,11 @@ class UserDetails {
   }
 
   int getFreeStorage() {
-    return max(
-      isPartOfFamily()
-          ? (familyData!.storage - familyData!.getTotalUsage())
-          : (subscription.storage - (usage)),
-      0,
-    );
+    return max(getTotalStorage() - getFamilyOrPersonalUsage(), 0);
   }
 
+  // getTotalStorage will return total storage available including the
+  // storage bonus
   int getTotalStorage() {
     return (isPartOfFamily() ? familyData!.storage : subscription.storage) +
         storageBonus;

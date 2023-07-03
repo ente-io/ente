@@ -9,7 +9,6 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
-import 'package:photos/extensions/list.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
@@ -90,27 +89,13 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   Future<List<Collection>> _getCollections() async {
     final List<Collection> collections =
         CollectionsService.instance.getCollectionsForUI();
-
-    // Remove uncategorized collection
-    collections.removeWhere(
-      (t) => t.type == CollectionType.uncategorized,
-    );
-    final ListMatch<Collection> favMathResult = collections.splitMatch(
-      (element) => element.type == CollectionType.favorites,
-    );
-
-    // Hide fav collection if it's empty
-    if (!FavoritesService.instance.hasFavorites()) {
-      favMathResult.matched.clear();
-    }
-
+    final bool hasFavorites = FavoritesService.instance.hasFavorites();
     late Map<int, int> collectionIDToNewestPhotoTime;
     if (sortKey == AlbumSortKey.newestPhoto) {
       collectionIDToNewestPhotoTime =
           await CollectionsService.instance.getCollectionIDToNewestFileTime();
     }
-
-    favMathResult.unmatched.sort(
+    collections.sort(
       (first, second) {
         if (sortKey == AlbumSortKey.albumName) {
           return compareAsciiLowerCaseNatural(
@@ -127,14 +112,28 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
         }
       },
     );
-    // This is a way to identify collection which were automatically created
-    // during create link flow for selected files
-    final ListMatch<Collection> potentialSharedLinkCollection =
-        favMathResult.unmatched.splitMatch(
-      (e) => (e.isSharedFilesCollection()),
-    );
+    final List<Collection> favorites = [];
+    final List<Collection> pinned = [];
+    final List<Collection> rest = [];
+    for (final collection in collections) {
+      if (collection.type == CollectionType.uncategorized ||
+          collection.isSharedFilesCollection() ||
+          collection.isHidden()) {
+        continue;
+      }
+      if (collection.type == CollectionType.favorites) {
+        // Hide fav collection if it's empty
+        if (hasFavorites) {
+          favorites.add(collection);
+        }
+      } else if (collection.isPinned) {
+        pinned.add(collection);
+      } else {
+        rest.add(collection);
+      }
+    }
 
-    return favMathResult.matched + potentialSharedLinkCollection.unmatched;
+    return favorites + pinned + rest;
   }
 
   Widget _getCollectionsGalleryWidget(List<Collection> collections) {

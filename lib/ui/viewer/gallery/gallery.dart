@@ -49,6 +49,7 @@ class Gallery extends StatefulWidget {
   // will select if even when no other item is selected.
   final bool inSelectionMode;
   final bool showSelectAllByDefault;
+  final bool isScrollablePositionedList;
 
   // add a Function variable to get sort value in bool
   final SortAscFn? sortAsyncFn;
@@ -73,6 +74,7 @@ class Gallery extends StatefulWidget {
     this.inSelectionMode = false,
     this.sortAsyncFn,
     this.showSelectAllByDefault = true,
+    this.isScrollablePositionedList = true,
     Key? key,
   }) : super(key: key);
 
@@ -247,6 +249,7 @@ class _GalleryState extends State<Gallery> {
         footer: widget.footer,
         selectedFiles: widget.selectedFiles,
         showSelectAllByDefault: widget.showSelectAllByDefault,
+        isScrollablePositionedList: widget.isScrollablePositionedList,
       ),
     );
   }

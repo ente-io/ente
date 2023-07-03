@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -13,6 +14,8 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
+import "package:photos/events/collection_updated_event.dart";
+import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
@@ -20,11 +23,13 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection_items.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/entity_service.dart";
 import 'package:photos/services/local_sync_service.dart';
+import "package:photos/services/notification_service.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
@@ -46,7 +51,9 @@ import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings_page.dart';
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -79,6 +86,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   StreamSubscription? _intentDataStreamSubscription;
   List<SharedMediaFile>? _sharedFiles;
   bool _shouldRenderCreateCollectionSheet = false;
+  bool _showShowBackupHook = false;
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -89,6 +97,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<SyncStatusUpdate> _firstImportEvent;
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
+  late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
 
   @override
   void initState() {
@@ -162,6 +171,18 @@ class _HomeWidgetState extends State<HomeWidget> {
         setState(() {});
       }
     });
+    _collectionUpdatedEvent = Bus.instance.on<CollectionUpdatedEvent>().listen(
+      (event) async {
+        // only reset state if backup hook is shown. This is to ensure that
+        // during first sync, we don't keep showing backup hook if user has
+        // files
+        if (mounted &&
+            _showShowBackupHook &&
+            event.type == EventType.addedOrUpdated) {
+          setState(() {});
+        }
+      },
+    );
     _initDeepLinks();
     UpdateService.instance.shouldUpdate().then((shouldUpdate) {
       if (shouldUpdate) {
@@ -188,6 +209,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         },
       ),
     );
+
+    NotificationService.instance.init(_onDidReceiveNotificationResponse);
 
     super.initState();
   }
@@ -236,6 +259,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _backupFoldersUpdatedEvent.cancel();
     _accountConfiguredEvent.cancel();
     _intentDataStreamSubscription?.cancel();
+    _collectionUpdatedEvent.cancel();
     super.dispose();
   }
 
@@ -346,7 +370,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     }
 
-    final bool showBackupFolderHook =
+    _showShowBackupHook =
         !Configuration.instance.hasSelectedAnyBackupFolder() &&
             !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
             CollectionsService.instance.getActiveCollections().isEmpty;
@@ -368,7 +392,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               openDrawer: Scaffold.of(context).openDrawer,
               physics: const BouncingScrollPhysics(),
               children: [
-                showBackupFolderHook
+                _showShowBackupHook
                     ? const StartBackupHookWidget(headerWidget: _headerWidget)
                     : HomeGalleryWidget(
                         header: _headerWidget,
@@ -474,5 +498,30 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
     // Do not show change dialog again
     UpdateService.instance.hideChangeLog().ignore();
+  }
+
+  void _onDidReceiveNotificationResponse(
+    NotificationResponse notificationResponse,
+  ) async {
+    final String? payload = notificationResponse.payload;
+    if (payload != null) {
+      debugPrint('notification payload: $payload');
+      final collectionID = Uri.parse(payload).queryParameters["collectionID"];
+      if (collectionID != null) {
+        final collection = CollectionsService.instance
+            .getCollectionByID(int.parse(collectionID))!;
+        final thumbnail =
+            await CollectionsService.instance.getCover(collection);
+        routeToPage(
+          context,
+          CollectionPage(
+            CollectionWithThumbnail(
+              collection,
+              thumbnail,
+            ),
+          ),
+        );
+      }
+    }
   }
 }

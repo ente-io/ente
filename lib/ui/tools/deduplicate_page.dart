@@ -350,12 +350,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   }
 
   Widget _getDeleteButton() {
-    String text;
-    if (_selectedFiles.length == 1) {
-      text = "Delete 1 item";
-    } else {
-      text = "Delete " + _selectedFiles.length.toString() + " items";
-    }
+    final String text = S.of(context).deleteItemCount(_selectedFiles.length);
     int size = 0;
     for (final file in _selectedFiles) {
       size += _fileSizeMap[file.uploadedFileID]!;
@@ -416,10 +411,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         Padding(
           padding: const EdgeInsets.fromLTRB(2, 4, 4, 12),
           child: Text(
-            duplicates.files.length.toString() +
-                " files, " +
-                formatBytes(duplicates.size) +
-                " each",
+            S.of(context).duplicateItemsGroup(
+                  duplicates.files.length,
+                  formatBytes(duplicates.size),
+                ),
             style: Theme.of(context).textTheme.titleSmall,
           ),
         ),

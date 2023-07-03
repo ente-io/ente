@@ -1,5 +1,3 @@
-import "dart:async";
-
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart";
@@ -10,6 +8,7 @@ import 'package:photos/ui/map/map_gallery_tile.dart';
 import 'package:photos/ui/map/map_gallery_tile_badge.dart';
 import "package:photos/ui/map/map_marker.dart";
 import "package:photos/ui/map/tile/layers.dart";
+import "package:photos/utils/debouncer.dart";
 
 class MapView extends StatefulWidget {
   final List<ImageMarker> imageMarkers;
@@ -20,6 +19,7 @@ class MapView extends StatefulWidget {
   final double maxZoom;
   final double initialZoom;
   final int debounceDuration;
+  final double bottomSheetDraggableAreaHeight;
 
   const MapView({
     Key? key,
@@ -31,6 +31,7 @@ class MapView extends StatefulWidget {
     required this.maxZoom,
     required this.initialZoom,
     required this.debounceDuration,
+    required this.bottomSheetDraggableAreaHeight,
   }) : super(key: key);
 
   @override
@@ -38,9 +39,9 @@ class MapView extends StatefulWidget {
 }
 
 class _MapViewState extends State<MapView> {
-  Timer? _debounceTimer;
-  bool _isDebouncing = false;
   late List<Marker> _markers;
+  final _debouncer =
+      Debouncer(const Duration(milliseconds: 300), executionInterval: 750);
 
   @override
   void initState() {
@@ -50,23 +51,15 @@ class _MapViewState extends State<MapView> {
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
-    _debounceTimer = null;
     super.dispose();
   }
 
   void onChange(LatLngBounds bounds) {
-    if (!_isDebouncing) {
-      _isDebouncing = true;
-      _debounceTimer?.cancel();
-      _debounceTimer = Timer(
-        Duration(milliseconds: widget.debounceDuration),
-        () {
-          widget.updateVisibleImages(bounds);
-          _isDebouncing = false;
-        },
-      );
-    }
+    _debouncer.run(
+      () async {
+        widget.updateVisibleImages(bounds);
+      },
+    );
   }
 
   @override
@@ -81,13 +74,24 @@ class _MapViewState extends State<MapView> {
             maxZoom: widget.maxZoom,
             enableMultiFingerGestureRace: true,
             zoom: widget.initialZoom,
+            maxBounds: LatLngBounds(
+              LatLng(-90, -180),
+              LatLng(90, 180),
+            ),
             onPositionChanged: (position, hasGesture) {
               if (position.bounds != null) {
                 onChange(position.bounds!);
               }
             },
           ),
-          nonRotatedChildren: const [OSMFranceTileAttributes()],
+          nonRotatedChildren: [
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: widget.bottomSheetDraggableAreaHeight,
+              ),
+              child: const OSMFranceTileAttributes(),
+            )
+          ],
           children: [
             const OSMFranceTileLayer(),
             MarkerClusterLayerWidget(
@@ -97,13 +101,11 @@ class _MapViewState extends State<MapView> {
                 showPolygon: false,
                 size: const Size(75, 75),
                 fitBoundsOptions: const FitBoundsOptions(
-                  padding: EdgeInsets.all(1),
+                  padding: EdgeInsets.all(80),
                 ),
                 markers: _markers,
                 onClusterTap: (_) {
-                  if (!_isDebouncing) {
-                    onChange(widget.controller.bounds!);
-                  }
+                  onChange(widget.controller.bounds!);
                 },
                 builder: (context, List<Marker> markers) {
                   final index = int.parse(
@@ -143,7 +145,7 @@ class _MapViewState extends State<MapView> {
           ),
         ),
         Positioned(
-          bottom: 10,
+          bottom: widget.bottomSheetDraggableAreaHeight + 10,
           right: 10,
           child: Column(
             children: [

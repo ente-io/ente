@@ -253,18 +253,27 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       // action can to be performed
       includeCollab: widget.actionType == CollectionActionType.addFiles,
     );
-    collections.removeWhere(
-      (element) => (element.type == CollectionType.favorites ||
-          element.type == CollectionType.uncategorized ||
-          element.isSharedFilesCollection()),
-    );
     collections.sort((first, second) {
       return compareAsciiLowerCaseNatural(
         first.displayName,
         second.displayName,
       );
     });
-    return collections;
+    final List<Collection> pinned = [];
+    final List<Collection> unpinned = [];
+    for (final collection in collections) {
+      if (collection.isSharedFilesCollection() ||
+          collection.type == CollectionType.favorites ||
+          collection.type == CollectionType.uncategorized) {
+        continue;
+      }
+      if (collection.isPinned) {
+        pinned.add(collection);
+      } else {
+        unpinned.add(collection);
+      }
+    }
+    return pinned + unpinned;
   }
 
   void _removeIncomingCollections(List<Collection> items) {

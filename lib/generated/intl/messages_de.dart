@@ -21,7 +21,7 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'de';
 
   static String m0(count) =>
-      "${Intl.plural(count, one: 'Füge ein Element hinzu', other: 'Füge # Elemente hinzu')}";
+      "${Intl.plural(count, one: 'Element hinzufügen', other: 'Elemente hinzufügen')}";
 
   static String m1(emailOrName) => "Von ${emailOrName} hinzugefügt";
 
@@ -108,7 +108,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, zero: 'keine Erinnerungsstücke', one: '${formattedCount} Erinnerung', other: '${formattedCount} Erinnerungsstücke')}";
 
   static String m30(count) =>
-      "${Intl.plural(count, one: '# Element', other: '# Elemente')}";
+      "${Intl.plural(count, one: 'Element verschieben', other: 'Elemente verschieben')}";
 
   static String m31(albumName) => "Erfolgreich zu ${albumName} hinzugefügt";
 
@@ -229,7 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "advanced": MessageLookupByLibrary.simpleMessage("Erweitert"),
         "advancedSettings": MessageLookupByLibrary.simpleMessage("Erweitert"),
         "after1Day": MessageLookupByLibrary.simpleMessage("Nach einem Tag"),
-        "after1Hour": MessageLookupByLibrary.simpleMessage("Nach 1. Stunde"),
+        "after1Hour": MessageLookupByLibrary.simpleMessage("Nach 1 Stunde"),
         "after1Month": MessageLookupByLibrary.simpleMessage("Nach 1 Monat"),
         "after1Week": MessageLookupByLibrary.simpleMessage("Nach 1 Woche"),
         "after1Year": MessageLookupByLibrary.simpleMessage("Nach 1 Jahr"),

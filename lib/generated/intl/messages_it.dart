@@ -54,6 +54,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m10(provider) =>
       "Scrivi all\'indirizzo support@ente.io per gestire il tuo abbonamento ${provider}.";
 
+  static String m63(count) =>
+      "${Intl.plural(count, one: 'Elimina ${count} elemento', other: 'Elimina ${count} elementi')}";
+
   static String m11(currentlyDeleting, totalCount) =>
       "Eliminazione di ${currentlyDeleting} / ${totalCount}";
 
@@ -65,6 +68,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m14(count, storageSaved) =>
       "Hai ripulito ${Intl.plural(count, one: '${count} doppione', other: '${count} doppioni')}, salvando (${storageSaved}!)";
+
+  static String m64(count, formattedSize) =>
+      "${count} file, ${formattedSize} l\'uno";
 
   static String m15(newEmail) => "Email cambiata in ${newEmail}";
 
@@ -119,6 +125,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m34(reason) =>
       "Purtroppo il tuo pagamento non è riuscito a causa di ${reason}";
+
+  static String m65(endDate) =>
+      "Prova gratuita valida fino al ${endDate}.\nPuoi scegliere un piano a pagamento in seguito.";
 
   static String m35(toEmail) => "Per favore invia un\'email a ${toEmail}";
 
@@ -494,6 +503,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Elimina dal dispositivo"),
         "deleteFromEnte":
             MessageLookupByLibrary.simpleMessage("Elimina da ente"),
+        "deleteItemCount": m63,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Elimina posizione"),
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Elimina foto"),
@@ -553,6 +563,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Scaricamento in corso..."),
         "dropSupportEmail": m13,
         "duplicateFileCountWithStorageSaved": m14,
+        "duplicateItemsGroup": m64,
         "edit": MessageLookupByLibrary.simpleMessage("Modifica"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Modifica luogo"),
@@ -566,6 +577,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "empty": MessageLookupByLibrary.simpleMessage("Vuoto"),
         "emptyTrash":
             MessageLookupByLibrary.simpleMessage("Vuoi svuotare il cestino?"),
+        "enableMaps": MessageLookupByLibrary.simpleMessage("Abilita le Mappe"),
+        "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
+            "Questo mostrerà le tue foto su una mappa del mondo.\n\nQuesta mappa è ospitata da Open Street Map e le posizioni esatte delle tue foto non sono mai condivise.\n\nPuoi disabilitare questa funzionalità in qualsiasi momento, dalle Impostazioni."),
         "encryptingBackup":
             MessageLookupByLibrary.simpleMessage("Crittografando il backup..."),
         "encryption": MessageLookupByLibrary.simpleMessage("Crittografia"),
@@ -576,6 +590,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enteCanEncryptAndPreserveFilesOnlyIfYouGrant":
             MessageLookupByLibrary.simpleMessage(
                 "ente può criptare e preservare i file solo se concedi l\'accesso alle foto e ai video"),
+        "entePhotosPerm": MessageLookupByLibrary.simpleMessage(
+            "ente <i>necessita del permesso per</i> preservare le tue foto"),
         "enteSubscriptionPitch": MessageLookupByLibrary.simpleMessage(
             "ente conserva i tuoi ricordi, in modo che siano sempre a disposizione, anche se perdi il dispositivo."),
         "enteSubscriptionShareWithFamily": MessageLookupByLibrary.simpleMessage(
@@ -680,6 +696,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Raggruppa foto nelle vicinanze"),
         "hidden": MessageLookupByLibrary.simpleMessage("Nascosti"),
         "hide": MessageLookupByLibrary.simpleMessage("Nascondi"),
+        "hostedAtOsmFrance":
+            MessageLookupByLibrary.simpleMessage("Ospitato presso OSM France"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Come funziona"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
             "Chiedi di premere a lungo il loro indirizzo email nella schermata delle impostazioni e verificare che gli ID su entrambi i dispositivi corrispondano."),
@@ -809,6 +827,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Gestisci"),
         "manageSubscription":
             MessageLookupByLibrary.simpleMessage("Gestisci abbonamento"),
+        "map": MessageLookupByLibrary.simpleMessage("Mappa"),
+        "maps": MessageLookupByLibrary.simpleMessage("Mappe"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "maxDeviceLimitSpikeHandling": m28,
@@ -851,6 +871,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nessun risultato trovato"),
         "nothingToSeeHere":
             MessageLookupByLibrary.simpleMessage("Nulla da vedere qui! 👀"),
+        "notifications": MessageLookupByLibrary.simpleMessage("Notifiche"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "onDevice": MessageLookupByLibrary.simpleMessage("Sul dispositivo"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
@@ -862,6 +883,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oops! Qualcosa è andato storto"),
         "openTheItem":
             MessageLookupByLibrary.simpleMessage("• Apri la foto o il video"),
+        "openstreetmapContributors": MessageLookupByLibrary.simpleMessage(
+            "Collaboratori di OpenStreetMap"),
         "optionalAsShortAsYouLike": MessageLookupByLibrary.simpleMessage(
             "Facoltativo, breve quanto vuoi..."),
         "orPickAnExistingOne": MessageLookupByLibrary.simpleMessage(
@@ -898,6 +921,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Le foto aggiunte da te verranno rimosse dall\'album"),
         "pickCenterPoint": MessageLookupByLibrary.simpleMessage(
             "Selezionare il punto centrale"),
+        "pinAlbum": MessageLookupByLibrary.simpleMessage("Fissa l\'album"),
+        "playStoreFreeTrialValidTill": m65,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("Abbonamento su PlayStore"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
@@ -1079,6 +1104,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "setAPassword":
             MessageLookupByLibrary.simpleMessage("Imposta una password"),
         "setAs": MessageLookupByLibrary.simpleMessage("Imposta come"),
+        "setCover": MessageLookupByLibrary.simpleMessage("Imposta copertina"),
         "setLabel": MessageLookupByLibrary.simpleMessage("Imposta"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Imposta password"),
@@ -1107,6 +1133,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Crea album condivisi e collaborativi con altri utenti ente, inclusi utenti su piani gratuiti."),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("Condiviso da me"),
+        "sharedPhotoNotifications":
+            MessageLookupByLibrary.simpleMessage("Nuove foto condivise"),
+        "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
+            "Ricevi notifiche quando qualcuno aggiunge una foto a un album condiviso, di cui fai parte"),
         "sharedWith": m47,
         "sharedWithMe":
             MessageLookupByLibrary.simpleMessage("Condivisi con me"),
@@ -1272,6 +1302,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unhidingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Mostra i file nell\'album"),
         "unlock": MessageLookupByLibrary.simpleMessage("Sblocca"),
+        "unpinAlbum": MessageLookupByLibrary.simpleMessage("Non fissare album"),
         "unselectAll":
             MessageLookupByLibrary.simpleMessage("Deseleziona tutto"),
         "update": MessageLookupByLibrary.simpleMessage("Aggiorna"),
