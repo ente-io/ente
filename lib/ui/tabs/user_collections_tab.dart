@@ -152,19 +152,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 12.0, bottom: 8, right: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    S.of(context).albums,
-                    style: enteTextTheme.h2Bold,
-                  ),
-                  const CreateNewAlbumIcon(),
-                ],
-              ),
-            ),
             SectionOptions(
               SectionTitle(title: S.of(context).onDevice),
               trailingWidget: IconButtonWidget(
@@ -188,11 +175,34 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             SectionOptions(
               SectionTitle(titleWithBrand: getOnEnteSection(context)),
               trailingWidget: _sortMenu(collections),
+              padding: const EdgeInsets.only(left: 12, right: 6),
             ),
             DeleteEmptyAlbums(collections ?? []),
             Configuration.instance.hasConfiguredAccount()
                 ? CollectionsHorizontalGridView(collections)
                 : const EmptyState(),
+            GestureDetector(
+              onTap: () {
+                unawaited(
+                  routeToPage(
+                    context,
+                    CollectionVerticalGridView(
+                      collections,
+                      appTitle: SectionTitle(
+                        titleWithBrand: getOnEnteSection(context),
+                      ),
+                    ),
+                  ),
+                );
+              },
+              child: SectionOptions(
+                SectionTitle(title: S.of(context).viewAll, mutedTitle: true),
+                trailingWidget: const IconButtonWidget(
+                  icon: Icons.chevron_right,
+                  iconButtonType: IconButtonType.secondary,
+                ),
+              ),
+            ),
             const Divider(),
             const SizedBox(height: 16),
             Padding(
@@ -245,6 +255,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
       ),
       child: Row(
         children: [
+          const CreateNewAlbumIcon(),
           GestureDetector(
             onTapDown: (TapDownDetails details) async {
               final int? selectedValue = await showMenu<int>(
@@ -274,23 +285,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               iconButtonType: IconButtonType.secondary,
             ),
           ),
-          IconButtonWidget(
-            icon: Icons.chevron_right,
-            iconButtonType: IconButtonType.secondary,
-            onTap: () {
-              unawaited(
-                routeToPage(
-                  context,
-                  CollectionVerticalGridView(
-                    collections,
-                    appTitle: SectionTitle(
-                      titleWithBrand: getOnEnteSection(context),
-                    ),
-                  ),
-                ),
-              );
-            },
-          )
         ],
       ),
     );

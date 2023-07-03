@@ -6,12 +6,14 @@ import "package:styled_text/styled_text.dart";
 
 class SectionTitle extends StatelessWidget {
   final String? title;
+  final bool mutedTitle;
   final Widget? titleWithBrand;
   final EdgeInsetsGeometry? padding;
 
   const SectionTitle({
     this.title,
     this.titleWithBrand,
+    this.mutedTitle = false,
     Key? key,
     this.padding,
   }) : super(key: key);
@@ -25,7 +27,7 @@ class SectionTitle extends StatelessWidget {
     } else if (title != null) {
       child = Text(
         title!,
-        style: enteTextTheme.largeBold,
+        style: mutedTitle ? enteTextTheme.bodyMuted : enteTextTheme.largeBold,
       );
     } else {
       child = const SizedBox.shrink();

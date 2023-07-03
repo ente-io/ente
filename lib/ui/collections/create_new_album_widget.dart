@@ -16,7 +16,7 @@ class CreateNewAlbumIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButtonWidget(
       icon: Icons.add_rounded,
-      iconButtonType: IconButtonType.primary,
+      iconButtonType: IconButtonType.secondary,
       onTap: () async {
         final result = await showTextInputDialog(
           context,

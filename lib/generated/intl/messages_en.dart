@@ -1294,6 +1294,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("View active sessions"),
+        "viewAll": MessageLookupByLibrary.simpleMessage("View all"),
         "viewAllExifData":
             MessageLookupByLibrary.simpleMessage("View all EXIF data"),
         "viewLogs": MessageLookupByLibrary.simpleMessage("View logs"),

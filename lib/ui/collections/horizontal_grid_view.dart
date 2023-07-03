@@ -1,3 +1,5 @@
+import "dart:math";
+
 import 'package:flutter/material.dart';
 import "package:photos/models/collection.dart";
 import "package:photos/ui/collections/album/row_item.dart";
@@ -18,8 +20,9 @@ class CollectionsHorizontalGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double sizeBoxHeight =
-        (maxThumbnailWidth + albumNameSectionHeight + rowItemBottomPadding) * 2;
+    final double sizeBoxHeight =
+        (maxThumbnailWidth + albumNameSectionHeight + rowItemBottomPadding) *
+            min((collections?.length ?? 0), 2);
 
     return SizedBox(
       height: sizeBoxHeight,

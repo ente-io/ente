@@ -1086,5 +1086,6 @@
   "addPhotos": "Add photos",
   "unpinAlbum": "Unpin album",
   "pinAlbum": "Pin album",
-  "create": "Create"
+  "create": "Create",
+  "viewAll": "View all"
 }
