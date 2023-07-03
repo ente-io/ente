@@ -47,7 +47,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   AlbumSortKey? sortKey;
   String _loadReason = "init";
 
-  static const int _kOnEnteItemLimitCount = 8;
+  static const int _kOnEnteItemLimitCount = 10;
   @override
   void initState() {
     _localFilesSubscription =

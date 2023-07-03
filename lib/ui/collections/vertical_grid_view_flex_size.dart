@@ -21,7 +21,7 @@ class CollectionsFlexiGridViewWidget extends StatelessWidget {
 
   const CollectionsFlexiGridViewWidget(
     this.collections, {
-    this.displayLimitCount = 6,
+    this.displayLimitCount = 10,
     Key? key,
   }) : super(key: key);
 
