@@ -1036,7 +1036,9 @@ export default function Gallery() {
                         activeCollection={activeCollection}
                         isIncomingSharedCollection={
                             collectionSummaries.get(activeCollection)?.type ===
-                            CollectionSummaryType.incomingShare
+                                CollectionSummaryType.incomingShareCollaborator ||
+                            collectionSummaries.get(activeCollection)?.type ===
+                                CollectionSummaryType.incomingShareViewer
                         }
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
@@ -1105,7 +1107,10 @@ export default function Gallery() {
                             isIncomingSharedCollection={
                                 collectionSummaries.get(activeCollection)
                                     ?.type ===
-                                CollectionSummaryType.incomingShare
+                                    CollectionSummaryType.incomingShareCollaborator ||
+                                collectionSummaries.get(activeCollection)
+                                    ?.type ===
+                                    CollectionSummaryType.incomingShareViewer
                             }
                             isInSearchMode={isInSearchMode}
                         />

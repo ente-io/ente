@@ -36,7 +36,8 @@ export default function CollectionInfoWithOptions({
                 return <Favorite />;
             case CollectionSummaryType.archived:
                 return <ArchiveOutlined />;
-            case CollectionSummaryType.incomingShare:
+            case CollectionSummaryType.incomingShareViewer:
+            case CollectionSummaryType.incomingShareCollaborator:
                 return <PeopleIcon />;
             case CollectionSummaryType.outgoingShare:
                 return <PeopleIcon />;

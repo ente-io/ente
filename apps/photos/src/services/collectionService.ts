@@ -48,12 +48,13 @@ import { User } from 'types/user';
 import {
     isQuickLinkCollection,
     isOutgoingShare,
-    isIncomingShare,
     isSharedOnlyViaLink,
     isValidMoveTarget,
     isHiddenCollection,
     getNonHiddenCollections,
     changeCollectionSubType,
+    isIncomingViewerShare,
+    isIncomingCollabShare,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -1024,9 +1025,11 @@ export async function getCollectionSummaries(
                 latestFile: collectionLatestFiles.get(collection.id),
                 fileCount: collectionFilesCount.get(collection.id) ?? 0,
                 updationTime: collection.updationTime,
-                type: isIncomingShare(collection, user)
-                    ? CollectionSummaryType.incomingShare
-                    : isOutgoingShare(collection)
+                type: isIncomingViewerShare(collection, user)
+                    ? CollectionSummaryType.incomingShareViewer
+                    : isIncomingCollabShare(collection, user)
+                    ? CollectionSummaryType.incomingShareCollaborator
+                    : isOutgoingShare(collection, user)
                     ? CollectionSummaryType.outgoingShare
                     : isSharedOnlyViaLink(collection)
                     ? CollectionSummaryType.sharedOnlyViaLink
