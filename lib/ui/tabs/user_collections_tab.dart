@@ -181,28 +181,31 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             Configuration.instance.hasConfiguredAccount()
                 ? CollectionsHorizontalGridView(collections)
                 : const EmptyState(),
-            GestureDetector(
-              onTap: () {
-                unawaited(
-                  routeToPage(
-                    context,
-                    CollectionVerticalGridView(
-                      collections,
-                      appTitle: SectionTitle(
-                        titleWithBrand: getOnEnteSection(context),
+            collections.length > 4
+                ? GestureDetector(
+                    onTap: () {
+                      unawaited(
+                        routeToPage(
+                          context,
+                          CollectionVerticalGridView(
+                            collections,
+                            appTitle: SectionTitle(
+                              titleWithBrand: getOnEnteSection(context),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    child: SectionOptions(
+                      SectionTitle(
+                          title: S.of(context).viewAll, mutedTitle: true),
+                      trailingWidget: const IconButtonWidget(
+                        icon: Icons.chevron_right,
+                        iconButtonType: IconButtonType.secondary,
                       ),
                     ),
-                  ),
-                );
-              },
-              child: SectionOptions(
-                SectionTitle(title: S.of(context).viewAll, mutedTitle: true),
-                trailingWidget: const IconButtonWidget(
-                  icon: Icons.chevron_right,
-                  iconButtonType: IconButtonType.secondary,
-                ),
-              ),
-            ),
+                  )
+                : const SizedBox.shrink(),
             const Divider(),
             const SizedBox(height: 16),
             Padding(
