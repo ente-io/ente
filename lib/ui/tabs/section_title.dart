@@ -38,12 +38,12 @@ class SectionTitle extends StatelessWidget {
   }
 }
 
-class SectionTitleRow extends StatelessWidget {
-  final SectionTitle title;
+class SectionOptions extends StatelessWidget {
+  final Widget title;
   final Widget? trailingWidget;
   final EdgeInsetsGeometry? padding;
 
-  const SectionTitleRow(
+  const SectionOptions(
     this.title, {
     this.trailingWidget,
     this.padding = const EdgeInsets.only(left: 12, right: 0),

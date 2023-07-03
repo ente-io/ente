@@ -165,7 +165,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 ],
               ),
             ),
-            SectionTitleRow(
+            SectionOptions(
               SectionTitle(title: S.of(context).onDevice),
               trailingWidget: IconButtonWidget(
                 icon: Icons.chevron_right,
@@ -176,8 +176,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                       context,
                       DeviceFolderVerticalGridView(
                         appTitle: SectionTitle(
-                          titleWithBrand:
-                              SectionTitle(title: S.of(context).onDevice),
+                          title: S.of(context).onDevice,
                         ),
                       ),
                     ),
@@ -186,7 +185,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               ),
             ),
             const DeviceFoldersGridView(),
-            SectionTitleRow(
+            SectionOptions(
               SectionTitle(titleWithBrand: getOnEnteSection(context)),
               trailingWidget: _sortMenu(collections),
             ),

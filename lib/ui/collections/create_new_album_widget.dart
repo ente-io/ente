@@ -36,7 +36,9 @@ class CreateNewAlbumIcon extends StatelessWidget {
               final Collection c =
                   await CollectionsService.instance.createAlbum(text);
               routeToPage(
-                  context, CollectionPage(CollectionWithThumbnail(c, null)));
+                context,
+                CollectionPage(CollectionWithThumbnail(c, null)),
+              );
             } catch (e, s) {
               Logger("CreateNewAlbumIcon")
                   .severe("Failed to rename album", e, s);

@@ -83,14 +83,18 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
     const maxThumbnailWidth = 160.0;
     final bool hasQuickLinks = collections.quickLinks.isNotEmpty;
+    final SectionTitle sharedWithMe =
+        SectionTitle(title: S.of(context).sharedWithMe);
+    final SectionTitle sharedByMe =
+        SectionTitle(title: S.of(context).sharedByMe);
     return SingleChildScrollView(
       child: Container(
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
             const SizedBox(height: 12),
-            SectionTitleRow(
-              SectionTitle(title: S.of(context).sharedWithMe),
+            SectionOptions(
+              sharedWithMe,
               trailingWidget: collections.incoming.isNotEmpty
                   ? IconButtonWidget(
                       icon: Icons.chevron_right,
@@ -102,9 +106,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                             CollectionVerticalGridView(
                               collections.incoming,
                               tag: "incoming",
-                              appTitle: SectionTitle(
-                                title: S.of(context).sharedWithMe,
-                              ),
+                              appTitle: sharedWithMe,
                             ),
                           ),
                         );
@@ -137,8 +139,8 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                   )
                 : const IncomingAlbumEmptyState(),
             const SizedBox(height: 16),
-            SectionTitleRow(
-              SectionTitle(title: S.of(context).sharedByMe),
+            SectionOptions(
+              sharedByMe,
               trailingWidget: collections.outgoing.isNotEmpty
                   ? IconButtonWidget(
                       icon: Icons.chevron_right,
@@ -150,9 +152,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                             CollectionVerticalGridView(
                               collections.outgoing,
                               tag: "outgoing",
-                              appTitle: SectionTitle(
-                                title: S.of(context).sharedByMe,
-                              ),
+                              appTitle: sharedByMe,
                             ),
                           ),
                         );
@@ -186,7 +186,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                 : const OutgoingAlbumEmptyState(),
             if (hasQuickLinks) const SizedBox(height: 12),
             if (hasQuickLinks)
-              SectionTitleRow(SectionTitle(title: S.of(context).quickLinks)),
+              SectionOptions(SectionTitle(title: S.of(context).quickLinks)),
             if (hasQuickLinks) const SizedBox(height: 4),
             if (hasQuickLinks)
               ListView.builder(
