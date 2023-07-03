@@ -1085,5 +1085,6 @@
   "addFromDevice": "Add from device",
   "addPhotos": "Add photos",
   "unpinAlbum": "Unpin album",
-  "pinAlbum": "Pin album"
+  "pinAlbum": "Pin album",
+  "create": "Create"
 }
