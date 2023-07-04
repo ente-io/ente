@@ -324,6 +324,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 ) : collectionSummaryType ===
                   CollectionSummaryType.incomingShare ? (
                     <SharedCollectionOption
+                        isArchived={isArchived(activeCollection)}
                         handleCollectionAction={handleCollectionAction}
                     />
                 ) : (
