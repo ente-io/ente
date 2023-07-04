@@ -689,15 +689,15 @@ export default function Gallery() {
                         : selectedFiles.filter(
                               (file) => file.ownerID === user.id
                           );
-                if (toProcessFiles.length === 0) {
-                    return;
+                if (toProcessFiles.length > 0) {
+                    await handleCollectionOps(
+                        ops,
+                        collection,
+                        toProcessFiles,
+                        selected.collectionID
+                    );
                 }
-                await handleCollectionOps(
-                    ops,
-                    collection,
-                    toProcessFiles,
-                    selected.collectionID
-                );
+
                 clearSelection();
                 await syncWithRemote(false, true);
                 setActiveCollection(collection.id);
