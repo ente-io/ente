@@ -11,7 +11,7 @@ import SortIcon from '@mui/icons-material/Sort';
 import { t } from 'i18next';
 
 interface Iprops {
-    IsArchived: boolean;
+    isArchived: boolean;
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean
@@ -19,7 +19,7 @@ interface Iprops {
 }
 
 export function AlbumCollectionOption({
-    IsArchived,
+    isArchived,
     handleCollectionAction,
 }: Iprops) {
     return (
@@ -40,7 +40,7 @@ export function AlbumCollectionOption({
                 startIcon={<SortIcon />}>
                 {t('SORT_BY')}
             </OverflowMenuOption>
-            {IsArchived ? (
+            {isArchived ? (
                 <OverflowMenuOption
                     onClick={handleCollectionAction(
                         CollectionActions.UNARCHIVE

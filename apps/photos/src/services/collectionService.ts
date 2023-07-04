@@ -43,7 +43,7 @@ import {
     HIDDEN_SECTION,
 } from 'constants/collection';
 import { SUB_TYPE, UpdateMagicMetadataRequest } from 'types/magicMetadata';
-import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
+import { isArchived, updateMagicMetadata } from 'utils/magicMetadata';
 import { User } from 'types/user';
 import {
     isQuickLinkCollection,
@@ -289,7 +289,7 @@ export const getCollectionLatestFiles = (
         }
         if (
             !latestFiles.has(ALL_SECTION) &&
-            !IsArchived(file) &&
+            !isArchived(file) &&
             file.ownerID === user.id &&
             !archivedCollections.has(file.collectionID)
         ) {
@@ -1030,7 +1030,7 @@ export async function getCollectionSummaries(
                     ? CollectionSummaryType.outgoingShare
                     : isSharedOnlyViaLink(collection)
                     ? CollectionSummaryType.sharedOnlyViaLink
-                    : IsArchived(collection)
+                    : isArchived(collection)
                     ? CollectionSummaryType.archived
                     : isHiddenCollection(collection)
                     ? CollectionSummaryType.hidden
@@ -1107,7 +1107,7 @@ function getCollectionsFileCount(
     for (const file of files) {
         if (isSharedFile(user, file)) {
             continue;
-        } else if (IsArchived(file)) {
+        } else if (isArchived(file)) {
             uniqueArchivedFileIDs.add(file.id);
         } else if (!archivedCollections.has(file.collectionID)) {
             uniqueAllSectionFileIDs.add(file.id);

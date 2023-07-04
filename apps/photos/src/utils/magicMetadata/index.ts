@@ -3,7 +3,7 @@ import { EnteFile } from 'types/file';
 import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
-export function IsArchived(item: Collection | EnteFile) {
+export function isArchived(item: Collection | EnteFile) {
     if (
         !item ||
         !item.magicMetadata ||

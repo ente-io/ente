@@ -10,7 +10,7 @@ import {
 } from 'utils/collection';
 import { SetCollectionNamerAttributes } from '../CollectionNamer';
 import { Collection } from 'types/collection';
-import { IsArchived } from 'utils/magicMetadata';
+import { isArchived } from 'utils/magicMetadata';
 import { GalleryContext } from 'pages/gallery';
 import { logError } from 'utils/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
@@ -328,7 +328,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     />
                 ) : (
                     <AlbumCollectionOption
-                        IsArchived={IsArchived(activeCollection)}
+                        isArchived={isArchived(activeCollection)}
                         handleCollectionAction={handleCollectionAction}
                     />
                 )}
