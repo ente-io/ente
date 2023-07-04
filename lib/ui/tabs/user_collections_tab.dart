@@ -199,14 +199,18 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                         ),
                       );
                     },
-                    child: SectionOptions(
-                      SectionTitle(
-                        title: S.of(context).viewAll,
-                        mutedTitle: true,
-                      ),
-                      trailingWidget: const IconButtonWidget(
-                        icon: Icons.chevron_right,
-                        iconButtonType: IconButtonType.secondary,
+                    child: Container(
+                      // The container is needed to make the whole row clickable
+                      color: Colors.transparent,
+                      child: SectionOptions(
+                        SectionTitle(
+                          title: S.of(context).viewAll,
+                          mutedTitle: true,
+                        ),
+                        trailingWidget: const IconButtonWidget(
+                          icon: Icons.chevron_right,
+                          iconButtonType: IconButtonType.secondary,
+                        ),
                       ),
                     ),
                   )
