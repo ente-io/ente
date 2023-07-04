@@ -3,6 +3,7 @@ import { Collection, PublicURL } from 'types/collection';
 import { appendCollectionKeyToShareURL } from 'utils/collection';
 import ManageAddViewer from '../ShareControl/ManageAddViewer';
 import ManageAddCollab from './MangeAddCollab';
+import ManageParticipants from './ManageParticipants';
 
 export default function ShareControl({
     collection,
@@ -34,13 +35,24 @@ export default function ShareControl({
 
     return (
         <>
-            <ManageAddViewer
-                publicShareProp={publicShareProp}
-                setPublicShareProp={setPublicShareProp}
-                collection={collection}
-                publicShareUrl={publicShareUrl}
-                onRootClose={onRootClose}
-            />
+            {collection.sharees.length > 0 ? (
+                <ManageParticipants
+                    publicShareProp={publicShareProp}
+                    setPublicShareProp={setPublicShareProp}
+                    collection={collection}
+                    publicShareUrl={publicShareUrl}
+                    onRootClose={onRootClose}
+                />
+            ) : (
+                <ManageAddViewer
+                    publicShareProp={publicShareProp}
+                    setPublicShareProp={setPublicShareProp}
+                    collection={collection}
+                    publicShareUrl={publicShareUrl}
+                    onRootClose={onRootClose}
+                />
+            )}
+
             <ManageAddCollab
                 publicShareProp={publicShareProp}
                 setPublicShareProp={setPublicShareProp}

@@ -30,10 +30,13 @@ export default function ManageAddViewer({
     return (
         <>
             <Stack>
-                <Typography color="text.muted" variant="small" padding={1}>
-                    <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
-                    {t('Share with specific people')}
-                </Typography>
+                {collection.sharees.length === 0 && (
+                    <Typography color="text.muted" variant="small" padding={1}>
+                        <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
+                        {t('Share with specific people')}
+                    </Typography>
+                )}
+
                 <MenuItemGroup>
                     <EnteMenuItem
                         startIcon={<AddIcon />}

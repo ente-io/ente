@@ -101,7 +101,11 @@ export default function ViewerEmailShareOptions(
         setSelectedOptions(updatedSelectedOptions);
         console.log(selectedOptions);
         console.log('UpdatedOption list', updatedSelectedOptions);
-        setDisableInput(true);
+        if (updatedSelectedOptions.length === 0) {
+            setDisableInput(false);
+        } else {
+            setDisableInput(true);
+        }
     };
 
     return (

@@ -12,8 +12,9 @@ import { t } from 'i18next';
 import { DialogProps } from '@mui/material';
 import Titlebar from 'components/Titlebar';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import EmailShare from '../emailShare';
+// import EmailShare from '../emailShare';
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
+import CollabEmailShare from './CollabEmailShare';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -58,7 +59,7 @@ export default function ManageAddCollabOptions({
                             title={t('Add a new email')}
                             icon={<WorkspacesIcon />}
                         />
-                        <EmailShare collection={collection} />
+                        <CollabEmailShare collection={collection} />
                     </Stack>
                 </Stack>
             </EnteDrawer>
