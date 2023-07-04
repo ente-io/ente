@@ -160,8 +160,6 @@ class _DetailPageState extends State<DetailPage> {
           //don't toggle full screen for cases where this issue happens.
           playbackCallback: bottomPadding != 0
               ? (isPlaying) {
-                  ///This callback is getting called when the video is seeked which
-                  ///causes the popping.
                   Future.delayed(Duration.zero, () {
                     _toggleFullScreen();
                   });
