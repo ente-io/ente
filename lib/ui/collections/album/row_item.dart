@@ -33,8 +33,10 @@ class AlbumRowItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isOwner = c.isOwner(Configuration.instance.getUserID()!);
-    final String tagPrefix =
-        (isOwner ? "collection" : "shared_collection") + tag;
+    final String tagPrefix = (isOwner ? "collection" : "shared_collection") +
+        tag +
+        "_" +
+        c.id.toString();
     final enteTextTheme = getEnteTextTheme(context);
     return GestureDetector(
       child: Column(
@@ -76,10 +78,14 @@ class AlbumRowItemWidget extends StatelessWidget {
                       ),
                       if (isOwner && (c.hasSharees || c.hasLink))
                         if (c.hasSharees)
-                          Align(
-                            alignment: Alignment.topLeft,
-                            child: AlbumSharesIcons(
-                              sharees: c.getSharees(),
+                          Hero(
+                            tag: tagPrefix + "_sharees",
+                            transitionOnUserGestures: true,
+                            child: Align(
+                              alignment: Alignment.topLeft,
+                              child: AlbumSharesIcons(
+                                sharees: c.getSharees(),
+                              ),
                             ),
                           ),
                       if (isOwner && c.hasLink)
@@ -105,12 +111,18 @@ class AlbumRowItemWidget extends StatelessWidget {
                       if (!isOwner)
                         Align(
                           alignment: Alignment.bottomRight,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.only(right: 8.0, bottom: 8.0),
-                            child: UserAvatarWidget(
-                              c.owner!,
-                              thumbnailView: true,
+                          child: Hero(
+                            tag: tagPrefix + "_owner_other",
+                            transitionOnUserGestures: true,
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                right: 8.0,
+                                bottom: 8.0,
+                              ),
+                              child: UserAvatarWidget(
+                                c.owner!,
+                                thumbnailView: true,
+                              ),
                             ),
                           ),
                         ),
@@ -121,46 +133,51 @@ class AlbumRowItemWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          SizedBox(
-            width: sideOfThumbnail,
-            child: FutureBuilder<int>(
-              future: showFileCount
-                  ? FilesDB.instance.collectionFileCount(c.id)
-                  : Future.value(0),
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.data! > 0) {
-                  final String textCount = NumberFormat().format(snapshot.data);
-                  return Row(
-                    children: [
-                      Container(
-                        constraints: BoxConstraints(
-                          maxWidth:
-                              sideOfThumbnail - ((textCount.length + 3) * 10),
+          Hero(
+            tag: tagPrefix + "_title",
+            transitionOnUserGestures: true,
+            child: SizedBox(
+              width: sideOfThumbnail,
+              child: FutureBuilder<int>(
+                future: showFileCount
+                    ? FilesDB.instance.collectionFileCount(c.id)
+                    : Future.value(0),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data! > 0) {
+                    final String textCount =
+                        NumberFormat().format(snapshot.data);
+                    return Row(
+                      children: [
+                        Container(
+                          constraints: BoxConstraints(
+                            maxWidth:
+                                sideOfThumbnail - ((textCount.length + 3) * 10),
+                          ),
+                          child: Text(
+                            c.displayName,
+                            style: enteTextTheme.small,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        child: Text(
-                          c.displayName,
-                          style: enteTextTheme.small,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      RichText(
-                        text: TextSpan(
-                          style: enteTextTheme.smallMuted,
-                          children: [
-                            TextSpan(text: '  \u2022  $textCount'),
-                          ],
-                        ),
-                      )
-                    ],
-                  );
-                } else {
-                  return Text(
-                    c.displayName,
-                    style: enteTextTheme.small,
-                    overflow: TextOverflow.ellipsis,
-                  );
-                }
-              },
+                        RichText(
+                          text: TextSpan(
+                            style: enteTextTheme.smallMuted,
+                            children: [
+                              TextSpan(text: '  \u2022  $textCount'),
+                            ],
+                          ),
+                        )
+                      ],
+                    );
+                  } else {
+                    return Text(
+                      c.displayName,
+                      style: enteTextTheme.small,
+                      overflow: TextOverflow.ellipsis,
+                    );
+                  }
+                },
+              ),
             ),
           ),
         ],
