@@ -232,6 +232,14 @@
     "CAPTION_PLACEHOLDER": "Añadir una descripción",
     "LOCATION": "Localización",
     "SHOW_ON_MAP": "Ver en OpenStreetMap",
+    "MAP": "",
+    "MAP_SETTINGS": "",
+    "ENABLE_MAPS": "",
+    "ENABLE_MAP": "",
+    "DISABLE_MAPS": "",
+    "ENABLE_MAP_DESCRIPTION": "",
+    "DISABLE_MAP_DESCRIPTION": "",
+    "DISABLE_MAP": "",
     "DETAILS": "Detalles",
     "VIEW_EXIF": "Ver todos los datos de EXIF",
     "NO_EXIF": "No hay datos EXIF",
@@ -527,5 +535,7 @@
     "UNHIDE_TO_COLLECTION": "",
     "SORT_BY": "",
     "NEWEST_FIRST": "",
-    "OLDEST_FIRST": ""
+    "OLDEST_FIRST": "",
+    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "",
+    "SELECT_COLLECTION": ""
 }

@@ -34,3 +34,11 @@ export function setUserSRPSetupPending(status) {
 export function getUserSRPSetupPending() {
     return getData(LS_KEYS.USER_SRP_SETUP_PENDING)?.status ?? true;
 }
+
+export function getLocalMapEnabled(): boolean {
+    return getData(LS_KEYS.MAP_ENABLED)?.value ?? false;
+}
+
+export function setLocalMapEnabled(value: boolean) {
+    setData(LS_KEYS.MAP_ENABLED, { value });
+}

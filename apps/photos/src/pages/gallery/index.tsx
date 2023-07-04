@@ -38,7 +38,11 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from 'utils/storage';
-import { isTokenValid, validateKey } from 'services/userService';
+import {
+    isTokenValid,
+    syncMapEnabled,
+    validateKey,
+} from 'services/userService';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
@@ -120,6 +124,7 @@ import { IsArchived } from 'utils/magicMetadata';
 import { isSameDayAnyYear, isInsideLocationTag } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
+import { constructUserIDToEmailMap } from 'services/collectionService';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -137,10 +142,12 @@ const defaultGalleryContext: GalleryContextType = {
     setActiveCollection: () => null,
     syncWithRemote: () => null,
     setBlockingLoad: () => null,
+    setIsInSearchMode: () => null,
     photoListHeader: null,
     openExportModal: () => null,
     authenticateUser: () => null,
     user: null,
+    userIDToEmailMap: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -216,6 +223,8 @@ export default function Gallery() {
         useContext(AppContext);
     const [collectionSummaries, setCollectionSummaries] =
         useState<CollectionSummaries>();
+    const [userIDToEmailMap, setUserIDToEmailMap] =
+        useState<Map<number, string>>(null);
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
@@ -313,6 +322,17 @@ export default function Gallery() {
     }, [collections, files, hiddenFiles, trashedFiles, user]);
 
     useEffect(() => {
+        const fetchData = async () => {
+            if (!collections) {
+                return;
+            }
+            const userIdToEmailMap = await constructUserIDToEmailMap();
+            setUserIDToEmailMap(userIdToEmailMap);
+        };
+        fetchData();
+    }, [collections]);
+
+    useEffect(() => {
         collectionSelectorAttributes && setCollectionSelectorView(true);
     }, [collectionSelectorAttributes]);
 
@@ -343,7 +363,13 @@ export default function Gallery() {
             }
         }
         const href = `/gallery${collectionURL}`;
-        router.push(href, undefined, { shallow: true });
+        const delayRouteChange = () => {
+            setTimeout(() => {
+                router.push(href, undefined, { shallow: true });
+            }, 1000);
+        };
+
+        delayRouteChange();
     }, [activeCollection]);
 
     useEffect(() => {
@@ -521,6 +547,10 @@ export default function Gallery() {
         archivedCollections,
     ]);
 
+    useEffect(() => {
+        return setupCtrlAHandler(filteredData);
+    }, [filteredData]);
+
     const fileToCollectionsMap = useMemoSingleThreaded(() => {
         return constructFileToCollectionMap(files);
     }, [files]);
@@ -558,6 +588,7 @@ export default function Gallery() {
             await syncHiddenFiles(hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
+            await syncMapEnabled();
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
@@ -585,6 +616,25 @@ export default function Gallery() {
         }
     };
 
+    const setupCtrlAHandler = (filteredData) => {
+        const ctrlAHandler = (e: KeyboardEvent) => {
+            // setup ctrl/cmd + a handler
+            if (
+                (e.ctrlKey || e.metaKey) &&
+                e.key.toLowerCase() === 'a' &&
+                !e.shiftKey &&
+                !e.altKey
+            ) {
+                e.preventDefault();
+                selectAll(filteredData);
+            }
+        };
+        document.addEventListener('keydown', ctrlAHandler);
+        return () => {
+            document.removeEventListener('keydown', ctrlAHandler);
+        };
+    };
+
     const setDerivativeState = async (
         user: User,
         collections: Collection[],
@@ -596,7 +646,6 @@ export default function Gallery() {
         setFavItemIds(favItemIds);
         const archivedCollections = getArchivedCollections(collections);
         setArchivedCollections(archivedCollections);
-
         const collectionSummaries = await getCollectionSummaries(
             user,
             collections,
@@ -614,6 +663,23 @@ export default function Gallery() {
 
     const clearSelection = function () {
         setSelected({ ownCount: 0, count: 0, collectionID: 0 });
+    };
+
+    const selectAll = function (filteredData) {
+        const selected = {
+            ownCount: 0,
+            count: 0,
+            collectionID: activeCollection,
+        };
+
+        filteredData.forEach((item) => {
+            if (item.ownerID === user.id) {
+                selected.ownCount++;
+            }
+            selected.count++;
+            selected[item.id] = true;
+        });
+        setSelected(selected);
     };
 
     if (!collectionSummaries || !filteredData) {
@@ -843,9 +909,11 @@ export default function Gallery() {
                 setActiveCollection,
                 syncWithRemote,
                 setBlockingLoad,
+                setIsInSearchMode,
                 photoListHeader,
                 openExportModal,
                 authenticateUser,
+                userIDToEmailMap,
                 user,
             }}>
             <FullScreenDropZone

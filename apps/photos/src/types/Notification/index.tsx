@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 export interface NotificationAttributes {
     startIcon?: ReactNode;
     variant: ButtonProps['color'];
-    message: JSX.Element | string;
+    message?: JSX.Element | string;
     subtext?: JSX.Element | string;
     onClick: () => void;
     endIcon?: ReactNode;

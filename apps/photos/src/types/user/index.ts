@@ -121,3 +121,7 @@ export interface SetupSRPRequest {
 export interface ExchangeSRPABResponse {
     srpB: string;
 }
+
+export interface GetFeatureFlagResponse {
+    disableCFUploadProxy?: boolean;
+}

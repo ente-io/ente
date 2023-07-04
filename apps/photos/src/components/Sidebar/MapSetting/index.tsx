@@ -1,21 +1,31 @@
-import ChevronRight from '@mui/icons-material/ChevronRight';
-import ScienceIcon from '@mui/icons-material/Science';
 import { Box, DialogProps, Stack } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
-import MLSearchSettings from 'components/MachineLearning/MLSearchSettings';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import Titlebar from 'components/Titlebar';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { t } from 'i18next';
-
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
+import ModifyMapEnabled from './ModifyMapEnabled';
+import { getMapEnabledStatus } from 'services/userService';
+import { AppContext } from 'pages/_app';
 
-export default function AdvancedSettings({ open, onClose, onRootClose }) {
-    const [mlSearchSettingsView, setMlSearchSettingsView] = useState(false);
+export default function MapSettings({ open, onClose, onRootClose }) {
+    const { mapEnabled, updateMapEnabled } = useContext(AppContext);
+    const [modifyMapEnabledView, setModifyMapEnabledView] = useState(false);
 
-    const openMlSearchSettings = () => setMlSearchSettingsView(true);
-    const closeMlSearchSettings = () => setMlSearchSettingsView(false);
+    const openModifyMapEnabled = () => setModifyMapEnabledView(true);
+    const closeModifyMapEnabled = () => setModifyMapEnabledView(false);
+
+    useEffect(() => {
+        if (!open) {
+            return;
+        }
+        const main = async () => {
+            const remoteMapValue = await getMapEnabledStatus();
+            updateMapEnabled(remoteMapValue);
+        };
+        main();
+    }, [open]);
 
     const handleRootClose = () => {
         onClose();
@@ -41,31 +51,29 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
             <Stack spacing={'4px'} py={'12px'}>
                 <Titlebar
                     onClose={onClose}
-                    title={t('ADVANCED')}
+                    title={t('MAP')}
                     onRootClose={handleRootClose}
                 />
 
                 <Box px={'8px'}>
                     <Stack py="20px" spacing="24px">
                         <Box>
-                            <MenuSectionTitle
-                                title={t('LABS')}
-                                icon={<ScienceIcon />}
-                            />
                             <MenuItemGroup>
                                 <EnteMenuItem
-                                    endIcon={<ChevronRight />}
-                                    onClick={openMlSearchSettings}
-                                    label={t('ML_SEARCH')}
+                                    onClick={openModifyMapEnabled}
+                                    variant="toggle"
+                                    checked={mapEnabled}
+                                    label={t('MAP_SETTINGS')}
                                 />
                             </MenuItemGroup>
                         </Box>
                     </Stack>
                 </Box>
             </Stack>
-            <MLSearchSettings
-                open={mlSearchSettingsView}
-                onClose={closeMlSearchSettings}
+            <ModifyMapEnabled
+                open={modifyMapEnabledView}
+                mapEnabled={mapEnabled}
+                onClose={closeModifyMapEnabled}
                 onRootClose={handleRootClose}
             />
         </EnteDrawer>

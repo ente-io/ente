@@ -1,18 +1,30 @@
-import React, { useContext, useEffect, useMemo } from 'react';
-import { Collection, CollectionSummaries } from 'types/collection';
+import React, { useContext, useEffect, useState } from 'react';
+import {
+    Collection,
+    CollectionSummaries,
+    CollectionSummary,
+} from 'types/collection';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
-import { isUploadAllowedCollection } from 'utils/collection';
 import { AppContext } from 'pages/_app';
 import { AllCollectionDialog } from 'components/Collections/AllCollections/dialog';
 import { DialogContent } from '@mui/material';
 import { FlexWrapper } from 'components/Container';
 import CollectionSelectorCard from './CollectionCard';
 import AddCollectionButton from './AddCollectionButton';
+import { CollectionSelectorIntent } from 'types/gallery';
+import {
+    COLLECTION_SORT_ORDER,
+    CollectionSummaryType,
+    DUMMY_UNCATEGORIZED_SECTION,
+} from 'constants/collection';
+import { t } from 'i18next';
+import { isSelectAllowedCollection } from 'utils/collection';
+import { createUnCategorizedCollection } from 'services/collectionService';
 
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
     showNextModal: () => void;
-    title: string;
+    intent: CollectionSelectorIntent;
     fromCollection?: number;
     onCancel?: () => void;
 }
@@ -31,36 +43,62 @@ function CollectionSelector({
     ...props
 }: Props) {
     const appContext = useContext(AppContext);
-    const collectionToShow = useMemo(() => {
-        const personalCollectionsOtherThanFrom = [
-            ...collectionSummaries.values(),
-        ]
-            ?.filter(
-                ({ type, id }) =>
-                    id !== attributes?.fromCollection &&
-                    isUploadAllowedCollection(type)
-            )
-            .sort((a, b) => a.name.localeCompare(b.name));
-        return personalCollectionsOtherThanFrom;
-    }, [collectionSummaries, attributes]);
 
+    const [collectionsToShow, setCollectionsToShow] = useState<
+        CollectionSummary[]
+    >([]);
     useEffect(() => {
         if (!attributes || !props.open) {
             return;
         }
-        if (collectionToShow.length === 0) {
-            props.onClose();
-            attributes.showNextModal();
-        }
-    }, [collectionToShow, attributes, props.open]);
+        const main = async () => {
+            const collectionsToShow = [...collectionSummaries.values()]
+                ?.filter(({ id, type }) => {
+                    if (id === attributes.fromCollection) {
+                        return false;
+                    } else if (
+                        attributes.intent === CollectionSelectorIntent.upload
+                    ) {
+                        return (
+                            isSelectAllowedCollection(type) ||
+                            type === CollectionSummaryType.uncategorized
+                        );
+                    } else {
+                        return isSelectAllowedCollection(type);
+                    }
+                })
+                .sort((a, b) => {
+                    return a.name.localeCompare(b.name);
+                })
+                .sort((a, b) => {
+                    return (
+                        COLLECTION_SORT_ORDER.get(a.type) -
+                        COLLECTION_SORT_ORDER.get(b.type)
+                    );
+                });
+            if (collectionsToShow.length === 0) {
+                props.onClose();
+                attributes.showNextModal();
+            }
+            setCollectionsToShow(collectionsToShow);
+        };
+        main();
+    }, [collectionSummaries, attributes, props.open]);
 
-    if (!attributes) {
+    if (!collectionsToShow?.length) {
         return <></>;
     }
 
-    const handleCollectionClick = (collectionID: number) => {
-        const collection = collections.find((c) => c.id === collectionID);
-        attributes.callback(collection);
+    const handleCollectionClick = async (collectionID: number) => {
+        let selectedCollection: Collection;
+        if (collectionID === DUMMY_UNCATEGORIZED_SECTION) {
+            const uncategorizedCollection =
+                await createUnCategorizedCollection();
+            selectedCollection = uncategorizedCollection;
+        } else {
+            selectedCollection = collections.find((c) => c.id === collectionID);
+        }
+        attributes.callback(selectedCollection);
         props.onClose();
     };
 
@@ -76,14 +114,24 @@ function CollectionSelector({
             position="center"
             fullScreen={appContext.isMobile}>
             <DialogTitleWithCloseButton onClose={onUserTriggeredClose}>
-                {attributes.title}
+                {attributes.intent === CollectionSelectorIntent.upload
+                    ? t('UPLOAD_TO_COLLECTION')
+                    : attributes.intent === CollectionSelectorIntent.add
+                    ? t('ADD_TO_COLLECTION')
+                    : attributes.intent === CollectionSelectorIntent.move
+                    ? t('MOVE_TO_COLLECTION')
+                    : attributes.intent === CollectionSelectorIntent.restore
+                    ? t('RESTORE_TO_COLLECTION')
+                    : attributes.intent === CollectionSelectorIntent.unhide
+                    ? t('UNHIDE_TO_COLLECTION')
+                    : t('SELECT_COLLECTION')}
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <FlexWrapper flexWrap="wrap" gap={0.5}>
                     <AddCollectionButton
                         showNextModal={attributes.showNextModal}
                     />
-                    {collectionToShow.map((collectionSummary) => (
+                    {collectionsToShow.map((collectionSummary) => (
                         <CollectionSelectorCard
                             onCollectionClick={handleCollectionClick}
                             collectionSummary={collectionSummary}

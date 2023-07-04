@@ -19,6 +19,8 @@ import {
 } from 'components/PlaceholderThumbnails';
 import { FILE_TYPE } from 'constants/file';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
+import Avatar from './Avatar';
+import { shouldShowAvatar } from 'utils/file';
 
 interface IProps {
     file: EnteFile;
@@ -106,6 +108,14 @@ export const HoverOverlay = styled('div')<{ checked: boolean }>`
     ${(props) =>
         !props.checked &&
         'background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))'};
+`;
+
+export const AvatarOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding-right: 5px;
+    padding-top: 5px;
 `;
 
 export const InSelectRangeOverLay = styled('div')<{ $active: boolean }>`
@@ -206,7 +216,7 @@ const Cont = styled('div')<{ disabled: boolean }>`
 `;
 
 export default function PreviewCard(props: IProps) {
-    const { thumbs } = useContext(GalleryContext);
+    const { thumbs, user } = useContext(GalleryContext);
 
     const {
         file,
@@ -358,6 +368,12 @@ export default function PreviewCard(props: IProps) {
                 )
             )}
             <SelectedOverlay selected={selected} />
+            {shouldShowAvatar(file, user) && (
+                <AvatarOverlay>
+                    <Avatar file={file} />
+                </AvatarOverlay>
+            )}
+
             <HoverOverlay checked={selected} />
             <InSelectRangeOverLay
                 $active={isRangeSelectActive && isInsSelectRange}

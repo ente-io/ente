@@ -5,11 +5,11 @@ import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
 import * as FFmpegService from 'services/ffmpeg/ffmpegService';
 import ElectronImageProcessorService from 'services/electron/imageProcessor';
 import { convertBytesToHumanReadable } from 'utils/file/size';
-import { isExactTypeHEIC } from 'utils/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from '../readerService';
 import { getFileNameSize, addLogLine } from 'utils/logging';
 import HeicConversionService from 'services/heicConversionService';
+import { isFileHEIC } from 'utils/file';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -106,7 +106,7 @@ export async function generateImageThumbnailUsingCanvas(
 
     let imageURL = null;
     let timeout = null;
-    const isHEIC = isExactTypeHEIC(fileTypeInfo.exactType);
+    const isHEIC = isFileHEIC(fileTypeInfo.exactType);
     if (isHEIC) {
         addLogLine(`HEICConverter called for ${getFileNameSize(file)}`);
         const convertedBlob = await HeicConversionService.convert(

@@ -232,6 +232,14 @@
     "CAPTION_PLACEHOLDER": "",
     "LOCATION": "",
     "SHOW_ON_MAP": "",
+    "MAP": "",
+    "MAP_SETTINGS": "",
+    "ENABLE_MAPS": "",
+    "ENABLE_MAP": "",
+    "DISABLE_MAPS": "",
+    "ENABLE_MAP_DESCRIPTION": "",
+    "DISABLE_MAP_DESCRIPTION": "",
+    "DISABLE_MAP": "",
     "DETAILS": "",
     "VIEW_EXIF": "",
     "NO_EXIF": "",
@@ -527,5 +535,7 @@
     "UNHIDE_TO_COLLECTION": "",
     "SORT_BY": "",
     "NEWEST_FIRST": "",
-    "OLDEST_FIRST": ""
+    "OLDEST_FIRST": "",
+    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "",
+    "SELECT_COLLECTION": ""
 }

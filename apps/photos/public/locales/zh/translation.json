@@ -232,6 +232,14 @@
     "CAPTION_PLACEHOLDER": "添加说明",
     "LOCATION": "地理位置",
     "SHOW_ON_MAP": "在 OpenStreetMap 上查看",
+    "MAP": "",
+    "MAP_SETTINGS": "",
+    "ENABLE_MAPS": "",
+    "ENABLE_MAP": "",
+    "DISABLE_MAPS": "",
+    "ENABLE_MAP_DESCRIPTION": "",
+    "DISABLE_MAP_DESCRIPTION": "",
+    "DISABLE_MAP": "",
     "DETAILS": "详情",
     "VIEW_EXIF": "查看所有 EXIF 数据",
     "NO_EXIF": "无 EXIF 数据",
@@ -527,5 +535,7 @@
     "UNHIDE_TO_COLLECTION": "取消隐藏到相册",
     "SORT_BY": "",
     "NEWEST_FIRST": "",
-    "OLDEST_FIRST": ""
+    "OLDEST_FIRST": "",
+    "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "",
+    "SELECT_COLLECTION": ""
 }

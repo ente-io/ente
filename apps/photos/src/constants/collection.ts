@@ -36,17 +36,17 @@ export const COLLECTION_SHARE_DEFAULT_DEVICE_LIMIT = 4;
 
 export const COLLECTION_SORT_ORDER = new Map([
     [CollectionSummaryType.all, 0],
-    [CollectionSummaryType.favorites, 1],
-    [CollectionSummaryType.album, 2],
-    [CollectionSummaryType.folder, 2],
-    [CollectionSummaryType.incomingShare, 2],
-    [CollectionSummaryType.outgoingShare, 2],
-    [CollectionSummaryType.sharedOnlyViaLink, 2],
-    [CollectionSummaryType.archived, 2],
-    [CollectionSummaryType.archive, 3],
-    [CollectionSummaryType.trash, 4],
-    [CollectionSummaryType.uncategorized, 4],
-    [CollectionSummaryType.hidden, 4],
+    [CollectionSummaryType.uncategorized, 1],
+    [CollectionSummaryType.favorites, 2],
+    [CollectionSummaryType.album, 3],
+    [CollectionSummaryType.folder, 3],
+    [CollectionSummaryType.incomingShare, 3],
+    [CollectionSummaryType.outgoingShare, 3],
+    [CollectionSummaryType.sharedOnlyViaLink, 3],
+    [CollectionSummaryType.archived, 3],
+    [CollectionSummaryType.archive, 4],
+    [CollectionSummaryType.trash, 5],
+    [CollectionSummaryType.hidden, 5],
 ]);
 
 export const SYSTEM_COLLECTION_TYPES = new Set([
@@ -57,7 +57,7 @@ export const SYSTEM_COLLECTION_TYPES = new Set([
     CollectionSummaryType.hidden,
 ]);
 
-export const UPLOAD_NOT_ALLOWED_COLLECTION_TYPES = new Set([
+export const SELECT_NOT_ALLOWED_COLLECTION = new Set([
     CollectionSummaryType.all,
     CollectionSummaryType.archive,
     CollectionSummaryType.incomingShare,

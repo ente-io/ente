@@ -27,6 +27,7 @@ import {
     SetupSRPRequest,
     ExchangeSRPABResponse,
     EmailVerificationResponse,
+    GetFeatureFlagResponse,
 } from 'types/user';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
@@ -39,6 +40,7 @@ import { APPS, getAppName } from 'constants/apps';
 import { addLocalLog } from 'utils/logging';
 import { setUserSRPSetupPending } from 'utils/storage';
 import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
+import { setLocalMapEnabled } from 'utils/storage';
 
 const ENDPOINT = getEndpoint();
 
@@ -479,6 +481,16 @@ export const getSRPAttributes = async (email: string) => {
     }
 };
 
+export const syncMapEnabled = async () => {
+    try {
+        const status = await getMapEnabledStatus();
+        setLocalMapEnabled(status);
+    } catch (e) {
+        logError(e, 'failed to sync map enabled status');
+        throw e;
+    }
+};
+
 export const configureSRP = async (email: string, password: string) => {
     try {
         addLocalLog(() => `starting srp setup for ${email}`);
@@ -488,6 +500,27 @@ export const configureSRP = async (email: string, password: string) => {
         setUserSRPSetupPending(false);
     } catch (e) {
         logError(e, 'srp configure failed');
+        throw e;
+    }
+};
+
+export const getMapEnabledStatus = async () => {
+    try {
+        const token = getToken();
+        const resp: AxiosResponse<GetRemoteStoreValueResponse> =
+            await HTTPService.get(
+                `${ENDPOINT}/remote-store`,
+                {
+                    key: 'mapEnabled',
+                    defaultValue: false,
+                },
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+        return resp.data.value === 'true';
+    } catch (e) {
+        logError(e, 'failed to get map enabled status');
         throw e;
     }
 };
@@ -551,6 +584,26 @@ export const exchangeAB = async (email: string, srpA: string) => {
     }
 };
 
+export const updateMapEnabledStatus = async (newStatus: boolean) => {
+    try {
+        const token = getToken();
+        await HTTPService.post(
+            `${ENDPOINT}/remote-store/update`,
+            {
+                key: 'mapEnabled',
+                value: newStatus.toString(),
+            },
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'failed to update map enabled status');
+        throw e;
+    }
+};
+
 export const verifySRP = async (email: string, srpM1: string) => {
     try {
         const resp = await HTTPService.post(
@@ -567,3 +620,14 @@ export const verifySRP = async (email: string, srpM1: string) => {
         throw e;
     }
 };
+export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
+    try {
+        const featureFlags = (
+            await fetch('https://static.ente.io/feature_flags.json')
+        ).json() as GetFeatureFlagResponse;
+        return featureFlags.disableCFUploadProxy;
+    } catch (e) {
+        logError(e, 'failed to get feature flags');
+        return false;
+    }
+}

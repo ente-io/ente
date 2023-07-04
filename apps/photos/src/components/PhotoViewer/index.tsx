@@ -42,6 +42,7 @@ import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import { t } from 'i18next';
 import { getParsedExifData } from 'services/upload/exifService';
 import { getFileType } from 'services/typeDetectionService';
+import { ConversionFailedNotification } from './styledComponents/ConversionFailedNotification';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -75,6 +76,7 @@ interface Iprops {
     isHiddenCollection: boolean;
     enableDownload: boolean;
     isSourceLoaded: boolean;
+    conversionFailed: boolean;
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
 }
@@ -84,7 +86,7 @@ function PhotoViewer(props: Iprops) {
     const [photoSwipe, setPhotoSwipe] =
         useState<Photoswipe<Photoswipe.Options>>();
 
-    const { isOpen, items, isSourceLoaded } = props;
+    const { isOpen, items, isSourceLoaded, conversionFailed } = props;
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
     const [exif, setExif] =
@@ -553,6 +555,14 @@ function PhotoViewer(props: Iprops) {
                             {livePhotoBtnHTML} {t('LIVE')}
                         </LivePhotoBtn>
                     )}
+                    {conversionFailed && (
+                        <ConversionFailedNotification
+                            onClick={() =>
+                                downloadFileHelper(photoSwipe.currItem)
+                            }
+                        />
+                    )}
+
                     <div className="pswp__container">
                         <div className="pswp__item" />
                         <div className="pswp__item" />
@@ -682,6 +692,7 @@ function PhotoViewer(props: Iprops) {
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={props.fileToCollectionsMap}
                 collectionNameMap={props.collectionNameMap}
+                closePhotoViewer={handleClose}
             />
         </>
     );

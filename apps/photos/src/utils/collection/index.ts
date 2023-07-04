@@ -28,7 +28,7 @@ import {
     HIDE_FROM_COLLECTION_BAR_TYPES,
     OPTIONS_NOT_HAVING_COLLECTION_TYPES,
     SYSTEM_COLLECTION_TYPES,
-    UPLOAD_NOT_ALLOWED_COLLECTION_TYPES,
+    SELECT_NOT_ALLOWED_COLLECTION,
 } from 'constants/collection';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
@@ -237,8 +237,8 @@ export const hasNonSystemCollections = (
     return false;
 };
 
-export const isUploadAllowedCollection = (type: CollectionSummaryType) => {
-    return !UPLOAD_NOT_ALLOWED_COLLECTION_TYPES.has(type);
+export const isSelectAllowedCollection = (type: CollectionSummaryType) => {
+    return !SELECT_NOT_ALLOWED_COLLECTION.has(type);
 };
 
 export const isSystemCollection = (type: CollectionSummaryType) => {

@@ -68,7 +68,7 @@ const COLLECTION_TABLE = 'collections';
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
 
 const UNCATEGORIZED_COLLECTION_NAME = 'Uncategorized';
-const HIDDEN_COLLECTION_NAME = '.hidden';
+export const HIDDEN_COLLECTION_NAME = '.hidden';
 const FAVORITE_COLLECTION_NAME = 'Favorites';
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>
@@ -1260,3 +1260,30 @@ export async function unhideToCollection(
         throw e;
     }
 }
+
+export const constructUserIDToEmailMap = async (): Promise<
+    Map<number, string>
+> => {
+    try {
+        const collection = await getLocalCollections();
+        const user: User = getData(LS_KEYS.USER);
+        const userIDToEmailMap = new Map<number, string>();
+        collection.map((item) => {
+            const { owner, sharees } = item;
+            if (user.id !== owner.id && owner.email) {
+                userIDToEmailMap.set(owner.id, owner.email);
+            }
+            if (sharees) {
+                sharees.map((item) => {
+                    if (item.id !== user.id)
+                        userIDToEmailMap.set(item.id, item.email);
+                });
+            }
+        });
+        return userIDToEmailMap;
+    } catch (e) {
+        logError('Error Mapping UserId to email:', e);
+        return new Map<number, string>();
+        throw e;
+    }
+};

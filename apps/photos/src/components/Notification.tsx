@@ -4,9 +4,10 @@ import {
     Button,
     ButtonProps,
     IconButton,
-    Paper,
     Snackbar,
     Stack,
+    SxProps,
+    Theme,
     Typography,
 } from '@mui/material';
 import React from 'react';
@@ -18,9 +19,19 @@ interface Iprops {
     open: boolean;
     onClose: () => void;
     attributes: NotificationAttributes;
+    horizontal?: 'left' | 'right';
+    vertical?: 'top' | 'bottom';
+    sx?: SxProps<Theme>;
 }
 
-export default function Notification({ open, onClose, attributes }: Iprops) {
+export default function Notification({
+    open,
+    onClose,
+    horizontal,
+    vertical,
+    sx,
+    attributes,
+}: Iprops) {
     if (!attributes) {
         return <></>;
     }
@@ -38,18 +49,18 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
         <Snackbar
             open={open}
             anchorOrigin={{
-                horizontal: 'right',
-                vertical: 'bottom',
+                horizontal: horizontal ?? 'right',
+                vertical: vertical ?? 'bottom',
             }}
-            sx={{ backgroundColor: '#000', width: '320px' }}>
-            <Paper
-                component={Button}
+            sx={{ width: '320px', backgroundColor: '#000', ...sx }}>
+            <Button
                 color={attributes.variant}
                 onClick={handleClick}
                 sx={{
                     textAlign: 'left',
                     flex: '1',
                     padding: (theme) => theme.spacing(1.5, 2),
+                    borderRadius: '8px',
                 }}>
                 <Stack
                     flex={'1'}
@@ -89,7 +100,7 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                         </IconButton>
                     )}
                 </Stack>
-            </Paper>
+            </Button>
         </Snackbar>
     );
 }

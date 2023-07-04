@@ -23,6 +23,7 @@ export enum LS_KEYS {
     API_ENDPOINT = 'apiEndpoint',
     LOCALE = 'locale',
     USER_SRP_SETUP_PENDING = 'userSRPSetupPending',
+    MAP_ENABLED = 'mapEnabled',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {

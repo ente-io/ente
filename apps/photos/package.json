@@ -55,6 +55,8 @@
         "idb": "^7.0.0",
         "is-electron": "^2.2.0",
         "jszip": "3.8.0",
+        "leaflet": "^1.9.4",
+        "leaflet-defaulticon-compatibility": "^0.1.1",
         "libsodium-wrappers": "^0.7.8",
         "localforage": "^1.9.0",
         "memoize-one": "^6.0.0",
@@ -95,6 +97,7 @@
         "@next/bundle-analyzer": "^13.1.6",
         "@types/bs58": "^4.0.1",
         "@types/debounce-promise": "^3.1.3",
+        "@types/leaflet": "^1.9.3",
         "@types/libsodium-wrappers": "^0.7.8",
         "@types/node": "^14.6.4",
         "@types/photoswipe": "^4.1.1",
@@ -110,7 +113,7 @@
         "@types/zxcvbn": "^4.4.1",
         "@typescript-eslint/parser": "^5.59.2",
         "eslint": "^8.28.0",
-        "typescript": "^4.1.3"
+        "typescript": "^5.1.3"
     },
     "standard": {
         "parser": "babel-eslint"

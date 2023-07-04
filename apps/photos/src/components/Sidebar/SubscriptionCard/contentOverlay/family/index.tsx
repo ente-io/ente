@@ -18,21 +18,17 @@ export function FamilySubscriptionCardContent({ userDetails }: Iprops) {
             return userDetails.usage;
         }
     }, [userDetails]);
+    const totalStorage =
+        userDetails.familyData.storage + (userDetails.storageBonus ?? 0);
 
     return (
         <>
-            <StorageSection
-                storage={userDetails.familyData.storage}
-                usage={totalUsage}
-            />
+            <StorageSection storage={totalStorage} usage={totalUsage} />
             <FamilyUsageSection
                 userUsage={userDetails.usage}
                 fileCount={userDetails.fileCount}
                 totalUsage={totalUsage}
-                totalStorage={
-                    userDetails.familyData.storage +
-                    (userDetails.storageBonus ?? 0)
-                }
+                totalStorage={totalStorage}
             />
         </>
     );
