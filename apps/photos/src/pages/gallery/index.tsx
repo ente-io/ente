@@ -1020,10 +1020,6 @@ export default function Gallery() {
                         deletedFileIds={deletedFileIds}
                         setDeletedFileIds={setDeletedFileIds}
                         activeCollection={activeCollection}
-                        isIncomingSharedCollection={
-                            collectionSummaries.get(activeCollection)?.type ===
-                            CollectionSummaryType.incomingShare
-                        }
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
                         collectionNameMap={collectionNameMap}
