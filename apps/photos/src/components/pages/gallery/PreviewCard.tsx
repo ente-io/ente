@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
@@ -20,8 +20,6 @@ import {
 import { FILE_TYPE } from 'constants/file';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 import Avatar from './Avatar';
-import { User } from 'types/user';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 interface IProps {
     file: EnteFile;
@@ -217,7 +215,7 @@ const Cont = styled('div')<{ disabled: boolean }>`
 `;
 
 export default function PreviewCard(props: IProps) {
-    const { thumbs } = useContext(GalleryContext);
+    const { thumbs, user } = useContext(GalleryContext);
 
     const {
         file,
@@ -241,6 +239,25 @@ export default function PreviewCard(props: IProps) {
     const deduplicateContext = useContext(DeduplicateContext);
 
     const isMounted = useRef(true);
+
+    const shouldShowAvatar = useMemo(() => {
+        if (!file || !user) {
+            return false;
+        }
+        // is Shared file
+        else if (file.ownerID !== user.id) {
+            return true;
+        }
+        // is public collected file
+        else if (
+            file.ownerID === user.id &&
+            file.pubMagicMetadata?.data?.uploaderName
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }, [file, user]);
 
     useEffect(() => {
         return () => {
@@ -334,8 +351,6 @@ export default function PreviewCard(props: IProps) {
         }
     };
 
-    const user: User = getData(LS_KEYS.USER);
-
     return (
         <Cont
             key={`thumb-${file.id}-${props.showPlaceholder}`}
@@ -371,9 +386,7 @@ export default function PreviewCard(props: IProps) {
                 )
             )}
             <SelectedOverlay selected={selected} />
-            {(file.ownerID !== user.id ||
-                (file.ownerID === user.id &&
-                    file.pubMagicMetadata?.data?.uploaderName)) && (
+            {shouldShowAvatar && (
                 <AvatarOverlay>
                     <Avatar file={file} />
                 </AvatarOverlay>
