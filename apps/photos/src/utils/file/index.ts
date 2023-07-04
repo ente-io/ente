@@ -672,3 +672,22 @@ export function constructFileToCollectionMap(files: EnteFile[]) {
     });
     return fileToCollectionsMap;
 }
+
+export const shouldShowAvatar = (file: EnteFile, user: User) => {
+    if (!file || !user) {
+        return false;
+    }
+    // is Shared file
+    else if (file.ownerID !== user.id) {
+        return true;
+    }
+    // is public collected file
+    else if (
+        file.ownerID === user.id &&
+        file.pubMagicMetadata?.data?.uploaderName
+    ) {
+        return true;
+    } else {
+        return false;
+    }
+};

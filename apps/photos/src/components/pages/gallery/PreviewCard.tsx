@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
@@ -20,6 +20,7 @@ import {
 import { FILE_TYPE } from 'constants/file';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 import Avatar from './Avatar';
+import { shouldShowAvatar } from 'utils/file';
 
 interface IProps {
     file: EnteFile;
@@ -240,25 +241,6 @@ export default function PreviewCard(props: IProps) {
 
     const isMounted = useRef(true);
 
-    const shouldShowAvatar = useMemo(() => {
-        if (!file || !user) {
-            return false;
-        }
-        // is Shared file
-        else if (file.ownerID !== user.id) {
-            return true;
-        }
-        // is public collected file
-        else if (
-            file.ownerID === user.id &&
-            file.pubMagicMetadata?.data?.uploaderName
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }, [file, user]);
-
     useEffect(() => {
         return () => {
             isMounted.current = false;
@@ -386,7 +368,7 @@ export default function PreviewCard(props: IProps) {
                 )
             )}
             <SelectedOverlay selected={selected} />
-            {shouldShowAvatar && (
+            {shouldShowAvatar(file, user) && (
                 <AvatarOverlay>
                     <Avatar file={file} />
                 </AvatarOverlay>
