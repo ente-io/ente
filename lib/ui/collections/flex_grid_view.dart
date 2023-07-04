@@ -49,6 +49,7 @@ class CollectionsFlexiGridViewWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: GridView.builder(
+        padding: const EdgeInsets.only(top: 8),
         shrinkWrap: shrinkWrap,
         physics: const ScrollPhysics(),
         // to disable GridView's scrolling
