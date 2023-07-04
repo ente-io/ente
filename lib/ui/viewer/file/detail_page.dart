@@ -123,7 +123,7 @@ class _DetailPageState extends State<DetailPage> {
       body: Center(
         child: Stack(
           children: [
-            _buildPageView(),
+            _buildPageView(context),
             FadingBottomBar(
               _files![_selectedIndex],
               _onEditFileRequested,
@@ -138,7 +138,8 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
-  Widget _buildPageView() {
+  Widget _buildPageView(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     _logger.info("Building with " + _selectedIndex.toString());
     return PageView.builder(
       itemBuilder: (context, index) {
@@ -154,13 +155,18 @@ class _DetailPageState extends State<DetailPage> {
               });
             }
           },
-          playbackCallback: (isPlaying) {
-            ///This callback is getting called when the video is seeked which
-            ///causes the popping.
-            Future.delayed(Duration.zero, () {
-              _toggleFullScreen();
-            });
-          },
+          //Noticed that when the video is seeked, the video pops and moves the
+          //seek bar along with it and it happens when bottomPadding is 0. So we
+          //don't toggle full screen for cases where this issue happens.
+          playbackCallback: bottomPadding != 0
+              ? (isPlaying) {
+                  ///This callback is getting called when the video is seeked which
+                  ///causes the popping.
+                  Future.delayed(Duration.zero, () {
+                    _toggleFullScreen();
+                  });
+                }
+              : null,
           backgroundDecoration: const BoxDecoration(color: Colors.black),
         );
         _preloadFiles(index);
@@ -190,7 +196,7 @@ class _DetailPageState extends State<DetailPage> {
   void _toggleFullScreen() {
     _enableFullScreenNotifier.value = !_enableFullScreenNotifier.value;
 
-    Future.delayed(Duration.zero, () {
+    Future.delayed(const Duration(milliseconds: 125), () {
       SystemChrome.setEnabledSystemUIMode(
         //to hide status bar?
         SystemUiMode.manual,
