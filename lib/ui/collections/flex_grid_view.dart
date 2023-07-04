@@ -19,9 +19,15 @@ class CollectionsFlexiGridViewWidget extends StatelessWidget {
   // At max how many albums to display
   final int displayLimitCount;
 
+  // If true, the GridView will shrink-wrap its contents.
+  final bool shrinkWrap;
+  final String tag;
+
   const CollectionsFlexiGridViewWidget(
     this.collections, {
     this.displayLimitCount = 10,
+    this.shrinkWrap = false,
+    this.tag = "",
     Key? key,
   }) : super(key: key);
 
@@ -43,13 +49,14 @@ class CollectionsFlexiGridViewWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: GridView.builder(
-        shrinkWrap: true,
+        shrinkWrap: shrinkWrap,
         physics: const ScrollPhysics(),
         // to disable GridView's scrolling
         itemBuilder: (context, index) {
           return AlbumRowItemWidget(
             collections![index],
             sideOfThumbnail,
+            tag: tag,
           );
         },
         itemCount: min(collections!.length, displayLimitCount),

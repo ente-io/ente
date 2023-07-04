@@ -12,7 +12,7 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/ui/collections/album/row_item.dart";
-import "package:photos/ui/collections/vertical_grid_view.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/tabs/section_title.dart';
@@ -103,7 +103,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                         unawaited(
                           routeToPage(
                             context,
-                            CollectionVerticalGridView(
+                            CollectionListPage(
                               collections.incoming,
                               tag: "incoming",
                               appTitle: sharedWithMe,
@@ -149,7 +149,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                         unawaited(
                           routeToPage(
                             context,
-                            CollectionVerticalGridView(
+                            CollectionListPage(
                               collections.outgoing,
                               tag: "outgoing",
                               appTitle: sharedByMe,

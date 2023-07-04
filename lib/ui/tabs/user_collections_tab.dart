@@ -17,11 +17,11 @@ import "package:photos/ui/collections/button/archived_button.dart";
 import "package:photos/ui/collections/button/hidden_button.dart";
 import "package:photos/ui/collections/button/trash_button.dart";
 import "package:photos/ui/collections/button/uncategorized_button.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/collections/create_new_album_widget.dart";
 import "package:photos/ui/collections/device/device_folders_grid_view.dart";
 import "package:photos/ui/collections/device/device_folders_vertical_grid_view.dart";
-import "package:photos/ui/collections/vertical_grid_view.dart";
-import "package:photos/ui/collections/vertical_grid_view_flex_size.dart";
+import "package:photos/ui/collections/flex_grid_view.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/tabs/section_title.dart';
@@ -181,6 +181,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 ? CollectionsFlexiGridViewWidget(
                     collections,
                     displayLimitCount: _kOnEnteItemLimitCount,
+                    shrinkWrap: true,
                   )
                 : const EmptyState(),
             collections.length > _kOnEnteItemLimitCount
@@ -189,7 +190,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                       unawaited(
                         routeToPage(
                           context,
-                          CollectionVerticalGridView(
+                          CollectionListPage(
                             collections,
                             appTitle: SectionTitle(
                               titleWithBrand: getOnEnteSection(context),
