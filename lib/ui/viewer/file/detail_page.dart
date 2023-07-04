@@ -75,7 +75,6 @@ class _DetailPageState extends State<DetailPage> {
   bool _hasPageChanged = false;
   bool _hasLoadedTillStart = false;
   bool _hasLoadedTillEnd = false;
-  bool _shouldHideAppBar = false;
   final _enableFullScreenNotifier = ValueNotifier(false);
 
   @override
@@ -156,7 +155,8 @@ class _DetailPageState extends State<DetailPage> {
             }
           },
           playbackCallback: (isPlaying) {
-            _shouldHideAppBar = isPlaying;
+            ///This callback is getting called when the video is seeked which
+            ///causes the popping.
             Future.delayed(Duration.zero, () {
               _toggleFullScreen();
             });
@@ -166,7 +166,6 @@ class _DetailPageState extends State<DetailPage> {
         _preloadFiles(index);
         return GestureDetector(
           onTap: () {
-            _shouldHideAppBar = !_shouldHideAppBar;
             _toggleFullScreen();
           },
           child: content,
@@ -195,7 +194,7 @@ class _DetailPageState extends State<DetailPage> {
       SystemChrome.setEnabledSystemUIMode(
         //to hide status bar?
         SystemUiMode.manual,
-        overlays: _shouldHideAppBar ? [] : SystemUiOverlay.values,
+        overlays: _enableFullScreenNotifier.value ? [] : SystemUiOverlay.values,
       );
     });
   }
