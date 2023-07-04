@@ -53,7 +53,6 @@ import {
     downloadFiles,
     getSelectedFiles,
     getUniqueFiles,
-    isSharedFile,
     mergeMetadata,
     sortFiles,
 } from 'utils/file';
@@ -444,10 +443,6 @@ export default function Gallery() {
 
                 // SEARCH MODE
                 if (isInSearchMode) {
-                    // shared files are not searchable
-                    if (isSharedFile(user, item)) {
-                        return false;
-                    }
                     if (
                         search?.date &&
                         !isSameDayAnyYear(search.date)(
