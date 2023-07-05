@@ -1,13 +1,13 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { t } from 'i18next';
 import { Collection } from 'types/collection';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import AvatarCollectionShare from '../AvatarCollectionShare';
 import ManageAddViewer from './ManageAddViewer';
+import PhotoIcon from '@mui/icons-material/Photo';
 
 interface Iprops {
     collection: Collection;
@@ -30,7 +30,10 @@ export function ViewerParticipants({ collection, onRootClose }: Iprops) {
 
     return (
         <Box mb={3}>
-            <MenuSectionTitle title={t('Viewers')} />
+            <Typography color="text.muted" variant="small" padding={1}>
+                <PhotoIcon style={{ fontSize: 20, marginRight: 8 }} />
+                {t('Viewers')}
+            </Typography>
             <MenuItemGroup>
                 <>
                     {Viewers.map((item, index) => (

@@ -1,15 +1,15 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
 import React, { useEffect, useState } from 'react';
 import { t } from 'i18next';
 import { Collection } from 'types/collection';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 // import AvatarCollectionShare from '../AvatarCollectionShare';
 // import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import ManageAddCollab from './MangeAddCollab';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
 
 interface Iprops {
     collection: Collection;
@@ -35,7 +35,11 @@ export function CollaboratorParticipants({ collection, onRootClose }: Iprops) {
 
     return (
         <Box mb={3}>
-            <MenuSectionTitle title={t('Collaborators')} />
+            <Typography color="text.muted" variant="small" padding={1}>
+                <ModeEditIcon style={{ fontSize: 20, marginRight: 8 }} />
+                {t('Collaborators')}
+            </Typography>
+
             <MenuItemGroup>
                 {collaborators.map((item, index) => (
                     <>

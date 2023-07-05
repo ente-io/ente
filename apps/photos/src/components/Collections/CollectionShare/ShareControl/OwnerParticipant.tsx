@@ -1,8 +1,7 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import React from 'react';
 import { t } from 'i18next';
 import { Collection } from 'types/collection';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import AvatarCollectionShare from '../AvatarCollectionShare';
@@ -10,6 +9,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { User } from 'types/user';
 import { LS_KEYS, getData } from 'utils/storage/localStorage';
 
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 interface Iprops {
     collection: Collection;
 }
@@ -25,7 +25,12 @@ export function OwnerParticipant({ collection }: Iprops) {
 
     return (
         <Box mb={3}>
-            <MenuSectionTitle title={t('Owner')} />
+            <Typography color="text.muted" variant="small" padding={1}>
+                <AdminPanelSettingsIcon
+                    style={{ fontSize: 20, marginRight: 8 }}
+                />
+                {t('Owner')}
+            </Typography>
 
             <MenuItemGroup>
                 <>
