@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { t } from 'i18next';
 import { Collection } from 'types/collection';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
@@ -27,12 +27,23 @@ export function CollaboratorParticipants({ collection }: Iprops) {
         '1 year',
         'Custom',
     ];
+    const [collaborators, setCollaborators] = useState([]);
+
+    useEffect(() => {
+        collection.sharees?.map((sharee) => {
+            if (sharee.role === 'COLLABORATOR')
+                setCollaborators((prevViewers) => [
+                    ...prevViewers,
+                    sharee.email,
+                ]);
+        });
+    }, [collection.sharees]);
 
     return (
         <Box mb={3}>
             <MenuSectionTitle title={t('Collaborators')} />
             <MenuItemGroup>
-                {shareExpireOption.map((item, index) => (
+                {collaborators.map((item, index) => (
                     <>
                         <EnteMenuItem
                             fontWeight="normal"

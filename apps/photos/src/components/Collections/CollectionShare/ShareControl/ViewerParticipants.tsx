@@ -16,14 +16,6 @@ export function ViewerParticipants({ collection }: Iprops) {
     if (!collection.sharees?.length) {
         return <></>;
     }
-    const shareExpireOption = [
-        'Never',
-        '1 day',
-        '1 week',
-        '1 month',
-        '1 year',
-        'Custom',
-    ];
 
     const [Viewers, setViewers] = useState([]);
 
@@ -47,9 +39,7 @@ export function ViewerParticipants({ collection }: Iprops) {
                             label={item}
                             startIcon={<AvatarCollectionShare email={item} />}
                         />
-                        {index !== shareExpireOption.length - 1 && (
-                            <MenuItemDivider />
-                        )}
+                        {index !== Viewers.length - 1 && <MenuItemDivider />}
                     </>
                 ))}
             </MenuItemGroup>
