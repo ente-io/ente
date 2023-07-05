@@ -31,7 +31,6 @@ import {
 import { encryptFile, getFileSize, readFile } from './fileService';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
-import { USE_CF_PROXY } from 'constants/upload';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import publicUploadHttpClient from './publicUploadHttpClient';
@@ -52,8 +51,14 @@ class UploadService {
 
     private publicUploadProps: PublicUploadProps = undefined;
 
-    init(publicUploadProps: PublicUploadProps) {
+    private isCFUploadProxyDisabled: boolean = false;
+
+    init(
+        publicUploadProps: PublicUploadProps,
+        isCFUploadProxyDisabled: boolean
+    ) {
         this.publicUploadProps = publicUploadProps;
+        this.isCFUploadProxyDisabled = isCFUploadProxyDisabled;
     }
 
     async setFileCount(fileCount: number) {
@@ -71,6 +76,10 @@ class UploadService {
 
     getUploaderName() {
         return this.uploaderName;
+    }
+
+    getIsCFUploadProxyDisabled() {
+        return this.isCFUploadProxyDisabled;
     }
 
     reducePendingUploadCount() {
@@ -158,7 +167,7 @@ class UploadService {
                     file.localID
                 );
                 const fileUploadURL = await this.getUploadURL();
-                if (USE_CF_PROXY) {
+                if (!this.isCFUploadProxyDisabled) {
                     fileObjectKey = await UploadHttpClient.putFileV2(
                         fileUploadURL,
                         file.file.encryptedData as Uint8Array,
@@ -174,7 +183,7 @@ class UploadService {
             }
             const thumbnailUploadURL = await this.getUploadURL();
             let thumbnailObjectKey: string = null;
-            if (USE_CF_PROXY) {
+            if (!this.isCFUploadProxyDisabled) {
                 thumbnailObjectKey = await UploadHttpClient.putFileV2(
                     thumbnailUploadURL,
                     file.thumbnail.encryptedData,

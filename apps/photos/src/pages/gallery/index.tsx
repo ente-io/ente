@@ -38,7 +38,11 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from 'utils/storage';
-import { isTokenValid, validateKey } from 'services/userService';
+import {
+    isTokenValid,
+    syncMapEnabled,
+    validateKey,
+} from 'services/userService';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
@@ -543,6 +547,10 @@ export default function Gallery() {
         archivedCollections,
     ]);
 
+    useEffect(() => {
+        return setupCtrlAHandler(filteredData);
+    }, [filteredData]);
+
     const fileToCollectionsMap = useMemoSingleThreaded(() => {
         return constructFileToCollectionMap(files);
     }, [files]);
@@ -580,6 +588,7 @@ export default function Gallery() {
             await syncHiddenFiles(hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
+            await syncMapEnabled();
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
@@ -605,6 +614,25 @@ export default function Gallery() {
             setTimeout(() => syncWithRemote(force, silent), 0);
             resync.current = null;
         }
+    };
+
+    const setupCtrlAHandler = (filteredData) => {
+        const ctrlAHandler = (e: KeyboardEvent) => {
+            // setup ctrl/cmd + a handler
+            if (
+                (e.ctrlKey || e.metaKey) &&
+                e.key.toLowerCase() === 'a' &&
+                !e.shiftKey &&
+                !e.altKey
+            ) {
+                e.preventDefault();
+                selectAll(filteredData);
+            }
+        };
+        document.addEventListener('keydown', ctrlAHandler);
+        return () => {
+            document.removeEventListener('keydown', ctrlAHandler);
+        };
     };
 
     const setDerivativeState = async (
@@ -635,6 +663,23 @@ export default function Gallery() {
 
     const clearSelection = function () {
         setSelected({ ownCount: 0, count: 0, collectionID: 0 });
+    };
+
+    const selectAll = function (filteredData) {
+        const selected = {
+            ownCount: 0,
+            count: 0,
+            collectionID: activeCollection,
+        };
+
+        filteredData.forEach((item) => {
+            if (item.ownerID === user.id) {
+                selected.ownCount++;
+            }
+            selected.count++;
+            selected[item.id] = true;
+        });
+        setSelected(selected);
     };
 
     if (!collectionSummaries || !filteredData) {
@@ -991,7 +1036,9 @@ export default function Gallery() {
                         activeCollection={activeCollection}
                         isIncomingSharedCollection={
                             collectionSummaries.get(activeCollection)?.type ===
-                            CollectionSummaryType.incomingShare
+                                CollectionSummaryType.incomingShareCollaborator ||
+                            collectionSummaries.get(activeCollection)?.type ===
+                                CollectionSummaryType.incomingShareViewer
                         }
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
@@ -1060,7 +1107,10 @@ export default function Gallery() {
                             isIncomingSharedCollection={
                                 collectionSummaries.get(activeCollection)
                                     ?.type ===
-                                CollectionSummaryType.incomingShare
+                                    CollectionSummaryType.incomingShareCollaborator ||
+                                collectionSummaries.get(activeCollection)
+                                    ?.type ===
+                                    CollectionSummaryType.incomingShareViewer
                             }
                             isInSearchMode={isInSearchMode}
                         />
