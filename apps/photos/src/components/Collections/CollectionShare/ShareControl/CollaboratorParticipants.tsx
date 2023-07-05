@@ -10,18 +10,34 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import ManageAddCollab from './MangeAddCollab';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
+import ManageParticipantsRole from './ManageParticipantsRole';
 
 interface Iprops {
     collection: Collection;
     onRootClose: () => void;
+    collectionUnshare: (email: string) => Promise<void>;
 }
 
-export function CollaboratorParticipants({ collection, onRootClose }: Iprops) {
+export function CollaboratorParticipants({
+    collection,
+    onRootClose,
+    collectionUnshare,
+}: Iprops) {
     if (!collection.sharees?.length) {
         return <></>;
     }
 
     const [collaborators, setCollaborators] = useState([]);
+    const [participantRoleView, setParticipantRoleView] = useState(false);
+    const [selectedEmail, setSelectedEmail] = useState('');
+
+    const openParticipantRoleView = (email) => {
+        setParticipantRoleView(true);
+        setSelectedEmail(email);
+    };
+    const closeParticipantRoleView = () => {
+        setParticipantRoleView(false);
+    };
 
     useEffect(() => {
         const collaboratorEmails =
@@ -44,7 +60,7 @@ export function CollaboratorParticipants({ collection, onRootClose }: Iprops) {
                         <EnteMenuItem
                             fontWeight="normal"
                             key={item}
-                            onClick={() => console.log('clicked')}
+                            onClick={() => openParticipantRoleView(item)}
                             label={item}
                             startIcon={<AvatarCollectionShare email={item} />}
                             endIcon={<ChevronRightIcon />}
@@ -59,6 +75,14 @@ export function CollaboratorParticipants({ collection, onRootClose }: Iprops) {
                     onRootClose={onRootClose}
                 />
             </MenuItemGroup>
+            <ManageParticipantsRole
+                collectionUnshare={collectionUnshare}
+                open={participantRoleView}
+                collection={collection}
+                onRootClose={onRootClose}
+                onClose={closeParticipantRoleView}
+                selectedEmail={selectedEmail} // Pass the selected email to ManageParticipantsRole
+            />
         </Box>
     );
 }

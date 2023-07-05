@@ -36,7 +36,10 @@ export function ManageParticipantsList({ collection, onRootClose }: Iprops) {
             <OwnerParticipant collection={collection}></OwnerParticipant>
             <CollaboratorParticipants
                 collection={collection}
-                onRootClose={onRootClose}></CollaboratorParticipants>
+                onRootClose={onRootClose}
+                collectionUnshare={
+                    collectionUnshare
+                }></CollaboratorParticipants>
             <ViewerParticipants
                 collection={collection}
                 onRootClose={onRootClose}

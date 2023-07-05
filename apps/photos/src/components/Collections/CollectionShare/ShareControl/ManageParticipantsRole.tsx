@@ -1,5 +1,5 @@
 import { Stack, Typography } from '@mui/material';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Collection } from 'types/collection';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { t } from 'i18next';
@@ -11,6 +11,7 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import PhotoIcon from '@mui/icons-material/Photo';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import BlockIcon from '@mui/icons-material/Block';
+import DoneIcon from '@mui/icons-material/Done';
 
 interface Iprops {
     open: boolean;
@@ -29,6 +30,15 @@ export default function ManageParticipantsRole({
     selectedEmail,
     collectionUnshare,
 }: Iprops) {
+    const [selectedRole, setSelectedRole] = useState('');
+
+    useEffect(() => {
+        setSelectedRole(
+            collection.sharees?.find((sharee) => sharee.email === selectedEmail)
+                ?.role
+        );
+    }, [open]);
+
     const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
         if (reason === 'backdropClick') {
             onRootClose();
@@ -42,68 +52,111 @@ export default function ManageParticipantsRole({
         onClose();
     };
 
+    const handleRoleChange = (role: string) => {
+        setSelectedRole(role);
+    };
+
     console.log('collection Clicked', collection, selectedEmail);
     return (
         <>
             <EnteDrawer anchor="right" open={open} onClose={handleDrawerClose}>
-                <Stack spacing={'10px'} py={'12px'}>
+                <Stack spacing={'4px'} py={'12px'}>
                     <Titlebar
                         onClose={onClose}
                         title={t('Manage')}
                         onRootClose={onRootClose}
                         caption={selectedEmail}
                     />
-                    <Typography color="text.muted" variant="small" padding={1}>
-                        {t('Added as')}
-                    </Typography>
 
-                    <MenuItemGroup>
-                        <EnteMenuItem
-                            //
-                            fontWeight="normal"
-                            onClick={() => console.log('clicked')}
-                            label={'Collaborator'}
-                            startIcon={
-                                <ModeEditIcon
-                                    style={{ fontSize: 20, marginRight: 8 }}
+                    <Stack py={'20px'} px={'8px'} spacing={'32px'}>
+                        <Stack>
+                            <Typography
+                                color="text.muted"
+                                variant="small"
+                                padding={1}>
+                                {t('Added as')}
+                            </Typography>
+
+                            <MenuItemGroup>
+                                <EnteMenuItem
+                                    //
+                                    fontWeight="normal"
+                                    onClick={() =>
+                                        handleRoleChange('COLLABORATOR')
+                                    }
+                                    label={'Collaborator'}
+                                    startIcon={
+                                        <ModeEditIcon
+                                            style={{
+                                                fontSize: 20,
+                                                marginRight: 8,
+                                            }}
+                                        />
+                                    }
+                                    endIcon={
+                                        selectedRole === 'COLLABORATOR' && (
+                                            <DoneIcon />
+                                        )
+                                    }
                                 />
-                            }
-                        />
-                        <MenuItemDivider />
-                        <EnteMenuItem
-                            //
-                            fontWeight="normal"
-                            onClick={() => console.log('clicked')}
-                            label={'Viewer'}
-                            startIcon={
-                                <PhotoIcon
-                                    style={{ fontSize: 20, marginRight: 8 }}
+                                <MenuItemDivider />
+
+                                <EnteMenuItem
+                                    //
+                                    fontWeight="normal"
+                                    onClick={() => handleRoleChange('VIEWER')}
+                                    label={'Viewer'}
+                                    startIcon={
+                                        <PhotoIcon
+                                            style={{
+                                                fontSize: 20,
+                                                marginRight: 8,
+                                            }}
+                                        />
+                                    }
+                                    endIcon={
+                                        selectedRole === 'VIEWER' && (
+                                            <DoneIcon />
+                                        )
+                                    }
                                 />
-                            }
-                        />
-                    </MenuItemGroup>
+                            </MenuItemGroup>
 
-                    <Typography color="text.muted" variant="small" padding={1}>
-                        {t(
-                            'Collaborators can add photos and videos to the shared album'
-                        )}
-                    </Typography>
+                            <Typography
+                                color="text.muted"
+                                variant="small"
+                                padding={1}>
+                                {t(
+                                    'Collaborators can add photos and videos to the shared album'
+                                )}
+                            </Typography>
 
-                    <Typography color="text.muted" variant="small" padding={1}>
-                        {t('Remove Participant')}
-                    </Typography>
-                    <EnteMenuItem
-                        //
-                        color="error"
-                        fontWeight="normal"
-                        onClick={handleClick}
-                        label={'Remove'}
-                        startIcon={
-                            <BlockIcon
-                                style={{ fontSize: 20, marginRight: 8 }}
-                            />
-                        }
-                    />
+                            <Stack py={'30px'}>
+                                <Typography
+                                    color="text.muted"
+                                    variant="small"
+                                    padding={1}>
+                                    {t('Remove Participant')}
+                                </Typography>
+
+                                <EnteMenuItem
+                                    //
+                                    color="error"
+                                    fontWeight="normal"
+                                    onClick={handleClick}
+                                    label={'Remove'}
+                                    startIcon={
+                                        <BlockIcon
+                                            style={{
+                                                fontSize: 20,
+                                                marginRight: 8,
+                                            }}
+                                        />
+                                    }
+                                />
+                            </Stack>
+                        </Stack>
+                    </Stack>
                 </Stack>
             </EnteDrawer>
         </>
