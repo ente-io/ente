@@ -1,4 +1,3 @@
-import { User } from 'types/user';
 import { EnteFile } from 'types/file';
 import { CollectionSummaryType, CollectionType } from 'constants/collection';
 import {
@@ -8,9 +7,22 @@ import {
     VISIBILITY_STATE,
 } from 'types/magicMetadata';
 
+export enum COLLECTION_ROLE {
+    VIEWER = 'VIEWER',
+    OWNER = 'OWNER',
+    COLLABORATOR = 'COLLABORATOR',
+    UNKNOWN = 'UNKNOWN',
+}
+
+export interface CollectionUser {
+    id: number;
+    email: string;
+    role: COLLECTION_ROLE;
+}
+
 export interface EncryptedCollection {
     id: number;
-    owner: User;
+    owner: CollectionUser;
     // collection name was unencrypted in the past, so we need to keep it as optional
     name?: string;
     encryptedKey: string;
@@ -19,7 +31,7 @@ export interface EncryptedCollection {
     nameDecryptionNonce: string;
     type: CollectionType;
     attributes: collectionAttributes;
-    sharees: User[];
+    sharees: CollectionUser[];
     publicURLs?: PublicURL[];
     updationTime: number;
     isDeleted: boolean;
