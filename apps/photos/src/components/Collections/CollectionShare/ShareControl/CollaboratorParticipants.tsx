@@ -5,8 +5,8 @@ import { t } from 'i18next';
 import { Collection } from 'types/collection';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-// import AvatarCollectionShare from '../AvatarCollectionShare';
-// import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import AvatarCollectionShare from '../AvatarCollectionShare';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import ManageAddCollab from './MangeAddCollab';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
@@ -48,6 +48,8 @@ export function CollaboratorParticipants({ collection, onRootClose }: Iprops) {
                             key={item}
                             onClick={() => console.log('clicked')}
                             label={item}
+                            startIcon={<AvatarCollectionShare email={item} />}
+                            endIcon={<ChevronRightIcon />}
                         />
                         {index !== collaborators.length - 1 && (
                             <MenuItemDivider />

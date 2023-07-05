@@ -8,6 +8,7 @@ import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import AvatarCollectionShare from '../AvatarCollectionShare';
 import ManageAddViewer from './ManageAddViewer';
 import PhotoIcon from '@mui/icons-material/Photo';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 interface Iprops {
     collection: Collection;
@@ -20,6 +21,7 @@ export function ViewerParticipants({ collection, onRootClose }: Iprops) {
     }
 
     const [Viewers, setViewers] = useState([]);
+    // const [participantRoleView, setParticipantRoleView] = useState(false);
 
     useEffect(() => {
         collection.sharees?.map((sharee) => {
@@ -46,6 +48,7 @@ export function ViewerParticipants({ collection, onRootClose }: Iprops) {
                                 startIcon={
                                     <AvatarCollectionShare email={item} />
                                 }
+                                endIcon={<ChevronRightIcon />}
                             />
                             {index !== Viewers.length - 1 && (
                                 <MenuItemDivider />
