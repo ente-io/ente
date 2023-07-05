@@ -71,7 +71,7 @@ export default function ViewerEmailShare({ collection }) {
             ) {
                 setFieldError(t('ALREADY_SHARED', { email }));
             } else {
-                await shareCollection(collection, email);
+                await shareCollection(collection, email, 'VIEWER');
                 await galleryContext.syncWithRemote(false, true);
                 resetForm();
             }

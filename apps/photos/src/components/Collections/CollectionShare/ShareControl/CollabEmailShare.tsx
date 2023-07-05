@@ -71,7 +71,7 @@ export default function CollabEmailShare({ collection }) {
             ) {
                 setFieldError(t('ALREADY_SHARED', { email }));
             } else {
-                await shareCollection(collection, email);
+                await shareCollection(collection, email, 'COLLABORATOR');
                 await galleryContext.syncWithRemote(false, true);
                 resetForm();
             }

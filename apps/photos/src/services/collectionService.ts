@@ -812,7 +812,8 @@ export const renameCollection = async (
 
 export const shareCollection = async (
     collection: Collection,
-    withUserEmail: string
+    withUserEmail: string,
+    role: string
 ) => {
     try {
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
@@ -825,6 +826,7 @@ export const shareCollection = async (
         const shareCollectionRequest = {
             collectionID: collection.id,
             email: withUserEmail,
+            role: role,
             encryptedKey,
         };
         await HTTPService.post(
