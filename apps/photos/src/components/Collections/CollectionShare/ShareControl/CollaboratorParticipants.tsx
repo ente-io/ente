@@ -9,24 +9,18 @@ import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 // import AvatarCollectionShare from '../AvatarCollectionShare';
 // import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
+import ManageAddCollab from './MangeAddCollab';
 
 interface Iprops {
     collection: Collection;
+    onRootClose: () => void;
 }
 
-export function CollaboratorParticipants({ collection }: Iprops) {
+export function CollaboratorParticipants({ collection, onRootClose }: Iprops) {
     if (!collection.sharees?.length) {
         return <></>;
     }
 
-    const shareExpireOption = [
-        'Never',
-        '1 day',
-        '1 week',
-        '1 month',
-        '1 year',
-        'Custom',
-    ];
     const [collaborators, setCollaborators] = useState([]);
 
     useEffect(() => {
@@ -51,11 +45,15 @@ export function CollaboratorParticipants({ collection }: Iprops) {
                             onClick={() => console.log('clicked')}
                             label={item}
                         />
-                        {index !== shareExpireOption.length - 1 && (
+                        {index !== collaborators.length - 1 && (
                             <MenuItemDivider />
                         )}
                     </>
                 ))}
+                <ManageAddCollab
+                    collection={collection}
+                    onRootClose={onRootClose}
+                />
             </MenuItemGroup>
         </Box>
     );

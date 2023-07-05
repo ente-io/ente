@@ -9,9 +9,10 @@ import { CollaboratorParticipants } from './CollaboratorParticipants';
 
 interface Iprops {
     collection: Collection;
+    onRootClose: () => void;
 }
 
-export function ManageParticipantsList({ collection }: Iprops) {
+export function ManageParticipantsList({ collection, onRootClose }: Iprops) {
     if (!collection.sharees?.length) {
         return <></>;
     }
@@ -20,8 +21,11 @@ export function ManageParticipantsList({ collection }: Iprops) {
         <Box mb={3}>
             <OwnerParticipant collection={collection}></OwnerParticipant>
             <CollaboratorParticipants
-                collection={collection}></CollaboratorParticipants>
-            <ViewerParticipants collection={collection}></ViewerParticipants>
+                collection={collection}
+                onRootClose={onRootClose}></CollaboratorParticipants>
+            <ViewerParticipants
+                collection={collection}
+                onRootClose={onRootClose}></ViewerParticipants>
         </Box>
     );
 }
