@@ -1,29 +1,21 @@
 import { Stack, Typography } from '@mui/material';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
-import { Collection, PublicURL } from 'types/collection';
+import { Collection } from 'types/collection';
 import PublicIcon from '@mui/icons-material/Public';
 // import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { SetPublicShareProp } from 'types/publicCollection';
+
 import AddIcon from '@mui/icons-material/Add';
 import { useState } from 'react';
 import { t } from 'i18next';
 import ManageAddViewerOptions from './ManageAddViewerOptions';
 
 interface Iprops {
-    publicShareProp: PublicURL;
     collection: Collection;
-    setPublicShareProp: SetPublicShareProp;
+
     onRootClose: () => void;
-    publicShareUrl: string;
 }
-export default function ManageAddViewer({
-    publicShareProp,
-    setPublicShareProp,
-    collection,
-    onRootClose,
-    publicShareUrl,
-}: Iprops) {
+export default function ManageAddViewer({ collection, onRootClose }: Iprops) {
     const [manageAddViewer, setManageAddViewer] = useState(false);
     const closeManageAddViewer = () => setManageAddViewer(false);
     const openManageAddViewer = () => setManageAddViewer(true);
@@ -49,10 +41,7 @@ export default function ManageAddViewer({
                 open={manageAddViewer}
                 onClose={closeManageAddViewer}
                 onRootClose={onRootClose}
-                publicShareProp={publicShareProp}
                 collection={collection}
-                setPublicShareProp={setPublicShareProp}
-                publicShareUrl={publicShareUrl}
             />
         </>
     );

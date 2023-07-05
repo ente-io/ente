@@ -5,8 +5,7 @@ import { Stack } from '@mui/material';
 //     deleteShareableURL,
 //     updateShareableURL,
 // } from 'services/collectionService';
-import { Collection, PublicURL } from 'types/collection';
-import { SetPublicShareProp } from 'types/publicCollection';
+import { Collection } from 'types/collection';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { t } from 'i18next';
 import { DialogProps } from '@mui/material';
@@ -17,13 +16,10 @@ import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import ViewerEmailShare from './ViewerEmailShare';
 
 interface Iprops {
-    publicShareProp: PublicURL;
     collection: Collection;
-    setPublicShareProp: SetPublicShareProp;
     open: boolean;
     onClose: () => void;
     onRootClose: () => void;
-    publicShareUrl: string;
 }
 
 export default function ManageAddViewerOptions({

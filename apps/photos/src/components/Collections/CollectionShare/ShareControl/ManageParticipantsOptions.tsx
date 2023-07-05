@@ -5,8 +5,8 @@ import { Stack } from '@mui/material';
 //     deleteShareableURL,
 //     updateShareableURL,
 // } from 'services/collectionService';
-import { Collection, PublicURL } from 'types/collection';
-import { SetPublicShareProp } from 'types/publicCollection';
+import { Collection } from 'types/collection';
+
 import { EnteDrawer } from 'components/EnteDrawer';
 import { t } from 'i18next';
 import { DialogProps } from '@mui/material';
@@ -19,13 +19,12 @@ import Titlebar from 'components/Titlebar';
 import { ManageParticipantsList } from './ManageParticipantsList';
 
 interface Iprops {
-    publicShareProp: PublicURL;
     collection: Collection;
-    setPublicShareProp: SetPublicShareProp;
+
     open: boolean;
     onClose: () => void;
     onRootClose: () => void;
-    publicShareUrl: string;
+
     peopleCount: number;
 }
 
