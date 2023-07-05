@@ -3,10 +3,13 @@ import { GalleryContext } from 'pages/gallery';
 import { styled } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { logError } from 'utils/sentry';
+import { LS_KEYS, getData } from 'utils/storage/localStorage';
+import { User } from 'types/user';
 
 interface AvatarProps {
     email: string;
 }
+const OWNER_AVATAR_COLOR_CODE = '#000000';
 
 const AvatarBaseCollectionShare = styled('div')<{
     colorCode: string;
@@ -30,6 +33,7 @@ const AvatarCollectionShare: React.FC<AvatarProps> = ({ email }) => {
 
     const [colorCode, setColorCode] = useState('');
     const [userLetter, setUserLetter] = useState('');
+    const user: User = getData(LS_KEYS.USER);
 
     useLayoutEffect(() => {
         try {
@@ -40,10 +44,16 @@ const AvatarCollectionShare: React.FC<AvatarProps> = ({ email }) => {
             const id = Array.from(userIDToEmailMap.keys()).find(
                 (key) => userIDToEmailMap.get(key) === email
             );
-            if (!id) {
+            if (!id && user.email !== email) {
                 logError(Error(), `ID not found for email: ${email}`);
                 return;
+            } else if (!id && user.email === email) {
+                const OwnerColorCode = OWNER_AVATAR_COLOR_CODE;
+                setUserLetter(email[0].toUpperCase());
+                setColorCode(OwnerColorCode);
+                return;
             }
+
             const colorIndex = id % theme.colors.avatarColors.length;
             const colorCode = theme.colors.avatarColors[colorIndex];
             setUserLetter(email[0].toUpperCase());

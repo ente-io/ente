@@ -7,11 +7,14 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { SetPublicShareProp } from 'types/publicCollection';
 import { useState } from 'react';
 import { t } from 'i18next';
-import ManageAddViewerOptions from './ManageAddViewerOptions';
+// import ManageAddViewerOptions from './ManageAddViewerOptions';
 // import { CollectionShareSharees } from '../sharees';
 import AvatarCollectionShare from '../AvatarCollectionShare';
-import ManageAddViewer from './ManageAddViewer';
+// import ManageAddViewer from './ManageAddViewer';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
+import Avatar from '@mui/material/Avatar';
+import ManageParticipantsOptions from './ManageParticipantsOptions';
+// import { CollectionShareSharees } from '../sharees';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -34,6 +37,12 @@ const AvatarContainerOuter = styled('div')({
     alignItems: 'center',
     marginLeft: 8,
 });
+const AvatarCounter = styled(Avatar)({
+    height: 20,
+    width: 20,
+    fontSize: 10,
+    color: '#fff',
+});
 
 export default function ManageParticipants({
     publicShareProp,
@@ -46,6 +55,9 @@ export default function ManageParticipants({
     const closeManageAddViewer = () => setManageAddViewer(false);
     const openManageAddViewer = () => setManageAddViewer(true);
     const peopleCount = collection.sharees.length;
+
+    const shareeCount = collection.sharees?.length || 0;
+    const extraShareeCount = Math.max(0, shareeCount - 6);
     // console.log('Lenght for sharee list', collection.sharees[0].email);
     return (
         <>
@@ -58,14 +70,23 @@ export default function ManageParticipants({
                     <EnteMenuItem
                         startIcon={
                             <AvatarContainerOuter>
-                                {collection.sharees?.map((sharee) => (
-                                    <AvatarContainer key={sharee.email}>
-                                        <AvatarCollectionShare
-                                            key={sharee.email}
-                                            email={sharee.email}
-                                        />
+                                {collection.sharees
+                                    ?.slice(0, 6)
+                                    .map((sharee) => (
+                                        <AvatarContainer key={sharee.email}>
+                                            <AvatarCollectionShare
+                                                key={sharee.email}
+                                                email={sharee.email}
+                                            />
+                                        </AvatarContainer>
+                                    ))}
+                                {extraShareeCount > 0 && (
+                                    <AvatarContainer key="extra-count">
+                                        <AvatarCounter>
+                                            +{extraShareeCount}
+                                        </AvatarCounter>
                                     </AvatarContainer>
-                                ))}
+                                )}
                             </AvatarContainerOuter>
                         }
                         onClick={openManageAddViewer}
@@ -76,18 +97,12 @@ export default function ManageParticipants({
                         }
                         endIcon={<ChevronRightIcon />}
                     />
+                    <MenuItemDivider />
                 </MenuItemGroup>
-                <MenuItemDivider />
-                <ManageAddViewer
-                    publicShareProp={publicShareProp}
-                    setPublicShareProp={setPublicShareProp}
-                    collection={collection}
-                    publicShareUrl={publicShareUrl}
-                    onRootClose={onRootClose}
-                />
             </Stack>
-            {/* <CollectionShareSharees collection={collection} /> */}
-            <ManageAddViewerOptions
+
+            <ManageParticipantsOptions
+                peopleCount={peopleCount}
                 open={manageAddViewer}
                 onClose={closeManageAddViewer}
                 onRootClose={onRootClose}
