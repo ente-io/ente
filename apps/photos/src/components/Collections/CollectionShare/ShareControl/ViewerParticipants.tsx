@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { t } from 'i18next';
 import { Collection } from 'types/collection';
@@ -9,6 +9,7 @@ import AvatarCollectionShare from '../AvatarCollectionShare';
 import ManageAddViewer from './ManageAddViewer';
 import PhotoIcon from '@mui/icons-material/Photo';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ManageParticipantsRole from './ManageParticipantsRole';
 
 interface Iprops {
     collection: Collection;
@@ -21,7 +22,16 @@ export function ViewerParticipants({ collection, onRootClose }: Iprops) {
     }
 
     const [Viewers, setViewers] = useState([]);
-    // const [participantRoleView, setParticipantRoleView] = useState(false);
+    const [participantRoleView, setParticipantRoleView] = useState(false);
+    const [selectedEmail, setSelectedEmail] = useState('');
+
+    const openParticipantRoleView = (email) => {
+        setParticipantRoleView(true);
+        setSelectedEmail(email);
+    };
+    const closeParticipantRoleView = () => {
+        setParticipantRoleView(false);
+    };
 
     useEffect(() => {
         collection.sharees?.map((sharee) => {
@@ -31,36 +41,51 @@ export function ViewerParticipants({ collection, onRootClose }: Iprops) {
     }, [collection.sharees]);
 
     return (
-        <Box mb={3}>
-            <Typography color="text.muted" variant="small" padding={1}>
-                <PhotoIcon style={{ fontSize: 20, marginRight: 8 }} />
-                {t('Viewers')}
-            </Typography>
-            <MenuItemGroup>
-                <>
-                    {Viewers.map((item, index) => (
+        <>
+            <Stack>
+                <Box mb={3}>
+                    <Typography color="text.muted" variant="small" padding={1}>
+                        <PhotoIcon style={{ fontSize: 20, marginRight: 8 }} />
+                        {t('Viewers')}
+                    </Typography>
+                    <MenuItemGroup>
                         <>
-                            <EnteMenuItem
-                                fontWeight="normal"
-                                key={item}
-                                onClick={() => console.log('clicked')}
-                                label={item}
-                                startIcon={
-                                    <AvatarCollectionShare email={item} />
-                                }
-                                endIcon={<ChevronRightIcon />}
+                            {Viewers.map((item, index) => (
+                                <>
+                                    <EnteMenuItem
+                                        fontWeight="normal"
+                                        key={item}
+                                        onClick={() =>
+                                            openParticipantRoleView(item)
+                                        }
+                                        label={item}
+                                        startIcon={
+                                            <AvatarCollectionShare
+                                                email={item}
+                                            />
+                                        }
+                                        endIcon={<ChevronRightIcon />}
+                                    />
+                                    {index !== Viewers.length - 1 && (
+                                        <MenuItemDivider />
+                                    )}
+                                </>
+                            ))}
+                            <ManageAddViewer
+                                collection={collection}
+                                onRootClose={onRootClose}
                             />
-                            {index !== Viewers.length - 1 && (
-                                <MenuItemDivider />
-                            )}
                         </>
-                    ))}
-                    <ManageAddViewer
-                        collection={collection}
-                        onRootClose={onRootClose}
-                    />
-                </>
-            </MenuItemGroup>
-        </Box>
+                    </MenuItemGroup>
+                </Box>
+            </Stack>
+            <ManageParticipantsRole
+                open={participantRoleView}
+                collection={collection}
+                onRootClose={onRootClose}
+                onClose={closeParticipantRoleView}
+                selectedEmail={selectedEmail} // Pass the selected email to ManageParticipantsRole
+            />
+        </>
     );
 }
