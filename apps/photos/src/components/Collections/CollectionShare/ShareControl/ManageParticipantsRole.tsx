@@ -18,6 +18,7 @@ interface Iprops {
     onClose: () => void;
     onRootClose: () => void;
     selectedEmail: string;
+    collectionUnshare: (email: string) => Promise<void>;
 }
 
 export default function ManageParticipantsRole({
@@ -26,6 +27,7 @@ export default function ManageParticipantsRole({
     onClose,
     onRootClose,
     selectedEmail,
+    collectionUnshare,
 }: Iprops) {
     const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
         if (reason === 'backdropClick') {
@@ -34,6 +36,12 @@ export default function ManageParticipantsRole({
             onClose();
         }
     };
+
+    const handleClick = () => {
+        collectionUnshare(selectedEmail);
+        onClose();
+    };
+
     console.log('collection Clicked', collection, selectedEmail);
     return (
         <>
@@ -88,7 +96,7 @@ export default function ManageParticipantsRole({
                         //
                         color="error"
                         fontWeight="normal"
-                        onClick={() => console.log('clicked')}
+                        onClick={handleClick}
                         label={'Remove'}
                         startIcon={
                             <BlockIcon

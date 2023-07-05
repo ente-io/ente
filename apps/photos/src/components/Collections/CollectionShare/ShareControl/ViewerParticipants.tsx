@@ -14,9 +14,14 @@ import ManageParticipantsRole from './ManageParticipantsRole';
 interface Iprops {
     collection: Collection;
     onRootClose: () => void;
+    collectionUnshare: (email: string) => Promise<void>;
 }
 
-export function ViewerParticipants({ collection, onRootClose }: Iprops) {
+export function ViewerParticipants({
+    collection,
+    onRootClose,
+    collectionUnshare,
+}: Iprops) {
     if (!collection.sharees?.length) {
         return <></>;
     }
@@ -34,10 +39,11 @@ export function ViewerParticipants({ collection, onRootClose }: Iprops) {
     };
 
     useEffect(() => {
-        collection.sharees?.map((sharee) => {
-            if (sharee.role === 'VIEWER')
-                setViewers((prevViewers) => [...prevViewers, sharee.email]);
-        });
+        const viewersEmails =
+            collection.sharees
+                ?.filter((sharee) => sharee.role === 'VIEWER')
+                .map((sharee) => sharee.email) || [];
+        setViewers(viewersEmails);
     }, [collection.sharees]);
 
     return (
@@ -80,6 +86,7 @@ export function ViewerParticipants({ collection, onRootClose }: Iprops) {
                 </Box>
             </Stack>
             <ManageParticipantsRole
+                collectionUnshare={collectionUnshare}
                 open={participantRoleView}
                 collection={collection}
                 onRootClose={onRootClose}

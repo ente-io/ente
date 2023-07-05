@@ -24,13 +24,11 @@ export function CollaboratorParticipants({ collection, onRootClose }: Iprops) {
     const [collaborators, setCollaborators] = useState([]);
 
     useEffect(() => {
-        collection.sharees?.map((sharee) => {
-            if (sharee.role === 'COLLABORATOR')
-                setCollaborators((prevViewers) => [
-                    ...prevViewers,
-                    sharee.email,
-                ]);
-        });
+        const collaboratorEmails =
+            collection.sharees
+                ?.filter((sharee) => sharee.role === 'COLLABORATOR')
+                .map((sharee) => sharee.email) || [];
+        setCollaborators(collaboratorEmails);
     }, [collection.sharees]);
 
     return (
