@@ -14,11 +14,14 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/empty_state.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/share_util.dart";
 
 class SharedCollectionsTab extends StatefulWidget {
   const SharedCollectionsTab({Key? key}) : super(key: key);
@@ -200,6 +203,18 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                 },
                 itemCount: collections.quickLinks.length,
               ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: ButtonWidget(
+                buttonType: ButtonType.trailingIcon,
+                labelText: S.of(context).inviteYourFriends,
+                icon: Icons.ios_share_outlined,
+                onTap: () async {
+                  shareText(S.of(context).shareTextRecommendUsingEnte);
+                },
+              ),
+            ),
             const SizedBox(height: 32),
           ],
         ),
