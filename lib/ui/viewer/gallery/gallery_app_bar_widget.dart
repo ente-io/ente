@@ -595,6 +595,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> _trashCollection() async {
+    // Fetch the count by-passing the cache to avoid any stale data
     final int count =
         await FilesDB.instance.collectionFileCount(widget.collection!.id);
     final bool isEmptyCollection = count == 0;

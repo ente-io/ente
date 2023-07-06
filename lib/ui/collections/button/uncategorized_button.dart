@@ -55,7 +55,7 @@ class UnCategorizedCollections extends StatelessWidget {
                   FutureBuilder<int>(
                     future: collection == null
                         ? Future.value(0)
-                        : FilesDB.instance.collectionFileCount(collection.id),
+                        : CollectionsService.instance.getFileCount(collection),
                     builder: (context, snapshot) {
                       if (snapshot.hasData && snapshot.data! > 0) {
                         return RichText(

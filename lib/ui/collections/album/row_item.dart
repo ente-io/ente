@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
 import "package:photos/core/configuration.dart";
-import 'package:photos/db/files_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import "package:photos/models/file.dart";

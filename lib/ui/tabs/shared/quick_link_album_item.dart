@@ -64,7 +64,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                     child: FutureBuilder<int>(
-                      future: FilesDB.instance.collectionFileCount(c.id),
+                      future: CollectionsService.instance.getFileCount(c),
                       builder: (context, snapshot) {
                         if (!snapshot.hasError) {
                           // final String textCount = NumberFormat().format(snapshot.data);
