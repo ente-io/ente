@@ -58,6 +58,7 @@ class CollectionsService {
   Future<Map<int, int>>? _collectionIDToNewestFileTime;
   Collection? cachedUncategorizedCollection;
   final Map<String, File> _coverCache = <String, File>{};
+  final Map<int, int> _countCache = <int, int>{};
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
@@ -83,6 +84,7 @@ class CollectionsService {
         _coverCache.removeWhere(
           (key, value) => key.startsWith(event.collectionID!.toString()),
         );
+        _countCache.remove(event.collectionID);
       }
     });
   }
@@ -250,6 +252,20 @@ class CollectionsService {
       return Future.value(coverFile);
     }
     return null;
+  }
+
+  Future<int> getFileCount(Collection c) async {
+    if (_countCache.containsKey(c.id)) {
+      return _countCache[c.id]!;
+    } else {
+      final count = await _filesDB.collectionFileCount(c.id);
+      _countCache[c.id] = count;
+      return count;
+    }
+  }
+
+  int? getCachedFileCount(Collection c) {
+    return _countCache[c.id];
   }
 
   Future<bool> setCollectionSyncTime(int collectionID, int? time) async {
