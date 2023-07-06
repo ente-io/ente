@@ -203,7 +203,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                 },
                 itemCount: collections.quickLinks.length,
               ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 48),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: ButtonWidget(
