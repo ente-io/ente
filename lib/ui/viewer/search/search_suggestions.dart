@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
