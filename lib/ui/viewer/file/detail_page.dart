@@ -70,14 +70,12 @@ class _DetailPageState extends State<DetailPage> {
   final _logger = Logger("DetailPageState");
   bool _shouldDisableScroll = false;
   List<File>? _files;
-  PageController? _pageController;
+  late PageController _pageController;
   int _selectedIndex = 0;
   bool _hasPageChanged = false;
   bool _hasLoadedTillStart = false;
   bool _hasLoadedTillEnd = false;
-  bool _shouldHideAppBar = false;
-  GlobalKey<FadingAppBarState>? _appBarKey;
-  GlobalKey<FadingBottomBarState>? _bottomBarKey;
+  final _enableFullScreenNotifier = ValueNotifier(false);
 
   @override
   void initState() {
@@ -87,11 +85,12 @@ class _DetailPageState extends State<DetailPage> {
     ]; // Make a copy since we append preceding and succeeding entries to this
     _selectedIndex = widget.config.selectedIndex;
     _preloadEntries();
+    _pageController = PageController(initialPage: _selectedIndex);
   }
 
   @override
   void dispose() {
-    // _pageController?.dispose();
+    _pageController.dispose();
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
@@ -110,8 +109,6 @@ class _DetailPageState extends State<DetailPage> {
           _files!.length.toString() +
           " files .",
     );
-    _appBarKey = GlobalKey<FadingAppBarState>();
-    _bottomBarKey = GlobalKey<FadingBottomBarState>();
     return Scaffold(
       appBar: FadingAppBar(
         _files![_selectedIndex],
@@ -119,34 +116,31 @@ class _DetailPageState extends State<DetailPage> {
         Configuration.instance.getUserID(),
         100,
         widget.config.mode == DetailPageMode.full,
-        key: _appBarKey,
+        enableFullScreenNotifier: _enableFullScreenNotifier,
       ),
       extendBodyBehindAppBar: true,
       resizeToAvoidBottomInset: false,
       body: Center(
         child: Stack(
           children: [
-            _buildPageView(),
+            _buildPageView(context),
             FadingBottomBar(
               _files![_selectedIndex],
               _onEditFileRequested,
               widget.config.mode == DetailPageMode.minimalistic,
               onFileRemoved: _onFileRemoved,
               userID: Configuration.instance.getUserID(),
-              key: _bottomBarKey,
+              enableFullScreenNotifier: _enableFullScreenNotifier,
             ),
           ],
         ),
       ),
-
-      // backgroundColor: Theme.of(context).colorScheme.onPrimary,
     );
   }
 
-  Widget _buildPageView() {
+  Widget _buildPageView(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     _logger.info("Building with " + _selectedIndex.toString());
-    // todo: perf.. do we always need to create new controller?
-    _pageController = PageController(initialPage: _selectedIndex);
     return PageView.builder(
       itemBuilder: (context, index) {
         final file = _files![index];
@@ -161,18 +155,21 @@ class _DetailPageState extends State<DetailPage> {
               });
             }
           },
-          playbackCallback: (isPlaying) {
-            _shouldHideAppBar = isPlaying;
-            Future.delayed(Duration.zero, () {
-              _toggleFullScreen();
-            });
-          },
+          //Noticed that when the video is seeked, the video pops and moves the
+          //seek bar along with it and it happens when bottomPadding is 0. So we
+          //don't toggle full screen for cases where this issue happens.
+          playbackCallback: bottomPadding != 0
+              ? (isPlaying) {
+                  Future.delayed(Duration.zero, () {
+                    _toggleFullScreen();
+                  });
+                }
+              : null,
           backgroundDecoration: const BoxDecoration(color: Colors.black),
         );
         _preloadFiles(index);
         return GestureDetector(
           onTap: () {
-            _shouldHideAppBar = !_shouldHideAppBar;
             _toggleFullScreen();
           },
           child: content,
@@ -195,18 +192,13 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   void _toggleFullScreen() {
-    if (_shouldHideAppBar) {
-      _appBarKey!.currentState!.hide();
-      _bottomBarKey!.currentState!.hide();
-    } else {
-      _appBarKey!.currentState!.show();
-      _bottomBarKey!.currentState!.show();
-    }
-    Future.delayed(Duration.zero, () {
+    _enableFullScreenNotifier.value = !_enableFullScreenNotifier.value;
+
+    Future.delayed(const Duration(milliseconds: 125), () {
       SystemChrome.setEnabledSystemUIMode(
         //to hide status bar?
         SystemUiMode.manual,
-        overlays: _shouldHideAppBar ? [] : SystemUiOverlay.values,
+        overlays: _enableFullScreenNotifier.value ? [] : SystemUiOverlay.values,
       );
     });
   }
@@ -249,7 +241,7 @@ class _DetailPageState extends State<DetailPage> {
       final length = files.length;
       files.addAll(_files!);
       _files = files;
-      _pageController!.jumpToPage(length);
+      _pageController.jumpToPage(length);
       _selectedIndex = length;
     });
   }
