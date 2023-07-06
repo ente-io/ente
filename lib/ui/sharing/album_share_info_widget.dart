@@ -40,10 +40,12 @@ class AlbumSharesIcons extends StatelessWidget {
     if (sharees.length > limitCountTo) {
       widgets.add(
         Positioned(
-          left: 12.1 * displayCount,
+          left: (overlapPadding * displayCount) + 0.5,
           child: MoreCountWidget(
             sharees.length - displayCount,
-            type: MoreCountType.tiny,
+            type: type == AvatarType.tiny
+                ? MoreCountType.tiny
+                : MoreCountType.mini,
             thumbnailView: removeBorder,
           ),
         ),
