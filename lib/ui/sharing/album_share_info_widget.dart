@@ -11,6 +11,7 @@ class AlbumSharesIcons extends StatelessWidget {
   final AvatarType type;
   final bool removeBorder;
   final EdgeInsets padding;
+  final Widget? trailingWidget;
 
   const AlbumSharesIcons({
     Key? key,
@@ -18,13 +19,15 @@ class AlbumSharesIcons extends StatelessWidget {
     this.type = AvatarType.tiny,
     this.limitCountTo = 2,
     this.removeBorder = true,
+    this.trailingWidget,
     this.padding = const EdgeInsets.only(left: 10.0, top: 10, bottom: 10),
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final displayCount = min(sharees.length, limitCountTo);
-    final double overlapPadding = type == AvatarType.tiny ? 12.0 : 18.0;
+    final hasMore = sharees.length > limitCountTo;
+    final double overlapPadding = type == AvatarType.tiny ? 14.0 : 20.0;
     final widgets = List<Widget>.generate(
       displayCount,
       (index) => Positioned(
@@ -37,10 +40,10 @@ class AlbumSharesIcons extends StatelessWidget {
       ),
     );
 
-    if (sharees.length > limitCountTo) {
+    if (hasMore) {
       widgets.add(
         Positioned(
-          left: (overlapPadding * displayCount) + 0.5,
+          left: (overlapPadding * displayCount),
           child: MoreCountWidget(
             sharees.length - displayCount,
             type: type == AvatarType.tiny
@@ -48,6 +51,14 @@ class AlbumSharesIcons extends StatelessWidget {
                 : MoreCountType.mini,
             thumbnailView: removeBorder,
           ),
+        ),
+      );
+    }
+    if (trailingWidget != null) {
+      widgets.add(
+        Positioned(
+          left: (overlapPadding * (displayCount + (hasMore ? 1 : 0))) + 12,
+          child: trailingWidget!,
         ),
       );
     }

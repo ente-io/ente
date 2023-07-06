@@ -38,6 +38,12 @@ class AlbumRowItemWidget extends StatelessWidget {
         "_" +
         c.id.toString();
     final enteTextTheme = getEnteTextTheme(context);
+    final Widget? linkIcon = c.hasLink && isOwner
+        ? Icon(
+            Icons.link,
+            color: c.publicURLs!.first!.isExpired ? warning500 : strokeBaseDark,
+          )
+        : null;
     return GestureDetector(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,29 +91,11 @@ class AlbumRowItemWidget extends StatelessWidget {
                               alignment: Alignment.topLeft,
                               child: AlbumSharesIcons(
                                 sharees: c.getSharees(),
+                                type: AvatarType.mini,
+                                trailingWidget: linkIcon,
                               ),
                             ),
                           ),
-                      if (isOwner && c.hasLink)
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              top: 4.0,
-                              left: 10.0,
-                              right: 10.0,
-                            ),
-                            child: c.publicURLs!.first!.isExpired
-                                ? const Icon(
-                                    Icons.link,
-                                    color: warning500,
-                                  )
-                                : const Icon(
-                                    Icons.link,
-                                    color: strokeBaseDark,
-                                  ),
-                          ),
-                        ),
                       if (!isOwner)
                         Align(
                           alignment: Alignment.bottomRight,
