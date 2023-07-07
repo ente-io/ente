@@ -19,7 +19,8 @@ export enum CollectionSummaryType {
     uncategorized = 'uncategorized',
     all = 'all',
     outgoingShare = 'outgoingShare',
-    incomingShare = 'incomingShare',
+    incomingShareViewer = 'incomingShareViewer',
+    incomingShareCollaborator = 'incomingShareCollaborator',
     sharedOnlyViaLink = 'sharedOnlyViaLink',
     archived = 'archived',
     hidden = 'hidden',
@@ -40,7 +41,8 @@ export const COLLECTION_SORT_ORDER = new Map([
     [CollectionSummaryType.favorites, 2],
     [CollectionSummaryType.album, 3],
     [CollectionSummaryType.folder, 3],
-    [CollectionSummaryType.incomingShare, 3],
+    [CollectionSummaryType.incomingShareViewer, 3],
+    [CollectionSummaryType.incomingShareCollaborator, 3],
     [CollectionSummaryType.outgoingShare, 3],
     [CollectionSummaryType.sharedOnlyViaLink, 3],
     [CollectionSummaryType.archived, 3],
@@ -57,10 +59,20 @@ export const SYSTEM_COLLECTION_TYPES = new Set([
     CollectionSummaryType.hidden,
 ]);
 
-export const SELECT_NOT_ALLOWED_COLLECTION = new Set([
+export const ADD_TO_NOT_ALLOWED_COLLECTION = new Set([
     CollectionSummaryType.all,
     CollectionSummaryType.archive,
-    CollectionSummaryType.incomingShare,
+    CollectionSummaryType.incomingShareViewer,
+    CollectionSummaryType.trash,
+    CollectionSummaryType.uncategorized,
+    CollectionSummaryType.hidden,
+]);
+
+export const MOVE_TO_NOT_ALLOWED_COLLECTION = new Set([
+    CollectionSummaryType.all,
+    CollectionSummaryType.archive,
+    CollectionSummaryType.incomingShareViewer,
+    CollectionSummaryType.incomingShareCollaborator,
     CollectionSummaryType.trash,
     CollectionSummaryType.uncategorized,
     CollectionSummaryType.hidden,

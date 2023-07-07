@@ -63,7 +63,9 @@ function CollectionCardIcon({ collectionType }) {
             {collectionType === CollectionSummaryType.outgoingShare && (
                 <PeopleIcon />
             )}
-            {collectionType === CollectionSummaryType.incomingShare && (
+            {(collectionType === CollectionSummaryType.incomingShareViewer ||
+                collectionType ===
+                    CollectionSummaryType.incomingShareCollaborator) && (
                 <PeopleIcon />
             )}
             {collectionType === CollectionSummaryType.sharedOnlyViaLink && (
