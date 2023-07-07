@@ -119,6 +119,8 @@ dependencies:
   shared_preferences: ^2.0.5
   sqflite: ^2.0.0+3
   sqflite_migration: ^0.3.0
+  srp:
+    git: https://github.com/kee-org/srp.dart.git
   step_progress_indicator: ^1.0.2
   styled_text: ^7.0.0
   syncfusion_flutter_core: ^19.2.49
