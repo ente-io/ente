@@ -50,7 +50,7 @@ class LazyGroupGallery extends StatefulWidget {
 }
 
 class _LazyGroupGalleryState extends State<LazyGroupGallery> {
-  static const kNumberOfDaysToRenderBeforeAndAfter = 8;
+  static const numberOfGroupsToRenderBeforeAndAfter = 8;
 
   late Logger _logger;
 
@@ -80,7 +80,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
     _currentIndexSubscription =
         widget.currentIndexStream.listen((currentIndex) {
       final bool shouldRender = (currentIndex - widget.index).abs() <
-          kNumberOfDaysToRenderBeforeAndAfter;
+          numberOfGroupsToRenderBeforeAndAfter;
       if (mounted && shouldRender != _shouldRender) {
         setState(() {
           _shouldRender = shouldRender;
