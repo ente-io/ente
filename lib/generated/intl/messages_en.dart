@@ -832,9 +832,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "noExifData": MessageLookupByLibrary.simpleMessage("No EXIF data"),
         "noHiddenPhotosOrVideos":
             MessageLookupByLibrary.simpleMessage("No hidden photos or videos"),
+        "noImagesWithLocation":
+            MessageLookupByLibrary.simpleMessage("No images with location"),
         "noPhotosAreBeingBackedUpRightNow":
             MessageLookupByLibrary.simpleMessage(
                 "No photos are being backed up right now"),
+        "noPhotosFoundHere":
+            MessageLookupByLibrary.simpleMessage("No photos found here"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("No recovery key?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -1367,6 +1371,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "You\'ve no duplicate files that can be cleared"),
         "youveNoFilesInThisAlbumThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage(
-                "You\'ve no files in this album that can be deleted")
+                "You\'ve no files in this album that can be deleted"),
+        "zoomOutToSeePhotos":
+            MessageLookupByLibrary.simpleMessage("Zoom out to see photos")
       };
 }

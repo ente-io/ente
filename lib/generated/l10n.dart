@@ -7415,6 +7415,36 @@ class S {
     );
   }
 
+  /// `No photos found here`
+  String get noPhotosFoundHere {
+    return Intl.message(
+      'No photos found here',
+      name: 'noPhotosFoundHere',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Zoom out to see photos`
+  String get zoomOutToSeePhotos {
+    return Intl.message(
+      'Zoom out to see photos',
+      name: 'zoomOutToSeePhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No images with location`
+  String get noImagesWithLocation {
+    return Intl.message(
+      'No images with location',
+      name: 'noImagesWithLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Unpin album`
   String get unpinAlbum {
     return Intl.message(

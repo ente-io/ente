@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -108,7 +109,7 @@ class _MapScreenState extends State<MapScreen> {
         debugPrint("Info for map: center $center, initialZoom $initialZoom");
       }
     } else {
-      showShortToast(context, "No images with location");
+      showShortToast(context, S.of(context).noImagesWithLocation);
     }
 
     setState(() {

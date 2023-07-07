@@ -111,12 +111,8 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   void dispose() {
-    if (_videoPlayerController != null) {
-      _videoPlayerController!.dispose();
-    }
-    if (_chewieController != null) {
-      _chewieController!.dispose();
-    }
+    _videoPlayerController?.dispose();
+    _chewieController?.dispose();
     if (_wakeLockEnabledHere) {
       unawaited(
         Wakelock.enabled.then((isEnabled) {
