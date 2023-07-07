@@ -7365,36 +7365,6 @@ class S {
     );
   }
 
-  /// `Unpin album`
-  String get unpinAlbum {
-    return Intl.message(
-      'Unpin album',
-      name: 'unpinAlbum',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pin album`
-  String get pinAlbum {
-    return Intl.message(
-      'Pin album',
-      name: 'pinAlbum',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No images with location`
-  String get noImagesWithLocation {
-    return Intl.message(
-      'No images with location',
-      name: 'noImagesWithLocation',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `No photos found here`
   String get noPhotosFoundHere {
     return Intl.message(
@@ -7410,6 +7380,36 @@ class S {
     return Intl.message(
       'Zoom out to see photos',
       name: 'zoomOutToSeePhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No images with location`
+  String get noImagesWithLocation {
+    return Intl.message(
+      'No images with location',
+      name: 'noImagesWithLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unpin album`
+  String get unpinAlbum {
+    return Intl.message(
+      'Unpin album',
+      name: 'unpinAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pin album`
+  String get pinAlbum {
+    return Intl.message(
+      'Pin album',
+      name: 'pinAlbum',
       desc: '',
       args: [],
     );

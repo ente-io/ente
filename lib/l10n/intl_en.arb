@@ -1079,6 +1079,9 @@
   "maps": "Maps",
   "enableMaps": "Enable Maps",
   "enableMapsDesc": "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.",
+  "noPhotosFoundHere": "No photos found here",
+  "zoomOutToSeePhotos": "Zoom out to see photos",
+  "noImagesWithLocation": "No images with location",
   "unpinAlbum": "Unpin album",
   "pinAlbum": "Pin album"
 }
