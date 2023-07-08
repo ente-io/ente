@@ -133,6 +133,7 @@ export default function Collections(props: Iprops) {
             />
 
             <CollectionShare
+                collectionSummary={collectionSummaries.get(activeCollectionID)}
                 open={collectionShareModalView}
                 onClose={closeCollectionShare}
                 collection={activeCollection.current}

@@ -277,7 +277,9 @@ export const showShareQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.album ||
         type === CollectionSummaryType.outgoingShare ||
         type === CollectionSummaryType.sharedOnlyViaLink ||
-        type === CollectionSummaryType.archived
+        type === CollectionSummaryType.archived ||
+        type === CollectionSummaryType.incomingShareViewer ||
+        type === CollectionSummaryType.incomingShareCollaborator
     );
 };
 export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
