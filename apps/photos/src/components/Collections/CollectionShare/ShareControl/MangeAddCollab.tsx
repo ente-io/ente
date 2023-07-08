@@ -1,6 +1,5 @@
 import { Stack } from '@mui/material';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { Collection } from 'types/collection';
 // import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -24,7 +23,6 @@ export default function ManageAddCollab({ collection, onRootClose }: Iprops) {
         <>
             <Stack>
                 <MenuItemGroup>
-                    <MenuItemDivider hasIcon={true} />
                     <EnteMenuItem
                         startIcon={<AddIcon />}
                         onClick={openManageShare}
