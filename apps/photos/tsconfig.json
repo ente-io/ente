@@ -9,7 +9,6 @@
         "noImplicitAny": false,
         "noUnusedLocals": false,
         "noUnusedParameters": false,
-        "strictBindCallApply": false,
         "strictNullChecks": false,
         "strictPropertyInitialization": false,
         "target": "es5",
