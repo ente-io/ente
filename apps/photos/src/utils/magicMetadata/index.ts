@@ -8,12 +8,19 @@ export function isArchived(item: Collection | EnteFile) {
         !item ||
         !item.magicMetadata ||
         !item.magicMetadata.data ||
+        !(item as Collection).sharedMagicMetadata?.data ||
         typeof item.magicMetadata.data === 'string' ||
-        typeof item.magicMetadata.data.visibility === 'undefined'
+        typeof item.magicMetadata.data.visibility === 'undefined' ||
+        typeof (item as Collection).sharedMagicMetadata?.data.visibility ===
+            'undefined'
     ) {
         return false;
     }
-    return item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
+    return (
+        item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED ||
+        (item as Collection).sharedMagicMetadata.data.visibility ===
+            VISIBILITY_STATE.ARCHIVED
+    );
 }
 
 export async function updateMagicMetadata<T>(
