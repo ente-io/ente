@@ -49,7 +49,7 @@ export default function ViewerEmailShareOptions(
         props.optionsList
     );
     const [disableInput, setDisableInput] = useState(false);
-    console.log('updatedOptionsList list:', updatedOptionsList);
+    // console.log('updatedOptionsList list:', updatedOptionsList);
 
     const [loading, SetLoading] = useState(false);
 
@@ -74,6 +74,8 @@ export default function ViewerEmailShareOptions(
 
         setUpdatedOptionsList(resultList);
         setDisableInput(false);
+        console.log('Final passing list', selectedOptions);
+        setSelectedOptions([]);
 
         SetLoading(false);
     };
@@ -108,6 +110,11 @@ export default function ViewerEmailShareOptions(
         }
     };
 
+    const handleInputFieldClick = () => {
+        setDisableInput(false);
+        setSelectedOptions([]);
+    };
+
     return (
         <Formik<formValues>
             initialValues={{ inputValue: props.initialValue ?? '' }}
@@ -131,6 +138,7 @@ export default function ViewerEmailShareOptions(
                         type={props.fieldType}
                         id={props.fieldType}
                         onChange={handleChange('inputValue')}
+                        onClick={handleInputFieldClick}
                         name={props.fieldType}
                         {...(props.hiddenLabel
                             ? { placeholder: props.placeholder }
