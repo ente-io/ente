@@ -91,7 +91,7 @@ export default function ManageParticipants({
                         }
                         endIcon={<ChevronRightIcon />}
                     />
-                    <MenuItemDivider />
+                    <MenuItemDivider hasIcon={true} />
                 </MenuItemGroup>
             </Stack>
 

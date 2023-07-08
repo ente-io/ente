@@ -40,6 +40,41 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
 
     return (
         <>
+            {type === CollectionSummaryType.album && (
+                <EnteDrawer
+                    anchor="right"
+                    open={props.open}
+                    onClose={handleDrawerClose}
+                    BackdropProps={{
+                        sx: { '&&&': { backgroundColor: 'transparent' } },
+                    }}>
+                    <Stack spacing={'4px'} py={'12px'}>
+                        <Titlebar
+                            onClose={props.onClose}
+                            title={t('SHARE_COLLECTION')}
+                            onRootClose={handleRootClose}
+                        />
+                        <Stack py={'20px'} px={'8px'}>
+                            <ShareControl
+                                collectionSummaryType={type}
+                                collection={props.collection}
+                                onRootClose={handleRootClose}
+                            />
+                            <Stack py={'20px'} px={'8px'} spacing={10}></Stack>
+                            {/* <MenuSectionTitle
+                            title={t('ADD_EMAIL_TITLE')}
+                            icon={<WorkspacesIcon />}
+                        />
+                        <EmailShare collection={props.collection} /> */}
+                            <PublicShare
+                                collection={props.collection}
+                                onRootClose={handleRootClose}
+                            />
+                        </Stack>
+                    </Stack>
+                </EnteDrawer>
+            )}
+
             {type === CollectionSummaryType.outgoingShare && (
                 <EnteDrawer
                     anchor="right"
@@ -95,17 +130,7 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                                 collection={props.collection}
                             />
 
-                            {/* <SharingDetailsViewers
-                                collectionSummaryType={type}
-                                collection={props.collection}
-                                onRootClose={handleRootClose}
-                            /> */}
                             <Stack py={'20px'} px={'8px'} spacing={10}></Stack>
-                            {/* <MenuSectionTitle
-                            title={t('ADD_EMAIL_TITLE')}
-                            icon={<WorkspacesIcon />}
-                        />
-                        <EmailShare collection={props.collection} /> */}
                         </Stack>
                     </Stack>
                 </EnteDrawer>
@@ -131,11 +156,6 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                                 collection={props.collection}
                             />
                             <ShareDetailsCollab collection={props.collection} />
-                            {/* <MenuSectionTitle
-                            title={t('ADD_EMAIL_TITLE')}
-                            icon={<WorkspacesIcon />}
-                        />
-                        <EmailShare collection={props.collection} /> */}
                         </Stack>
                     </Stack>
                 </EnteDrawer>

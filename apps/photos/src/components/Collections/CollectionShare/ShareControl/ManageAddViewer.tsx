@@ -9,6 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { useState } from 'react';
 import { t } from 'i18next';
 import ManageAddViewerOptions from './ManageAddViewerOptions';
+import MenuItemDivider from 'components/Menu/MenuItemDivider';
 
 interface Iprops {
     collection: Collection;
@@ -35,6 +36,7 @@ export default function ManageAddViewer({ collection, onRootClose }: Iprops) {
                         onClick={openManageAddViewer}
                         label={t('Add Viewers')}
                     />
+                    <MenuItemDivider hasIcon={true} />
                 </MenuItemGroup>
             </Stack>
             <ManageAddViewerOptions

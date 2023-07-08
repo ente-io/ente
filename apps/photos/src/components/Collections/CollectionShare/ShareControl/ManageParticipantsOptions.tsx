@@ -61,7 +61,10 @@ export default function ManageParticipantsOptions({
                         caption={`${peopleCount}${t(' Participants')} `}
                     />
                     <Stack py={'20px'} px={'8px'} spacing={'8px'}>
-                        <ManageParticipantsList collection={collection} />
+                        <ManageParticipantsList
+                            collection={collection}
+                            onRootClose={onRootClose}
+                        />
                     </Stack>
                 </Stack>
             </EnteDrawer>

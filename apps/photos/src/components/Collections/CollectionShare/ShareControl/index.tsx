@@ -5,6 +5,7 @@ import ManageAddViewer from '../ShareControl/ManageAddViewer';
 import ManageAddCollab from './MangeAddCollab';
 import ManageParticipants from './ManageParticipants';
 import { CollectionSummaryType } from 'constants/collection';
+import { Stack } from '@mui/material';
 
 export default function ShareControl({
     collection,
@@ -21,24 +22,23 @@ export default function ShareControl({
         : console.log('not incomingShareViewer');
     return (
         <>
-            {collectionSummaryType === CollectionSummaryType.outgoingShare && (
-                <>
-                    {collection.sharees.length > 0 ? (
-                        <ManageParticipants
-                            collection={collection}
-                            onRootClose={onRootClose}
-                        />
-                    ) : null}
-                    <ManageAddViewer
+            <Stack spacing={0}>
+                {collection.sharees.length > 0 ? (
+                    <ManageParticipants
                         collection={collection}
                         onRootClose={onRootClose}
                     />
-                    <ManageAddCollab
-                        collection={collection}
-                        onRootClose={onRootClose}
-                    />
-                </>
-            )}
+                ) : null}
+                <ManageAddViewer
+                    collection={collection}
+                    onRootClose={onRootClose}
+                />
+
+                <ManageAddCollab
+                    collection={collection}
+                    onRootClose={onRootClose}
+                />
+            </Stack>
         </>
     );
 }
