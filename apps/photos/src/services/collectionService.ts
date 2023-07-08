@@ -30,6 +30,7 @@ import {
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadata,
     RemoveFromCollectionRequest,
+    CollectionShareeMagicMetadata,
 } from 'types/collection';
 import {
     COLLECTION_LIST_SORT_BY,
@@ -139,12 +140,26 @@ const getCollectionWithSecrets = async (
         };
     }
 
+    let collectionShareeMagicMetadata: CollectionShareeMagicMetadata;
+
+    if (collection.sharedMagicMetadata?.data) {
+        collectionShareeMagicMetadata = {
+            ...collection.sharedMagicMetadata,
+            data: await cryptoWorker.decryptMetadata(
+                collection.sharedMagicMetadata.data,
+                collection.sharedMagicMetadata.header,
+                collectionKey
+            ),
+        };
+    }
+
     return {
         ...collection,
         name: collectionName,
         key: collectionKey,
         magicMetadata: collectionMagicMetadata,
         pubMagicMetadata: collectionPublicMagicMetadata,
+        sharedMagicMetadata: collectionShareeMagicMetadata,
     };
 };
 
@@ -359,6 +374,7 @@ const createCollection = async (
             isDeleted: false,
             magicMetadata: encryptedMagicMetadata,
             pubMagicMetadata: null,
+            sharedMagicMetadata: null,
         };
         const createdCollection = await postCollection(newCollection, token);
         const decryptedCreatedCollection = await getCollectionWithSecrets(
@@ -722,6 +738,50 @@ export const updateCollectionMagicMetadata = async (
 
     await HTTPService.put(
         `${ENDPOINT}/collections/magic-metadata`,
+        reqBody,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    const updatedCollection: Collection = {
+        ...collection,
+        magicMetadata: {
+            ...updatedMagicMetadata,
+            version: updatedMagicMetadata.version + 1,
+        },
+    };
+    return updatedCollection;
+};
+
+export const updateSharedCollectionMagicMetadata = async (
+    collection: Collection,
+    updatedMagicMetadata: CollectionMagicMetadata
+) => {
+    const token = getToken();
+    if (!token) {
+        return;
+    }
+
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
+    const { file: encryptedMagicMetadata } = await cryptoWorker.encryptMetadata(
+        updatedMagicMetadata.data,
+        collection.key
+    );
+
+    const reqBody: UpdateMagicMetadataRequest = {
+        id: collection.id,
+        magicMetadata: {
+            version: updatedMagicMetadata.version,
+            count: updatedMagicMetadata.count,
+            data: encryptedMagicMetadata.encryptedData,
+            header: encryptedMagicMetadata.decryptionHeader,
+        },
+    };
+
+    await HTTPService.put(
+        `${ENDPOINT}/collections/sharee-magic-metadata`,
         reqBody,
         null,
         {

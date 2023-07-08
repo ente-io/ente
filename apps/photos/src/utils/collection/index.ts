@@ -8,6 +8,7 @@ import {
     unhideToCollection,
     updateCollectionMagicMetadata,
     updatePublicCollectionMagicMetadata,
+    updateSharedCollectionMagicMetadata,
 } from 'services/collectionService';
 import { downloadFiles } from 'utils/file';
 import { getLocalFiles, getLocalHiddenFiles } from 'services/fileService';
@@ -164,12 +165,30 @@ export const changeCollectionVisibility = async (
             visibility,
         };
 
-        const updatedMagicMetadata = await updateMagicMetadata(
-            updatedMagicMetadataProps,
-            collection.magicMetadata,
-            collection.key
-        );
-        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
+        const user: User = getData(LS_KEYS.USER);
+
+        if (collection.owner.id === user.id) {
+            const updatedMagicMetadata = await updateMagicMetadata(
+                updatedMagicMetadataProps,
+                collection.magicMetadata,
+                collection.key
+            );
+
+            await updateCollectionMagicMetadata(
+                collection,
+                updatedMagicMetadata
+            );
+        } else {
+            const updatedMagicMetadata = await updateMagicMetadata(
+                updatedMagicMetadataProps,
+                collection.sharedMagicMetadata,
+                collection.key
+            );
+            await updateSharedCollectionMagicMetadata(
+                collection,
+                updatedMagicMetadata
+            );
+        }
     } catch (e) {
         logError(e, 'change collection visibility failed');
         throw e;
