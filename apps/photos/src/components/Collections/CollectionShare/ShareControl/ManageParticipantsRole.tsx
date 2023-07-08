@@ -1,5 +1,5 @@
 import { Stack, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Collection } from 'types/collection';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { t } from 'i18next';
@@ -12,6 +12,10 @@ import PhotoIcon from '@mui/icons-material/Photo';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import BlockIcon from '@mui/icons-material/Block';
 import DoneIcon from '@mui/icons-material/Done';
+import { handleSharingErrors } from 'utils/error/ui';
+import { logError } from 'utils/sentry';
+import { shareCollection } from 'services/collectionService';
+import { GalleryContext } from 'pages/gallery';
 
 interface Iprops {
     open: boolean;
@@ -31,6 +35,7 @@ export default function ManageParticipantsRole({
     collectionUnshare,
 }: Iprops) {
     const [selectedRole, setSelectedRole] = useState('');
+    const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
         setSelectedRole(
@@ -54,6 +59,18 @@ export default function ManageParticipantsRole({
 
     const handleRoleChange = (role: string) => {
         setSelectedRole(role);
+        updateCollectionRole(selectedEmail, role);
+    };
+
+    const updateCollectionRole = async (selectedEmail, role) => {
+        try {
+            console.log('collection Clicked', collection, selectedEmail);
+            await shareCollection(collection, selectedEmail, role);
+            await galleryContext.syncWithRemote(false, true);
+        } catch (e) {
+            const errorMessage = handleSharingErrors(e);
+            logError(e, errorMessage);
+        }
     };
 
     console.log('collection Clicked', collection, selectedEmail);
