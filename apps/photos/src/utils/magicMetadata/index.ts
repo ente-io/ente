@@ -3,24 +3,29 @@ import { EnteFile } from 'types/file';
 import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
-export function isArchived(item: Collection | EnteFile) {
-    if (
-        !item ||
-        !item.magicMetadata ||
-        !item.magicMetadata.data ||
-        !(item as Collection).sharedMagicMetadata?.data ||
-        typeof item.magicMetadata.data === 'string' ||
-        typeof item.magicMetadata.data.visibility === 'undefined' ||
-        typeof (item as Collection).sharedMagicMetadata?.data.visibility ===
-            'undefined'
-    ) {
+export function isArchivedFile(item: EnteFile): boolean {
+    if (!item || !item.magicMetadata || !item.magicMetadata.data) {
         return false;
     }
-    return (
-        item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED ||
-        (item as Collection).sharedMagicMetadata.data.visibility ===
+    return item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
+}
+
+export function isArchivedCollection(item: Collection): boolean {
+    if (!item) {
+        return;
+    }
+
+    if (item.magicMetadata && item.magicMetadata.data) {
+        return item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
+    }
+
+    if (!item.sharedMagicMetadata && item.sharedMagicMetadata.data) {
+        return (
+            item.sharedMagicMetadata.data.visibility ===
             VISIBILITY_STATE.ARCHIVED
-    );
+        );
+    }
+    return false;
 }
 
 export async function updateMagicMetadata<T>(
