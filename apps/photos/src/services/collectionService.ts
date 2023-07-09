@@ -44,17 +44,22 @@ import {
     HIDDEN_SECTION,
 } from 'constants/collection';
 import { SUB_TYPE, UpdateMagicMetadataRequest } from 'types/magicMetadata';
-import { isArchived, updateMagicMetadata } from 'utils/magicMetadata';
+import {
+    isArchivedCollection,
+    isArchivedFile,
+    updateMagicMetadata,
+} from 'utils/magicMetadata';
 import { User } from 'types/user';
 import {
     isQuickLinkCollection,
     isOutgoingShare,
-    isIncomingShare,
     isSharedOnlyViaLink,
     isValidMoveTarget,
     isHiddenCollection,
     getNonHiddenCollections,
     changeCollectionSubType,
+    isIncomingCollabShare,
+    isIncomingShare,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -304,7 +309,7 @@ export const getCollectionLatestFiles = (
         }
         if (
             !latestFiles.has(ALL_SECTION) &&
-            !isArchived(file) &&
+            !isArchivedFile(file) &&
             file.ownerID === user.id &&
             !archivedCollections.has(file.collectionID)
         ) {
@@ -1078,23 +1083,32 @@ export async function getCollectionSummaries(
             collectionFilesCount.get(collection.id) ||
             collection.type === CollectionType.uncategorized
         ) {
+            let type: CollectionSummaryType;
+            if (isIncomingShare(collection, user)) {
+                if (isIncomingCollabShare(collection, user)) {
+                    type = CollectionSummaryType.incomingShareCollaborator;
+                } else {
+                    type = CollectionSummaryType.incomingShareViewer;
+                }
+            } else if (isOutgoingShare(collection, user)) {
+                type = CollectionSummaryType.outgoingShare;
+            } else if (isSharedOnlyViaLink(collection)) {
+                type = CollectionSummaryType.sharedOnlyViaLink;
+            } else if (isArchivedCollection(collection)) {
+                type = CollectionSummaryType.archived;
+            } else if (isHiddenCollection(collection)) {
+                type = CollectionSummaryType.hidden;
+            } else {
+                type = CollectionSummaryType[collection.type];
+            }
+
             collectionSummaries.set(collection.id, {
                 id: collection.id,
                 name: collection.name,
                 latestFile: collectionLatestFiles.get(collection.id),
                 fileCount: collectionFilesCount.get(collection.id) ?? 0,
                 updationTime: collection.updationTime,
-                type: isIncomingShare(collection, user)
-                    ? CollectionSummaryType.incomingShare
-                    : isOutgoingShare(collection)
-                    ? CollectionSummaryType.outgoingShare
-                    : isSharedOnlyViaLink(collection)
-                    ? CollectionSummaryType.sharedOnlyViaLink
-                    : isArchived(collection)
-                    ? CollectionSummaryType.archived
-                    : isHiddenCollection(collection)
-                    ? CollectionSummaryType.hidden
-                    : CollectionSummaryType[collection.type],
+                type: type,
             });
         }
     }
@@ -1167,7 +1181,7 @@ function getCollectionsFileCount(
     for (const file of files) {
         if (isSharedFile(user, file)) {
             continue;
-        } else if (isArchived(file)) {
+        } else if (isArchivedFile(file)) {
             uniqueArchivedFileIDs.add(file.id);
         } else if (!archivedCollections.has(file.collectionID)) {
             uniqueAllSectionFileIDs.add(file.id);

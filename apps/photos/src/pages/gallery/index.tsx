@@ -1087,7 +1087,10 @@ export default function Gallery() {
                             isIncomingSharedCollection={
                                 collectionSummaries.get(activeCollection)
                                     ?.type ===
-                                CollectionSummaryType.incomingShare
+                                    CollectionSummaryType.incomingShareCollaborator ||
+                                collectionSummaries.get(activeCollection)
+                                    ?.type ===
+                                    CollectionSummaryType.incomingShareViewer
                             }
                             isInSearchMode={isInSearchMode}
                         />

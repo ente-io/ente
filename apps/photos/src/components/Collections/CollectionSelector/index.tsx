@@ -18,8 +18,11 @@ import {
     DUMMY_UNCATEGORIZED_SECTION,
 } from 'constants/collection';
 import { t } from 'i18next';
-import { isSelectAllowedCollection } from 'utils/collection';
 import { createUnCategorizedCollection } from 'services/collectionService';
+import {
+    isAddToAllowedCollection,
+    isMoveToAllowedCollection,
+} from 'utils/collection';
 
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
@@ -57,14 +60,18 @@ function CollectionSelector({
                     if (id === attributes.fromCollection) {
                         return false;
                     } else if (
+                        attributes.intent === CollectionSelectorIntent.add
+                    ) {
+                        return isAddToAllowedCollection(type);
+                    } else if (
                         attributes.intent === CollectionSelectorIntent.upload
                     ) {
                         return (
-                            isSelectAllowedCollection(type) ||
+                            isMoveToAllowedCollection(type) ||
                             type === CollectionSummaryType.uncategorized
                         );
                     } else {
-                        return isSelectAllowedCollection(type);
+                        return isMoveToAllowedCollection(type);
                     }
                 })
                 .sort((a, b) => {
