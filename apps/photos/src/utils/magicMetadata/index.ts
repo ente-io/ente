@@ -12,14 +12,14 @@ export function isArchivedFile(item: EnteFile): boolean {
 
 export function isArchivedCollection(item: Collection): boolean {
     if (!item) {
-        return;
+        return false;
     }
 
     if (item.magicMetadata && item.magicMetadata.data) {
         return item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
     }
 
-    if (!item.sharedMagicMetadata && item.sharedMagicMetadata.data) {
+    if (item.sharedMagicMetadata && item.sharedMagicMetadata.data) {
         return (
             item.sharedMagicMetadata.data.visibility ===
             VISIBILITY_STATE.ARCHIVED
