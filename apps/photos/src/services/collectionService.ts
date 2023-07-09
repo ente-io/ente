@@ -48,12 +48,13 @@ import { User } from 'types/user';
 import {
     isQuickLinkCollection,
     isOutgoingShare,
-    isIncomingShare,
     isSharedOnlyViaLink,
     isValidMoveTarget,
     isHiddenCollection,
     getNonHiddenCollections,
     changeCollectionSubType,
+    isIncomingCollabShare,
+    isIncomingShare,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -1018,23 +1019,32 @@ export async function getCollectionSummaries(
             collectionFilesCount.get(collection.id) ||
             collection.type === CollectionType.uncategorized
         ) {
+            let type: CollectionSummaryType;
+            if (isIncomingShare(collection, user)) {
+                if (isIncomingCollabShare(collection, user)) {
+                    type = CollectionSummaryType.incomingShareCollaborator;
+                } else {
+                    type = CollectionSummaryType.incomingShareViewer;
+                }
+            } else if (isOutgoingShare(collection, user)) {
+                type = CollectionSummaryType.outgoingShare;
+            } else if (isSharedOnlyViaLink(collection)) {
+                type = CollectionSummaryType.sharedOnlyViaLink;
+            } else if (IsArchived(collection)) {
+                type = CollectionSummaryType.archived;
+            } else if (isHiddenCollection(collection)) {
+                type = CollectionSummaryType.hidden;
+            } else {
+                type = CollectionSummaryType[collection.type];
+            }
+
             collectionSummaries.set(collection.id, {
                 id: collection.id,
                 name: collection.name,
                 latestFile: collectionLatestFiles.get(collection.id),
                 fileCount: collectionFilesCount.get(collection.id) ?? 0,
                 updationTime: collection.updationTime,
-                type: isIncomingShare(collection, user)
-                    ? CollectionSummaryType.incomingShare
-                    : isOutgoingShare(collection)
-                    ? CollectionSummaryType.outgoingShare
-                    : isSharedOnlyViaLink(collection)
-                    ? CollectionSummaryType.sharedOnlyViaLink
-                    : IsArchived(collection)
-                    ? CollectionSummaryType.archived
-                    : isHiddenCollection(collection)
-                    ? CollectionSummaryType.hidden
-                    : CollectionSummaryType[collection.type],
+                type: type,
             });
         }
     }
