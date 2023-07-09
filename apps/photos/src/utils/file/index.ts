@@ -28,7 +28,7 @@ import PublicCollectionDownloadManager from 'services/publicCollectionDownloadMa
 import heicConversionService from 'services/heicConversionService';
 import * as ffmpegService from 'services/ffmpeg/ffmpegService';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
-import { isArchived, updateMagicMetadata } from 'utils/magicMetadata';
+import { isArchivedFile, updateMagicMetadata } from 'utils/magicMetadata';
 
 import { addLocalLog, addLogLine } from 'utils/logging';
 import { CustomError } from 'utils/error';
@@ -576,7 +576,7 @@ export const isImageOrVideo = (fileType: FILE_TYPE) =>
     [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
 
 export const getArchivedFiles = (files: EnteFile[]) => {
-    return files.filter(isArchived).map((file) => file.id);
+    return files.filter(isArchivedFile).map((file) => file.id);
 };
 
 export const createTypedObjectURL = async (blob: Blob, fileName: string) => {

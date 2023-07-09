@@ -35,7 +35,7 @@ import {
 } from 'constants/collection';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
-import { isArchived, updateMagicMetadata } from 'utils/magicMetadata';
+import { isArchivedCollection, updateMagicMetadata } from 'utils/magicMetadata';
 import { getAlbumsURL } from 'utils/common/apiUtil';
 import bs58 from 'bs58';
 import { t } from 'i18next';
@@ -245,7 +245,9 @@ export const changeCollectionSubType = async (
 
 export const getArchivedCollections = (collections: Collection[]) => {
     return new Set<number>(
-        collections.filter(isArchived).map((collection) => collection.id)
+        collections
+            .filter(isArchivedCollection)
+            .map((collection) => collection.id)
     );
 };
 
