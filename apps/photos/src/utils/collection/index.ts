@@ -168,7 +168,6 @@ export const changeCollectionVisibility = async (
         };
 
         const user: User = getData(LS_KEYS.USER);
-
         if (collection.owner.id === user.id) {
             const updatedMagicMetadata = await updateMagicMetadata(
                 updatedMagicMetadataProps,

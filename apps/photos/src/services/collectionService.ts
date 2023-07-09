@@ -146,7 +146,6 @@ const getCollectionWithSecrets = async (
     }
 
     let collectionShareeMagicMetadata: CollectionShareeMagicMetadata;
-
     if (collection.sharedMagicMetadata?.data) {
         collectionShareeMagicMetadata = {
             ...collection.sharedMagicMetadata,
