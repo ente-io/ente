@@ -881,17 +881,13 @@ class RemoteSyncService {
         if (sharedFiles.isNotEmpty) {
           _logger.info(
             "Creating notification for shared files: " +
-                sharedFiles
-                    .map((file) => file.uploadedFileID.toString())
-                    .toString(),
+                sharedFiles.map((file) => file.uploadedFileID).toString(),
           );
         }
         if (collectedFiles.isNotEmpty) {
           _logger.info(
             "Creating notification for collected files: " +
-                collectedFiles
-                    .map((file) => file.uploadedFileID.toString())
-                    .toString(),
+                collectedFiles.map((file) => file.uploadedFileID).toString(),
           );
         }
         NotificationService.instance.showNotification(
