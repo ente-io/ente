@@ -31,17 +31,15 @@ class GalleryGridViewWidget extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       // to disable GridView's scrolling
       itemBuilder: (context, index) {
-        return ExcludeSemantics(
-          child: GalleryFileWidget(
-            file: filesInGroup[index],
-            selectedFiles: selectedFiles,
-            limitSelectionToOne: limitSelectionToOne,
-            tag: tag,
-            photoGridSize: photoGridSize,
-            currentUserID: currentUserID,
-            filesInGroup: filesInGroup,
-            asyncLoader: asyncLoader,
-          ),
+        return GalleryFileWidget(
+          file: filesInGroup[index],
+          selectedFiles: selectedFiles,
+          limitSelectionToOne: limitSelectionToOne,
+          tag: tag,
+          photoGridSize: photoGridSize,
+          currentUserID: currentUserID,
+          filesInGroup: filesInGroup,
+          asyncLoader: asyncLoader,
         );
       },
       itemCount: filesInGroup.length,

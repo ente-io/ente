@@ -32,7 +32,7 @@ class PlaceHolderGridViewWidget extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
-          return ExcludeSemantics(child: Container(color: faintColor));
+          return Container(color: faintColor);
         },
         itemCount: limitCount,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
