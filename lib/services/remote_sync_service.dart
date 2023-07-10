@@ -856,10 +856,14 @@ class RemoteSyncService {
   bool _shouldShowNotification(int collectionID) {
     // TODO: Add option to opt out of notifications for a specific collection
     // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
+    final isForeground = AppLifecycleService.instance.isForeground;
+    _logger.info(
+      "Attempting to show notification for $collectionID, isAppInForeground? $isForeground",
+    );
     return NotificationService.instance
             .shouldShowNotificationsForSharedPhotos() &&
         isFirstRemoteSyncDone() &&
-        !AppLifecycleService.instance.isForeground;
+        !isForeground;
   }
 
   Future<void> _notifyNewFiles(List<int> collectionIDs) async {
@@ -869,13 +873,23 @@ class RemoteSyncService {
       final collection = _collectionsService.getCollectionByID(collectionID);
       final files =
           await _db.getNewFilesInCollection(collectionID, appOpenTime);
-      final sharedFileCount =
-          files.where((file) => file.ownerID != userID).length;
-      final collectedFileCount = files
-          .where((file) => file.pubMagicMetadata!.uploaderName != null)
-          .length;
-      final totalCount = sharedFileCount + collectedFileCount;
+      final sharedFiles = files.where((file) => file.ownerID != userID);
+      final collectedFiles =
+          files.where((file) => file.pubMagicMetadata!.uploaderName != null);
+      final totalCount = sharedFiles.length + collectedFiles.length;
       if (totalCount > 0 && _shouldShowNotification(collectionID)) {
+        if (sharedFiles.isNotEmpty) {
+          _logger.info(
+            "Creating notification for shared files: " +
+                sharedFiles.map((file) => file.uploadedFileID).toString(),
+          );
+        }
+        if (collectedFiles.isNotEmpty) {
+          _logger.info(
+            "Creating notification for collected files: " +
+                collectedFiles.map((file) => file.uploadedFileID).toString(),
+          );
+        }
         NotificationService.instance.showNotification(
           collection!.displayName,
           totalCount.toString() + " new 📸",
