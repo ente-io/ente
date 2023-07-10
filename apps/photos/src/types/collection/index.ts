@@ -139,6 +139,7 @@ export interface CollectionSummary {
     latestFile: EnteFile;
     fileCount: number;
     updationTime: number;
+    order: number;
 }
 
 export type CollectionSummaries = Map<number, CollectionSummary>;

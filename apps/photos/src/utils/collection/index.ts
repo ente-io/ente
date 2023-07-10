@@ -199,6 +199,27 @@ export const changeCollectionSortOrder = async (
             updatedPubMagicMetadata
         );
     } catch (e) {
+        logError(e, 'change collection sort order failed');
+    }
+};
+
+export const changeCollectionOrder = async (
+    collection: Collection,
+    order: number
+) => {
+    try {
+        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
+            order,
+        };
+
+        const updatedMagicMetadata = await updateMagicMetadata(
+            updatedMagicMetadataProps,
+            collection.magicMetadata,
+            collection.key
+        );
+
+        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
+    } catch (e) {
         logError(e, 'change collection order failed');
     }
 };
