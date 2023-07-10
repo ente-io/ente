@@ -176,7 +176,9 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
               initialScrollIndex: widget.startIndex,
               itemCount: max(widget.totalCount, 0),
               itemBuilder: (context, index) {
-                return widget.itemBuilder(context, index);
+                return ExcludeSemantics(
+                  child: widget.itemBuilder(context, index),
+                );
               },
             ),
           )
