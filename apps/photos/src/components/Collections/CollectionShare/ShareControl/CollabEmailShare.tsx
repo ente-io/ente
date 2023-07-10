@@ -12,7 +12,7 @@ import CollabEmailShareOptions, {
     CollabEmailShareOptionsProps,
 } from './CollabEmailShareOptions';
 
-export default function CollabEmailShare({ collection }) {
+export default function CollabEmailShare({ collection, onClose }) {
     const galleryContext = useContext(GalleryContext);
 
     const [updatedOptionsList, setUpdatedOptionsList] = useState(['']);
@@ -89,6 +89,7 @@ export default function CollabEmailShare({ collection }) {
     return (
         <>
             <CollabEmailShareOptions
+                onClose={onClose}
                 callback={collectionShare}
                 optionsList={updatedOptionsList}
                 placeholder={t('ENTER_EMAIL')}

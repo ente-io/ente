@@ -12,7 +12,7 @@ import ViewerEmailShareOptions, {
     ViewerEmailShareOptionsProps,
 } from './ViewerEmailShareOptions';
 
-export default function ViewerEmailShare({ collection }) {
+export default function ViewerEmailShare({ collection, onClose }) {
     const galleryContext = useContext(GalleryContext);
 
     const [updatedOptionsList, setUpdatedOptionsList] = useState(['']);
@@ -89,6 +89,7 @@ export default function ViewerEmailShare({ collection }) {
     return (
         <>
             <ViewerEmailShareOptions
+                onClose={onClose}
                 callback={collectionShare}
                 optionsList={updatedOptionsList}
                 placeholder={t('ENTER_EMAIL')}

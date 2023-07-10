@@ -37,6 +37,7 @@ export interface CollabEmailShareOptionsProps {
     blockButton?: boolean;
     hiddenLabel?: boolean;
     optionsList?: string[];
+    onClose?: () => void;
 }
 
 export default function CollabEmailShareOptions(
@@ -81,6 +82,9 @@ export default function CollabEmailShareOptions(
         setDisableInput(false);
 
         SetLoading(false);
+        if (props.onClose) {
+            props.onClose();
+        }
     };
 
     const validationSchema = useMemo(() => {

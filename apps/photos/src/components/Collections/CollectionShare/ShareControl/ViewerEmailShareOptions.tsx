@@ -36,6 +36,7 @@ export interface ViewerEmailShareOptionsProps {
     autoComplete?: string;
     blockButton?: boolean;
     hiddenLabel?: boolean;
+    onClose?: () => void;
     optionsList?: string[];
 }
 
@@ -78,8 +79,11 @@ export default function ViewerEmailShareOptions(
         }
 
         setDisableInput(false);
-
         SetLoading(false);
+
+        if (props.onClose) {
+            props.onClose();
+        }
     };
 
     const validationSchema = useMemo(() => {
