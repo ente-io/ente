@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import "package:logging/logging.dart";
 import "package:photos/services/remote_sync_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -17,6 +18,7 @@ class NotificationService {
   late SharedPreferences _preferences;
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  final _logger = Logger("NotificationService");
 
   Future<void> init(
     void Function(
@@ -101,6 +103,9 @@ class NotificationService {
     String channelName = "ente",
     String payload = "ente://home",
   }) async {
+    _logger.info(
+      "Showing notification with: $title, $message, $channelID, $channelName, $payload",
+    );
     final androidSpecs = AndroidNotificationDetails(
       channelID,
       channelName,
