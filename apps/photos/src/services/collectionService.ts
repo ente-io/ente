@@ -997,7 +997,7 @@ export function sortCollectionSummaries(
                 case COLLECTION_LIST_SORT_BY.CREATION_TIME_ASCENDING:
                     return (
                         -1 *
-                        compareCollectionsLatestFile(b.coverFile, a.coverFile)
+                        compareCollectionsLatestFile(b.latestFile, a.latestFile)
                     );
                 case COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING:
                     return b.updationTime - a.updationTime;
