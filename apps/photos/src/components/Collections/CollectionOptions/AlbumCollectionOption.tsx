@@ -10,7 +10,7 @@ import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 import SortIcon from '@mui/icons-material/Sort';
 import { t } from 'i18next';
 import PushPinOutlined from '@mui/icons-material/PushPinOutlined';
-import { UnPinIcon } from 'components/Icons/UnPinIcon';
+import { UnPinIcon } from 'components/icons/UnPinIcon';
 
 interface Iprops {
     IsArchived: boolean;
