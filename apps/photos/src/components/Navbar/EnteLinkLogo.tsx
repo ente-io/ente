@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import Ente from 'components/icons/ente';
+import Ente from 'components/Icons/ente';
 import Link from 'next/link';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
 
