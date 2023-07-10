@@ -59,13 +59,7 @@ export function AlbumCollectionOption({
                         CollectionActions.PIN_ALBUM,
                         false
                     )}
-                    startIcon={
-                        <PushPinOutlined
-                            style={{
-                                fontSize: '20px',
-                            }}
-                        />
-                    }>
+                    startIcon={<PushPinOutlined />}>
                     {t('PIN_ALBUM')}
                 </OverflowMenuOption>
             )}
