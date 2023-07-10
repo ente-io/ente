@@ -108,7 +108,7 @@ export interface collectionAttributes {
     pathDecryptionNonce?: string;
 }
 
-export type CollectionLatestFiles = Map<number, EnteFile>;
+export type CollectionToFileMap = Map<number, EnteFile>;
 
 export interface RemoveFromCollectionRequest {
     collectionID: number;
@@ -136,6 +136,7 @@ export interface CollectionSummary {
     name: string;
     type: CollectionSummaryType;
     coverFile: EnteFile;
+    latestFile: EnteFile;
     fileCount: number;
     updationTime: number;
 }
