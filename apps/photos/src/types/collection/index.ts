@@ -118,6 +118,7 @@ export interface RemoveFromCollectionRequest {
 export interface CollectionMagicMetadataProps {
     visibility?: VISIBILITY_STATE;
     subType?: SUB_TYPE;
+    order?: number;
 }
 
 export type CollectionMagicMetadata =
