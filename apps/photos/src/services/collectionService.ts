@@ -314,21 +314,32 @@ export const getCollectionCoverFiles = (
     });
 
     files.forEach((file) => {
-        const collection = collectionMap.get(file.collectionID);
-        if (collection.pubMagicMetadata?.data?.coverID === file.id) {
-            coverFiles.set(file.collectionID, file);
-        } else if (collection.pubMagicMetadata?.data?.asc) {
-            coverFiles.set(file.collectionID, file);
-        } else if (!coverFiles.has(file.collectionID)) {
-            coverFiles.set(file.collectionID, file);
+        if (!coverFiles.has(file.collectionID)) {
+            const collection = collectionMap.get(file.collectionID);
+            if (
+                typeof collection.pubMagicMetadata?.data?.coverID !==
+                'undefined'
+            ) {
+                if (collection.pubMagicMetadata?.data?.coverID === file.id) {
+                    coverFiles.set(file.collectionID, file);
+                }
+            } else if (collection.pubMagicMetadata?.data?.asc) {
+                // if asc is set and is 1, then the collection is sorted in ascending order
+                //  so the last file of the collection is the cover
+                // as the files are sorted in descending order
+                coverFiles.set(file.collectionID, file);
+            } else {
+                coverFiles.set(file.collectionID, file);
+            }
         }
-        if (
-            !coverFiles.has(ALL_SECTION) &&
-            !IsArchived(file) &&
-            file.ownerID === user.id &&
-            !archivedCollections.has(file.collectionID)
-        ) {
-            coverFiles.set(ALL_SECTION, file);
+        if (!coverFiles.has(ALL_SECTION)) {
+            if (
+                !IsArchived(file) &&
+                file.ownerID === user.id &&
+                !archivedCollections.has(file.collectionID)
+            ) {
+                coverFiles.set(ALL_SECTION, file);
+            }
         }
     });
     return coverFiles;
