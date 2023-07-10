@@ -29,7 +29,7 @@ const CollectionListBarCard = (props: Iprops) => {
         <Box>
             <CollectionCard
                 collectionTile={CollectionBarTile}
-                latestFile={collectionSummary.latestFile}
+                coverFile={collectionSummary.coverFile}
                 onClick={() => {
                     onCollectionClick(collectionSummary.id);
                 }}>

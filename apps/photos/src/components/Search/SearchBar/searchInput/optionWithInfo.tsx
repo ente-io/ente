@@ -40,7 +40,7 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
                             {data.previewFiles.map((file) => (
                                 <CollectionCard
                                     key={file.id}
-                                    latestFile={file}
+                                    coverFile={file}
                                     onClick={() => null}
                                     collectionTile={ResultPreviewTile}
                                 />

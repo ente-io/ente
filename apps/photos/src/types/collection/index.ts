@@ -135,7 +135,7 @@ export interface CollectionSummary {
     id: number;
     name: string;
     type: CollectionSummaryType;
-    latestFile: EnteFile;
+    coverFile: EnteFile;
     fileCount: number;
     updationTime: number;
 }
