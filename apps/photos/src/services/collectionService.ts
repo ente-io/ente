@@ -325,8 +325,8 @@ export const getCollectionCoverFiles = (
                 }
             } else if (collection.pubMagicMetadata?.data?.asc) {
                 // if asc is set and is 1, then the collection is sorted in ascending order
-                //  so the last file of the collection is the cover
-                // as the files are sorted in descending order
+                // as the files are sorted in descending order,
+                // so the last file of the collection is the cover file
                 coverFiles.set(file.collectionID, file);
             } else {
                 coverFiles.set(file.collectionID, file);
