@@ -58,23 +58,28 @@ export default function ViewerEmailShare({ collection }) {
     }, []);
 
     const collectionShare: ViewerEmailShareOptionsProps['callback'] = async (
-        email,
+        emails,
         setFieldError,
         resetForm
     ) => {
         try {
             const user: User = getData(LS_KEYS.USER);
-            if (email === user.email) {
-                setFieldError(t('SHARE_WITH_SELF'));
-            } else if (
-                collection?.sharees?.find((value) => value.email === email)
-            ) {
-                setFieldError(t('ALREADY_SHARED', { email }));
-            } else {
-                await shareCollection(collection, email, 'VIEWER');
-                await galleryContext.syncWithRemote(false, true);
-                resetForm();
+
+            for (const email of emails) {
+                if (email === user.email) {
+                    setFieldError(t('SHARE_WITH_SELF'));
+                    break;
+                } else if (
+                    collection?.sharees?.find((value) => value.email === email)
+                ) {
+                    setFieldError(t('ALREADY_SHARED', { email }));
+                    break;
+                } else {
+                    await shareCollection(collection, email, 'VIEWER');
+                    await galleryContext.syncWithRemote(false, true);
+                }
             }
+            resetForm();
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             setFieldError(errorMessage);

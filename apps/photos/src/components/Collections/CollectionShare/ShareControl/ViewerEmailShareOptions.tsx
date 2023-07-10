@@ -15,10 +15,11 @@ import DoneIcon from '@mui/icons-material/Done';
 
 interface formValues {
     inputValue: string;
+    selectedOptions: string[];
 }
 export interface ViewerEmailShareOptionsProps {
     callback: (
-        inputValue: string,
+        emails: string[],
         setFieldError: (errorMessage: string) => void,
         resetForm: (nextState?: Partial<FormikState<formValues>>) => void
     ) => Promise<void>;
@@ -42,7 +43,6 @@ export default function ViewerEmailShareOptions(
     props: ViewerEmailShareOptionsProps
 ) {
     console.log('OptionList Intial', props.optionsList);
-    const [selectedOptions, setSelectedOptions] = useState([]);
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
     const [updatedOptionsList, setUpdatedOptionsList] = useState<string[]>(
@@ -62,20 +62,22 @@ export default function ViewerEmailShareOptions(
         { setFieldError, resetForm }: FormikHelpers<formValues>
     ) => {
         SetLoading(true);
-        await props.callback(
-            values.inputValue,
-            (message) => setFieldError('inputValue', message),
-            resetForm
-        );
 
-        const resultList = updatedOptionsList.filter(
-            (option) => !selectedOptions.includes(option)
-        );
+        if (values.inputValue !== '') {
+            await props.callback(
+                [values.inputValue],
+                (message) => setFieldError('inputValue', message),
+                resetForm
+            );
+        } else if (values.selectedOptions.length !== 0) {
+            await props.callback(
+                values.selectedOptions,
+                (message) => setFieldError('inputValue', message),
+                resetForm
+            );
+        }
 
-        setUpdatedOptionsList(resultList);
         setDisableInput(false);
-        console.log('Final passing list', selectedOptions);
-        setSelectedOptions([]);
 
         SetLoading(false);
     };
@@ -88,42 +90,27 @@ export default function ViewerEmailShareOptions(
                 });
             case 'email':
                 return Yup.object().shape({
-                    inputValue: Yup.string()
-                        .email(t('EMAIL_ERROR'))
-                        .required(t('REQUIRED')),
+                    inputValue: Yup.string().email(t('EMAIL_ERROR')),
                 });
         }
     }, [props.fieldType]);
 
-    const handleEmailClick = (email: string, setFieldValue) => {
-        setFieldValue('inputValue', email);
-        const updatedSelectedOptions = selectedOptions.includes(email)
-            ? selectedOptions.filter((item) => item !== email)
-            : [...selectedOptions, email];
-        setSelectedOptions(updatedSelectedOptions);
-        console.log(selectedOptions);
-        console.log('UpdatedOption list', updatedSelectedOptions);
-        if (updatedSelectedOptions.length === 0) {
-            setDisableInput(false);
-        } else {
-            setDisableInput(true);
-        }
-    };
-
-    const handleInputFieldClick = () => {
-        setDisableInput(false);
-        setSelectedOptions([]);
+    const handleInputFieldClick = (setFieldValue) => {
+        setFieldValue('selectedOptions', []);
     };
 
     return (
         <Formik<formValues>
-            initialValues={{ inputValue: props.initialValue ?? '' }}
+            initialValues={{
+                inputValue: props.initialValue ?? '',
+                selectedOptions: [],
+            }}
             onSubmit={submitForm}
             validationSchema={validationSchema}
             validateOnChange={false}
             validateOnBlur={false}>
             {({
-                //values,
+                values,
                 errors,
                 handleChange,
                 handleSubmit,
@@ -138,14 +125,14 @@ export default function ViewerEmailShareOptions(
                         type={props.fieldType}
                         id={props.fieldType}
                         onChange={handleChange('inputValue')}
-                        onClick={handleInputFieldClick}
+                        onClick={() => handleInputFieldClick(setFieldValue)}
                         name={props.fieldType}
                         {...(props.hiddenLabel
                             ? { placeholder: props.placeholder }
                             : { label: props.placeholder })}
                         error={Boolean(errors.inputValue)}
                         helperText={errors.inputValue}
-                        // value={values.inputValue}
+                        value={values.inputValue}
                         disabled={loading || disableInput}
                         autoFocus={!props.disableAutoFocus}
                         autoComplete={props.autoComplete}
@@ -163,15 +150,35 @@ export default function ViewerEmailShareOptions(
                                     //
                                     fontWeight="normal"
                                     key={item}
-                                    onClick={() =>
-                                        handleEmailClick(item, setFieldValue)
-                                    }
+                                    onClick={() => {
+                                        // handleEmailClick(item, setFieldValue)
+                                        if (
+                                            values.selectedOptions.includes(
+                                                item
+                                            )
+                                        ) {
+                                            setFieldValue(
+                                                'selectedOptions',
+                                                values.selectedOptions.filter(
+                                                    (selectedOption) =>
+                                                        selectedOption !== item
+                                                )
+                                            );
+                                        } else {
+                                            setFieldValue('selectedOptions', [
+                                                ...values.selectedOptions,
+                                                item,
+                                            ]);
+                                        }
+                                    }}
                                     label={item}
                                     startIcon={
                                         <AvatarCollectionShare email={item} />
                                     }
                                     endIcon={
-                                        selectedOptions.includes(item) ? (
+                                        values.selectedOptions.includes(
+                                            item
+                                        ) ? (
                                             <DoneIcon />
                                         ) : null
                                     }
