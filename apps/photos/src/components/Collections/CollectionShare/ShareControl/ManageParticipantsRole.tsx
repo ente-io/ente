@@ -16,6 +16,7 @@ import { handleSharingErrors } from 'utils/error/ui';
 import { logError } from 'utils/sentry';
 import { shareCollection } from 'services/collectionService';
 import { GalleryContext } from 'pages/gallery';
+import { AppContext } from 'pages/_app';
 
 interface Iprops {
     open: boolean;
@@ -44,6 +45,8 @@ export default function ManageParticipantsRole({
         );
     }, [open]);
 
+    const appContext = useContext(AppContext);
+
     const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
         if (reason === 'backdropClick') {
             onRootClose();
@@ -58,19 +61,71 @@ export default function ManageParticipantsRole({
     };
 
     const handleRoleChange = (role: string) => {
-        setSelectedRole(role);
-        updateCollectionRole(selectedEmail, role);
+        if (role !== selectedRole) {
+            changeRolePermission(selectedEmail, role);
+        }
     };
 
     const updateCollectionRole = async (selectedEmail, role) => {
         try {
-            console.log('collection Clicked', collection, selectedEmail);
             await shareCollection(collection, selectedEmail, role);
+
             await galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             logError(e, errorMessage);
         }
+    };
+
+    const changeRolePermission = (selectedEmail, role) => {
+        let contentText;
+        let buttonText;
+
+        if (role === 'VIEWER' && selectedRole === 'COLLABORATOR') {
+            contentText = t(
+                `{{selectedEmail}} will not be able to add more photos to the album, they will still be able to remove photos added by them`,
+                { selectedEmail: selectedEmail }
+            );
+            buttonText = t('Yes, convert to viewer');
+        } else if (role === 'COLLABORATOR' && selectedRole === 'VIEWER') {
+            contentText = t(
+                `{{selectedEmail}} will be able to add photos to the album`,
+                { selectedEmail: selectedEmail }
+            );
+            buttonText = t('Yes, convert to collaborator');
+        }
+
+        appContext.setDialogMessage({
+            title: t('Change Permission?'),
+            content: contentText,
+            close: { text: t('CANCEL') },
+            proceed: {
+                text: buttonText,
+                action: () => {
+                    updateCollectionRole(selectedEmail, role),
+                        setSelectedRole(role);
+                },
+                variant: 'critical',
+            },
+        });
+    };
+
+    const removeParticipant = () => {
+        appContext.setDialogMessage({
+            title: t('Remove?'),
+            content: t(
+                ` {{selectedEmail}} will be removed removed from the album, Any photos added by them will be removed from the album.`,
+                { selectedEmail: selectedEmail }
+            ),
+            close: { text: t('CANCEL') },
+            proceed: {
+                text: t('Yes, remove'),
+                action: () => {
+                    handleClick();
+                },
+                variant: 'critical',
+            },
+        });
     };
 
     console.log('collection Clicked', collection, selectedEmail);
@@ -160,7 +215,7 @@ export default function ManageParticipantsRole({
                                     //
                                     color="error"
                                     fontWeight="normal"
-                                    onClick={handleClick}
+                                    onClick={removeParticipant}
                                     label={'Remove'}
                                     startIcon={
                                         <BlockIcon

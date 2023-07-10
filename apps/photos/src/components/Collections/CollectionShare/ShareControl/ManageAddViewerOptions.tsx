@@ -57,7 +57,10 @@ export default function ManageAddViewerOptions({
                             title={t('Add a new email')}
                             icon={<WorkspacesIcon />}
                         />
-                        <ViewerEmailShare collection={collection} />
+                        <ViewerEmailShare
+                            collection={collection}
+                            onClose={onClose}
+                        />
                     </Stack>
                 </Stack>
             </EnteDrawer>

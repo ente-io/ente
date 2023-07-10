@@ -81,9 +81,7 @@ export default function ViewerEmailShareOptions(
         setDisableInput(false);
         SetLoading(false);
 
-        if (props.onClose) {
-            props.onClose();
-        }
+        props.onClose();
     };
 
     const validationSchema = useMemo(() => {

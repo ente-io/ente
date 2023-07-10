@@ -57,7 +57,10 @@ export default function ManageAddCollabOptions({
                             title={t('Add a new email')}
                             icon={<WorkspacesIcon />}
                         />
-                        <CollabEmailShare collection={collection} />
+                        <CollabEmailShare
+                            collection={collection}
+                            onClose={onClose}
+                        />
                     </Stack>
                 </Stack>
             </EnteDrawer>

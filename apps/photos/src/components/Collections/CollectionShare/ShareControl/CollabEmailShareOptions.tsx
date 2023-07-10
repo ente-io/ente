@@ -82,9 +82,8 @@ export default function CollabEmailShareOptions(
         setDisableInput(false);
 
         SetLoading(false);
-        if (props.onClose) {
-            props.onClose();
-        }
+
+        props.onClose();
     };
 
     const validationSchema = useMemo(() => {
