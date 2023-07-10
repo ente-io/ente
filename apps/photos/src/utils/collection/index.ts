@@ -289,7 +289,8 @@ export const showDownloadQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.incomingShareCollaborator ||
         type === CollectionSummaryType.outgoingShare ||
         type === CollectionSummaryType.sharedOnlyViaLink ||
-        type === CollectionSummaryType.archived
+        type === CollectionSummaryType.archived ||
+        type === CollectionSummaryType.pinned
     );
 };
 export const showShareQuickOption = (type: CollectionSummaryType) => {
@@ -298,7 +299,8 @@ export const showShareQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.album ||
         type === CollectionSummaryType.outgoingShare ||
         type === CollectionSummaryType.sharedOnlyViaLink ||
-        type === CollectionSummaryType.archived
+        type === CollectionSummaryType.archived ||
+        type === CollectionSummaryType.pinned
     );
 };
 export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
