@@ -277,27 +277,38 @@ export const getCollection = async (
     }
 };
 
-export const getCollectionLatestFiles = (
+export const getCollectionCoverFiles = (
     user: User,
     files: EnteFile[],
-    archivedCollections: Set<number>
+    archivedCollections: Set<number>,
+    collections: Collection[]
 ): CollectionLatestFiles => {
-    const latestFiles = new Map<number, EnteFile>();
+    const coverFiles = new Map<number, EnteFile>();
+
+    const collectionMap = new Map<number, Collection>();
+    collections.forEach((collection) => {
+        collectionMap.set(collection.id, collection);
+    });
 
     files.forEach((file) => {
-        if (!latestFiles.has(file.collectionID)) {
-            latestFiles.set(file.collectionID, file);
+        const collection = collectionMap.get(file.collectionID);
+        if (collection.pubMagicMetadata?.data?.coverID === file.id) {
+            coverFiles.set(file.collectionID, file);
+        } else if (collection.pubMagicMetadata?.data?.asc) {
+            coverFiles.set(file.collectionID, file);
+        } else if (!coverFiles.has(file.collectionID)) {
+            coverFiles.set(file.collectionID, file);
         }
         if (
-            !latestFiles.has(ALL_SECTION) &&
+            !coverFiles.has(ALL_SECTION) &&
             !IsArchived(file) &&
             file.ownerID === user.id &&
             !archivedCollections.has(file.collectionID)
         ) {
-            latestFiles.set(ALL_SECTION, file);
+            coverFiles.set(ALL_SECTION, file);
         }
     });
-    return latestFiles;
+    return coverFiles;
 };
 
 export const getFavItemIds = async (
@@ -963,7 +974,7 @@ export function sortCollectionSummaries(
                 case COLLECTION_LIST_SORT_BY.CREATION_TIME_ASCENDING:
                     return (
                         -1 *
-                        compareCollectionsLatestFile(b.latestFile, a.latestFile)
+                        compareCollectionsLatestFile(b.coverFile, a.coverFile)
                     );
                 case COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING:
                     return b.updationTime - a.updationTime;
@@ -1002,10 +1013,11 @@ export async function getCollectionSummaries(
     archivedCollections: Set<number>
 ): Promise<CollectionSummaries> {
     const collectionSummaries: CollectionSummaries = new Map();
-    const collectionLatestFiles = getCollectionLatestFiles(
+    const collectionCoverFiles = getCollectionCoverFiles(
         user,
         files,
-        archivedCollections
+        archivedCollections,
+        collections
     );
     const collectionFilesCount = getCollectionsFileCount(
         files,
@@ -1041,7 +1053,7 @@ export async function getCollectionSummaries(
             collectionSummaries.set(collection.id, {
                 id: collection.id,
                 name: collection.name,
-                latestFile: collectionLatestFiles.get(collection.id),
+                coverFile: collectionCoverFiles.get(collection.id),
                 fileCount: collectionFilesCount.get(collection.id) ?? 0,
                 updationTime: collection.updationTime,
                 type: type,
@@ -1072,29 +1084,26 @@ export async function getCollectionSummaries(
 
     collectionSummaries.set(
         ALL_SECTION,
-        getAllCollectionSummaries(collectionFilesCount, collectionLatestFiles)
+        getAllCollectionSummaries(collectionFilesCount, collectionCoverFiles)
     );
     collectionSummaries.set(
         ARCHIVE_SECTION,
         getArchivedCollectionSummaries(
             collectionFilesCount,
-            collectionLatestFiles
+            collectionCoverFiles
         )
     );
     collectionSummaries.set(
         TRASH_SECTION,
         getTrashedCollectionSummaries(
             collectionFilesCount,
-            collectionLatestFiles
+            collectionCoverFiles
         )
     );
 
     collectionSummaries.set(
         HIDDEN_SECTION,
-        getHiddenCollectionSummaries(
-            collectionFilesCount,
-            collectionLatestFiles
-        )
+        getHiddenCollectionSummaries(collectionFilesCount, collectionCoverFiles)
     );
 
     return collectionSummaries;
@@ -1138,7 +1147,7 @@ function getAllCollectionSummaries(
         id: ALL_SECTION,
         name: t('ALL_SECTION_NAME'),
         type: CollectionSummaryType.all,
-        latestFile: collectionsLatestFile.get(ALL_SECTION),
+        coverFile: collectionsLatestFile.get(ALL_SECTION),
         fileCount: collectionFilesCount.get(ALL_SECTION) || 0,
         updationTime: collectionsLatestFile.get(ALL_SECTION)?.updationTime,
     };
@@ -1149,7 +1158,7 @@ function getDummyUncategorizedCollectionSummaries(): CollectionSummary {
         id: DUMMY_UNCATEGORIZED_SECTION,
         name: t('UNCATEGORIZED'),
         type: CollectionSummaryType.uncategorized,
-        latestFile: null,
+        coverFile: null,
         fileCount: 0,
         updationTime: 0,
     };
@@ -1163,7 +1172,7 @@ function getHiddenCollectionSummaries(
         id: HIDDEN_SECTION,
         name: t('HIDDEN'),
         type: CollectionSummaryType.hidden,
-        latestFile: collectionsLatestFile.get(HIDDEN_SECTION),
+        coverFile: collectionsLatestFile.get(HIDDEN_SECTION),
         fileCount: collectionFilesCount.get(HIDDEN_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(HIDDEN_SECTION)?.updationTime,
     };
@@ -1176,7 +1185,7 @@ function getArchivedCollectionSummaries(
         id: ARCHIVE_SECTION,
         name: t('ARCHIVE_SECTION_NAME'),
         type: CollectionSummaryType.archive,
-        latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
+        coverFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(ARCHIVE_SECTION)?.updationTime,
     };
@@ -1190,7 +1199,7 @@ function getTrashedCollectionSummaries(
         id: TRASH_SECTION,
         name: t('TRASH'),
         type: CollectionSummaryType.trash,
-        latestFile: collectionsLatestFile.get(TRASH_SECTION),
+        coverFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(TRASH_SECTION)?.updationTime,
     };
