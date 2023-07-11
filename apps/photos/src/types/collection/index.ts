@@ -118,6 +118,7 @@ export interface RemoveFromCollectionRequest {
 export interface CollectionMagicMetadataProps {
     visibility?: VISIBILITY_STATE;
     subType?: SUB_TYPE;
+    order?: number;
 }
 
 export type CollectionMagicMetadata =
@@ -139,6 +140,7 @@ export interface CollectionSummary {
     latestFile: EnteFile;
     fileCount: number;
     updationTime: number;
+    order: number;
 }
 
 export type CollectionSummaries = Map<number, CollectionSummary>;

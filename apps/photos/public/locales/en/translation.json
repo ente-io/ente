@@ -537,5 +537,7 @@
     "NEWEST_FIRST": "Newest first",
     "OLDEST_FIRST": "Oldest first",
     "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "This file could not be previewed. Click here to download the original.",
-    "SELECT_COLLECTION":"Select album"
+    "SELECT_COLLECTION":"Select album",
+    "PIN_ALBUM":"Pin album",
+    "UNPIN_ALBUM":"Unpin album"
 }

@@ -53,7 +53,6 @@ import {
     downloadFiles,
     getSelectedFiles,
     getUniqueFiles,
-    isSharedFile,
     mergeMetadata,
     sortFiles,
 } from 'utils/file';
@@ -444,10 +443,6 @@ export default function Gallery() {
 
                 // SEARCH MODE
                 if (isInSearchMode) {
-                    // shared files are not searchable
-                    if (isSharedFile(user, item)) {
-                        return false;
-                    }
                     if (
                         search?.date &&
                         !isSameDayAnyYear(search.date)(
@@ -490,15 +485,6 @@ export default function Gallery() {
                         return false;
                     }
                     return true;
-                }
-
-                // shared files can only be seen in their respective collection
-                if (isSharedFile(user, item)) {
-                    if (activeCollection === item.collectionID) {
-                        return true;
-                    } else {
-                        return false;
-                    }
                 }
 
                 // archived collections files can only be seen in their respective collection
@@ -698,15 +684,15 @@ export default function Gallery() {
                         : selectedFiles.filter(
                               (file) => file.ownerID === user.id
                           );
-                if (toProcessFiles.length === 0) {
-                    return;
+                if (toProcessFiles.length > 0) {
+                    await handleCollectionOps(
+                        ops,
+                        collection,
+                        toProcessFiles,
+                        selected.collectionID
+                    );
                 }
-                await handleCollectionOps(
-                    ops,
-                    collection,
-                    toProcessFiles,
-                    selected.collectionID
-                );
+
                 clearSelection();
                 await syncWithRemote(false, true);
                 setActiveCollection(collection.id);
@@ -1034,12 +1020,6 @@ export default function Gallery() {
                         deletedFileIds={deletedFileIds}
                         setDeletedFileIds={setDeletedFileIds}
                         activeCollection={activeCollection}
-                        isIncomingSharedCollection={
-                            collectionSummaries.get(activeCollection)?.type ===
-                                CollectionSummaryType.incomingShareCollaborator ||
-                            collectionSummaries.get(activeCollection)?.type ===
-                                CollectionSummaryType.incomingShareViewer
-                        }
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
                         collectionNameMap={collectionNameMap}
