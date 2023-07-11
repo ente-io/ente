@@ -10,7 +10,6 @@
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "strictNullChecks": false,
-        "strictPropertyInitialization": false,
         "target": "es5",
         "useUnknownInCatchVariables": false
     },
