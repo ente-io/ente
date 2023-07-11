@@ -13,7 +13,7 @@ import PushPinOutlined from '@mui/icons-material/PushPinOutlined';
 import { UnPinIcon } from 'components/icons/UnPinIcon';
 
 interface Iprops {
-    IsArchived: boolean;
+    isArchived: boolean;
     isPinned: boolean;
     handleCollectionAction: (
         action: CollectionActions,
@@ -22,7 +22,7 @@ interface Iprops {
 }
 
 export function AlbumCollectionOption({
-    IsArchived,
+    isArchived,
     isPinned,
     handleCollectionAction,
 }: Iprops) {
@@ -63,7 +63,7 @@ export function AlbumCollectionOption({
                     {t('PIN_ALBUM')}
                 </OverflowMenuOption>
             )}
-            {IsArchived ? (
+            {isArchived ? (
                 <OverflowMenuOption
                     onClick={handleCollectionAction(
                         CollectionActions.UNARCHIVE

@@ -37,6 +37,7 @@ export interface EncryptedCollection {
     isDeleted: boolean;
     magicMetadata: EncryptedMagicMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
+    sharedMagicMetadata: EncryptedMagicMetadata;
 }
 
 export interface Collection
@@ -48,11 +49,13 @@ export interface Collection
         | 'nameDecryptionNonce'
         | 'magicMetadata'
         | 'pubMagicMetadata'
+        | 'sharedMagicMetadata'
     > {
     key: string;
     name: string;
     magicMetadata: CollectionMagicMetadata;
     pubMagicMetadata: CollectionPublicMagicMetadata;
+    sharedMagicMetadata: CollectionShareeMagicMetadata;
 }
 
 export interface PublicURL {
@@ -123,6 +126,12 @@ export interface CollectionMagicMetadataProps {
 
 export type CollectionMagicMetadata =
     MagicMetadataCore<CollectionMagicMetadataProps>;
+
+export interface CollectionShareeMetadataProps {
+    visibility?: VISIBILITY_STATE;
+}
+export type CollectionShareeMagicMetadata =
+    MagicMetadataCore<CollectionShareeMetadataProps>;
 
 export interface CollectionPublicMagicMetadataProps {
     asc?: boolean;

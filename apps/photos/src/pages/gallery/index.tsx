@@ -119,7 +119,7 @@ import ExportModal from 'components/ExportModal';
 import GalleryEmptyState from 'components/GalleryEmptyState';
 import AuthenticateUserModal from 'components/AuthenticateUserModal';
 import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
-import { IsArchived } from 'utils/magicMetadata';
+import { isArchivedFile } from 'utils/magicMetadata';
 import { isSameDayAnyYear, isInsideLocationTag } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
@@ -497,7 +497,7 @@ export default function Gallery() {
                 }
 
                 // Archived files can only be seen in archive section or their respective collection
-                if (IsArchived(item)) {
+                if (isArchivedFile(item)) {
                     if (
                         activeCollection === ARCHIVE_SECTION ||
                         activeCollection === item.collectionID
