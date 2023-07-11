@@ -1,6 +1,5 @@
 import { Box } from '@mui/material';
 import React, { useContext } from 'react';
-// import { t } from 'i18next';
 import { Collection } from 'types/collection';
 import { OwnerParticipant } from './OwnerParticipant';
 import { ViewerParticipants } from './ViewerParticipants';

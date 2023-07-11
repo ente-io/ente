@@ -50,7 +50,6 @@ export default function ViewerEmailShareOptions(
         props.optionsList
     );
     const [disableInput, setDisableInput] = useState(false);
-    // console.log('updatedOptionsList list:', updatedOptionsList);
 
     const [loading, SetLoading] = useState(false);
 
@@ -153,7 +152,6 @@ export default function ViewerEmailShareOptions(
                                     fontWeight="normal"
                                     key={item}
                                     onClick={() => {
-                                        // handleEmailClick(item, setFieldValue)
                                         if (
                                             values.selectedOptions.includes(
                                                 item

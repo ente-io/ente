@@ -5,15 +5,11 @@ import { Collection } from 'types/collection';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useState } from 'react';
 import { t } from 'i18next';
-// import ManageAddViewerOptions from './ManageAddViewerOptions';
-// import { CollectionShareSharees } from '../sharees';
 import AvatarCollectionShare from '../AvatarCollectionShare';
-// import ManageAddViewer from './ManageAddViewer';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import Avatar from '@mui/material/Avatar';
 import ManageParticipantsOptions from './ManageParticipantsOptions';
 import { Workspaces } from '@mui/icons-material';
-// import { CollectionShareSharees } from '../sharees';
 
 interface Iprops {
     collection: Collection;
@@ -51,7 +47,6 @@ export default function ManageParticipants({
 
     const shareeCount = collection.sharees?.length || 0;
     const extraShareeCount = Math.max(0, shareeCount - 6);
-    // console.log('Lenght for sharee list', collection.sharees[0].email);
     return (
         <>
             <Stack>

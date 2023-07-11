@@ -5,7 +5,6 @@ import { shareCollection } from 'services/collectionService';
 import { User } from 'types/user';
 import { handleSharingErrors } from 'utils/error/ui';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-// import { CollectionShareSharees } from './sharees';
 import { getLocalCollections } from 'services/collectionService';
 import { getLocalFamilyData } from 'utils/user/family';
 import ViewerEmailShareOptions, {
@@ -101,7 +100,6 @@ export default function ViewerEmailShare({ collection, onClose }) {
                 }}
                 disableAutoFocus
             />
-            {/* <CollectionShareSharees collection={collection} /> */}
         </>
     );
 }

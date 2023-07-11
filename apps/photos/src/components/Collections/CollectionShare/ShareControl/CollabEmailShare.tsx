@@ -101,7 +101,6 @@ export default function CollabEmailShare({ collection, onClose }) {
                 }}
                 disableAutoFocus
             />
-            {/* <CollectionShareSharees collection={collection} /> */}
         </>
     );
 }

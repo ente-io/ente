@@ -128,7 +128,6 @@ export default function ManageParticipantsRole({
         });
     };
 
-    console.log('collection Clicked', collection, selectedEmail);
     return (
         <>
             <EnteDrawer anchor="right" open={open} onClose={handleDrawerClose}>
@@ -151,7 +150,6 @@ export default function ManageParticipantsRole({
 
                             <MenuItemGroup>
                                 <EnteMenuItem
-                                    //
                                     fontWeight="normal"
                                     onClick={() =>
                                         handleRoleChange('COLLABORATOR')
@@ -212,7 +210,6 @@ export default function ManageParticipantsRole({
                                 </Typography>
 
                                 <EnteMenuItem
-                                    //
                                     color="error"
                                     fontWeight="normal"
                                     onClick={removeParticipant}

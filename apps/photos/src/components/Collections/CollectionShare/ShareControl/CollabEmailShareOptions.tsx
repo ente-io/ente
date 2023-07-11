@@ -17,6 +17,7 @@ interface formValues {
     inputValue: string;
     selectedOptions: string[];
 }
+
 export interface CollabEmailShareOptionsProps {
     callback: (
         inputValue: string[],
@@ -44,7 +45,6 @@ export default function CollabEmailShareOptions(
     props: CollabEmailShareOptionsProps
 ) {
     console.log('OptionList Intial', props.optionsList);
-    // const [selectedOptions, setSelectedOptions] = useState([]);
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
     const [updatedOptionsList, setUpdatedOptionsList] = useState<string[]>(
@@ -80,9 +80,7 @@ export default function CollabEmailShareOptions(
         }
 
         setDisableInput(false);
-
         SetLoading(false);
-
         props.onClose();
     };
 
@@ -136,7 +134,7 @@ export default function CollabEmailShareOptions(
                             : { label: props.placeholder })}
                         error={Boolean(errors.inputValue)}
                         helperText={errors.inputValue}
-                        // value={values.inputValue}
+                        value={values.inputValue}
                         disabled={loading || disableInput}
                         autoFocus={!props.disableAutoFocus}
                         autoComplete={props.autoComplete}
@@ -151,11 +149,9 @@ export default function CollabEmailShareOptions(
                         {updatedOptionsList.map((item, index) => (
                             <>
                                 <EnteMenuItem
-                                    //
                                     fontWeight="normal"
                                     key={item}
                                     onClick={() => {
-                                        // handleEmailClick(item, setFieldValue)
                                         if (
                                             values.selectedOptions.includes(
                                                 item
