@@ -11,7 +11,7 @@ import {
 } from 'utils/collection';
 import { SetCollectionNamerAttributes } from '../CollectionNamer';
 import { Collection } from 'types/collection';
-import { IsArchived, isPinnedCollection } from 'utils/magicMetadata';
+import { isArchivedCollection, isPinnedCollection } from 'utils/magicMetadata';
 import { GalleryContext } from 'pages/gallery';
 import { logError } from 'utils/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
@@ -343,11 +343,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                   collectionSummaryType ===
                       CollectionSummaryType.incomingShareCollaborator ? (
                     <SharedCollectionOption
+                        isArchived={isArchivedCollection(activeCollection)}
                         handleCollectionAction={handleCollectionAction}
                     />
                 ) : (
                     <AlbumCollectionOption
-                        IsArchived={IsArchived(activeCollection)}
+                        isArchived={isArchivedCollection(activeCollection)}
                         isPinned={isPinnedCollection(activeCollection)}
                         handleCollectionAction={handleCollectionAction}
                     />
