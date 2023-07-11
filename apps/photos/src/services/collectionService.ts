@@ -282,7 +282,6 @@ export const getCollection = async (
 };
 
 export const getCollectionLatestFiles = (
-    user: User,
     files: EnteFile[],
     archivedCollections: Set<number>
 ): CollectionToFileMap => {
@@ -295,7 +294,6 @@ export const getCollectionLatestFiles = (
         if (
             !latestFiles.has(ALL_SECTION) &&
             !IsArchived(file) &&
-            file.ownerID === user.id &&
             !archivedCollections.has(file.collectionID)
         ) {
             latestFiles.set(ALL_SECTION, file);
@@ -305,7 +303,6 @@ export const getCollectionLatestFiles = (
 };
 
 export const getCollectionCoverFiles = (
-    user: User,
     files: EnteFile[],
     archivedCollections: Set<number>,
     collections: Collection[]
@@ -342,11 +339,7 @@ export const getCollectionCoverFiles = (
         if (coverFiles.has(ALL_SECTION)) {
             break;
         }
-        if (
-            !IsArchived(file) &&
-            file.ownerID === user.id &&
-            !archivedCollections.has(file.collectionID)
-        ) {
+        if (!IsArchived(file) && !archivedCollections.has(file.collectionID)) {
             coverFiles.set(ALL_SECTION, file);
         }
     }
@@ -1058,12 +1051,10 @@ export async function getCollectionSummaries(
 ): Promise<CollectionSummaries> {
     const collectionSummaries: CollectionSummaries = new Map();
     const collectionLatestFiles = getCollectionLatestFiles(
-        user,
         files,
         archivedCollections
     );
     const collectionCoverFiles = getCollectionCoverFiles(
-        user,
         files,
         archivedCollections,
         collections
