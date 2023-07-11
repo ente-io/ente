@@ -38,7 +38,6 @@ class GroupGallery extends StatelessWidget {
     for (int index = 0; index < files.length; index += subGalleryItemLimit) {
       childGalleries.add(
         LazyGridView(
-          key: ValueKey("subGallery index:$index"),
           tag,
           files.sublist(
             index,

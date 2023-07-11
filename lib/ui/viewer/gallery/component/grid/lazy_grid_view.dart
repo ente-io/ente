@@ -23,7 +23,7 @@ class LazyGridView extends StatefulWidget {
   final int? photoGridSize;
   final bool limitSelectionToOne;
 
-  LazyGridView(
+  const LazyGridView(
     this.tag,
     this.filesInGroup,
     this.asyncLoader,
@@ -35,7 +35,7 @@ class LazyGridView extends StatefulWidget {
     this.photoGridSize, {
     this.limitSelectionToOne = false,
     Key? key,
-  }) : super(key: key ?? UniqueKey());
+  }) : super(key: key);
 
   @override
   State<LazyGridView> createState() => _LazyGridViewState();
