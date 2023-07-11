@@ -3,6 +3,7 @@ import React, { useContext, useRef, useState } from 'react';
 import * as CollectionAPI from 'services/collectionService';
 import * as TrashService from 'services/trashService';
 import {
+    changeCollectionOrder,
     changeCollectionSortOrder,
     changeCollectionVisibility,
     downloadAllCollectionFiles,
@@ -10,7 +11,7 @@ import {
 } from 'utils/collection';
 import { SetCollectionNamerAttributes } from '../CollectionNamer';
 import { Collection } from 'types/collection';
-import { IsArchived } from 'utils/magicMetadata';
+import { IsArchived, isPinnedCollection } from 'utils/magicMetadata';
 import { GalleryContext } from 'pages/gallery';
 import { logError } from 'utils/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
@@ -53,6 +54,8 @@ export enum CollectionActions {
     LEAVE_SHARED_ALBUM,
     SHOW_SORT_ORDER_MENU,
     UPDATE_COLLECTION_SORT_ORDER,
+    PIN_ALBUM,
+    UNPIN_ALBUM,
 }
 
 const CollectionOptions = (props: CollectionOptionsProps) => {
@@ -131,6 +134,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 break;
             case CollectionActions.UPDATE_COLLECTION_SORT_ORDER:
                 callback = updateCollectionSortOrder;
+                break;
+            case CollectionActions.PIN_ALBUM:
+                callback = pinAlbum;
+                break;
+            case CollectionActions.UNPIN_ALBUM:
+                callback = unPinAlbum;
                 break;
             default:
                 logError(
@@ -290,6 +299,14 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         await changeCollectionSortOrder(activeCollection, asc);
     };
 
+    const pinAlbum = async () => {
+        await changeCollectionOrder(activeCollection, 1);
+    };
+
+    const unPinAlbum = async () => {
+        await changeCollectionOrder(activeCollection, 0);
+    };
+
     return (
         <HorizontalFlex sx={{ display: 'inline-flex', gap: '16px' }}>
             <QuickOptions
@@ -331,6 +348,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 ) : (
                     <AlbumCollectionOption
                         IsArchived={IsArchived(activeCollection)}
+                        isPinned={isPinnedCollection(activeCollection)}
                         handleCollectionAction={handleCollectionAction}
                     />
                 )}
