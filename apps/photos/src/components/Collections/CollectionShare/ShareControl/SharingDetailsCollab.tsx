@@ -9,6 +9,7 @@ import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { LS_KEYS, getData } from 'utils/storage/localStorage';
 import { User } from 'types/user';
+import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 
 interface Iprops {
     collection: Collection;
@@ -57,6 +58,11 @@ export function ShareDetailsCollab({ collection }: Iprops) {
                     </>
                 ))}
             </MenuItemGroup>
+            <MenuSectionTitle
+                title={t(
+                    'Collaborators can add photos and videos to the shared album.'
+                )}
+            />
         </Box>
     );
 }

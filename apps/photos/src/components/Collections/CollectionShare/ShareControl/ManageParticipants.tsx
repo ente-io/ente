@@ -2,9 +2,7 @@ import { Stack, Typography, styled } from '@mui/material';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { Collection } from 'types/collection';
-import PublicIcon from '@mui/icons-material/Public';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-
 import { useState } from 'react';
 import { t } from 'i18next';
 // import ManageAddViewerOptions from './ManageAddViewerOptions';
@@ -14,6 +12,7 @@ import AvatarCollectionShare from '../AvatarCollectionShare';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import Avatar from '@mui/material/Avatar';
 import ManageParticipantsOptions from './ManageParticipantsOptions';
+import { Workspaces } from '@mui/icons-material';
 // import { CollectionShareSharees } from '../sharees';
 
 interface Iprops {
@@ -57,7 +56,7 @@ export default function ManageParticipants({
         <>
             <Stack>
                 <Typography color="text.muted" variant="small" padding={1}>
-                    <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
+                    <Workspaces style={{ fontSize: 17, marginRight: 8 }} />
                     {t(`Shared with ${peopleCount}  people`)}
                 </Typography>
                 <MenuItemGroup>

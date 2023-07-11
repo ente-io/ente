@@ -123,6 +123,7 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                             onClose={props.onClose}
                             title={t('Sharing details')}
                             onRootClose={handleRootClose}
+                            caption={props.collection.name}
                         />
                         <Stack py={'20px'} px={'8px'}>
                             <OwnerParticipant collection={props.collection} />
@@ -149,6 +150,7 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                             onClose={props.onClose}
                             title={t('Sharing details')}
                             onRootClose={handleRootClose}
+                            caption={props.collection.name}
                         />
                         <Stack py={'20px'} px={'8px'}>
                             <OwnerParticipant collection={props.collection} />
