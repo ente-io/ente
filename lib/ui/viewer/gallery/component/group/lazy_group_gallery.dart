@@ -28,7 +28,7 @@ class LazyGroupGallery extends StatefulWidget {
   final bool enableFileGrouping;
   final bool limitSelectionToOne;
   final bool showSelectAllByDefault;
-  LazyGroupGallery(
+  const LazyGroupGallery(
     this.files,
     this.index,
     this.reloadEvent,
@@ -43,7 +43,7 @@ class LazyGroupGallery extends StatefulWidget {
     this.photoGridSize = photoGridSizeDefault,
     this.limitSelectionToOne = false,
     Key? key,
-  }) : super(key: key ?? UniqueKey());
+  }) : super(key: key);
 
   @override
   State<LazyGroupGallery> createState() => _LazyGroupGalleryState();
