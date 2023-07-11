@@ -76,7 +76,7 @@ const CollectionCardContainer = React.memo(
 );
 
 const getItemKey = (index: number, data: ItemData) => {
-    return `${data.collectionSummaries[index].id}-${data.collectionSummaries[index].latestFile?.id}`;
+    return `${data.collectionSummaries[index].id}-${data.collectionSummaries[index].coverFile?.id}`;
 };
 
 const CollectionListBar = (props: IProps) => {

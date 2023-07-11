@@ -15,7 +15,7 @@ import {
 } from 'utils/file';
 import {
     Collection,
-    CollectionLatestFiles,
+    CollectionToFileMap,
     AddToCollectionRequest,
     MoveToCollectionRequest,
     EncryptedFileKey,
@@ -297,10 +297,9 @@ export const getCollection = async (
 };
 
 export const getCollectionLatestFiles = (
-    user: User,
     files: EnteFile[],
     archivedCollections: Set<number>
-): CollectionLatestFiles => {
+): CollectionToFileMap => {
     const latestFiles = new Map<number, EnteFile>();
 
     files.forEach((file) => {
@@ -310,13 +309,60 @@ export const getCollectionLatestFiles = (
         if (
             !latestFiles.has(ALL_SECTION) &&
             !isArchivedFile(file) &&
-            file.ownerID === user.id &&
             !archivedCollections.has(file.collectionID)
         ) {
             latestFiles.set(ALL_SECTION, file);
         }
     });
     return latestFiles;
+};
+
+export const getCollectionCoverFiles = (
+    files: EnteFile[],
+    archivedCollections: Set<number>,
+    collections: Collection[]
+): CollectionToFileMap => {
+    const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
+
+    const coverFiles = new Map<number, EnteFile>();
+
+    collections.forEach((collection) => {
+        const collectionFiles = collectionIDToFileMap.get(collection.id);
+        if (!collectionFiles || collectionFiles.length === 0) {
+            return;
+        }
+        if (typeof collection.pubMagicMetadata?.data?.coverID !== 'undefined') {
+            const coverFile = collectionFiles.find(
+                (file) => file.id === collection.pubMagicMetadata?.data?.coverID
+            );
+            if (coverFile) {
+                coverFiles.set(collection.id, coverFile);
+                return;
+            }
+        }
+        if (collection.pubMagicMetadata?.data?.asc) {
+            coverFiles.set(
+                collection.id,
+                collectionFiles[collectionFiles.length - 1]
+            );
+        } else {
+            coverFiles.set(collection.id, collectionFiles[0]);
+        }
+    });
+
+    for (const file of files) {
+        if (coverFiles.has(ALL_SECTION)) {
+            break;
+        }
+        if (
+            !isArchivedFile(file) &&
+            !archivedCollections.has(file.collectionID)
+        ) {
+            coverFiles.set(ALL_SECTION, file);
+        }
+    }
+
+    return coverFiles;
 };
 
 export const getFavItemIds = async (
@@ -1068,9 +1114,13 @@ export async function getCollectionSummaries(
 ): Promise<CollectionSummaries> {
     const collectionSummaries: CollectionSummaries = new Map();
     const collectionLatestFiles = getCollectionLatestFiles(
-        user,
         files,
         archivedCollections
+    );
+    const collectionCoverFiles = getCollectionCoverFiles(
+        files,
+        archivedCollections,
+        collections
     );
     const collectionFilesCount = getCollectionsFileCount(
         files,
@@ -1109,6 +1159,7 @@ export async function getCollectionSummaries(
                 id: collection.id,
                 name: collection.name,
                 latestFile: collectionLatestFiles.get(collection.id),
+                coverFile: collectionCoverFiles.get(collection.id),
                 fileCount: collectionFilesCount.get(collection.id) ?? 0,
                 updationTime: collection.updationTime,
                 type: type,
@@ -1140,7 +1191,11 @@ export async function getCollectionSummaries(
 
     collectionSummaries.set(
         ALL_SECTION,
-        getAllCollectionSummaries(collectionFilesCount, collectionLatestFiles)
+        getAllCollectionSummaries(
+            collectionFilesCount,
+            collectionCoverFiles,
+            collectionLatestFiles
+        )
     );
     collectionSummaries.set(
         ARCHIVE_SECTION,
@@ -1200,12 +1255,14 @@ function getCollectionsFileCount(
 
 function getAllCollectionSummaries(
     collectionFilesCount: CollectionFilesCount,
-    collectionsLatestFile: CollectionLatestFiles
+    collectionCoverFiles: CollectionToFileMap,
+    collectionsLatestFile: CollectionToFileMap
 ): CollectionSummary {
     return {
         id: ALL_SECTION,
         name: t('ALL_SECTION_NAME'),
         type: CollectionSummaryType.all,
+        coverFile: collectionCoverFiles.get(ALL_SECTION),
         latestFile: collectionsLatestFile.get(ALL_SECTION),
         fileCount: collectionFilesCount.get(ALL_SECTION) || 0,
         updationTime: collectionsLatestFile.get(ALL_SECTION)?.updationTime,
@@ -1219,6 +1276,7 @@ function getDummyUncategorizedCollectionSummaries(): CollectionSummary {
         name: t('UNCATEGORIZED'),
         type: CollectionSummaryType.uncategorized,
         latestFile: null,
+        coverFile: null,
         fileCount: 0,
         updationTime: 0,
         order: 1,
@@ -1227,12 +1285,13 @@ function getDummyUncategorizedCollectionSummaries(): CollectionSummary {
 
 function getHiddenCollectionSummaries(
     collectionFilesCount: CollectionFilesCount,
-    collectionsLatestFile: CollectionLatestFiles
+    collectionsLatestFile: CollectionToFileMap
 ): CollectionSummary {
     return {
         id: HIDDEN_SECTION,
         name: t('HIDDEN'),
         type: CollectionSummaryType.hidden,
+        coverFile: null,
         latestFile: collectionsLatestFile.get(HIDDEN_SECTION),
         fileCount: collectionFilesCount.get(HIDDEN_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(HIDDEN_SECTION)?.updationTime,
@@ -1241,12 +1300,13 @@ function getHiddenCollectionSummaries(
 }
 function getArchivedCollectionSummaries(
     collectionFilesCount: CollectionFilesCount,
-    collectionsLatestFile: CollectionLatestFiles
+    collectionsLatestFile: CollectionToFileMap
 ): CollectionSummary {
     return {
         id: ARCHIVE_SECTION,
         name: t('ARCHIVE_SECTION_NAME'),
         type: CollectionSummaryType.archive,
+        coverFile: null,
         latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(ARCHIVE_SECTION)?.updationTime,
@@ -1256,12 +1316,13 @@ function getArchivedCollectionSummaries(
 
 function getTrashedCollectionSummaries(
     collectionFilesCount: CollectionFilesCount,
-    collectionsLatestFile: CollectionLatestFiles
+    collectionsLatestFile: CollectionToFileMap
 ): CollectionSummary {
     return {
         id: TRASH_SECTION,
         name: t('TRASH'),
         type: CollectionSummaryType.trash,
+        coverFile: null,
         latestFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(TRASH_SECTION)?.updationTime,
