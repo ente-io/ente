@@ -9,9 +9,12 @@ import Unarchive from '@mui/icons-material/Unarchive';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 import SortIcon from '@mui/icons-material/Sort';
 import { t } from 'i18next';
+import PushPinOutlined from '@mui/icons-material/PushPinOutlined';
+import { UnPinIcon } from 'components/icons/UnPinIcon';
 
 interface Iprops {
     isArchived: boolean;
+    isPinned: boolean;
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean
@@ -20,6 +23,7 @@ interface Iprops {
 
 export function AlbumCollectionOption({
     isArchived,
+    isPinned,
     handleCollectionAction,
 }: Iprops) {
     return (
@@ -40,6 +44,25 @@ export function AlbumCollectionOption({
                 startIcon={<SortIcon />}>
                 {t('SORT_BY')}
             </OverflowMenuOption>
+            {isPinned ? (
+                <OverflowMenuOption
+                    onClick={handleCollectionAction(
+                        CollectionActions.UNPIN_ALBUM,
+                        false
+                    )}
+                    startIcon={<UnPinIcon />}>
+                    {t('UNPIN_ALBUM')}
+                </OverflowMenuOption>
+            ) : (
+                <OverflowMenuOption
+                    onClick={handleCollectionAction(
+                        CollectionActions.PIN_ALBUM,
+                        false
+                    )}
+                    startIcon={<PushPinOutlined />}>
+                    {t('PIN_ALBUM')}
+                </OverflowMenuOption>
+            )}
             {isArchived ? (
                 <OverflowMenuOption
                     onClick={handleCollectionAction(

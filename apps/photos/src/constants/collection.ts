@@ -24,6 +24,7 @@ export enum CollectionSummaryType {
     sharedOnlyViaLink = 'sharedOnlyViaLink',
     archived = 'archived',
     hidden = 'hidden',
+    pinned = 'pinned',
 }
 export enum COLLECTION_LIST_SORT_BY {
     NAME,
@@ -39,16 +40,17 @@ export const COLLECTION_SORT_ORDER = new Map([
     [CollectionSummaryType.all, 0],
     [CollectionSummaryType.uncategorized, 1],
     [CollectionSummaryType.favorites, 2],
-    [CollectionSummaryType.album, 3],
-    [CollectionSummaryType.folder, 3],
-    [CollectionSummaryType.incomingShareViewer, 3],
-    [CollectionSummaryType.incomingShareCollaborator, 3],
-    [CollectionSummaryType.outgoingShare, 3],
-    [CollectionSummaryType.sharedOnlyViaLink, 3],
-    [CollectionSummaryType.archived, 3],
-    [CollectionSummaryType.archive, 4],
-    [CollectionSummaryType.trash, 5],
-    [CollectionSummaryType.hidden, 5],
+    [CollectionSummaryType.pinned, 3],
+    [CollectionSummaryType.album, 4],
+    [CollectionSummaryType.folder, 4],
+    [CollectionSummaryType.incomingShareViewer, 4],
+    [CollectionSummaryType.incomingShareCollaborator, 4],
+    [CollectionSummaryType.outgoingShare, 4],
+    [CollectionSummaryType.sharedOnlyViaLink, 4],
+    [CollectionSummaryType.archived, 4],
+    [CollectionSummaryType.archive, 5],
+    [CollectionSummaryType.trash, 6],
+    [CollectionSummaryType.hidden, 7],
 ]);
 
 export const SYSTEM_COLLECTION_TYPES = new Set([

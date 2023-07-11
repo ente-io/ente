@@ -14,6 +14,7 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 import PeopleIcon from '@mui/icons-material/People';
 import LinkIcon from '@mui/icons-material/Link';
 import { CollectionSummary } from 'types/collection';
+import PushPin from '@mui/icons-material/PushPin';
 
 interface Iprops {
     collectionSummary: CollectionSummary;
@@ -71,6 +72,7 @@ function CollectionCardIcon({ collectionType }) {
             {collectionType === CollectionSummaryType.sharedOnlyViaLink && (
                 <LinkIcon />
             )}
+            {collectionType === CollectionSummaryType.pinned && <PushPin />}
         </CollectionBarTileIcon>
     );
 }

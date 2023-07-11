@@ -28,6 +28,19 @@ export function isArchivedCollection(item: Collection): boolean {
     return false;
 }
 
+export function isPinnedCollection(item: Collection) {
+    if (
+        !item ||
+        !item.magicMetadata ||
+        !item.magicMetadata.data ||
+        typeof item.magicMetadata.data === 'string' ||
+        typeof item.magicMetadata.data.order === 'undefined'
+    ) {
+        return false;
+    }
+    return item.magicMetadata.data.order !== 0;
+}
+
 export async function updateMagicMetadata<T>(
     magicMetadataUpdates: T,
     originalMagicMetadata?: MagicMetadataCore<T>,

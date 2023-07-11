@@ -47,6 +47,7 @@ import { SUB_TYPE, UpdateMagicMetadataRequest } from 'types/magicMetadata';
 import {
     isArchivedCollection,
     isArchivedFile,
+    isPinnedCollection,
     updateMagicMetadata,
 } from 'utils/magicMetadata';
 import { User } from 'types/user';
@@ -1034,6 +1035,7 @@ export function sortCollectionSummaries(
                     return a.name.localeCompare(b.name);
             }
         })
+        .sort((a, b) => b.order - a.order)
         .sort(
             (a, b) =>
                 COLLECTION_SORT_ORDER.get(a.type) -
@@ -1097,6 +1099,8 @@ export async function getCollectionSummaries(
                 type = CollectionSummaryType.archived;
             } else if (isHiddenCollection(collection)) {
                 type = CollectionSummaryType.hidden;
+            } else if (isPinnedCollection(collection)) {
+                type = CollectionSummaryType.pinned;
             } else {
                 type = CollectionSummaryType[collection.type];
             }
@@ -1108,6 +1112,7 @@ export async function getCollectionSummaries(
                 fileCount: collectionFilesCount.get(collection.id) ?? 0,
                 updationTime: collection.updationTime,
                 type: type,
+                order: collection.magicMetadata?.data?.order ?? 0,
             });
         }
     }
@@ -1204,6 +1209,7 @@ function getAllCollectionSummaries(
         latestFile: collectionsLatestFile.get(ALL_SECTION),
         fileCount: collectionFilesCount.get(ALL_SECTION) || 0,
         updationTime: collectionsLatestFile.get(ALL_SECTION)?.updationTime,
+        order: 1,
     };
 }
 
@@ -1215,6 +1221,7 @@ function getDummyUncategorizedCollectionSummaries(): CollectionSummary {
         latestFile: null,
         fileCount: 0,
         updationTime: 0,
+        order: 1,
     };
 }
 
@@ -1229,6 +1236,7 @@ function getHiddenCollectionSummaries(
         latestFile: collectionsLatestFile.get(HIDDEN_SECTION),
         fileCount: collectionFilesCount.get(HIDDEN_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(HIDDEN_SECTION)?.updationTime,
+        order: -1,
     };
 }
 function getArchivedCollectionSummaries(
@@ -1242,6 +1250,7 @@ function getArchivedCollectionSummaries(
         latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(ARCHIVE_SECTION)?.updationTime,
+        order: -1,
     };
 }
 
@@ -1256,6 +1265,7 @@ function getTrashedCollectionSummaries(
         latestFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(TRASH_SECTION)?.updationTime,
+        order: -1,
     };
 }
 
