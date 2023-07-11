@@ -143,7 +143,7 @@ export default function CollabEmailShareOptions(
                     <Stack py={'10px'} px={'8px'}>
                         {' '}
                     </Stack>
-                    <MenuSectionTitle title={t('or add an existing one')} />
+                    <MenuSectionTitle title={t('OR_ADD_EXISTING')} />
 
                     <MenuItemGroup>
                         {updatedOptionsList.map((item, index) => (
