@@ -2,12 +2,12 @@ import { Stack, Typography } from '@mui/material';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { Collection } from 'types/collection';
-import PublicIcon from '@mui/icons-material/Public';
 import AddIcon from '@mui/icons-material/Add';
 import { useState } from 'react';
 import { t } from 'i18next';
 import ManageAddViewerOptions from './ManageAddViewerOptions';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
+import { Workspaces } from '@mui/icons-material';
 
 interface Iprops {
     collection: Collection;
@@ -23,7 +23,7 @@ export default function ManageAddViewer({ collection, onRootClose }: Iprops) {
             <Stack>
                 {collection.sharees.length === 0 && (
                     <Typography color="text.muted" variant="small" padding={1}>
-                        <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
+                        <Workspaces style={{ fontSize: 17, marginRight: 8 }} />
                         {t('SHARE_WITH_PEOPLE')}
                     </Typography>
                 )}
