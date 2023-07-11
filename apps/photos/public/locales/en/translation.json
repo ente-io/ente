@@ -355,6 +355,31 @@
     "INSTALL": "Install",
     "SHARING_DETAILS": "Sharing details",
     "MODIFY_SHARING": "Modify sharing",
+    "ADD_COLLABORATOR": "Add collaborators",
+    "ADD_NEW_EMAIL": "Add a new email",
+    "SHARE_WITH_PEOPLE":"Share with specific people",
+    "ADD_VIEWERS":"Add viewers",
+    "ADD_VIEWER": "Add viewer",
+    "PARTICIPANTS": " Participants",
+    "_CHANGE_PERMISSIONS_TO_VIEWER": " will not be able to add more photos to the album, they will still be able to remove photos added by them",
+    "CONVERT_TO_VIEWER": "Yes, convert to viewer",
+    "CONVERT_TO_COLLABORATOR": "Yes, convert to collaborator",
+    "CHANGE_PERMISSION":"Change permission?",
+    "REMOVE_PARTICIPANT": "Remove?",
+    "CONFIRM_REMOVE":"Yes, remove",
+    "MANAGE":"Manage",
+    "ADDED_AS":"Added as",
+    "COLLABORATOR_RIGHTS":"Collaborators can add photos and videos to the shared album",
+    "REMOVE_PARTICIPANT_HEAD": "Remove participant",
+    "OWNER": "Owner",
+    "COLLABORATORS": "Collaborators",
+    "VIEWERS": "Viewers",
+
+
+
+
+
+
     "NOT_FOUND": "404 - not found",
     "LINK_EXPIRED": "Link expired",
     "LINK_EXPIRED_MESSAGE": "This link has either expired or been disabled!",

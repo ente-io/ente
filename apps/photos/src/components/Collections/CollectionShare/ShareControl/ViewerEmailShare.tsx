@@ -93,7 +93,7 @@ export default function ViewerEmailShare({ collection, onClose }) {
                 optionsList={updatedOptionsList}
                 placeholder={t('ENTER_EMAIL')}
                 fieldType="email"
-                buttonText={t('Add Viewer')}
+                buttonText={t('ADD_VIEWERS')}
                 submitButtonProps={{
                     size: 'large',
                     sx: { mt: 1, mb: 2 },

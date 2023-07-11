@@ -39,7 +39,7 @@ export default function ManageParticipantsOptions({
                         onClose={onClose}
                         title={collection.name}
                         onRootClose={onRootClose}
-                        caption={`${peopleCount}${t(' Participants')} `}
+                        caption={`${peopleCount}${t('PARTICIPANTS')} `}
                     />
                     <Stack py={'20px'} px={'8px'} spacing={'8px'}>
                         <ManageParticipantsList

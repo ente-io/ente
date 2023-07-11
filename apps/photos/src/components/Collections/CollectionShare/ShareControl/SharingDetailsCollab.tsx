@@ -39,7 +39,7 @@ export function ShareDetailsCollab({ collection }: Iprops) {
         <Box mb={3}>
             <Typography color="text.muted" variant="small" padding={1}>
                 <ModeEditIcon style={{ fontSize: 20, marginRight: 8 }} />
-                {t('Collaborators')}
+                {t('COLLABORATORS')}
             </Typography>
 
             <MenuItemGroup>
@@ -58,11 +58,7 @@ export function ShareDetailsCollab({ collection }: Iprops) {
                     </>
                 ))}
             </MenuItemGroup>
-            <MenuSectionTitle
-                title={t(
-                    'Collaborators can add photos and videos to the shared album.'
-                )}
-            />
+            <MenuSectionTitle title={t('COLLABORATOR_RIGHTS')} />
         </Box>
     );
 }

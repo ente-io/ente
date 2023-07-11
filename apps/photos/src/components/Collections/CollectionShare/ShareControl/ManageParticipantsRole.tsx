@@ -83,20 +83,22 @@ export default function ManageParticipantsRole({
 
         if (role === 'VIEWER' && selectedRole === 'COLLABORATOR') {
             contentText = t(
-                `{{selectedEmail}} will not be able to add more photos to the album, they will still be able to remove photos added by them`,
-                { selectedEmail: selectedEmail }
+                `${selectedEmail} will not be able to add more photos to the album, they will still be able to remove photos added by them`,
+                {
+                    selectedEmail: selectedEmail,
+                }
             );
-            buttonText = t('Yes, convert to viewer');
+            buttonText = t('CONVERT_TO_VIEWER');
         } else if (role === 'COLLABORATOR' && selectedRole === 'VIEWER') {
             contentText = t(
                 `{{selectedEmail}} will be able to add photos to the album`,
                 { selectedEmail: selectedEmail }
             );
-            buttonText = t('Yes, convert to collaborator');
+            buttonText = t('CONVERT_TO_COLLABORATOR');
         }
 
         appContext.setDialogMessage({
-            title: t('Change Permission?'),
+            title: t('CHANGE_PERMISSION'),
             content: contentText,
             close: { text: t('CANCEL') },
             proceed: {
@@ -112,14 +114,14 @@ export default function ManageParticipantsRole({
 
     const removeParticipant = () => {
         appContext.setDialogMessage({
-            title: t('Remove?'),
+            title: t('REMOVE_PARTICIPANT'),
             content: t(
                 ` {{selectedEmail}} will be removed removed from the album, Any photos added by them will be removed from the album.`,
                 { selectedEmail: selectedEmail }
             ),
             close: { text: t('CANCEL') },
             proceed: {
-                text: t('Yes, remove'),
+                text: t('CONFIRM_REMOVE'),
                 action: () => {
                     handleClick();
                 },
@@ -134,7 +136,7 @@ export default function ManageParticipantsRole({
                 <Stack spacing={'4px'} py={'12px'}>
                     <Titlebar
                         onClose={onClose}
-                        title={t('Manage')}
+                        title={t('MANAGE')}
                         onRootClose={onRootClose}
                         caption={selectedEmail}
                     />
@@ -145,7 +147,7 @@ export default function ManageParticipantsRole({
                                 color="text.muted"
                                 variant="small"
                                 padding={1}>
-                                {t('Added as')}
+                                {t('ADDED_AS')}
                             </Typography>
 
                             <MenuItemGroup>
@@ -196,9 +198,7 @@ export default function ManageParticipantsRole({
                                 color="text.muted"
                                 variant="small"
                                 padding={1}>
-                                {t(
-                                    'Collaborators can add photos and videos to the shared album'
-                                )}
+                                {t('COLLABORATOR_RIGHTS')}
                             </Typography>
 
                             <Stack py={'30px'}>
@@ -206,7 +206,7 @@ export default function ManageParticipantsRole({
                                     color="text.muted"
                                     variant="small"
                                     padding={1}>
-                                    {t('Remove Participant')}
+                                    {t('REMOVE_PARTICIPANT_HEAD')}
                                 </Typography>
 
                                 <EnteMenuItem

@@ -20,7 +20,7 @@ export function OwnerParticipant({ collection }: Iprops) {
     const user: User = getData(LS_KEYS.USER);
 
     const ownerEmail =
-        user.id === collection.owner?.id ? t('You') : collection.owner?.email;
+        user.id === collection.owner?.id ? t('YOU') : collection.owner?.email;
 
     return (
         <Box mb={3}>
@@ -28,7 +28,7 @@ export function OwnerParticipant({ collection }: Iprops) {
                 <AdminPanelSettingsIcon
                     style={{ fontSize: 20, marginRight: 8 }}
                 />
-                {t('Owner')}
+                {t('OWNER')}
             </Typography>
 
             <MenuItemGroup>

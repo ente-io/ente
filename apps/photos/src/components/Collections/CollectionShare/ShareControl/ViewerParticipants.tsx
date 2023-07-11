@@ -52,7 +52,7 @@ export function ViewerParticipants({
                 <Box mb={3}>
                     <Typography color="text.muted" variant="small" padding={1}>
                         <PhotoIcon style={{ fontSize: 20, marginRight: 8 }} />
-                        {t('Viewers')}
+                        {t('VIEWERS')}
                     </Typography>
                     <MenuItemGroup>
                         <>

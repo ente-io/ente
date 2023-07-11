@@ -36,12 +36,12 @@ export default function ManageAddViewerOptions({
                 <Stack spacing={'4px'} py={'12px'}>
                     <Titlebar
                         onClose={onClose}
-                        title={t('Add Viewer')}
+                        title={t('ADD_VIEWERS')}
                         onRootClose={onRootClose}
                     />
                     <Stack py={'20px'} px={'8px'} spacing={'8px'}>
                         <MenuSectionTitle
-                            title={t('Add a new email')}
+                            title={t('ADD_NEW_EMAIL')}
                             icon={<WorkspacesIcon />}
                         />
                         <ViewerEmailShare

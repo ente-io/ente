@@ -37,12 +37,12 @@ export default function ManageAddCollabOptions({
                 <Stack spacing={'4px'} py={'12px'}>
                     <Titlebar
                         onClose={onClose}
-                        title={t('Add Collaborator')}
+                        title={t('ADD_COLLABORATOR')}
                         onRootClose={onRootClose}
                     />
                     <Stack py={'20px'} px={'8px'} spacing={'8px'}>
                         <MenuSectionTitle
-                            title={t('Add a new email')}
+                            title={t('ADD_NEW_EMAIL')}
                             icon={<WorkspacesIcon />}
                         />
                         <CollabEmailShare

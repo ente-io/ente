@@ -105,7 +105,7 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                     <Stack spacing={'4px'} py={'12px'}>
                         <Titlebar
                             onClose={props.onClose}
-                            title={t('Sharing details')}
+                            title={t('SHARING_DETAILS')}
                             onRootClose={handleRootClose}
                             caption={props.collection.name}
                         />
@@ -132,7 +132,7 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                     <Stack spacing={'4px'} py={'12px'}>
                         <Titlebar
                             onClose={props.onClose}
-                            title={t('Sharing details')}
+                            title={t('SHARING_DETAILS')}
                             onRootClose={handleRootClose}
                             caption={props.collection.name}
                         />

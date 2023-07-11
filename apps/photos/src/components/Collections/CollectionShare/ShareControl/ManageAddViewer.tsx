@@ -24,7 +24,7 @@ export default function ManageAddViewer({ collection, onRootClose }: Iprops) {
                 {collection.sharees.length === 0 && (
                     <Typography color="text.muted" variant="small" padding={1}>
                         <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
-                        {t('Share with specific people')}
+                        {t('SHARE_WITH_PEOPLE')}
                     </Typography>
                 )}
 
@@ -32,7 +32,7 @@ export default function ManageAddViewer({ collection, onRootClose }: Iprops) {
                     <EnteMenuItem
                         startIcon={<AddIcon />}
                         onClick={openManageAddViewer}
-                        label={t('Add Viewers')}
+                        label={t('ADD_VIEWERS')}
                     />
                     <MenuItemDivider hasIcon={true} />
                 </MenuItemGroup>
