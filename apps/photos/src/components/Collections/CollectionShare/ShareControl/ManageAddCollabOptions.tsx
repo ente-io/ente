@@ -39,6 +39,7 @@ export default function ManageAddCollabOptions({
                         onClose={onClose}
                         title={t('ADD_COLLABORATOR')}
                         onRootClose={onRootClose}
+                        caption={collection.name}
                     />
                     <Stack py={'20px'} px={'8px'} spacing={'8px'}>
                         <MenuSectionTitle
