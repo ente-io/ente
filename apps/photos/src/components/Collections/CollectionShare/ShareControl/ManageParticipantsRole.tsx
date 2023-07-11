@@ -118,9 +118,14 @@ export default function ManageParticipantsRole({
     const removeParticipant = () => {
         appContext.setDialogMessage({
             title: t('REMOVE_PARTICIPANT'),
-            content: t(`REMOVE_PARTICIPANT_MESSAGE`, {
-                selectedEmail: selectedEmail,
-            }),
+            content: (
+                <Trans
+                    i18nKey="REMOVE_PARTICIPANT_MESSAGE"
+                    values={{
+                        selectedEmail: `${selectedEmail}`,
+                    }}
+                />
+            ),
             close: { text: t('CANCEL') },
             proceed: {
                 text: t('CONFIRM_REMOVE'),
