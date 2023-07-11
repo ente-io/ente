@@ -306,42 +306,47 @@ export const getCollectionCoverFiles = (
     archivedCollections: Set<number>,
     collections: Collection[]
 ): CollectionToFileMap => {
+    const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
+
     const coverFiles = new Map<number, EnteFile>();
 
-    const collectionMap = new Map<number, Collection>();
     collections.forEach((collection) => {
-        collectionMap.set(collection.id, collection);
+        const collectionFiles = collectionIDToFileMap.get(collection.id);
+        if (!collectionFiles || collectionFiles.length === 0) {
+            return;
+        }
+        if (typeof collection.pubMagicMetadata?.data?.coverID !== 'undefined') {
+            const coverFile = collectionFiles.find(
+                (file) => file.id === collection.pubMagicMetadata?.data?.coverID
+            );
+            if (coverFile) {
+                coverFiles.set(collection.id, coverFile);
+                return;
+            }
+        }
+        if (collection.pubMagicMetadata?.data?.asc) {
+            coverFiles.set(
+                collection.id,
+                collectionFiles[collectionFiles.length - 1]
+            );
+        } else {
+            coverFiles.set(collection.id, collectionFiles[0]);
+        }
     });
 
-    files.forEach((file) => {
-        if (!coverFiles.has(file.collectionID)) {
-            const collection = collectionMap.get(file.collectionID);
-            if (
-                typeof collection.pubMagicMetadata?.data?.coverID !==
-                'undefined'
-            ) {
-                if (collection.pubMagicMetadata?.data?.coverID === file.id) {
-                    coverFiles.set(file.collectionID, file);
-                }
-            } else if (collection.pubMagicMetadata?.data?.asc) {
-                // if asc is set and is 1, then the collection is sorted in ascending order
-                // as the files are sorted in descending order,
-                // so the last file of the collection is the cover file
-                coverFiles.set(file.collectionID, file);
-            } else {
-                coverFiles.set(file.collectionID, file);
-            }
+    for (const file of files) {
+        if (coverFiles.has(ALL_SECTION)) {
+            break;
         }
-        if (!coverFiles.has(ALL_SECTION)) {
-            if (
-                !IsArchived(file) &&
-                file.ownerID === user.id &&
-                !archivedCollections.has(file.collectionID)
-            ) {
-                coverFiles.set(ALL_SECTION, file);
-            }
+        if (
+            !IsArchived(file) &&
+            file.ownerID === user.id &&
+            !archivedCollections.has(file.collectionID)
+        ) {
+            coverFiles.set(ALL_SECTION, file);
         }
-    });
+    }
+
     return coverFiles;
 };
 
