@@ -1,16 +1,12 @@
-// import EmailShare from './emailShare';
 import React from 'react';
 import { Collection, CollectionSummary } from 'types/collection';
 import { EnteDrawer } from 'components/EnteDrawer';
 import PublicShare from './publicShare';
-// import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import { t } from 'i18next';
-// import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import { DialogProps, Stack } from '@mui/material';
 import Titlebar from 'components/Titlebar';
 import ShareControl from './ShareControl';
 import { CollectionSummaryType } from 'constants/collection';
-// import SharingDetailsViewers from './ShareControl/SharingDetailsViewers';
 import { OwnerParticipant } from './ShareControl/OwnerParticipant';
 import { SharingDetailsViewers } from './ShareControl/SharingDetailsViewers';
 import { ShareDetailsCollab } from './ShareControl/SharingDetailsCollab';
@@ -56,16 +52,10 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                         />
                         <Stack py={'20px'} px={'8px'}>
                             <ShareControl
-                                collectionSummaryType={type}
                                 collection={props.collection}
                                 onRootClose={handleRootClose}
                             />
                             <Stack py={'20px'} px={'8px'} spacing={10}></Stack>
-                            {/* <MenuSectionTitle
-                            title={t('ADD_EMAIL_TITLE')}
-                            icon={<WorkspacesIcon />}
-                        />
-                        <EmailShare collection={props.collection} /> */}
                             <PublicShare
                                 collection={props.collection}
                                 onRootClose={handleRootClose}
@@ -91,16 +81,10 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                         />
                         <Stack py={'20px'} px={'8px'}>
                             <ShareControl
-                                collectionSummaryType={type}
                                 collection={props.collection}
                                 onRootClose={handleRootClose}
                             />
                             <Stack py={'20px'} px={'8px'} spacing={10}></Stack>
-                            {/* <MenuSectionTitle
-                            title={t('ADD_EMAIL_TITLE')}
-                            icon={<WorkspacesIcon />}
-                        />
-                        <EmailShare collection={props.collection} /> */}
                             <PublicShare
                                 collection={props.collection}
                                 onRootClose={handleRootClose}

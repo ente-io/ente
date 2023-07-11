@@ -3,8 +3,6 @@ import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { Collection } from 'types/collection';
 import PublicIcon from '@mui/icons-material/Public';
-// import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-
 import AddIcon from '@mui/icons-material/Add';
 import { useState } from 'react';
 import { t } from 'i18next';
