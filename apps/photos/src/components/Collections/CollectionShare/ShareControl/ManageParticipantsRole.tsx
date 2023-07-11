@@ -17,6 +17,7 @@ import { logError } from 'utils/sentry';
 import { shareCollection } from 'services/collectionService';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
+import { Trans } from 'react-i18next';
 
 interface Iprops {
     open: boolean;
@@ -82,18 +83,20 @@ export default function ManageParticipantsRole({
         let buttonText;
 
         if (role === 'VIEWER' && selectedRole === 'COLLABORATOR') {
-            contentText = t(
-                `${selectedEmail} will not be able to add more photos to the album, they will still be able to remove photos added by them`,
-                {
-                    selectedEmail: selectedEmail,
-                }
+            contentText = (
+                <Trans
+                    i18nKey="CHANGE_PERMISSIONS_TO_VIEWER"
+                    values={{
+                        selectedEmail: `${selectedEmail}`,
+                    }}
+                />
             );
+
             buttonText = t('CONVERT_TO_VIEWER');
         } else if (role === 'COLLABORATOR' && selectedRole === 'VIEWER') {
-            contentText = t(
-                `{{selectedEmail}} will be able to add photos to the album`,
-                { selectedEmail: selectedEmail }
-            );
+            contentText = t(`CHANGE_PERMISSIONS_TO_COLLABORATOR`, {
+                selectedEmail: selectedEmail,
+            });
             buttonText = t('CONVERT_TO_COLLABORATOR');
         }
 
@@ -115,10 +118,9 @@ export default function ManageParticipantsRole({
     const removeParticipant = () => {
         appContext.setDialogMessage({
             title: t('REMOVE_PARTICIPANT'),
-            content: t(
-                ` {{selectedEmail}} will be removed removed from the album, Any photos added by them will be removed from the album.`,
-                { selectedEmail: selectedEmail }
-            ),
+            content: t(`REMOVE_PARTICIPANT_MESSAGE`, {
+                selectedEmail: selectedEmail,
+            }),
             close: { text: t('CANCEL') },
             proceed: {
                 text: t('CONFIRM_REMOVE'),

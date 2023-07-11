@@ -361,7 +361,8 @@
     "ADD_VIEWERS":"Add viewers",
     "ADD_VIEWER": "Add viewer",
     "PARTICIPANTS": " Participants",
-    "_CHANGE_PERMISSIONS_TO_VIEWER": " will not be able to add more photos to the album, they will still be able to remove photos added by them",
+    "CHANGE_PERMISSIONS_TO_VIEWER": "{{selectedEmail}} will not be able to add more photos to the album, they will still be able to remove photos added by them",
+    "CHANGE_PERMISSIONS_TO_COLLABORATOR": "{{selectedEmail}} will be able to add photos to the album",
     "CONVERT_TO_VIEWER": "Yes, convert to viewer",
     "CONVERT_TO_COLLABORATOR": "Yes, convert to collaborator",
     "CHANGE_PERMISSION":"Change permission?",
@@ -375,10 +376,7 @@
     "COLLABORATORS": "Collaborators",
     "VIEWERS": "Viewers",
     "OR_ADD_EXISTING": "or an add existing one",
-
-
-
-
+    "REMOVE_PARTICIPANT_MESSAGE": "{{selectedEmail}} will be removed from the album, Any photos added by them will also be removed from the album.",
 
 
     "NOT_FOUND": "404 - not found",
