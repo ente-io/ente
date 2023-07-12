@@ -115,7 +115,9 @@ export default function ManageParticipants({
                         onClose={onClose}
                         title={collection.name}
                         onRootClose={handleRootClose}
-                        caption={`${peopleCount}${t('PARTICIPANTS')} `}
+                        caption={t('participants', {
+                            count: peopleCount,
+                        })}
                     />
                     <Stack py={'20px'} px={'12px'} spacing={'24px'}>
                         <Stack>
