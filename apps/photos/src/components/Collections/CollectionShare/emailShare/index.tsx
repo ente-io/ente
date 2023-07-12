@@ -57,6 +57,7 @@ export default function EmailShare({
                     {collection.sharees.length > 0 ? (
                         <>
                             <EnteMenuItem
+                                fontWeight={'normal'}
                                 startIcon={
                                     <AvatarGroup sharees={collection.sharees} />
                                 }
