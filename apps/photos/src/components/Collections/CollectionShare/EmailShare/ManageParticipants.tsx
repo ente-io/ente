@@ -9,7 +9,7 @@ import Avatar from 'components/pages/gallery/Avatar';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import NumberAvatar from '@mui/material/Avatar';
 import ManageParticipantsOptions from './ManageParticipantsOptions';
-import { Workspaces } from '@mui/icons-material';
+import Workspaces from '@mui/icons-material/Workspaces';
 
 interface Iprops {
     collection: Collection;
