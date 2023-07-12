@@ -6,7 +6,7 @@ import { DialogProps } from '@mui/material';
 import Titlebar from 'components/Titlebar';
 
 import { GalleryContext } from 'pages/gallery';
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useMemo } from 'react';
 import {
     getLocalCollections,
     shareCollection,
@@ -34,39 +34,27 @@ export default function AddParticipant({
     onRootClose,
     type,
 }: Iprops) {
-    const handleRootClose = () => {
-        onClose();
-        onRootClose();
-    };
+    const { user, syncWithRemote } = useContext(GalleryContext);
 
-    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
-        if (reason === 'backdropClick') {
-            handleRootClose();
-        } else {
-            onClose();
-        }
-    };
+    const [emails, setEmails] = useState<string[]>([]);
 
-    const galleryContext = useContext(GalleryContext);
-
-    const [updatedOptionsList, setUpdatedOptionsList] = useState(['']);
-    let updatedList = [];
     useEffect(() => {
-        const getUpdatedOptionsList = async () => {
-            const ownerUser: User = getData(LS_KEYS.USER);
-            const collectionList = getLocalCollections();
+        const main = async () => {
             const familyList = getLocalFamilyData();
-            const result = await collectionList;
-            const emails = result.flatMap((item) => {
-                if (item.owner.email && item.owner.id !== ownerUser.id) {
-                    return [item.owner.email];
-                } else {
-                    const shareeEmails = item.sharees.map(
-                        (sharee) => sharee.email
-                    );
-                    return shareeEmails;
-                }
-            });
+            const collectionList = await getLocalCollections();
+
+            const emails = collectionList
+                .map((item) => {
+                    if (item.owner.email && item.owner.id !== user.id) {
+                        return [item.owner.email];
+                    } else {
+                        const shareeEmails = item.sharees.map(
+                            (sharee) => sharee.email
+                        );
+                        return shareeEmails;
+                    }
+                })
+                .flat();
 
             // adding family members
             if (familyList) {
@@ -74,22 +62,19 @@ export default function AddParticipant({
                 emails.push(...family);
             }
 
-            updatedList = Array.from(new Set(emails));
-
-            const shareeEmailsCollection = collection.sharees.map(
-                (sharees) => sharees.email
-            );
-            const filteredList = updatedList.filter(
-                (email) =>
-                    !shareeEmailsCollection.includes(email) &&
-                    email !== ownerUser.email
-            );
-
-            setUpdatedOptionsList(filteredList);
+            setEmails(Array.from(new Set(emails)));
         };
-
-        getUpdatedOptionsList();
+        main();
     }, []);
+
+    const nonSharedEmails = useMemo(
+        () =>
+            emails.filter(
+                (email) =>
+                    !collection.sharees?.find((value) => value.email === email)
+            ),
+        [emails, collection.sharees]
+    );
 
     const collectionShare: AddParticipantFormProps['callback'] = async (
         emails,
@@ -110,13 +95,26 @@ export default function AddParticipant({
                     break;
                 } else {
                     await shareCollection(collection, email, type);
-                    await galleryContext.syncWithRemote(false, true);
+                    await syncWithRemote(false, true);
                 }
             }
             resetForm();
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             setFieldError(errorMessage);
+        }
+    };
+
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
+    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
+        if (reason === 'backdropClick') {
+            handleRootClose();
+        } else {
+            onClose();
         }
     };
 
@@ -137,7 +135,7 @@ export default function AddParticipant({
                     <AddParticipantForm
                         onClose={onClose}
                         callback={collectionShare}
-                        optionsList={updatedOptionsList}
+                        optionsList={nonSharedEmails}
                         placeholder={t('ENTER_EMAIL')}
                         fieldType="email"
                         buttonText={
