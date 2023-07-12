@@ -6,7 +6,7 @@ import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import Avatar from 'components/pages/gallery/Avatar';
-import ManageAddViewer from './ManageAddViewer';
+import AddViewer from './AddViewer';
 import PhotoIcon from '@mui/icons-material/Photo';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ManageParticipantsRole from './ManageParticipantsRole';
@@ -73,7 +73,9 @@ export function ViewerParticipants({
                                     )}
                                 </>
                             ))}
-                            <ManageAddViewer
+                            <AddViewer
+                                open
+                                onClose={() => {}}
                                 collection={collection}
                                 onRootClose={onRootClose}
                             />

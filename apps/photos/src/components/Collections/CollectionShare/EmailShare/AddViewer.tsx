@@ -1,23 +1,22 @@
 import { Stack } from '@mui/material';
 import { Collection } from 'types/collection';
-
 import { EnteDrawer } from 'components/EnteDrawer';
 import { t } from 'i18next';
 import { DialogProps } from '@mui/material';
 import Titlebar from 'components/Titlebar';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
+
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
-import CollabEmailShare from './CollabEmailShare';
+import ViewerEmailShare from './ViewerEmailShare';
 
 interface Iprops {
     collection: Collection;
-
     open: boolean;
     onClose: () => void;
     onRootClose: () => void;
 }
 
-export default function ManageAddCollabOptions({
+export default function AddViewer({
     open,
     collection,
     onClose,
@@ -37,7 +36,7 @@ export default function ManageAddCollabOptions({
                 <Stack spacing={'4px'} py={'12px'}>
                     <Titlebar
                         onClose={onClose}
-                        title={t('ADD_COLLABORATORS')}
+                        title={t('ADD_VIEWERS')}
                         onRootClose={onRootClose}
                         caption={collection.name}
                     />
@@ -46,7 +45,7 @@ export default function ManageAddCollabOptions({
                             title={t('ADD_NEW_EMAIL')}
                             icon={<WorkspacesIcon />}
                         />
-                        <CollabEmailShare
+                        <ViewerEmailShare
                             collection={collection}
                             onClose={onClose}
                         />

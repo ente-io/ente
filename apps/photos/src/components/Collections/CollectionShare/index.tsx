@@ -48,7 +48,7 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                     onRootClose={handleRootClose}
                     caption={props.collection.name}
                 />
-                <Stack py={'20px'} px={'8px'}>
+                <Stack py={'20px'} px={'8px'} gap={'24px'}>
                     {type === CollectionSummaryType.incomingShareCollaborator ||
                     type === CollectionSummaryType.incomingShareViewer ? (
                         <SharingDetails

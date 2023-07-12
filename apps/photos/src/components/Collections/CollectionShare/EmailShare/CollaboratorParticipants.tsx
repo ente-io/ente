@@ -8,7 +8,7 @@ import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import Avatar from 'components/pages/gallery/Avatar';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import ManageAddCollab from './MangeAddCollab';
+import AddCollab from './AddCollab';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import ManageParticipantsRole from './ManageParticipantsRole';
 
@@ -70,7 +70,9 @@ export function CollaboratorParticipants({
                         )}
                     </>
                 ))}
-                <ManageAddCollab
+                <AddCollab
+                    open
+                    onClose={() => {}}
                     collection={collection}
                     onRootClose={onRootClose}
                 />
