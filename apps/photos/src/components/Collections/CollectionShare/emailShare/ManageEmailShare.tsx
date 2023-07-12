@@ -30,7 +30,7 @@ interface Iprops {
     peopleCount: number;
 }
 
-export default function ManageParticipants({
+export default function ManageEmailShare({
     open,
     collection,
     onClose,
@@ -41,8 +41,7 @@ export default function ManageParticipants({
     const galleryContext = useContext(GalleryContext);
 
     const [addParticipantView, setAddParticipantView] = useState(false);
-    const [participantRoleView, setParticipantRoleView] = useState(false);
-    const [selectedEmail, setSelectedEmail] = useState('');
+    const [modifyParticipantView, setModifyParticipantView] = useState(false);
 
     const closeAddParticipant = () => setAddParticipantView(false);
     const openAddParticipant = () => setAddParticipantView(true);
@@ -50,6 +49,8 @@ export default function ManageParticipants({
     const participantType = useRef<
         COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
     >();
+
+    const selectedParticipant = useRef<string>();
 
     const openAddCollab = () => {
         participantType.current = COLLECTION_ROLE.COLLABORATOR;
@@ -100,11 +101,11 @@ export default function ManageParticipants({
             .map((sharee) => sharee.email) || [];
 
     const openParticipantRoleView = (email) => {
-        setParticipantRoleView(true);
-        setSelectedEmail(email);
+        selectedParticipant.current = email;
+        setModifyParticipantView(true);
     };
     const closeParticipantRoleView = () => {
-        setParticipantRoleView(false);
+        setModifyParticipantView(false);
     };
 
     return (
@@ -206,11 +207,11 @@ export default function ManageParticipants({
             </EnteDrawer>
             <ModifyParticipant
                 collectionUnshare={collectionUnshare}
-                open={participantRoleView}
+                open={modifyParticipantView}
                 collection={collection}
                 onRootClose={onRootClose}
                 onClose={closeParticipantRoleView}
-                selectedEmail={selectedEmail} // Pass the selected email to ManageParticipantsRole
+                selectedEmail={selectedParticipant.current}
             />
             <AddParticipant
                 open={addParticipantView}

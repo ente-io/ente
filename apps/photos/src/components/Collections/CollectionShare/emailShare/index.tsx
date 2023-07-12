@@ -10,7 +10,7 @@ import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import AddIcon from '@mui/icons-material/Add';
 import AddParticipant from './AddParticipant';
-import ManageParticipants from './ManageParticipants';
+import ManageEmailShare from './ManageEmailShare';
 import AvatarGroup from 'components/pages/gallery/AvatarGroup';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 
@@ -22,13 +22,13 @@ export default function EmailShare({
     onRootClose: () => void;
 }) {
     const [addParticipantView, setAddParticipantView] = useState(false);
-    const [manageParticipantView, setManageParticipantView] = useState(false);
+    const [manageEmailShareView, setManageEmailShareView] = useState(false);
 
     const closeAddParticipant = () => setAddParticipantView(false);
     const openAddParticipant = () => setAddParticipantView(true);
 
-    const closeManageParticipant = () => setManageParticipantView(false);
-    const openManageParticipant = () => setManageParticipantView(true);
+    const closeManageEmailShare = () => setManageEmailShareView(false);
+    const openManageEmailShare = () => setManageEmailShareView(true);
 
     const participantType = useRef<
         COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
@@ -61,7 +61,7 @@ export default function EmailShare({
                                 startIcon={
                                     <AvatarGroup sharees={collection.sharees} />
                                 }
-                                onClick={openManageParticipant}
+                                onClick={openManageEmailShare}
                                 label={
                                     collection.sharees.length === 1
                                         ? t(collection.sharees[0]?.email)
@@ -92,10 +92,10 @@ export default function EmailShare({
                 collection={collection}
                 type={participantType.current}
             />
-            <ManageParticipants
+            <ManageEmailShare
                 peopleCount={collection.sharees.length}
-                open={manageParticipantView}
-                onClose={closeManageParticipant}
+                open={manageEmailShareView}
+                onClose={closeManageEmailShare}
                 onRootClose={onRootClose}
                 collection={collection}
             />
