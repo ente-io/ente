@@ -30,42 +30,44 @@ export default function EmailShare({
     const openAddCollab = () => setAddCollabView(true);
 
     return (
-        <Stack>
-            <MenuSectionTitle
-                title={t('SHARE_WITH_PEOPLE')}
-                icon={<Workspaces />}
-            />
-            <MenuItemGroup>
-                {collection.sharees.length > 0 ? (
-                    <ManageParticipants
-                        collection={collection}
-                        onRootClose={onRootClose}
+        <>
+            <Stack>
+                <MenuSectionTitle
+                    title={t('SHARE_WITH_PEOPLE')}
+                    icon={<Workspaces />}
+                />
+                <MenuItemGroup>
+                    {collection.sharees.length > 0 ? (
+                        <ManageParticipants
+                            collection={collection}
+                            onRootClose={onRootClose}
+                        />
+                    ) : null}
+                    <EnteMenuItem
+                        startIcon={<AddIcon />}
+                        onClick={openAddViewer}
+                        label={t('ADD_VIEWERS')}
                     />
-                ) : null}
-                <EnteMenuItem
-                    startIcon={<AddIcon />}
-                    onClick={openAddViewer}
-                    label={t('ADD_VIEWERS')}
-                />
-                <MenuItemDivider hasIcon />
-                <EnteMenuItem
-                    startIcon={<AddIcon />}
-                    onClick={openAddCollab}
-                    label={t('ADD_COLLABORATORS')}
-                />
-            </MenuItemGroup>
+                    <MenuItemDivider hasIcon />
+                    <EnteMenuItem
+                        startIcon={<AddIcon />}
+                        onClick={openAddCollab}
+                        label={t('ADD_COLLABORATORS')}
+                    />
+                </MenuItemGroup>
+            </Stack>
             <AddViewer
                 open={addViewerView}
-                onClose={closeAddCollab}
+                onClose={closeAddViewer}
                 onRootClose={onRootClose}
                 collection={collection}
             />
             <AddCollab
                 open={addCollabView}
-                onClose={closeAddViewer}
+                onClose={closeAddCollab}
                 onRootClose={onRootClose}
                 collection={collection}
             />
-        </Stack>
+        </>
     );
 }
