@@ -17,7 +17,7 @@ interface formValues {
     inputValue: string;
     selectedOptions: string[];
 }
-export interface ViewerEmailShareOptionsProps {
+export interface AddParticipantFormProps {
     callback: (
         emails: string[],
         setFieldError: (errorMessage: string) => void,
@@ -40,7 +40,7 @@ export interface ViewerEmailShareOptionsProps {
     optionsList?: string[];
 }
 
-export default function AddViewerForm(props: ViewerEmailShareOptionsProps) {
+export default function AddParticipantForm(props: AddParticipantFormProps) {
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
     const [updatedOptionsList, setUpdatedOptionsList] = useState<string[]>(

@@ -1,11 +1,10 @@
 import { Stack } from '@mui/material';
-import { Collection } from 'types/collection';
+import { COLLECTION_ROLE, Collection } from 'types/collection';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { t } from 'i18next';
 import { DialogProps } from '@mui/material';
 import Titlebar from 'components/Titlebar';
 
-import AddViewerForm, { ViewerEmailShareOptionsProps } from './AddViewerForm';
 import { GalleryContext } from 'pages/gallery';
 import { useContext, useState, useEffect } from 'react';
 import {
@@ -16,19 +15,24 @@ import { handleSharingErrors } from 'utils/error/ui';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getLocalFamilyData } from 'utils/user/family';
 import { User } from 'types/user';
+import AddParticipantForm, {
+    AddParticipantFormProps,
+} from './AddPartipantForm';
 
 interface Iprops {
     collection: Collection;
     open: boolean;
     onClose: () => void;
     onRootClose: () => void;
+    type: COLLECTION_ROLE.VIEWER | COLLECTION_ROLE.COLLABORATOR;
 }
 
-export default function AddViewer({
+export default function AddParticipant({
     open,
     collection,
     onClose,
     onRootClose,
+    type,
 }: Iprops) {
     const handleRootClose = () => {
         onClose();
@@ -87,7 +91,7 @@ export default function AddViewer({
         getUpdatedOptionsList();
     }, []);
 
-    const collectionShare: ViewerEmailShareOptionsProps['callback'] = async (
+    const collectionShare: AddParticipantFormProps['callback'] = async (
         emails,
         setFieldError,
         resetForm
@@ -105,7 +109,7 @@ export default function AddViewer({
                     setFieldError(t('ALREADY_SHARED', { email }));
                     break;
                 } else {
-                    await shareCollection(collection, email, 'VIEWER');
+                    await shareCollection(collection, email, type);
                     await galleryContext.syncWithRemote(false, true);
                 }
             }
@@ -122,17 +126,25 @@ export default function AddViewer({
                 <Stack spacing={'4px'} py={'12px'}>
                     <Titlebar
                         onClose={onClose}
-                        title={t('ADD_VIEWERS')}
+                        title={
+                            type === COLLECTION_ROLE.VIEWER
+                                ? t('ADD_VIEWERS')
+                                : t('ADD_COLLABORATORS')
+                        }
                         onRootClose={handleRootClose}
                         caption={collection.name}
                     />
-                    <AddViewerForm
+                    <AddParticipantForm
                         onClose={onClose}
                         callback={collectionShare}
                         optionsList={updatedOptionsList}
                         placeholder={t('ENTER_EMAIL')}
                         fieldType="email"
-                        buttonText={t('ADD_VIEWERS')}
+                        buttonText={
+                            type === COLLECTION_ROLE.VIEWER
+                                ? t('ADD_VIEWERS')
+                                : t('ADD_COLLABORATORS')
+                        }
                         submitButtonProps={{
                             size: 'large',
                             sx: { mt: 1, mb: 2 },
