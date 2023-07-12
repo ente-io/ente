@@ -4,7 +4,7 @@ import { t } from 'i18next';
 import { Collection } from 'types/collection';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import AvatarCollectionShare from '../AvatarCollectionShare';
+import Avatar from 'components/pages/gallery/Avatar';
 import { User } from 'types/user';
 import { LS_KEYS, getData } from 'utils/storage/localStorage';
 
@@ -39,7 +39,7 @@ export function OwnerParticipant({ collection }: Iprops) {
                         onClick={() => console.log('clicked', ownerEmail)}
                         label={ownerEmail}
                         startIcon={
-                            <AvatarCollectionShare
+                            <Avatar
                                 email={
                                     user.id === collection.owner?.id
                                         ? user.email

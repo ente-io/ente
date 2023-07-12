@@ -10,7 +10,7 @@ import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import AvatarCollectionShare from '../AvatarCollectionShare';
+import Avatar from 'components/pages/gallery/Avatar';
 import DoneIcon from '@mui/icons-material/Done';
 
 interface formValues {
@@ -172,9 +172,7 @@ export default function ViewerEmailShareOptions(
                                         }
                                     }}
                                     label={item}
-                                    startIcon={
-                                        <AvatarCollectionShare email={item} />
-                                    }
+                                    startIcon={<Avatar email={item} />}
                                     endIcon={
                                         values.selectedOptions.includes(
                                             item

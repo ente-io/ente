@@ -4,7 +4,7 @@ import { t } from 'i18next';
 import { Collection } from 'types/collection';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import AvatarCollectionShare from '../AvatarCollectionShare';
+import Avatar from 'components/pages/gallery/Avatar';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { LS_KEYS, getData } from 'utils/storage/localStorage';
@@ -50,7 +50,7 @@ export function ShareDetailsCollab({ collection }: Iprops) {
                             key={item}
                             onClick={() => console.log('collaborator')}
                             label={user.email === item ? 'You' : item}
-                            startIcon={<AvatarCollectionShare email={item} />}
+                            startIcon={<Avatar email={item} />}
                         />
                         {index !== collaborators.length - 1 && (
                             <MenuItemDivider />

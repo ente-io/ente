@@ -5,8 +5,7 @@ import { Collection } from 'types/collection';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import AvatarCollectionShare from '../AvatarCollectionShare';
-
+import Avatar from 'components/pages/gallery/Avatar';
 import PhotoIcon from '@mui/icons-material/Photo';
 import { LS_KEYS, getData } from 'utils/storage/localStorage';
 import { User } from 'types/user';
@@ -57,11 +56,7 @@ export function SharingDetailsViewers({ collection }: Iprops) {
                                         label={
                                             user.email === item ? 'You' : item
                                         }
-                                        startIcon={
-                                            <AvatarCollectionShare
-                                                email={item}
-                                            />
-                                        }
+                                        startIcon={<Avatar email={item} />}
                                     />
                                     {index !== Viewers.length - 1 && (
                                         <MenuItemDivider />

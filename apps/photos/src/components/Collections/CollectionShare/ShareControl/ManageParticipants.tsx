@@ -5,9 +5,9 @@ import { Collection } from 'types/collection';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useState } from 'react';
 import { t } from 'i18next';
-import AvatarCollectionShare from '../AvatarCollectionShare';
+import Avatar from 'components/pages/gallery/Avatar';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import Avatar from '@mui/material/Avatar';
+import NumberAvatar from '@mui/material/Avatar';
 import ManageParticipantsOptions from './ManageParticipantsOptions';
 import { Workspaces } from '@mui/icons-material';
 
@@ -29,7 +29,7 @@ const AvatarContainerOuter = styled('div')({
     alignItems: 'center',
     marginLeft: 8,
 });
-const AvatarCounter = styled(Avatar)({
+const AvatarCounter = styled(NumberAvatar)({
     height: 20,
     width: 20,
     fontSize: 10,
@@ -62,7 +62,7 @@ export default function ManageParticipants({
                                     ?.slice(0, 6)
                                     .map((sharee) => (
                                         <AvatarContainer key={sharee.email}>
-                                            <AvatarCollectionShare
+                                            <Avatar
                                                 key={sharee.email}
                                                 email={sharee.email}
                                             />

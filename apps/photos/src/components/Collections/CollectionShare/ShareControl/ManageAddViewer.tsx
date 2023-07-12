@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { t } from 'i18next';
 import ManageAddViewerOptions from './ManageAddViewerOptions';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import { Workspaces } from '@mui/icons-material';
+import Workspaces from '@mui/icons-material/Workspaces';
 
 interface Iprops {
     collection: Collection;

@@ -5,7 +5,7 @@ import { Collection } from 'types/collection';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import AvatarCollectionShare from '../AvatarCollectionShare';
+import Avatar from 'components/pages/gallery/Avatar';
 import ManageAddViewer from './ManageAddViewer';
 import PhotoIcon from '@mui/icons-material/Photo';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -65,11 +65,7 @@ export function ViewerParticipants({
                                             openParticipantRoleView(item)
                                         }
                                         label={item}
-                                        startIcon={
-                                            <AvatarCollectionShare
-                                                email={item}
-                                            />
-                                        }
+                                        startIcon={<Avatar email={item} />}
                                         endIcon={<ChevronRightIcon />}
                                     />
                                     {index !== Viewers.length - 1 && (
