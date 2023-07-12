@@ -1,6 +1,6 @@
 import { Stack, Typography } from '@mui/material';
-import React, { useContext, useEffect, useState } from 'react';
-import { Collection } from 'types/collection';
+import React, { useContext } from 'react';
+import { Collection, CollectionUser } from 'types/collection';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { t } from 'i18next';
 import { DialogProps } from '@mui/material';
@@ -24,7 +24,7 @@ interface Iprops {
     collection: Collection;
     onClose: () => void;
     onRootClose: () => void;
-    selectedEmail: string;
+    selectedParticipant: CollectionUser;
     collectionUnshare: (email: string) => Promise<void>;
 }
 
@@ -33,19 +33,10 @@ export default function ManageParticipant({
     open,
     onClose,
     onRootClose,
-    selectedEmail,
+    selectedParticipant,
     collectionUnshare,
 }: Iprops) {
-    const [selectedRole, setSelectedRole] = useState('');
     const galleryContext = useContext(GalleryContext);
-
-    useEffect(() => {
-        setSelectedRole(
-            collection.sharees?.find((sharee) => sharee.email === selectedEmail)
-                ?.role
-        );
-    }, [open]);
-
     const appContext = useContext(AppContext);
 
     const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
@@ -57,20 +48,20 @@ export default function ManageParticipant({
     };
 
     const handleClick = () => {
-        collectionUnshare(selectedEmail);
+        collectionUnshare(selectedParticipant.email);
         onClose();
     };
 
-    const handleRoleChange = (role: string) => {
-        if (role !== selectedRole) {
-            changeRolePermission(selectedEmail, role);
+    const handleRoleChange = (role: string) => () => {
+        if (role !== selectedParticipant.role) {
+            changeRolePermission(selectedParticipant.email, role);
         }
     };
 
-    const updateCollectionRole = async (selectedEmail, role) => {
+    const updateCollectionRole = async (selectedEmail, newRole) => {
         try {
-            await shareCollection(collection, selectedEmail, role);
-
+            await shareCollection(collection, selectedEmail, newRole);
+            selectedParticipant.role = newRole;
             await galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
@@ -78,11 +69,11 @@ export default function ManageParticipant({
         }
     };
 
-    const changeRolePermission = (selectedEmail, role) => {
+    const changeRolePermission = (selectedEmail, newRole) => {
         let contentText;
         let buttonText;
 
-        if (role === 'VIEWER' && selectedRole === 'COLLABORATOR') {
+        if (newRole === 'VIEWER') {
             contentText = (
                 <Trans
                     i18nKey="CHANGE_PERMISSIONS_TO_VIEWER"
@@ -93,7 +84,7 @@ export default function ManageParticipant({
             );
 
             buttonText = t('CONVERT_TO_VIEWER');
-        } else if (role === 'COLLABORATOR' && selectedRole === 'VIEWER') {
+        } else if (newRole === 'COLLABORATOR') {
             contentText = t(`CHANGE_PERMISSIONS_TO_COLLABORATOR`, {
                 selectedEmail: selectedEmail,
             });
@@ -107,8 +98,7 @@ export default function ManageParticipant({
             proceed: {
                 text: buttonText,
                 action: () => {
-                    updateCollectionRole(selectedEmail, role),
-                        setSelectedRole(role);
+                    updateCollectionRole(selectedEmail, newRole);
                 },
                 variant: 'critical',
             },
@@ -122,7 +112,7 @@ export default function ManageParticipant({
                 <Trans
                     i18nKey="REMOVE_PARTICIPANT_MESSAGE"
                     values={{
-                        selectedEmail: `${selectedEmail}`,
+                        selectedEmail: `${selectedParticipant.email}`,
                     }}
                 />
             ),
@@ -137,6 +127,10 @@ export default function ManageParticipant({
         });
     };
 
+    if (!selectedParticipant) {
+        return <></>;
+    }
+
     return (
         <>
             <EnteDrawer anchor="right" open={open} onClose={handleDrawerClose}>
@@ -145,7 +139,7 @@ export default function ManageParticipant({
                         onClose={onClose}
                         title={t('MANAGE')}
                         onRootClose={onRootClose}
-                        caption={selectedEmail}
+                        caption={selectedParticipant.email}
                     />
 
                     <Stack py={'20px'} px={'8px'} spacing={'32px'}>
@@ -160,43 +154,24 @@ export default function ManageParticipant({
                             <MenuItemGroup>
                                 <EnteMenuItem
                                     fontWeight="normal"
-                                    onClick={() =>
-                                        handleRoleChange('COLLABORATOR')
-                                    }
+                                    onClick={handleRoleChange('COLLABORATOR')}
                                     label={'Collaborator'}
-                                    startIcon={
-                                        <ModeEditIcon
-                                            style={{
-                                                fontSize: 20,
-                                                marginRight: 8,
-                                            }}
-                                        />
-                                    }
+                                    startIcon={<ModeEditIcon />}
                                     endIcon={
-                                        selectedRole === 'COLLABORATOR' && (
-                                            <DoneIcon />
-                                        )
+                                        selectedParticipant.role ===
+                                            'COLLABORATOR' && <DoneIcon />
                                     }
                                 />
-                                <MenuItemDivider />
+                                <MenuItemDivider hasIcon />
 
                                 <EnteMenuItem
-                                    //
                                     fontWeight="normal"
-                                    onClick={() => handleRoleChange('VIEWER')}
+                                    onClick={handleRoleChange('VIEWER')}
                                     label={'Viewer'}
-                                    startIcon={
-                                        <PhotoIcon
-                                            style={{
-                                                fontSize: 20,
-                                                marginRight: 8,
-                                            }}
-                                        />
-                                    }
+                                    startIcon={<PhotoIcon />}
                                     endIcon={
-                                        selectedRole === 'VIEWER' && (
-                                            <DoneIcon />
-                                        )
+                                        selectedParticipant.role ===
+                                            'VIEWER' && <DoneIcon />
                                     }
                                 />
                             </MenuItemGroup>
@@ -216,20 +191,15 @@ export default function ManageParticipant({
                                     {t('REMOVE_PARTICIPANT_HEAD')}
                                 </Typography>
 
-                                <EnteMenuItem
-                                    color="error"
-                                    fontWeight="normal"
-                                    onClick={removeParticipant}
-                                    label={'Remove'}
-                                    startIcon={
-                                        <BlockIcon
-                                            style={{
-                                                fontSize: 20,
-                                                marginRight: 8,
-                                            }}
-                                        />
-                                    }
-                                />
+                                <MenuItemGroup>
+                                    <EnteMenuItem
+                                        color="error"
+                                        fontWeight="normal"
+                                        onClick={removeParticipant}
+                                        label={'Remove'}
+                                        startIcon={<BlockIcon />}
+                                    />
+                                </MenuItemGroup>
                             </Stack>
                         </Stack>
                     </Stack>

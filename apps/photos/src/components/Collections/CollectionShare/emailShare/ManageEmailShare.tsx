@@ -1,5 +1,5 @@
 import { Stack } from '@mui/material';
-import { COLLECTION_ROLE, Collection } from 'types/collection';
+import { COLLECTION_ROLE, Collection, CollectionUser } from 'types/collection';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { t } from 'i18next';
 import { DialogProps } from '@mui/material';
@@ -50,7 +50,7 @@ export default function ManageEmailShare({
         COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
     >();
 
-    const selectedParticipant = useRef<string>();
+    const selectedParticipant = useRef<CollectionUser>();
 
     const openAddCollab = () => {
         participantType.current = COLLECTION_ROLE.COLLABORATOR;
@@ -101,7 +101,9 @@ export default function ManageEmailShare({
             .map((sharee) => sharee.email) || [];
 
     const openManageParticipant = (email) => {
-        selectedParticipant.current = email;
+        selectedParticipant.current = collection.sharees.find(
+            (sharee) => sharee.email === email
+        );
         setManageParticipantView(true);
     };
     const closeManageParticipant = () => {
@@ -211,7 +213,7 @@ export default function ManageEmailShare({
                 collection={collection}
                 onRootClose={onRootClose}
                 onClose={closeManageParticipant}
-                selectedEmail={selectedParticipant.current}
+                selectedParticipant={selectedParticipant.current}
             />
             <AddParticipant
                 open={addParticipantView}
