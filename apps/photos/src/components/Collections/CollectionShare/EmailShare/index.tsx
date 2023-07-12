@@ -1,11 +1,11 @@
 import React from 'react';
 import { Collection } from 'types/collection';
 
-import ManageAddViewer from '../ShareControl/ManageAddViewer';
+import ManageAddViewer from './ManageAddViewer';
 import ManageAddCollab from './MangeAddCollab';
 import ManageParticipants from './ManageParticipants';
 
-export default function ShareControl({
+export default function EmailShare({
     collection,
     onRootClose,
 }: {
@@ -24,7 +24,6 @@ export default function ShareControl({
                 collection={collection}
                 onRootClose={onRootClose}
             />
-
             <ManageAddCollab
                 collection={collection}
                 onRootClose={onRootClose}

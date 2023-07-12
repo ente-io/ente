@@ -5,11 +5,11 @@ import PublicShare from './publicShare';
 import { t } from 'i18next';
 import { DialogProps, Stack } from '@mui/material';
 import Titlebar from 'components/Titlebar';
-import ShareControl from './ShareControl';
+import EmailShare from './EmailShare';
 import { CollectionSummaryType } from 'constants/collection';
-import { OwnerParticipant } from './ShareControl/OwnerParticipant';
-import { SharingDetailsViewers } from './ShareControl/SharingDetailsViewers';
-import { ShareDetailsCollab } from './ShareControl/SharingDetailsCollab';
+import { OwnerParticipant } from './EmailShare/OwnerParticipant';
+import { SharingDetailsViewers } from './EmailShare/SharingDetailsViewers';
+import { ShareDetailsCollab } from './EmailShare/SharingDetailsCollab';
 
 interface Props {
     open: boolean;
@@ -52,7 +52,7 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                             caption={props.collection.name}
                         />
                         <Stack py={'20px'} px={'8px'}>
-                            <ShareControl
+                            <EmailShare
                                 collection={props.collection}
                                 onRootClose={handleRootClose}
                             />
@@ -82,7 +82,7 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                             caption={props.collection.name}
                         />
                         <Stack py={'20px'} px={'8px'}>
-                            <ShareControl
+                            <EmailShare
                                 collection={props.collection}
                                 onRootClose={handleRootClose}
                             />
