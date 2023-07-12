@@ -41,17 +41,13 @@ export interface CollabEmailShareOptionsProps {
     onClose?: () => void;
 }
 
-export default function CollabEmailShareOptions(
-    props: CollabEmailShareOptionsProps
-) {
-    console.log('OptionList Intial', props.optionsList);
+export default function AddCollabForm(props: CollabEmailShareOptionsProps) {
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
     const [updatedOptionsList, setUpdatedOptionsList] = useState<string[]>(
         props.optionsList
     );
     const [disableInput, setDisableInput] = useState(false);
-    console.log('updatedOptionsList list:', updatedOptionsList);
 
     const [loading, SetLoading] = useState(false);
 
