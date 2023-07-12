@@ -37,7 +37,7 @@ export default function ManageAddCollabOptions({
                 <Stack spacing={'4px'} py={'12px'}>
                     <Titlebar
                         onClose={onClose}
-                        title={t('ADD_COLLABORATOR')}
+                        title={t('ADD_COLLABORATORS')}
                         onRootClose={onRootClose}
                         caption={collection.name}
                     />

@@ -94,7 +94,7 @@ export default function CollabEmailShare({ collection, onClose }) {
                 optionsList={updatedOptionsList}
                 placeholder={t('ENTER_EMAIL')}
                 fieldType="email"
-                buttonText={t('ADD_COLLABORATOR')}
+                buttonText={t('ADD_COLLABORATORS')}
                 submitButtonProps={{
                     size: 'large',
                     sx: { mt: 1, mb: 2 },

@@ -355,11 +355,10 @@
     "INSTALL": "Install",
     "SHARING_DETAILS": "Sharing details",
     "MODIFY_SHARING": "Modify sharing",
-    "ADD_COLLABORATOR": "Add collaborators",
+    "ADD_COLLABORATORS": "Add collaborators",
     "ADD_NEW_EMAIL": "Add a new email",
     "SHARE_WITH_PEOPLE":"Share with specific people",
     "ADD_VIEWERS":"Add viewers",
-    "ADD_VIEWER": "Add viewer",
     "PARTICIPANTS": " Participants",
     "CHANGE_PERMISSIONS_TO_VIEWER": "<p>{{selectedEmail}} will not be able to add more photos to the album</p> <p>They will still be able to remove photos added by them</p>",
     "CHANGE_PERMISSIONS_TO_COLLABORATOR": "{{selectedEmail}} will be able to add photos to the album",
@@ -377,8 +376,6 @@
     "VIEWERS": "Viewers",
     "OR_ADD_EXISTING": "or an add existing one",
     "REMOVE_PARTICIPANT_MESSAGE": "<p>{{selectedEmail}} will be removed from the album</p> <p>Any photos added by them will also be removed from the album</p>",
-
-
     "NOT_FOUND": "404 - not found",
     "LINK_EXPIRED": "Link expired",
     "LINK_EXPIRED_MESSAGE": "This link has either expired or been disabled!",

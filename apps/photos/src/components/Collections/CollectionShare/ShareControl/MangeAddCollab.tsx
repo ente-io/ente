@@ -23,7 +23,7 @@ export default function ManageAddCollab({ collection, onRootClose }: Iprops) {
                     <EnteMenuItem
                         startIcon={<AddIcon />}
                         onClick={openManageShare}
-                        label={t('ADD_COLLABORATOR')}
+                        label={t('ADD_COLLABORATORS')}
                     />
                 </MenuItemGroup>
             </Stack>
