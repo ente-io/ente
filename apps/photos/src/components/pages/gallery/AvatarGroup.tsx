@@ -33,7 +33,11 @@ const AvatarGroup = ({ sharees }: { sharees: Collection['sharees'] }) => {
         <AvatarContainerOuter>
             {sharees?.slice(0, 6).map((sharee) => (
                 <AvatarContainer key={sharee.email}>
-                    <Avatar key={sharee.email} email={sharee.email} />
+                    <Avatar
+                        key={sharee.email}
+                        email={sharee.email}
+                        opacity={100}
+                    />
                 </AvatarContainer>
             ))}
             {hasShareesOverLimit && (

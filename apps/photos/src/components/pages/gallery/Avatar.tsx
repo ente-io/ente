@@ -8,14 +8,20 @@ import { logError } from 'utils/sentry';
 interface AvatarProps {
     file?: EnteFile;
     email?: string;
+    opacity?: number;
 }
 
 const PUBLIC_COLLECTED_FILES_AVATAR_COLOR_CODE = '#000000';
 
-const AvatarBase = styled('div')<{ colorCode: string; size: number }>`
+const AvatarBase = styled('div')<{
+    colorCode: string;
+    size: number;
+    opacity: number;
+}>`
     width: ${({ size }) => `${size}px`};
     height: ${({ size }) => `${size}px`};
-    background-color: ${({ colorCode }) => `${colorCode}95`};
+    background-color: ${({ colorCode, opacity }) =>
+        `${colorCode}${opacity === 100 ? '' : opacity ?? 95}`};
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -25,7 +31,7 @@ const AvatarBase = styled('div')<{ colorCode: string; size: number }>`
     font-size: ${({ size }) => `${Math.floor(size / 2)}px`};
 `;
 
-const Avatar: React.FC<AvatarProps> = ({ file, email }) => {
+const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
     const { userIDToEmailMap, user } = useContext(GalleryContext);
     const theme = useTheme();
 
@@ -98,7 +104,7 @@ const Avatar: React.FC<AvatarProps> = ({ file, email }) => {
     }
 
     return (
-        <AvatarBase size={18} colorCode={colorCode}>
+        <AvatarBase size={18} colorCode={colorCode} opacity={opacity}>
             {userLetter}
         </AvatarBase>
     );
