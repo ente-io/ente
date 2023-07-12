@@ -51,6 +51,8 @@ class LazyGroupGallery extends StatefulWidget {
 
 class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   static const numberOfGroupsToRenderBeforeAndAfter = 8;
+  late final ValueNotifier<bool> _showSelectAllButton;
+  final _areAllFromGroupSelected = ValueNotifier(false);
 
   late Logger _logger;
 
@@ -58,13 +60,11 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   late StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
   late StreamSubscription<int> _currentIndexSubscription;
   bool? _shouldRender;
-  final ValueNotifier<bool> _toggleSelectAllFromDay = ValueNotifier(false);
-  late final ValueNotifier<bool> _showSelectAllButton;
-  final ValueNotifier<bool> _areAllFromDaySelected = ValueNotifier(false);
 
   @override
   void initState() {
     //this is for removing the 'select all from day' icon on unselecting all files with 'cancel'
+
     super.initState();
     widget.selectedFiles?.addListener(_selectedFilesListener);
     _showSelectAllButton = ValueNotifier(widget.showSelectAllByDefault);
@@ -134,9 +134,6 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
     _reloadEventSubscription?.cancel();
     _currentIndexSubscription.cancel();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
-    _toggleSelectAllFromDay.dispose();
-    _showSelectAllButton.dispose();
-    _areAllFromDaySelected.dispose();
     super.dispose();
   }
 
@@ -177,7 +174,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
                                 width: 48,
                                 height: 44,
                                 child: ValueListenableBuilder(
-                                  valueListenable: _areAllFromDaySelected,
+                                  valueListenable: _areAllFromGroupSelected,
                                   builder: (context, dynamic value, _) {
                                     return value
                                         ? const Icon(
@@ -196,8 +193,8 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
                               onTap: () {
                                 //this value has no significance
                                 //changing only to notify the listeners
-                                _toggleSelectAllFromDay.value =
-                                    !_toggleSelectAllFromDay.value;
+                                // _toggleSelectAllFromDay.value =
+                                //     !_toggleSelectAllFromDay.value;
                               },
                             );
                     },
@@ -211,8 +208,6 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
                 tag: widget.tag,
                 asyncLoader: widget.asyncLoader,
                 selectedFiles: widget.selectedFiles,
-                toggleSelectAllFromDay: _toggleSelectAllFromDay,
-                areAllFromDaySelected: _areAllFromDaySelected,
                 limitSelectionToOne: widget.limitSelectionToOne,
               )
             // todo: perf eval should we have separate PlaceHolder for Groups
@@ -226,6 +221,11 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   }
 
   void _selectedFilesListener() {
+    if (widget.selectedFiles == null) return;
+    _areAllFromGroupSelected.value =
+        widget.selectedFiles!.files.containsAll(widget.files.toSet());
+
+    //Can remove this if we decide to show select all by default for all galleries
     if (widget.selectedFiles!.files.isEmpty && !widget.showSelectAllByDefault) {
       _showSelectAllButton.value = false;
     } else {
