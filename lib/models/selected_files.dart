@@ -25,6 +25,14 @@ class SelectedFiles extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleGroupSelection(Set<File> filesToToggle) {
+    if (files.containsAll(filesToToggle)) {
+      unSelectAll(filesToToggle);
+    } else {
+      selectAll(filesToToggle);
+    }
+  }
+
   void selectAll(Set<File> selectedFiles) {
     files.addAll(selectedFiles);
     lastSelections.clear();

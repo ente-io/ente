@@ -191,10 +191,9 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
                                 ),
                               ),
                               onTap: () {
-                                //this value has no significance
-                                //changing only to notify the listeners
-                                // _toggleSelectAllFromDay.value =
-                                //     !_toggleSelectAllFromDay.value;
+                                widget.selectedFiles?.toggleGroupSelection(
+                                  _files.toSet(),
+                                );
                               },
                             );
                     },
