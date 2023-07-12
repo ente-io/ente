@@ -21,7 +21,9 @@ export function ShareQuickOption({
         <Tooltip
             title={
                 collectionSummaryType ===
-                CollectionSummaryType.incomingShareViewer
+                    CollectionSummaryType.incomingShareViewer ||
+                collectionSummaryType ===
+                    CollectionSummaryType.incomingShareCollaborator
                     ? t('SHARING_DETAILS')
                     : collectionSummaryType ===
                           CollectionSummaryType.outgoingShare ||
