@@ -318,6 +318,10 @@ function PhotoViewer(props: Iprops) {
         photoSwipe.listen('beforeChange', () => {
             if (!photoSwipe?.currItem) return;
             const currItem = photoSwipe.currItem as EnteFile;
+            const videoTags = document.getElementsByTagName('video');
+            for (const videoTag of videoTags) {
+                videoTag.pause();
+            }
             updateFavButton(currItem);
             updateIsOwnFile(currItem);
             if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
