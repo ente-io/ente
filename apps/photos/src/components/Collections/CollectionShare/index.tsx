@@ -44,7 +44,13 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
             <Stack spacing={'4px'} py={'12px'}>
                 <Titlebar
                     onClose={props.onClose}
-                    title={t('SHARE_COLLECTION')}
+                    title={
+                        type ===
+                            CollectionSummaryType.incomingShareCollaborator ||
+                        type === CollectionSummaryType.incomingShareViewer
+                            ? t('SHARING_DETAILS')
+                            : t('SHARE_COLLECTION')
+                    }
                     onRootClose={handleRootClose}
                     caption={props.collection.name}
                 />

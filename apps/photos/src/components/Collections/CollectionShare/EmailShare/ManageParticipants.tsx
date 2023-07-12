@@ -1,100 +1,222 @@
-import { Stack, Typography, styled } from '@mui/material';
+import { Stack } from '@mui/material';
+import { COLLECTION_ROLE, Collection } from 'types/collection';
+import { EnteDrawer } from 'components/EnteDrawer';
+import { t } from 'i18next';
+import { DialogProps } from '@mui/material';
+import Titlebar from 'components/Titlebar';
+import { useContext, useState } from 'react';
+import { AppContext } from 'pages/_app';
+import { GalleryContext } from 'pages/gallery';
+import { unshareCollection } from 'services/collectionService';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
-import { Collection } from 'types/collection';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { useState } from 'react';
-import { t } from 'i18next';
 import Avatar from 'components/pages/gallery/Avatar';
+import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import NumberAvatar from '@mui/material/Avatar';
-import ManageParticipantsOptions from './ManageParticipantsOptions';
-import Workspaces from '@mui/icons-material/Workspaces';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ModifyParticipant from './ModifyParticipant';
+import AddParticipant from './AddParticipant';
+import { useRef } from 'react';
+import Add from '@mui/icons-material/Add';
 
 interface Iprops {
     collection: Collection;
+    open: boolean;
+    onClose: () => void;
     onRootClose: () => void;
+    peopleCount: number;
 }
 
-const AvatarContainer = styled('div')({
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    marginLeft: -5,
-});
-
-const AvatarContainerOuter = styled('div')({
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    marginLeft: 8,
-});
-const AvatarCounter = styled(NumberAvatar)({
-    height: 20,
-    width: 20,
-    fontSize: 10,
-    color: '#fff',
-});
-
 export default function ManageParticipants({
+    open,
     collection,
+    onClose,
     onRootClose,
+    peopleCount,
 }: Iprops) {
-    const [manageAddViewer, setManageAddViewer] = useState(false);
-    const closeManageAddViewer = () => setManageAddViewer(false);
-    const openManageAddViewer = () => setManageAddViewer(true);
-    const peopleCount = collection.sharees.length;
+    const appContext = useContext(AppContext);
+    const galleryContext = useContext(GalleryContext);
 
-    const shareeCount = collection.sharees?.length || 0;
-    const extraShareeCount = Math.max(0, shareeCount - 6);
+    const [addParticipantView, setAddParticipantView] = useState(false);
+    const [participantRoleView, setParticipantRoleView] = useState(false);
+    const [selectedEmail, setSelectedEmail] = useState('');
+
+    const closeAddParticipant = () => setAddParticipantView(false);
+    const openAddParticipant = () => setAddParticipantView(true);
+
+    const participantType = useRef<
+        COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
+    >();
+
+    const openAddCollab = () => {
+        participantType.current = COLLECTION_ROLE.COLLABORATOR;
+        openAddParticipant();
+    };
+
+    const openAddViewer = () => {
+        participantType.current = COLLECTION_ROLE.VIEWER;
+        openAddParticipant();
+    };
+
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
+        if (reason === 'backdropClick') {
+            handleRootClose();
+        } else {
+            onClose();
+        }
+    };
+
+    const collectionUnshare = async (email: string) => {
+        try {
+            appContext.startLoading();
+            await unshareCollection(collection, email);
+            await galleryContext.syncWithRemote(false, true);
+        } finally {
+            appContext.finishLoading();
+        }
+    };
+
+    const ownerEmail =
+        galleryContext.user.id === collection.owner?.id
+            ? galleryContext.user.email
+            : collection.owner?.email;
+
+    const isOwner = galleryContext.user.id === collection.owner?.id;
+
+    const collaborators = collection.sharees
+        ?.filter((sharee) => sharee.role === COLLECTION_ROLE.COLLABORATOR)
+        .map((sharee) => sharee.email);
+
+    const viewers =
+        collection.sharees
+            ?.filter((sharee) => sharee.role === COLLECTION_ROLE.VIEWER)
+            .map((sharee) => sharee.email) || [];
+
+    const openParticipantRoleView = (email) => {
+        setParticipantRoleView(true);
+        setSelectedEmail(email);
+    };
+    const closeParticipantRoleView = () => {
+        setParticipantRoleView(false);
+    };
+
     return (
         <>
-            <Stack>
-                <Typography color="text.muted" variant="small" padding={1}>
-                    <Workspaces style={{ fontSize: 17, marginRight: 8 }} />
-                    {t(`Shared with ${peopleCount}  people`)}
-                </Typography>
-                <MenuItemGroup>
-                    <EnteMenuItem
-                        startIcon={
-                            <AvatarContainerOuter>
-                                {collection.sharees
-                                    ?.slice(0, 6)
-                                    .map((sharee) => (
-                                        <AvatarContainer key={sharee.email}>
-                                            <Avatar
-                                                key={sharee.email}
-                                                email={sharee.email}
-                                            />
-                                        </AvatarContainer>
-                                    ))}
-                                {extraShareeCount > 0 && (
-                                    <AvatarContainer key="extra-count">
-                                        <AvatarCounter>
-                                            +{extraShareeCount}
-                                        </AvatarCounter>
-                                    </AvatarContainer>
-                                )}
-                            </AvatarContainerOuter>
-                        }
-                        onClick={openManageAddViewer}
-                        label={
-                            collection.sharees.length === 1
-                                ? t(collection.sharees[0]?.email)
-                                : null
-                        }
-                        endIcon={<ChevronRightIcon />}
+            <EnteDrawer anchor="right" open={open} onClose={handleDrawerClose}>
+                <Stack spacing={'4px'} py={'12px'}>
+                    <Titlebar
+                        onClose={onClose}
+                        title={collection.name}
+                        onRootClose={handleRootClose}
+                        caption={`${peopleCount}${t('PARTICIPANTS')} `}
                     />
-                    <MenuItemDivider hasIcon={true} />
-                </MenuItemGroup>
-            </Stack>
+                    <Stack py={'20px'} px={'12px'} spacing={'24px'}>
+                        <Stack>
+                            <MenuSectionTitle
+                                title={t('OWNER')}
+                                icon={<AdminPanelSettingsIcon />}
+                            />
+                            <MenuItemGroup>
+                                <EnteMenuItem
+                                    fontWeight="normal"
+                                    onClick={() => {}}
+                                    label={isOwner ? t('YOU') : ownerEmail}
+                                    startIcon={<Avatar email={ownerEmail} />}
+                                />
+                            </MenuItemGroup>
+                        </Stack>
+                        <Stack>
+                            <MenuSectionTitle
+                                title={t('COLLABORATORS')}
+                                icon={<ModeEditIcon />}
+                            />
+                            <MenuItemGroup>
+                                {collaborators.map((item, index) => (
+                                    <>
+                                        <EnteMenuItem
+                                            key={item}
+                                            onClick={() =>
+                                                openParticipantRoleView(item)
+                                            }
+                                            label={item}
+                                            startIcon={<Avatar email={item} />}
+                                            endIcon={<ChevronRightIcon />}
+                                        />
+                                        {index !== collaborators.length - 1 && (
+                                            <MenuItemDivider />
+                                        )}
+                                    </>
+                                ))}
 
-            <ManageParticipantsOptions
-                peopleCount={peopleCount}
-                open={manageAddViewer}
-                onClose={closeManageAddViewer}
+                                <EnteMenuItem
+                                    startIcon={<Add />}
+                                    fontWeight={'bold'}
+                                    onClick={openAddCollab}
+                                    label={
+                                        collaborators?.length
+                                            ? t('ADD_MORE')
+                                            : t('ADD_COLLABORATORS')
+                                    }
+                                />
+                            </MenuItemGroup>
+                        </Stack>
+                        <Stack>
+                            <MenuSectionTitle
+                                title={t('VIEWERS')}
+                                icon={<ModeEditIcon />}
+                            />
+                            <MenuItemGroup>
+                                {viewers.map((item, index) => (
+                                    <>
+                                        <EnteMenuItem
+                                            key={item}
+                                            onClick={() =>
+                                                openParticipantRoleView(item)
+                                            }
+                                            label={item}
+                                            startIcon={<Avatar email={item} />}
+                                            endIcon={<ChevronRightIcon />}
+                                        />
+                                        {index !== collaborators.length - 1 && (
+                                            <MenuItemDivider />
+                                        )}
+                                    </>
+                                ))}
+                                <EnteMenuItem
+                                    startIcon={<Add />}
+                                    fontWeight={'bold'}
+                                    onClick={openAddViewer}
+                                    label={
+                                        viewers?.length
+                                            ? t('ADD_MORE')
+                                            : t('ADD_VIEWERS')
+                                    }
+                                />
+                            </MenuItemGroup>
+                        </Stack>
+                    </Stack>
+                </Stack>
+            </EnteDrawer>
+            <ModifyParticipant
+                collectionUnshare={collectionUnshare}
+                open={participantRoleView}
+                collection={collection}
+                onRootClose={onRootClose}
+                onClose={closeParticipantRoleView}
+                selectedEmail={selectedEmail} // Pass the selected email to ManageParticipantsRole
+            />
+            <AddParticipant
+                open={addParticipantView}
+                onClose={closeAddParticipant}
                 onRootClose={onRootClose}
                 collection={collection}
+                type={participantType.current}
             />
         </>
     );

@@ -141,56 +141,64 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
                                 autoComplete={props.autoComplete}
                             />
                         </Stack>
-                        <Stack>
-                            <MenuSectionTitle title={t('OR_ADD_EXISTING')} />
-                            <MenuItemGroup>
-                                {updatedOptionsList.map((item, index) => (
-                                    <>
-                                        <EnteMenuItem
-                                            fontWeight="normal"
-                                            key={item}
-                                            onClick={() => {
-                                                if (
+
+                        {updatedOptionsList.length > 0 && (
+                            <Stack>
+                                <MenuSectionTitle
+                                    title={t('OR_ADD_EXISTING')}
+                                />
+                                <MenuItemGroup>
+                                    {updatedOptionsList.map((item, index) => (
+                                        <>
+                                            <EnteMenuItem
+                                                fontWeight="normal"
+                                                key={item}
+                                                onClick={() => {
+                                                    if (
+                                                        values.selectedOptions.includes(
+                                                            item
+                                                        )
+                                                    ) {
+                                                        setFieldValue(
+                                                            'selectedOptions',
+                                                            values.selectedOptions.filter(
+                                                                (
+                                                                    selectedOption
+                                                                ) =>
+                                                                    selectedOption !==
+                                                                    item
+                                                            )
+                                                        );
+                                                    } else {
+                                                        setFieldValue(
+                                                            'selectedOptions',
+                                                            [
+                                                                ...values.selectedOptions,
+                                                                item,
+                                                            ]
+                                                        );
+                                                    }
+                                                }}
+                                                label={item}
+                                                startIcon={
+                                                    <Avatar email={item} />
+                                                }
+                                                endIcon={
                                                     values.selectedOptions.includes(
                                                         item
-                                                    )
-                                                ) {
-                                                    setFieldValue(
-                                                        'selectedOptions',
-                                                        values.selectedOptions.filter(
-                                                            (selectedOption) =>
-                                                                selectedOption !==
-                                                                item
-                                                        )
-                                                    );
-                                                } else {
-                                                    setFieldValue(
-                                                        'selectedOptions',
-                                                        [
-                                                            ...values.selectedOptions,
-                                                            item,
-                                                        ]
-                                                    );
+                                                    ) ? (
+                                                        <DoneIcon />
+                                                    ) : null
                                                 }
-                                            }}
-                                            label={item}
-                                            startIcon={<Avatar email={item} />}
-                                            endIcon={
-                                                values.selectedOptions.includes(
-                                                    item
-                                                ) ? (
-                                                    <DoneIcon />
-                                                ) : null
-                                            }
-                                        />
-                                        {index !==
-                                            props.optionsList.length - 1 && (
-                                            <MenuItemDivider />
-                                        )}
-                                    </>
-                                ))}
-                            </MenuItemGroup>
-                        </Stack>
+                                            />
+                                            {index !==
+                                                props.optionsList.length -
+                                                    1 && <MenuItemDivider />}
+                                        </>
+                                    ))}
+                                </MenuItemGroup>
+                            </Stack>
+                        )}
 
                         <FormHelperText
                             sx={{

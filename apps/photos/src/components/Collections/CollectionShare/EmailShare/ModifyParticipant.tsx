@@ -28,7 +28,7 @@ interface Iprops {
     collectionUnshare: (email: string) => Promise<void>;
 }
 
-export default function ManageParticipantsRole({
+export default function ModifyParticipant({
     collection,
     open,
     onClose,

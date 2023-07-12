@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Collection } from 'types/collection';
+import React, { useRef, useState } from 'react';
+import { COLLECTION_ROLE, Collection } from 'types/collection';
 
-import ManageParticipants from './ManageParticipants';
 import { Stack } from '@mui/material';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import { t } from 'i18next';
@@ -10,8 +9,10 @@ import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import AddIcon from '@mui/icons-material/Add';
-import AddViewer from './AddViewer';
-import AddCollab from './AddCollab';
+import AddParticipant from './AddParticipant';
+import ManageParticipants from './ManageParticipants';
+import AvatarGroup from 'components/pages/gallery/AvatarGroup';
+import ChevronRight from '@mui/icons-material/ChevronRight';
 
 export default function EmailShare({
     collection,
@@ -20,28 +21,55 @@ export default function EmailShare({
     collection: Collection;
     onRootClose: () => void;
 }) {
-    const [addViewerView, setAddViewerView] = useState(false);
-    const [addCollabView, setAddCollabView] = useState(false);
+    const [addParticipantView, setAddParticipantView] = useState(false);
+    const [manageParticipantView, setManageParticipantView] = useState(false);
 
-    const closeAddViewer = () => setAddViewerView(false);
-    const openAddViewer = () => setAddViewerView(true);
+    const closeAddParticipant = () => setAddParticipantView(false);
+    const openAddParticipant = () => setAddParticipantView(true);
 
-    const closeAddCollab = () => setAddCollabView(false);
-    const openAddCollab = () => setAddCollabView(true);
+    const closeManageParticipant = () => setManageParticipantView(false);
+    const openManageParticipant = () => setManageParticipantView(true);
+
+    const participantType = useRef<
+        COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
+    >();
+
+    const openAddCollab = () => {
+        participantType.current = COLLECTION_ROLE.COLLABORATOR;
+        openAddParticipant();
+    };
+
+    const openAddViewer = () => {
+        participantType.current = COLLECTION_ROLE.VIEWER;
+        openAddParticipant();
+    };
 
     return (
         <>
             <Stack>
                 <MenuSectionTitle
-                    title={t('SHARE_WITH_PEOPLE')}
+                    title={t('shared_with_people', {
+                        count: collection.sharees?.length ?? 0,
+                    })}
                     icon={<Workspaces />}
                 />
                 <MenuItemGroup>
                     {collection.sharees.length > 0 ? (
-                        <ManageParticipants
-                            collection={collection}
-                            onRootClose={onRootClose}
-                        />
+                        <>
+                            <EnteMenuItem
+                                startIcon={
+                                    <AvatarGroup sharees={collection.sharees} />
+                                }
+                                onClick={openManageParticipant}
+                                label={
+                                    collection.sharees.length === 1
+                                        ? t(collection.sharees[0]?.email)
+                                        : null
+                                }
+                                endIcon={<ChevronRight />}
+                            />
+                            <MenuItemDivider hasIcon />
+                        </>
                     ) : null}
                     <EnteMenuItem
                         startIcon={<AddIcon />}
@@ -56,15 +84,17 @@ export default function EmailShare({
                     />
                 </MenuItemGroup>
             </Stack>
-            <AddViewer
-                open={addViewerView}
-                onClose={closeAddViewer}
+            <AddParticipant
+                open={addParticipantView}
+                onClose={closeAddParticipant}
                 onRootClose={onRootClose}
                 collection={collection}
+                type={participantType.current}
             />
-            <AddCollab
-                open={addCollabView}
-                onClose={closeAddCollab}
+            <ManageParticipants
+                peopleCount={collection.sharees.length}
+                open={manageParticipantView}
+                onClose={closeManageParticipant}
                 onRootClose={onRootClose}
                 collection={collection}
             />

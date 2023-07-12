@@ -34,6 +34,9 @@ const Avatar: React.FC<AvatarProps> = ({ file, email }) => {
 
     useLayoutEffect(() => {
         try {
+            if (!file) {
+                return;
+            }
             if (file.ownerID !== user.id) {
                 // getting email from in-memory id-email map
                 const email = userIDToEmailMap.get(file.ownerID);
@@ -66,21 +69,21 @@ const Avatar: React.FC<AvatarProps> = ({ file, email }) => {
     useLayoutEffect(() => {
         try {
             if (!email) {
-                logError(Error(), 'email not found in userIDToEmailMap');
                 return;
             }
-            const id = Array.from(userIDToEmailMap.keys()).find(
-                (key) => userIDToEmailMap.get(key) === email
-            );
-            if (!id && user.email !== email) {
-                logError(Error(), `ID not found for email: ${email}`);
-                return;
-            } else if (!id && user.email === email) {
+            if (user.email === email) {
                 setUserLetter(email[0].toUpperCase());
                 setColorCode(PUBLIC_COLLECTED_FILES_AVATAR_COLOR_CODE);
                 return;
             }
 
+            const id = Array.from(userIDToEmailMap.keys()).find(
+                (key) => userIDToEmailMap.get(key) === email
+            );
+            if (!id) {
+                logError(Error(), `ID not found for email: ${email}`);
+                return;
+            }
             const colorIndex = id % theme.colors.avatarColors.length;
             const colorCode = theme.colors.avatarColors[colorIndex];
             setUserLetter(email[0].toUpperCase());
