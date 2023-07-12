@@ -16,7 +16,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ModifyParticipant from './ModifyParticipant';
+import ManageParticipant from './ManageParticipant';
 import AddParticipant from './AddParticipant';
 import { useRef } from 'react';
 import Add from '@mui/icons-material/Add';
@@ -41,7 +41,7 @@ export default function ManageEmailShare({
     const galleryContext = useContext(GalleryContext);
 
     const [addParticipantView, setAddParticipantView] = useState(false);
-    const [modifyParticipantView, setModifyParticipantView] = useState(false);
+    const [manageParticipantView, setManageParticipantView] = useState(false);
 
     const closeAddParticipant = () => setAddParticipantView(false);
     const openAddParticipant = () => setAddParticipantView(true);
@@ -100,12 +100,12 @@ export default function ManageEmailShare({
             ?.filter((sharee) => sharee.role === COLLECTION_ROLE.VIEWER)
             .map((sharee) => sharee.email) || [];
 
-    const openParticipantRoleView = (email) => {
+    const openManageParticipant = (email) => {
         selectedParticipant.current = email;
-        setModifyParticipantView(true);
+        setManageParticipantView(true);
     };
-    const closeParticipantRoleView = () => {
-        setModifyParticipantView(false);
+    const closeManageParticipant = () => {
+        setManageParticipantView(false);
     };
 
     return (
@@ -147,7 +147,7 @@ export default function ManageEmailShare({
                                             fontWeight={'normal'}
                                             key={item}
                                             onClick={() =>
-                                                openParticipantRoleView(item)
+                                                openManageParticipant(item)
                                             }
                                             label={item}
                                             startIcon={<Avatar email={item} />}
@@ -180,7 +180,7 @@ export default function ManageEmailShare({
                                             fontWeight={'normal'}
                                             key={item}
                                             onClick={() =>
-                                                openParticipantRoleView(item)
+                                                openManageParticipant(item)
                                             }
                                             label={item}
                                             startIcon={<Avatar email={item} />}
@@ -205,12 +205,12 @@ export default function ManageEmailShare({
                     </Stack>
                 </Stack>
             </EnteDrawer>
-            <ModifyParticipant
+            <ManageParticipant
                 collectionUnshare={collectionUnshare}
-                open={modifyParticipantView}
+                open={manageParticipantView}
                 collection={collection}
                 onRootClose={onRootClose}
-                onClose={closeParticipantRoleView}
+                onClose={closeManageParticipant}
                 selectedEmail={selectedParticipant.current}
             />
             <AddParticipant
