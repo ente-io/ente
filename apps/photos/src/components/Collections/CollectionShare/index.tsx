@@ -6,7 +6,7 @@ import { DialogProps, Stack } from '@mui/material';
 import Titlebar from 'components/Titlebar';
 import EmailShare from './emailShare';
 import { CollectionSummaryType } from 'constants/collection';
-import SharingDetails from './SharingDetails';
+import SharingDetails from './sharingDetails';
 
 interface Props {
     open: boolean;
