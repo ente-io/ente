@@ -20,6 +20,7 @@ import ModifyParticipant from './ModifyParticipant';
 import AddParticipant from './AddParticipant';
 import { useRef } from 'react';
 import Add from '@mui/icons-material/Add';
+import Photo from '@mui/icons-material/Photo';
 
 interface Iprops {
     collection: Collection;
@@ -137,9 +138,10 @@ export default function ManageParticipants({
                                 icon={<ModeEditIcon />}
                             />
                             <MenuItemGroup>
-                                {collaborators.map((item, index) => (
+                                {collaborators.map((item) => (
                                     <>
                                         <EnteMenuItem
+                                            fontWeight={'normal'}
                                             key={item}
                                             onClick={() =>
                                                 openParticipantRoleView(item)
@@ -148,15 +150,12 @@ export default function ManageParticipants({
                                             startIcon={<Avatar email={item} />}
                                             endIcon={<ChevronRightIcon />}
                                         />
-                                        {index !== collaborators.length - 1 && (
-                                            <MenuItemDivider />
-                                        )}
+                                        <MenuItemDivider hasIcon />
                                     </>
                                 ))}
 
                                 <EnteMenuItem
                                     startIcon={<Add />}
-                                    fontWeight={'bold'}
                                     onClick={openAddCollab}
                                     label={
                                         collaborators?.length
@@ -169,12 +168,13 @@ export default function ManageParticipants({
                         <Stack>
                             <MenuSectionTitle
                                 title={t('VIEWERS')}
-                                icon={<ModeEditIcon />}
+                                icon={<Photo />}
                             />
                             <MenuItemGroup>
-                                {viewers.map((item, index) => (
+                                {viewers.map((item) => (
                                     <>
                                         <EnteMenuItem
+                                            fontWeight={'normal'}
                                             key={item}
                                             onClick={() =>
                                                 openParticipantRoleView(item)
@@ -183,9 +183,8 @@ export default function ManageParticipants({
                                             startIcon={<Avatar email={item} />}
                                             endIcon={<ChevronRightIcon />}
                                         />
-                                        {index !== collaborators.length - 1 && (
-                                            <MenuItemDivider />
-                                        )}
+
+                                        <MenuItemDivider hasIcon />
                                     </>
                                 ))}
                                 <EnteMenuItem

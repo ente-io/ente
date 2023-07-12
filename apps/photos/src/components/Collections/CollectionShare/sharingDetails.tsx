@@ -11,15 +11,15 @@ import { useContext } from 'react';
 import Avatar from 'components/pages/gallery/Avatar';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { CollectionSummaryType } from 'constants/collection';
+import Photo from '@mui/icons-material/Photo';
 
 export default function SharingDetails({ collection, type }) {
     const galleryContext = useContext(GalleryContext);
 
     const ownerEmail =
         galleryContext.user.id === collection.owner?.id
-            ? galleryContext.user.email
+            ? galleryContext.user?.email
             : collection.owner?.email;
-    const isOwner = galleryContext.user.id === collection.owner?.id;
 
     const collaborators = collection.sharees
         ?.filter((sharee) => sharee.role === COLLECTION_ROLE.COLLABORATOR)
@@ -29,6 +29,10 @@ export default function SharingDetails({ collection, type }) {
         collection.sharees
             ?.filter((sharee) => sharee.role === COLLECTION_ROLE.VIEWER)
             .map((sharee) => sharee.email) || [];
+
+    const isOwner = galleryContext.user?.id === collection.owner?.id;
+
+    const isMe = (email: string) => email === galleryContext.user?.email;
 
     return (
         <>
@@ -47,7 +51,7 @@ export default function SharingDetails({ collection, type }) {
                 </MenuItemGroup>
             </Stack>
             {type === CollectionSummaryType.incomingShareCollaborator &&
-                viewers?.length > 0 && (
+                collaborators?.length > 0 && (
                     <Stack>
                         <MenuSectionTitle
                             title={t('COLLABORATORS')}
@@ -57,9 +61,10 @@ export default function SharingDetails({ collection, type }) {
                             {collaborators.map((item, index) => (
                                 <>
                                     <EnteMenuItem
+                                        fontWeight="normal"
                                         key={item}
                                         onClick={() => {}}
-                                        label={item}
+                                        label={isMe(item) ? t('YOU') : item}
                                         startIcon={<Avatar email={item} />}
                                     />
                                     {index !== collaborators.length - 1 && (
@@ -72,17 +77,15 @@ export default function SharingDetails({ collection, type }) {
                 )}
             {viewers?.length > 0 && (
                 <Stack>
-                    <MenuSectionTitle
-                        title={t('VIEWERS')}
-                        icon={<ModeEditIcon />}
-                    />
+                    <MenuSectionTitle title={t('VIEWERS')} icon={<Photo />} />
                     <MenuItemGroup>
                         {viewers.map((item, index) => (
                             <>
                                 <EnteMenuItem
+                                    fontWeight="normal"
                                     key={item}
                                     onClick={() => {}}
-                                    label={item}
+                                    label={isMe(item) ? t('YOU') : item}
                                     startIcon={<Avatar email={item} />}
                                 />
                                 {index !== viewers.length - 1 && (
