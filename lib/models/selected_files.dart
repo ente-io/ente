@@ -9,24 +9,24 @@ class SelectedFiles extends ChangeNotifier {
 
   ///This variable is used to track the files that were involved in last selection
   ///operation (select/unselect). Each [LazyGridView] checks this variable on
-  ///change in selectedFiles to see if any of it's files were involved in last
+  ///change in [SelectedFiles] to see if any of it's files were involved in last
   ///select/unselect operation. If yes, then it will rebuild itself.
   final lastSelectionOperationFiles = <File>{};
 
-  void toggleSelection(File file) {
+  void toggleSelection(File fileToToggle) {
     // To handle the cases, where the file might have changed due to upload
     // or any other update, using file.generatedID to track if this file was already
     // selected or not
     final File? alreadySelected = files.firstWhereOrNull(
-      (element) => _isMatch(file, element),
+      (element) => _isMatch(fileToToggle, element),
     );
     if (alreadySelected != null) {
       files.remove(alreadySelected);
     } else {
-      files.add(file);
+      files.add(fileToToggle);
     }
     lastSelectionOperationFiles.clear();
-    lastSelectionOperationFiles.add(file);
+    lastSelectionOperationFiles.add(fileToToggle);
     notifyListeners();
   }
 
@@ -38,10 +38,10 @@ class SelectedFiles extends ChangeNotifier {
     }
   }
 
-  void selectAll(Set<File> selectedFiles) {
-    files.addAll(selectedFiles);
+  void selectAll(Set<File> filesToSelect) {
+    files.addAll(filesToSelect);
     lastSelectionOperationFiles.clear();
-    lastSelectionOperationFiles.addAll(selectedFiles);
+    lastSelectionOperationFiles.addAll(filesToSelect);
     notifyListeners();
   }
 
@@ -86,10 +86,10 @@ class SelectedFiles extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Retains only the files that are present in the [images] set. Takes the
-  /// intersection of the two sets.
-  void filesToRetain(Set<File> images) {
-    files.retainAll(images);
+  ///Retains only the files that are present in the [filesToRetain] set in
+  ///[files]. Takes the intersection of the two sets.
+  void retainFiles(Set<File> filesToRetain) {
+    files.retainAll(filesToRetain);
     notifyListeners();
   }
 }
