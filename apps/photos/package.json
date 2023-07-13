@@ -47,7 +47,6 @@
         "get-user-locale": "^2.1.3",
         "hdbscan": "0.0.1-alpha.5",
         "heic-convert": "^1.2.4",
-        "http-proxy-middleware": "^1.0.5",
         "i18next": "^22.4.11",
         "i18next-http-backend": "^2.1.1",
         "idb": "^7.0.0",
