@@ -108,9 +108,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                           _secretController.text.trim().isEmpty) {
                         String message;
                         if (_secretController.text.trim().isEmpty) {
-                          message = "Secret can not be empty";
+                          message = context.l10n.secretCanNotBeEmpty;
                         } else {
-                          message = "Both account and issuer can not be empty";
+                          message = context.l10n.bothIssuerAndAccountCanNotBeEmpty;
                         }
                         _showIncorrectDetailsDialog(context, message: message);
                         return;
@@ -157,12 +157,12 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
 
   void _showIncorrectDetailsDialog(
     BuildContext context, {
-    String message = "Please verify the entered details",
+    String? message,
   }) {
     showErrorDialog(
       context,
-      "Incorrect details",
-      message,
+      context.l10n.incorrectDetails,
+      message ?? context.l10n.pleaseVerifyDetails,
     );
   }
 }
