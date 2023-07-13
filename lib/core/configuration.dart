@@ -58,7 +58,6 @@ class Configuration {
   static const keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
-  static const nameKey = "name";
   static const secretKeyKey = "secret_key";
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
@@ -408,14 +407,6 @@ class Configuration {
 
   Future<void> setEmail(String email) async {
     await _preferences.setString(emailKey, email);
-  }
-
-  String? getName() {
-    return _preferences.getString(nameKey);
-  }
-
-  Future<void> setName(String name) async {
-    await _preferences.setString(nameKey, name);
   }
 
   int? getUserID() {

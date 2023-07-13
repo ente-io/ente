@@ -409,11 +409,9 @@ class UserService {
 
   Future<void> setAttributes(KeyGenResult result) async {
     try {
-      final name = _config.getName();
       await _enteDio.put(
         "/users/attributes",
         data: {
-          "name": name,
           "keyAttributes": result.keyAttributes.toMap(),
         },
       );
