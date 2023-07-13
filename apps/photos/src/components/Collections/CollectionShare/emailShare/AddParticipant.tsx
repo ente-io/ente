@@ -71,7 +71,11 @@ export default function AddParticipant({
         () =>
             emails.filter(
                 (email) =>
-                    !collection.sharees?.find((value) => value.email === email)
+                    !(
+                        collection.sharees?.find(
+                            (value) => value.email === email
+                        ) || email === user.email
+                    )
             ),
         [emails, collection.sharees]
     );
