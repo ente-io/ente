@@ -40,9 +40,10 @@ class SelectedFiles extends ChangeNotifier {
     notifyListeners();
   }
 
-  void unSelectAll(Set<File> selectedFiles, {bool skipNotify = false}) {
-    files.removeWhere((file) => selectedFiles.contains(file));
+  void unSelectAll(Set<File> filesToUnselect, {bool skipNotify = false}) {
+    files.removeWhere((file) => filesToUnselect.contains(file));
     lastSelections.clear();
+    lastSelections.addAll(filesToUnselect);
     if (!skipNotify) {
       notifyListeners();
     }
