@@ -69,6 +69,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
       _areAllFromGroupSelected.value =
           widget.selectedFiles!.files.containsAll(widget.files);
     }
+
     widget.selectedFiles?.addListener(_selectedFilesListener);
     _showSelectAllButton = ValueNotifier(widget.showSelectAllByDefault);
     _init();
@@ -136,6 +137,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   void dispose() {
     _reloadEventSubscription?.cancel();
     _currentIndexSubscription.cancel();
+    _areAllFromGroupSelected.dispose();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     super.dispose();
   }
