@@ -1302,10 +1302,10 @@ bip39@^3.0.4:
     pbkdf2 "^3.0.9"
     randombytes "^2.0.1"
 
-blazeface-back@^0.0.8:
-  version "0.0.8"
-  resolved "https://registry.npmjs.org/blazeface-back/-/blazeface-back-0.0.8.tgz"
-  integrity sha512-7eYoSPJ9JvV2cHp+qwW+YNvrdTDFzMGnSGCGR24Lx6OluwPa+qX4NqNrBv31ukw2Ne/FkvFHhZuUDpxpowr+Bg==
+blazeface-back@^0.0.9:
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/blazeface-back/-/blazeface-back-0.0.9.tgz#a8a26a0022950eb21136693f2fca3c52315ad2a4"
+  integrity sha512-t0i5V117j074d7d7mlLaRq9n/bYchXcSEgpWVbGGloV68A6Jn22t4SNoEC3t+MOsU8H+eXoDv2/6+JsqActM1g==
 
 bootstrap@^4.5.2:
   version "4.6.0"
