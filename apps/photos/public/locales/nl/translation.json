@@ -537,5 +537,7 @@
     "NEWEST_FIRST": "Nieuwste eerst",
     "OLDEST_FIRST": "Oudste eerst",
     "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "Dit bestand kan niet worden bekeken in de app, klik hier om het origineel te downloaden",
-    "SELECT_COLLECTION": ""
+    "SELECT_COLLECTION": "",
+    "PIN_ALBUM": "",
+    "UNPIN_ALBUM": ""
 }
