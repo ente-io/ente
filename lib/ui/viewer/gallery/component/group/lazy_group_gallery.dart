@@ -63,9 +63,12 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
 
   @override
   void initState() {
-    //this is for removing the 'select all from day' icon on unselecting all files with 'cancel'
-
     super.initState();
+    if (widget.selectedFiles != null &&
+        widget.selectedFiles!.files.isNotEmpty) {
+      _areAllFromGroupSelected.value =
+          widget.selectedFiles!.files.containsAll(widget.files);
+    }
     widget.selectedFiles?.addListener(_selectedFilesListener);
     _showSelectAllButton = ValueNotifier(widget.showSelectAllByDefault);
     _init();
