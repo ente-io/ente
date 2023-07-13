@@ -6,7 +6,12 @@ import 'package:photos/models/file.dart';
 
 class SelectedFiles extends ChangeNotifier {
   final files = <File>{};
-  final lastSelections = <File>{};
+
+  ///This variable is used to track the files that were involved in last selection
+  ///operation (select/unselect). Each [LazyGridView] checks this variable on
+  ///change in selectedFiles to see if any of it's files were involved in last
+  ///select/unselect operation. If yes, then it will rebuild itself.
+  final lastSelectionOperationFiles = <File>{};
 
   void toggleSelection(File file) {
     // To handle the cases, where the file might have changed due to upload
@@ -20,8 +25,8 @@ class SelectedFiles extends ChangeNotifier {
     } else {
       files.add(file);
     }
-    lastSelections.clear();
-    lastSelections.add(file);
+    lastSelectionOperationFiles.clear();
+    lastSelectionOperationFiles.add(file);
     notifyListeners();
   }
 
@@ -35,15 +40,15 @@ class SelectedFiles extends ChangeNotifier {
 
   void selectAll(Set<File> selectedFiles) {
     files.addAll(selectedFiles);
-    lastSelections.clear();
-    lastSelections.addAll(selectedFiles);
+    lastSelectionOperationFiles.clear();
+    lastSelectionOperationFiles.addAll(selectedFiles);
     notifyListeners();
   }
 
   void unSelectAll(Set<File> filesToUnselect, {bool skipNotify = false}) {
     files.removeWhere((file) => filesToUnselect.contains(file));
-    lastSelections.clear();
-    lastSelections.addAll(filesToUnselect);
+    lastSelectionOperationFiles.clear();
+    lastSelectionOperationFiles.addAll(filesToUnselect);
     if (!skipNotify) {
       notifyListeners();
     }
@@ -57,7 +62,7 @@ class SelectedFiles extends ChangeNotifier {
   }
 
   bool isPartOfLastSelected(File file) {
-    final File? matchedFile = lastSelections.firstWhereOrNull(
+    final File? matchedFile = lastSelectionOperationFiles.firstWhereOrNull(
       (element) => _isMatch(file, element),
     );
     return matchedFile != null;
@@ -76,7 +81,7 @@ class SelectedFiles extends ChangeNotifier {
 
   void clearAll() {
     Bus.instance.fire(ClearSelectionsEvent());
-    lastSelections.addAll(files);
+    lastSelectionOperationFiles.addAll(files);
     files.clear();
     notifyListeners();
   }
