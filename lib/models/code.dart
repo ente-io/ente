@@ -90,6 +90,7 @@ class Code {
 
   static Code fromRawData(String rawData) {
     Uri uri = Uri.parse(rawData);
+    try {
     return Code(
       _getAccount(uri),
       _getIssuer(uri),
@@ -100,6 +101,15 @@ class Code {
       _getType(uri),
       rawData,
     );
+    } catch(e) {
+      // if account name contains # without encoding,
+      // rest of the url are treated as url fragment
+      if(rawData.contains("#")) {
+        return Code.fromRawData(rawData.replaceAll("#", '%23'));
+      } else {
+        rethrow;
+      }
+    }
   }
 
   static String _getAccount(Uri uri) {
