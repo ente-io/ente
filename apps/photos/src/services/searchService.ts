@@ -22,8 +22,6 @@ import {
 } from 'utils/search';
 import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
-import { User } from 'types/user';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getLatestEntities } from './entityService';
 import { LocationTag, LocationTagData, EntityType } from 'types/entity';
 
@@ -66,7 +64,6 @@ function convertSuggestionsToOptions(
     suggestions: Suggestion[],
     files: EnteFile[]
 ) {
-    const user = getData(LS_KEYS.USER) as User;
     const previewImageAppendedOptions: SearchOption[] = suggestions
         .map((suggestion) => ({
             suggestion,
@@ -74,7 +71,7 @@ function convertSuggestionsToOptions(
         }))
         .map(({ suggestion, searchQuery }) => {
             const resultFiles = getUniqueFiles(
-                files.filter((file) => isSearchedFile(user, file, searchQuery))
+                files.filter((file) => isSearchedFile(file, searchQuery))
             );
             return {
                 ...suggestion,
@@ -260,21 +257,14 @@ function searchCollection(
 }
 
 function searchFilesByName(searchPhrase: string, files: EnteFile[]) {
-    const user = getData(LS_KEYS.USER) as User;
-    if (!user) return [];
-    return files.filter(
-        (file) =>
-            file.ownerID === user.id &&
-            file.metadata.title.toLowerCase().includes(searchPhrase)
+    return files.filter((file) =>
+        file.metadata.title.toLowerCase().includes(searchPhrase)
     );
 }
 
 function searchFilesByCaption(searchPhrase: string, files: EnteFile[]) {
-    const user = getData(LS_KEYS.USER) as User;
-    if (!user) return [];
     return files.filter(
         (file) =>
-            file.ownerID === user.id &&
             file.pubMagicMetadata &&
             file.pubMagicMetadata.data.caption
                 ?.toLowerCase()
@@ -324,12 +314,9 @@ async function searchThing(searchPhrase: string) {
     );
 }
 
-function isSearchedFile(user: User, file: EnteFile, search: Search) {
+function isSearchedFile(file: EnteFile, search: Search) {
     if (search?.collection) {
         return search.collection === file.collectionID;
-    }
-    if (file.ownerID !== user.id) {
-        return false;
     }
 
     if (search?.date) {

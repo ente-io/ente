@@ -8,13 +8,13 @@ import { LoadingThumbnail } from 'components/PlaceholderThumbnails';
 
 export default function CollectionCard(props: {
     children?: any;
-    latestFile: EnteFile;
+    coverFile: EnteFile;
     onClick: () => void;
     collectionTile: any;
     isScrolling?: boolean;
 }) {
     const {
-        latestFile: file,
+        coverFile: file,
         onClick,
         children,
         collectionTile: CustomCollectionTile,

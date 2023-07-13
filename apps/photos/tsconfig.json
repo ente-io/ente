@@ -6,13 +6,10 @@
         "jsx": "preserve",
         "jsxImportSource": "@emotion/react",
         "lib": ["dom", "dom.iterable", "esnext", "webworker"],
-        "noFallthroughCasesInSwitch": false,
         "noImplicitAny": false,
         "noUnusedLocals": false,
         "noUnusedParameters": false,
-        "strictBindCallApply": false,
         "strictNullChecks": false,
-        "strictPropertyInitialization": false,
         "target": "es5",
         "useUnknownInCatchVariables": false
     },

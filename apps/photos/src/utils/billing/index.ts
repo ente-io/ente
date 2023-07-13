@@ -163,7 +163,7 @@ export async function updateSubscription(
 
 export async function cancelSubscription(
     setDialogMessage: SetDialogBoxAttributes,
-    closePlanSelectorModal: () => null,
+    closePlanSelectorModal: () => void,
     setLoading: SetLoading
 ) {
     try {
@@ -188,7 +188,7 @@ export async function cancelSubscription(
 
 export async function activateSubscription(
     setDialogMessage: SetDialogBoxAttributes,
-    closePlanSelectorModal: () => null,
+    closePlanSelectorModal: () => void,
     setLoading: SetLoading
 ) {
     try {

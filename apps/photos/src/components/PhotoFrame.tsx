@@ -45,7 +45,6 @@ interface Props {
     deletedFileIds?: Set<number>;
     setDeletedFileIds?: (value: Set<number>) => void;
     activeCollection: number;
-    isIncomingSharedCollection?: boolean;
     enableDownload?: boolean;
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
@@ -61,7 +60,6 @@ const PhotoFrame = ({
     deletedFileIds,
     setDeletedFileIds,
     activeCollection,
-    isIncomingSharedCollection,
     enableDownload,
     fileToCollectionsMap,
     collectionNameMap,
@@ -529,7 +527,6 @@ const PhotoFrame = ({
                 favItemIds={favItemIds}
                 deletedFileIds={deletedFileIds}
                 setDeletedFileIds={setDeletedFileIds}
-                isIncomingSharedCollection={isIncomingSharedCollection}
                 isTrashCollection={activeCollection === TRASH_SECTION}
                 isHiddenCollection={activeCollection === HIDDEN_SECTION}
                 enableDownload={enableDownload}

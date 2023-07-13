@@ -4,7 +4,7 @@ import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
 import { t } from 'i18next';
 import { unshareCollection } from 'services/collectionService';
-import { Collection } from 'types/collection';
+import { Collection, CollectionUser } from 'types/collection';
 import ShareeRow from './row';
 
 interface Iprops {
@@ -15,7 +15,7 @@ export function CollectionShareSharees({ collection }: Iprops) {
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
 
-    const collectionUnshare = async (sharee) => {
+    const collectionUnshare = async (sharee: CollectionUser) => {
         try {
             appContext.startLoading();
             await unshareCollection(collection, sharee.email);

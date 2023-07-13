@@ -1,4 +1,3 @@
-import { User } from 'types/user';
 import { EnteFile } from 'types/file';
 import { CollectionSummaryType, CollectionType } from 'constants/collection';
 import {
@@ -8,9 +7,22 @@ import {
     VISIBILITY_STATE,
 } from 'types/magicMetadata';
 
+export enum COLLECTION_ROLE {
+    VIEWER = 'VIEWER',
+    OWNER = 'OWNER',
+    COLLABORATOR = 'COLLABORATOR',
+    UNKNOWN = 'UNKNOWN',
+}
+
+export interface CollectionUser {
+    id: number;
+    email: string;
+    role: COLLECTION_ROLE;
+}
+
 export interface EncryptedCollection {
     id: number;
-    owner: User;
+    owner: CollectionUser;
     // collection name was unencrypted in the past, so we need to keep it as optional
     name?: string;
     encryptedKey: string;
@@ -19,12 +31,13 @@ export interface EncryptedCollection {
     nameDecryptionNonce: string;
     type: CollectionType;
     attributes: collectionAttributes;
-    sharees: User[];
+    sharees: CollectionUser[];
     publicURLs?: PublicURL[];
     updationTime: number;
     isDeleted: boolean;
     magicMetadata: EncryptedMagicMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
+    sharedMagicMetadata: EncryptedMagicMetadata;
 }
 
 export interface Collection
@@ -36,11 +49,13 @@ export interface Collection
         | 'nameDecryptionNonce'
         | 'magicMetadata'
         | 'pubMagicMetadata'
+        | 'sharedMagicMetadata'
     > {
     key: string;
     name: string;
     magicMetadata: CollectionMagicMetadata;
     pubMagicMetadata: CollectionPublicMagicMetadata;
+    sharedMagicMetadata: CollectionShareeMagicMetadata;
 }
 
 export interface PublicURL {
@@ -96,7 +111,7 @@ export interface collectionAttributes {
     pathDecryptionNonce?: string;
 }
 
-export type CollectionLatestFiles = Map<number, EnteFile>;
+export type CollectionToFileMap = Map<number, EnteFile>;
 
 export interface RemoveFromCollectionRequest {
     collectionID: number;
@@ -106,10 +121,17 @@ export interface RemoveFromCollectionRequest {
 export interface CollectionMagicMetadataProps {
     visibility?: VISIBILITY_STATE;
     subType?: SUB_TYPE;
+    order?: number;
 }
 
 export type CollectionMagicMetadata =
     MagicMetadataCore<CollectionMagicMetadataProps>;
+
+export interface CollectionShareeMetadataProps {
+    visibility?: VISIBILITY_STATE;
+}
+export type CollectionShareeMagicMetadata =
+    MagicMetadataCore<CollectionShareeMetadataProps>;
 
 export interface CollectionPublicMagicMetadataProps {
     asc?: boolean;
@@ -123,9 +145,11 @@ export interface CollectionSummary {
     id: number;
     name: string;
     type: CollectionSummaryType;
+    coverFile: EnteFile;
     latestFile: EnteFile;
     fileCount: number;
     updationTime: number;
+    order: number;
 }
 
 export type CollectionSummaries = Map<number, CollectionSummary>;

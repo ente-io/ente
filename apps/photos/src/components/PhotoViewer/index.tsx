@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import Photoswipe from 'photoswipe';
 import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
@@ -43,6 +43,7 @@ import { t } from 'i18next';
 import { getParsedExifData } from 'services/upload/exifService';
 import { getFileType } from 'services/typeDetectionService';
 import { ConversionFailedNotification } from './styledComponents/ConversionFailedNotification';
+import { GalleryContext } from 'pages/gallery';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -71,7 +72,6 @@ interface Iprops {
     favItemIds: Set<number>;
     deletedFileIds: Set<number>;
     setDeletedFileIds?: (value: Set<number>) => void;
-    isIncomingSharedCollection: boolean;
     isTrashCollection: boolean;
     isHiddenCollection: boolean;
     enableDownload: boolean;
@@ -99,10 +99,14 @@ function PhotoViewer(props: Iprops) {
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
+
+    const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
 
     const exifExtractionInProgress = useRef<string>(null);
-    const [shouldShowCopyOption] = useState(isClipboardItemPresent());
+    const shouldShowCopyOption = useMemo(() => isClipboardItemPresent(), []);
+
+    const [isOwnFile, setIsOwnFile] = useState(false);
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -245,6 +249,13 @@ function PhotoViewer(props: Iprops) {
         setIsFav(isInFav(file));
     }
 
+    function updateIsOwnFile(file: EnteFile) {
+        const isOwnFile =
+            !publicCollectionGalleryContext.accessedThroughSharedURL &&
+            galleryContext.user?.id === file.ownerID;
+        setIsOwnFile(isOwnFile);
+    }
+
     const openPhotoSwipe = () => {
         const { items, currentIndex } = props;
         const options = {
@@ -307,7 +318,12 @@ function PhotoViewer(props: Iprops) {
         photoSwipe.listen('beforeChange', () => {
             if (!photoSwipe?.currItem) return;
             const currItem = photoSwipe.currItem as EnteFile;
+            const videoTags = document.getElementsByTagName('video');
+            for (const videoTag of videoTags) {
+                videoTag.pause();
+            }
             updateFavButton(currItem);
+            updateIsOwnFile(currItem);
             if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
                 setExif({ key: currItem.src, value: null });
                 return;
@@ -370,8 +386,9 @@ function PhotoViewer(props: Iprops) {
     const onFavClick = async (file: EnteFile) => {
         try {
             if (
+                !file ||
                 props.isTrashCollection ||
-                props.isIncomingSharedCollection ||
+                !isOwnFile ||
                 props.isHiddenCollection
             ) {
                 return;
@@ -408,11 +425,7 @@ function PhotoViewer(props: Iprops) {
     };
 
     const confirmTrashFile = (file: EnteFile) => {
-        if (
-            !file ||
-            props.isIncomingSharedCollection ||
-            props.isTrashCollection
-        ) {
+        if (!file || !isOwnFile || props.isTrashCollection) {
             return;
         }
         appContext.setDialogMessage(getTrashFileMessage(() => trashFile(file)));
@@ -599,19 +612,18 @@ function PhotoViewer(props: Iprops) {
                                     <ContentCopy fontSize="small" />
                                 </button>
                             )}
-                            {!props.isIncomingSharedCollection &&
-                                !props.isTrashCollection && (
-                                    <button
-                                        className="pswp__button pswp__button--custom"
-                                        title={t('DELETE_OPTION')}
-                                        onClick={() => {
-                                            confirmTrashFile(
-                                                photoSwipe?.currItem as EnteFile
-                                            );
-                                        }}>
-                                        <DeleteIcon fontSize="small" />
-                                    </button>
-                                )}
+                            {isOwnFile && !props.isTrashCollection && (
+                                <button
+                                    className="pswp__button pswp__button--custom"
+                                    title={t('DELETE_OPTION')}
+                                    onClick={() => {
+                                        confirmTrashFile(
+                                            photoSwipe?.currItem as EnteFile
+                                        );
+                                    }}>
+                                    <DeleteIcon fontSize="small" />
+                                </button>
+                            )}
                             <button
                                 className="pswp__button pswp__button--zoom"
                                 title={t('ZOOM_IN_OUT')}
@@ -627,7 +639,7 @@ function PhotoViewer(props: Iprops) {
                                 onClick={handleOpenInfo}>
                                 <InfoIcon fontSize="small" />
                             </button>
-                            {!props.isIncomingSharedCollection &&
+                            {isOwnFile &&
                                 !props.isTrashCollection &&
                                 !props.isHiddenCollection && (
                                     <button
@@ -678,10 +690,10 @@ function PhotoViewer(props: Iprops) {
                 </div>
             </div>
             <FileInfo
-                shouldDisableEdits={props.isIncomingSharedCollection}
+                shouldDisableEdits={!isOwnFile}
                 showCollectionChips={
                     !props.isTrashCollection &&
-                    !props.isIncomingSharedCollection &&
+                    isOwnFile &&
                     !props.isHiddenCollection
                 }
                 showInfo={showInfo}
