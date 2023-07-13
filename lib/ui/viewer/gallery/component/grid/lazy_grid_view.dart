@@ -18,8 +18,6 @@ class LazyGridView extends StatefulWidget {
   final SelectedFiles? selectedFiles;
   final bool shouldRender;
   final bool shouldRecycle;
-  final ValueNotifier toggleSelectAllFromDay;
-  final ValueNotifier areAllFilesSelected;
   final int? photoGridSize;
   final bool limitSelectionToOne;
 
@@ -30,8 +28,6 @@ class LazyGridView extends StatefulWidget {
     this.selectedFiles,
     this.shouldRender,
     this.shouldRecycle,
-    this.toggleSelectAllFromDay,
-    this.areAllFilesSelected,
     this.photoGridSize, {
     this.limitSelectionToOne = false,
     Key? key,
@@ -57,7 +53,6 @@ class _LazyGridViewState extends State<LazyGridView> {
         setState(() {});
       }
     });
-    widget.toggleSelectAllFromDay.addListener(_toggleSelectAllFromDayListener);
     super.initState();
   }
 
@@ -65,8 +60,7 @@ class _LazyGridViewState extends State<LazyGridView> {
   void dispose() {
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     _clearSelectionsEvent.cancel();
-    widget.toggleSelectAllFromDay
-        .removeListener(_toggleSelectAllFromDayListener);
+
     super.dispose();
   }
 
@@ -106,13 +100,6 @@ class _LazyGridViewState extends State<LazyGridView> {
   }
 
   void _selectedFilesListener() {
-    if (widget.selectedFiles!.files
-        .toSet()
-        .containsAll(widget.filesInGroup.toSet())) {
-      widget.areAllFilesSelected.value = true;
-    } else {
-      widget.areAllFilesSelected.value = false;
-    }
     bool shouldRefresh = false;
     for (final file in widget.filesInGroup) {
       if (widget.selectedFiles!.isPartOfLastSelected(file)) {
@@ -121,18 +108,6 @@ class _LazyGridViewState extends State<LazyGridView> {
     }
     if (shouldRefresh && mounted) {
       setState(() {});
-    }
-  }
-
-  void _toggleSelectAllFromDayListener() {
-    if (widget.selectedFiles!.files
-        .toSet()
-        .containsAll(widget.filesInGroup.toSet())) {
-      setState(() {
-        widget.selectedFiles!.unSelectAll(widget.filesInGroup.toSet());
-      });
-    } else {
-      widget.selectedFiles!.selectAll(widget.filesInGroup.toSet());
     }
   }
 }
