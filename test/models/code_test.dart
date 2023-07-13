@@ -19,4 +19,14 @@ void main() {
     expect(code.account, "testdata@ente.io", reason: "accountMismatch");
     expect(code.secret, "ASKZNWOU6SVYAMVS");
   });
+//
+
+  test("parseWithFunnyAccountName", () {
+    final code = Code.fromRawData(
+      "otpauth://totp/Mongo Atlas:Acc !@#444?algorithm=sha1&digits=6&issuer=Mongo Atlas&period=30&secret=NI4CTTFEV4G2JFE6",
+    );
+    expect(code.issuer, "Mongo Atlas", reason: "issuerMismatch");
+    expect(code.account, "Acc !@#444", reason: "accountMismatch");
+    expect(code.secret, "NI4CTTFEV4G2JFE6");
+  });
 }
