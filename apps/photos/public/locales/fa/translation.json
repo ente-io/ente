@@ -235,12 +235,11 @@
     "MAP": "",
     "MAP_SETTINGS": "",
     "ENABLE_MAPS": "",
+    "ENABLE_MAP": "",
     "DISABLE_MAPS": "",
-    "ENABLE_MAP_DESCRIPTION_1": "",
-    "ENABLE_MAP_DESCRIPTION_2": "",
-    "ENABLE_MAP_DESCRIPTION_3": "",
-    "DISABLE_MAP_DESCRIPTION_1": "",
-    "DISABLE_MAP_DESCRIPTION_2": "",
+    "ENABLE_MAP_DESCRIPTION": "",
+    "DISABLE_MAP_DESCRIPTION": "",
+    "DISABLE_MAP": "",
     "DETAILS": "",
     "VIEW_EXIF": "",
     "NO_EXIF": "",
@@ -538,5 +537,7 @@
     "NEWEST_FIRST": "",
     "OLDEST_FIRST": "",
     "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "",
-    "SELECT_COLLECTION": ""
+    "SELECT_COLLECTION": "",
+    "PIN_ALBUM": "",
+    "UNPIN_ALBUM": ""
 }

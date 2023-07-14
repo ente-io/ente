@@ -53,7 +53,6 @@ import {
     downloadFiles,
     getSelectedFiles,
     getUniqueFiles,
-    isSharedFile,
     mergeMetadata,
     sortFiles,
 } from 'utils/file';
@@ -120,7 +119,7 @@ import ExportModal from 'components/ExportModal';
 import GalleryEmptyState from 'components/GalleryEmptyState';
 import AuthenticateUserModal from 'components/AuthenticateUserModal';
 import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
-import { IsArchived } from 'utils/magicMetadata';
+import { isArchivedFile } from 'utils/magicMetadata';
 import { isSameDayAnyYear, isInsideLocationTag } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
@@ -444,10 +443,6 @@ export default function Gallery() {
 
                 // SEARCH MODE
                 if (isInSearchMode) {
-                    // shared files are not searchable
-                    if (isSharedFile(user, item)) {
-                        return false;
-                    }
                     if (
                         search?.date &&
                         !isSameDayAnyYear(search.date)(
@@ -492,15 +487,6 @@ export default function Gallery() {
                     return true;
                 }
 
-                // shared files can only be seen in their respective collection
-                if (isSharedFile(user, item)) {
-                    if (activeCollection === item.collectionID) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-
                 // archived collections files can only be seen in their respective collection
                 if (archivedCollections.has(item.collectionID)) {
                     if (activeCollection === item.collectionID) {
@@ -511,7 +497,7 @@ export default function Gallery() {
                 }
 
                 // Archived files can only be seen in archive section or their respective collection
-                if (IsArchived(item)) {
+                if (isArchivedFile(item)) {
                     if (
                         activeCollection === ARCHIVE_SECTION ||
                         activeCollection === item.collectionID
@@ -698,15 +684,15 @@ export default function Gallery() {
                         : selectedFiles.filter(
                               (file) => file.ownerID === user.id
                           );
-                if (toProcessFiles.length === 0) {
-                    return;
+                if (toProcessFiles.length > 0) {
+                    await handleCollectionOps(
+                        ops,
+                        collection,
+                        toProcessFiles,
+                        selected.collectionID
+                    );
                 }
-                await handleCollectionOps(
-                    ops,
-                    collection,
-                    toProcessFiles,
-                    selected.collectionID
-                );
+
                 clearSelection();
                 await syncWithRemote(false, true);
                 setActiveCollection(collection.id);
@@ -1034,12 +1020,6 @@ export default function Gallery() {
                         deletedFileIds={deletedFileIds}
                         setDeletedFileIds={setDeletedFileIds}
                         activeCollection={activeCollection}
-                        isIncomingSharedCollection={
-                            collectionSummaries.get(activeCollection)?.type ===
-                                CollectionSummaryType.incomingShareCollaborator ||
-                            collectionSummaries.get(activeCollection)?.type ===
-                                CollectionSummaryType.incomingShareViewer
-                        }
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
                         collectionNameMap={collectionNameMap}

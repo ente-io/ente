@@ -152,6 +152,7 @@ export default function Recover() {
                     fieldType="text"
                     placeholder={t('RECOVERY_KEY_HINT')}
                     buttonText={t('RECOVER')}
+                    disableAutoComplete
                 />
                 <FormPaperFooter style={{ justifyContent: 'space-between' }}>
                     <LinkButton onClick={() => showContactSupportDialog()}>

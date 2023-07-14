@@ -22,7 +22,7 @@ export default function AddCollectionButton({ showNextModal }: Iprops) {
         <CollectionCard
             collectionTile={AllCollectionTile}
             onClick={() => showNextModal()}
-            latestFile={null}>
+            coverFile={null}>
             <AllCollectionTileText>
                 {t('CREATE_COLLECTION')}
             </AllCollectionTileText>

@@ -37,6 +37,7 @@ import {
     getMapDisableConfirmationDialog,
     getMapEnableConfirmationDialog,
 } from 'utils/ui';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
@@ -97,6 +98,9 @@ export function FileInfo({
 }: Iprops) {
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
 
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
     const [showExif, setShowExif] = useState(false);
@@ -235,7 +239,8 @@ export function FileInfo({
                             icon={<LocationOnOutlined />}
                             title={t('LOCATION')}
                             caption={
-                                !appContext.mapEnabled ? (
+                                !appContext.mapEnabled ||
+                                publicCollectionGalleryContext.accessedThroughSharedURL ? (
                                     <Link
                                         href={getOpenStreetMapLink(location)}
                                         target="_blank"
@@ -264,13 +269,15 @@ export function FileInfo({
                                 />
                             }
                         />
-                        <MapBox
-                            location={location}
-                            mapEnabled={appContext.mapEnabled}
-                            openUpdateMapConfirmationDialog={
-                                openEnableMapConfirmationDialog
-                            }
-                        />
+                        {!publicCollectionGalleryContext.accessedThroughSharedURL && (
+                            <MapBox
+                                location={location}
+                                mapEnabled={appContext.mapEnabled}
+                                openUpdateMapConfirmationDialog={
+                                    openEnableMapConfirmationDialog
+                                }
+                            />
+                        )}
                     </>
                 )}
                 <InfoItem

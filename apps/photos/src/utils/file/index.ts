@@ -28,7 +28,7 @@ import PublicCollectionDownloadManager from 'services/publicCollectionDownloadMa
 import heicConversionService from 'services/heicConversionService';
 import * as ffmpegService from 'services/ffmpeg/ffmpegService';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
-import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
+import { isArchivedFile, updateMagicMetadata } from 'utils/magicMetadata';
 
 import { addLocalLog, addLogLine } from 'utils/logging';
 import { CustomError } from 'utils/error';
@@ -576,7 +576,7 @@ export const isImageOrVideo = (fileType: FILE_TYPE) =>
     [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
 
 export const getArchivedFiles = (files: EnteFile[]) => {
-    return files.filter(IsArchived).map((file) => file.id);
+    return files.filter(isArchivedFile).map((file) => file.id);
 };
 
 export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
@@ -672,3 +672,22 @@ export function constructFileToCollectionMap(files: EnteFile[]) {
     });
     return fileToCollectionsMap;
 }
+
+export const shouldShowAvatar = (file: EnteFile, user: User) => {
+    if (!file || !user) {
+        return false;
+    }
+    // is Shared file
+    else if (file.ownerID !== user.id) {
+        return true;
+    }
+    // is public collected file
+    else if (
+        file.ownerID === user.id &&
+        file.pubMagicMetadata?.data?.uploaderName
+    ) {
+        return true;
+    } else {
+        return false;
+    }
+};

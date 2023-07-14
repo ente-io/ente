@@ -19,7 +19,7 @@ export default function AllCollectionCard({
     return (
         <CollectionCard
             collectionTile={AllCollectionTile}
-            latestFile={collectionSummary.latestFile}
+            coverFile={collectionSummary.coverFile}
             onClick={() => onCollectionClick(collectionSummary.id)}
             isScrolling={isScrolling}>
             <AllCollectionTileText>

@@ -20,8 +20,7 @@ import {
 import { FILE_TYPE } from 'constants/file';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 import Avatar from './Avatar';
-import { User } from 'types/user';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { shouldShowAvatar } from 'utils/file';
 
 interface IProps {
     file: EnteFile;
@@ -217,7 +216,7 @@ const Cont = styled('div')<{ disabled: boolean }>`
 `;
 
 export default function PreviewCard(props: IProps) {
-    const { thumbs } = useContext(GalleryContext);
+    const { thumbs, user } = useContext(GalleryContext);
 
     const {
         file,
@@ -334,8 +333,6 @@ export default function PreviewCard(props: IProps) {
         }
     };
 
-    const user: User = getData(LS_KEYS.USER);
-
     return (
         <Cont
             key={`thumb-${file.id}-${props.showPlaceholder}`}
@@ -371,9 +368,7 @@ export default function PreviewCard(props: IProps) {
                 )
             )}
             <SelectedOverlay selected={selected} />
-            {(file.ownerID !== user.id ||
-                (file.ownerID === user.id &&
-                    file.pubMagicMetadata?.data?.uploaderName)) && (
+            {shouldShowAvatar(file, user) && (
                 <AvatarOverlay>
                     <Avatar file={file} />
                 </AvatarOverlay>

@@ -37,6 +37,7 @@ export interface EncryptedCollection {
     isDeleted: boolean;
     magicMetadata: EncryptedMagicMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
+    sharedMagicMetadata: EncryptedMagicMetadata;
 }
 
 export interface Collection
@@ -48,11 +49,13 @@ export interface Collection
         | 'nameDecryptionNonce'
         | 'magicMetadata'
         | 'pubMagicMetadata'
+        | 'sharedMagicMetadata'
     > {
     key: string;
     name: string;
     magicMetadata: CollectionMagicMetadata;
     pubMagicMetadata: CollectionPublicMagicMetadata;
+    sharedMagicMetadata: CollectionShareeMagicMetadata;
 }
 
 export interface PublicURL {
@@ -108,7 +111,7 @@ export interface collectionAttributes {
     pathDecryptionNonce?: string;
 }
 
-export type CollectionLatestFiles = Map<number, EnteFile>;
+export type CollectionToFileMap = Map<number, EnteFile>;
 
 export interface RemoveFromCollectionRequest {
     collectionID: number;
@@ -118,10 +121,17 @@ export interface RemoveFromCollectionRequest {
 export interface CollectionMagicMetadataProps {
     visibility?: VISIBILITY_STATE;
     subType?: SUB_TYPE;
+    order?: number;
 }
 
 export type CollectionMagicMetadata =
     MagicMetadataCore<CollectionMagicMetadataProps>;
+
+export interface CollectionShareeMetadataProps {
+    visibility?: VISIBILITY_STATE;
+}
+export type CollectionShareeMagicMetadata =
+    MagicMetadataCore<CollectionShareeMetadataProps>;
 
 export interface CollectionPublicMagicMetadataProps {
     asc?: boolean;
@@ -135,9 +145,11 @@ export interface CollectionSummary {
     id: number;
     name: string;
     type: CollectionSummaryType;
+    coverFile: EnteFile;
     latestFile: EnteFile;
     fileCount: number;
     updationTime: number;
+    order: number;
 }
 
 export type CollectionSummaries = Map<number, CollectionSummary>;

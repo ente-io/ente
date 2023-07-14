@@ -16,7 +16,7 @@ export default function CollectionSelectorCard({
     return (
         <CollectionCard
             collectionTile={AllCollectionTile}
-            latestFile={collectionSummary.latestFile}
+            coverFile={collectionSummary.coverFile}
             onClick={() => onCollectionClick(collectionSummary.id)}>
             <AllCollectionTileText>
                 <Typography>{collectionSummary.name}</Typography>
