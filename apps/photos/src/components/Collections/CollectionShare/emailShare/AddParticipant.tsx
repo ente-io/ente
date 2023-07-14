@@ -12,9 +12,7 @@ import {
     shareCollection,
 } from 'services/collectionService';
 import { handleSharingErrors } from 'utils/error/ui';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getLocalFamilyData } from 'utils/user/family';
-import { User } from 'types/user';
 import AddParticipantForm, {
     AddParticipantFormProps,
 } from './AddParticipantForm';
@@ -86,8 +84,6 @@ export default function AddParticipant({
         resetForm
     ) => {
         try {
-            const user: User = getData(LS_KEYS.USER);
-
             for (const email of emails) {
                 if (email === user.email) {
                     setFieldError(t('SHARE_WITH_SELF'));
