@@ -26,6 +26,22 @@ export const WHITELISTED_FILE_FORMATS: FileTypeInfo[] = [
         exactType: 'hevc',
         mimeType: 'video/hevc',
     },
+    {
+        fileType: FILE_TYPE.IMAGE,
+        exactType: 'raf',
+        mimeType: 'image/x-fuji-raf',
+    },
+    {
+        fileType: FILE_TYPE.IMAGE,
+        exactType: 'orf',
+        mimeType: 'image/x-olympus-orf',
+    },
+
+    {
+        fileType: FILE_TYPE.IMAGE,
+        exactType: 'crw',
+        mimeType: 'image/x-canon-crw',
+    },
 ];
 
 export const KNOWN_NON_MEDIA_FORMATS = ['xmp', 'html', 'txt'];
