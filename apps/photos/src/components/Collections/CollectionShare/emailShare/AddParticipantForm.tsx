@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Formik, FormikHelpers, FormikState } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from 'components/SubmitButton';
@@ -43,16 +43,9 @@ export interface AddParticipantFormProps {
 export default function AddParticipantForm(props: AddParticipantFormProps) {
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
-    const [updatedOptionsList, setUpdatedOptionsList] = useState<string[]>(
-        props.optionsList
-    );
     const [disableInput, setDisableInput] = useState(false);
 
     const [loading, SetLoading] = useState(false);
-
-    useEffect(() => {
-        setUpdatedOptionsList(props.optionsList);
-    }, [props.optionsList]);
 
     const submitForm = async (
         values: formValues,
@@ -142,13 +135,13 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
                             />
                         </Stack>
 
-                        {updatedOptionsList.length > 0 && (
+                        {props.optionsList.length > 0 && (
                             <Stack>
                                 <MenuSectionTitle
                                     title={t('OR_ADD_EXISTING')}
                                 />
                                 <MenuItemGroup>
-                                    {updatedOptionsList.map((item, index) => (
+                                    {props.optionsList.map((item, index) => (
                                         <>
                                             <EnteMenuItem
                                                 fontWeight="normal"
