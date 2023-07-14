@@ -17,7 +17,7 @@ import { getLocalFamilyData } from 'utils/user/family';
 import { User } from 'types/user';
 import AddParticipantForm, {
     AddParticipantFormProps,
-} from './AddPartipantForm';
+} from './AddParticipantForm';
 
 interface Iprops {
     collection: Collection;
