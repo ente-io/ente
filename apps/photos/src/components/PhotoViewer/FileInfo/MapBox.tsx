@@ -58,7 +58,6 @@ const MapBox: React.FC<MapBoxProps> = ({
         } else {
             if (mapContainer && mapContainer.hasChildNodes()) {
                 if (mapContainer.firstChild) {
-                    console.log('removing child');
                     mapContainer.removeChild(mapContainer.firstChild);
                 }
             }

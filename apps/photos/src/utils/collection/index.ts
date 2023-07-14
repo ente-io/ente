@@ -320,6 +320,8 @@ export const showShareQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.outgoingShare ||
         type === CollectionSummaryType.sharedOnlyViaLink ||
         type === CollectionSummaryType.archived ||
+        type === CollectionSummaryType.incomingShareViewer ||
+        type === CollectionSummaryType.incomingShareCollaborator ||
         type === CollectionSummaryType.pinned
     );
 };
