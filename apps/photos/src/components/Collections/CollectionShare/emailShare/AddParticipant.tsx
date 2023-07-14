@@ -6,13 +6,9 @@ import { DialogProps } from '@mui/material';
 import Titlebar from 'components/Titlebar';
 
 import { GalleryContext } from 'pages/gallery';
-import { useContext, useState, useEffect, useMemo } from 'react';
-import {
-    getLocalCollections,
-    shareCollection,
-} from 'services/collectionService';
+import { useContext, useMemo } from 'react';
+import { shareCollection } from 'services/collectionService';
 import { handleSharingErrors } from 'utils/error/ui';
-import { getLocalFamilyData } from 'utils/user/family';
 import AddParticipantForm, {
     AddParticipantFormProps,
 } from './AddParticipantForm';
@@ -32,50 +28,15 @@ export default function AddParticipant({
     onRootClose,
     type,
 }: Iprops) {
-    const { user, syncWithRemote } = useContext(GalleryContext);
-
-    const [emails, setEmails] = useState<string[]>([]);
-
-    useEffect(() => {
-        const main = async () => {
-            const familyList = getLocalFamilyData();
-            const collectionList = await getLocalCollections();
-
-            const emails = collectionList
-                .map((item) => {
-                    if (item.owner.email && item.owner.id !== user.id) {
-                        return [item.owner.email];
-                    } else {
-                        const shareeEmails = item.sharees.map(
-                            (sharee) => sharee.email
-                        );
-                        return shareeEmails;
-                    }
-                })
-                .flat();
-
-            // adding family members
-            if (familyList) {
-                const family = familyList.members.map((member) => member.email);
-                emails.push(...family);
-            }
-
-            setEmails(Array.from(new Set(emails)));
-        };
-        main();
-    }, []);
+    const { user, syncWithRemote, emailList } = useContext(GalleryContext);
 
     const nonSharedEmails = useMemo(
         () =>
-            emails.filter(
+            emailList.filter(
                 (email) =>
-                    !(
-                        collection.sharees?.find(
-                            (value) => value.email === email
-                        ) || email === user.email
-                    )
+                    !collection.sharees?.find((value) => value.email === email)
             ),
-        [emails, collection.sharees]
+        [emailList, collection.sharees]
     );
 
     const collectionShare: AddParticipantFormProps['callback'] = async (

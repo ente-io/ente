@@ -50,7 +50,7 @@ import {
     isPinnedCollection,
     updateMagicMetadata,
 } from 'utils/magicMetadata';
-import { User } from 'types/user';
+import { FamilyData, User } from 'types/user';
 import {
     isQuickLinkCollection,
     isOutgoingShare,
@@ -1407,20 +1407,19 @@ export async function unhideToCollection(
     }
 }
 
-export const constructUserIDToEmailMap = async (): Promise<
-    Map<number, string>
-> => {
+export const constructUserIDToEmailMap = (
+    user: User,
+    collections: Collection[]
+): Map<number, string> => {
     try {
-        const collection = await getLocalCollections();
-        const user: User = getData(LS_KEYS.USER);
         const userIDToEmailMap = new Map<number, string>();
-        collection.map((item) => {
+        collections.forEach((item) => {
             const { owner, sharees } = item;
             if (user.id !== owner.id && owner.email) {
                 userIDToEmailMap.set(owner.id, owner.email);
             }
             if (sharees) {
-                sharees.map((item) => {
+                sharees.forEach((item) => {
                     if (item.id !== user.id)
                         userIDToEmailMap.set(item.id, item.email);
                 });
@@ -1430,6 +1429,31 @@ export const constructUserIDToEmailMap = async (): Promise<
     } catch (e) {
         logError('Error Mapping UserId to email:', e);
         return new Map<number, string>();
-        throw e;
     }
+};
+
+export const constructEmailList = (
+    user: User,
+    collections: Collection[],
+    familyData: FamilyData
+): string[] => {
+    const emails = collections
+        .map((item) => {
+            if (item.owner.email && item.owner.id !== user.id) {
+                return [item.owner.email];
+            } else {
+                const shareeEmails = item.sharees
+                    .filter((sharee) => sharee.email !== user.email)
+                    .map((sharee) => sharee.email);
+                return shareeEmails;
+            }
+        })
+        .flat();
+
+    // adding family members
+    if (familyData) {
+        const family = familyData.members.map((member) => member.email);
+        emails.push(...family);
+    }
+    return Array.from(new Set(emails));
 };

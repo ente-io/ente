@@ -39,6 +39,7 @@ export type GalleryContextType = {
     authenticateUser: (callback: () => void) => void;
     user: User;
     userIDToEmailMap: Map<number, string>;
+    emailList: string[];
 };
 
 export enum CollectionSelectorIntent {

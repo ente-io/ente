@@ -24,6 +24,7 @@ import {
     createAlbum,
     getCollectionSummaries,
     moveToHiddenCollection,
+    constructEmailList,
 } from 'services/collectionService';
 import { t } from 'i18next';
 
@@ -107,7 +108,7 @@ import SearchResultInfo from 'components/Search/SearchResultInfo';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 import UploadInputs from 'components/UploadSelectorInputs';
 import useFileInput from 'hooks/useFileInput';
-import { User } from 'types/user';
+import { FamilyData, User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
 import { checkConnectivity } from 'utils/common';
@@ -124,6 +125,7 @@ import { isSameDayAnyYear, isInsideLocationTag } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
 import { constructUserIDToEmailMap } from 'services/collectionService';
+import { getLocalFamilyData } from 'utils/user/family';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -147,6 +149,7 @@ const defaultGalleryContext: GalleryContextType = {
     authenticateUser: () => null,
     user: null,
     userIDToEmailMap: null,
+    emailList: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -156,6 +159,7 @@ export const GalleryContext = createContext<GalleryContextType>(
 export default function Gallery() {
     const router = useRouter();
     const [user, setUser] = useState(null);
+    const [familyData, setFamilyData] = useState<FamilyData>(null);
     const [collections, setCollections] = useState<Collection[]>(null);
     const [files, setFiles] = useState<EnteFile[]>(null);
     const [hiddenFiles, setHiddenFiles] = useState<EnteFile[]>(null);
@@ -224,6 +228,7 @@ export default function Gallery() {
         useState<CollectionSummaries>();
     const [userIDToEmailMap, setUserIDToEmailMap] =
         useState<Map<number, string>>(null);
+    const [emailList, setEmailList] = useState<string[]>(null);
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
@@ -283,6 +288,7 @@ export default function Gallery() {
             }
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
+            const familyData = getLocalFamilyData();
             const files = sortFiles(mergeMetadata(await getLocalFiles()));
             const hiddenFiles = sortFiles(
                 mergeMetadata(await getLocalHiddenFiles())
@@ -291,6 +297,7 @@ export default function Gallery() {
             const trashedFiles = await getLocalTrashedFiles();
 
             setUser(user);
+            setFamilyData(familyData);
             setFiles(files);
             setTrashedFiles(trashedFiles);
             setHiddenFiles(hiddenFiles);
@@ -321,15 +328,20 @@ export default function Gallery() {
     }, [collections, files, hiddenFiles, trashedFiles, user]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            if (!collections) {
-                return;
-            }
-            const userIdToEmailMap = await constructUserIDToEmailMap();
-            setUserIDToEmailMap(userIdToEmailMap);
-        };
-        fetchData();
+        if (!collections || !user) {
+            return;
+        }
+        const userIdToEmailMap = constructUserIDToEmailMap(user, collections);
+        setUserIDToEmailMap(userIdToEmailMap);
     }, [collections]);
+
+    useEffect(() => {
+        if (!user || !collections) {
+            return;
+        }
+        const emailList = constructEmailList(user, collections, familyData);
+        setEmailList(emailList);
+    }, [user, collections, familyData]);
 
     useEffect(() => {
         collectionSelectorAttributes && setCollectionSelectorView(true);
@@ -901,6 +913,7 @@ export default function Gallery() {
                 authenticateUser,
                 userIDToEmailMap,
                 user,
+                emailList,
             }}>
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}>
