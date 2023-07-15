@@ -201,6 +201,7 @@ class Configuration {
       utf8.encode(password) as Uint8List,
       kekSalt,
     );
+    final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
     final encryptedKeyData =
@@ -230,7 +231,7 @@ class Configuration {
       CryptoUtil.bin2hex(recoveryKey),
       CryptoUtil.bin2base64(keyPair.sk),
     );
-    return KeyGenResult(attributes, privateAttributes);
+    return KeyGenResult(attributes, privateAttributes, loginKey);
   }
 
   Future<KeyAttributes> updatePassword(String password) async {

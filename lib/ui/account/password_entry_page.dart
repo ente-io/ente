@@ -7,6 +7,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/key_gen_result.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
@@ -403,7 +404,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         createProgressDialog(context, S.of(context).generatingEncryptionKeys);
     await dialog.show();
     try {
-      final result = await Configuration.instance.generateKey(password);
+      final KeyGenResult result = await Configuration.instance.generateKey(password);
       Configuration.instance.setVolatilePassword(null);
       await dialog.hide();
       onDone() async {

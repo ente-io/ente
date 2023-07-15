@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:convert";
 import 'dart:typed_data';
 
 import 'package:bip39/bip39.dart' as bip39;
@@ -13,6 +14,7 @@ import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/api/user/srp.dart";
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
@@ -33,6 +35,8 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:srp/client.dart' as client;
+import "package:uuid/uuid.dart";
 
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
@@ -423,6 +427,39 @@ class UserService {
       rethrow;
     }
   }
+
+  Future<void> registerSrp(Uint8List loginKey) async {
+    try {
+      // generate random uuid
+      final password = base64Encode(loginKey);
+      final username = const Uuid().v4();
+      final salt = client.generateSalt();
+      final privateKey = client.derivePrivateKey(salt, username, password);
+      final verifier = client.deriveVerifier(privateKey);
+      final clientEphemeral = client.generateEphemeral();
+      final request = SetupSRPRequest(srpUserID: username.toString(),
+          srpSalt: salt,
+          srpVerifier: verifier,
+          srpA: clientEphemeral.public,
+          isUpdate: false,
+      );
+      final response = await _enteDio.post(
+        "/users/srp/setup",
+        data: request.toMap(),
+      );
+      if (response.statusCode == 200) {
+      final setupSRPResponse = SetupSRPResponse.fromJson(response.data);
+
+      } else {
+        throw Exception("register-srp action failed");
+      }
+    } catch (e) {
+      _logger.severe(e);
+      rethrow;
+    }
+  }
+
+
 
   Future<void> updateKeyAttributes(KeyAttributes keyAttributes) async {
     try {
@@ -857,4 +894,6 @@ class UserService {
   bool hasEnabledTwoFactor() {
     return _preferences.getBool(keyHasEnabledTwoFactor) ?? false;
   }
+
+
 }
