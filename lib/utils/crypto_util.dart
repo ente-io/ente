@@ -302,9 +302,10 @@ class CryptoUtil {
   // randomly generated nonce using XChaCha20 (w Poly1305 MAC), and writes it
   // to the destinationFilePath.
   // If a key is not provided, one is generated and returned.
-  static Future<EncryptionResult> encryptFile(String sourceFilePath,
+  static Future<EncryptionResult> encryptFile(
+      String sourceFilePath,
       String destinationFilePath, {
-        Uint8List? key,
+      Uint8List? key,
       }) {
     final args = <String, dynamic>{};
     args["sourceFilePath"] = sourceFilePath;
@@ -319,7 +320,8 @@ class CryptoUtil {
 
   // Decrypts the file at sourceFilePath, with the given key and header using
   // XChaCha20 (w Poly1305 MAC), and writes it to the destinationFilePath.
-  static Future<void> decryptFile(String sourceFilePath,
+  static Future<void> decryptFile(
+      String sourceFilePath,
       String destinationFilePath,
       Uint8List header,
       Uint8List key,) {
@@ -352,9 +354,11 @@ class CryptoUtil {
   }
 
   // Decrypts the input using the given publicKey-secretKey pair
-  static Uint8List openSealSync(Uint8List input,
+  static Uint8List openSealSync(
+      Uint8List input,
       Uint8List publicKey,
-      Uint8List secretKey,) {
+      Uint8List secretKey,
+      ) {
     return Sodium.cryptoBoxSealOpen(input, publicKey, secretKey);
   }
 
@@ -371,8 +375,10 @@ class CryptoUtil {
   // the min and max limits for both parameters.
   // At all points, we ensure that the product of these two variables (the area
   // under the graph that determines the amount of work required) is a constant.
-  static Future<DerivedKeyResult> deriveSensitiveKey(Uint8List password,
-      Uint8List salt,) async {
+  static Future<DerivedKeyResult> deriveSensitiveKey(
+      Uint8List password,
+      Uint8List salt,
+      ) async {
     final logger = Logger("pwhash");
     int memLimit = Sodium.cryptoPwhashMemlimitSensitive;
     int opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
@@ -416,8 +422,10 @@ class CryptoUtil {
   // NOTE: This is only used while setting passwords for shared links, as an
   // extra layer of authentication (atop the access token and collection key).
   // More details @ https://ente.io/blog/building-shareable-links/
-  static Future<DerivedKeyResult> deriveInteractiveKey(Uint8List password,
-      Uint8List salt,) async {
+  static Future<DerivedKeyResult> deriveInteractiveKey(
+      Uint8List password,
+      Uint8List salt,
+      ) async {
     final int memLimit = Sodium.cryptoPwhashMemlimitInteractive;
     final int opsLimit = Sodium.cryptoPwhashOpslimitInteractive;
     final key = await deriveKey(password, salt, memLimit, opsLimit);
@@ -426,10 +434,12 @@ class CryptoUtil {
 
   // Derives a key for a given password, salt, memLimit and opsLimit using
   // Argon2id, v1.3.
-  static Future<Uint8List> deriveKey(Uint8List password,
+  static Future<Uint8List> deriveKey(
+      Uint8List password,
       Uint8List salt,
       int memLimit,
-      int opsLimit,) {
+      int opsLimit,
+      ) {
     return _computer.compute(
       cryptoPwHash,
       param: {
