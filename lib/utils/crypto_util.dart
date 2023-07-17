@@ -13,9 +13,9 @@ const int encryptionChunkSize = 4 * 1024 * 1024;
 final int decryptionChunkSize =
     encryptionChunkSize + Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
 const int hashChunkSize = 4 * 1024 * 1024;
-const int loginSubKeyLen = 128;
+const int loginSubKeyLen = 32;
 const int loginSubKeyId = 1;
-const String loginSubKeyContext = "login";
+const String loginSubKeyContext = "loginctx";
 
 Uint8List cryptoSecretboxEasy(Map<String, dynamic> args) {
   return Sodium.cryptoSecretboxEasy(args["source"], args["nonce"], args["key"]);
@@ -453,7 +453,7 @@ class CryptoUtil {
         "subkeyLen": loginSubKeyLen,
         "context": utf8.encode(loginSubKeyContext),
       },
-      taskName: "deriveKey",
+      taskName: "deriveLoginKey",
     );
   }
 

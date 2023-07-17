@@ -1,5 +1,6 @@
 import 'dart:async';
 import "dart:convert";
+import "dart:math";
 import 'dart:typed_data';
 
 import 'package:bip39/bip39.dart' as bip39;
@@ -18,7 +19,7 @@ import "package:photos/models/api/user/srp.dart";
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
-import 'package:photos/models/public_key.dart';
+import 'package:photos/models/public_key.dart' as ePublicKey;
 import 'package:photos/models/sessions.dart';
 import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/set_recovery_key_request.dart';
@@ -34,8 +35,13 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import "package:pointycastle/pointycastle.dart";
+import "package:pointycastle/srp/srp6_client.dart";
+// import "package:pointycastle/srp/srp6_server.dart";
+import "package:pointycastle/srp/srp6_standard_groups.dart";
+import "package:pointycastle/srp/srp6_util.dart";
+import "package:pointycastle/srp/srp6_verifier_generator.dart";
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:srp/client.dart' as client;
 import "package:uuid/uuid.dart";
 
 class UserService {
@@ -141,7 +147,12 @@ class UserService {
         queryParameters: {"email": email},
       );
       final publicKey = response.data["publicKey"];
-      await PublicKeysDB.instance.setKey(PublicKey(email, publicKey));
+      await PublicKeysDB.instance.setKey(
+        ePublicKey.PublicKey(
+          email,
+          publicKey,
+        ),
+      );
       return publicKey;
     } on DioError catch (e) {
       if (e.response != null && e.response?.statusCode == 404) {
@@ -413,6 +424,7 @@ class UserService {
 
   Future<void> setAttributes(KeyGenResult result) async {
     try {
+      await registerSrp(result.loginKey);
       await _enteDio.put(
         "/users/attributes",
         data: {
@@ -430,36 +442,63 @@ class UserService {
 
   Future<void> registerSrp(Uint8List loginKey) async {
     try {
-      // generate random uuid
-      final password = base64Encode(loginKey);
+      debugPrint("Start srp registering");
       final username = const Uuid().v4();
-      final salt = client.generateSalt();
-      final privateKey = client.derivePrivateKey(salt, username, password);
-      final verifier = client.deriveVerifier(privateKey);
-      final clientEphemeral = client.generateEphemeral();
-      final request = SetupSRPRequest(srpUserID: username.toString(),
-          srpSalt: salt,
-          srpVerifier: verifier,
-          srpA: clientEphemeral.public,
-          isUpdate: false,
+      final sGen = Random.secure();
+      final random = SecureRandom('Fortuna');
+      random.seed(KeyParameter(
+          Uint8List.fromList(List.generate(32, (_) => sGen.nextInt(255))),),);
+      final Uint8List identity = Uint8List.fromList(username.codeUnits);
+      final Uint8List password = loginKey;
+      final Uint8List salt = random.nextBytes(16);
+      final gen = SRP6VerifierGenerator(
+        group: SRP6StandardGroups.rfc5054_4096,
+        digest: Digest('SHA-256'),
+      );
+      final v = gen.generateVerifier(salt, identity, password);
+
+      final client = SRP6Client(
+        group: SRP6StandardGroups.rfc5054_4096,
+        digest: Digest('SHA-256'),
+        random: random,
+      );
+
+      final A = client.generateClientCredentials(salt, identity, password);
+      final request = SetupSRPRequest(
+        srpUserID: username.toString(),
+        srpSalt: base64Encode(salt),
+        srpVerifier: base64Encode(SRP6Util.encodeBigInt(v)),
+        srpA: base64Encode(SRP6Util.encodeBigInt(A!)),
+        isUpdate: false,
       );
       final response = await _enteDio.post(
         "/users/srp/setup",
         data: request.toMap(),
       );
       if (response.statusCode == 200) {
-      final setupSRPResponse = SetupSRPResponse.fromJson(response.data);
-
+        final SetupSRPResponse setupSRPResponse =
+            SetupSRPResponse.fromJson(response.data);
+        final serverB =
+            SRP6Util.decodeBigInt(base64Decode(setupSRPResponse.srpB));
+        final clientS = client.calculateSecret(serverB);
+        final clientM = client.calculateClientEvidenceMessage();
+        final CompleteSRPSetupRequest completeSRPSetupRequest =
+            CompleteSRPSetupRequest(
+          setupID: setupSRPResponse.setupID,
+          srpM1: base64Encode(SRP6Util.encodeBigInt(clientM!)),
+        );
+        final completeResponse = await _enteDio.post(
+          "/users/srp/complete",
+          data: completeSRPSetupRequest.toMap(),
+        );
       } else {
         throw Exception("register-srp action failed");
       }
-    } catch (e) {
-      _logger.severe(e);
+    } catch (e,s) {
+      _logger.severe("failed to register srp" ,e,s);
       rethrow;
     }
   }
-
-
 
   Future<void> updateKeyAttributes(KeyAttributes keyAttributes) async {
     try {
@@ -894,6 +933,4 @@ class UserService {
   bool hasEnabledTwoFactor() {
     return _preferences.getBool(keyHasEnabledTwoFactor) ?? false;
   }
-
-
 }
