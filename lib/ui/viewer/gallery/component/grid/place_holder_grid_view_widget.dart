@@ -13,6 +13,7 @@ class PlaceHolderGridViewWidget extends StatelessWidget {
 
   final int count, columns;
 
+  static Widget? _placeHolderCache;
   static final _gridViewCache = <String, GridView>{};
   static const crossAxisSpacing = 2.0; // as per your code
   static const mainAxisSpacing = 2.0; // as per your code
@@ -32,7 +33,8 @@ class PlaceHolderGridViewWidget extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
-          return Container(color: faintColor);
+          return PlaceHolderGridViewWidget._placeHolderCache ??=
+              Container(color: faintColor);
         },
         itemCount: limitCount,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
