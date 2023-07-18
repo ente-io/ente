@@ -67,7 +67,7 @@ class CollectionsFlexiGridViewWidget extends StatelessWidget {
           mainAxisSpacing: 4,
           crossAxisSpacing: gapBetweenAlbums,
           childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 46),
-        ), //24 is height of album title
+        ),
       ),
     );
   }

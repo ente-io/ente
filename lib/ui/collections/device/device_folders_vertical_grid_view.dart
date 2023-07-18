@@ -48,9 +48,15 @@ class _DeviceFolderVerticalGridViewBodyState
   StreamSubscription<BackupFoldersUpdatedEvent>? _backupFoldersUpdatedEvent;
   StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
   String _loadReason = "init";
-  static const horizontalPadding = 20.0;
-  static const thumbnailSize = 120.0;
   final logger = Logger((_DeviceFolderVerticalGridViewBodyState).toString());
+  /*
+  Aspect ratio 1:1 Max width 224 Fixed gap 8
+  Width changes dynamically with screen width such that we can fit 2 in one row.
+  Keep the width integral (center the albums to distribute excess pixels)
+   */
+  static const maxThumbnailWidth = 224.0;
+  static const fixedGapBetweenAlbum = 8.0;
+  static const minGapForHorizontalPadding = 8.0;
 
   @override
   void initState() {
@@ -80,27 +86,41 @@ class _DeviceFolderVerticalGridViewBodyState
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final double screenWidth = MediaQuery.of(context).size.width;
+          final int albumsCountInOneRow =
+              max(screenWidth ~/ maxThumbnailWidth, 2);
+          final double gapBetweenAlbums =
+              (albumsCountInOneRow - 1) * fixedGapBetweenAlbum;
+          final double gapOnSizeOfAlbums = minGapForHorizontalPadding +
+              (screenWidth -
+                      gapBetweenAlbums -
+                      (2 * minGapForHorizontalPadding)) %
+                  albumsCountInOneRow;
 
-          final int crossAxisItemCount =
-              max(screenWidth ~/ (thumbnailSize + horizontalPadding), 2);
+          final double sideOfThumbnail =
+              (screenWidth - gapOnSizeOfAlbums - gapBetweenAlbums) /
+                  albumsCountInOneRow;
+
           return snapshot.data!.isEmpty
               ? const EmptyState()
               : Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: horizontalPadding,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: GridView.builder(
-                    physics: const ScrollPhysics(),
+                    padding: const EdgeInsets.only(top: 8),
+                    shrinkWrap: false,
                     itemBuilder: (context, index) {
                       final deviceCollection = snapshot.data![index];
-                      return DeviceFolderItem(deviceCollection);
+                      return DeviceFolderItem(
+                        deviceCollection,
+                        sideOfThumbnail: sideOfThumbnail,
+                      );
                     },
                     itemCount: snapshot.data!.length,
-                    // To include the + button
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisItemCount,
-                      crossAxisSpacing: 16.0,
-                      childAspectRatio: thumbnailSize / (thumbnailSize + 22),
+                      crossAxisCount: albumsCountInOneRow,
+                      mainAxisSpacing: 4,
+                      crossAxisSpacing: gapBetweenAlbums,
+                      childAspectRatio:
+                          sideOfThumbnail / (sideOfThumbnail + 46),
                     ),
                   ),
                 );

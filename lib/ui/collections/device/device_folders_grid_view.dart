@@ -69,7 +69,10 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
                       // to disable GridView's scrolling
                       itemBuilder: (context, index) {
                         final deviceCollection = snapshot.data![index];
-                        return DeviceFolderItem(deviceCollection);
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: DeviceFolderItem(deviceCollection),
+                        );
                       },
                       itemCount: snapshot.data!.length,
                     );
