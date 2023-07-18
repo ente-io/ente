@@ -602,27 +602,26 @@ class UserService {
         // should never reach here
         throw Exception("unexpected response during email verification");
       }
-    } on DioError catch (e) {
-      _logger.info(e);
+    } on DioError catch (e,s) {
       await dialog.hide();
-      if (e.response != null && e.response!.statusCode == 410) {
+      if (e.response != null && e.response!.statusCode == 401) {
+        await showErrorDialog(
+          context,
+          S.of(context).incorrectPasswordTitle,
+          S.of(context).pleaseTryAgain,
+        );
+      } else {
+        _logger.fine('failed to verify password', e,s);
         await showErrorDialog(
           context,
           S.of(context).oops,
-          S.of(context).yourVerificationCodeHasExpired,
-        );
-        Navigator.of(context).pop();
-      } else {
-        showErrorDialog(
-          context,
-          S.of(context).incorrectCode,
-          S.of(context).sorryTheCodeYouveEnteredIsIncorrect,
+          S.of(context).verificationFailedPleaseTryAgain,
         );
       }
-    } catch (e) {
+    } catch (e,s) {
+      _logger.fine('failed to verify password', e,s);
       await dialog.hide();
-      _logger.severe(e);
-      showErrorDialog(
+      await showErrorDialog(
         context,
         S.of(context).oops,
         S.of(context).verificationFailedPleaseTryAgain,
