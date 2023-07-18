@@ -5,6 +5,7 @@ import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/user/srp.dart";
 import "package:photos/services/user_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/toast_util.dart";
@@ -93,11 +94,16 @@ State<LoginPasswordVerificationPage> {
               children: [
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                  const EdgeInsets.only(top: 30, left: 20, right: 20),
                   child: Text(
                     S.of(context).enterPassword,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 30, left: 22, right:
+                  20,),
+                  child: Text(email ?? '', style: getEnteTextTheme(context).smallMuted,),
                 ),
                 Visibility(
                   // hidden textForm for suggesting auto-fill service for saving
