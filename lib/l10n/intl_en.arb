@@ -1083,5 +1083,6 @@
   "zoomOutToSeePhotos": "Zoom out to see photos",
   "noImagesWithLocation": "No images with location",
   "unpinAlbum": "Unpin album",
-  "pinAlbum": "Pin album"
+  "pinAlbum": "Pin album",
+  "toResetVerifyEmail": "To reset your password, please verify your email first."
 }

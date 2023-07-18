@@ -8,7 +8,6 @@ import "package:photos/services/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/toast_util.dart";
 
 // LoginPasswordVerificationPage is a page that allows the user to enter their password to verify their identity.
 // If the password is correct, then the user is either directed to
@@ -176,15 +175,10 @@ State<LoginPasswordVerificationPage> {
                     children: [
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          showToast(context, "Trigger ott verification");
-                          // Navigator.of(context).push(
-                          //   MaterialPageRoute(
-                          //     builder: (BuildContext context) {
-                          //       return const RecoveryPage();
-                          //     },
-                          //   ),
-                          // );
+                        onTap: () async {
+                          await UserService.instance
+                              .sendOtt(context, email!,
+                              isResetPasswordScreen: true,);
                         },
                         child: Center(
                           child: Text(

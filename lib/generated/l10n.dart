@@ -7414,6 +7414,16 @@ class S {
       args: [],
     );
   }
+
+  /// `To reset your password, please verify your email first.`
+  String get toResetVerifyEmail {
+    return Intl.message(
+      'To reset your password, please verify your email first.',
+      name: 'toResetVerifyEmail',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

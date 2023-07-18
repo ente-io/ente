@@ -84,6 +84,7 @@ class UserService {
     String email, {
     bool isChangeEmail = false,
     bool isCreateAccountScreen = false,
+    bool isResetPasswordScreen = false,
   }) async {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
@@ -102,6 +103,7 @@ class UserService {
                   email,
                   isChangeEmail: isChangeEmail,
                   isCreateAccountScreen: isCreateAccountScreen,
+                  isResetPasswordScreen: isResetPasswordScreen,
                 );
               },
             ),
