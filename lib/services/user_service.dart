@@ -459,10 +459,9 @@ class UserService {
 
   Future<void> registerSrp(Uint8List loginKey) async {
     try {
-      debugPrint("Start srp registering");
       final String username = const Uuid().v4().toString();
       final SecureRandom random = _getSecureRandom();
-      final Uint8List identity = Uint8List.fromList(username.codeUnits);
+      final Uint8List identity = Uint8List.fromList(utf8.encode(username));
       final Uint8List password = loginKey;
       final Uint8List salt = random.nextBytes(16);
       final gen = SRP6VerifierGenerator(
@@ -526,13 +525,16 @@ class UserService {
     return secureRandom;
   }
 
-  Future<void> verifyEmailViaPassword(BuildContext context,
-      SrpAttributes srpAttributes,
-      String userPassword,
-      )
-  async {
-    final dialog = createProgressDialog(context, S.of(context).pleaseWait,
-        isDismissible: true,);
+  Future<void> verifyEmailViaPassword(
+    BuildContext context,
+    SrpAttributes srpAttributes,
+    String userPassword,
+  ) async {
+    final dialog = createProgressDialog(
+      context,
+      S.of(context).pleaseWait,
+      isDismissible: true,
+    );
     await dialog.show();
     try {
       final kek = await CryptoUtil.deriveKey(
@@ -545,7 +547,9 @@ class UserService {
         throw KeyDerivationError();
       });
       final loginKey = await CryptoUtil.deriveLoginKey(kek);
-      final Uint8List identity = Uint8List.fromList(srpAttributes.srpUserID.codeUnits);
+      final Uint8List identity = Uint8List.fromList(
+        utf8.encode(srpAttributes.srpUserID),
+      );
       final Uint8List salt = base64Decode(srpAttributes.srpSalt);
       final Uint8List password = loginKey;
       final SecureRandom random = _getSecureRandom();
@@ -592,7 +596,7 @@ class UserService {
           if (Configuration.instance.getEncryptedToken() != null) {
             page = const PasswordReentryPage();
           } else {
-           throw Exception("unexpected response during email verification");
+            throw Exception("unexpected response during email verification");
           }
         }
         Navigator.of(context).pushAndRemoveUntil(
@@ -601,13 +605,13 @@ class UserService {
               return page;
             },
           ),
-              (route) => route.isFirst,
+          (route) => route.isFirst,
         );
       } else {
         // should never reach here
         throw Exception("unexpected response during email verification");
       }
-    } on DioError catch (e,s) {
+    } on DioError catch (e, s) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 401) {
         await showErrorDialog(
@@ -616,15 +620,15 @@ class UserService {
           S.of(context).pleaseTryAgain,
         );
       } else {
-        _logger.fine('failed to verify password', e,s);
+        _logger.fine('failed to verify password', e, s);
         await showErrorDialog(
           context,
           S.of(context).oops,
           S.of(context).verificationFailedPleaseTryAgain,
         );
       }
-    } catch (e,s) {
-      _logger.fine('failed to verify password', e,s);
+    } catch (e, s) {
+      _logger.fine('failed to verify password', e, s);
       await dialog.hide();
       await showErrorDialog(
         context,
@@ -633,7 +637,6 @@ class UserService {
       );
     }
   }
-
 
   Future<void> updateKeyAttributes(KeyAttributes keyAttributes) async {
     try {
