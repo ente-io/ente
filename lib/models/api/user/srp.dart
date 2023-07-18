@@ -81,6 +81,31 @@ class CompleteSRPSetupRequest {
     );
   }
 }
+class SrpAttributes {
+  final String srpUserID;
+  final String srpSalt;
+  final int memLimit;
+  final int opsLimit;
+  final String kekSalt;
+
+  SrpAttributes({
+    required this.srpUserID,
+    required this.srpSalt,
+    required this.memLimit,
+    required this.opsLimit,
+    required this.kekSalt,
+  });
+
+  factory SrpAttributes.fromMap(Map<String, dynamic> map) {
+    return SrpAttributes(
+      srpUserID: map['attributes']['srpUserID'],
+      srpSalt: map['attributes']['srpSalt'],
+      memLimit: map['attributes']['memLimit'],
+      opsLimit: map['attributes']['opsLimit'],
+      kekSalt: map['attributes']['kekSalt'],
+    );
+  }
+}
 
 class CompleteSRPSetupResponse {
   final String setupID;

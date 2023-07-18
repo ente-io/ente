@@ -5,10 +5,12 @@ import 'dart:typed_data';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/public_keys_db.dart';
@@ -440,10 +442,23 @@ class UserService {
     }
   }
 
+  Future<SrpAttributes> getSrpAttributes(String email) async {
+    final response = await _dio.get( _config.getHttpEndpoint() + "/users/srp/attributes",
+      queryParameters: {
+        "email": email,
+      },
+    );
+    if (response.statusCode == 200) {
+      return SrpAttributes.fromMap(response.data);
+    } else {
+      throw Exception("get-srp-attributes action failed");
+    }
+  }
+
   Future<void> registerSrp(Uint8List loginKey) async {
     try {
       debugPrint("Start srp registering");
-      final username = const Uuid().v4();
+      final String username = const Uuid().v4().toString();
       final sGen = Random.secure();
       final random = SecureRandom('Fortuna');
       random.seed(KeyParameter(
@@ -465,7 +480,7 @@ class UserService {
 
       final A = client.generateClientCredentials(salt, identity, password);
       final request = SetupSRPRequest(
-        srpUserID: username.toString(),
+        srpUserID: username,
         srpSalt: base64Encode(salt),
         srpVerifier: base64Encode(SRP6Util.encodeBigInt(v)),
         srpA: base64Encode(SRP6Util.encodeBigInt(A!)),
@@ -480,6 +495,7 @@ class UserService {
             SetupSRPResponse.fromJson(response.data);
         final serverB =
             SRP6Util.decodeBigInt(base64Decode(setupSRPResponse.srpB));
+        // ignore: need to calculate secret to get M1, unused_local_variable
         final clientS = client.calculateSecret(serverB);
         final clientM = client.calculateClientEvidenceMessage();
         final CompleteSRPSetupRequest completeSRPSetupRequest =
@@ -499,6 +515,120 @@ class UserService {
       rethrow;
     }
   }
+
+  Future<void> verifyEmailViaPassword(BuildContext context,
+      SrpAttributes srpAttributes,
+      String userPassword,
+      )
+  async {
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait,
+        isDismissible: true,);
+    await dialog.show();
+    try {
+      final kek = await CryptoUtil.deriveKey(
+        utf8.encode(userPassword) as Uint8List,
+        CryptoUtil.base642bin(srpAttributes.kekSalt),
+        srpAttributes.memLimit,
+        srpAttributes.opsLimit,
+      ).onError((e, s) {
+        _logger.severe('key derivation failed', e, s);
+        throw KeyDerivationError();
+      });
+      final loginKey = await CryptoUtil.deriveLoginKey(kek);
+      final sGen = Random.secure();
+      final random = SecureRandom('Fortuna');
+      final Uint8List identity = Uint8List.fromList(srpAttributes.srpUserID.codeUnits);
+      final Uint8List salt = base64Decode(srpAttributes.srpSalt);
+      final Uint8List password = loginKey;
+      random.seed(KeyParameter(
+        Uint8List.fromList(List.generate(32, (_) => sGen.nextInt(255))),),);
+
+      final client = SRP6Client(
+        group: SRP6StandardGroups.rfc5054_4096,
+        digest: Digest('SHA-256'),
+        random: random,
+      );
+
+      final A = client.generateClientCredentials(salt, identity, password);
+
+      final createSessionResponse = await _dio.post(
+        _config.getHttpEndpoint() + "/users/srp/create-session",
+        data: {
+          "srpUserID": srpAttributes.srpUserID,
+          "srpA": base64Encode(SRP6Util.encodeBigInt(A!)),
+        },
+      );
+      final String sessionID = createSessionResponse.data["sessionID"];
+      final String srpB = createSessionResponse.data["srpB"];
+
+      final serverB = SRP6Util.decodeBigInt(base64Decode(srpB));
+      // ignore: need to calculate secret to get M1, unused_local_variable
+      final clientS = client.calculateSecret(serverB);
+      final clientM = client.calculateClientEvidenceMessage();
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/users/srp/verify",
+        data: {
+          "sessionID": sessionID,
+          "srpUserID": srpAttributes.srpUserID,
+          "srpM1": base64Encode(SRP6Util.encodeBigInt(clientM!)),
+        },
+      );
+      if (response.statusCode == 200) {
+        await dialog.hide();
+        Widget page;
+        final String twoFASessionID = response.data["twoFactorSessionID"];
+        Configuration.instance.setVolatilePassword(userPassword);
+        if (twoFASessionID.isNotEmpty) {
+          setTwoFactor(value: true);
+          page = TwoFactorAuthenticationPage(twoFASessionID);
+        } else {
+          await _saveConfiguration(response);
+          if (Configuration.instance.getEncryptedToken() != null) {
+            page = const PasswordReentryPage();
+          } else {
+           throw Exception("unexpected response during email verification");
+          }
+        }
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return page;
+            },
+          ),
+              (route) => route.isFirst,
+        );
+      } else {
+        // should never reach here
+        throw Exception("unexpected response during email verification");
+      }
+    } on DioError catch (e) {
+      _logger.info(e);
+      await dialog.hide();
+      if (e.response != null && e.response!.statusCode == 410) {
+        await showErrorDialog(
+          context,
+          S.of(context).oops,
+          S.of(context).yourVerificationCodeHasExpired,
+        );
+        Navigator.of(context).pop();
+      } else {
+        showErrorDialog(
+          context,
+          S.of(context).incorrectCode,
+          S.of(context).sorryTheCodeYouveEnteredIsIncorrect,
+        );
+      }
+    } catch (e) {
+      await dialog.hide();
+      _logger.severe(e);
+      showErrorDialog(
+        context,
+        S.of(context).oops,
+        S.of(context).verificationFailedPleaseTryAgain,
+      );
+    }
+  }
+
 
   Future<void> updateKeyAttributes(KeyAttributes keyAttributes) async {
     try {
