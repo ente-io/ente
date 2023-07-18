@@ -20,7 +20,7 @@ class DeviceFolderItem extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
         child: SizedBox(
-          height: 140,
+          // height: 140,
           width: 120,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
