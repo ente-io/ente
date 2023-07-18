@@ -662,7 +662,7 @@ class RemoteSyncService {
         // Case [1] Check and clear local cache when uploadedFile already exist
         // Note: Existing file can be null here if it's replaced by the time we
         // reach here
-        existingFile = await _db.getFile(remoteFile.generatedID!);
+        existingFile = await _db.getUploadedFile(remoteFile.uploadedFileID!, remoteFile.collectionID!,);
         if (existingFile != null &&
             _shouldClearCache(remoteFile, existingFile)) {
           needsGalleryReload = true;
