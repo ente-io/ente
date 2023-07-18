@@ -586,7 +586,7 @@ class UserService {
       final clientS = client.calculateSecret(serverB);
       final clientM = client.calculateClientEvidenceMessage();
       final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/srp/verify",
+        _config.getHttpEndpoint() + "/users/srp/verify-session",
         data: {
           "sessionID": sessionID,
           "srpUserID": srpAttributes.srpUserID,
