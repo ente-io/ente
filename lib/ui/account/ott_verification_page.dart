@@ -129,14 +129,14 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                             },
                           ),
                         ),
-                        if(widget.isResetPasswordScreen)
+                        widget.isResetPasswordScreen ?
                           Text(
                             S.of(context).toResetVerifyEmail,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium!
                                 .copyWith(fontSize: 14),
-                          ),
+                          ):
                         Text(
                           S.of(context).checkInboxAndSpamFolder,
                           style: Theme.of(context)
