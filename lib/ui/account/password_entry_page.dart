@@ -383,9 +383,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         createProgressDialog(context, S.of(context).generatingEncryptionKeys);
     await dialog.show();
     try {
-      final keyAttributes = await Configuration.instance
+      final result = await Configuration.instance
           .getAttributesForNewPassword(_passwordController1.text);
-      await UserService.instance.updateKeyAttributes(keyAttributes);
+      await UserService.instance.updateKeyAttributes(result.item1, result.item2);
       await dialog.hide();
       showShortToast(context, S.of(context).passwordChangedSuccessfully);
       Navigator.of(context).pop();

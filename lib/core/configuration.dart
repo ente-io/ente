@@ -32,6 +32,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import "package:tuple/tuple.dart";
 import 'package:uuid/uuid.dart';
 import 'package:wakelock/wakelock.dart';
 
@@ -234,7 +235,9 @@ class Configuration {
     return KeyGenResult(attributes, privateAttributes, loginKey);
   }
 
-  Future<KeyAttributes> getAttributesForNewPassword(String password) async {
+  Future<Tuple2<KeyAttributes, Uint8List>> getAttributesForNewPassword(
+    String password,
+  ) async {
     // Get master key
     final masterKey = getKey();
 
@@ -245,6 +248,7 @@ class Configuration {
       utf8.encode(password) as Uint8List,
       kekSalt,
     );
+    final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
     final encryptedKeyData =
@@ -252,13 +256,14 @@ class Configuration {
 
     final existingAttributes = getKeyAttributes();
 
-    return existingAttributes!.copyWith(
+    final updatedAttributes = existingAttributes!.copyWith(
       kekSalt: CryptoUtil.bin2base64(kekSalt),
       encryptedKey: CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
       keyDecryptionNonce: CryptoUtil.bin2base64(encryptedKeyData.nonce!),
       memLimit: derivedKeyResult.memLimit,
       opsLimit: derivedKeyResult.opsLimit,
     );
+    return Tuple2(updatedAttributes, loginKey);
   }
 
   Future<void> decryptAndSaveSecrets(

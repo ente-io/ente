@@ -436,7 +436,7 @@ class UserService {
 
   Future<void> setAttributes(KeyGenResult result) async {
     try {
-      await registerSrp(result.loginKey);
+      await registerOrUpdateSrp(result.loginKey);
       await _enteDio.put(
         "/users/attributes",
         data: {
@@ -465,7 +465,10 @@ class UserService {
     }
   }
 
-  Future<void> registerSrp(Uint8List loginKey) async {
+  Future<void> registerOrUpdateSrp(
+    Uint8List loginKey, {
+    SetKeysRequest? setKeysRequest,
+  }) async {
     try {
       final String username = const Uuid().v4().toString();
       final SecureRandom random = _getSecureRandom();
@@ -504,15 +507,25 @@ class UserService {
         // ignore: need to calculate secret to get M1, unused_local_variable
         final clientS = client.calculateSecret(serverB);
         final clientM = client.calculateClientEvidenceMessage();
-        final CompleteSRPSetupRequest completeSRPSetupRequest =
-            CompleteSRPSetupRequest(
-          setupID: setupSRPResponse.setupID,
-          srpM1: base64Encode(SRP6Util.encodeBigInt(clientM!)),
-        );
-        final completeResponse = await _enteDio.post(
-          "/users/srp/complete",
-          data: completeSRPSetupRequest.toMap(),
-        );
+        late Response srpCompleteResponse;
+        if(setKeysRequest == null) {
+          srpCompleteResponse = await _enteDio.post(
+            "/users/srp/complete",
+            data: {
+              'setupID': setupSRPResponse.setupID,
+              'srpM1': base64Encode(SRP6Util.encodeBigInt(clientM!)),
+            },
+          );
+        } else {
+          srpCompleteResponse = await _enteDio.post(
+            "/users/srp/update",
+            data: {
+              'setupID': setupSRPResponse.setupID,
+              'srpM1': base64Encode(SRP6Util.encodeBigInt(clientM!)),
+              'updatedKeyAttr': setKeysRequest.toMap(),
+            },
+          );
+        }
       } else {
         throw Exception("register-srp action failed");
       }
@@ -646,7 +659,9 @@ class UserService {
     }
   }
 
-  Future<void> updateKeyAttributes(KeyAttributes keyAttributes) async {
+  Future<void> updateKeyAttributes(KeyAttributes keyAttributes, Uint8List
+  loginKey,)
+  async {
     try {
       final setKeyRequest = SetKeysRequest(
         kekSalt: keyAttributes.kekSalt,
@@ -655,10 +670,11 @@ class UserService {
         memLimit: keyAttributes.memLimit!,
         opsLimit: keyAttributes.opsLimit!,
       );
-      await _enteDio.put(
-        "/users/keys",
-        data: setKeyRequest.toMap(),
-      );
+      await registerOrUpdateSrp(loginKey, setKeysRequest: setKeyRequest);
+      // await _enteDio.put(
+      //   "/users/keys",
+      //   data: setKeyRequest.toMap(),
+      // );
       await _config.setKeyAttributes(keyAttributes);
     } catch (e) {
       _logger.severe(e);
