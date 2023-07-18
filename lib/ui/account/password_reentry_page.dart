@@ -36,6 +36,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     email = Configuration.instance.getEmail();
     _volatilePassword = Configuration.instance.getVolatilePassword();
     if (_volatilePassword != null) {
+      _passwordController.text = _volatilePassword!;
       Future.delayed(
         Duration.zero,
             () => verifyPassword(_volatilePassword!),
