@@ -30,6 +30,7 @@ import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/ott_verification_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/password_reentry_page.dart';
+import "package:photos/ui/account/recovery_page.dart";
 import 'package:photos/ui/account/two_factor_authentication_page.dart';
 import 'package:photos/ui/account/two_factor_recovery_page.dart';
 import 'package:photos/ui/account/two_factor_setup_page.dart';
@@ -303,7 +304,9 @@ class UserService {
     }
   }
 
-  Future<void> verifyEmail(BuildContext context, String ott) async {
+  Future<void> verifyEmail(BuildContext context, String ott, {bool
+  isResettingPasswordScreen = false,})
+  async {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
@@ -324,7 +327,12 @@ class UserService {
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
-            page = const PasswordReentryPage();
+            if(isResettingPasswordScreen) {
+              page = const RecoveryPage();
+            } else {
+              page = const PasswordReentryPage();
+            }
+
           } else {
             page = const PasswordEntryPage(mode: PasswordEntryMode.set,);
           }

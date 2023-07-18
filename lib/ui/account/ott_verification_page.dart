@@ -79,7 +79,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             );
           } else {
             UserService.instance
-                .verifyEmail(context, _verificationCodeController.text);
+                .verifyEmail(context, _verificationCodeController.text,
+              isResettingPasswordScreen: widget.isResetPasswordScreen,);
           }
           FocusScope.of(context).unfocus();
         },
