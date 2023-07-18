@@ -12,7 +12,6 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/ui/huge_listview/huge_listview.dart';
 import "package:photos/ui/viewer/gallery/component/multiple_groups_gallery_view.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
@@ -86,8 +85,6 @@ class Gallery extends StatefulWidget {
 
 class _GalleryState extends State<Gallery> {
   static const int kInitialLoadLimit = 100;
-
-  final _hugeListViewKey = GlobalKey<HugeListViewState>();
 
   late Logger _logger;
   List<List<File>> _currentGroupedFiles = [];
@@ -231,7 +228,6 @@ class _GalleryState extends State<Gallery> {
       sortOrderAsc: _sortOrderAsc,
       inSelectionMode: widget.inSelectionMode,
       child: MultipleGroupsGalleryView(
-        hugeListViewKey: _hugeListViewKey,
         itemScroller: _itemScroller,
         groupedFiles: _currentGroupedFiles,
         disableScroll: widget.disableScroll,

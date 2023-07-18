@@ -13,8 +13,6 @@ class GroupGallery extends StatelessWidget {
   final String tag;
   final GalleryLoader asyncLoader;
   final SelectedFiles? selectedFiles;
-  final ValueNotifier<bool> toggleSelectAllFromDay;
-  final ValueNotifier<bool> areAllFromDaySelected;
   final bool limitSelectionToOne;
 
   const GroupGallery({
@@ -23,8 +21,6 @@ class GroupGallery extends StatelessWidget {
     required this.tag,
     required this.asyncLoader,
     required this.selectedFiles,
-    required this.toggleSelectAllFromDay,
-    required this.areAllFromDaySelected,
     required this.limitSelectionToOne,
     super.key,
   });
@@ -47,8 +43,6 @@ class GroupGallery extends StatelessWidget {
           selectedFiles,
           index == 0,
           files.length > kRecycleLimit,
-          toggleSelectAllFromDay,
-          areAllFromDaySelected,
           photoGridSize,
           limitSelectionToOne: limitSelectionToOne,
         ),
