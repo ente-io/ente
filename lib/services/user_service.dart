@@ -37,6 +37,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import "package:pointycastle/export.dart";
 import "package:pointycastle/pointycastle.dart";
 import "package:pointycastle/srp/srp6_client.dart";
 // import "package:pointycastle/srp/srp6_server.dart";
@@ -49,6 +50,7 @@ import "package:uuid/uuid.dart";
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
   static const keyUserDetails = "user_details";
+  final  SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
   final _dio = NetworkClient.instance.getDio();
   final _enteDio = NetworkClient.instance.enteDio;
   final _logger = Logger((UserService).toString());
@@ -464,13 +466,13 @@ class UserService {
       final Uint8List password = loginKey;
       final Uint8List salt = random.nextBytes(16);
       final gen = SRP6VerifierGenerator(
-        group: SRP6StandardGroups.rfc5054_4096,
+        group: kDefaultSrpGroup,
         digest: Digest('SHA-256'),
       );
       final v = gen.generateVerifier(salt, identity, password);
 
       final client = SRP6Client(
-        group: SRP6StandardGroups.rfc5054_4096,
+        group: kDefaultSrpGroup,
         digest: Digest('SHA-256'),
         random: random,
       );
@@ -514,11 +516,14 @@ class UserService {
   }
 
   SecureRandom _getSecureRandom() {
-    final sGen = Random.secure();
-    final random = SecureRandom('Fortuna');
-    random.seed(KeyParameter(
-        Uint8List.fromList(List.generate(32, (_) => sGen.nextInt(255))),),);
-    return random;
+    final List<int> seeds = [];
+    final random = Random.secure();
+    for (int i = 0; i < 32; i++) {
+      seeds.add(random.nextInt(255));
+    }
+    final secureRandom = FortunaRandom();
+    secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
+    return secureRandom;
   }
 
   Future<void> verifyEmailViaPassword(BuildContext context,
@@ -543,10 +548,10 @@ class UserService {
       final Uint8List identity = Uint8List.fromList(srpAttributes.srpUserID.codeUnits);
       final Uint8List salt = base64Decode(srpAttributes.srpSalt);
       final Uint8List password = loginKey;
-      final random =_getSecureRandom();
+      final SecureRandom random = _getSecureRandom();
 
       final client = SRP6Client(
-        group: SRP6StandardGroups.rfc5054_4096,
+        group: kDefaultSrpGroup,
         digest: Digest('SHA-256'),
         random: random,
       );
