@@ -384,7 +384,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     await dialog.show();
     try {
       final keyAttributes = await Configuration.instance
-          .updatePassword(_passwordController1.text);
+          .getAttributesForNewPassword(_passwordController1.text);
       await UserService.instance.updateKeyAttributes(keyAttributes);
       await dialog.hide();
       showShortToast(context, S.of(context).passwordChangedSuccessfully);

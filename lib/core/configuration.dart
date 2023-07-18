@@ -234,7 +234,7 @@ class Configuration {
     return KeyGenResult(attributes, privateAttributes, loginKey);
   }
 
-  Future<KeyAttributes> updatePassword(String password) async {
+  Future<KeyAttributes> getAttributesForNewPassword(String password) async {
     // Get master key
     final masterKey = getKey();
 

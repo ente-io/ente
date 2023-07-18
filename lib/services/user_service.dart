@@ -39,9 +39,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import "package:pointycastle/export.dart";
-import "package:pointycastle/pointycastle.dart";
 import "package:pointycastle/srp/srp6_client.dart";
-// import "package:pointycastle/srp/srp6_server.dart";
 import "package:pointycastle/srp/srp6_standard_groups.dart";
 import "package:pointycastle/srp/srp6_util.dart";
 import "package:pointycastle/srp/srp6_verifier_generator.dart";
@@ -615,7 +613,7 @@ class UserService {
               return page;
             },
           ),
-          (route) => route.isFirst,
+              (route) => route.isFirst,
         );
       } else {
         // should never reach here
