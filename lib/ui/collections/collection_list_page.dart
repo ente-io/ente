@@ -17,15 +17,20 @@ class CollectionListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: appTitle,
-      ),
       body: SafeArea(
-        child: CollectionsFlexiGridViewWidget(
-          collections,
-          displayLimitCount: collections?.length ?? 0,
-          tag: tag,
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              elevation: 0,
+              title: appTitle,
+              floating: true,
+            ),
+            CollectionsFlexiGridViewWidget(
+              collections,
+              displayLimitCount: collections?.length ?? 0,
+              tag: tag,
+            ),
+          ],
         ),
       ),
     );
