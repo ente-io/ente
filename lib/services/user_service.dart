@@ -459,10 +459,7 @@ class UserService {
     try {
       debugPrint("Start srp registering");
       final String username = const Uuid().v4().toString();
-      final sGen = Random.secure();
-      final random = SecureRandom('Fortuna');
-      random.seed(KeyParameter(
-          Uint8List.fromList(List.generate(32, (_) => sGen.nextInt(255))),),);
+      final SecureRandom random = _getSecureRandom();
       final Uint8List identity = Uint8List.fromList(username.codeUnits);
       final Uint8List password = loginKey;
       final Uint8List salt = random.nextBytes(16);
@@ -516,6 +513,14 @@ class UserService {
     }
   }
 
+  SecureRandom _getSecureRandom() {
+    final sGen = Random.secure();
+    final random = SecureRandom('Fortuna');
+    random.seed(KeyParameter(
+        Uint8List.fromList(List.generate(32, (_) => sGen.nextInt(255))),),);
+    return random;
+  }
+
   Future<void> verifyEmailViaPassword(BuildContext context,
       SrpAttributes srpAttributes,
       String userPassword,
@@ -535,13 +540,10 @@ class UserService {
         throw KeyDerivationError();
       });
       final loginKey = await CryptoUtil.deriveLoginKey(kek);
-      final sGen = Random.secure();
-      final random = SecureRandom('Fortuna');
       final Uint8List identity = Uint8List.fromList(srpAttributes.srpUserID.codeUnits);
       final Uint8List salt = base64Decode(srpAttributes.srpSalt);
       final Uint8List password = loginKey;
-      random.seed(KeyParameter(
-        Uint8List.fromList(List.generate(32, (_) => sGen.nextInt(255))),),);
+      final random =_getSecureRandom();
 
       final client = SRP6Client(
         group: SRP6StandardGroups.rfc5054_4096,
@@ -550,7 +552,6 @@ class UserService {
       );
 
       final A = client.generateClientCredentials(salt, identity, password);
-
       final createSessionResponse = await _dio.post(
         _config.getHttpEndpoint() + "/users/srp/create-session",
         data: {
