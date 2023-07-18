@@ -22,12 +22,15 @@ class DeviceFolderVerticalGridView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: appTitle,
-      ),
-      body: const SafeArea(
-        child: _DeviceFolderVerticalGridViewBody(),
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            elevation: 0,
+            title: appTitle,
+            floating: true,
+          ),
+          const _DeviceFolderVerticalGridViewBody(),
+        ],
       ),
     );
   }
@@ -101,20 +104,10 @@ class _DeviceFolderVerticalGridViewBodyState
                   albumsCountInOneRow;
 
           return snapshot.data!.isEmpty
-              ? const EmptyState()
-              : Padding(
+              ? const SliverFillRemaining(child: EmptyState())
+              : SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: GridView.builder(
-                    padding: const EdgeInsets.only(top: 8),
-                    shrinkWrap: false,
-                    itemBuilder: (context, index) {
-                      final deviceCollection = snapshot.data![index];
-                      return DeviceFolderItem(
-                        deviceCollection,
-                        sideOfThumbnail: sideOfThumbnail,
-                      );
-                    },
-                    itemCount: snapshot.data!.length,
+                  sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: albumsCountInOneRow,
                       mainAxisSpacing: 4,
@@ -122,13 +115,25 @@ class _DeviceFolderVerticalGridViewBodyState
                       childAspectRatio:
                           sideOfThumbnail / (sideOfThumbnail + 46),
                     ),
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        final deviceCollection = snapshot.data![index];
+                        return DeviceFolderItem(
+                          deviceCollection,
+                          sideOfThumbnail: sideOfThumbnail,
+                        );
+                      },
+                      childCount: snapshot.data!.length,
+                    ),
                   ),
                 );
         } else if (snapshot.hasError) {
           logger.severe("failed to load device gallery", snapshot.error);
-          return Text(S.of(context).failedToLoadAlbums);
+          return SliverFillRemaining(
+            child: Center(child: Text(S.of(context).failedToLoadAlbums)),
+          );
         } else {
-          return const EnteLoadingWidget();
+          return const SliverFillRemaining(child: EnteLoadingWidget());
         }
       },
     );
