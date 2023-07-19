@@ -33,8 +33,10 @@ import "package:photos/ui/account/recovery_page.dart";
 import 'package:photos/ui/account/two_factor_authentication_page.dart';
 import 'package:photos/ui/account/two_factor_recovery_page.dart';
 import 'package:photos/ui/account/two_factor_setup_page.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import "package:pointycastle/export.dart";
@@ -641,11 +643,21 @@ class UserService {
     } on DioError catch (e, s) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 401) {
-        await showErrorDialog(
+        final dialogChoice = await showChoiceDialog(
           context,
-          S.of(context).incorrectPasswordTitle,
-          S.of(context).pleaseTryAgain,
+          title: S.of(context).incorrectPasswordTitle,
+          body: S.of(context).pleaseTryAgain,
+          firstButtonLabel: S.of(context).contactSupport,
+          secondButtonLabel: S.of(context).ok,
         );
+        if (dialogChoice!.action == ButtonAction.first) {
+          await sendLogs(
+            context,
+            S.of(context).contactSupport,
+            "support@ente.io",
+            postShare: () {},
+          );
+        }
       } else {
         _logger.fine('failed to verify password', e, s);
         await showErrorDialog(
