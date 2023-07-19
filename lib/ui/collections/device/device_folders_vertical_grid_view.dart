@@ -16,8 +16,8 @@ import 'package:photos/ui/viewer/gallery/empty_state.dart';
 
 class DeviceFolderVerticalGridView extends StatelessWidget {
   final Widget? appTitle;
-
-  const DeviceFolderVerticalGridView({this.appTitle, super.key});
+  final String? tag;
+  const DeviceFolderVerticalGridView({this.appTitle, this.tag, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,12 @@ class DeviceFolderVerticalGridView extends StatelessWidget {
         slivers: <Widget>[
           SliverAppBar(
             elevation: 0,
-            title: appTitle,
+            title: tag != null
+                ? Hero(
+                    tag: tag!,
+                    child: appTitle ?? const SizedBox.shrink(),
+                  )
+                : appTitle ?? const SizedBox.shrink(),
             floating: true,
           ),
           const _DeviceFolderVerticalGridViewBody(),

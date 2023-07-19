@@ -22,7 +22,10 @@ class CollectionListPage extends StatelessWidget {
           slivers: [
             SliverAppBar(
               elevation: 0,
-              title: appTitle,
+              title: Hero(
+                tag: tag,
+                child: appTitle ?? const SizedBox.shrink(),
+              ),
               floating: true,
             ),
             CollectionsFlexiGridViewWidget(

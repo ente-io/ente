@@ -96,26 +96,29 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         child: Column(
           children: [
             const SizedBox(height: 12),
-            SectionOptions(
-              sharedWithMe,
-              trailingWidget: collections.incoming.isNotEmpty
-                  ? IconButtonWidget(
-                      icon: Icons.chevron_right,
-                      iconButtonType: IconButtonType.secondary,
-                      onTap: () {
-                        unawaited(
-                          routeToPage(
-                            context,
-                            CollectionListPage(
-                              collections.incoming,
-                              tag: "incoming",
-                              appTitle: sharedWithMe,
+            Hero(
+              tag: "incoming",
+              child: SectionOptions(
+                sharedWithMe,
+                trailingWidget: collections.incoming.isNotEmpty
+                    ? IconButtonWidget(
+                        icon: Icons.chevron_right,
+                        iconButtonType: IconButtonType.secondary,
+                        onTap: () {
+                          unawaited(
+                            routeToPage(
+                              context,
+                              CollectionListPage(
+                                collections.incoming,
+                                tag: "incoming",
+                                appTitle: sharedWithMe,
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    )
-                  : null,
+                          );
+                        },
+                      )
+                    : null,
+              ),
             ),
             const SizedBox(height: 4),
             collections.incoming.isNotEmpty
@@ -142,26 +145,29 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                   )
                 : const IncomingAlbumEmptyState(),
             const SizedBox(height: 16),
-            SectionOptions(
-              sharedByMe,
-              trailingWidget: collections.outgoing.isNotEmpty
-                  ? IconButtonWidget(
-                      icon: Icons.chevron_right,
-                      iconButtonType: IconButtonType.secondary,
-                      onTap: () {
-                        unawaited(
-                          routeToPage(
-                            context,
-                            CollectionListPage(
-                              collections.outgoing,
-                              tag: "outgoing",
-                              appTitle: sharedByMe,
+            Hero(
+              tag: "outgoing",
+              child: SectionOptions(
+                sharedByMe,
+                trailingWidget: collections.outgoing.isNotEmpty
+                    ? IconButtonWidget(
+                        icon: Icons.chevron_right,
+                        iconButtonType: IconButtonType.secondary,
+                        onTap: () {
+                          unawaited(
+                            routeToPage(
+                              context,
+                              CollectionListPage(
+                                collections.outgoing,
+                                tag: "outgoing",
+                                appTitle: sharedByMe,
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    )
-                  : null,
+                          );
+                        },
+                      )
+                    : null,
+              ),
             ),
             const SizedBox(height: 4),
             collections.outgoing.isNotEmpty

@@ -149,23 +149,27 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
-          child: SectionOptions(
-            SectionTitle(title: S.of(context).onDevice),
-            trailingWidget: IconButtonWidget(
-              icon: Icons.chevron_right,
-              iconButtonType: IconButtonType.secondary,
-              onTap: () {
-                unawaited(
-                  routeToPage(
-                    context,
-                    DeviceFolderVerticalGridView(
-                      appTitle: SectionTitle(
-                        title: S.of(context).onDevice,
+          child: Hero(
+            tag: "OnDeviceAppTitle",
+            child: SectionOptions(
+              SectionTitle(title: S.of(context).onDevice),
+              trailingWidget: IconButtonWidget(
+                icon: Icons.chevron_right,
+                iconButtonType: IconButtonType.secondary,
+                onTap: () {
+                  unawaited(
+                    routeToPage(
+                      context,
+                      DeviceFolderVerticalGridView(
+                        appTitle: SectionTitle(
+                          title: S.of(context).onDevice,
+                        ),
+                        tag: "OnDeviceAppTitle",
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),
