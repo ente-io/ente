@@ -127,11 +127,10 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                   const SizedBox(height: 2),
                   collections.incoming.isNotEmpty
                       ? SizedBox(
-                          height: maxThumbnailWidth + 48,
+                          height: maxThumbnailWidth + 24,
                           child: ListView.builder(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
-                              vertical: 8,
                             ),
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (context, index) {
@@ -183,11 +182,10 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                   const SizedBox(height: 2),
                   collections.outgoing.isNotEmpty
                       ? SizedBox(
-                          height: maxThumbnailWidth + 48,
+                          height: maxThumbnailWidth + 24,
                           child: ListView.builder(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
-                              vertical: 2,
                             ),
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (context, index) {
