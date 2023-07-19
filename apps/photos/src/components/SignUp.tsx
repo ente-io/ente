@@ -8,6 +8,7 @@ import SubmitButton from 'components/SubmitButton';
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
+    generateLoginSubKey,
     generateSRPSetupAttributes,
     isWeakPassword,
     saveKeyInSessionStore,
@@ -81,11 +82,14 @@ export default function SignUp(props: SignUpProps) {
                 const { keyAttributes, masterKey } =
                     await generateKeyAttributes(passphrase);
 
-                const srpSetupAttributes = await generateSRPSetupAttributes(
+                const loginSubKey = await generateLoginSubKey(
                     passphrase,
                     keyAttributes.kekSalt,
                     keyAttributes.memLimit,
                     keyAttributes.opsLimit
+                );
+                const srpSetupAttributes = await generateSRPSetupAttributes(
+                    loginSubKey
                 );
 
                 setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);

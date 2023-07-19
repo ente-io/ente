@@ -251,12 +251,12 @@ export const isWeakPassword = (password: string) => {
     return estimatePasswordStrength(password) === PasswordStrength.WEAK;
 };
 
-export const generateSRPSetupAttributes = async (
+export const generateLoginSubKey = async (
     password: string,
     kekSalt: string,
     memLimit: number,
     opsLimit: number
-): Promise<SRPSetupAttributes> => {
+) => {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const kek = await cryptoWorker.deriveKey(
         password,
@@ -270,6 +270,14 @@ export const generateSRPSetupAttributes = async (
         LOGIN_SUB_KEY_ID,
         LOGIN_SUB_KEY_CONTEXT
     );
+    return loginSubKey;
+};
+
+export const generateSRPSetupAttributes = async (
+    loginSubKey: string
+): Promise<SRPSetupAttributes> => {
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
     const srpSalt = await cryptoWorker.generateSaltToDeriveKey();
 
     const srpUserID = uuidv4();

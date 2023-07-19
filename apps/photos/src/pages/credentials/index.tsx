@@ -9,6 +9,7 @@ import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
+    generateLoginSubKey,
     generateSRPSetupAttributes,
     saveKeyInSessionStore,
 } from 'utils/crypto';
@@ -87,11 +88,14 @@ export default function Credentials() {
             const userSRPSetupPending = getUserSRPSetupPending();
             addLocalLog(() => `userSRPSetupPending ${userSRPSetupPending}`);
             if (userSRPSetupPending) {
-                const srpSetupAttributes = await generateSRPSetupAttributes(
+                const loginSubKey = await generateLoginSubKey(
                     passphrase,
                     keyAttributes.kekSalt,
                     keyAttributes.memLimit,
                     keyAttributes.opsLimit
+                );
+                const srpSetupAttributes = await generateSRPSetupAttributes(
+                    loginSubKey
                 );
                 // we don't have access to kek here, so we will have to re-derive it from the passphrase
                 await configureSRP(srpSetupAttributes);

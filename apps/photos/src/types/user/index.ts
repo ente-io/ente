@@ -104,12 +104,11 @@ export interface UpdateRemoteStoreValueRequest {
 }
 
 export interface SRPAttributes {
+    srpUserID: string;
     srpSalt: string;
-    srpGroup: string;
-}
-
-export interface GetSRPAttributesResponse {
-    srpAttributes: SRPAttributes;
+    memLimit: number;
+    opsLimit: number;
+    kekSalt: string;
 }
 
 export interface SRPSetupAttributes {
@@ -141,7 +140,8 @@ export interface CompleteSRPSetupResponse {
     srpM2: string;
 }
 
-export interface ExchangeSRPABResponse {
+export interface CreateSRPSessionResponse {
+    sessionID: string;
     srpB: string;
 }
 

@@ -6,7 +6,11 @@ import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
-import { generateSRPClient, getRecoveryKey } from 'utils/crypto';
+import {
+    generateLoginSubKey,
+    generateSRPClient,
+    getRecoveryKey,
+} from 'utils/crypto';
 import { logError } from 'utils/sentry';
 import { eventBus, Events } from './events';
 import {
@@ -19,15 +23,15 @@ import {
     UserDetails,
     DeleteChallengeResponse,
     GetRemoteStoreValueResponse,
-    GetSRPAttributesResponse,
     SetupSRPRequest,
-    ExchangeSRPABResponse,
+    CreateSRPSessionResponse,
     EmailVerificationResponse,
     GetFeatureFlagResponse,
     SetupSRPResponse,
     CompleteSRPSetupRequest,
     CompleteSRPSetupResponse,
     SRPSetupAttributes,
+    SRPAttributes,
 } from 'types/user';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
@@ -471,7 +475,7 @@ export const getSRPAttributes = async (email: string) => {
         const resp = await HTTPService.get(`${ENDPOINT}/users/srp/attributes`, {
             email,
         });
-        return (resp.data as GetSRPAttributesResponse)?.srpAttributes;
+        return resp.data as SRPAttributes;
     } catch (e) {
         if (e.status?.toString() === ServerErrorCodes.NOT_FOUND) {
             return null;
@@ -594,22 +598,35 @@ export const completeSRPSetup = async (
 };
 
 export const loginViaSRP = async (
-    srpSalt: string,
-    email: string,
-    password: string
+    srpAttributes: SRPAttributes,
+    passphrase: string
 ) => {
     try {
-        const srpClient = await generateSRPClient(srpSalt, email, password);
+        const loginSubKey = await generateLoginSubKey(
+            passphrase,
+            srpAttributes.kekSalt,
+            srpAttributes.memLimit,
+            srpAttributes.opsLimit
+        );
+        const srpClient = await generateSRPClient(
+            srpAttributes.srpSalt,
+            srpAttributes.srpUserID,
+            loginSubKey
+        );
         const srpA = srpClient.computeA();
-        const { srpB } = await exchangeAB(email, convertBufferToBase64(srpA));
+        const { srpB, sessionID } = await createSRPSession(
+            srpAttributes.srpUserID,
+            convertBufferToBase64(srpA)
+        );
         srpClient.setB(convertBase64ToBuffer(srpB));
 
         const k = srpClient.computeK();
         addLocalLog(() => `srp k: ${convertBufferToBase64(k)}`);
         const m1 = srpClient.computeM1();
         addLocalLog(() => `srp m1: ${convertBufferToBase64(m1)}`);
-        const verificationResponse = await verifySRP(
-            email,
+        const verificationResponse = await verifySRPSession(
+            sessionID,
+            srpAttributes.srpUserID,
             convertBufferToBase64(m1)
         );
         addLocalLog(() => `srp verify successful, ${verificationResponse}`);
@@ -620,17 +637,16 @@ export const loginViaSRP = async (
     }
 };
 
-export const exchangeAB = async (email: string, srpA: string) => {
+export const createSRPSession = async (srpUserID: string, srpA: string) => {
     try {
         const resp = await HTTPService.post(
             `${ENDPOINT}/users/srp/exchange-ab`,
             {
-                email,
+                srpUserID,
                 srpA,
-            },
-            null
+            }
         );
-        return resp.data as ExchangeSRPABResponse;
+        return resp.data as CreateSRPSessionResponse;
     } catch (e) {
         logError(e, 'exchangeAB failed');
         throw e;
@@ -657,12 +673,17 @@ export const updateMapEnabledStatus = async (newStatus: boolean) => {
     }
 };
 
-export const verifySRP = async (email: string, srpM1: string) => {
+export const verifySRPSession = async (
+    sessionID: string,
+    srpUserID: string,
+    srpM1: string
+) => {
     try {
         const resp = await HTTPService.post(
             `${ENDPOINT}/users/srp/verify`,
             {
-                email,
+                sessionID,
+                srpUserID,
                 srpM1,
             },
             null

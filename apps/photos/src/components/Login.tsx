@@ -80,7 +80,7 @@ export default function Login(props: LoginProps) {
                     token,
                     id,
                     twoFactorSessionID,
-                } = await loginViaSRP(srpAttributes.srpSalt, email, passphrase);
+                } = await loginViaSRP(srpAttributes, passphrase);
                 if (twoFactorSessionID) {
                     setData(LS_KEYS.USER, {
                         email,
