@@ -8,7 +8,6 @@ import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
-import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -266,7 +265,11 @@ class Configuration {
     return Tuple2(updatedAttributes, loginKey);
   }
 
-  Future<void> decryptAndSaveSecrets(
+  // decryptSecretsAndGetLoginKey decrypts the master key and recovery key
+  // with the given password and save them in local secure storage.
+  // This method also returns the keyEncKey that can be used for performing
+  // SRP setup for existing users.
+  Future<Uint8List> decryptSecretsAndGetKeyEncKey(
     String password,
     KeyAttributes attributes,
   ) async {
@@ -283,6 +286,7 @@ class Configuration {
       attributes.memLimit!,
       attributes.opsLimit!,
     );
+
     Uint8List key;
     try {
       // Decrypt the master key with the derived key
@@ -310,6 +314,7 @@ class Configuration {
     await setToken(
       CryptoUtil.bin2base64(token, urlSafe: true),
     );
+    return key;
   }
 
   Future<KeyAttributes> createNewRecoveryKey() async {

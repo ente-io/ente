@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:typed_data";
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -7,10 +8,12 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/services/user_service.dart";
 import 'package:photos/ui/account/recovery_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
+import "package:photos/utils/crypto_util.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 
@@ -95,10 +98,11 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       createProgressDialog(context, S.of(context).pleaseWait);
       await dialog.show();
       try {
-        await Configuration.instance.decryptAndSaveSecrets(
+        final kek = await Configuration.instance.decryptSecretsAndGetKeyEncKey(
           password,
           Configuration.instance.getKeyAttributes()!,
         );
+        _registerSRPForExistingUsers(kek).ignore();
       } on KeyDerivationError catch (e, s) {
         _logger.severe("Password verification failed", e, s);
         await dialog.hide();
@@ -150,6 +154,26 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
               (route) => false,
         ),
       );
+  }
+
+  Future<void> _registerSRPForExistingUsers(Uint8List key) async {
+    bool shouldSetupSRP = false;
+    try {
+      // ignore: unused_local_variable
+      final attr = await UserService.instance.getSrpAttributes(email!);
+    } on SrpSetupNotCompleteError {
+      shouldSetupSRP = true;
+    } catch (e, s) {
+      _logger.severe("error while fetching attr", e, s);
+    }
+    if (shouldSetupSRP) {
+      try {
+        final Uint8List loginKey = await CryptoUtil.deriveLoginKey(key);
+        await UserService.instance.registerOrUpdateSrp(loginKey);
+      } catch (e, s) {
+        _logger.severe("error while setting up srp for existing users", e, s);
+      }
+    }
   }
 
   Widget _getBody() {
