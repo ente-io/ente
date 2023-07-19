@@ -1439,9 +1439,13 @@ export const constructEmailList = (
 ): string[] => {
     const emails = collections
         .map((item) => {
-            if (item.owner.email && item.owner.id !== user.id) {
+            const { owner, sharees } = item;
+            if (owner.email && item.owner.id !== user.id) {
                 return [item.owner.email];
             } else {
+                if (sharees?.length === 0) {
+                    return [];
+                }
                 const shareeEmails = item.sharees
                     .filter((sharee) => sharee.email !== user.email)
                     .map((sharee) => sharee.email);
