@@ -205,23 +205,31 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                 ],
               ),
             ),
-            if (hasQuickLinks) const SizedBox(height: 12),
-            if (hasQuickLinks)
-              SectionOptions(SectionTitle(title: S.of(context).quickLinks)),
-            if (hasQuickLinks) const SizedBox(height: 4),
-            if (hasQuickLinks)
-              ListView.builder(
-                shrinkWrap: true,
-                padding: const EdgeInsets.only(bottom: 12),
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return QuickLinkAlbumItem(
-                    c: collections.quickLinks[index],
-                  );
-                },
-                itemCount: collections.quickLinks.length,
-              ),
-            const SizedBox(height: 48),
+            hasQuickLinks
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Column(
+                      children: [
+                        SectionOptions(
+                          SectionTitle(title: S.of(context).quickLinks),
+                        ),
+                        const SizedBox(height: 2),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.only(bottom: 12),
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemBuilder: (context, index) {
+                            return QuickLinkAlbumItem(
+                              c: collections.quickLinks[index],
+                            );
+                          },
+                          itemCount: collections.quickLinks.length,
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+            const SizedBox(height: 24),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: ButtonWidget(
@@ -233,7 +241,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                 },
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 44),
           ],
         ),
       ),
