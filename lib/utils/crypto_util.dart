@@ -457,6 +457,9 @@ class CryptoUtil {
     }
   }
 
+  // derives a Login key as subKey from the given key by applying KDF
+  // (Key Derivation Function) with the `loginSubKeyId` and
+  // `loginSubKeyLen` and `loginSubKeyContext` as context
   static Future<Uint8List> deriveLoginKey(
     Uint8List key,
   ) {
