@@ -1,7 +1,6 @@
 import 'dart:async';
 import "dart:convert";
 import "dart:math";
-import 'dart:typed_data';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
@@ -460,6 +459,8 @@ class UserService {
     );
     if (response.statusCode == 200) {
       return SrpAttributes.fromMap(response.data);
+    } else if (response.statusCode == 404) {
+      throw SrpSetupNotCompleteError();
     } else {
       throw Exception("get-srp-attributes action failed");
     }
