@@ -414,6 +414,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         try {
           await UserService.instance.setAttributes(result);
           await dialog.hide();
+          Configuration.instance.setVolatilePassword(null);
           Bus.instance.fire(AccountConfiguredEvent());
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(

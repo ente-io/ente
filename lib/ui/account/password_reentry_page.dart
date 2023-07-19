@@ -143,6 +143,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         return;
       }
       await dialog.hide();
+      Configuration.instance.setVolatilePassword(null);
       Bus.instance.fire(SubscriptionPurchasedEvent());
       unawaited(
         Navigator.of(context).pushAndRemoveUntil(
