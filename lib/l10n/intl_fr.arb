@@ -726,5 +726,6 @@
   "didYouKnow": "Le savais-tu ?",
   "loadingMessage": "Chargement de vos photos...",
   "language": "Langue",
-  "edit": "Éditer"
+  "edit": "Éditer",
+  "nothingSharedWithYouYet": "Nothing shared with you yet"
 }

@@ -7484,6 +7484,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Nothing shared with you yet`
+  String get nothingSharedWithYouYet {
+    return Intl.message(
+      'Nothing shared with you yet',
+      name: 'nothingSharedWithYouYet',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

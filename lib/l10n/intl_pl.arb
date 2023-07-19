@@ -100,5 +100,6 @@
   "codeCopiedToClipboard": "Kod został skopiowany do schowka",
   "confirm": "Potwierdź",
   "twofactorAuthenticationPageTitle": "Uwierzytelnianie dwuskładnikowe",
-  "tryAgain": "Spróbuj ponownie"
+  "tryAgain": "Spróbuj ponownie",
+  "nothingSharedWithYouYet": "Nothing shared with you yet"
 }

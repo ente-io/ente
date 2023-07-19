@@ -823,6 +823,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("Sin resultados"),
         "noResultsFound": MessageLookupByLibrary.simpleMessage(
             "No se han encontrado resultados"),
+        "nothingSharedWithYouYet":
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage(
             "¡No hay nada que ver aquí! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("Aceptar"),

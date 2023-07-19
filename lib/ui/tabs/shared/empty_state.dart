@@ -153,30 +153,39 @@ class IncomingAlbumEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 220,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            S.of(context).askYourLovedOnesToShare,
-            style: Theme.of(context).textTheme.bodySmall,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.collections_outlined,
+                color: getEnteColorScheme(context).strokeMuted,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                S.of(context).nothingSharedWithYouYet,
+                style: getEnteTextTheme(context).bodyMuted,
+              ),
+            ],
           ),
-          const Padding(padding: EdgeInsets.only(top: 14)),
-          SizedBox(
-            width: 200,
-            height: 50,
-            child: GradientButton(
-              onTap: () async {
-                shareText(S.of(context).shareTextRecommendUsingEnte);
-              },
-              iconData: Icons.outgoing_mail,
-              text: S.of(context).invite,
-            ),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+          child: ButtonWidget(
+            buttonType: ButtonType.trailingIconPrimary,
+            labelText: S.of(context).inviteYourFriends,
+            icon: Icons.ios_share_outlined,
+            onTap: () async {
+              shareText(S.of(context).shareTextRecommendUsingEnte);
+            },
           ),
-          const SizedBox(height: 60),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

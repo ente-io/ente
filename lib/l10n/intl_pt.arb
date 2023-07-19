@@ -266,5 +266,6 @@
   "update": "Atualização",
   "installManually": "Instalar manualmente",
   "criticalUpdateAvailable": "Atualização crítica disponível",
-  "updateAvailable": "Atualização disponível"
+  "updateAvailable": "Atualização disponível",
+  "nothingSharedWithYouYet": "Nothing shared with you yet"
 }

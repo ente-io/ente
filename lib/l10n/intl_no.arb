@@ -12,5 +12,6 @@
   "feedback": "Tilbakemelding",
   "kindlyHelpUsWithThisInformation": "Vær vennlig og hjelp oss med denne informasjonen",
   "confirmDeletePrompt": "Ja, jeg ønsker å slette denne kontoen og all dataen dens permanent.",
-  "confirmAccountDeletion": "Bekreft sletting av konto"
+  "confirmAccountDeletion": "Bekreft sletting av konto",
+  "nothingSharedWithYouYet": "Nothing shared with you yet"
 }
