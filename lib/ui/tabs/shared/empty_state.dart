@@ -151,6 +151,7 @@ class OutgoingAlbumEmptyState extends StatelessWidget {
             },
           ),
         ),
+        const SizedBox(height: 12),
       ],
     );
   }
@@ -193,6 +194,7 @@ class IncomingAlbumEmptyState extends StatelessWidget {
             },
           ),
         ),
+        const SizedBox(height: 12),
       ],
     );
   }

@@ -95,104 +95,118 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
-            const SizedBox(height: 12),
-            Hero(
-              tag: "incoming",
-              child: SectionOptions(
-                sharedWithMe,
-                trailingWidget: collections.incoming.isNotEmpty
-                    ? IconButtonWidget(
-                        icon: Icons.chevron_right,
-                        iconButtonType: IconButtonType.secondary,
-                        onTap: () {
-                          unawaited(
-                            routeToPage(
-                              context,
-                              CollectionListPage(
-                                collections.incoming,
-                                tag: "incoming",
-                                appTitle: sharedWithMe,
-                              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Hero(
+                    tag: "incoming",
+                    child: SectionOptions(
+                      sharedWithMe,
+                      trailingWidget: collections.incoming.isNotEmpty
+                          ? IconButtonWidget(
+                              icon: Icons.chevron_right,
+                              iconButtonType: IconButtonType.secondary,
+                              onTap: () {
+                                unawaited(
+                                  routeToPage(
+                                    context,
+                                    CollectionListPage(
+                                      collections.incoming,
+                                      tag: "incoming",
+                                      appTitle: sharedWithMe,
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  collections.incoming.isNotEmpty
+                      ? SizedBox(
+                          height: maxThumbnailWidth + 48,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 8,
                             ),
-                          );
-                        },
-                      )
-                    : null,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: AlbumRowItemWidget(
+                                  collections.incoming[index],
+                                  maxThumbnailWidth,
+                                  tag: "incoming",
+                                ),
+                              );
+                            },
+                            itemCount: collections.incoming.length,
+                          ),
+                        )
+                      : const IncomingAlbumEmptyState(),
+                ],
               ),
             ),
-            const SizedBox(height: 4),
-            collections.incoming.isNotEmpty
-                ? SizedBox(
-                    height: maxThumbnailWidth + 48,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 8,
-                      ),
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: AlbumRowItemWidget(
-                            collections.incoming[index],
-                            maxThumbnailWidth,
-                            tag: "incoming",
-                          ),
-                        );
-                      },
-                      itemCount: collections.incoming.length,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Hero(
+                    tag: "outgoing",
+                    child: SectionOptions(
+                      sharedByMe,
+                      trailingWidget: collections.outgoing.isNotEmpty
+                          ? IconButtonWidget(
+                              icon: Icons.chevron_right,
+                              iconButtonType: IconButtonType.secondary,
+                              onTap: () {
+                                unawaited(
+                                  routeToPage(
+                                    context,
+                                    CollectionListPage(
+                                      collections.outgoing,
+                                      tag: "outgoing",
+                                      appTitle: sharedByMe,
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                          : null,
                     ),
-                  )
-                : const IncomingAlbumEmptyState(),
-            const SizedBox(height: 16),
-            Hero(
-              tag: "outgoing",
-              child: SectionOptions(
-                sharedByMe,
-                trailingWidget: collections.outgoing.isNotEmpty
-                    ? IconButtonWidget(
-                        icon: Icons.chevron_right,
-                        iconButtonType: IconButtonType.secondary,
-                        onTap: () {
-                          unawaited(
-                            routeToPage(
-                              context,
-                              CollectionListPage(
-                                collections.outgoing,
-                                tag: "outgoing",
-                                appTitle: sharedByMe,
-                              ),
+                  ),
+                  const SizedBox(height: 2),
+                  collections.outgoing.isNotEmpty
+                      ? SizedBox(
+                          height: maxThumbnailWidth + 48,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
                             ),
-                          );
-                        },
-                      )
-                    : null,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: AlbumRowItemWidget(
+                                  collections.outgoing[index],
+                                  maxThumbnailWidth,
+                                  tag: "outgoing",
+                                ),
+                              );
+                            },
+                            itemCount: collections.outgoing.length,
+                          ),
+                        )
+                      : const OutgoingAlbumEmptyState(),
+                ],
               ),
             ),
-            const SizedBox(height: 4),
-            collections.outgoing.isNotEmpty
-                ? SizedBox(
-                    height: maxThumbnailWidth + 48,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: AlbumRowItemWidget(
-                            collections.outgoing[index],
-                            maxThumbnailWidth,
-                            tag: "outgoing",
-                          ),
-                        );
-                      },
-                      itemCount: collections.outgoing.length,
-                    ),
-                  )
-                : const OutgoingAlbumEmptyState(),
             if (hasQuickLinks) const SizedBox(height: 12),
             if (hasQuickLinks)
               SectionOptions(SectionTitle(title: S.of(context).quickLinks)),
