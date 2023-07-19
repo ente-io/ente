@@ -563,10 +563,7 @@ class UserService {
         CryptoUtil.base642bin(srpAttributes.kekSalt),
         srpAttributes.memLimit,
         srpAttributes.opsLimit,
-      ).onError((e, s) {
-        _logger.severe('key derivation failed', e, s);
-        throw KeyDerivationError();
-      });
+      );
       final loginKey = await CryptoUtil.deriveLoginKey(kek);
       final Uint8List identity = Uint8List.fromList(
         utf8.encode(srpAttributes.srpUserID),

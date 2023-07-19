@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:computer/computer.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import "package:photos/core/errors.dart";
 import 'package:photos/models/derived_key_result.dart';
 import 'package:photos/models/encryption_result.dart';
 import "package:photos/utils/device_info.dart";
@@ -405,11 +406,8 @@ class CryptoUtil {
         key = await deriveKey(password, salt, memLimit, opsLimit);
         return DerivedKeyResult(key, memLimit, opsLimit);
       } catch (e, s) {
-        logger.severe(
-          "failed to derive memLimit: $memLimit and opsLimit: $opsLimit",
-          e,
-          s,
-        );
+        logger.warning(
+          "failed to deriveKey mem: $memLimit, ops: $opsLimit", e, s,);
       }
       memLimit = (memLimit / 2).round();
       opsLimit = opsLimit * 2;
@@ -440,6 +438,7 @@ class CryptoUtil {
       int memLimit,
       int opsLimit,
       ) {
+    try {
     return _computer.compute(
       cryptoPwHash,
       param: {
@@ -450,6 +449,12 @@ class CryptoUtil {
       },
       taskName: "deriveKey",
     );
+    } catch(e,s) {
+      final String errMessage = 'failed to deriveKey memLimit: $memLimit and '
+          'opsLimit: $opsLimit';
+      Logger("CryptoUtilDeriveKey").warning(errMessage, e, s);
+      throw KeyDerivationError();
+    }
   }
 
   static Future<Uint8List> deriveLoginKey(

@@ -282,11 +282,7 @@ class Configuration {
       CryptoUtil.base642bin(attributes.kekSalt),
       attributes.memLimit!,
       attributes.opsLimit!,
-    ).onError((e, s) {
-      _logger.severe('key derivation failed', e, s);
-      throw KeyDerivationError();
-    });
-
+    );
     Uint8List key;
     try {
       // Decrypt the master key with the derived key
