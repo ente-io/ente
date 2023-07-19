@@ -682,6 +682,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "newToEnte": MessageLookupByLibrary.simpleMessage("刚来到ente"),
         "newest": MessageLookupByLibrary.simpleMessage("最新"),
         "no": MessageLookupByLibrary.simpleMessage("否"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noDeviceThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage("您在此设备上没有可被删除的文件"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ 没有重复内容"),

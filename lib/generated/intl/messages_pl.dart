@@ -107,6 +107,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pomóż nam z tą informacją"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Umiarkowana"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Brak klucza odzyskiwania?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -145,6 +147,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectReason": MessageLookupByLibrary.simpleMessage("Wybierz powód"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Wyślij e-mail"),
         "setPasswordTitle": MessageLookupByLibrary.simpleMessage("Ustaw hasło"),
+        "shareYourFirstAlbum":
+            MessageLookupByLibrary.simpleMessage("Share your first album"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Akceptuję <u-terms>warunki korzystania z usługi</u-terms> i <u-policy>politykę prywatności</u-policy>"),
         "somethingWentWrongPleaseTryAgain":

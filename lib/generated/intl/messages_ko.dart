@@ -22,7 +22,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "nothingSharedWithYouYet":
-            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet")
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
+        "shareYourFirstAlbum":
+            MessageLookupByLibrary.simpleMessage("Share your first album")
       };
 }

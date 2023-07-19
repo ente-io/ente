@@ -727,5 +727,7 @@
   "loadingMessage": "Chargement de vos photos...",
   "language": "Langue",
   "edit": "Éditer",
-  "nothingSharedWithYouYet": "Nothing shared with you yet"
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "shareYourFirstAlbum": "Share your first album",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet"
 }

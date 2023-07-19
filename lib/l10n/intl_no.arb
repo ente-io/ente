@@ -13,5 +13,7 @@
   "kindlyHelpUsWithThisInformation": "Vær vennlig og hjelp oss med denne informasjonen",
   "confirmDeletePrompt": "Ja, jeg ønsker å slette denne kontoen og all dataen dens permanent.",
   "confirmAccountDeletion": "Bekreft sletting av konto",
-  "nothingSharedWithYouYet": "Nothing shared with you yet"
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "shareYourFirstAlbum": "Share your first album",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet"
 }

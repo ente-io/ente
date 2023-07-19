@@ -101,5 +101,7 @@
   "confirm": "Potwierdź",
   "twofactorAuthenticationPageTitle": "Uwierzytelnianie dwuskładnikowe",
   "tryAgain": "Spróbuj ponownie",
-  "nothingSharedWithYouYet": "Nothing shared with you yet"
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "shareYourFirstAlbum": "Share your first album",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet"
 }

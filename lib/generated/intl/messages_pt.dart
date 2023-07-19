@@ -257,6 +257,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dispositivo perdido?"),
         "manage": MessageLookupByLibrary.simpleMessage("Gerenciar"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderada"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Nenhuma chave de recuperação?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -351,6 +353,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "setupComplete":
             MessageLookupByLibrary.simpleMessage("Configuração concluída"),
         "shareTextReferralCode": m45,
+        "shareYourFirstAlbum":
+            MessageLookupByLibrary.simpleMessage("Share your first album"),
         "sharing": MessageLookupByLibrary.simpleMessage("Compartilhando..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Eu concordo com os <u-terms>termos de serviço</u-terms> e a <u-policy>política de privacidade</u-policy>"),

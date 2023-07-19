@@ -806,6 +806,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nuevo en ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Más reciente"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "No tienes archivos en este dispositivo que puedan ser borrados"),
         "noDuplicates":

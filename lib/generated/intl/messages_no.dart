@@ -44,8 +44,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ugyldig e-postadresse"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Vær vennlig og hjelp oss med denne informasjonen"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "nothingSharedWithYouYet":
             MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
+        "shareYourFirstAlbum":
+            MessageLookupByLibrary.simpleMessage("Share your first album"),
         "verify": MessageLookupByLibrary.simpleMessage("Bekreft")
       };
 }

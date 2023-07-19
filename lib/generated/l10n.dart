@@ -7494,6 +7494,16 @@ class S {
       args: [],
     );
   }
+
+  /// `No albums shared by you yet`
+  String get noAlbumsSharedByYouYet {
+    return Intl.message(
+      'No albums shared by you yet',
+      name: 'noAlbumsSharedByYouYet',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

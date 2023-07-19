@@ -267,5 +267,7 @@
   "installManually": "Instalar manualmente",
   "criticalUpdateAvailable": "Atualização crítica disponível",
   "updateAvailable": "Atualização disponível",
-  "nothingSharedWithYouYet": "Nothing shared with you yet"
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "shareYourFirstAlbum": "Share your first album",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet"
 }

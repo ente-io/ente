@@ -1091,5 +1091,6 @@
   "pinAlbum": "Pin album",
   "create": "Create",
   "viewAll": "View all",
-  "nothingSharedWithYouYet": "Nothing shared with you yet"
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet"
 }
