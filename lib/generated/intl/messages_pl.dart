@@ -149,6 +149,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "setPasswordTitle": MessageLookupByLibrary.simpleMessage("Ustaw hasło"),
         "shareYourFirstAlbum":
             MessageLookupByLibrary.simpleMessage("Share your first album"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Akceptuję <u-terms>warunki korzystania z usługi</u-terms> i <u-policy>politykę prywatności</u-policy>"),
         "somethingWentWrongPleaseTryAgain":

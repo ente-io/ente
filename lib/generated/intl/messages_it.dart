@@ -1137,6 +1137,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Crea album condivisi e collaborativi con altri utenti ente, inclusi utenti su piani gratuiti."),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("Condiviso da me"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
         "sharedPhotoNotifications":
             MessageLookupByLibrary.simpleMessage("Nuove foto condivise"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
@@ -1144,6 +1145,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWith": m47,
         "sharedWithMe":
             MessageLookupByLibrary.simpleMessage("Condivisi con me"),
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "sharing":
             MessageLookupByLibrary.simpleMessage("Condivisione in corso..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(

@@ -7504,6 +7504,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Shared with you`
+  String get sharedWithYou {
+    return Intl.message(
+      'Shared with you',
+      name: 'sharedWithYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared by you`
+  String get sharedByYou {
+    return Intl.message(
+      'Shared by you',
+      name: 'sharedByYou',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

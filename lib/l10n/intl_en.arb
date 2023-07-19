@@ -1092,5 +1092,7 @@
   "create": "Create",
   "viewAll": "View all",
   "nothingSharedWithYouYet": "Nothing shared with you yet",
-  "noAlbumsSharedByYouYet": "No albums shared by you yet"
+  "noAlbumsSharedByYouYet": "No albums shared by you yet",
+  "sharedWithYou": "Shared with you",
+  "sharedByYou": "Shared by you"
 }

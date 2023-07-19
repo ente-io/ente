@@ -86,10 +86,10 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
     const maxThumbnailWidth = 160.0;
     final bool hasQuickLinks = collections.quickLinks.isNotEmpty;
-    final SectionTitle sharedWithMe =
-        SectionTitle(title: S.of(context).sharedWithMe);
-    final SectionTitle sharedByMe =
-        SectionTitle(title: S.of(context).sharedByMe);
+    final SectionTitle sharedWithYou =
+        SectionTitle(title: S.of(context).sharedWithYou);
+    final SectionTitle sharedByYou =
+        SectionTitle(title: S.of(context).sharedByYou);
     return SingleChildScrollView(
       child: Container(
         margin: const EdgeInsets.only(bottom: 50),
@@ -103,7 +103,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                   Hero(
                     tag: "incoming",
                     child: SectionOptions(
-                      sharedWithMe,
+                      sharedWithYou,
                       trailingWidget: collections.incoming.isNotEmpty
                           ? IconButtonWidget(
                               icon: Icons.chevron_right,
@@ -115,7 +115,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                                     CollectionListPage(
                                       collections.incoming,
                                       tag: "incoming",
-                                      appTitle: sharedWithMe,
+                                      appTitle: sharedWithYou,
                                     ),
                                   ),
                                 );
@@ -158,7 +158,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                   Hero(
                     tag: "outgoing",
                     child: SectionOptions(
-                      sharedByMe,
+                      sharedByYou,
                       trailingWidget: collections.outgoing.isNotEmpty
                           ? IconButtonWidget(
                               icon: Icons.chevron_right,
@@ -170,7 +170,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                                     CollectionListPage(
                                       collections.outgoing,
                                       tag: "outgoing",
-                                      appTitle: sharedByMe,
+                                      appTitle: sharedByYou,
                                     ),
                                   ),
                                 );
