@@ -586,6 +586,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "invite": MessageLookupByLibrary.simpleMessage("邀请"),
         "inviteToEnte": MessageLookupByLibrary.simpleMessage("邀请到 ente"),
         "inviteYourFriends": MessageLookupByLibrary.simpleMessage("邀请您的朋友"),
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "看起来出了点问题。 请稍后重试。 如果错误仍然存在，请联系我们的支持团队。"),

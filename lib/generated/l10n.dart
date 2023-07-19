@@ -7524,6 +7524,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Invite your friends to ente`
+  String get inviteYourFriendsToEnte {
+    return Intl.message(
+      'Invite your friends to ente',
+      name: 'inviteYourFriendsToEnte',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

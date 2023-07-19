@@ -240,6 +240,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Convidar para o ente"),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("Convide seus amigos"),
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Os itens selecionados serão removidos deste álbum"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Manter fotos"),

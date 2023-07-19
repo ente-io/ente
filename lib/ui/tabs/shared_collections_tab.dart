@@ -235,7 +235,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 44),
                     child: ButtonWidget(
                       buttonType: ButtonType.trailingIconPrimary,
-                      labelText: S.of(context).inviteYourFriends,
+                      labelText: S.of(context).inviteYourFriendsToEnte,
                       icon: Icons.ios_share_outlined,
                       onTap: () async {
                         shareText(S.of(context).shareTextRecommendUsingEnte);
