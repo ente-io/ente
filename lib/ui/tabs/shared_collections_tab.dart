@@ -229,19 +229,20 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     ),
                   )
                 : const SizedBox.shrink(),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: ButtonWidget(
-                buttonType: ButtonType.trailingIcon,
-                labelText: S.of(context).inviteYourFriends,
-                icon: Icons.ios_share_outlined,
-                onTap: () async {
-                  shareText(S.of(context).shareTextRecommendUsingEnte);
-                },
-              ),
-            ),
-            const SizedBox(height: 44),
+            const SizedBox(height: 32),
+            collections.incoming.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 44),
+                    child: ButtonWidget(
+                      buttonType: ButtonType.trailingIconPrimary,
+                      labelText: S.of(context).inviteYourFriends,
+                      icon: Icons.ios_share_outlined,
+                      onTap: () async {
+                        shareText(S.of(context).shareTextRecommendUsingEnte);
+                      },
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ],
         ),
       ),
