@@ -280,7 +280,7 @@ class Configuration {
     );
     // Derive key-encryption-key from the entered password and existing
     // mem and ops limits
-    final kek = await CryptoUtil.deriveKey(
+    final keyEncryptionKey = await CryptoUtil.deriveKey(
       utf8.encode(password) as Uint8List,
       CryptoUtil.base642bin(attributes.kekSalt),
       attributes.memLimit!,
@@ -292,7 +292,7 @@ class Configuration {
       // Decrypt the master key with the derived key
       key = CryptoUtil.decryptSync(
         CryptoUtil.base642bin(attributes.encryptedKey),
-        kek,
+        keyEncryptionKey,
         CryptoUtil.base642bin(attributes.keyDecryptionNonce),
       );
     } catch (e) {
@@ -314,7 +314,7 @@ class Configuration {
     await setToken(
       CryptoUtil.bin2base64(token, urlSafe: true),
     );
-    return key;
+    return keyEncryptionKey;
   }
 
   Future<KeyAttributes> createNewRecoveryKey() async {

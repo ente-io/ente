@@ -452,17 +452,25 @@ class UserService {
   }
 
   Future<SrpAttributes> getSrpAttributes(String email) async {
-    final response = await _dio.get( _config.getHttpEndpoint() + "/users/srp/attributes",
-      queryParameters: {
-        "email": email,
-      },
-    );
-    if (response.statusCode == 200) {
-      return SrpAttributes.fromMap(response.data);
-    } else if (response.statusCode == 404) {
-      throw SrpSetupNotCompleteError();
-    } else {
-      throw Exception("get-srp-attributes action failed");
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/srp/attributes",
+        queryParameters: {
+          "email": email,
+        },
+      );
+      if (response.statusCode == 200) {
+        return SrpAttributes.fromMap(response.data);
+      } else {
+        throw Exception("get-srp-attributes action failed");
+      }
+    } on DioError catch (e) {
+      if (e.response != null && e.response!.statusCode == 404) {
+        throw SrpSetupNotCompleteError();
+      }
+      rethrow;
+    } catch (e) {
+      rethrow;
     }
   }
 

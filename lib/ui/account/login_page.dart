@@ -2,6 +2,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/errors.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/user_service.dart';
@@ -73,8 +74,11 @@ class _LoginPageState extends State<LoginPage> {
                 },
               ),
             );
-          } catch (e,s) {
-            _logger.warning('Error getting SRP attributes', e, s);
+          }
+          catch (e) {
+            if(e is! SrpSetupNotCompleteError) {
+              _logger.warning('Error getting SRP attributes', e);
+            }
             await UserService.instance
                 .sendOtt(context, _email!, isCreateAccountScreen: false);
           }
