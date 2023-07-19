@@ -365,14 +365,15 @@ export async function boxSeal(input: string, publicKey: string) {
 
 export async function generateSubKey(
     key: string,
-    context: string,
-    index: number
+    subKeyLength: number,
+    subKeyID: number,
+    context: string
 ) {
     await sodium.ready;
     return await toB64(
         sodium.crypto_kdf_derive_from_key(
-            sodium.crypto_secretbox_KEYBYTES,
-            index,
+            subKeyLength,
+            subKeyID,
             context,
             await fromB64(key)
         )

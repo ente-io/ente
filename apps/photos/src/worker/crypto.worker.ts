@@ -142,8 +142,13 @@ export class DedicatedCryptoWorker {
         return libsodium.boxSeal(input, publicKey);
     }
 
-    async generateSubKey(key: string, context: string) {
-        return libsodium.generateSubKey(key, context, 0);
+    async generateSubKey(
+        key: string,
+        subKeyLength: number,
+        subKeyID: number,
+        context: string
+    ) {
+        return libsodium.generateSubKey(key, subKeyLength, subKeyID, context);
     }
 
     async fromString(string: string) {

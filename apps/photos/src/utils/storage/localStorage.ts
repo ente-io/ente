@@ -24,6 +24,7 @@ export enum LS_KEYS {
     LOCALE = 'locale',
     USER_SRP_SETUP_PENDING = 'userSRPSetupPending',
     MAP_ENABLED = 'mapEnabled',
+    SRP_SETUP_ATTRIBUTES = 'srpSetupAttributes',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {

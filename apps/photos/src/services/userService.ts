@@ -6,11 +6,7 @@ import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
-import {
-    generateSRPClient,
-    generateSRPAttributes,
-    getRecoveryKey,
-} from 'utils/crypto';
+import { generateSRPClient, getRecoveryKey } from 'utils/crypto';
 import { logError } from 'utils/sentry';
 import { eventBus, Events } from './events';
 import {
@@ -28,6 +24,10 @@ import {
     ExchangeSRPABResponse,
     EmailVerificationResponse,
     GetFeatureFlagResponse,
+    SetupSRPResponse,
+    CompleteSRPSetupRequest,
+    CompleteSRPSetupResponse,
+    SRPSetupAttributes,
 } from 'types/user';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
@@ -491,12 +491,39 @@ export const syncMapEnabled = async () => {
     }
 };
 
-export const configureSRP = async (email: string, password: string) => {
+export const configureSRP = async ({
+    srpSalt,
+    srpUserID,
+    srpVerifier,
+    loginSubKey,
+}: SRPSetupAttributes) => {
     try {
-        addLocalLog(() => `starting srp setup for ${email}`);
-        const setupSRPRequest = await generateSRPAttributes(email, password);
+        const srpClient = await generateSRPClient(
+            srpSalt,
+            srpUserID,
+            loginSubKey
+        );
 
-        await setupSRP(setupSRPRequest);
+        const srpA = convertBufferToBase64(srpClient.computeA());
+        const token = getToken();
+        const { setupID, srpB } = await startSRPSetup(token, {
+            srpA,
+            srpUserID,
+            srpSalt,
+            srpVerifier,
+        });
+
+        srpClient.setB(convertBase64ToBuffer(srpB));
+
+        const srpM1 = convertBufferToBase64(srpClient.computeM1());
+
+        const { srpM2 } = await completeSRPSetup(token, {
+            srpM1,
+            setupID,
+        });
+
+        srpClient.checkM2(convertBase64ToBuffer(srpM2));
+
         setUserSRPSetupPending(false);
     } catch (e) {
         logError(e, 'srp configure failed');
@@ -525,17 +552,43 @@ export const getMapEnabledStatus = async () => {
     }
 };
 
-export const setupSRP = async (setupSRPRequest: SetupSRPRequest) => {
+export const startSRPSetup = async (
+    token: string,
+    setupSRPRequest: SetupSRPRequest
+): Promise<SetupSRPResponse> => {
     try {
-        addLocalLog(() => `posting srp attributes`);
-        await HTTPService.post(
+        const resp = await HTTPService.post(
             `${ENDPOINT}/users/srp/setup`,
             setupSRPRequest,
-            null
+            null,
+            {
+                'X-Auth-Token': token,
+            }
         );
-        addLocalLog(() => `post successful`);
+
+        return resp.data as SetupSRPResponse;
     } catch (e) {
         logError(e, 'failed to post SRP attributes');
+        throw e;
+    }
+};
+
+export const completeSRPSetup = async (
+    token: string,
+    completeSRPSetupRequest: CompleteSRPSetupRequest
+) => {
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp/complete`,
+            completeSRPSetupRequest,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data as CompleteSRPSetupResponse;
+    } catch (e) {
+        logError(e, 'failed to complete SRP setup');
         throw e;
     }
 };
