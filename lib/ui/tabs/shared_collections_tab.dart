@@ -100,29 +100,26 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Hero(
-                    tag: "incoming",
-                    child: SectionOptions(
-                      sharedWithYou,
-                      trailingWidget: collections.incoming.isNotEmpty
-                          ? IconButtonWidget(
-                              icon: Icons.chevron_right,
-                              iconButtonType: IconButtonType.secondary,
-                              onTap: () {
-                                unawaited(
-                                  routeToPage(
-                                    context,
-                                    CollectionListPage(
-                                      collections.incoming,
-                                      tag: "incoming",
-                                      appTitle: sharedWithYou,
-                                    ),
+                  SectionOptions(
+                    Hero(tag: "incoming", child: sharedWithYou),
+                    trailingWidget: collections.incoming.isNotEmpty
+                        ? IconButtonWidget(
+                            icon: Icons.chevron_right,
+                            iconButtonType: IconButtonType.secondary,
+                            onTap: () {
+                              unawaited(
+                                routeToPage(
+                                  context,
+                                  CollectionListPage(
+                                    collections.incoming,
+                                    tag: "incoming",
+                                    appTitle: sharedWithYou,
                                   ),
-                                );
-                              },
-                            )
-                          : null,
-                    ),
+                                ),
+                              );
+                            },
+                          )
+                        : null,
                   ),
                   const SizedBox(height: 2),
                   collections.incoming.isNotEmpty
@@ -155,29 +152,26 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Hero(
-                    tag: "outgoing",
-                    child: SectionOptions(
-                      sharedByYou,
-                      trailingWidget: collections.outgoing.isNotEmpty
-                          ? IconButtonWidget(
-                              icon: Icons.chevron_right,
-                              iconButtonType: IconButtonType.secondary,
-                              onTap: () {
-                                unawaited(
-                                  routeToPage(
-                                    context,
-                                    CollectionListPage(
-                                      collections.outgoing,
-                                      tag: "outgoing",
-                                      appTitle: sharedByYou,
-                                    ),
+                  SectionOptions(
+                    Hero(tag: "outgoing", child: sharedByYou),
+                    trailingWidget: collections.outgoing.isNotEmpty
+                        ? IconButtonWidget(
+                            icon: Icons.chevron_right,
+                            iconButtonType: IconButtonType.secondary,
+                            onTap: () {
+                              unawaited(
+                                routeToPage(
+                                  context,
+                                  CollectionListPage(
+                                    collections.outgoing,
+                                    tag: "outgoing",
+                                    appTitle: sharedByYou,
                                   ),
-                                );
-                              },
-                            )
-                          : null,
-                    ),
+                                ),
+                              );
+                            },
+                          )
+                        : null,
                   ),
                   const SizedBox(height: 2),
                   collections.outgoing.isNotEmpty
