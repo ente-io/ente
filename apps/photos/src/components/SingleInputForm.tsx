@@ -30,6 +30,7 @@ export interface SingleInputFormProps {
     autoComplete?: string;
     blockButton?: boolean;
     hiddenLabel?: boolean;
+    disableAutoComplete?: boolean;
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
@@ -109,6 +110,11 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                         autoFocus={!props.disableAutoFocus}
                         autoComplete={props.autoComplete}
                         InputProps={{
+                            autoComplete:
+                                props.disableAutoComplete ||
+                                props.fieldType === 'password'
+                                    ? 'off'
+                                    : 'on',
                             endAdornment: props.fieldType === 'password' && (
                                 <ShowHidePassword
                                     showPassword={showPassword}

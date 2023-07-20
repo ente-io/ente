@@ -20,12 +20,15 @@ export function ShareQuickOption({
     return (
         <Tooltip
             title={
-                // collectionSummaryType === CollectionSummaryType.incomingShare
-                //     ? t('SHARING_DETAILS')
-                //     :
-                collectionSummaryType === CollectionSummaryType.outgoingShare ||
                 collectionSummaryType ===
-                    CollectionSummaryType.sharedOnlyViaLink
+                    CollectionSummaryType.incomingShareViewer ||
+                collectionSummaryType ===
+                    CollectionSummaryType.incomingShareCollaborator
+                    ? t('SHARING_DETAILS')
+                    : collectionSummaryType ===
+                          CollectionSummaryType.outgoingShare ||
+                      collectionSummaryType ===
+                          CollectionSummaryType.sharedOnlyViaLink
                     ? t('MODIFY_SHARING')
                     : t('SHARE_COLLECTION')
             }>

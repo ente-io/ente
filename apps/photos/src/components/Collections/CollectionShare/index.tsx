@@ -1,21 +1,21 @@
-import EmailShare from './emailShare';
-import React from 'react';
-import { Collection } from 'types/collection';
+import { Collection, CollectionSummary } from 'types/collection';
 import { EnteDrawer } from 'components/EnteDrawer';
 import PublicShare from './publicShare';
-import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import { t } from 'i18next';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import { DialogProps, Stack } from '@mui/material';
 import Titlebar from 'components/Titlebar';
+import EmailShare from './emailShare';
+import { CollectionSummaryType } from 'constants/collection';
+import SharingDetails from './sharingDetails';
 
 interface Props {
     open: boolean;
     onClose: () => void;
     collection: Collection;
+    collectionSummary: CollectionSummary;
 }
 
-function CollectionShare(props: Props) {
+function CollectionShare({ collectionSummary, ...props }: Props) {
     const handleRootClose = () => {
         props.onClose();
     };
@@ -29,36 +29,53 @@ function CollectionShare(props: Props) {
     if (!props.collection) {
         return <></>;
     }
+    const { type } = collectionSummary;
 
     return (
-        <>
-            <EnteDrawer
-                anchor="right"
-                open={props.open}
-                onClose={handleDrawerClose}
-                BackdropProps={{
+        <EnteDrawer
+            anchor="right"
+            open={props.open}
+            onClose={handleDrawerClose}
+            slotProps={{
+                backdrop: {
                     sx: { '&&&': { backgroundColor: 'transparent' } },
-                }}>
-                <Stack spacing={'4px'} py={'12px'}>
-                    <Titlebar
-                        onClose={props.onClose}
-                        title={t('SHARE_COLLECTION')}
-                        onRootClose={handleRootClose}
-                    />
-                    <Stack py={'20px'} px={'8px'}>
-                        <MenuSectionTitle
-                            title={t('ADD_EMAIL_TITLE')}
-                            icon={<WorkspacesIcon />}
-                        />
-                        <EmailShare collection={props.collection} />
-                        <PublicShare
+                },
+            }}>
+            <Stack spacing={'4px'} py={'12px'}>
+                <Titlebar
+                    onClose={props.onClose}
+                    title={
+                        type ===
+                            CollectionSummaryType.incomingShareCollaborator ||
+                        type === CollectionSummaryType.incomingShareViewer
+                            ? t('SHARING_DETAILS')
+                            : t('SHARE_COLLECTION')
+                    }
+                    onRootClose={handleRootClose}
+                    caption={props.collection.name}
+                />
+                <Stack py={'20px'} px={'8px'} gap={'24px'}>
+                    {type === CollectionSummaryType.incomingShareCollaborator ||
+                    type === CollectionSummaryType.incomingShareViewer ? (
+                        <SharingDetails
                             collection={props.collection}
-                            onRootClose={handleRootClose}
+                            type={type}
                         />
-                    </Stack>
+                    ) : (
+                        <>
+                            <EmailShare
+                                collection={props.collection}
+                                onRootClose={handleRootClose}
+                            />
+                            <PublicShare
+                                collection={props.collection}
+                                onRootClose={handleRootClose}
+                            />
+                        </>
+                    )}
                 </Stack>
-            </EnteDrawer>
-        </>
+            </Stack>
+        </EnteDrawer>
     );
 }
 export default CollectionShare;

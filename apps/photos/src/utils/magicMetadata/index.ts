@@ -3,17 +3,42 @@ import { EnteFile } from 'types/file';
 import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
-export function IsArchived(item: Collection | EnteFile) {
+export function isArchivedFile(item: EnteFile): boolean {
+    if (!item || !item.magicMetadata || !item.magicMetadata.data) {
+        return false;
+    }
+    return item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
+}
+
+export function isArchivedCollection(item: Collection): boolean {
+    if (!item) {
+        return false;
+    }
+
+    if (item.magicMetadata && item.magicMetadata.data) {
+        return item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
+    }
+
+    if (item.sharedMagicMetadata && item.sharedMagicMetadata.data) {
+        return (
+            item.sharedMagicMetadata.data.visibility ===
+            VISIBILITY_STATE.ARCHIVED
+        );
+    }
+    return false;
+}
+
+export function isPinnedCollection(item: Collection) {
     if (
         !item ||
         !item.magicMetadata ||
         !item.magicMetadata.data ||
         typeof item.magicMetadata.data === 'string' ||
-        typeof item.magicMetadata.data.visibility === 'undefined'
+        typeof item.magicMetadata.data.order === 'undefined'
     ) {
         return false;
     }
-    return item.magicMetadata.data.visibility === VISIBILITY_STATE.ARCHIVED;
+    return item.magicMetadata.data.order !== 0;
 }
 
 export async function updateMagicMetadata<T>(

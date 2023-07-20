@@ -8,6 +8,7 @@ import {
     unhideToCollection,
     updateCollectionMagicMetadata,
     updatePublicCollectionMagicMetadata,
+    updateSharedCollectionMagicMetadata,
 } from 'services/collectionService';
 import { downloadFiles } from 'utils/file';
 import { getLocalFiles, getLocalHiddenFiles } from 'services/fileService';
@@ -34,7 +35,7 @@ import {
 } from 'constants/collection';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
-import { IsArchived, updateMagicMetadata } from 'utils/magicMetadata';
+import { isArchivedCollection, updateMagicMetadata } from 'utils/magicMetadata';
 import { getAlbumsURL } from 'utils/common/apiUtil';
 import bs58 from 'bs58';
 import { t } from 'i18next';
@@ -166,12 +167,29 @@ export const changeCollectionVisibility = async (
             visibility,
         };
 
-        const updatedMagicMetadata = await updateMagicMetadata(
-            updatedMagicMetadataProps,
-            collection.magicMetadata,
-            collection.key
-        );
-        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
+        const user: User = getData(LS_KEYS.USER);
+        if (collection.owner.id === user.id) {
+            const updatedMagicMetadata = await updateMagicMetadata(
+                updatedMagicMetadataProps,
+                collection.magicMetadata,
+                collection.key
+            );
+
+            await updateCollectionMagicMetadata(
+                collection,
+                updatedMagicMetadata
+            );
+        } else {
+            const updatedMagicMetadata = await updateMagicMetadata(
+                updatedMagicMetadataProps,
+                collection.sharedMagicMetadata,
+                collection.key
+            );
+            await updateSharedCollectionMagicMetadata(
+                collection,
+                updatedMagicMetadata
+            );
+        }
     } catch (e) {
         logError(e, 'change collection visibility failed');
         throw e;
@@ -198,6 +216,27 @@ export const changeCollectionSortOrder = async (
             collection,
             updatedPubMagicMetadata
         );
+    } catch (e) {
+        logError(e, 'change collection sort order failed');
+    }
+};
+
+export const changeCollectionOrder = async (
+    collection: Collection,
+    order: number
+) => {
+    try {
+        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
+            order,
+        };
+
+        const updatedMagicMetadata = await updateMagicMetadata(
+            updatedMagicMetadataProps,
+            collection.magicMetadata,
+            collection.key
+        );
+
+        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
     } catch (e) {
         logError(e, 'change collection order failed');
     }
@@ -226,7 +265,9 @@ export const changeCollectionSubType = async (
 
 export const getArchivedCollections = (collections: Collection[]) => {
     return new Set<number>(
-        collections.filter(IsArchived).map((collection) => collection.id)
+        collections
+            .filter(isArchivedCollection)
+            .map((collection) => collection.id)
     );
 };
 
@@ -268,7 +309,8 @@ export const showDownloadQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.incomingShareCollaborator ||
         type === CollectionSummaryType.outgoingShare ||
         type === CollectionSummaryType.sharedOnlyViaLink ||
-        type === CollectionSummaryType.archived
+        type === CollectionSummaryType.archived ||
+        type === CollectionSummaryType.pinned
     );
 };
 export const showShareQuickOption = (type: CollectionSummaryType) => {
@@ -277,7 +319,10 @@ export const showShareQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.album ||
         type === CollectionSummaryType.outgoingShare ||
         type === CollectionSummaryType.sharedOnlyViaLink ||
-        type === CollectionSummaryType.archived
+        type === CollectionSummaryType.archived ||
+        type === CollectionSummaryType.incomingShareViewer ||
+        type === CollectionSummaryType.incomingShareCollaborator ||
+        type === CollectionSummaryType.pinned
     );
 };
 export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {

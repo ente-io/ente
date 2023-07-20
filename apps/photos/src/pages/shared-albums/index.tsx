@@ -53,7 +53,7 @@ import AddPhotoAlternateOutlined from '@mui/icons-material/AddPhotoAlternateOutl
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { UploadTypeSelectorIntent } from 'types/gallery';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
-import { MoreHoriz } from '@mui/icons-material';
+import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
 
@@ -447,7 +447,6 @@ export default function PublicCollectionGallery() {
                     setSelected={() => null}
                     selected={{ count: 0, collectionID: null, ownCount: 0 }}
                     activeCollection={ALL_SECTION}
-                    isIncomingSharedCollection
                     enableDownload={downloadEnabled}
                     fileToCollectionsMap={null}
                     collectionNameMap={null}
