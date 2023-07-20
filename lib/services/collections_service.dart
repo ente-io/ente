@@ -254,6 +254,12 @@ class CollectionsService {
     return null;
   }
 
+  File? getCoverCache(Collection c) {
+    final int localSyncTime = getCollectionSyncTime(c.id);
+    final String coverKey = '${c.id}_${localSyncTime}_${c.updationTime}';
+    return _coverCache[coverKey];
+  }
+
   Future<int> getFileCount(Collection c) async {
     if (_countCache.containsKey(c.id)) {
       return _countCache[c.id]!;

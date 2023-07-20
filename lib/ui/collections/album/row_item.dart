@@ -59,8 +59,13 @@ class AlbumRowItemWidget extends StatelessWidget {
                       FutureBuilder<File?>(
                         future: CollectionsService.instance.getCover(c),
                         builder: (context, snapshot) {
+                          File? thumbnail;
                           if (snapshot.hasData) {
-                            final thumbnail = snapshot.data!;
+                            thumbnail = snapshot.data!;
+                          } else {
+                            thumbnail = CollectionsService.instance.getCoverCache(c);
+                          }
+                          if (thumbnail != null) {
                             final String heroTag = tagPrefix + thumbnail.tag;
                             return Hero(
                               tag: heroTag,
