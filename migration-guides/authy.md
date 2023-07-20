@@ -55,4 +55,4 @@ Now that we have the TXT file, let's import it. This should be the easiest part 
 
 And that's it! You have now successfully migrated from Authy to ente Authenticator.
 
-Just one more thing before I finish the guide: Now that your secrets are safely stored, I recommend you delete the unencrypted JSON and TXT files that were made during the migration process for security.
+Just one more thing: Now that your secrets are safely stored, I recommend you delete the unencrypted JSON and TXT files that were made during the migration process for security.
