@@ -59,6 +59,7 @@ export interface EmailVerificationResponse {
     encryptedToken?: string;
     token?: string;
     twoFactorSessionID: string;
+    srpM2?: string;
 }
 
 export interface TwoFactorVerificationResponse {
@@ -121,6 +122,10 @@ export interface SRPAttributes {
     memLimit: number;
     opsLimit: number;
     kekSalt: string;
+}
+
+export interface GetSRPAttributesResponse {
+    attributes: SRPAttributes;
 }
 
 export interface SRPSetupAttributes {

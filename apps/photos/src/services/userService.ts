@@ -33,6 +33,7 @@ import {
     SRPAttributes,
     UpdateSRPAndKeysRequest,
     UpdateSRPAndKeysResponse,
+    GetSRPAttributesResponse,
 } from 'types/user';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
@@ -46,6 +47,7 @@ import { addLocalLog } from 'utils/logging';
 import { setUserSRPSetupPending } from 'utils/storage';
 import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
 import { setLocalMapEnabled } from 'utils/storage';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 const ENDPOINT = getEndpoint();
 
@@ -486,7 +488,7 @@ export const getSRPAttributes = async (email: string) => {
         const resp = await HTTPService.get(`${ENDPOINT}/users/srp/attributes`, {
             email,
         });
-        return resp.data as SRPAttributes;
+        return (resp.data as GetSRPAttributesResponse).attributes;
     } catch (e) {
         if (e.status?.toString() === ServerErrorCodes.NOT_FOUND) {
             return null;
@@ -613,12 +615,16 @@ export const loginViaSRP = async (
     passphrase: string
 ) => {
     try {
-        const loginSubKey = await generateLoginSubKey(
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
+        const kek = await cryptoWorker.deriveKey(
             passphrase,
             srpAttributes.kekSalt,
-            srpAttributes.memLimit,
-            srpAttributes.opsLimit
+            srpAttributes.opsLimit,
+            srpAttributes.memLimit
         );
+
+        const loginSubKey = await generateLoginSubKey(kek);
         const srpClient = await generateSRPClient(
             srpAttributes.srpSalt,
             srpAttributes.srpUserID,
@@ -640,7 +646,14 @@ export const loginViaSRP = async (
             srpAttributes.srpUserID,
             convertBufferToBase64(m1)
         );
-        addLocalLog(() => `srp verify successful, ${verificationResponse}`);
+        addLocalLog(
+            () => `srp verify session successful, ${verificationResponse}`
+        );
+
+        srpClient.checkM2(convertBase64ToBuffer(verificationResponse.srpM2));
+
+        addLocalLog(() => `srp server verify successful`);
+
         return verificationResponse;
     } catch (e) {
         logError(e, 'srp verify failed');
@@ -651,7 +664,7 @@ export const loginViaSRP = async (
 export const createSRPSession = async (srpUserID: string, srpA: string) => {
     try {
         const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp/exchange-ab`,
+            `${ENDPOINT}/users/srp/create-session`,
             {
                 srpUserID,
                 srpA,
@@ -691,7 +704,7 @@ export const verifySRPSession = async (
 ) => {
     try {
         const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp/verify`,
+            `${ENDPOINT}/users/srp/verify-session`,
             {
                 sessionID,
                 srpUserID,

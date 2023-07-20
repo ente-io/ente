@@ -19,9 +19,11 @@ const LOGIN_SUB_KEY_LENGTH = 32;
 const LOGIN_SUB_KEY_ID = 1;
 const LOGIN_SUB_KEY_CONTEXT = 'loginctx';
 
-export async function generateKeyAttributes(
-    passphrase: string
-): Promise<{ keyAttributes: KeyAttributes; masterKey: string }> {
+export async function generateKeyAndSRPAttributes(passphrase: string): Promise<{
+    keyAttributes: KeyAttributes;
+    masterKey: string;
+    srpSetupAttributes: SRPSetupAttributes;
+}> {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const masterKey = await cryptoWorker.generateEncryptionKey();
     const recoveryKey = await cryptoWorker.generateEncryptionKey();
@@ -47,6 +49,10 @@ export async function generateKeyAttributes(
         masterKey
     );
 
+    const loginSubKey = await generateLoginSubKey(kek.key);
+
+    const srpSetupAttributes = await generateSRPSetupAttributes(loginSubKey);
+
     const keyAttributes: KeyAttributes = {
         kekSalt,
         encryptedKey: masterKeyEncryptedWithKek.encryptedData,
@@ -64,7 +70,11 @@ export async function generateKeyAttributes(
         recoveryKeyDecryptionNonce: recoveryKeyEncryptedWithMasterKey.nonce,
     };
 
-    return { keyAttributes, masterKey };
+    return {
+        keyAttributes,
+        masterKey,
+        srpSetupAttributes,
+    };
 }
 
 // We encrypt the masterKey, with an intermediate key derived from the
@@ -251,19 +261,8 @@ export const isWeakPassword = (password: string) => {
     return estimatePasswordStrength(password) === PasswordStrength.WEAK;
 };
 
-export const generateLoginSubKey = async (
-    password: string,
-    kekSalt: string,
-    memLimit: number,
-    opsLimit: number
-) => {
+export const generateLoginSubKey = async (kek: string) => {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-    const kek = await cryptoWorker.deriveKey(
-        password,
-        kekSalt,
-        memLimit,
-        opsLimit
-    );
     const loginSubKey = await cryptoWorker.generateSubKey(
         kek,
         LOGIN_SUB_KEY_LENGTH,

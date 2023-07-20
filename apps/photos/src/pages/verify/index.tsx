@@ -95,18 +95,19 @@ export default function Verify() {
                 if (keyAttributes) {
                     setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
                     setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
-                } else if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
-                    await putAttributes(
-                        token,
-                        getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
-                    );
-                }
-
-                if (getData(LS_KEYS.SRP_SETUP_ATTRIBUTES)) {
-                    const srpSetupAttributes: SRPSetupAttributes = getData(
-                        LS_KEYS.SRP_SETUP_ATTRIBUTES
-                    );
-                    await configureSRP(srpSetupAttributes);
+                } else {
+                    if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
+                        await putAttributes(
+                            token,
+                            getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
+                        );
+                    }
+                    if (getData(LS_KEYS.SRP_SETUP_ATTRIBUTES)) {
+                        const srpSetupAttributes: SRPSetupAttributes = getData(
+                            LS_KEYS.SRP_SETUP_ATTRIBUTES
+                        );
+                        await configureSRP(srpSetupAttributes);
+                    }
                 }
                 clearFiles();
                 setIsFirstLogin(true);

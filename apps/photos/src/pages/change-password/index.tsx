@@ -69,12 +69,7 @@ export default function ChangePassword() {
             memLimit: kek.memLimit,
         };
 
-        const loginSubKey = await generateLoginSubKey(
-            passphrase,
-            updatedKey.kekSalt,
-            updatedKey.opsLimit,
-            updatedKey.memLimit
-        );
+        const loginSubKey = await generateLoginSubKey(kek.key);
 
         const { srpUserID, srpSalt, srpVerifier } =
             await generateSRPSetupAttributes(loginSubKey);
