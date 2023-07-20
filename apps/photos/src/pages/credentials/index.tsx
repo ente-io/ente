@@ -97,7 +97,6 @@ export default function Credentials() {
                 const srpSetupAttributes = await generateSRPSetupAttributes(
                     loginSubKey
                 );
-                // we don't have access to kek here, so we will have to re-derive it from the passphrase
                 await configureSRP(srpSetupAttributes);
             }
 

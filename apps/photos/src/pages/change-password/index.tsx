@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { t } from 'i18next';
 
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
@@ -6,9 +6,12 @@ import { useRouter } from 'next/router';
 import {
     saveKeyInSessionStore,
     generateAndSaveIntermediateKeyAttributes,
+    generateLoginSubKey,
+    generateSRPClient,
+    generateSRPSetupAttributes,
 } from 'utils/crypto';
 import { getActualKey } from 'utils/common/key';
-import { setKeys } from 'services/userService';
+import { startSRPSetup, updateSRPAndKeys } from 'services/userService';
 import SetPasswordForm, {
     SetPasswordFormProps,
 } from 'components/SetPasswordForm';
@@ -22,6 +25,7 @@ import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { APPS, getAppName } from 'constants/apps';
+import { convertBufferToBase64, convertBase64ToBuffer } from 'utils/user';
 
 export default function ChangePassword() {
     const [token, setToken] = useState<string>();
@@ -65,7 +69,40 @@ export default function ChangePassword() {
             memLimit: kek.memLimit,
         };
 
-        await setKeys(token, updatedKey);
+        const loginSubKey = await generateLoginSubKey(
+            passphrase,
+            updatedKey.kekSalt,
+            updatedKey.opsLimit,
+            updatedKey.memLimit
+        );
+
+        const { srpUserID, srpSalt, srpVerifier } =
+            await generateSRPSetupAttributes(loginSubKey);
+
+        const srpClient = await generateSRPClient(
+            srpSalt,
+            srpUserID,
+            loginSubKey
+        );
+
+        const srpA = convertBufferToBase64(srpClient.computeA());
+
+        const { setupID, srpB } = await startSRPSetup(token, {
+            srpUserID,
+            srpSalt,
+            srpVerifier,
+            srpA,
+        });
+
+        srpClient.setB(convertBase64ToBuffer(srpB));
+
+        const srpM1 = convertBufferToBase64(srpClient.computeM1());
+
+        await updateSRPAndKeys(token, {
+            setupID,
+            srpM1,
+            updatedKeyAttr: updatedKey,
+        });
 
         const updatedKeyAttributes = Object.assign(keyAttributes, updatedKey);
         await generateAndSaveIntermediateKeyAttributes(

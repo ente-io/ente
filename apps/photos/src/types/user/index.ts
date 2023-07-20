@@ -27,6 +27,18 @@ export interface UpdatedKey {
     memLimit: number;
     opsLimit: number;
 }
+
+export interface UpdateSRPAndKeysRequest {
+    srpM1: string;
+    setupID: string;
+    updatedKeyAttr: UpdatedKey;
+}
+
+export interface UpdateSRPAndKeysResponse {
+    srpM2: string;
+    setupID: string;
+}
+
 export interface RecoveryKey {
     masterKeyEncryptedWithRecoveryKey: string;
     masterKeyDecryptionNonce: string;

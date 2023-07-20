@@ -15,7 +15,6 @@ import { logError } from 'utils/sentry';
 import { eventBus, Events } from './events';
 import {
     KeyAttributes,
-    UpdatedKey,
     RecoveryKey,
     TwoFactorSecret,
     TwoFactorVerificationResponse,
@@ -32,6 +31,8 @@ import {
     CompleteSRPSetupResponse,
     SRPSetupAttributes,
     SRPAttributes,
+    UpdateSRPAndKeysRequest,
+    UpdateSRPAndKeysResponse,
 } from 'types/user';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
@@ -128,10 +129,20 @@ export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
         'X-Auth-Token': token,
     });
 
-export const setKeys = (token: string, updatedKey: UpdatedKey) =>
-    HTTPService.put(`${ENDPOINT}/users/keys`, updatedKey, null, {
-        'X-Auth-Token': token,
-    });
+export const updateSRPAndKeys = async (
+    token: string,
+    updateSRPAndKeyRequest: UpdateSRPAndKeysRequest
+): Promise<UpdateSRPAndKeysResponse> => {
+    const resp = await HTTPService.post(
+        `${ENDPOINT}/users/srp/update`,
+        updateSRPAndKeyRequest,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    return resp.data as UpdateSRPAndKeysResponse;
+};
 
 export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
     HTTPService.put(`${ENDPOINT}/users/recovery-key`, recoveryKey, null, {
