@@ -46,6 +46,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   AlbumSortKey? sortKey;
   String _loadReason = "init";
+  final _scrollController = ScrollController();
 
   static const int _kOnEnteItemLimitCount = 10;
   @override
@@ -147,6 +148,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             );
 
     return CustomScrollView(
+      controller: _scrollController,
       slivers: [
         SliverToBoxAdapter(
           child: Hero(
@@ -202,6 +204,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                           appTitle: SectionTitle(
                             titleWithBrand: getOnEnteSection(context),
                           ),
+                          initalScrollOffset: _scrollController.offset,
                         ),
                       ),
                     );
@@ -311,6 +314,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     _localFilesSubscription.cancel();
     _collectionUpdatesSubscription.cancel();
     _loggedOutEvent.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 

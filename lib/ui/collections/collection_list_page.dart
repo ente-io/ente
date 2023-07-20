@@ -5,11 +5,13 @@ import "package:photos/ui/collections/flex_grid_view.dart";
 class CollectionListPage extends StatelessWidget {
   final List<Collection>? collections;
   final Widget? appTitle;
+  final double? initalScrollOffset;
   final String tag;
 
   const CollectionListPage(
     this.collections, {
     this.appTitle,
+    this.initalScrollOffset,
     this.tag = "",
     Key? key,
   }) : super(key: key);
@@ -19,6 +21,8 @@ class CollectionListPage extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
+          controller:
+              ScrollController(initialScrollOffset: initalScrollOffset ?? 0),
           slivers: [
             SliverAppBar(
               elevation: 0,
