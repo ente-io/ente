@@ -16,6 +16,7 @@ import "package:photos/ui/collections/collection_list_page.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/empty_state.dart";
@@ -223,22 +224,31 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     ),
                   )
                 : const SizedBox.shrink(),
-            const SizedBox(height: 32),
             collections.incoming.isNotEmpty
-                ? Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 44),
-                    child: ButtonWidget(
-                      buttonType: !hasQuickLinks && collections.outgoing.isEmpty
-                          ? ButtonType.trailingIconSecondary
-                          : ButtonType.trailingIconPrimary,
-                      labelText: S.of(context).inviteYourFriendsToEnte,
-                      icon: Icons.ios_share_outlined,
-                      onTap: () async {
-                        shareText(S.of(context).shareTextRecommendUsingEnte);
-                      },
-                    ),
+                ? Column(
+                    children: [
+                      const DividerWidget(dividerType: DividerType.bottomBar),
+                      const SizedBox(height: 32),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                        child: ButtonWidget(
+                          buttonType:
+                              !hasQuickLinks && collections.outgoing.isEmpty
+                                  ? ButtonType.trailingIconSecondary
+                                  : ButtonType.trailingIconPrimary,
+                          labelText: S.of(context).inviteYourFriendsToEnte,
+                          icon: Icons.ios_share_outlined,
+                          onTap: () async {
+                            shareText(
+                              S.of(context).shareTextRecommendUsingEnte,
+                            );
+                          },
+                        ),
+                      )
+                    ],
                   )
                 : const SizedBox.shrink(),
+            const SizedBox(height: 32),
           ],
         ),
       ),
