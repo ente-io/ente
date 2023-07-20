@@ -72,7 +72,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           final dialog = createProgressDialog(context, context.l10n.pleaseWait);
           await dialog.show();
           try {
-            await Configuration.instance.decryptAndSaveSecrets(
+            await Configuration.instance.decryptSecretsAndGetKeyEncKey(
               _passwordController.text,
               Configuration.instance.getKeyAttributes()!,
             );

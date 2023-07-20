@@ -282,7 +282,7 @@ class UserService {
           if (Configuration.instance.getEncryptedToken() != null) {
             page = const PasswordReentryPage();
           } else {
-            page = const PasswordEntryPage();
+            page = const PasswordEntryPage(mode: PasswordEntryMode.set,);
           }
         }
         Navigator.of(context).pushAndRemoveUntil(

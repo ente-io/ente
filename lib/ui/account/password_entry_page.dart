@@ -23,7 +23,7 @@ enum PasswordEntryMode {
 class PasswordEntryPage extends StatefulWidget {
   final PasswordEntryMode mode;
 
-  const PasswordEntryPage({this.mode = PasswordEntryMode.set, Key? key})
+  const PasswordEntryPage({required this.mode, Key? key})
       : super(key: key);
 
   @override
@@ -378,8 +378,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     await dialog.show();
     try {
       final keyAttributes = await Configuration.instance
-          .updatePassword(_passwordController1.text);
-      await UserService.instance.updateKeyAttributes(keyAttributes);
+          .getAttributesForNewPassword(_passwordController1.text);
+      await UserService.instance.updateKeyAttributes(keyAttributes.item1);
       await dialog.hide();
       showShortToast(context, context.l10n.passwordChangedSuccessfully);
       Navigator.of(context).pop();

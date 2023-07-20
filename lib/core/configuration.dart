@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:ente_auth/core/constants.dart';
-import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/signed_in_event.dart';
 import 'package:ente_auth/events/signed_out_event.dart';
@@ -18,6 +17,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tuple/tuple.dart';
 
 class Configuration {
   Configuration._privateConstructor();
@@ -146,6 +146,7 @@ class Configuration {
       utf8.encode(password) as Uint8List,
       kekSalt,
     );
+    final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
     final encryptedKeyData =
@@ -175,10 +176,11 @@ class Configuration {
       Sodium.bin2hex(recoveryKey),
       Sodium.bin2base64(keyPair.sk),
     );
-    return KeyGenResult(attributes, privateAttributes);
+    return KeyGenResult(attributes, privateAttributes, loginKey);
   }
 
-  Future<KeyAttributes> updatePassword(String password) async {
+
+  Future<Tuple2<KeyAttributes, Uint8List>> getAttributesForNewPassword(String password) async {
     // Get master key
     final masterKey = getKey();
 
@@ -189,6 +191,7 @@ class Configuration {
       utf8.encode(password) as Uint8List,
       kekSalt,
     );
+    final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
     final encryptedKeyData =
@@ -196,42 +199,38 @@ class Configuration {
 
     final existingAttributes = getKeyAttributes();
 
-    return existingAttributes!.copyWith(
+    final updatedAttributes = existingAttributes!.copyWith(
       kekSalt: Sodium.bin2base64(kekSalt),
       encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData!),
       keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce!),
       memLimit: derivedKeyResult.memLimit,
       opsLimit: derivedKeyResult.opsLimit,
     );
+    return Tuple2(updatedAttributes, loginKey);
   }
 
-  Future<void> decryptAndSaveSecrets(
+  // decryptSecretsAndGetLoginKey decrypts the master key and recovery key
+  // with the given password and save them in local secure storage.
+  // This method also returns the keyEncKey that can be used for performing
+  // SRP setup for existing users.
+  Future<Uint8List> decryptSecretsAndGetKeyEncKey(
     String password,
     KeyAttributes attributes,
   ) async {
     _logger.info('Start decryptAndSaveSecrets');
-    // validatePreVerificationStateCheck(
-    //   attributes,
-    //   password,
-    //   getEncryptedToken(),
-    // );
-    _logger.info('state validation done');
-    final kek = await CryptoUtil.deriveKey(
+    final keyEncryptionKey = await CryptoUtil.deriveKey(
       utf8.encode(password) as Uint8List,
       Sodium.base642bin(attributes.kekSalt),
       attributes.memLimit,
       attributes.opsLimit,
-    ).onError((e, s) {
-      _logger.severe('deriveKey failed', e, s);
-      throw KeyDerivationError();
-    });
+    );
 
     _logger.info('user-key done');
     Uint8List key;
     try {
       key = CryptoUtil.decryptSync(
         Sodium.base642bin(attributes.encryptedKey),
-        kek,
+        keyEncryptionKey,
         Sodium.base642bin(attributes.keyDecryptionNonce),
       );
     } catch (e) {
@@ -256,6 +255,7 @@ class Configuration {
     await setToken(
       Sodium.bin2base64(token, variant: Sodium.base64VariantUrlsafe),
     );
+    return keyEncryptionKey;
   }
 
   Future<void> recover(String recoveryKey) async {
