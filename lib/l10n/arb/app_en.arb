@@ -280,5 +280,6 @@
   "authenticationSuccessful": "Authentication successful!",
   "twofactorAuthenticationSuccessfullyReset": "Two-factor authentication successfully reset",
   "incorrectRecoveryKey": "Incorrect recovery key",
-  "theRecoveryKeyYouEnteredIsIncorrect": "The recovery key you entered is incorrect"
+  "theRecoveryKeyYouEnteredIsIncorrect": "The recovery key you entered is incorrect",
+  "enterPassword": "Enter password"
 }
