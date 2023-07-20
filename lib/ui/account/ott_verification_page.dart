@@ -10,11 +10,13 @@ class OTTVerificationPage extends StatefulWidget {
   final String email;
   final bool isChangeEmail;
   final bool isCreateAccountScreen;
+  final bool isResetPasswordScreen;
 
   const OTTVerificationPage(
     this.email, {
     this.isChangeEmail = false,
     this.isCreateAccountScreen = false,
+    this.isResetPasswordScreen = false,
     Key? key,
   }) : super(key: key);
 
@@ -78,7 +80,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             );
           } else {
             UserService.instance
-                .verifyEmail(context, _verificationCodeController.text);
+                .verifyEmail(context, _verificationCodeController.text,
+              isResettingPasswordScreen: widget.isResetPasswordScreen,);
           }
           FocusScope.of(context).unfocus();
         },
@@ -129,13 +132,21 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                             },
                           ),
                         ),
-                        Text(
-                          l10n.checkInboxAndSpamFolder,
-                          style: Theme.of(context)
-                              .textTheme
-                              .subtitle1!
-                              .copyWith(fontSize: 14),
-                        ),
+                        widget.isResetPasswordScreen
+                            ? Text(
+                                l10n.toResetVerifyEmail,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium!
+                                    .copyWith(fontSize: 14),
+                              )
+                            : Text(
+                                l10n.checkInboxAndSpamFolder,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .subtitle1!
+                                    .copyWith(fontSize: 14),
+                              ),
                       ],
                     ),
                   ),
@@ -182,6 +193,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                         context,
                         widget.email,
                         isCreateAccountScreen: widget.isCreateAccountScreen,
+                        isChangeEmail: widget.isChangeEmail,
+                        isResetPasswordScreen: widget.isResetPasswordScreen,
                       );
                     },
                     child: Text(

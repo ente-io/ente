@@ -1,11 +1,17 @@
+import 'dart:async';
+import "dart:convert";
+import "dart:math";
+
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
+import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/events/user_details_changed_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/models/api/user/srp.dart';
 import 'package:ente_auth/models/delete_account.dart';
 import 'package:ente_auth/models/key_attributes.dart';
 import 'package:ente_auth/models/key_gen_result.dart';
@@ -17,93 +23,133 @@ import 'package:ente_auth/ui/account/login_page.dart';
 import 'package:ente_auth/ui/account/ott_verification_page.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/account/password_reentry_page.dart';
+import 'package:ente_auth/ui/account/recovery_page.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/two_factor_authentication_page.dart';
 import 'package:ente_auth/ui/two_factor_recovery_page.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/email_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import "package:pointycastle/export.dart";
+import "package:pointycastle/srp/srp6_client.dart";
+import "package:pointycastle/srp/srp6_standard_groups.dart";
+import "package:pointycastle/srp/srp6_util.dart";
+import "package:pointycastle/srp/srp6_verifier_generator.dart";
+import 'package:shared_preferences/shared_preferences.dart';
+import "package:uuid/uuid.dart";
 
 class UserService {
+  static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
+  static const keyUserDetails = "user_details";
+  final  SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
   final _dio = Network.instance.getDio();
-  final _logger = Logger("UserSerivce");
+  final _enteDio = Network.instance.enteDio;
+  final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
+  late SharedPreferences _preferences;
+
   late ValueNotifier<String?> emailValueNotifier;
 
   UserService._privateConstructor();
+
   static final UserService instance = UserService._privateConstructor();
 
   Future<void> init() async {
     emailValueNotifier =
         ValueNotifier<String?>(Configuration.instance.getEmail());
+    _preferences = await SharedPreferences.getInstance();
   }
 
   Future<void> sendOtt(
-    BuildContext context,
-    String email, {
-    bool isChangeEmail = false,
-    bool isCreateAccountScreen = false,
-  }) async {
-    final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWait);
+      BuildContext context,
+      String email, {
+        bool isChangeEmail = false,
+        bool isCreateAccountScreen = false,
+        bool isResetPasswordScreen = false,
+      }) async {
+    final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/ott",
-        data: {
-          "email": email,
-          "purpose": isChangeEmail ? "change" : "",
-          "client": "totp"
-        },
+        data: {"email": email, "purpose": isChangeEmail ? "change" : ""},
       );
       await dialog.hide();
-      if (response != null && response.statusCode == 200) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return OTTVerificationPage(
-                email,
-                isChangeEmail: isChangeEmail,
-                isCreateAccountScreen: isCreateAccountScreen,
-              );
-            },
+      if (response.statusCode == 200) {
+        unawaited(
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return OTTVerificationPage(
+                  email,
+                  isChangeEmail: isChangeEmail,
+                  isCreateAccountScreen: isCreateAccountScreen,
+                  isResetPasswordScreen: isResetPasswordScreen,
+                );
+              },
+            ),
           ),
         );
         return;
       }
-      showGenericErrorDialog(context: context);
+      unawaited(showGenericErrorDialog(context: context));
     } on DioError catch (e) {
       await dialog.hide();
       _logger.info(e);
       if (e.response != null && e.response!.statusCode == 403) {
-        showErrorDialog(context, "Oops", "This email is already in use");
+        unawaited(
+          showErrorDialog(
+            context,
+            context.l10n.oops,
+            context.l10n.thisEmailIsAlreadyInUse,
+          ),
+        );
       } else {
-        showGenericErrorDialog(context: context);
+        unawaited(showGenericErrorDialog(context: context));
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showGenericErrorDialog(context: context);
+      unawaited(showGenericErrorDialog(context: context));
     }
   }
 
-  Future<UserDetails> getUserDetailsV2({bool memoryCount = true}) async {
+  Future<void> sendFeedback(
+      BuildContext context,
+      String feedback, {
+        String type = "SubCancellation",
+      }) async {
+    await _dio.post(
+      _config.getHttpEndpoint() + "/anonymous/feedback",
+      data: {"feedback": feedback, "type": "type"},
+    );
+  }
+
+
+  Future<UserDetails> getUserDetailsV2({
+    bool memoryCount = true,
+    bool shouldCache = false,
+  }) async {
+    _logger.info("Fetching user details");
     try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() +
-            "/users/details/v2?memoryCount=$memoryCount",
+      final response = await _enteDio.get(
+        "/users/details/v2",
         queryParameters: {
           "memoryCount": memoryCount,
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
-      return UserDetails.fromMap(response.data);
+      final userDetails = UserDetails.fromMap(response.data);
+      if (shouldCache) {
+        // handle email change from different client
+        if (userDetails.email != _config.getEmail()) {
+          setEmail(userDetails.email);
+        }
+      }
+      return userDetails;
     } on DioError catch (e) {
       _logger.info(e);
       rethrow;
@@ -112,14 +158,7 @@ class UserService {
 
   Future<Sessions> getActiveSessions() async {
     try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/sessions",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response = await _enteDio.get("/users/sessions");
       return Sessions.fromMap(response.data);
     } on DioError catch (e) {
       _logger.info(e);
@@ -129,13 +168,8 @@ class UserService {
 
   Future<void> terminateSession(String token) async {
     try {
-      await _dio.delete(
-        _config.getHttpEndpoint() + "/users/session",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
+      await _enteDio.delete(
+        "/users/session",
         queryParameters: {
           "token": token,
         },
@@ -148,14 +182,7 @@ class UserService {
 
   Future<void> leaveFamilyPlan() async {
     try {
-      await _dio.delete(
-        _config.getHttpEndpoint() + "/family/leave",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      await _enteDio.delete("/family/leave");
     } on DioError catch (e) {
       _logger.warning('failed to leave family plan', e);
       rethrow;
@@ -163,49 +190,32 @@ class UserService {
   }
 
   Future<void> logout(BuildContext context) async {
-    final dialog = createProgressDialog(context, "Logging out...");
-    await dialog.show();
     try {
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/logout",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
-      if (response != null && response.statusCode == 200) {
+      final response = await _enteDio.post("/users/logout");
+      if (response.statusCode == 200) {
         await Configuration.instance.logout();
-        await dialog.hide();
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         throw Exception("Log out action failed");
       }
     } catch (e) {
       _logger.severe(e);
-      await dialog.hide();
-      showGenericErrorDialog(context: context);
+      //This future is for waiting for the dialog from which logout() is called
+      //to close and only then to show the error dialog.
+      Future.delayed(
+        const Duration(milliseconds: 150),
+            () => showGenericErrorDialog(context: context),
+      );
+      rethrow;
     }
   }
 
   Future<DeleteChallengeResponse?> getDeleteChallenge(
-    BuildContext context,
-  ) async {
-    final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWait);
-    await dialog.show();
+      BuildContext context,
+      ) async {
     try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/delete-challenge",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
-      if (response != null && response.statusCode == 200) {
-        // clear data
-        await dialog.hide();
+      final response = await _enteDio.get("/users/delete-challenge");
+      if (response.statusCode == 200) {
         return DeleteChallengeResponse(
           allowDelete: response.data["allowDelete"] as bool,
           encryptedChallenge: response.data["encryptedChallenge"],
@@ -215,53 +225,37 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
-      await dialog.hide();
       await showGenericErrorDialog(context: context);
       return null;
     }
   }
 
   Future<void> deleteAccount(
-    BuildContext context,
-    String challengeResponse,
-  ) async {
-    final dialog = createProgressDialog(context, "Deleting account...");
-    await dialog.show();
+      BuildContext context,
+      String challengeResponse,) async {
     try {
-      final response = await _dio.delete(
-        _config.getHttpEndpoint() + "/users/delete",
+      final response = await _enteDio.delete(
+        "/users/delete",
         data: {
           "challenge": challengeResponse,
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
-      if (response != null && response.statusCode == 200) {
+      if (response.statusCode == 200) {
         // clear data
         await Configuration.instance.logout();
-        await dialog.hide();
-        showToast(
-          context,
-          "We have deleted your account and scheduled your uploaded data "
-          "for deletion.",
-        );
-        Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         throw Exception("delete action failed");
       }
     } catch (e) {
       _logger.severe(e);
-      await dialog.hide();
-      showGenericErrorDialog(context: context);
+      rethrow;
     }
   }
 
-  Future<void> verifyEmail(BuildContext context, String ott) async {
-    final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWait);
+  Future<void> verifyEmail(BuildContext context, String ott, {bool
+  isResettingPasswordScreen = false,})
+  async {
+    final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.post(
@@ -272,15 +266,20 @@ class UserService {
         },
       );
       await dialog.hide();
-      if (response != null && response.statusCode == 200) {
+      if (response.statusCode == 200) {
         Widget page;
         final String twoFASessionID = response.data["twoFactorSessionID"];
-        if (twoFASessionID != null && twoFASessionID.isNotEmpty) {
+        if (twoFASessionID.isNotEmpty) {
           page = TwoFactorAuthenticationPage(twoFASessionID);
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
-            page = const PasswordReentryPage();
+            if(isResettingPasswordScreen) {
+              page = const RecoveryPage();
+            } else {
+              page = const PasswordReentryPage();
+            }
+
           } else {
             page = const PasswordEntryPage(mode: PasswordEntryMode.set,);
           }
@@ -291,7 +290,7 @@ class UserService {
               return page;
             },
           ),
-          (route) => route.isFirst,
+              (route) => route.isFirst,
         );
       } else {
         // should never reach here
@@ -303,89 +302,95 @@ class UserService {
       if (e.response != null && e.response!.statusCode == 410) {
         await showErrorDialog(
           context,
-          "Oops",
-          "Your verification code has expired",
+          context.l10n.oops,
+          context.l10n.yourVerificationCodeHasExpired,
         );
         Navigator.of(context).pop();
       } else {
         showErrorDialog(
           context,
-          "Incorrect code",
-          "Sorry, the code you've entered is incorrect",
+          context.l10n.incorrectCode,
+          context.l10n.sorryTheCodeYouveEnteredIsIncorrect,
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showErrorDialog(context, "Oops", "Verification failed, please try again");
+      showErrorDialog(
+        context,
+        context.l10n.oops,
+        context.l10n.verificationFailedPleaseTryAgain,
+      );
     }
   }
 
   Future<void> setEmail(String email) async {
     await _config.setEmail(email);
-    emailValueNotifier.value = email ?? "";
+    emailValueNotifier.value = email;
   }
 
   Future<void> changeEmail(
-    BuildContext context,
-    String email,
-    String ott,
-  ) async {
-    final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWait);
+      BuildContext context,
+      String email,
+      String ott,
+      ) async {
+    final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/change-email",
+      final response = await _enteDio.post(
+        "/users/change-email",
         data: {
           "email": email,
           "ott": ott,
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       await dialog.hide();
-      if (response != null && response.statusCode == 200) {
-        showToast(context, "Email changed to " + email);
+      if (response.statusCode == 200) {
+        showShortToast(context, context.l10n.emailChangedTo(email));
         await setEmail(email);
         Navigator.of(context).popUntil((route) => route.isFirst);
         Bus.instance.fire(UserDetailsChangedEvent());
         return;
       }
-      showErrorDialog(context, "Oops", "Verification failed, please try again");
+      showErrorDialog(
+        context,
+        context.l10n.oops,
+        context.l10n.verificationFailedPleaseTryAgain,
+      );
     } on DioError catch (e) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 403) {
-        showErrorDialog(context, "Oops", "This email is already in use");
+        showErrorDialog(
+          context,
+          context.l10n.oops,
+          context.l10n.thisEmailIsAlreadyInUse,
+        );
       } else {
         showErrorDialog(
           context,
-          "Incorrect code",
-          "Authentication failed, please try again",
+          context.l10n.incorrectCode,
+          context.l10n.authenticationFailedPleaseTryAgain,
         );
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showErrorDialog(context, "Oops", "Verification failed, please try again");
+      showErrorDialog(
+        context,
+        context.l10n.oops,
+        context.l10n.verificationFailedPleaseTryAgain,
+      );
     }
   }
 
   Future<void> setAttributes(KeyGenResult result) async {
     try {
-      await _dio.put(
-        _config.getHttpEndpoint() + "/users/attributes",
+      await registerOrUpdateSrp(result.loginKey);
+      await _enteDio.put(
+        "/users/attributes",
         data: {
           "keyAttributes": result.keyAttributes.toMap(),
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       await _config.setKey(result.privateKeyAttributes.key);
       await _config.setSecretKey(result.privateKeyAttributes.secretKey);
@@ -396,7 +401,233 @@ class UserService {
     }
   }
 
-  Future<void> updateKeyAttributes(KeyAttributes keyAttributes) async {
+  Future<SrpAttributes> getSrpAttributes(String email) async {
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/srp/attributes",
+        queryParameters: {
+          "email": email,
+        },
+      );
+      if (response.statusCode == 200) {
+        return SrpAttributes.fromMap(response.data);
+      } else {
+        throw Exception("get-srp-attributes action failed");
+      }
+    } on DioError catch (e) {
+      if (e.response != null && e.response!.statusCode == 404) {
+        throw SrpSetupNotCompleteError();
+      }
+      rethrow;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> registerOrUpdateSrp(
+      Uint8List loginKey, {
+        SetKeysRequest? setKeysRequest,
+      }) async {
+    try {
+      final String username = const Uuid().v4().toString();
+      final SecureRandom random = _getSecureRandom();
+      final Uint8List identity = Uint8List.fromList(utf8.encode(username));
+      final Uint8List password = loginKey;
+      final Uint8List salt = random.nextBytes(16);
+      final gen = SRP6VerifierGenerator(
+        group: kDefaultSrpGroup,
+        digest: Digest('SHA-256'),
+      );
+      final v = gen.generateVerifier(salt, identity, password);
+
+      final client = SRP6Client(
+        group: kDefaultSrpGroup,
+        digest: Digest('SHA-256'),
+        random: random,
+      );
+
+      final A = client.generateClientCredentials(salt, identity, password);
+      final request = SetupSRPRequest(
+        srpUserID: username,
+        srpSalt: base64Encode(salt),
+        srpVerifier: base64Encode(SRP6Util.encodeBigInt(v)),
+        srpA: base64Encode(SRP6Util.encodeBigInt(A!)),
+        isUpdate: false,
+      );
+      final response = await _enteDio.post(
+        "/users/srp/setup",
+        data: request.toMap(),
+      );
+      if (response.statusCode == 200) {
+        final SetupSRPResponse setupSRPResponse =
+        SetupSRPResponse.fromJson(response.data);
+        final serverB =
+        SRP6Util.decodeBigInt(base64Decode(setupSRPResponse.srpB));
+        // ignore: need to calculate secret to get M1, unused_local_variable
+        final clientS = client.calculateSecret(serverB);
+        final clientM = client.calculateClientEvidenceMessage();
+        late Response srpCompleteResponse;
+        if(setKeysRequest == null) {
+          srpCompleteResponse = await _enteDio.post(
+            "/users/srp/complete",
+            data: {
+              'setupID': setupSRPResponse.setupID,
+              'srpM1': base64Encode(SRP6Util.encodeBigInt(clientM!)),
+            },
+          );
+        } else {
+          srpCompleteResponse = await _enteDio.post(
+            "/users/srp/update",
+            data: {
+              'setupID': setupSRPResponse.setupID,
+              'srpM1': base64Encode(SRP6Util.encodeBigInt(clientM!)),
+              'updatedKeyAttr': setKeysRequest.toMap(),
+            },
+          );
+        }
+      } else {
+        throw Exception("register-srp action failed");
+      }
+    } catch (e,s) {
+      _logger.severe("failed to register srp" ,e,s);
+      rethrow;
+    }
+  }
+
+  SecureRandom _getSecureRandom() {
+    final List<int> seeds = [];
+    final random = Random.secure();
+    for (int i = 0; i < 32; i++) {
+      seeds.add(random.nextInt(255));
+    }
+    final secureRandom = FortunaRandom();
+    secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
+    return secureRandom;
+  }
+
+  Future<void> verifyEmailViaPassword(
+      BuildContext context,
+      SrpAttributes srpAttributes,
+      String userPassword,
+      ) async {
+    final dialog = createProgressDialog(
+      context,
+      context.l10n.pleaseWait,
+      isDismissible: true,
+    );
+    await dialog.show();
+    try {
+      final kek = await CryptoUtil.deriveKey(
+        utf8.encode(userPassword) as Uint8List,
+        CryptoUtil.base642bin(srpAttributes.kekSalt),
+        srpAttributes.memLimit,
+        srpAttributes.opsLimit,
+      );
+      final loginKey = await CryptoUtil.deriveLoginKey(kek);
+      final Uint8List identity = Uint8List.fromList(
+        utf8.encode(srpAttributes.srpUserID),
+      );
+      final Uint8List salt = base64Decode(srpAttributes.srpSalt);
+      final Uint8List password = loginKey;
+      final SecureRandom random = _getSecureRandom();
+
+      final client = SRP6Client(
+        group: kDefaultSrpGroup,
+        digest: Digest('SHA-256'),
+        random: random,
+      );
+
+      final A = client.generateClientCredentials(salt, identity, password);
+      final createSessionResponse = await _dio.post(
+        _config.getHttpEndpoint() + "/users/srp/create-session",
+        data: {
+          "srpUserID": srpAttributes.srpUserID,
+          "srpA": base64Encode(SRP6Util.encodeBigInt(A!)),
+        },
+      );
+      final String sessionID = createSessionResponse.data["sessionID"];
+      final String srpB = createSessionResponse.data["srpB"];
+
+      final serverB = SRP6Util.decodeBigInt(base64Decode(srpB));
+      // ignore: need to calculate secret to get M1, unused_local_variable
+      final clientS = client.calculateSecret(serverB);
+      final clientM = client.calculateClientEvidenceMessage();
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/users/srp/verify-session",
+        data: {
+          "sessionID": sessionID,
+          "srpUserID": srpAttributes.srpUserID,
+          "srpM1": base64Encode(SRP6Util.encodeBigInt(clientM!)),
+        },
+      );
+      if (response.statusCode == 200) {
+        await dialog.hide();
+        Widget page;
+        final String twoFASessionID = response.data["twoFactorSessionID"];
+        Configuration.instance.setVolatilePassword(userPassword);
+        if (twoFASessionID.isNotEmpty) {
+
+          page = TwoFactorAuthenticationPage(twoFASessionID);
+        } else {
+          await _saveConfiguration(response);
+          if (Configuration.instance.getEncryptedToken() != null) {
+            page = const PasswordReentryPage();
+          } else {
+            throw Exception("unexpected response during email verification");
+          }
+        }
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return page;
+            },
+          ),
+              (route) => route.isFirst,
+        );
+      } else {
+        // should never reach here
+        throw Exception("unexpected response during email verification");
+      }
+    } on DioError catch (e, s) {
+      await dialog.hide();
+      if (e.response != null && e.response!.statusCode == 401) {
+        final dialogChoice = await showChoiceDialog(
+          context,
+          title: context.l10n.incorrectPasswordTitle,
+          body: context.l10n.pleaseTryAgain,
+          firstButtonLabel: context.l10n.contactSupport,
+          secondButtonLabel: context.l10n.ok,
+        );
+        if (dialogChoice!.action == ButtonAction.first) {
+          await sendLogs(
+            context,
+            context.l10n.contactSupport,
+            "support@ente.io",
+            postShare: () {},
+          );
+        }
+      } else {
+        _logger.fine('failed to verify password', e, s);
+        await showErrorDialog(
+          context,
+          context.l10n.oops,
+          context.l10n.verificationFailedPleaseTryAgain,
+        );
+      }
+    } catch (e, s) {
+      _logger.fine('failed to verify password', e, s);
+      await dialog.hide();
+      await showErrorDialog(
+        context,
+        context.l10n.oops,
+        context.l10n.verificationFailedPleaseTryAgain,
+      );
+    }
+  }
+
+  Future<void> updateKeyAttributes(KeyAttributes keyAttributes, Uint8List
+  loginKey,)
+  async {
     try {
       final setKeyRequest = SetKeysRequest(
         kekSalt: keyAttributes.kekSalt,
@@ -405,15 +636,11 @@ class UserService {
         memLimit: keyAttributes.memLimit,
         opsLimit: keyAttributes.opsLimit,
       );
-      await _dio.put(
-        _config.getHttpEndpoint() + "/users/keys",
-        data: setKeyRequest.toMap(),
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      await registerOrUpdateSrp(loginKey, setKeysRequest: setKeyRequest);
+      // await _enteDio.put(
+      //   "/users/keys",
+      //   data: setKeyRequest.toMap(),
+      // );
       await _config.setKeyAttributes(keyAttributes);
     } catch (e) {
       _logger.severe(e);
@@ -429,14 +656,9 @@ class UserService {
         keyAttributes.recoveryKeyEncryptedWithMasterKey,
         keyAttributes.recoveryKeyDecryptionNonce,
       );
-      await _dio.put(
-        _config.getHttpEndpoint() + "/users/recovery-key",
+      await _enteDio.put(
+        "/users/recovery-key",
         data: setRecoveryKeyRequest.toMap(),
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       await _config.setKeyAttributes(keyAttributes);
     } catch (e) {
@@ -445,47 +667,215 @@ class UserService {
     }
   }
 
-  Future<String?> getPaymentToken() async {
+  Future<void> verifyTwoFactor(
+      BuildContext context,
+      String sessionID,
+      String code,
+      ) async {
+    final dialog = createProgressDialog(context, context.l10n.pleaseWait);
+    await dialog.show();
     try {
-      final response = await _dio.get(
-        "${_config.getHttpEndpoint()}/users/payment-token",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/users/two-factor/verify",
+        data: {
+          "sessionID": sessionID,
+          "code": code,
+        },
       );
-      if (response != null && response.statusCode == 200) {
-        return response.data["paymentToken"];
+      await dialog.hide();
+      if (response.statusCode == 200) {
+        showShortToast(context, context.l10n.authenticationSuccessful);
+        await _saveConfiguration(response);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const PasswordReentryPage();
+            },
+          ),
+              (route) => route.isFirst,
+        );
+      }
+    } on DioError catch (e) {
+      await dialog.hide();
+      _logger.severe(e);
+      if (e.response != null && e.response!.statusCode == 404) {
+        showToast(context, "Session expired");
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const LoginPage();
+            },
+          ),
+              (route) => route.isFirst,
+        );
       } else {
-        throw Exception("non 200 ok response");
+        showErrorDialog(
+          context,
+          context.l10n.incorrectCode,
+          context.l10n.authenticationFailedPleaseTryAgain,
+        );
       }
     } catch (e) {
-      _logger.severe("Failed to get payment token", e);
-      return null;
+      await dialog.hide();
+      _logger.severe(e);
+      showErrorDialog(
+        context,
+        context.l10n.oops,
+        context.l10n.authenticationFailedPleaseTryAgain,
+      );
     }
   }
 
-  Future<String> getFamiliesToken() async {
+  Future<void> recoverTwoFactor(BuildContext context, String sessionID) async {
+    final dialog = createProgressDialog(context, context.l10n.pleaseWait);
+    await dialog.show();
     try {
       final response = await _dio.get(
-        "${_config.getHttpEndpoint()}/users/families-token",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
+        _config.getHttpEndpoint() + "/users/two-factor/recover",
+        queryParameters: {
+          "sessionID": sessionID,
+        },
       );
-      if (response != null && response.statusCode == 200) {
-        return response.data["familiesToken"];
-      } else {
-        throw Exception("non 200 ok response");
+      if (response.statusCode == 200) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return TwoFactorRecoveryPage(
+                sessionID,
+                response.data["encryptedSecret"],
+                response.data["secretDecryptionNonce"],
+              );
+            },
+          ),
+              (route) => route.isFirst,
+        );
       }
-    } catch (e, s) {
-      _logger.severe("failed to fetch families token", e, s);
-      rethrow;
+    } on DioError catch (e) {
+      _logger.severe(e);
+      if (e.response != null && e.response!.statusCode == 404) {
+        showToast(context, context.l10n.sessionExpired);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const LoginPage();
+            },
+          ),
+              (route) => route.isFirst,
+        );
+      } else {
+        showErrorDialog(
+          context,
+          context.l10n.oops,
+          context.l10n.somethingWentWrongPleaseTryAgain,
+        );
+      }
+    } catch (e) {
+      _logger.severe(e);
+      showErrorDialog(
+        context,
+        context.l10n.oops,
+        context.l10n.somethingWentWrongPleaseTryAgain,
+      );
+    } finally {
+      await dialog.hide();
     }
   }
+
+  Future<void> removeTwoFactor(
+      BuildContext context,
+      String sessionID,
+      String recoveryKey,
+      String encryptedSecret,
+      String secretDecryptionNonce,
+      ) async {
+    final dialog = createProgressDialog(context, context.l10n.pleaseWait);
+    await dialog.show();
+    String secret;
+    try {
+      if (recoveryKey.contains(' ')) {
+        if (recoveryKey.split(' ').length != mnemonicKeyWordCount) {
+          throw AssertionError(
+            'recovery code should have $mnemonicKeyWordCount words',
+          );
+        }
+        recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
+      }
+      secret = CryptoUtil.bin2base64(
+        await CryptoUtil.decrypt(
+          CryptoUtil.base642bin(encryptedSecret),
+          CryptoUtil.hex2bin(recoveryKey.trim()),
+          CryptoUtil.base642bin(secretDecryptionNonce),
+        ),
+      );
+    } catch (e) {
+      await dialog.hide();
+      await showErrorDialog(
+        context,
+        context.l10n.incorrectRecoveryKey,
+        context.l10n.theRecoveryKeyYouEnteredIsIncorrect,
+      );
+      return;
+    }
+    try {
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/users/two-factor/remove",
+        data: {
+          "sessionID": sessionID,
+          "secret": secret,
+        },
+      );
+      if (response.statusCode == 200) {
+        showShortToast(
+          context,
+          context.l10n.twofactorAuthenticationSuccessfullyReset,
+        );
+        await _saveConfiguration(response);
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const PasswordReentryPage();
+            },
+          ),
+              (route) => route.isFirst,
+        );
+      }
+    } on DioError catch (e) {
+      _logger.severe(e);
+      if (e.response != null && e.response!.statusCode == 404) {
+        showToast(context, "Session expired");
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const LoginPage();
+            },
+          ),
+              (route) => route.isFirst,
+        );
+      } else {
+        showErrorDialog(
+          context,
+          context.l10n.oops,
+          context.l10n.somethingWentWrongPleaseTryAgain,
+        );
+      }
+    } catch (e) {
+      _logger.severe(e);
+      showErrorDialog(
+        context,
+        context.l10n.oops,
+        context.l10n.somethingWentWrongPleaseTryAgain,
+      );
+    } finally {
+      await dialog.hide();
+    }
+  }
+
+
+
+
+
+
+
 
   Future<void> _saveConfiguration(Response response) async {
     await Configuration.instance.setUserID(response.data["id"]);
@@ -500,205 +890,7 @@ class UserService {
     }
   }
 
-  Future<void> recoverTwoFactor(BuildContext context, String sessionID) async {
-    final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWait);
-    await dialog.show();
-    try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/two-factor/recover",
-        queryParameters: {
-          "sessionID": sessionID,
-        },
-      );
-      if (response != null && response.statusCode == 200) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return TwoFactorRecoveryPage(
-                sessionID,
-                response.data["encryptedSecret"],
-                response.data["secretDecryptionNonce"],
-              );
-            },
-          ),
-          (route) => route.isFirst,
-        );
-      }
-    } on DioError catch (e) {
-      _logger.severe(e);
-      if (e.response != null && e.response!.statusCode == 404) {
-        showToast(context, "Session expired");
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const LoginPage();
-            },
-          ),
-          (route) => route.isFirst,
-        );
-      } else {
-        showErrorDialog(
-          context,
-          "Oops",
-          "Something went wrong, please try again",
-        );
-      }
-    } catch (e) {
-      _logger.severe(e);
-      showErrorDialog(
-        context,
-        "Oops",
-        "Something went wrong, please try again",
-      );
-    } finally {
-      await dialog.hide();
-    }
-  }
 
-  Future<void> verifyTwoFactor(
-    BuildContext context,
-    String sessionID,
-    String code,
-  ) async {
-    final dialog = createProgressDialog(context, "Authenticating...");
-    await dialog.show();
-    try {
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/two-factor/verify",
-        data: {
-          "sessionID": sessionID,
-          "code": code,
-        },
-      );
-      await dialog.hide();
-      if (response != null && response.statusCode == 200) {
-        showToast(context, "Authentication successful!");
-        await _saveConfiguration(response);
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const PasswordReentryPage();
-            },
-          ),
-          (route) => route.isFirst,
-        );
-      }
-    } on DioError catch (e) {
-      await dialog.hide();
-      _logger.severe(e);
-      if (e.response != null && e.response!.statusCode == 404) {
-        showToast(context, "Session expired");
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const LoginPage();
-            },
-          ),
-          (route) => route.isFirst,
-        );
-      } else {
-        showErrorDialog(
-          context,
-          "Incorrect code",
-          "Authentication failed, please try again",
-        );
-      }
-    } catch (e) {
-      await dialog.hide();
-      _logger.severe(e);
-      showErrorDialog(
-        context,
-        "Oops",
-        "Authentication failed, please try again",
-      );
-    }
-  }
 
-  Future<void> removeTwoFactor(
-    BuildContext context,
-    String sessionID,
-    String recoveryKey,
-    String encryptedSecret,
-    String secretDecryptionNonce,
-  ) async {
-    final l10n = context.l10n;
-    final dialog = createProgressDialog(context, l10n.pleaseWait);
-    await dialog.show();
-    String secret;
-    try {
-      if (recoveryKey.contains(' ')) {
-        if (recoveryKey.split(' ').length != mnemonicKeyWordCount) {
-          throw AssertionError(
-            'recovery code should have $mnemonicKeyWordCount words',
-          );
-        }
-        recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
-      }
-      secret = Sodium.bin2base64(
-        await CryptoUtil.decrypt(
-          Sodium.base642bin(encryptedSecret),
-          Sodium.hex2bin(recoveryKey.trim()),
-          Sodium.base642bin(secretDecryptionNonce),
-        ),
-      );
-    } catch (e) {
-      await dialog.hide();
-      showErrorDialog(
-        context,
-        "Incorrect recovery key",
-        "The recovery key you entered is incorrect",
-      );
-      return;
-    }
-    try {
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/two-factor/remove",
-        data: {
-          "sessionID": sessionID,
-          "secret": secret,
-        },
-      );
-      if (response != null && response.statusCode == 200) {
-        showShortToast(context, "Two-factor authentication successfully reset");
-        await _saveConfiguration(response);
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const PasswordReentryPage();
-            },
-          ),
-          (route) => route.isFirst,
-        );
-      }
-    } on DioError catch (e) {
-      _logger.severe(e);
-      if (e.response != null && e.response!.statusCode == 404) {
-        showToast(context, "Session expired");
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const LoginPage();
-            },
-          ),
-          (route) => route.isFirst,
-        );
-      } else {
-        showErrorDialog(
-          context,
-          "Oops",
-          "Something went wrong, please try again",
-        );
-      }
-    } catch (e) {
-      _logger.severe(e);
-      showErrorDialog(
-        context,
-        "Oops",
-        "Something went wrong, please try again",
-      );
-    } finally {
-      await dialog.hide();
-    }
-  }
 }
+

@@ -306,6 +306,10 @@ class Configuration {
     return _cachedToken;
   }
 
+  bool isLoggedIn() {
+    return getToken() != null;
+  }
+
   Future<void> setToken(String token) async {
     _cachedToken = token;
     await _preferences.setString(tokenKey, token);
