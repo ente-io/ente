@@ -413,7 +413,7 @@ class Configuration {
     final keyAttributes = getKeyAttributes()!;
     return CryptoUtil.decryptSync(
       Sodium.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey),
-      getKey(),
+      getKey()!,
       Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce),
     );
   }

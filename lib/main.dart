@@ -1,4 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:computer/computer.dart';
 import "package:ente_auth/app/view/app.dart";
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
@@ -17,6 +18,7 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
+import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
@@ -70,6 +72,8 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
 }
 
 Future<void> _init(bool bool, {String? via}) async {
+  // Start workers asynchronously. No need to wait for them to start
+  Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode);
   CryptoUtil.init();
   await PreferenceService.instance.init();
   await CodeStore.instance.init();
