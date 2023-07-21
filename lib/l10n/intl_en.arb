@@ -18,7 +18,7 @@
   "yourAccountHasBeenDeleted": "Your account has been deleted",
   "selectReason": "Select reason",
   "deleteReason1": "It’s missing a key feature that I need",
-  "deleteReason2": "The app or a certain feature does not \nbehave as I think it should",
+  "deleteReason2": "The app or a certain feature does not behave as I think it should",
   "deleteReason3": "I found another service that I like better",
   "deleteReason4": "My reason isn’t listed",
   "sendEmail": "Send email",

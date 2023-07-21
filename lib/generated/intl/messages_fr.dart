@@ -389,7 +389,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "Il manque une fonction clé dont j\'ai besoin"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
-            "L\'application ou une certaine fonctionnalité ne se comporte pas \ncomme je pense qu\'elle devrait"),
+            "L\'application ou une certaine fonctionnalité ne se comporte pas comme je pense qu\'elle devrait"),
         "deleteReason3": MessageLookupByLibrary.simpleMessage(
             "J\'ai trouvé un autre service que je préfère"),
         "deleteReason4":

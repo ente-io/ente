@@ -240,10 +240,10 @@ class S {
     );
   }
 
-  /// `The app or a certain feature does not \nbehave as I think it should`
+  /// `The app or a certain feature does not behave as I think it should`
   String get deleteReason2 {
     return Intl.message(
-      'The app or a certain feature does not \nbehave as I think it should',
+      'The app or a certain feature does not behave as I think it should',
       name: 'deleteReason2',
       desc: '',
       args: [],
