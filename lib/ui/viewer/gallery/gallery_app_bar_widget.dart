@@ -248,16 +248,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         }
       },
     );
-
-    showConfettiDialog(
-      context: context,
-      dialogBuilder: (BuildContext context) {
-        return dialog;
-      },
-      barrierColor: Colors.black87,
-      confettiAlignment: Alignment.topCenter,
-      useRootNavigator: true,
-    );
   }
 
   List<Widget> _getDefaultActions(BuildContext context) {

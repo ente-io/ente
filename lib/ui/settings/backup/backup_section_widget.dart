@@ -172,16 +172,6 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         }
       },
     );
-
-    showConfettiDialog(
-      context: context,
-      dialogBuilder: (BuildContext context) {
-        return dialog;
-      },
-      barrierColor: Colors.black87,
-      confettiAlignment: Alignment.topCenter,
-      useRootNavigator: true,
-    );
   }
 
   void _showDuplicateFilesDeletedDialog(DeduplicationResult result) {
@@ -203,16 +193,6 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           S.of(context).remindToEmptyEnteTrash,
         );
       },
-    );
-
-    showConfettiDialog(
-      context: context,
-      dialogBuilder: (BuildContext context) {
-        return dialog;
-      },
-      barrierColor: Colors.black87,
-      confettiAlignment: Alignment.topCenter,
-      useRootNavigator: true,
     );
   }
 }
