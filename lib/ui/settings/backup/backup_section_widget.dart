@@ -9,10 +9,9 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
-import 'package:photos/ui/components/models/button_type.dart';
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
 import 'package:photos/ui/settings/backup/backup_settings_screen.dart';
 import 'package:photos/ui/settings/common_settings.dart';
@@ -154,7 +153,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   void _showSpaceFreedDialog(BackupStatus status) {
-    final DialogWidget dialog = choiceDialog(
+    showChoiceDialog(
+      context,
       title: S.of(context).success,
       body: S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
       firstButtonLabel: S.of(context).rateUs,
@@ -175,7 +175,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   void _showDuplicateFilesDeletedDialog(DeduplicationResult result) {
-    final DialogWidget dialog = choiceDialog(
+    showChoiceDialog(
+      context,
       title: S.of(context).sparkleSuccess,
       body: S.of(context).duplicateFileCountWithStorageSaved(
             result.count,
