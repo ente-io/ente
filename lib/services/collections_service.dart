@@ -236,7 +236,7 @@ class CollectionsService {
       debugPrint("getCover for collection ${c.id} ${c.displayName}");
     }
     final coverID = c.pubMagicMetadata.coverID;
-    if (coverID != null) {
+    if (coverID != null && coverID >= 0) {
       final File? cover = await filesDB.getUploadedFile(coverID, c.id);
       if (cover != null) {
         _coverCache[coverKey] = cover;

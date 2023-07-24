@@ -126,13 +126,15 @@ Future<void> updateOrder(
   }
 }
 
+// changeCoverPhoto is used to change cover photo for a collection. To reset to
+// default cover photo, pass uploadedFileID as -1
 Future<void> changeCoverPhoto(
   BuildContext context,
   Collection collection,
-  File file,
+  int uploadedFileID,
 ) async {
   try {
-    final Map<String, dynamic> update = {"coverID": file.uploadedFileID};
+    final Map<String, dynamic> update = {"coverID": uploadedFileID};
     await CollectionsService.instance
         .updatePublicMagicMetadata(collection, update);
     Bus.instance.fire(
