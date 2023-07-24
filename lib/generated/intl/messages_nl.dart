@@ -502,7 +502,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "Ik mis een belangrijke functie"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
-            "De app of een bepaalde functie functioneert niet \nzoals ik verwacht"),
+            "De app of een bepaalde functie functioneert niet zoals ik verwacht"),
         "deleteReason3": MessageLookupByLibrary.simpleMessage(
             "Ik heb een andere dienst gevonden die me beter bevalt"),
         "deleteReason4": MessageLookupByLibrary.simpleMessage(
@@ -723,6 +723,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Uitnodigen voor ente"),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("Vrienden uitnodigen"),
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "Het lijkt erop dat er iets fout is gegaan. Probeer het later opnieuw. Als de fout zich blijft voordoen, neem dan contact op met ons supportteam."),
@@ -834,6 +836,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nieuw bij ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Nieuwste"),
         "no": MessageLookupByLibrary.simpleMessage("Nee"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "Je hebt geen bestanden op dit apparaat die verwijderd kunnen worden"),
         "noDuplicates":
@@ -852,6 +856,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("Geen resultaten"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("Geen resultaten gevonden"),
+        "nothingSharedWithYouYet":
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "nothingToSeeHere":
             MessageLookupByLibrary.simpleMessage("Nog niets te zien hier! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("Oké"),
@@ -1113,8 +1119,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Maak gedeelde en collaboratieve albums met andere ente gebruikers, inclusief gebruikers met gratis abonnementen."),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("Gedeeld door mij"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
         "sharedWith": m47,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Gedeeld met mij"),
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "sharing": MessageLookupByLibrary.simpleMessage("Delen..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Ik ga akkoord met de <u-terms>gebruiksvoorwaarden</u-terms> en <u-policy>privacybeleid</u-policy>"),

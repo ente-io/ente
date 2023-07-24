@@ -68,7 +68,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 S.of(context).askDeleteReason,
                 style: getEnteTextTheme(context).body,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 12),
               Container(
                 width: double.infinity,
                 height: 48,
@@ -110,7 +110,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 S.of(context).deleteAccountFeedbackPrompt,
                 style: getEnteTextTheme(context).body,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 12),
               TextFormField(
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(

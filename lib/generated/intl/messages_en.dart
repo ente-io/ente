@@ -217,10 +217,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "addANewEmail": MessageLookupByLibrary.simpleMessage("Add a new email"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Add collaborator"),
+        "addFromDevice":
+            MessageLookupByLibrary.simpleMessage("Add from device"),
         "addItem": m0,
         "addLocation": MessageLookupByLibrary.simpleMessage("Add location"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Add"),
         "addMore": MessageLookupByLibrary.simpleMessage("Add more"),
+        "addPhotos": MessageLookupByLibrary.simpleMessage("Add photos"),
+        "addSelected": MessageLookupByLibrary.simpleMessage("Add selected"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("Add to album"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("Add to ente"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Add viewer"),
@@ -438,6 +442,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "couldNotUpdateSubscription": MessageLookupByLibrary.simpleMessage(
             "Could not update subscription"),
         "count": MessageLookupByLibrary.simpleMessage("Count"),
+        "create": MessageLookupByLibrary.simpleMessage("Create"),
         "createAccount": MessageLookupByLibrary.simpleMessage("Create account"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
             "Long press to select photos and click + to create an album"),
@@ -497,7 +502,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "It’s missing a key feature that I need"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
-            "The app or a certain feature does not \nbehave as I think it should"),
+            "The app or a certain feature does not behave as I think it should"),
         "deleteReason3": MessageLookupByLibrary.simpleMessage(
             "I found another service that I like better"),
         "deleteReason4":
@@ -713,6 +718,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "inviteToEnte": MessageLookupByLibrary.simpleMessage("Invite to ente"),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("Invite your friends"),
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team."),
@@ -821,6 +828,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "newToEnte": MessageLookupByLibrary.simpleMessage("New to ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Newest"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "You\'ve no files on this device that can be deleted"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ No duplicates"),
@@ -841,6 +850,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("No results"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("No results found"),
+        "nothingSharedWithYouYet":
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "nothingToSeeHere":
             MessageLookupByLibrary.simpleMessage("Nothing to see here! 👀"),
         "notifications": MessageLookupByLibrary.simpleMessage("Notifications"),
@@ -932,6 +943,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Public link created"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Public link enabled"),
+        "quickLinks": MessageLookupByLibrary.simpleMessage("Quick links"),
         "radius": MessageLookupByLibrary.simpleMessage("Radius"),
         "raiseTicket": MessageLookupByLibrary.simpleMessage("Raise ticket"),
         "rateTheApp": MessageLookupByLibrary.simpleMessage("Rate the app"),
@@ -1047,6 +1059,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
         "selectFoldersForBackup":
             MessageLookupByLibrary.simpleMessage("Select folders for backup"),
+        "selectItemsToAdd":
+            MessageLookupByLibrary.simpleMessage("Select items to add"),
         "selectLanguage":
             MessageLookupByLibrary.simpleMessage("Select Language"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Select reason"),
@@ -1098,12 +1112,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Create shared and collaborative albums with other ente users, including users on free plans."),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("Shared by me"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
         "sharedPhotoNotifications":
             MessageLookupByLibrary.simpleMessage("New shared photos"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
             "Receive notifications when someone adds a photo to a shared album that you\'re a part of"),
         "sharedWith": m47,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Shared with me"),
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "sharing": MessageLookupByLibrary.simpleMessage("Sharing..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>"),
@@ -1292,6 +1309,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("View active sessions"),
+        "viewAll": MessageLookupByLibrary.simpleMessage("View all"),
         "viewAllExifData":
             MessageLookupByLibrary.simpleMessage("View all EXIF data"),
         "viewLogs": MessageLookupByLibrary.simpleMessage("View logs"),

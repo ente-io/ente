@@ -18,7 +18,7 @@
   "yourAccountHasBeenDeleted": "Your account has been deleted",
   "selectReason": "Select reason",
   "deleteReason1": "It’s missing a key feature that I need",
-  "deleteReason2": "The app or a certain feature does not \nbehave as I think it should",
+  "deleteReason2": "The app or a certain feature does not behave as I think it should",
   "deleteReason3": "I found another service that I like better",
   "deleteReason4": "My reason isn’t listed",
   "sendEmail": "Send email",
@@ -420,7 +420,7 @@
   "itemCount": "{count, plural, one{{count} item} other{{count} items}}",
   "deleteItemCount": "{count, plural, =1 {Delete {count} item} other {Delete {count} items}}",
   "duplicateItemsGroup": "{count} files, {formattedSize} each",
-  "@duplicateItemsGroup" : {
+  "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
     "type": "text",
     "placeholders": {
@@ -1079,10 +1079,22 @@
   "maps": "Maps",
   "enableMaps": "Enable Maps",
   "enableMapsDesc": "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.",
+  "quickLinks": "Quick links",
+  "selectItemsToAdd": "Select items to add",
+  "addSelected": "Add selected",
+  "addFromDevice": "Add from device",
+  "addPhotos": "Add photos",
   "noPhotosFoundHere": "No photos found here",
   "zoomOutToSeePhotos": "Zoom out to see photos",
   "noImagesWithLocation": "No images with location",
   "unpinAlbum": "Unpin album",
   "pinAlbum": "Pin album",
-  "toResetVerifyEmail": "To reset your password, please verify your email first."
+  "toResetVerifyEmail": "To reset your password, please verify your email first.",
+  "create": "Create",
+  "viewAll": "View all",
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet",
+  "sharedWithYou": "Shared with you",
+  "sharedByYou": "Shared by you",
+  "inviteYourFriendsToEnte": "Invite your friends to ente"
 }

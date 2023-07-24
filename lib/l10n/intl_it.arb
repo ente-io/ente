@@ -18,7 +18,7 @@
   "yourAccountHasBeenDeleted": "Il tuo account è stato eliminato",
   "selectReason": "Seleziona un motivo",
   "deleteReason1": "Manca una caratteristica chiave di cui ho bisogno",
-  "deleteReason2": "L'app o una determinata funzionalità\nnon si comporta come dovrebbe",
+  "deleteReason2": "L'app o una determinata funzionalità non si comporta come dovrebbe",
   "deleteReason3": "Ho trovato un altro servizio che mi piace di più",
   "deleteReason4": "Il motivo non è elencato",
   "sendEmail": "Invia email",
@@ -1080,5 +1080,10 @@
   "enableMaps": "Abilita le Mappe",
   "enableMapsDesc": "Questo mostrerà le tue foto su una mappa del mondo.\n\nQuesta mappa è ospitata da Open Street Map e le posizioni esatte delle tue foto non sono mai condivise.\n\nPuoi disabilitare questa funzionalità in qualsiasi momento, dalle Impostazioni.",
   "unpinAlbum": "Non fissare album",
-  "pinAlbum": "Fissa l'album"
+  "pinAlbum": "Fissa l'album",
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet",
+  "sharedWithYou": "Shared with you",
+  "sharedByYou": "Shared by you",
+  "inviteYourFriendsToEnte": "Invite your friends to ente"
 }

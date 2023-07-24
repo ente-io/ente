@@ -6,12 +6,16 @@ import "package:styled_text/styled_text.dart";
 
 class SectionTitle extends StatelessWidget {
   final String? title;
+  final bool mutedTitle;
   final Widget? titleWithBrand;
+  final EdgeInsetsGeometry? padding;
 
   const SectionTitle({
     this.title,
     this.titleWithBrand,
+    this.mutedTitle = false,
     Key? key,
+    this.padding,
   }) : super(key: key);
 
   @override
@@ -23,22 +27,52 @@ class SectionTitle extends StatelessWidget {
     } else if (title != null) {
       child = Text(
         title!,
-        style: enteTextTheme.largeBold,
+        style: mutedTitle ? enteTextTheme.bodyMuted : enteTextTheme.largeBold,
       );
     } else {
       child = const SizedBox.shrink();
     }
     return Container(
-      margin: const EdgeInsets.only(left: 16),
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: child,
-          ),
-        ],
-      ),
+      constraints: const BoxConstraints(minHeight: 48),
+      alignment: Alignment.centerLeft,
+      padding: padding,
+      child: child,
     );
+  }
+}
+
+class SectionOptions extends StatelessWidget {
+  final Widget title;
+  final Widget? trailingWidget;
+  final EdgeInsetsGeometry? padding;
+
+  const SectionOptions(
+    this.title, {
+    this.trailingWidget,
+    this.padding = const EdgeInsets.only(left: 12, right: 0),
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (trailingWidget != null) {
+      return Container(
+        padding: padding,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(alignment: Alignment.centerLeft, child: title),
+            trailingWidget!,
+          ],
+        ),
+      );
+    } else {
+      return Container(
+        alignment: Alignment.centerLeft,
+        padding: padding,
+        child: title,
+      );
+    }
   }
 }
 

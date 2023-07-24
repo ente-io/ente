@@ -415,7 +415,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteProgress": m11,
         "deleteReason1": MessageLookupByLibrary.simpleMessage("找不到我想要的功能"),
         "deleteReason2":
-            MessageLookupByLibrary.simpleMessage("应用或某个功能不会有 \n行为。我认为它应该有的"),
+            MessageLookupByLibrary.simpleMessage("应用或某个功能不会有 行为。我认为它应该有的"),
         "deleteReason3":
             MessageLookupByLibrary.simpleMessage("我找到了另一个我喜欢更好的服务"),
         "deleteReason4": MessageLookupByLibrary.simpleMessage("我的原因未被列出"),
@@ -586,6 +586,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "invite": MessageLookupByLibrary.simpleMessage("邀请"),
         "inviteToEnte": MessageLookupByLibrary.simpleMessage("邀请到 ente"),
         "inviteYourFriends": MessageLookupByLibrary.simpleMessage("邀请您的朋友"),
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "看起来出了点问题。 请稍后重试。 如果错误仍然存在，请联系我们的支持团队。"),
@@ -682,6 +684,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "newToEnte": MessageLookupByLibrary.simpleMessage("刚来到ente"),
         "newest": MessageLookupByLibrary.simpleMessage("最新"),
         "no": MessageLookupByLibrary.simpleMessage("否"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noDeviceThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage("您在此设备上没有可被删除的文件"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ 没有重复内容"),
@@ -695,6 +699,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "由于我们端到端加密协议的性质，如果没有您的密码或恢复密钥，您的数据将无法解密"),
         "noResults": MessageLookupByLibrary.simpleMessage("无结果"),
         "noResultsFound": MessageLookupByLibrary.simpleMessage("未找到任何结果"),
+        "nothingSharedWithYouYet":
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage("这里空空如也! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "onDevice": MessageLookupByLibrary.simpleMessage("在设备上"),
@@ -898,8 +904,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "与其他ente用户创建共享和协作相册，包括免费计划的用户。"),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("由我共享的"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
         "sharedWith": m47,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("与我共享"),
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "sharing": MessageLookupByLibrary.simpleMessage("正在分享..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "我同意 <u-terms>服务条款</u-terms> 和 <u-policy>隐私政策</u-policy>"),

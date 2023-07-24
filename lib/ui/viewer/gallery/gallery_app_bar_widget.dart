@@ -22,14 +22,14 @@ import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
 import 'package:photos/ui/sharing/album_participants_page.dart';
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
-import "package:photos/ui/viewer/gallery/pick_cover_photo.dart";
+import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
+import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -66,6 +66,7 @@ enum AlbumPopupAction {
   leave,
   freeUpSpace,
   setCover,
+  addPhotos,
   pinAlbum,
 }
 
@@ -135,6 +136,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       submitButtonLabel: S.of(context).rename,
       hintText: S.of(context).enterAlbumName,
       alwaysShowSuccessState: true,
+      initialValue: widget.collection?.displayName ?? "",
       textCapitalization: TextCapitalization.words,
       onSubmit: (String text) async {
         // indicates user cancelled the rename request
@@ -230,7 +232,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   void _showSpaceFreedDialog(BackupStatus status) {
-    final DialogWidget dialog = choiceDialog(
+    showChoiceDialog(
+      context,
       title: S.of(context).success,
       body: S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
       firstButtonLabel: S.of(context).rateUs,
@@ -248,28 +251,35 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         }
       },
     );
-
-    showConfettiDialog(
-      context: context,
-      dialogBuilder: (BuildContext context) {
-        return dialog;
-      },
-      barrierColor: Colors.black87,
-      confettiAlignment: Alignment.topCenter,
-      useRootNavigator: true,
-    );
   }
 
   List<Widget> _getDefaultActions(BuildContext context) {
     final List<Widget> actions = <Widget>[];
-    if (widget.selectedFiles.files.isNotEmpty) {
+    // If the user has selected files, don't show any actions
+    if (widget.selectedFiles.files.isNotEmpty ||
+        !Configuration.instance.hasConfiguredAccount()) {
       return actions;
     }
-    if (Configuration.instance.hasConfiguredAccount() &&
-        widget.selectedFiles.files.isEmpty &&
-        (widget.type == GalleryType.ownedCollection ||
+    final int userID = Configuration.instance.getUserID()!;
+    if ((widget.type == GalleryType.ownedCollection ||
             widget.type == GalleryType.sharedCollection) &&
         widget.collection?.type != CollectionType.favorites) {
+      final bool canAddFiles = widget.type == GalleryType.ownedCollection ||
+          widget.collection!.getRole(userID) ==
+              CollectionParticipantRole.collaborator;
+      if (canAddFiles) {
+        actions.add(
+          Tooltip(
+            message: "Add Files",
+            child: IconButton(
+              icon: const Icon(Icons.add_photo_alternate_outlined),
+              onPressed: () async {
+                await _showAddPhotoDialog(context);
+              },
+            ),
+          ),
+        );
+      }
       actions.add(
         Tooltip(
           message: "Share",
@@ -575,6 +585,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> _trashCollection() async {
+    // Fetch the count by-passing the cache to avoid any stale data
     final int count =
         await FilesDB.instance.collectionFileCount(widget.collection!.id);
     final bool isEmptyCollection = count == 0;
@@ -635,6 +646,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     } catch (e, s) {
       _logger.severe(e, s);
       showGenericErrorDialog(context: context);
+    }
+  }
+
+  Future<void> _showAddPhotoDialog(BuildContext bContext) async {
+    final collection = widget.collection;
+    try {
+      await showAddPhotosSheet(bContext, collection!);
+    } catch (e, s) {
+      _logger.severe(e, s);
+      showGenericErrorDialog(context: bContext);
     }
   }
 }

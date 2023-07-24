@@ -5,7 +5,6 @@ import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
-import "package:photos/ui/common/gradient_button.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/empty_state_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
@@ -113,37 +112,47 @@ class OutgoingAlbumEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 200,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            S.of(context).shareYourFirstAlbum,
-            style: Theme.of(context).textTheme.bodySmall,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.collections_outlined,
+                color: getEnteColorScheme(context).strokeMuted,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                S.of(context).noAlbumsSharedByYouYet,
+                style: getEnteTextTheme(context).bodyMuted,
+              ),
+            ],
           ),
-          const Padding(padding: EdgeInsets.only(top: 14)),
-          SizedBox(
-            width: 200,
-            height: 50,
-            child: GradientButton(
-              onTap: () async {
-                await showToast(
-                  context,
-                  S.of(context).shareAlbumHint,
-                  toastLength: Toast.LENGTH_LONG,
-                );
-                Bus.instance.fire(
-                  TabChangedEvent(1, TabChangedEventSource.collectionsPage),
-                );
-              },
-              iconData: Icons.person_add,
-              text: S.of(context).share,
-            ),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+          child: ButtonWidget(
+            buttonType: ButtonType.trailingIconPrimary,
+            labelText: S.of(context).shareYourFirstAlbum,
+            icon: Icons.add,
+            onTap: () async {
+              await showToast(
+                context,
+                S.of(context).shareAlbumHint,
+                toastLength: Toast.LENGTH_LONG,
+              );
+              Bus.instance.fire(
+                TabChangedEvent(1, TabChangedEventSource.collectionsPage),
+              );
+            },
           ),
-          const SizedBox(height: 60),
-        ],
-      ),
+        ),
+        const SizedBox(height: 12),
+      ],
     );
   }
 }
@@ -153,30 +162,40 @@ class IncomingAlbumEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 220,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            S.of(context).askYourLovedOnesToShare,
-            style: Theme.of(context).textTheme.bodySmall,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.collections_outlined,
+                color: getEnteColorScheme(context).strokeMuted,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                S.of(context).nothingSharedWithYouYet,
+                style: getEnteTextTheme(context).bodyMuted,
+              ),
+            ],
           ),
-          const Padding(padding: EdgeInsets.only(top: 14)),
-          SizedBox(
-            width: 200,
-            height: 50,
-            child: GradientButton(
-              onTap: () async {
-                shareText(S.of(context).shareTextRecommendUsingEnte);
-              },
-              iconData: Icons.outgoing_mail,
-              text: S.of(context).invite,
-            ),
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+          child: ButtonWidget(
+            buttonType: ButtonType.trailingIconPrimary,
+            labelText: S.of(context).inviteYourFriends,
+            icon: Icons.ios_share_outlined,
+            onTap: () async {
+              shareText(S.of(context).shareTextRecommendUsingEnte);
+            },
           ),
-          const SizedBox(height: 60),
-        ],
-      ),
+        ),
+        const SizedBox(height: 12),
+      ],
     );
   }
 }

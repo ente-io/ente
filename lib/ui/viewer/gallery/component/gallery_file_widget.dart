@@ -10,7 +10,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
-import "package:photos/ui/viewer/gallery/state/gallery_sort_order.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -73,6 +73,7 @@ class GalleryFileWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(1),
             child: Hero(
               tag: heroTag,
+              transitionOnUserGestures: true,
               child: isFileSelected
                   ? ColorFiltered(
                       colorFilter: ColorFilter.mode(
@@ -114,7 +115,10 @@ class GalleryFileWidget extends StatelessWidget {
   }
 
   void _onTapNoSelectionLimit(BuildContext context, File file) async {
-    if (selectedFiles?.files.isNotEmpty ?? false) {
+    final bool shouldToggleSelection =
+        (selectedFiles?.files.isNotEmpty ?? false) ||
+            GalleryContextState.of(context)!.inSelectionMode;
+    if (shouldToggleSelection) {
       _toggleFileSelection(file);
     } else {
       if (AppLifecycleService.instance.mediaExtensionAction.action ==
@@ -157,7 +161,7 @@ class GalleryFileWidget extends StatelessWidget {
         asyncLoader,
         filesInGroup.indexOf(file),
         tag,
-        sortOrderAsc: GallerySortOrder.of(context)!.sortOrderAsc,
+        sortOrderAsc: GalleryContextState.of(context)!.sortOrderAsc,
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);
