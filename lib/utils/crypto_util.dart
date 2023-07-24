@@ -461,9 +461,9 @@ class CryptoUtil {
   // (Key Derivation Function) with the `loginSubKeyId` and
   // `loginSubKeyLen` and `loginSubKeyContext` as context
   static Future<Uint8List> deriveLoginKey(
-    Uint8List key,
-  ) {
-    return _computer.compute(
+      Uint8List key,
+      ) async {
+    final Uint8List derivedKey = await  _computer.compute(
       cryptoKdfDeriveFromKey,
       param: {
         "key": key,
@@ -473,6 +473,8 @@ class CryptoUtil {
       },
       taskName: "deriveLoginKey",
     );
+    // return the first 16 bytes of the derived key
+    return derivedKey.sublist(0, 16);
   }
 
   // Computes and returns the hash of the source file
