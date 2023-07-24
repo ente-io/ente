@@ -331,9 +331,10 @@ export const getCollectionCoverFiles = (
         if (!collectionFiles || collectionFiles.length === 0) {
             return;
         }
-        if (typeof collection.pubMagicMetadata?.data?.coverID !== 'undefined') {
+        const coverID = collection.pubMagicMetadata?.data?.coverID;
+        if (typeof coverID === 'number' && coverID > 0) {
             const coverFile = collectionFiles.find(
-                (file) => file.id === collection.pubMagicMetadata?.data?.coverID
+                (file) => file.id === coverID
             );
             if (coverFile) {
                 coverFiles.set(collection.id, coverFile);
