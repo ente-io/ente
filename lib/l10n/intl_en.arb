@@ -976,6 +976,10 @@
   "centerPoint": "Center point",
   "pickCenterPoint": "Pick center point",
   "useSelectedPhoto": "Use selected photo",
+  "resetToDefault" : "Reset to default",
+  "@resetToDefault": {
+    "description": "Button text to reset cover photo to default"
+  },
   "edit": "Edit",
   "deleteLocation": "Delete location",
   "rotateLeft": "Rotate left",

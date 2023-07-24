@@ -6859,6 +6859,16 @@ class S {
     );
   }
 
+  /// `Reset to default`
+  String get resetToDefault {
+    return Intl.message(
+      'Reset to default',
+      name: 'resetToDefault',
+      desc: 'Button text to reset cover photo to default',
+      args: [],
+    );
+  }
+
   /// `Edit`
   String get edit {
     return Intl.message(

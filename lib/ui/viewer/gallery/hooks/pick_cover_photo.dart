@@ -7,7 +7,6 @@ import "package:photos/db/files_db.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection.dart";
-import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/ignored_files_service.dart";
@@ -19,7 +18,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
-Future<File?> showPickCoverPhotoSheet(
+Future<int?> showPickCoverPhotoSheet(
   BuildContext context,
   Collection collection,
 ) async {
@@ -79,6 +78,7 @@ class PickCoverPhotoWidget extends StatelessWidget {
                             title: "Select cover photo",
                           ),
                           caption: collection.displayName,
+                          showCloseButton: true,
                         ),
                         Expanded(
                           child: Gallery(
@@ -151,7 +151,8 @@ class PickCoverPhotoWidget extends StatelessWidget {
                                   onTap: () async {
                                     final selectedFile =
                                         selectedFiles.files.first;
-                                    Navigator.pop(context, selectedFile);
+                                    Navigator.pop(context, selectedFile
+                                        .uploadedFileID!,);
                                   },
                                 ),
                               );
@@ -161,9 +162,18 @@ class PickCoverPhotoWidget extends StatelessWidget {
                           ButtonWidget(
                             buttonType: ButtonType.secondary,
                             buttonAction: ButtonAction.cancel,
-                            labelText: S.of(context).cancel,
+                            labelText: collection.hasCover
+                                ? S.of(context).resetToDefault
+                                : S.of(context).cancel,
+                            icon: collection.hasCover
+                                ? Icons.restore_outlined
+                                : null,
                             onTap: () async {
-                              Navigator.of(context).pop();
+                              if(collection.hasCover) {
+                                Navigator.pop(context, 0);
+                              } else {
+                                Navigator.of(context).pop();
+                              }
                             },
                           ),
                         ],

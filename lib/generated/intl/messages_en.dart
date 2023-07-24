@@ -1025,6 +1025,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Reset ignored files"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Reset password"),
+        "resetToDefault":
+            MessageLookupByLibrary.simpleMessage("Reset to default"),
         "restore": MessageLookupByLibrary.simpleMessage("Restore"),
         "restoreToAlbum":
             MessageLookupByLibrary.simpleMessage("Restore to album"),
