@@ -26,7 +26,7 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
             props.onClose();
         }
     };
-    if (!props.collection) {
+    if (!props.collection || !collectionSummary) {
         return <></>;
     }
     const { type } = collectionSummary;
