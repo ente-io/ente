@@ -14,6 +14,9 @@ import FormPaper from 'components/Form/FormPaper';
 import FormTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import { VerticallyCentered } from 'components/Container';
+import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { B64EncryptionResult } from 'types/crypto';
 
 export default function Home() {
     const [sessionID, setSessionID] = useState('');
@@ -47,6 +50,19 @@ export default function Home() {
                 id,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+            const kekEncryptedAttributes: B64EncryptionResult = getKey(
+                SESSION_KEYS.KEY_ENCRYPTION_KEY
+            );
+            if (kekEncryptedAttributes) {
+                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+                const kek = await cryptoWorker.decryptB64(
+                    kekEncryptedAttributes.encryptedData,
+                    kekEncryptedAttributes.nonce,
+                    kekEncryptedAttributes.key
+                );
+                console.log('kek', kek);
+            }
+
             router.push(PAGES.CREDENTIALS);
         } catch (e) {
             if (e.status === 404) {

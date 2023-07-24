@@ -20,7 +20,7 @@ import { VerticallyCentered } from './Container';
 import ShowHidePassword from './Form/ShowHidePassword';
 import { useContext, useState } from 'react';
 import SubmitButton from './SubmitButton';
-import { SESSION_KEYS, clearKeys } from 'utils/storage/sessionStorage';
+import { SESSION_KEYS, clearKeys, setKey } from 'utils/storage/sessionStorage';
 import { getAppName, APPS } from 'constants/apps';
 import {
     generateAndSaveIntermediateKeyAttributes,
@@ -74,14 +74,34 @@ export default function Login(props: LoginProps) {
                 setData(LS_KEYS.USER, { email });
                 router.push(PAGES.VERIFY);
             } else {
+                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+                let kek: string = null;
+                try {
+                    kek = await cryptoWorker.deriveKey(
+                        passphrase,
+                        srpAttributes.kekSalt,
+                        srpAttributes.opsLimit,
+                        srpAttributes.memLimit
+                    );
+                } catch (e) {
+                    logError(e, 'failed to derive key');
+                    throw Error(CustomError.WEAK_DEVICE);
+                }
+
                 const {
                     keyAttributes,
                     encryptedToken,
                     token,
                     id,
                     twoFactorSessionID,
-                } = await loginViaSRP(srpAttributes, passphrase);
+                } = await loginViaSRP(srpAttributes, kek);
                 if (twoFactorSessionID) {
+                    const sessionKeyAttributes =
+                        await cryptoWorker.generateKeyAndEncryptToB64(kek);
+                    setKey(
+                        SESSION_KEYS.KEY_ENCRYPTION_KEY,
+                        sessionKeyAttributes
+                    );
                     setData(LS_KEYS.USER, {
                         email,
                         twoFactorSessionID,
@@ -101,18 +121,6 @@ export default function Login(props: LoginProps) {
                         try {
                             const cryptoWorker =
                                 await ComlinkCryptoWorker.getInstance();
-                            let kek: string = null;
-                            try {
-                                kek = await cryptoWorker.deriveKey(
-                                    passphrase,
-                                    keyAttributes.kekSalt,
-                                    keyAttributes.opsLimit,
-                                    keyAttributes.memLimit
-                                );
-                            } catch (e) {
-                                logError(e, 'failed to derive key');
-                                throw Error(CustomError.WEAK_DEVICE);
-                            }
                             try {
                                 const key = await cryptoWorker.decryptB64(
                                     keyAttributes.encryptedKey,

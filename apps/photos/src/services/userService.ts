@@ -47,7 +47,6 @@ import { addLocalLog } from 'utils/logging';
 import { setUserSRPSetupPending } from 'utils/storage';
 import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
 import { setLocalMapEnabled } from 'utils/storage';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 const ENDPOINT = getEndpoint();
 
@@ -612,18 +611,9 @@ export const completeSRPSetup = async (
 
 export const loginViaSRP = async (
     srpAttributes: SRPAttributes,
-    passphrase: string
+    kek: string
 ) => {
     try {
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-
-        const kek = await cryptoWorker.deriveKey(
-            passphrase,
-            srpAttributes.kekSalt,
-            srpAttributes.opsLimit,
-            srpAttributes.memLimit
-        );
-
         const loginSubKey = await generateLoginSubKey(kek);
         const srpClient = await generateSRPClient(
             srpAttributes.srpSalt,
