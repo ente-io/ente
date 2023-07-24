@@ -43,9 +43,13 @@ class Gallery extends StatefulWidget {
   final bool enableFileGrouping;
   final Widget loadingWidget;
   final bool disableScroll;
+
+  /// When true, selection will be limited to one item. Tapping on any item
+  /// will select even when no other item is selected.
   final bool limitSelectionToOne;
-  // When true, the gallery will be in selection mode. Tapping on any item
-  // will select if even when no other item is selected.
+
+  /// When true, the gallery will be in selection mode. Tapping on any item
+  /// will select even when no other item is selected.
   final bool inSelectionMode;
   final bool showSelectAllByDefault;
   final bool isScrollablePositionedList;
