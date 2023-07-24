@@ -169,7 +169,6 @@ export default function Gallery() {
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
-    const [hasNoPersonalFiles, setHasNoPersonalFiles] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
         ownCount: 0,
         count: 0,
@@ -653,10 +652,6 @@ export default function Gallery() {
             archivedCollections
         );
         setCollectionSummaries(collectionSummaries);
-        const hasNoPersonalFiles = files.every(
-            (file) => file.ownerID !== user.id
-        );
-        setHasNoPersonalFiles(hasNoPersonalFiles);
     };
 
     const clearSelection = function () {
@@ -1020,7 +1015,8 @@ export default function Gallery() {
                 />
                 {!isInSearchMode &&
                 !isFirstLoad &&
-                hasNoPersonalFiles &&
+                !files?.length &&
+                !hiddenFiles?.length &&
                 activeCollection === ALL_SECTION ? (
                     <GalleryEmptyState openUploader={openUploader} />
                 ) : (
