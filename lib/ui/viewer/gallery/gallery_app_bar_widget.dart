@@ -537,7 +537,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<void> setCoverPhoto(BuildContext context) async {
     final int? coverPhotoID = await showPickCoverPhotoSheet(context, widget
-        .collection!);
+        .collection!,);
     if (coverPhotoID != null) {
       changeCoverPhoto(context, widget.collection!, coverPhotoID);
     }

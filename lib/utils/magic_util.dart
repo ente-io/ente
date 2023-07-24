@@ -127,7 +127,7 @@ Future<void> updateOrder(
 }
 
 // changeCoverPhoto is used to change cover photo for a collection. To reset to
-// default cover photo, pass uploadedFileID as -1
+// default cover photo, pass uploadedFileID as 0
 Future<void> changeCoverPhoto(
   BuildContext context,
   Collection collection,

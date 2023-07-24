@@ -66,7 +66,7 @@ class PickCoverPhotoWidget extends StatelessWidget {
               maxWidth: min(428, MediaQuery.of(context).size.width),
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
+              padding: const EdgeInsets.fromLTRB(0, 24, 0, 8),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -78,6 +78,7 @@ class PickCoverPhotoWidget extends StatelessWidget {
                             title: "Select cover photo",
                           ),
                           caption: collection.displayName,
+                          showCloseButton: true,
                         ),
                         Expanded(
                           child: Gallery(
@@ -161,9 +162,15 @@ class PickCoverPhotoWidget extends StatelessWidget {
                           ButtonWidget(
                             buttonType: ButtonType.secondary,
                             buttonAction: ButtonAction.cancel,
-                            labelText: S.of(context).cancel,
+                            labelText: collection.hasCover
+                                ? S.of(context).resetToDefault
+                                : S.of(context).cancel,
                             onTap: () async {
-                              Navigator.of(context).pop();
+                              if(collection.hasCover) {
+                                Navigator.pop(context, 0);
+                              } else {
+                                Navigator.of(context).pop();
+                              }
                             },
                           ),
                         ],
