@@ -3,7 +3,7 @@ A guide written by Green, an ente.io lover
 
 ---
 
-Migrating from Authy can be tiring, as there is you cannot export your 2FA codes through the app, meaning that you would have to reconfigure 2FA for all of your accounts for your new 2FA authenticator. But do not fear, as there is a much simpler way to migrate from Authy to ente Authenticator.
+Migrating from Authy can be tiring, as you cannot export your 2FA codes through the app, meaning that you would have to reconfigure 2FA for all of your accounts for your new 2FA authenticator. But do not fear, as there is a much simpler way to migrate from Authy to ente!
 
 A user on GitHub has written a guide to export our data from Authy (morpheus on Discord found this and showed it to us), so we are going to be using that for the migration.
 
@@ -54,3 +54,5 @@ Now that we have the TXT file, let's import it. This should be the easiest part 
 4. Select the TXT file that was made earlier.
 
 And that's it! You have now successfully migrated from Authy to ente Authenticator.
+
+Just one more thing: Now that your secrets are safely stored, I recommend you delete the unencrypted JSON and TXT files that were made during the migration process for security.
