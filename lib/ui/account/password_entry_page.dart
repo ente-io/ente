@@ -1,5 +1,6 @@
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/models/key_gen_result.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
@@ -399,7 +400,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         createProgressDialog(context, l10n.generatingEncryptionKeysTitle);
     await dialog.show();
     try {
-      final result = await Configuration.instance.generateKey(password);
+      final KeyGenResult result = await Configuration.instance.generateKey(password);
       Configuration.instance.setVolatilePassword(null);
       await dialog.hide();
       onDone() async {
@@ -408,6 +409,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         try {
           await UserService.instance.setAttributes(result);
           await dialog.hide();
+          Configuration.instance.setVolatilePassword(null);
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (BuildContext context) {

@@ -1,10 +1,13 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/core/errors.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/services/user_service.dart';
+import 'package:ente_auth/ui/account/login_pwd_verification_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
 import 'package:ente_auth/ui/common/web_page.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import "package:styled_text/styled_text.dart";
 
 class LoginPage extends StatefulWidget {
@@ -19,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _emailIsValid = false;
   String? _email;
   Color? _emailInputFieldColor;
+  final Logger _logger = Logger('_LoginPageState');
 
   @override
   void initState() {
@@ -55,10 +59,27 @@ class _LoginPageState extends State<LoginPage> {
         isKeypadOpen: isKeypadOpen,
         isFormValid: _emailIsValid,
         buttonText: context.l10n.logInLabel,
-        onPressedFunction: () {
+        onPressedFunction: () async {
           UserService.instance.setEmail(_email!);
-          UserService.instance
-              .sendOtt(context, _email!, isCreateAccountScreen: false);
+          try {
+            final attr = await UserService.instance.getSrpAttributes(_email!);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return LoginPasswordVerificationPage(
+                    srpAttributes: attr,
+                  );
+                },
+              ),
+            );
+          }
+          catch (e) {
+            if(e is! SrpSetupNotCompleteError) {
+              _logger.warning('Error getting SRP attributes', e);
+            }
+            await UserService.instance
+                .sendOtt(context, _email!, isCreateAccountScreen: false);
+          }
           FocusScope.of(context).unfocus();
         },
       ),
