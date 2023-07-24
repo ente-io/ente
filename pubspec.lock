@@ -291,14 +291,6 @@ packages:
       url: "https://github.com/ente-io/computer.git"
     source: git
     version: "3.2.1"
-  confetti:
-    dependency: "direct main"
-    description:
-      name: confetti
-      sha256: "8690fb3f138ff42958d419ef7dd0f0bb192895bea3c921214cb5c3fa82e597b1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.0"
   connectivity_plus:
     dependency: "direct main"
     description:

@@ -22,7 +22,6 @@ import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
@@ -233,7 +232,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   void _showSpaceFreedDialog(BackupStatus status) {
-    final DialogWidget dialog = choiceDialog(
+    showChoiceDialog(
+      context,
       title: S.of(context).success,
       body: S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
       firstButtonLabel: S.of(context).rateUs,
@@ -250,16 +250,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           );
         }
       },
-    );
-
-    showConfettiDialog(
-      context: context,
-      dialogBuilder: (BuildContext context) {
-        return dialog;
-      },
-      barrierColor: Colors.black87,
-      confettiAlignment: Alignment.topCenter,
-      useRootNavigator: true,
     );
   }
 

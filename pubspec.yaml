@@ -32,7 +32,6 @@ dependencies:
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
-  confetti: ^0.6.0
   connectivity_plus: ^3.0.3
   crypto: ^3.0.2
   cupertino_icons: ^1.0.0

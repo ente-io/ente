@@ -415,7 +415,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteProgress": m11,
         "deleteReason1": MessageLookupByLibrary.simpleMessage("找不到我想要的功能"),
         "deleteReason2":
-            MessageLookupByLibrary.simpleMessage("应用或某个功能不会有 \n行为。我认为它应该有的"),
+            MessageLookupByLibrary.simpleMessage("应用或某个功能不会有 行为。我认为它应该有的"),
         "deleteReason3":
             MessageLookupByLibrary.simpleMessage("我找到了另一个我喜欢更好的服务"),
         "deleteReason4": MessageLookupByLibrary.simpleMessage("我的原因未被列出"),
