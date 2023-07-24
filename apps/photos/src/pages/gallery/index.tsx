@@ -720,9 +720,10 @@ export default function Gallery() {
         startLoading();
         try {
             const selectedFiles = getSelectedFiles(selected, filteredData);
-            const toProcessFiles = selectedFiles.filter(
-                (file) => file.ownerID === user.id
-            );
+            const toProcessFiles =
+                ops === FILE_OPS_TYPE.DOWNLOAD
+                    ? selectedFiles
+                    : selectedFiles.filter((file) => file.ownerID === user.id);
             if (toProcessFiles.length > 0) {
                 await handleFileOps(
                     ops,
