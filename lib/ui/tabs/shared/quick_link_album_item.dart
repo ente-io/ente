@@ -24,7 +24,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: Row(
           children: <Widget>[
             ClipRRect(

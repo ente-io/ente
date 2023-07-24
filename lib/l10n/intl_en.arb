@@ -420,7 +420,7 @@
   "itemCount": "{count, plural, one{{count} item} other{{count} items}}",
   "deleteItemCount": "{count, plural, =1 {Delete {count} item} other {Delete {count} items}}",
   "duplicateItemsGroup": "{count} files, {formattedSize} each",
-  "@duplicateItemsGroup" : {
+  "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
     "type": "text",
     "placeholders": {
@@ -1078,7 +1078,7 @@
   },
   "maps": "Maps",
   "enableMaps": "Enable Maps",
-  "enableMapsDesc" : "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.",
+  "enableMapsDesc": "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.",
   "quickLinks": "Quick links",
   "selectItemsToAdd": "Select items to add",
   "addSelected": "Add selected",
@@ -1090,5 +1090,10 @@
   "unpinAlbum": "Unpin album",
   "pinAlbum": "Pin album",
   "create": "Create",
-  "viewAll": "View all"
+  "viewAll": "View all",
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet",
+  "sharedWithYou": "Shared with you",
+  "sharedByYou": "Shared by you",
+  "inviteYourFriendsToEnte": "Invite your friends to ente"
 }

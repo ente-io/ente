@@ -7484,6 +7484,56 @@ class S {
       args: [],
     );
   }
+
+  /// `Nothing shared with you yet`
+  String get nothingSharedWithYouYet {
+    return Intl.message(
+      'Nothing shared with you yet',
+      name: 'nothingSharedWithYouYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No albums shared by you yet`
+  String get noAlbumsSharedByYouYet {
+    return Intl.message(
+      'No albums shared by you yet',
+      name: 'noAlbumsSharedByYouYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared with you`
+  String get sharedWithYou {
+    return Intl.message(
+      'Shared with you',
+      name: 'sharedWithYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared by you`
+  String get sharedByYou {
+    return Intl.message(
+      'Shared by you',
+      name: 'sharedByYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invite your friends to ente`
+  String get inviteYourFriendsToEnte {
+    return Intl.message(
+      'Invite your friends to ente',
+      name: 'inviteYourFriendsToEnte',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

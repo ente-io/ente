@@ -46,28 +46,25 @@ class CollectionsFlexiGridViewWidget extends StatelessWidget {
         (screenWidth - gapOnSizeOfAlbums - gapBetweenAlbums) /
             albumsCountInOneRow;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: GridView.builder(
-        padding: const EdgeInsets.only(top: 8),
-        shrinkWrap: shrinkWrap,
-        physics: const ScrollPhysics(),
-        // to disable GridView's scrolling
-        itemBuilder: (context, index) {
-          return AlbumRowItemWidget(
-            collections![index],
-            sideOfThumbnail,
-            tag: tag,
-          );
-        },
-        itemCount: min(collections!.length, displayLimitCount),
-        // To include the + button
+    return SliverPadding(
+      padding: const EdgeInsets.all(8),
+      sliver: SliverGrid(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return AlbumRowItemWidget(
+              collections![index],
+              sideOfThumbnail,
+              tag: tag,
+            );
+          },
+          childCount: min(collections!.length, displayLimitCount),
+        ),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInOneRow,
           mainAxisSpacing: 4,
           crossAxisSpacing: gapBetweenAlbums,
           childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 46),
-        ), //24 is height of album title
+        ),
       ),
     );
   }

@@ -33,6 +33,7 @@ class SectionTitle extends StatelessWidget {
       child = const SizedBox.shrink();
     }
     return Container(
+      constraints: const BoxConstraints(minHeight: 48),
       alignment: Alignment.centerLeft,
       padding: padding,
       child: child,

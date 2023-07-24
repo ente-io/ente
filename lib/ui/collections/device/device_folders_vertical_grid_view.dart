@@ -14,26 +14,57 @@ import "package:photos/ui/collections/device/device_folder_item.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 
-class DeviceFolderVerticalGridView extends StatefulWidget {
+class DeviceFolderVerticalGridView extends StatelessWidget {
   final Widget? appTitle;
+  final String? tag;
+  const DeviceFolderVerticalGridView({this.appTitle, this.tag, super.key});
 
-  const DeviceFolderVerticalGridView({
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            elevation: 0,
+            title: tag != null
+                ? Hero(
+                    tag: tag!,
+                    child: appTitle ?? const SizedBox.shrink(),
+                  )
+                : appTitle ?? const SizedBox.shrink(),
+            floating: true,
+          ),
+          const _DeviceFolderVerticalGridViewBody(),
+        ],
+      ),
+    );
+  }
+}
+
+class _DeviceFolderVerticalGridViewBody extends StatefulWidget {
+  const _DeviceFolderVerticalGridViewBody({
     Key? key,
-    this.appTitle,
   }) : super(key: key);
 
   @override
-  State<DeviceFolderVerticalGridView> createState() =>
-      _DeviceFolderVerticalGridViewState();
+  State<_DeviceFolderVerticalGridViewBody> createState() =>
+      _DeviceFolderVerticalGridViewBodyState();
 }
 
-class _DeviceFolderVerticalGridViewState
-    extends State<DeviceFolderVerticalGridView> {
+class _DeviceFolderVerticalGridViewBodyState
+    extends State<_DeviceFolderVerticalGridViewBody> {
   StreamSubscription<BackupFoldersUpdatedEvent>? _backupFoldersUpdatedEvent;
   StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
   String _loadReason = "init";
-  static const horizontalPadding = 20.0;
-  static const thumbnailSize = 120.0;
+  final logger = Logger((_DeviceFolderVerticalGridViewBodyState).toString());
+  /*
+  Aspect ratio 1:1 Max width 224 Fixed gap 8
+  Width changes dynamically with screen width such that we can fit 2 in one row.
+  Keep the width integral (center the albums to distribute excess pixels)
+   */
+  static const maxThumbnailWidth = 224.0;
+  static const fixedGapBetweenAlbum = 8.0;
+  static const minGapForHorizontalPadding = 8.0;
 
   @override
   void initState() {
@@ -54,59 +85,62 @@ class _DeviceFolderVerticalGridViewState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: widget.appTitle,
-      ),
-      body: SafeArea(
-        child: _getBody(context),
-      ),
+    debugPrint(
+      "${(_DeviceFolderVerticalGridViewBody).toString()} - $_loadReason",
     );
-  }
+    return FutureBuilder<List<DeviceCollection>>(
+      future:
+          FilesDB.instance.getDeviceCollections(includeCoverThumbnail: true),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final double screenWidth = MediaQuery.of(context).size.width;
+          final int albumsCountInOneRow =
+              max(screenWidth ~/ maxThumbnailWidth, 2);
+          final double gapBetweenAlbums =
+              (albumsCountInOneRow - 1) * fixedGapBetweenAlbum;
+          final double gapOnSizeOfAlbums = minGapForHorizontalPadding +
+              (screenWidth -
+                      gapBetweenAlbums -
+                      (2 * minGapForHorizontalPadding)) %
+                  albumsCountInOneRow;
 
-  Widget _getBody(BuildContext context) {
-    debugPrint("${(DeviceFolderVerticalGridView).toString()} - $_loadReason");
-    final logger = Logger((_DeviceFolderVerticalGridViewState).toString());
-    return SafeArea(
-      child: FutureBuilder<List<DeviceCollection>>(
-        future:
-            FilesDB.instance.getDeviceCollections(includeCoverThumbnail: true),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final double screenWidth = MediaQuery.of(context).size.width;
+          final double sideOfThumbnail =
+              (screenWidth - gapOnSizeOfAlbums - gapBetweenAlbums) /
+                  albumsCountInOneRow;
 
-            final int crossAxisItemCount =
-                max(screenWidth ~/ (thumbnailSize + horizontalPadding), 2);
-            return snapshot.data!.isEmpty
-                ? const EmptyState()
-                : Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: horizontalPadding,
+          return snapshot.data!.isEmpty
+              ? const SliverFillRemaining(child: EmptyState())
+              : SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: albumsCountInOneRow,
+                      mainAxisSpacing: 4,
+                      crossAxisSpacing: gapBetweenAlbums,
+                      childAspectRatio:
+                          sideOfThumbnail / (sideOfThumbnail + 46),
                     ),
-                    child: GridView.builder(
-                      physics: const ScrollPhysics(),
-                      itemBuilder: (context, index) {
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
                         final deviceCollection = snapshot.data![index];
-                        return DeviceFolderItem(deviceCollection);
+                        return DeviceFolderItem(
+                          deviceCollection,
+                          sideOfThumbnail: sideOfThumbnail,
+                        );
                       },
-                      itemCount: snapshot.data!.length,
-                      // To include the + button
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisItemCount,
-                        crossAxisSpacing: 16.0,
-                        childAspectRatio: thumbnailSize / (thumbnailSize + 22),
-                      ),
+                      childCount: snapshot.data!.length,
                     ),
-                  );
-          } else if (snapshot.hasError) {
-            logger.severe("failed to load device gallery", snapshot.error);
-            return Text(S.of(context).failedToLoadAlbums);
-          } else {
-            return const EnteLoadingWidget();
-          }
-        },
-      ),
+                  ),
+                );
+        } else if (snapshot.hasError) {
+          logger.severe("failed to load device gallery", snapshot.error);
+          return SliverFillRemaining(
+            child: Center(child: Text(S.of(context).failedToLoadAlbums)),
+          );
+        } else {
+          return const SliverFillRemaining(child: EnteLoadingWidget());
+        }
+      },
     );
   }
 

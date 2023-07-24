@@ -63,7 +63,10 @@ class AlbumRowItemWidget extends StatelessWidget {
                           if (snapshot.hasData) {
                             thumbnail = snapshot.data!;
                           } else {
-                            thumbnail = CollectionsService.instance.getCoverCache(c);
+                            //Need to use cached thumbnail so that the hero
+                            //animation works as expected.
+                            thumbnail =
+                                CollectionsService.instance.getCoverCache(c);
                           }
                           if (thumbnail != null) {
                             final String heroTag = tagPrefix + thumbnail.tag;
@@ -140,13 +143,14 @@ class AlbumRowItemWidget extends StatelessWidget {
                     if (snapshot.hasData) {
                       cachedCount = snapshot.data;
                     } else {
+                      //Need to use cached count so that the hero
+                      //animation works as expected without flickering.
                       cachedCount =
                           CollectionsService.instance.getCachedFileCount(c);
                     }
                   }
                   if (cachedCount != null && cachedCount > 0) {
-                    final String textCount =
-                        NumberFormat().format(cachedCount);
+                    final String textCount = NumberFormat().format(cachedCount);
                     return Row(
                       children: [
                         Container(

@@ -26,6 +26,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
   StreamSubscription<BackupFoldersUpdatedEvent>? _backupFoldersUpdatedEvent;
   StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
   String _loadReason = "init";
+  final _logger = Logger((_DeviceFoldersGridViewState).toString());
 
   @override
   void initState() {
@@ -41,13 +42,13 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
       _loadReason = event.reason;
       setState(() {});
     });
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     debugPrint("${(DeviceFoldersGridView).toString()} - $_loadReason");
-    final logger = Logger((_DeviceFoldersGridViewState).toString());
     return SizedBox(
       height: 170,
       child: Align(
@@ -69,12 +70,15 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
                       // to disable GridView's scrolling
                       itemBuilder: (context, index) {
                         final deviceCollection = snapshot.data![index];
-                        return DeviceFolderItem(deviceCollection);
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: DeviceFolderItem(deviceCollection),
+                        );
                       },
                       itemCount: snapshot.data!.length,
                     );
             } else if (snapshot.hasError) {
-              logger.severe("failed to load device gallery", snapshot.error);
+              _logger.severe("failed to load device gallery", snapshot.error);
               return Text(S.of(context).failedToLoadAlbums);
             } else {
               return const EnteLoadingWidget();

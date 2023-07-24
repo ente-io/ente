@@ -21,5 +21,16 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'cs';
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{};
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
+        "nothingSharedWithYouYet":
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
+        "shareYourFirstAlbum":
+            MessageLookupByLibrary.simpleMessage("Share your first album"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
+        "sharedWithYou": MessageLookupByLibrary.simpleMessage("Shared with you")
+      };
 }

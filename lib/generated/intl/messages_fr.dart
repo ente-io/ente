@@ -548,6 +548,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "inviteToEnte": MessageLookupByLibrary.simpleMessage("Inviter à ente"),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("Invite tes ami(e)s"),
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "Il semble qu\'une erreur s\'est produite. Veuillez réessayer après un certain temps. Si l\'erreur persiste, veuillez contacter notre équipe d\'assistance."),
@@ -628,6 +630,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nouvel album"),
         "newest": MessageLookupByLibrary.simpleMessage("Le plus récent"),
         "no": MessageLookupByLibrary.simpleMessage("Non"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "Vous n\'avez pas de fichiers sur cet appareil qui peuvent être supprimés"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ Aucun doublon"),
@@ -636,6 +640,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "En raison de notre protocole de chiffrement de bout en bout, vos données ne peuvent pas être déchiffré sans votre mot de passe ou clé de récupération"),
         "noResults": MessageLookupByLibrary.simpleMessage("Aucun résultat"),
+        "nothingSharedWithYouYet":
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "oops": MessageLookupByLibrary.simpleMessage("Oups"),
         "oopsSomethingWentWrong": MessageLookupByLibrary.simpleMessage(
@@ -843,10 +849,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Partager avec des utilisateurs non-ente"),
         "shareWithPeopleSectionTitle": m46,
+        "shareYourFirstAlbum":
+            MessageLookupByLibrary.simpleMessage("Share your first album"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Créez des albums partagés et collaboratifs avec d\'autres utilisateurs de ente, y compris des utilisateurs sur des plans gratuits."),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("Partagé par moi"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
         "sharedWith": m47,
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "sharing": MessageLookupByLibrary.simpleMessage("Partage..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "J\'accepte les <u-terms>conditions d\'utilisation</u-terms> et la <u-policy>politique de confidentialité</u-policy>"),
