@@ -165,6 +165,9 @@ class PickCoverPhotoWidget extends StatelessWidget {
                             labelText: collection.hasCover
                                 ? S.of(context).resetToDefault
                                 : S.of(context).cancel,
+                            icon: collection.hasCover
+                                ? Icons.restore_outlined
+                                : null,
                             onTap: () async {
                               if(collection.hasCover) {
                                 Navigator.pop(context, 0);
