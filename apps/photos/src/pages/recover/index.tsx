@@ -78,7 +78,7 @@ export default function Recover() {
                 await cryptoWorker.fromHex(recoveryKey)
             );
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
-            await decryptAndStoreToken(masterKey);
+            await decryptAndStoreToken(keyAttributes, masterKey);
 
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
             router.push(PAGES.CHANGE_PASSWORD);

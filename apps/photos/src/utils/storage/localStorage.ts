@@ -26,6 +26,7 @@ export enum LS_KEYS {
     MAP_ENABLED = 'mapEnabled',
     SRP_SETUP_ATTRIBUTES = 'srpSetupAttributes',
     KEK = 'kek',
+    SRP_ATTRIBUTES = 'srpAttributes',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {

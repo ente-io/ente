@@ -185,10 +185,12 @@ async function createNewRecoveryKey() {
     return recoveryKey;
 }
 
-export async function decryptAndStoreToken(masterKey: string) {
+export async function decryptAndStoreToken(
+    keyAttributes: KeyAttributes,
+    masterKey: string
+) {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const user = getData(LS_KEYS.USER);
-    const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
     let decryptedToken = null;
     const { encryptedToken } = user;
     if (encryptedToken && encryptedToken.length > 0) {
