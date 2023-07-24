@@ -34,6 +34,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Slett konto"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
             "Vi er lei oss for at du forlater oss. Gi oss gjerne en tilbakemelding så vi kan forbedre oss."),
+        "deleteReason2": MessageLookupByLibrary.simpleMessage(
+            "The app or a certain feature does not behave as I think it should"),
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Vennligst skriv inn en gyldig e-postadresse."),

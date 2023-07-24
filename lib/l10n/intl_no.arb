@@ -12,5 +12,6 @@
   "feedback": "Tilbakemelding",
   "kindlyHelpUsWithThisInformation": "Vær vennlig og hjelp oss med denne informasjonen",
   "confirmDeletePrompt": "Ja, jeg ønsker å slette denne kontoen og all dataen dens permanent.",
-  "confirmAccountDeletion": "Bekreft sletting av konto"
+  "confirmAccountDeletion": "Bekreft sletting av konto",
+  "deleteReason2": "The app or a certain feature does not behave as I think it should"
 }
