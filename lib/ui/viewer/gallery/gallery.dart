@@ -14,7 +14,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/viewer/gallery/component/multiple_groups_gallery_view.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
-import "package:photos/ui/viewer/gallery/state/gallery_sort_order.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -43,7 +43,14 @@ class Gallery extends StatefulWidget {
   final bool enableFileGrouping;
   final Widget loadingWidget;
   final bool disableScroll;
+
+  /// When true, selection will be limited to one item. Tapping on any item
+  /// will select even when no other item is selected.
   final bool limitSelectionToOne;
+
+  /// When true, the gallery will be in selection mode. Tapping on any item
+  /// will select even when no other item is selected.
+  final bool inSelectionMode;
   final bool showSelectAllByDefault;
   final bool isScrollablePositionedList;
 
@@ -67,6 +74,7 @@ class Gallery extends StatefulWidget {
     this.loadingWidget = const EnteLoadingWidget(),
     this.disableScroll = false,
     this.limitSelectionToOne = false,
+    this.inSelectionMode = false,
     this.sortAsyncFn,
     this.showSelectAllByDefault = true,
     this.isScrollablePositionedList = true,
@@ -220,8 +228,9 @@ class _GalleryState extends State<Gallery> {
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
     }
-    return GallerySortOrder(
+    return GalleryContextState(
       sortOrderAsc: _sortOrderAsc,
+      inSelectionMode: widget.inSelectionMode,
       child: MultipleGroupsGalleryView(
         itemScroller: _itemScroller,
         groupedFiles: _currentGroupedFiles,

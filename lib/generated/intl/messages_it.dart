@@ -734,6 +734,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "inviteToEnte": MessageLookupByLibrary.simpleMessage("Invita su ente"),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("Invita i tuoi amici"),
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "Sembra che qualcosa sia andato storto. Riprova tra un po\'. Se l\'errore persiste, contatta il nostro team di supporto."),
@@ -852,6 +854,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nuovo utente"),
         "newest": MessageLookupByLibrary.simpleMessage("Più recenti"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "Non hai file su questo dispositivo che possono essere eliminati"),
         "noDuplicates":
@@ -869,6 +873,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("Nessun risultato"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("Nessun risultato trovato"),
+        "nothingSharedWithYouYet":
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "nothingToSeeHere":
             MessageLookupByLibrary.simpleMessage("Nulla da vedere qui! 👀"),
         "notifications": MessageLookupByLibrary.simpleMessage("Notifiche"),
@@ -1133,6 +1139,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Crea album condivisi e collaborativi con altri utenti ente, inclusi utenti su piani gratuiti."),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("Condiviso da me"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
         "sharedPhotoNotifications":
             MessageLookupByLibrary.simpleMessage("Nuove foto condivise"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
@@ -1140,6 +1147,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWith": m47,
         "sharedWithMe":
             MessageLookupByLibrary.simpleMessage("Condivisi con me"),
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "sharing":
             MessageLookupByLibrary.simpleMessage("Condivisione in corso..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(

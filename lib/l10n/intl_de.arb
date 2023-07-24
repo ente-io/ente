@@ -1057,5 +1057,10 @@
   },
   "maps": "Karten",
   "enableMaps": "Karten aktivieren",
-  "enableMapsDesc": "Dies zeigt Ihre Fotos auf einer Weltkarte.\n\nDiese Karte wird von OpenStreetMap gehostet und die genauen Standorte Ihrer Fotos werden niemals geteilt.\n\nSie können diese Funktion jederzeit in den Einstellungen deaktivieren."
+  "enableMapsDesc": "Dies zeigt Ihre Fotos auf einer Weltkarte.\n\nDiese Karte wird von OpenStreetMap gehostet und die genauen Standorte Ihrer Fotos werden niemals geteilt.\n\nSie können diese Funktion jederzeit in den Einstellungen deaktivieren.",
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet",
+  "sharedWithYou": "Shared with you",
+  "sharedByYou": "Shared by you",
+  "inviteYourFriendsToEnte": "Invite your friends to ente"
 }

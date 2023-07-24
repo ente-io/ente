@@ -44,8 +44,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Ugyldig e-postadresse"),
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Vær vennlig og hjelp oss med denne informasjonen"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
+        "nothingSharedWithYouYet":
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
+        "shareYourFirstAlbum":
+            MessageLookupByLibrary.simpleMessage("Share your first album"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "verify": MessageLookupByLibrary.simpleMessage("Bekreft")
       };
 }

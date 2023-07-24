@@ -1,43 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/tab_changed_event.dart';
+import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/utils/toast_util.dart';
+import "package:photos/models/collection.dart";
+import "package:photos/models/collection_items.dart";
+import "package:photos/services/collections_service.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/navigation_util.dart";
 
-class CreateNewAlbumWidget extends StatelessWidget {
-  const CreateNewAlbumWidget({Key? key}) : super(key: key);
+class CreateNewAlbumIcon extends StatelessWidget {
+  const CreateNewAlbumIcon({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(30, 30, 30, 54),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.background,
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 2,
-              spreadRadius: 0,
-              offset: const Offset(0, 0),
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.3),
-            )
-          ],
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Icon(
-          Icons.add,
-          color: Theme.of(context).iconTheme.color!.withOpacity(0.25),
-        ),
-      ),
+    return IconButtonWidget(
+      icon: Icons.add_rounded,
+      iconButtonType: IconButtonType.secondary,
       onTap: () async {
-        await showToast(
+        final result = await showTextInputDialog(
           context,
-          S.of(context).createAlbumActionHint,
-          toastLength: Toast.LENGTH_LONG,
+          title: S.of(context).newAlbum,
+          submitButtonLabel: S.of(context).create,
+          hintText: S.of(context).enterAlbumName,
+          alwaysShowSuccessState: false,
+          initialValue: "",
+          textCapitalization: TextCapitalization.words,
+          onSubmit: (String text) async {
+            // indicates user cancelled the rename request
+            if (text.trim() == "") {
+              return;
+            }
+
+            try {
+              final Collection c =
+                  await CollectionsService.instance.createAlbum(text);
+              routeToPage(
+                context,
+                CollectionPage(CollectionWithThumbnail(c, null)),
+              );
+            } catch (e, s) {
+              Logger("CreateNewAlbumIcon")
+                  .severe("Failed to rename album", e, s);
+              rethrow;
+            }
+          },
         );
-        Bus.instance
-            .fire(TabChangedEvent(0, TabChangedEventSource.collectionsPage));
+        if (result is Exception) {
+          showGenericErrorDialog(context: context);
+        }
       },
     );
   }

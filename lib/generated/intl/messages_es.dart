@@ -689,6 +689,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "inviteToEnte": MessageLookupByLibrary.simpleMessage("Invitar a ente"),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("Invita a tus amigos"),
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "Parece que algo salió mal. Por favor, vuelve a intentarlo después de algún tiempo. Si el error persiste, ponte en contacto con nuestro equipo de soporte."),
@@ -806,6 +808,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nuevo en ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Más reciente"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "No tienes archivos en este dispositivo que puedan ser borrados"),
         "noDuplicates":
@@ -823,6 +827,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("Sin resultados"),
         "noResultsFound": MessageLookupByLibrary.simpleMessage(
             "No se han encontrado resultados"),
+        "nothingSharedWithYouYet":
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage(
             "¡No hay nada que ver aquí! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("Aceptar"),
@@ -1090,9 +1096,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Crear álbumes compartidos y colaborativos con otros usuarios ente, incluyendo usuarios en planes gratuitos."),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("Compartido por mí"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
         "sharedWith": m47,
         "sharedWithMe":
             MessageLookupByLibrary.simpleMessage("Compartido conmigo"),
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "sharing": MessageLookupByLibrary.simpleMessage("Compartiendo..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Estoy de acuerdo con los <u-terms>términos del servicio</u-terms> y <u-policy> la política de privacidad</u-policy>"),

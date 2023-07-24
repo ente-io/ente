@@ -7365,6 +7365,56 @@ class S {
     );
   }
 
+  /// `Quick links`
+  String get quickLinks {
+    return Intl.message(
+      'Quick links',
+      name: 'quickLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select items to add`
+  String get selectItemsToAdd {
+    return Intl.message(
+      'Select items to add',
+      name: 'selectItemsToAdd',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add selected`
+  String get addSelected {
+    return Intl.message(
+      'Add selected',
+      name: 'addSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add from device`
+  String get addFromDevice {
+    return Intl.message(
+      'Add from device',
+      name: 'addFromDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add photos`
+  String get addPhotos {
+    return Intl.message(
+      'Add photos',
+      name: 'addPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `No photos found here`
   String get noPhotosFoundHere {
     return Intl.message(
@@ -7410,6 +7460,76 @@ class S {
     return Intl.message(
       'Pin album',
       name: 'pinAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create`
+  String get create {
+    return Intl.message(
+      'Create',
+      name: 'create',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View all`
+  String get viewAll {
+    return Intl.message(
+      'View all',
+      name: 'viewAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing shared with you yet`
+  String get nothingSharedWithYouYet {
+    return Intl.message(
+      'Nothing shared with you yet',
+      name: 'nothingSharedWithYouYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No albums shared by you yet`
+  String get noAlbumsSharedByYouYet {
+    return Intl.message(
+      'No albums shared by you yet',
+      name: 'noAlbumsSharedByYouYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared with you`
+  String get sharedWithYou {
+    return Intl.message(
+      'Shared with you',
+      name: 'sharedWithYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared by you`
+  String get sharedByYou {
+    return Intl.message(
+      'Shared by you',
+      name: 'sharedByYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invite your friends to ente`
+  String get inviteYourFriendsToEnte {
+    return Intl.message(
+      'Invite your friends to ente',
+      name: 'inviteYourFriendsToEnte',
       desc: '',
       args: [],
     );

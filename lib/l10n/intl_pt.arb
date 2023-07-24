@@ -266,5 +266,11 @@
   "update": "Atualização",
   "installManually": "Instalar manualmente",
   "criticalUpdateAvailable": "Atualização crítica disponível",
-  "updateAvailable": "Atualização disponível"
+  "updateAvailable": "Atualização disponível",
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "shareYourFirstAlbum": "Share your first album",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet",
+  "sharedWithYou": "Shared with you",
+  "sharedByYou": "Shared by you",
+  "inviteYourFriendsToEnte": "Invite your friends to ente"
 }

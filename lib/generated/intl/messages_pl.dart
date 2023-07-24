@@ -103,14 +103,20 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nieprawidłowy klucz odzyskiwania"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Nieprawidłowy adres e-mail"),
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "kindlyHelpUsWithThisInformation":
             MessageLookupByLibrary.simpleMessage("Pomóż nam z tą informacją"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Umiarkowana"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Brak klucza odzyskiwania?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "Ze względu na charakter naszego protokołu szyfrowania end-to-end, dane nie mogą być odszyfrowane bez hasła lub klucza odzyskiwania"),
+        "nothingSharedWithYouYet":
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "password": MessageLookupByLibrary.simpleMessage("Hasło"),
@@ -143,6 +149,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectReason": MessageLookupByLibrary.simpleMessage("Wybierz powód"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Wyślij e-mail"),
         "setPasswordTitle": MessageLookupByLibrary.simpleMessage("Ustaw hasło"),
+        "shareYourFirstAlbum":
+            MessageLookupByLibrary.simpleMessage("Share your first album"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Akceptuję <u-terms>warunki korzystania z usługi</u-terms> i <u-policy>politykę prywatności</u-policy>"),
         "somethingWentWrongPleaseTryAgain":

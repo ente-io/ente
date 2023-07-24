@@ -12,7 +12,7 @@ import "package:photos/ui/viewer/gallery/component/grid/place_holder_grid_view_w
 import "package:photos/ui/viewer/gallery/component/group/group_gallery.dart";
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
-import "package:photos/ui/viewer/gallery/state/gallery_sort_order.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 
 class LazyGroupGallery extends StatefulWidget {
   final List<File> files;
@@ -132,7 +132,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
         final result = await widget.asyncLoader(
           dayStartTime.microsecondsSinceEpoch,
           dayStartTime.microsecondsSinceEpoch + microSecondsInDay - 1,
-          asc: GallerySortOrder.of(context)!.sortOrderAsc,
+          asc: GalleryContextState.of(context)!.sortOrderAsc,
         );
         if (mounted) {
           setState(() {
