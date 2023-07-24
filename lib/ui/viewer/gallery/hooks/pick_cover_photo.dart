@@ -66,7 +66,7 @@ class PickCoverPhotoWidget extends StatelessWidget {
               maxWidth: min(428, MediaQuery.of(context).size.width),
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 24, 0, 8),
+              padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [

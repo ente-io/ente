@@ -72,30 +72,19 @@ class AddPhotosPhotoWidget extends StatelessWidget {
               maxWidth: min(428, MediaQuery.of(context).size.width),
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 4, 0, 8),
+              padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Expanded(
                     child: Column(
                       children: [
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.close,
-                              color: getEnteColorScheme(context).strokeFaint,
-                            ),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ),
                         BottomOfTitleBarWidget(
                           title: TitleBarTitleWidget(
                             title: S.of(context).addMore,
                           ),
                           caption: S.of(context).selectItemsToAdd,
+                          showCloseButton: true,
                         ),
                         Expanded(
                           child: Gallery(
