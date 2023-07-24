@@ -30,6 +30,7 @@ import { formatNumber } from 'utils/number/format';
 import VisibilityOffOutlined from '@mui/icons-material/VisibilityOffOutlined';
 import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 import { FILE_OPS_TYPE } from 'utils/file';
+import { Collection } from 'types/collection';
 
 interface Props {
     handleCollectionOps: (
@@ -46,6 +47,7 @@ interface Props {
     isUncategorizedCollection: boolean;
     isIncomingSharedCollection: boolean;
     isInSearchMode: boolean;
+    selectedCollection: Collection;
 }
 
 const SelectedFileOptions = ({
@@ -53,6 +55,7 @@ const SelectedFileOptions = ({
     setCollectionSelectorAttributes,
     handleCollectionOps,
     handleFileOps,
+    selectedCollection,
     count,
     ownCount,
     clearSelection,
@@ -104,7 +107,10 @@ const SelectedFileOptions = ({
                 content: t('CONFIRM_SELF_REMOVE_MESSAGE'),
 
                 proceed: {
-                    action: handleCollectionOps(COLLECTION_OPS_TYPE.REMOVE),
+                    action: () =>
+                        handleCollectionOps(COLLECTION_OPS_TYPE.REMOVE)(
+                            selectedCollection
+                        ),
                     text: t('YES_REMOVE'),
                     variant: 'primary',
                 },
@@ -116,7 +122,10 @@ const SelectedFileOptions = ({
                 content: t('CONFIRM_SELF_AND_OTHER_REMOVE_MESSAGE'),
 
                 proceed: {
-                    action: handleCollectionOps(COLLECTION_OPS_TYPE.REMOVE),
+                    action: () =>
+                        handleCollectionOps(COLLECTION_OPS_TYPE.REMOVE)(
+                            selectedCollection
+                        ),
                     text: t('YES_REMOVE'),
                     variant: 'critical',
                 },

@@ -82,6 +82,7 @@ import {
     hasNonSystemCollections,
     splitNormalAndHiddenCollections,
     constructCollectionNameMap,
+    getSelectedCollection,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import { getLocalTrashedFiles, syncTrash } from 'services/trashService';
@@ -966,6 +967,10 @@ export default function Gallery() {
                             ownCount={selected.ownCount}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
+                            selectedCollection={getSelectedCollection(
+                                selected.collectionID,
+                                collections
+                            )}
                             isFavoriteCollection={
                                 collectionSummaries.get(activeCollection)
                                     ?.type === CollectionSummaryType.favorites
