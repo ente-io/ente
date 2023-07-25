@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import 'package:photos/models/search/search_result.dart';
+import "package:photos/services/collections_service.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/ui/viewer/search/result/file_result_widget.dart';
 import 'package:photos/ui/viewer/search/result/search_result_widget.dart';
@@ -60,8 +60,8 @@ class SearchSuggestionsWidget extends StatelessWidget {
                     final AlbumSearchResult albumSearchResult = result;
                     return SearchResultWidget(
                       result,
-                      resultCount: FilesDB.instance.collectionFileCount(
-                        albumSearchResult.collectionWithThumbnail.collection.id,
+                      resultCount: CollectionsService.instance.getFileCount(
+                        albumSearchResult.collectionWithThumbnail.collection,
                       ),
                       onResultTap: () => routeToPage(
                         context,

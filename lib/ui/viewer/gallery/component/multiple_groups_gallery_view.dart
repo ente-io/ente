@@ -22,7 +22,6 @@ If a group has more than 400 files, LazyGroupGallery internally divides the
 group into multiple grid views during rendering.
  */
 class MultipleGroupsGalleryView extends StatelessWidget {
-  final GlobalKey<HugeListViewState<dynamic>> hugeListViewKey;
   final ItemScrollController itemScroller;
   final List<List<File>> groupedFiles;
   final bool disableScroll;
@@ -43,7 +42,6 @@ class MultipleGroupsGalleryView extends StatelessWidget {
   final bool isScrollablePositionedList;
 
   const MultipleGroupsGalleryView({
-    required this.hugeListViewKey,
     required this.itemScroller,
     required this.groupedFiles,
     required this.disableScroll,
@@ -68,7 +66,6 @@ class MultipleGroupsGalleryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HugeListView<List<File>>(
-      key: hugeListViewKey,
       controller: itemScroller,
       startIndex: 0,
       totalCount: groupedFiles.length,

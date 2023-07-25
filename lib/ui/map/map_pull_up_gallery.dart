@@ -121,7 +121,7 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                   logger.info("Visible images: ${images.length}");
                   //To retain only selected files that are in view (visible)
                   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                    _selectedFiles.filesToRetain(images.toSet());
+                    _selectedFiles.retainFiles(images.toSet());
                   });
 
                   if (images.isEmpty) {

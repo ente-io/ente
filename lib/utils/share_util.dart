@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' as dartio;
 
 import 'package:flutter/widgets.dart';
+import "package:image_picker/image_picker.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
@@ -16,6 +17,18 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:share_plus/share_plus.dart';
 
 final _logger = Logger("ShareUtil");
+// Set of possible image extensions
+final _imageExtension = {"jpg", "jpeg", "png", "heic", "heif", "webp", ".gif"};
+final _videoExtension = {
+  "mp4",
+  "mov",
+  "avi",
+  "mkv",
+  "webm",
+  "wmv",
+  "flv",
+  "3gp"
+};
 // share is used to share media/files from ente to other apps
 Future<void> share(
   BuildContext context,
@@ -120,6 +133,67 @@ Future<List<File>> convertIncomingSharedMediaToFile(
       }
     } else if (enteFile.fileType == FileType.video) {
       enteFile.duration = (media.duration ?? 0) ~/ 1000;
+    }
+    if (enteFile.creationTime == null || enteFile.creationTime == 0) {
+      final parsedDateTime =
+          parseDateTimeFromFileNameV2(basenameWithoutExtension(media.path));
+      if (parsedDateTime != null) {
+        enteFile.creationTime = parsedDateTime.microsecondsSinceEpoch;
+      } else {
+        enteFile.creationTime = DateTime.now().microsecondsSinceEpoch;
+      }
+    }
+    enteFile.modificationTime = enteFile.creationTime;
+    localFiles.add(enteFile);
+  }
+  return localFiles;
+}
+
+Future<List<File>> convertPickedFiles(
+  List<XFile> pickedFiles,
+  int collectionID,
+) async {
+  final List<File> localFiles = [];
+  for (var media in pickedFiles) {
+    FileType? enteTypeType;
+    final String mimeType = (media.mimeType ?? '').toLowerCase();
+    if (mimeType.contains('image')) {
+      enteTypeType = FileType.image;
+    } else if (mimeType.contains('video')) {
+      enteTypeType = FileType.video;
+    } else {
+      final extenName = extension(media.path ?? '').toLowerCase().replaceFirst(
+            '.',
+            '',
+          );
+      if (_imageExtension.contains(extenName)) {
+        enteTypeType = FileType.image;
+      } else if (_videoExtension.contains(extenName)) {
+        enteTypeType = FileType.video;
+      } else {
+        _logger.warning(
+          "ignore file type ${media.mimeType}, extn ${extenName} path: ${media.path}",
+        );
+        continue;
+      }
+    }
+    final enteFile = File();
+    // fileName: img_x.jpg
+    enteFile.title = basename(media.path);
+    var ioFile = dartio.File(media.path);
+    ioFile = ioFile.renameSync(
+      Configuration.instance.getSharedMediaDirectory() + "/" + enteFile.title!,
+    );
+    enteFile.localID = sharedMediaIdentifier + enteFile.title!;
+    enteFile.collectionID = collectionID;
+    enteFile.fileType = enteTypeType;
+    if (enteFile.fileType == FileType.image) {
+      final exifTime = await getCreationTimeFromEXIF(ioFile, null);
+      if (exifTime != null) {
+        enteFile.creationTime = exifTime.microsecondsSinceEpoch;
+      }
+    } else if (enteFile.fileType == FileType.video) {
+      // enteFile.duration = (media.duration ?? 0) ~/ 1000;
     }
     if (enteFile.creationTime == null || enteFile.creationTime == 0) {
       final parsedDateTime =

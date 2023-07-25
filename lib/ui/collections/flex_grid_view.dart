@@ -3,9 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import "package:photos/models/collection.dart";
 import "package:photos/ui/collections/album/row_item.dart";
-import 'package:photos/ui/collections/create_new_album_widget.dart';
 
-class RemoteCollectionsGridViewWidget extends StatelessWidget {
+class CollectionsFlexiGridViewWidget extends StatelessWidget {
   /*
   Aspect ratio 1:1 Max width 224 Fixed gap 8
   Width changes dynamically with screen width such that we can fit 2 in one row.
@@ -17,9 +16,18 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
   static const collectionItemsToPreload = 20;
 
   final List<Collection>? collections;
+  // At max how many albums to display
+  final int displayLimitCount;
 
-  const RemoteCollectionsGridViewWidget(
+  // If true, the GridView will shrink-wrap its contents.
+  final bool shrinkWrap;
+  final String tag;
+
+  const CollectionsFlexiGridViewWidget(
     this.collections, {
+    this.displayLimitCount = 10,
+    this.shrinkWrap = false,
+    this.tag = "",
     Key? key,
   }) : super(key: key);
 
@@ -38,31 +46,25 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
         (screenWidth - gapOnSizeOfAlbums - gapBetweenAlbums) /
             albumsCountInOneRow;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const ScrollPhysics(),
-        // to disable GridView's scrolling
-        itemBuilder: (context, index) {
-          if (index < collections!.length) {
+    return SliverPadding(
+      padding: const EdgeInsets.all(8),
+      sliver: SliverGrid(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
             return AlbumRowItemWidget(
               collections![index],
               sideOfThumbnail,
-              shouldRender: index < collectionItemsToPreload,
+              tag: tag,
             );
-          } else {
-            return const CreateNewAlbumWidget();
-          }
-        },
-        itemCount: collections!.length + 1,
-        // To include the + button
+          },
+          childCount: min(collections!.length, displayLimitCount),
+        ),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInOneRow,
-          mainAxisSpacing: 12,
+          mainAxisSpacing: 4,
           crossAxisSpacing: gapBetweenAlbums,
           childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 46),
-        ), //24 is height of album title
+        ),
       ),
     );
   }

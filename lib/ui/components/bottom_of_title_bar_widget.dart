@@ -6,11 +6,20 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 class BottomOfTitleBarWidget extends StatelessWidget {
   final TitleBarTitleWidget? title;
   final String? caption;
-  const BottomOfTitleBarWidget({this.title, this.caption, super.key});
+  final bool showCloseButton;
+
+  const BottomOfTitleBarWidget({
+    this.title,
+    this.caption,
+    this.showCloseButton = false,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: showCloseButton ? MainAxisAlignment.spaceBetween :
+      MainAxisAlignment.start,
       children: [
         Flexible(
           child: Padding(
@@ -31,6 +40,16 @@ class BottomOfTitleBarWidget extends StatelessWidget {
             ),
           ),
         ),
+        if (showCloseButton)
+          IconButton(
+            icon: Icon(
+              Icons.close,
+              color: getEnteColorScheme(context).strokeFaint,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
       ],
     );
   }

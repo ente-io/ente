@@ -85,7 +85,6 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                         return AlbumRowItemWidget(
                           item,
                           120,
-                          shouldRender: true,
                           showFileCount: false,
                         );
                       },

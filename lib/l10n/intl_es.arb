@@ -18,7 +18,7 @@
   "yourAccountHasBeenDeleted": "Su cuenta ha sido eliminada",
   "selectReason": "Seleccionar motivo",
   "deleteReason1": "Falta una característica clave que necesito",
-  "deleteReason2": "La aplicación o una característica determinada no \nse comporta como creo que debería",
+  "deleteReason2": "La aplicación o una característica determinada no se comporta como creo que debería",
   "deleteReason3": "He encontrado otro servicio que me gusta más",
   "deleteReason4": "Mi motivo no se encuentra en la lista",
   "sendEmail": "Enviar correo electrónico",
@@ -972,5 +972,10 @@
   },
   "setRadius": "Establecer radio",
   "familyPlanPortalTitle": "Familia",
-  "familyPlanOverview": "Añada 5 familiares a su plan existente sin pagar más.\n\nCada miembro tiene su propio espacio privado y no puede ver los archivos del otro a menos que sean compartidos.\n\nLos planes familiares están disponibles para los clientes que tienen una suscripción de ente pagada.\n\n¡Suscríbete ahora para empezar!"
+  "familyPlanOverview": "Añada 5 familiares a su plan existente sin pagar más.\n\nCada miembro tiene su propio espacio privado y no puede ver los archivos del otro a menos que sean compartidos.\n\nLos planes familiares están disponibles para los clientes que tienen una suscripción de ente pagada.\n\n¡Suscríbete ahora para empezar!",
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet",
+  "sharedWithYou": "Shared with you",
+  "sharedByYou": "Shared by you",
+  "inviteYourFriendsToEnte": "Invite your friends to ente"
 }

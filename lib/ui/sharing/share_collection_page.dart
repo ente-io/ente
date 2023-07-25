@@ -15,6 +15,7 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/sharing/add_partipant_page.dart';
 import 'package:photos/ui/sharing/album_participants_page.dart';
+import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/manage_album_participant.dart";
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
@@ -337,7 +338,7 @@ class EmailItemWidget extends StatelessWidget {
             ),
             leadingIconWidget: UserAvatarWidget(
               collection.getSharees().first,
-              thumbnailView: true,
+              thumbnailView: false,
             ),
             leadingIconSize: 24,
             menuItemColor: getEnteColorScheme(context).fillFaint,
@@ -361,10 +362,23 @@ class EmailItemWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).manageParticipants,
+            captionedTextWidget: Flexible(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                child: SizedBox(
+                  height: 24,
+                  child: AlbumSharesIcons(
+                    sharees: collection.getSharees(),
+                    padding: const EdgeInsets.all(0),
+                    limitCountTo: 10,
+                    type: AvatarType.mini,
+                    removeBorder: false,
+                  ),
+                ),
+              ),
             ),
-            leadingIcon: Icons.people_outline,
+            alignCaptionedTextToLeft: true,
+            // leadingIcon: Icons.people_outline,
             menuItemColor: getEnteColorScheme(context).fillFaint,
             trailingIconIsMuted: true,
             trailingIcon: Icons.chevron_right,
