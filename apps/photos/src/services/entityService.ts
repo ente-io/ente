@@ -14,6 +14,7 @@ import {
     EncryptedEntity,
 } from 'types/entity';
 import { getLatestVersionEntities } from 'utils/entity';
+import { addLogLine } from 'utils/logging';
 
 const ENDPOINT = getEndpoint();
 
@@ -108,7 +109,11 @@ export const syncEntities = async () => {
 const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
     try {
         let entities = await getLocalEntity(type);
+        addLogLine(
+            `Syncing ${type} entities localEntitiesCount: ${entities.length}`
+        );
         let syncTime = await getEntityLastSyncTime(type);
+        addLogLine(`Syncing ${type} entities syncTime: ${syncTime}`);
         let response: EntitySyncDiffResponse;
         do {
             response = await getEntityDiff(type, syncTime);
@@ -152,6 +157,9 @@ const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
             }
             await localForage.setItem(ENTITY_TABLES[type], nonDeletedEntities);
             await localForage.setItem(ENTITY_SYNC_TIME_TABLES[type], syncTime);
+            addLogLine(
+                `Syncing ${type} entities syncedEntitiesCount: ${nonDeletedEntities.length}`
+            );
         } while (response.hasMore);
     } catch (e) {
         logError(e, 'Sync entity failed');
