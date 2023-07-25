@@ -53,6 +53,13 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
   }
 
   @override
+  void dispose() {
+    _passwordController.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 

@@ -689,10 +689,6 @@ class UserService {
         opsLimit: keyAttributes.opsLimit!,
       );
       await registerOrUpdateSrp(loginKey, setKeysRequest: setKeyRequest);
-      // await _enteDio.put(
-      //   "/users/keys",
-      //   data: setKeyRequest.toMap(),
-      // );
       await _config.setKeyAttributes(keyAttributes);
     } catch (e) {
       _logger.severe(e);
