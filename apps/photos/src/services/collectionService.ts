@@ -1444,7 +1444,7 @@ export const constructEmailList = (
             if (owner.email && item.owner.id !== user.id) {
                 return [item.owner.email];
             } else {
-                if (sharees?.length === 0) {
+                if (!sharees?.length) {
                     return [];
                 }
                 const shareeEmails = item.sharees
