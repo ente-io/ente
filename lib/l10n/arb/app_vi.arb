@@ -1,0 +1,90 @@
+{
+  "account": "Tài khoản",
+  "recoveryKey": "Khóa khôi phục",
+  "counterAppBarTitle": "Bộ Đếm",
+  "@counterAppBarTitle": {
+    "description": "Text shown in the AppBar of the Counter Page"
+  },
+  "onBoardingBody": "Bảo mật mã 2FA của bạn",
+  "onBoardingGetStarted": "Bắt đầu",
+  "setupFirstAccount": "Thiết lập tài khoản đầu tiên của bạn",
+  "importScanQrCode": "Quét mã QR",
+  "importEnterSetupKey": "Nhập khóa thiết lập",
+  "importAccountPageTitle": "Nhập chi tiết tài khoản",
+  "secretCanNotBeEmpty": "Khoá bí mật không được để trống",
+  "bothIssuerAndAccountCanNotBeEmpty": "Cả nhà phát hành và tài khoản không được để trống",
+  "incorrectDetails": "Thông tin chi tiết không chính xác",
+  "pleaseVerifyDetails": "Vui lòng xác minh chi tiết và thử lại",
+  "codeIssuerHint": "Nhà phát hành",
+  "codeSecretKeyHint": "Khóa bí mật",
+  "codeAccountHint": "Tài khoản (bạn@miền.com)",
+  "accountKeyType": "Loại khóa",
+  "sessionExpired": "Phiên làm việc đã hết hạn",
+  "@sessionExpired": {
+    "description": "Title of the dialog when the users current session is invalid/expired"
+  },
+  "pleaseLoginAgain": "Vui lòng đăng nhập lại",
+  "loggingOut": "Đang thoát...",
+  "timeBasedKeyType": "Dựa trên thời gian (TOTP)",
+  "counterBasedKeyType": "Dựa trên bộ đếm (HOTP)",
+  "saveAction": "Lưu",
+  "nextTotpTitle": "tiếp",
+  "deleteCodeTitle": "Xóa mã?",
+  "deleteCodeMessage": "Bạn có chắc chắn muốn xóa mã này không? Hành động này không thể đảo ngược.",
+  "viewLogsAction": "Xem các bản ghi",
+  "sendLogsDescription": "Thao tác này sẽ gửi nhật ký để giúp chúng tôi gỡ lỗi sự cố của bạn. Mặc dù chúng tôi thực hiện các biện pháp phòng ngừa để đảm bảo rằng thông tin nhạy cảm không được ghi lại, nhưng chúng tôi khuyến khích bạn xem các nhật ký này trước khi chia sẻ chúng.",
+  "preparingLogsTitle": "Đang chuẩn bị nhật ký...",
+  "emailLogsTitle": "Nhật ký email",
+  "emailLogsMessage": "Vui lòng gửi nhật ký tới {email}",
+  "@emailLogsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "copyEmailAction": "Sao chép email",
+  "exportLogsAction": "Xuất nhật ký",
+  "reportABug": "Báo cáo lỗi",
+  "crashAndErrorReporting": "Báo cáo sự cố và lỗi",
+  "reportBug": "Báo lỗi",
+  "emailUsMessage": "Vui lòng gửi email cho chúng tôi tại {email}",
+  "@emailUsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contactSupport": "Liên hệ hỗ trợ",
+  "verifyPassword": "Xác nhận mật khẩu",
+  "pleaseWait": "Vui lòng chờ...",
+  "generatingEncryptionKeysTitle": "Đang tạo khóa mã hóa...",
+  "recreatePassword": "Tạo lại mật khẩu",
+  "useRecoveryKey": "Dùng khóa khôi phục",
+  "incorrectPasswordTitle": "Mật khẩu không đúng",
+  "welcomeBack": "Chào mừng trở lại!",
+  "madeWithLoveAtPrefix": "được làm bằng ❤️ tại ",
+  "supportDevs": "Đăng ký <bold-green>ente</bold-green> để hỗ trợ dự án này.",
+  "supportDiscount": "Sử dụng mã giảm giá \"AUTH\" để được giảm 10% trong năm đầu tiên",
+  "changeEmail": "Thay đổi email",
+  "changePassword": "Thay đổi mật khẩu",
+  "data": "Dữ liệu",
+  "importCodes": "Nhập mã",
+  "exportCodes": "Xuất mã",
+  "importInstruction": "Vui lòng chọn tệp chứa danh sách mã của bạn ở định dạng sau",
+  "importCodeDelimiterInfo": "Các mã có thể được phân tách bằng một dấu phẩy hoặc một dòng mới",
+  "selectFile": "Chọn tập tin",
+  "authToViewYourRecoveryKey": "Vui lòng xác thực để xem khóa khôi phục của bạn",
+  "authToChangeYourEmail": "Vui lòng xác thực để thay đổi email của bạn",
+  "authToChangeYourPassword": "Vui lòng xác thực để thay đổi mật khẩu của bạn",
+  "ok": "Được rồi",
+  "cancel": "Hủy",
+  "yes": "Đúng",
+  "no": "Không",
+  "email": "Thư điện tử",
+  "support": "Hỗ trợ",
+  "settings": "Cài đặt",
+  "copied": "\u001dĐã sao chép",
+  "pleaseTryAgain": "Vui lòng thử lại"
+}
