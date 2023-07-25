@@ -123,7 +123,7 @@ import { getLocalEntity, syncEntities } from 'services/entityService';
 import { constructUserIDToEmailMap } from 'services/collectionService';
 import { getLocalFamilyData } from 'utils/user/family';
 import { addLogLine } from 'utils/logging';
-import { EntityType } from 'types/entity';
+import { EntityType, LocationTagData } from 'types/entity';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -583,8 +583,14 @@ export default function Gallery() {
             await syncHiddenFiles(hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
-            const entities = await getLocalEntity(EntityType.LOCATION_TAG);
+            const entities = await getLocalEntity<LocationTagData>(
+                EntityType.LOCATION_TAG
+            );
             addLogLine('Synced entities count', entities.length);
+            addLogLine(
+                'entities names',
+                entities.map((e) => e.data.name).join(',')
+            );
             await syncMapEnabled();
         } catch (e) {
             switch (e.message) {
