@@ -119,11 +119,9 @@ import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
 import { isArchivedFile } from 'utils/magicMetadata';
 import { isSameDayAnyYear, isInsideLocationTag } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
-import { getLocalEntity, syncEntities } from 'services/entityService';
+import { syncEntities } from 'services/entityService';
 import { constructUserIDToEmailMap } from 'services/collectionService';
 import { getLocalFamilyData } from 'utils/user/family';
-import { addLogLine } from 'utils/logging';
-import { EntityType, LocationTagData } from 'types/entity';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -583,10 +581,6 @@ export default function Gallery() {
             await syncHiddenFiles(hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
-            const entities = await getLocalEntity<LocationTagData>(
-                EntityType.LOCATION_TAG
-            );
-            addLogLine('Synced entities count', entities.length);
             await syncMapEnabled();
         } catch (e) {
             switch (e.message) {

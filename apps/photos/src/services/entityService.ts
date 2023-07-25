@@ -32,7 +32,7 @@ const ENTITY_SYNC_TIME_TABLES: Record<EntityType, string> = {
     [EntityType.LOCATION_TAG]: 'location_tags_time',
 };
 
-export const getLocalEntity = async <T>(type: EntityType) => {
+const getLocalEntity = async <T>(type: EntityType) => {
     const entities: Array<Entity<T>> =
         (await localForage.getItem<Entity<T>[]>(ENTITY_TABLES[type])) || [];
     return entities;
@@ -106,9 +106,9 @@ export const syncEntities = async () => {
     }
 };
 
-const syncEntity = async <T>(type: EntityType): Promise<void> => {
+const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
     try {
-        let entities = await getLocalEntity<T>(type);
+        let entities = await getLocalEntity(type);
         addLogLine(
             `Syncing ${type} entities localEntitiesCount: ${entities.length}`
         );
@@ -158,7 +158,7 @@ const syncEntity = async <T>(type: EntityType): Promise<void> => {
             await localForage.setItem(ENTITY_TABLES[type], nonDeletedEntities);
             await localForage.setItem(ENTITY_SYNC_TIME_TABLES[type], syncTime);
             addLogLine(
-                `Syncing ${type} entities nonDeletedEntitiesCount: ${nonDeletedEntities.length}`
+                `Syncing ${type} entities syncedEntitiesCount: ${nonDeletedEntities.length}`
             );
         } while (response.hasMore);
     } catch (e) {
