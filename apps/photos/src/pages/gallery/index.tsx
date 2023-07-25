@@ -587,10 +587,6 @@ export default function Gallery() {
                 EntityType.LOCATION_TAG
             );
             addLogLine('Synced entities count', entities.length);
-            addLogLine(
-                'entities names',
-                entities.map((e) => e.data.name).join(',')
-            );
             await syncMapEnabled();
         } catch (e) {
             switch (e.message) {

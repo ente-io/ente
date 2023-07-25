@@ -307,7 +307,7 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
     );
     if (matchedLocationTags.length > 0) {
         addLogLine(
-            `Found ${matchedLocationTags.length} location tags for search phrase ${searchPhrase}`
+            `Found ${matchedLocationTags.length} location tags for search phrase`
         );
     }
     return matchedLocationTags;
