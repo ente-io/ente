@@ -31,7 +31,7 @@ const ENTITY_SYNC_TIME_TABLES: Record<EntityType, string> = {
     [EntityType.LOCATION_TAG]: 'location_tags_time',
 };
 
-const getLocalEntity = async <T>(type: EntityType) => {
+export const getLocalEntity = async <T>(type: EntityType) => {
     const entities: Array<Entity<T>> =
         (await localForage.getItem<Entity<T>[]>(ENTITY_TABLES[type])) || [];
     return entities;
