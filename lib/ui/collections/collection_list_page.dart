@@ -45,9 +45,8 @@ class _CollectionListPageState extends State<CollectionListPage> {
     collections = widget.collections;
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) async {
-          refreshCollections();
-          });
-
+      refreshCollections();
+    });
   }
 
   @override
@@ -85,18 +84,21 @@ class _CollectionListPageState extends State<CollectionListPage> {
   }
 
   Future<void> refreshCollections() async {
-    if(widget.sectionType == UISectionType.incomingCollections || widget.sectionType == UISectionType.outgoingCollections) {
-      final SharedCollections sharedCollections = CollectionsService.instance
-          .getSharedCollections();
+    if (widget.sectionType == UISectionType.incomingCollections ||
+        widget.sectionType == UISectionType.outgoingCollections) {
+      final SharedCollections sharedCollections =
+          CollectionsService.instance.getSharedCollections();
       if (widget.sectionType == UISectionType.incomingCollections) {
-         collections = sharedCollections.incoming;
+        collections = sharedCollections.incoming;
       } else {
         collections = sharedCollections.outgoing;
       }
+    } else if (widget.sectionType == UISectionType.homeCollections) {
+      collections =
+          await CollectionsService.instance.getCollectionForOnEnteSection();
     }
-     // todo: fetch user_collections
-    setState(() {
-
-    });
+    if (mounted) {
+      setState(() {});
+    }
   }
 }
