@@ -17,7 +17,7 @@ enum UISectionType {
 class CollectionListPage extends StatefulWidget {
   final List<Collection>? collections;
   final Widget? appTitle;
-  final double? initalScrollOffset;
+  final double? initialScrollOffset;
   final String tag;
   final UISectionType sectionType;
 
@@ -25,7 +25,7 @@ class CollectionListPage extends StatefulWidget {
     this.collections, {
     required this.sectionType,
     this.appTitle,
-    this.initalScrollOffset,
+    this.initialScrollOffset,
     this.tag = "",
     Key? key,
   }) : super(key: key);
@@ -61,7 +61,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
       body: SafeArea(
         child: CustomScrollView(
           controller: ScrollController(
-            initialScrollOffset: widget.initalScrollOffset ?? 0,
+            initialScrollOffset: widget.initialScrollOffset ?? 0,
           ),
           slivers: [
             SliverAppBar(
