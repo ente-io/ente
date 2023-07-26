@@ -26,6 +26,7 @@ import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
+import "package:photos/models/collection_items.dart";
 import 'package:photos/models/file.dart';
 import "package:photos/models/metadata/collection_magic.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -315,6 +316,29 @@ class CollectionsService {
               allowedRoles.contains(c.getRole(userID)),
         )
         .toList();
+  }
+
+
+  SharedCollections getSharedCollections() {
+    final List<Collection> outgoing = [];
+    final List<Collection> incoming = [];
+    final List<Collection> quickLinks = [];
+    final List<Collection> collections = getCollectionsForUI(includedShared: true);
+    for (final c in collections) {
+      if (c.owner!.id == Configuration.instance.getUserID()) {
+        if (c.hasSharees || c.hasLink && !c.isSharedFilesCollection()) {
+          outgoing.add(c);
+        } else if (c.isSharedFilesCollection()) {
+          quickLinks.add(c);
+        }
+      } else {
+        incoming.add(c);
+      }
+    }
+    incoming.sort((first, second) {
+      return second.updationTime.compareTo(first.updationTime);
+    });
+    return SharedCollections(outgoing, incoming, quickLinks);
   }
 
   User getFileOwner(int userID, int? collectionID) {

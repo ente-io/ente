@@ -1,15 +1,29 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/collection_updated_event.dart";
 import "package:photos/models/collection.dart";
+import "package:photos/models/collection_items.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
 
-class CollectionListPage extends StatelessWidget {
+enum UISectionType {
+  incomingCollections,
+  outgoingCollections,
+  homeCollections,
+}
+
+class CollectionListPage extends StatefulWidget {
   final List<Collection>? collections;
   final Widget? appTitle;
   final double? initalScrollOffset;
   final String tag;
+  final UISectionType sectionType;
 
   const CollectionListPage(
     this.collections, {
+    this.sectionType = UISectionType.homeCollections,
     this.appTitle,
     this.initalScrollOffset,
     this.tag = "",
@@ -17,29 +31,72 @@ class CollectionListPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<CollectionListPage> createState() => _CollectionListPageState();
+}
+
+class _CollectionListPageState extends State<CollectionListPage> {
+  late StreamSubscription<CollectionUpdatedEvent>
+      _collectionUpdatesSubscription;
+  List<Collection>? collections;
+
+  @override
+  void initState() {
+    super.initState();
+    collections = widget.collections;
+    _collectionUpdatesSubscription =
+        Bus.instance.on<CollectionUpdatedEvent>().listen((event) async {
+          refreshCollections();
+          });
+
+  }
+
+  @override
+  void dispose() {
+    _collectionUpdatesSubscription.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
-          controller:
-              ScrollController(initialScrollOffset: initalScrollOffset ?? 0),
+          controller: ScrollController(
+            initialScrollOffset: widget.initalScrollOffset ?? 0,
+          ),
           slivers: [
             SliverAppBar(
               elevation: 0,
               title: Hero(
-                tag: tag,
-                child: appTitle ?? const SizedBox.shrink(),
+                tag: widget.tag,
+                child: widget.appTitle ?? const SizedBox.shrink(),
               ),
               floating: true,
             ),
             CollectionsFlexiGridViewWidget(
               collections,
               displayLimitCount: collections?.length ?? 0,
-              tag: tag,
+              tag: widget.tag,
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> refreshCollections() async {
+    if(widget.sectionType == UISectionType.incomingCollections || widget.sectionType == UISectionType.outgoingCollections) {
+      final SharedCollections sharedCollections = CollectionsService.instance
+          .getSharedCollections();
+      if (widget.sectionType == UISectionType.incomingCollections) {
+         collections = sharedCollections.incoming;
+      } else {
+        collections = sharedCollections.outgoing;
+      }
+    }
+     // todo: fetch user_collections
+    setState(() {
+
+    });
   }
 }
