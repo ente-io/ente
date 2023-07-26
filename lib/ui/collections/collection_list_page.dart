@@ -23,7 +23,7 @@ class CollectionListPage extends StatefulWidget {
 
   const CollectionListPage(
     this.collections, {
-    this.sectionType = UISectionType.homeCollections,
+    required this.sectionType,
     this.appTitle,
     this.initalScrollOffset,
     this.tag = "",

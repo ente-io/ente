@@ -151,6 +151,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                         context,
                         CollectionListPage(
                           collections,
+                          sectionType: UISectionType.homeCollections,
                           appTitle: SectionTitle(
                             titleWithBrand: getOnEnteSection(context),
                           ),
