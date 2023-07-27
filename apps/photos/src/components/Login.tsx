@@ -23,6 +23,7 @@ export default function Login(props: LoginProps) {
         setFieldError
     ) => {
         try {
+            setData(LS_KEYS.USER, { email });
             const srpAttributes = await getSRPAttributes(email);
             addLocalLog(
                 () => ` srpAttributes: ${JSON.stringify(srpAttributes)}`
@@ -30,7 +31,6 @@ export default function Login(props: LoginProps) {
             if (!srpAttributes) {
                 setUserSRPSetupPending(true);
                 await sendOtt(email);
-                setData(LS_KEYS.USER, { email });
                 router.push(PAGES.VERIFY);
             } else {
                 setUserSRPSetupPending(false);

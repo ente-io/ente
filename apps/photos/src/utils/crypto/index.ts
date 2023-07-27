@@ -119,7 +119,11 @@ export const saveKeyInSessionStore = async (
         key
     );
     setKey(keyType, sessionKeyAttributes);
-    if (isElectron() && !fromDesktop) {
+    if (
+        isElectron() &&
+        !fromDesktop &&
+        keyType === SESSION_KEYS.ENCRYPTION_KEY
+    ) {
         safeStorageService.setEncryptionKey(key);
     }
 };
