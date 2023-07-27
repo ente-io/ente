@@ -17,7 +17,7 @@
         "@emotion/cache": "^11.10.5",
         "@emotion/react": "^11.10.6",
         "@emotion/server": "^11.10.0",
-        "@emotion/styled": "^11.10.6",
+        "@emotion/styled": "^11.11.0",
         "@mui/icons-material": "^5.6.2",
         "@mui/material": "^5.6.2",
         "@mui/x-date-pickers": "^5.0.0-alpha.6",
