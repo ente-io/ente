@@ -2,7 +2,7 @@ import VerifyTwoFactor, {
     VerifyTwoFactorCallback,
 } from 'components/TwoFactor/VerifyForm';
 import router from 'next/router';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { logoutUser, verifyTwoFactor } from 'services/userService';
 import { PAGES } from 'constants/pages';
 import { User } from 'types/user';
@@ -14,8 +14,10 @@ import FormPaper from 'components/Form/FormPaper';
 import FormTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import { VerticallyCentered } from 'components/Container';
+import { AppContext } from 'pages/_app';
 
 export default function Home() {
+    const appContext = useContext(AppContext);
     const [sessionID, setSessionID] = useState('');
 
     useEffect(() => {
@@ -48,7 +50,9 @@ export default function Home() {
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
 
-            router.push(PAGES.CREDENTIALS);
+            const redirectURL = appContext.redirectURL;
+            appContext.setRedirectURL(null);
+            router.push(redirectURL ?? PAGES.CREDENTIALS);
         } catch (e) {
             if (e.status === 404) {
                 logoutUser();
