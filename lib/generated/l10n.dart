@@ -550,6 +550,16 @@ class S {
     );
   }
 
+  /// `To reset your password, please verify your email first.`
+  String get toResetVerifyEmail {
+    return Intl.message(
+      'To reset your password, please verify your email first.',
+      name: 'toResetVerifyEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Please check your inbox (and spam) to complete verification`
   String get checkInboxAndSpamFolder {
     return Intl.message(

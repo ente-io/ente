@@ -1239,6 +1239,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "time": MessageLookupByLibrary.simpleMessage("Time"),
         "toHideAPhotoOrVideo":
             MessageLookupByLibrary.simpleMessage("To hide a photo or video"),
+        "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
+            "To reset your password, please verify your email first."),
         "todaysLogs": MessageLookupByLibrary.simpleMessage("Today\'s logs"),
         "total": MessageLookupByLibrary.simpleMessage("total"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Total size"),

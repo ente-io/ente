@@ -90,7 +90,6 @@ class AlbumRowItemWidget extends StatelessWidget {
                         },
                       ),
                       if (isOwner && (c.hasSharees || c.hasLink))
-                        if (c.hasSharees)
                           Hero(
                             tag: tagPrefix + "_sharees",
                             transitionOnUserGestures: true,
