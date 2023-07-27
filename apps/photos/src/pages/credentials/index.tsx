@@ -133,7 +133,7 @@ export default function Credentials() {
             }
             const userSRPSetupPending = getUserSRPSetupPending();
             addLocalLog(() => `userSRPSetupPending ${userSRPSetupPending}`);
-            if (!srpAttributes) {
+            if (!userSRPSetupPending) {
                 const loginSubKey = await generateLoginSubKey(kek);
                 const srpSetupAttributes = await generateSRPSetupAttributes(
                     loginSubKey

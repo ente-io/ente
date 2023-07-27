@@ -66,7 +66,7 @@ export default function VerifyMasterPasswordForm({
                 keyAttributes = await getKeyAttributes(kek);
             }
             if (!keyAttributes) {
-                return;
+                throw Error("couldn't get key attributes");
             }
             try {
                 const key = await cryptoWorker.decryptB64(
