@@ -131,19 +131,18 @@ export default function Credentials() {
                     key
                 );
             }
+            await setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+            await decryptAndStoreToken(keyAttributes, key);
             const userSRPSetupPending = getUserSRPSetupPending();
             addLocalLog(() => `userSRPSetupPending ${userSRPSetupPending}`);
-            if (!userSRPSetupPending) {
+            if (userSRPSetupPending) {
                 const loginSubKey = await generateLoginSubKey(kek);
                 const srpSetupAttributes = await generateSRPSetupAttributes(
                     loginSubKey
                 );
                 await configureSRP(srpSetupAttributes);
             }
-
-            await setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
-            await decryptAndStoreToken(keyAttributes, key);
             const redirectURL = appContext.redirectURL;
             appContext.setRedirectURL(null);
             const appName = getAppName();
