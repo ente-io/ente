@@ -33,6 +33,7 @@ export default function Login(props: LoginProps) {
                 setData(LS_KEYS.USER, { email });
                 router.push(PAGES.VERIFY);
             } else {
+                setUserSRPSetupPending(false);
                 setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
                 router.push(PAGES.CREDENTIALS);
             }

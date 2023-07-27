@@ -134,14 +134,18 @@ export default function Credentials() {
             await setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
             await decryptAndStoreToken(keyAttributes, key);
-            const userSRPSetupPending = getUserSRPSetupPending();
-            addLocalLog(() => `userSRPSetupPending ${userSRPSetupPending}`);
-            if (userSRPSetupPending) {
-                const loginSubKey = await generateLoginSubKey(kek);
-                const srpSetupAttributes = await generateSRPSetupAttributes(
-                    loginSubKey
-                );
-                await configureSRP(srpSetupAttributes);
+            try {
+                const userSRPSetupPending = getUserSRPSetupPending();
+                addLocalLog(() => `userSRPSetupPending ${userSRPSetupPending}`);
+                if (userSRPSetupPending) {
+                    const loginSubKey = await generateLoginSubKey(kek);
+                    const srpSetupAttributes = await generateSRPSetupAttributes(
+                        loginSubKey
+                    );
+                    await configureSRP(srpSetupAttributes);
+                }
+            } catch (e) {
+                logError(e, 'migrate to srp failed');
             }
             const redirectURL = appContext.redirectURL;
             appContext.setRedirectURL(null);

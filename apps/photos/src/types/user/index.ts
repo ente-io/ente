@@ -53,7 +53,7 @@ export interface User {
     isTwoFactorEnabled: boolean;
     twoFactorSessionID: string;
 }
-export interface EmailVerificationResponse {
+export interface UserVerificationResponse {
     id: number;
     keyAttributes?: KeyAttributes;
     encryptedToken?: string;

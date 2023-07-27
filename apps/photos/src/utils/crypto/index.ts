@@ -12,6 +12,7 @@ import zxcvbn from 'zxcvbn';
 import { SRP, SrpClient } from 'fast-srp-hap';
 import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
 import { v4 as uuidv4 } from 'uuid';
+import { addLocalLog } from 'utils/logging';
 
 const SRP_PARAMS = SRP.params['4096'];
 
@@ -283,7 +284,6 @@ export const generateSRPSetupAttributes = async (
 
     const srpUserID = uuidv4();
 
-    // DOCS: var verifier = srp.computeVerifier(params, salt, identity, password);
     const srpVerifierBuffer = SRP.computeVerifier(
         SRP_PARAMS,
         convertBase64ToBuffer(srpSalt),
@@ -293,6 +293,16 @@ export const generateSRPSetupAttributes = async (
 
     const srpVerifier = convertBufferToBase64(srpVerifierBuffer);
 
+    addLocalLog(
+        () => `SRP setup attributes generated',
+        ${JSON.stringify({
+            srpSalt,
+            srpUserID,
+            srpVerifier,
+            loginSubKey,
+        })}`
+    );
+
     return {
         srpUserID,
         srpSalt,
@@ -301,6 +311,19 @@ export const generateSRPSetupAttributes = async (
     };
 };
 
+export const computeVerifierHelper = (
+    srpSalt: string,
+    srpUserID: string,
+    loginSubKey: string
+) => {
+    const srpVerifierBuffer = SRP.computeVerifier(
+        SRP_PARAMS,
+        convertBase64ToBuffer(srpSalt),
+        Buffer.from(srpUserID),
+        convertBase64ToBuffer(loginSubKey)
+    );
+    return convertBufferToBase64(srpVerifierBuffer);
+};
 export const generateSRPClient = async (
     srpSalt: string,
     srpUserID: string,

@@ -18,7 +18,7 @@ import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import {
     KeyAttributes,
-    EmailVerificationResponse,
+    UserVerificationResponse,
     User,
     SRPSetupAttributes,
 } from 'types/user';
@@ -75,7 +75,7 @@ export default function Verify() {
                 token,
                 id,
                 twoFactorSessionID,
-            } = resp.data as EmailVerificationResponse;
+            } = resp.data as UserVerificationResponse;
             if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, {
                     email,
