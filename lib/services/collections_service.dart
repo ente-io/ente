@@ -26,14 +26,17 @@ import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
+import "package:photos/models/collection_items.dart";
 import 'package:photos/models/file.dart';
 import "package:photos/models/metadata/collection_magic.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
+import "package:photos/services/favorites_service.dart";
 import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
+import "package:photos/utils/local_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectionsService {
@@ -315,6 +318,80 @@ class CollectionsService {
               allowedRoles.contains(c.getRole(userID)),
         )
         .toList();
+  }
+
+
+  SharedCollections getSharedCollections() {
+    final List<Collection> outgoing = [];
+    final List<Collection> incoming = [];
+    final List<Collection> quickLinks = [];
+    final List<Collection> collections = getCollectionsForUI(includedShared: true);
+    for (final c in collections) {
+      if (c.owner!.id == Configuration.instance.getUserID()) {
+        if (c.hasSharees || c.hasLink && !c.isSharedFilesCollection()) {
+          outgoing.add(c);
+        } else if (c.isSharedFilesCollection()) {
+          quickLinks.add(c);
+        }
+      } else {
+        incoming.add(c);
+      }
+    }
+    incoming.sort((first, second) {
+      return second.updationTime.compareTo(first.updationTime);
+    });
+    return SharedCollections(outgoing, incoming, quickLinks);
+  }
+
+  Future<List<Collection>> getCollectionForOnEnteSection() async {
+    final AlbumSortKey sortKey = LocalSettings.instance.albumSortKey();
+    final List<Collection> collections =
+    CollectionsService.instance.getCollectionsForUI();
+    final bool hasFavorites = FavoritesService.instance.hasFavorites();
+    late Map<int, int> collectionIDToNewestPhotoTime;
+    if (sortKey == AlbumSortKey.newestPhoto) {
+      collectionIDToNewestPhotoTime =
+      await CollectionsService.instance.getCollectionIDToNewestFileTime();
+    }
+    collections.sort(
+          (first, second) {
+        if (sortKey == AlbumSortKey.albumName) {
+          return compareAsciiLowerCaseNatural(
+            first.displayName,
+            second.displayName,
+          );
+        } else if (sortKey == AlbumSortKey.newestPhoto) {
+          return (collectionIDToNewestPhotoTime[second.id] ?? -1 * intMaxValue)
+              .compareTo(
+            collectionIDToNewestPhotoTime[first.id] ?? -1 * intMaxValue,
+          );
+        } else {
+          return second.updationTime.compareTo(first.updationTime);
+        }
+      },
+    );
+    final List<Collection> favorites = [];
+    final List<Collection> pinned = [];
+    final List<Collection> rest = [];
+    for (final collection in collections) {
+      if (collection.type == CollectionType.uncategorized ||
+          collection.isSharedFilesCollection() ||
+          collection.isHidden()) {
+        continue;
+      }
+      if (collection.type == CollectionType.favorites) {
+        // Hide fav collection if it's empty
+        if (hasFavorites) {
+          favorites.add(collection);
+        }
+      } else if (collection.isPinned) {
+        pinned.add(collection);
+      } else {
+        rest.add(collection);
+      }
+    }
+
+    return favorites + pinned + rest;
   }
 
   User getFileOwner(int userID, int? collectionID) {

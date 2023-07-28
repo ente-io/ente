@@ -74,7 +74,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     super.build(context);
     _logger.info("Building, trigger: $_loadReason");
     return FutureBuilder<List<Collection>>(
-      future: _getCollections(),
+      future: CollectionsService.instance.getCollectionForOnEnteSection(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return _getCollectionsGalleryWidget(snapshot.data!);
@@ -85,56 +85,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
         }
       },
     );
-  }
-
-  Future<List<Collection>> _getCollections() async {
-    final List<Collection> collections =
-        CollectionsService.instance.getCollectionsForUI();
-    final bool hasFavorites = FavoritesService.instance.hasFavorites();
-    late Map<int, int> collectionIDToNewestPhotoTime;
-    if (sortKey == AlbumSortKey.newestPhoto) {
-      collectionIDToNewestPhotoTime =
-          await CollectionsService.instance.getCollectionIDToNewestFileTime();
-    }
-    collections.sort(
-      (first, second) {
-        if (sortKey == AlbumSortKey.albumName) {
-          return compareAsciiLowerCaseNatural(
-            first.displayName,
-            second.displayName,
-          );
-        } else if (sortKey == AlbumSortKey.newestPhoto) {
-          return (collectionIDToNewestPhotoTime[second.id] ?? -1 * intMaxValue)
-              .compareTo(
-            collectionIDToNewestPhotoTime[first.id] ?? -1 * intMaxValue,
-          );
-        } else {
-          return second.updationTime.compareTo(first.updationTime);
-        }
-      },
-    );
-    final List<Collection> favorites = [];
-    final List<Collection> pinned = [];
-    final List<Collection> rest = [];
-    for (final collection in collections) {
-      if (collection.type == CollectionType.uncategorized ||
-          collection.isSharedFilesCollection() ||
-          collection.isHidden()) {
-        continue;
-      }
-      if (collection.type == CollectionType.favorites) {
-        // Hide fav collection if it's empty
-        if (hasFavorites) {
-          favorites.add(collection);
-        }
-      } else if (collection.isPinned) {
-        pinned.add(collection);
-      } else {
-        rest.add(collection);
-      }
-    }
-
-    return favorites + pinned + rest;
   }
 
   Widget _getCollectionsGalleryWidget(List<Collection> collections) {
@@ -201,10 +151,11 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                         context,
                         CollectionListPage(
                           collections,
+                          sectionType: UISectionType.homeCollections,
                           appTitle: SectionTitle(
                             titleWithBrand: getOnEnteSection(context),
                           ),
-                          initalScrollOffset: _scrollController.offset,
+                          initialScrollOffset: _scrollController.offset,
                         ),
                       ),
                     );
@@ -294,7 +245,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               );
               if (selectedValue != null) {
                 sortKey = AlbumSortKey.values[selectedValue];
-                ;
                 await LocalSettings.instance.setAlbumSortKey(sortKey!);
                 setState(() {});
               }

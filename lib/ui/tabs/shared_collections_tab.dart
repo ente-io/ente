@@ -41,6 +41,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
 
   @override
   void initState() {
+    super.initState();
     _localFilesSubscription =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       debugPrint("SetState Shared Collections on ${event.reason}");
@@ -48,20 +49,19 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     });
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
-      debugPrint("SetState Shared Collections on ${event.reason}");
       setState(() {});
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
     });
-    super.initState();
+
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return FutureBuilder<SharedCollections>(
-      future: Future.value(_getSharedCollections()),
+      future: Future.value(CollectionsService.instance.getSharedCollections()),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if ((snapshot.data?.incoming.length ?? 0) == 0 &&
@@ -113,6 +113,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                                   context,
                                   CollectionListPage(
                                     collections.incoming,
+                                    sectionType: UISectionType.incomingCollections,
                                     tag: "incoming",
                                     appTitle: sharedWithYou,
                                   ),
@@ -165,6 +166,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                                   context,
                                   CollectionListPage(
                                     collections.outgoing,
+                                    sectionType: UISectionType.outgoingCollections,
                                     tag: "outgoing",
                                     appTitle: sharedByYou,
                                   ),
@@ -253,29 +255,6 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         ),
       ),
     );
-  }
-
-  SharedCollections _getSharedCollections() {
-    final List<Collection> outgoing = [];
-    final List<Collection> incoming = [];
-    final List<Collection> quickLinks = [];
-    final List<Collection> collections =
-        CollectionsService.instance.getCollectionsForUI(includedShared: true);
-    for (final c in collections) {
-      if (c.owner!.id == Configuration.instance.getUserID()) {
-        if (c.hasSharees || c.hasLink && !c.isSharedFilesCollection()) {
-          outgoing.add(c);
-        } else if (c.isSharedFilesCollection()) {
-          quickLinks.add(c);
-        }
-      } else {
-        incoming.add(c);
-      }
-    }
-    incoming.sort((first, second) {
-      return second.updationTime.compareTo(first.updationTime);
-    });
-    return SharedCollections(outgoing, incoming, quickLinks);
   }
 
   @override
