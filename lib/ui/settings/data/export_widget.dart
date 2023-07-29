@@ -20,7 +20,7 @@ Future<void> handleExportClick(BuildContext context) async {
     body: "Encrypted exports will be protected by a password of your choice.",
     buttons: [
       ButtonWidget(
-        buttonType: ButtonType.neutral,
+        buttonType: ButtonType.primary,
         labelText: "Encrypted",
         isInAlert: true,
         buttonSize: ButtonSize.large,
@@ -31,19 +31,13 @@ Future<void> handleExportClick(BuildContext context) async {
         // shouldShowSuccessConfirmation: true,
       ),
       const ButtonWidget(
-        buttonType: ButtonType.neutral,
+        buttonType: ButtonType.secondary,
         labelText: "Plain text",
         buttonSize: ButtonSize.large,
         isInAlert: true,
         buttonAction: ButtonAction.second,
       ),
-      ButtonWidget(
-        buttonSize: ButtonSize.large,
-        buttonType: ButtonType.secondary,
-        labelText: context.l10n.cancel,
-        isInAlert: true,
-        buttonAction: ButtonAction.cancel,
-      ),
+
     ],
   );
   if (result?.action != null && result!.action != ButtonAction.cancel) {
