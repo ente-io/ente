@@ -159,12 +159,12 @@
     "@emotion/utils" "^1.2.1"
     csstype "^3.0.2"
 
-"@emotion/server@^11.10.0":
-  version "11.10.0"
-  resolved "https://registry.npmjs.org/@emotion/server/-/server-11.10.0.tgz"
-  integrity sha512-MTvJ21JPo9aS02GdjFW4nhdwOi2tNNpMmAM/YED0pkxzjDNi5WbiTwXqaCnvLc2Lr8NFtjhT0az1vTJyLIHYcw==
+"@emotion/server@^11.11.0":
+  version "11.11.0"
+  resolved "https://registry.yarnpkg.com/@emotion/server/-/server-11.11.0.tgz#35537176a2a5ed8aed7801f254828e636ec3bd6e"
+  integrity sha512-6q89fj2z8VBTx9w93kJ5n51hsmtYuFPtZgnc1L8VzRx9ti4EU6EyvF6Nn1H1x3vcCQCF7u2dB2lY4AYJwUW4PA==
   dependencies:
-    "@emotion/utils" "^1.2.0"
+    "@emotion/utils" "^1.2.1"
     html-tokenize "^2.0.0"
     multipipe "^1.0.2"
     through "^2.3.8"
