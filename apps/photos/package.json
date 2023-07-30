@@ -51,7 +51,7 @@
         "i18next-http-backend": "^2.1.1",
         "idb": "^7.1.1",
         "is-electron": "^2.2.0",
-        "jszip": "3.8.0",
+        "jszip": "3.10.1",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.1",
         "libsodium-wrappers": "^0.7.8",
