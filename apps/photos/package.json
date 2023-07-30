@@ -91,7 +91,7 @@
     },
     "devDependencies": {
         "@ente/eslint-config": "*",
-        "@next/bundle-analyzer": "^13.1.6",
+        "@next/bundle-analyzer": "^13.4.12",
         "@types/bs58": "^4.0.1",
         "@types/debounce-promise": "^3.1.3",
         "@types/leaflet": "^1.9.3",
