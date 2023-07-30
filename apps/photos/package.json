@@ -49,7 +49,7 @@
         "heic-convert": "^1.2.4",
         "i18next": "^22.4.11",
         "i18next-http-backend": "^2.1.1",
-        "idb": "^7.0.0",
+        "idb": "^7.1.1",
         "is-electron": "^2.2.0",
         "jszip": "3.8.0",
         "leaflet": "^1.9.4",
