@@ -49,7 +49,6 @@ export default function Home() {
                 id,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-
             const redirectURL = appContext.redirectURL;
             appContext.setRedirectURL(null);
             router.push(redirectURL ?? PAGES.CREDENTIALS);
