@@ -25,7 +25,7 @@
         "@stripe/stripe-js": "^1.13.2",
         "@tensorflow-models/coco-ssd": "^2.2.2",
         "@tensorflow/tfjs-backend-cpu": "^3.13.0",
-        "@tensorflow/tfjs-backend-webgl": "^4.8.0",
+        "@tensorflow/tfjs-backend-webgl": "^4.9.0",
         "@tensorflow/tfjs-converter": "^3.11.0",
         "@tensorflow/tfjs-core": "^3.11.0",
         "@tensorflow/tfjs-tflite": "^0.0.1-alpha.7",
