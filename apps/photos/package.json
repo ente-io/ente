@@ -34,7 +34,7 @@
         "bip39": "^3.0.4",
         "blazeface-back": "^0.0.9",
         "bootstrap": "^4.5.2",
-        "bs58": "^4.0.1",
+        "bs58": "^5.0.0",
         "chrono-node": "^2.2.6",
         "comlink": "^4.3.0",
         "debounce-promise": "^3.1.2",
