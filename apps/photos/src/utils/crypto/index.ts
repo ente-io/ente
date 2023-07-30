@@ -19,6 +19,7 @@ const SRP_PARAMS = SRP.params['4096'];
 const LOGIN_SUB_KEY_LENGTH = 32;
 const LOGIN_SUB_KEY_ID = 1;
 const LOGIN_SUB_KEY_CONTEXT = 'loginctx';
+const LOGIN_SUB_KEY_SUBSTRING_LENGTH = 16;
 
 export async function generateKeyAndSRPAttributes(passphrase: string): Promise<{
     keyAttributes: KeyAttributes;
@@ -276,7 +277,7 @@ export const generateLoginSubKey = async (kek: string) => {
         LOGIN_SUB_KEY_ID,
         LOGIN_SUB_KEY_CONTEXT
     );
-    return loginSubKey;
+    return loginSubKey.substring(0, LOGIN_SUB_KEY_SUBSTRING_LENGTH);
 };
 
 export const generateSRPSetupAttributes = async (
