@@ -69,7 +69,7 @@
         "react-datepicker": "^4.3.0",
         "react-dom": "^18.2.0",
         "react-dropzone": "^11.2.4",
-        "react-i18next": "^12.2.0",
+        "react-i18next": "^13.0.2",
         "react-otp-input": "^2.3.1",
         "react-select": "^4.3.1",
         "react-simple-code-editor": "^0.11.0",
