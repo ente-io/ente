@@ -53,6 +53,12 @@ export default function Credentials() {
     useEffect(() => {
         router.prefetch(PAGES.GALLERY);
         const main = async () => {
+            const user: User = getData(LS_KEYS.USER);
+            if (!user?.email) {
+                router.push(PAGES.ROOT);
+                return;
+            }
+            setUser(user);
             let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
             if (!key && isElectron()) {
                 key = await safeStorageService.getEncryptionKey();
@@ -89,13 +95,6 @@ export default function Credentials() {
                 return;
             }
 
-            const user: User = getData(LS_KEYS.USER);
-
-            if (!user?.email) {
-                router.push(PAGES.ROOT);
-                return;
-            }
-            setUser(user);
             const srpAttributes: SRPAttributes = getData(
                 LS_KEYS.SRP_ATTRIBUTES
             );
@@ -104,13 +103,10 @@ export default function Credentials() {
                 return;
             }
 
-            if (!user?.token && !user?.encryptedToken) {
-                clearData();
-                router.push(PAGES.ROOT);
-                return;
-            }
-
-            if (keyAttributes && !keyAttributes.memLimit) {
+            if (
+                (!user?.token && !user?.encryptedToken) ||
+                (keyAttributes && !keyAttributes.memLimit)
+            ) {
                 clearData();
                 router.push(PAGES.ROOT);
                 return;
@@ -120,7 +116,6 @@ export default function Credentials() {
                 router.push(PAGES.GENERATE);
                 return;
             }
-
             setKeyAttributes(keyAttributes);
         };
         main();
