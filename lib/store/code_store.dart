@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/models/authenticator/entity_result.dart';
@@ -33,11 +34,11 @@ class CodeStore {
 
     // sort codes by issuer,account
     codes.sort((a, b) {
-      final issuerComparison = a.issuer.compareTo(b.issuer);
+      final issuerComparison = compareAsciiLowerCaseNatural(a.issuer, b.issuer);
       if (issuerComparison != 0) {
         return issuerComparison;
       }
-      return a.account.compareTo(b.account);
+      return compareAsciiLowerCaseNatural(a.account, b.account);
     });
     return codes;
   }
