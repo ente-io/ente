@@ -310,26 +310,29 @@ Future<dynamic> showTextInputDialog(
     builder: (context) {
       final bottomInset = MediaQuery.of(context).viewInsets.bottom;
       final isKeyboardUp = bottomInset > 100;
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.only(bottom: isKeyboardUp ? bottomInset : 0),
-          child: TextInputDialog(
-            title: title,
-            message: message,
-            label: label,
-            body: body,
-            icon: icon,
-            submitButtonLabel: submitButtonLabel,
-            onSubmit: onSubmit,
-            hintText: hintText,
-            prefixIcon: prefixIcon,
-            initialValue: initialValue,
-            alignMessage: alignMessage,
-            maxLength: maxLength,
-            showOnlyLoadingState: showOnlyLoadingState,
-            textCapitalization: textCapitalization,
-            alwaysShowSuccessState: alwaysShowSuccessState,
-            isPasswordInput: isPasswordInput,
+      return Material(
+        color: Colors.transparent,
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: isKeyboardUp ? bottomInset : 0),
+            child: TextInputDialog(
+              title: title,
+              message: message,
+              label: label,
+              body: body,
+              icon: icon,
+              submitButtonLabel: submitButtonLabel,
+              onSubmit: onSubmit,
+              hintText: hintText,
+              prefixIcon: prefixIcon,
+              initialValue: initialValue,
+              alignMessage: alignMessage,
+              maxLength: maxLength,
+              showOnlyLoadingState: showOnlyLoadingState,
+              textCapitalization: textCapitalization,
+              alwaysShowSuccessState: alwaysShowSuccessState,
+              isPasswordInput: isPasswordInput,
+            ),
           ),
         ),
       );
