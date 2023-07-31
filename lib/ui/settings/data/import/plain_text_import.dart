@@ -103,8 +103,8 @@ Future<void> _pickImportFile(BuildContext context) async {
   if (result == null) {
     return;
   }
-  final dialog = createProgressDialog(context, l10n.pleaseWait);
-  await dialog.show();
+  final progressDialog = createProgressDialog(context, l10n.pleaseWait);
+  await progressDialog.show();
   try {
     File file = File(result.files.single.path!);
     final codes = await file.readAsString();
@@ -124,14 +124,14 @@ Future<void> _pickImportFile(BuildContext context) async {
       await CodeStore.instance.addCode(code, shouldSync: false);
     }
     unawaited(AuthenticatorService.instance.sync());
-
+    await progressDialog.hide();
     final DialogWidget dialog = choiceDialog(
       title: context.l10n.importSuccessTitle,
       body: context.l10n.importSuccessDesc(parsedCodes.length),
       // body: "You have imported " + parsedCodes.length.toString() + " codes!",
       firstButtonLabel: l10n.ok,
       firstButtonOnTap: () async {
-        Navigator.of(context, rootNavigator: true).pop('dialog');
+        Navigator.of(context, rootNavigator: true).pop('progressDialog');
       },
       firstButtonType: ButtonType.primary,
     );
@@ -142,7 +142,7 @@ Future<void> _pickImportFile(BuildContext context) async {
       },
     );
   } catch (e) {
-    await dialog.hide();
+    await progressDialog.hide();
     await showErrorDialog(
       context,
       context.l10n.sorry,
