@@ -21,7 +21,7 @@ Future<void> showRaivoImportInstruction(BuildContext context) async {
     title: l10n.importFromApp("Raivo OTP"),
     body: l10n.importRaivoGuide,
     buttons: [
-       ButtonWidget(
+      ButtonWidget(
         buttonType: ButtonType.primary,
         labelText: l10n.importSelectJsonFile,
         isInAlert: true,
