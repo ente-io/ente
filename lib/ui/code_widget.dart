@@ -87,120 +87,117 @@ class _CodeWidgetState extends State<CodeWidget> {
             ),
           ],
         ),
-        child: Container(
-          margin: const EdgeInsets.only(right: 10),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              color: Theme.of(context).colorScheme.codeCardBackgroundColor,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  customBorder: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  onTap: () {
-                    _copyToClipboard();
-                  },
-                  onLongPress: () {
-                    _copyToClipboard();
-                  },
-                  child: SizedBox(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CodeTimerProgress(
-                          period: widget.code.period,
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 16, right: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    safeDecode(widget.code.issuer).trim(),
-                                    style:
-                                        Theme.of(context).textTheme.headline6,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            color: Theme.of(context).colorScheme.codeCardBackgroundColor,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                customBorder: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                onTap: () {
+                  _copyToClipboard();
+                },
+                onLongPress: () {
+                  _copyToClipboard();
+                },
+                child: SizedBox(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CodeTimerProgress(
+                        period: widget.code.period,
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16, right: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  safeDecode(widget.code.issuer).trim(),
+                                  style:
+                                      Theme.of(context).textTheme.headline6,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  safeDecode(widget.code.account).trim(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .caption
+                                      ?.copyWith(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            widget.code.hasSynced != null &&
+                                    widget.code.hasSynced!
+                                ? Container()
+                                : const Icon(
+                                    Icons.sync_disabled,
+                                    size: 20,
+                                    color: Colors.amber,
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    safeDecode(widget.code.account).trim(),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        ?.copyWith(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                        ),
-                                  ),
-                                ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.only(left: 16, right: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: ValueListenableBuilder<String>(
+                                valueListenable: _currentCode,
+                                builder: (context, value, child) {
+                                  return Text(
+                                    value,
+                                    style: const TextStyle(fontSize: 24),
+                                  );
+                                },
                               ),
-                              widget.code.hasSynced != null &&
-                                      widget.code.hasSynced!
-                                  ? Container()
-                                  : const Icon(
-                                      Icons.sync_disabled,
-                                      size: 20,
-                                      color: Colors.amber,
-                                    ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.only(left: 16, right: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Expanded(
-                                child: ValueListenableBuilder<String>(
-                                  valueListenable: _currentCode,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  l10n.nextTotpTitle,
+                                  style: Theme.of(context).textTheme.caption,
+                                ),
+                                ValueListenableBuilder<String>(
+                                  valueListenable: _nextCode,
                                   builder: (context, value, child) {
                                     return Text(
                                       value,
-                                      style: const TextStyle(fontSize: 24),
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.grey,
+                                      ),
                                     );
                                   },
                                 ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    l10n.nextTotpTitle,
-                                    style: Theme.of(context).textTheme.caption,
-                                  ),
-                                  ValueListenableBuilder<String>(
-                                    valueListenable: _nextCode,
-                                    builder: (context, value, child) {
-                                      return Text(
-                                        value,
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          color: Colors.grey,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
+                          ],
                         ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                    ],
                   ),
                 ),
               ),
