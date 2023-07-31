@@ -91,6 +91,7 @@ class _DetailPageState extends State<DetailPage> {
   @override
   void dispose() {
     _pageController.dispose();
+    _enableFullScreenNotifier.dispose();
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
