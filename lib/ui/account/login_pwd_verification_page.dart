@@ -1,48 +1,40 @@
-import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/core/errors.dart';
-import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/services/user_service.dart';
-import 'package:ente_auth/ui/account/recovery_page.dart';
+import "package:ente_auth/l10n/l10n.dart";
+import "package:ente_auth/models/api/user/srp.dart";
+import "package:ente_auth/services/user_service.dart";
+import "package:ente_auth/theme/ente_theme.dart";
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
-import 'package:ente_auth/ui/components/buttons/button_widget.dart';
-import 'package:ente_auth/ui/home_page.dart';
-import 'package:ente_auth/utils/crypto_util.dart';
-import 'package:ente_auth/utils/dialog_util.dart';
-import 'package:ente_auth/utils/email_util.dart';
+import "package:ente_auth/utils/dialog_util.dart";
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
+import "package:logging/logging.dart";
 
-class PasswordReentryPage extends StatefulWidget {
-  const PasswordReentryPage({Key? key}) : super(key: key);
+// LoginPasswordVerificationPage is a page that allows the user to enter their password to verify their identity.
+// If the password is correct, then the user is either directed to
+// PasswordReentryPage (if the user has not yet set up 2FA) or TwoFactorAuthenticationPage (if the user has set up 2FA).
+// In the PasswordReentryPage, the password is auto-filled based on the
+// volatile password.
+class LoginPasswordVerificationPage extends StatefulWidget {
+  final SrpAttributes srpAttributes;
+  const LoginPasswordVerificationPage({Key? key, required this.srpAttributes}) : super(key: key);
 
   @override
-  State<PasswordReentryPage> createState() => _PasswordReentryPageState();
+  State<LoginPasswordVerificationPage> createState() => _LoginPasswordVerificationPageState();
 }
 
-class _PasswordReentryPageState extends State<PasswordReentryPage> {
-  final _logger = Logger((_PasswordReentryPageState).toString());
+class _LoginPasswordVerificationPageState extends
+State<LoginPasswordVerificationPage> {
+  final _logger = Logger((_LoginPasswordVerificationPageState).toString());
   final _passwordController = TextEditingController();
   final FocusNode _passwordFocusNode = FocusNode();
   String? email;
   bool _passwordInFocus = false;
   bool _passwordVisible = false;
-  String? _volatilePassword;
 
   @override
   void initState() {
     super.initState();
     email = Configuration.instance.getEmail();
-    _volatilePassword = Configuration.instance.getVolatilePassword();
-    if (_volatilePassword != null) {
-      _passwordController.text = _volatilePassword!;
-      Future.delayed(
-        Duration.zero,
-            () => verifyPassword(_volatilePassword!),
-      );
-    }
     _passwordFocusNode.addListener(() {
       setState(() {
         _passwordInFocus = _passwordFocusNode.hasFocus;
@@ -79,99 +71,17 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         key: const ValueKey("verifyPasswordButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
-        buttonText: context.l10n.verifyPassword,
+        buttonText: context.l10n.logInLabel,
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
-          await verifyPassword(_passwordController.text);
+          await UserService.instance.verifyEmailViaPassword(context, widget
+              .srpAttributes,
+              _passwordController.text,);
         },
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
     );
-  }
-
-  Future<void> verifyPassword(String password) async {
-    FocusScope.of(context).unfocus();
-    final dialog =
-    createProgressDialog(context, context.l10n.pleaseWait);
-    await dialog.show();
-    try {
-      final kek = await Configuration.instance.decryptSecretsAndGetKeyEncKey(
-        password,
-        Configuration.instance.getKeyAttributes()!,
-      );
-      _registerSRPForExistingUsers(kek).ignore();
-    } on KeyDerivationError catch (e, s) {
-      _logger.severe("Password verification failed", e, s);
-      await dialog.hide();
-      final dialogChoice = await showChoiceDialog(
-        context,
-        title: context.l10n.recreatePasswordTitle,
-        body: context.l10n.recreatePasswordBody,
-        firstButtonLabel: context.l10n.useRecoveryKey,
-      );
-      if (dialogChoice!.action == ButtonAction.first) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const RecoveryPage();
-            },
-          ),
-        );
-      }
-      return;
-    } catch (e, s) {
-      _logger.severe("Password verification failed", e, s);
-      await dialog.hide();
-      final dialogChoice = await showChoiceDialog(
-        context,
-        title: context.l10n.incorrectPasswordTitle,
-        body: context.l10n.pleaseTryAgain,
-        firstButtonLabel: context.l10n.contactSupport,
-        secondButtonLabel: context.l10n.ok,
-      );
-      if (dialogChoice!.action == ButtonAction.first) {
-        await sendLogs(
-          context,
-          context.l10n.contactSupport,
-          "support@ente.io",
-          postShare: () {},
-        );
-      }
-      return;
-    }
-    await dialog.hide();
-    Configuration.instance.setVolatilePassword(null);
-    unawaited(
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (BuildContext context) {
-            return const HomePage();
-          },
-        ),
-            (route) => false,
-      ),
-    );
-  }
-
-  Future<void> _registerSRPForExistingUsers(Uint8List key) async {
-    bool shouldSetupSRP = false;
-    try {
-      // ignore: unused_local_variable
-      final attr = await UserService.instance.getSrpAttributes(email!);
-    } on SrpSetupNotCompleteError {
-      shouldSetupSRP = true;
-    } catch (e, s) {
-      _logger.severe("error while fetching attr", e, s);
-    }
-    if (shouldSetupSRP) {
-      try {
-        final Uint8List loginKey = await CryptoUtil.deriveLoginKey(key);
-        await UserService.instance.registerOrUpdateSrp(loginKey);
-      } catch (e, s) {
-        _logger.severe("error while setting up srp for existing users", e, s);
-      }
-    }
   }
 
   Widget _getBody() {
@@ -183,11 +93,16 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
               children: [
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                  const EdgeInsets.only(top: 30, left: 20, right: 20),
                   child: Text(
-                    context.l10n.welcomeBack,
+                    context.l10n.enterPassword,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 30, left: 22, right:
+                  20,),
+                  child: Text(email ?? '', style: getEnteTextTheme(context).smallMuted,),
                 ),
                 Visibility(
                   // hidden textForm for suggesting auto-fill service for saving
@@ -260,14 +175,10 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                     children: [
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (BuildContext context) {
-                                return const RecoveryPage();
-                              },
-                            ),
-                          );
+                        onTap: () async {
+                          await UserService.instance
+                              .sendOtt(context, email!,
+                              isResetPasswordScreen: true,);
                         },
                         child: Center(
                           child: Text(

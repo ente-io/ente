@@ -277,5 +277,18 @@
   "thisWillLogYouOutOfTheFollowingDevice": "This will log you out of the following device:",
   "terminateSession": "Terminate session?",
   "terminate": "Terminate",
-  "thisDevice": "This device"
+  "thisDevice": "This device",
+  "toResetVerifyEmail": "To reset your password, please verify your email first.",
+  "thisEmailIsAlreadyInUse": "This email is already in use",
+  "verificationFailedPleaseTryAgain": "Verification failed, please try again",
+  "yourVerificationCodeHasExpired": "Your verification code has expired",
+  "incorrectCode": "Incorrect code",
+  "sorryTheCodeYouveEnteredIsIncorrect": "Sorry, the code you've entered is incorrect",
+  "emailChangedTo": "Email changed to {newEmail}",
+  "authenticationFailedPleaseTryAgain": "Authentication failed, please try again",
+  "authenticationSuccessful": "Authentication successful!",
+  "twofactorAuthenticationSuccessfullyReset": "Two-factor authentication successfully reset",
+  "incorrectRecoveryKey": "Incorrect recovery key",
+  "theRecoveryKeyYouEnteredIsIncorrect": "The recovery key you entered is incorrect",
+  "enterPassword": "Enter password"
 }

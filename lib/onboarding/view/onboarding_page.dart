@@ -163,7 +163,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = const PasswordEntryPage();
+        page = const PasswordEntryPage(mode: PasswordEntryMode.set,);
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
         page = const PasswordReentryPage();
@@ -189,7 +189,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = const PasswordEntryPage();
+        page = const PasswordEntryPage(mode: PasswordEntryMode.set,);
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
         page = const PasswordReentryPage();

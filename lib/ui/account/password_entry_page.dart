@@ -1,5 +1,6 @@
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/models/key_gen_result.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
@@ -23,7 +24,7 @@ enum PasswordEntryMode {
 class PasswordEntryPage extends StatefulWidget {
   final PasswordEntryMode mode;
 
-  const PasswordEntryPage({this.mode = PasswordEntryMode.set, Key? key})
+  const PasswordEntryPage({required this.mode, Key? key})
       : super(key: key);
 
   @override
@@ -377,9 +378,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         createProgressDialog(context, context.l10n.generatingEncryptionKeys);
     await dialog.show();
     try {
-      final keyAttributes = await Configuration.instance
-          .updatePassword(_passwordController1.text);
-      await UserService.instance.updateKeyAttributes(keyAttributes);
+      final result = await Configuration.instance
+          .getAttributesForNewPassword(_passwordController1.text);
+      await UserService.instance.updateKeyAttributes(result.item1, result.item2);
       await dialog.hide();
       showShortToast(context, context.l10n.passwordChangedSuccessfully);
       Navigator.of(context).pop();
@@ -399,7 +400,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         createProgressDialog(context, l10n.generatingEncryptionKeysTitle);
     await dialog.show();
     try {
-      final result = await Configuration.instance.generateKey(password);
+      final KeyGenResult result = await Configuration.instance.generateKey(password);
       Configuration.instance.setVolatilePassword(null);
       await dialog.hide();
       onDone() async {
@@ -408,6 +409,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         try {
           await UserService.instance.setAttributes(result);
           await dialog.hide();
+          Configuration.instance.setVolatilePassword(null);
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (BuildContext context) {

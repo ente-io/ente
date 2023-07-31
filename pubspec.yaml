@@ -12,7 +12,8 @@ dependencies:
   bloc: ^8.0.3 #done
   clipboard: ^0.1.3
   collection: # dart
-  computer: ^2.0.0
+  computer:
+    git: "https://github.com/ente-io/computer.git"
   confetti: ^0.7.0
   connectivity: ^3.0.3
   cupertino_icons: ^1.0.0
@@ -56,6 +57,7 @@ dependencies:
   password_strength: ^0.2.0
   path_provider: ^2.0.11
   pinput: ^1.2.2
+  pointycastle: ^3.7.3
   qr_code_scanner: ^1.0.1
   sentry: ^6.12.1
   sentry_flutter: ^6.12.1
@@ -64,6 +66,7 @@ dependencies:
   sqflite: ^2.1.0
   step_progress_indicator: ^1.0.2
   styled_text: ^7.0.0
+  tuple: ^2.0.0
   uni_links: ^0.5.1
   url_launcher: ^6.1.5
   uuid: ^3.0.4

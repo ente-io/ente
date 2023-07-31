@@ -217,7 +217,7 @@ class AuthenticatorService {
       final AuthKey response = await _gateway.getKey();
       final authKey = CryptoUtil.decryptSync(
         Sodium.base642bin(response.encryptedKey),
-        _config.getKey(),
+        _config.getKey()!,
         Sodium.base642bin(response.header),
       );
       await _config.setAuthSecretKey(Sodium.bin2base64(authKey));

@@ -49,3 +49,4 @@ analyzer:
 
   exclude:
     - thirdparty/**
+    - flutter/**
