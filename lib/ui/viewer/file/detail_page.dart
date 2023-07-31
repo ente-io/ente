@@ -145,35 +145,34 @@ class _DetailPageState extends State<DetailPage> {
     return PageView.builder(
       itemBuilder: (context, index) {
         final file = _files![index];
-        final Widget content = FileWidget(
-          file,
-          autoPlay: !_hasPageChanged,
-          tagPrefix: widget.config.tagPrefix,
-          shouldDisableScroll: (value) {
-            if (_shouldDisableScroll != value) {
-              setState(() {
-                _shouldDisableScroll = value;
-              });
-            }
-          },
-          //Noticed that when the video is seeked, the video pops and moves the
-          //seek bar along with it and it happens when bottomPadding is 0. So we
-          //don't toggle full screen for cases where this issue happens.
-          playbackCallback: bottomPadding != 0
-              ? (isPlaying) {
-                  Future.delayed(Duration.zero, () {
-                    _toggleFullScreen();
-                  });
-                }
-              : null,
-          backgroundDecoration: const BoxDecoration(color: Colors.black),
-        );
         _preloadFiles(index);
         return GestureDetector(
           onTap: () {
             _toggleFullScreen();
           },
-          child: content,
+          child: FileWidget(
+            file,
+            autoPlay: !_hasPageChanged,
+            tagPrefix: widget.config.tagPrefix,
+            shouldDisableScroll: (value) {
+              if (_shouldDisableScroll != value) {
+                setState(() {
+                  _shouldDisableScroll = value;
+                });
+              }
+            },
+            //Noticed that when the video is seeked, the video pops and moves the
+            //seek bar along with it and it happens when bottomPadding is 0. So we
+            //don't toggle full screen for cases where this issue happens.
+            playbackCallback: bottomPadding != 0
+                ? (isPlaying) {
+                    Future.delayed(Duration.zero, () {
+                      _toggleFullScreen();
+                    });
+                  }
+                : null,
+            backgroundDecoration: const BoxDecoration(color: Colors.black),
+          ),
         );
       },
       onPageChanged: (index) {
