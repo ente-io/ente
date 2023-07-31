@@ -50,7 +50,7 @@
         "i18next": "^23.4.1",
         "i18next-http-backend": "^2.1.1",
         "idb": "^7.1.1",
-        "is-electron": "^2.2.0",
+        "is-electron": "^2.2.2",
         "jszip": "3.10.1",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.1",
