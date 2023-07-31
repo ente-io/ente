@@ -6,7 +6,7 @@ import 'package:ente_auth/ui/settings/about_section_widget.dart';
 import 'package:ente_auth/ui/settings/account_section_widget.dart';
 import 'package:ente_auth/ui/settings/app_version_widget.dart';
 import 'package:ente_auth/ui/settings/danger_section_widget.dart';
-import 'package:ente_auth/ui/settings/data_section_widget.dart';
+import 'package:ente_auth/ui/settings/data/data_section_widget.dart';
 import 'package:ente_auth/ui/settings/security_section_widget.dart';
 import 'package:ente_auth/ui/settings/social_section_widget.dart';
 import 'package:ente_auth/ui/settings/support_dev_widget.dart';

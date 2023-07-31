@@ -73,19 +73,22 @@ class DialogWidget extends StatelessWidget {
         boxShadow: shadowFloatLight,
         borderRadius: const BorderRadius.all(Radius.circular(8)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ContentContainer(
-              title: title,
-              body: body,
-              icon: icon,
-            ),
-            const SizedBox(height: 36),
-            Actions(buttons),
-          ],
+      child: Material(
+        color: Colors.transparent,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ContentContainer(
+                title: title,
+                body: body,
+                icon: icon,
+              ),
+              const SizedBox(height: 36),
+              Actions(buttons),
+            ],
+          ),
         ),
       ),
     );
