@@ -128,7 +128,6 @@ Future<void> _pickImportFile(BuildContext context) async {
     final DialogWidget dialog = choiceDialog(
       title: context.l10n.importSuccessTitle,
       body: context.l10n.importSuccessDesc(parsedCodes.length),
-      // body: "You have imported " + parsedCodes.length.toString() + " codes!",
       firstButtonLabel: l10n.ok,
       firstButtonOnTap: () async {
         Navigator.of(context, rootNavigator: true).pop('progressDialog');
