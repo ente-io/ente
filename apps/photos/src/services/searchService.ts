@@ -24,6 +24,7 @@ import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
 import { getLatestEntities } from './entityService';
 import { LocationTag, LocationTagData, EntityType } from 'types/entity';
+import { addLogLine } from 'utils/logging';
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
@@ -304,6 +305,11 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
     const matchedLocationTags = locationTags.filter((locationTag) =>
         locationTag.data.name.toLowerCase().includes(searchPhrase)
     );
+    if (matchedLocationTags.length > 0) {
+        addLogLine(
+            `Found ${matchedLocationTags.length} location tags for search phrase`
+        );
+    }
     return matchedLocationTags;
 }
 

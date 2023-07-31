@@ -331,9 +331,10 @@ export const getCollectionCoverFiles = (
         if (!collectionFiles || collectionFiles.length === 0) {
             return;
         }
-        if (typeof collection.pubMagicMetadata?.data?.coverID !== 'undefined') {
+        const coverID = collection.pubMagicMetadata?.data?.coverID;
+        if (typeof coverID === 'number' && coverID > 0) {
             const coverFile = collectionFiles.find(
-                (file) => file.id === collection.pubMagicMetadata?.data?.coverID
+                (file) => file.id === coverID
             );
             if (coverFile) {
                 coverFiles.set(collection.id, coverFile);
@@ -1443,7 +1444,7 @@ export const constructEmailList = (
             if (owner.email && item.owner.id !== user.id) {
                 return [item.owner.email];
             } else {
-                if (sharees?.length === 0) {
+                if (!sharees?.length) {
                     return [];
                 }
                 const shareeEmails = item.sharees

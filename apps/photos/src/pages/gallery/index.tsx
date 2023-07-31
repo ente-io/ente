@@ -11,8 +11,6 @@ import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
     getLocalFiles,
     syncFiles,
-    trashFiles,
-    deleteFromTrash,
     getLocalHiddenFiles,
     syncHiddenFiles,
 } from 'services/fileService';
@@ -23,7 +21,6 @@ import {
     getLocalCollections,
     createAlbum,
     getCollectionSummaries,
-    moveToHiddenCollection,
     constructEmailList,
 } from 'services/collectionService';
 import { t } from 'i18next';
@@ -49,11 +46,11 @@ import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
 import {
-    changeFilesVisibility,
+    FILE_OPS_TYPE,
     constructFileToCollectionMap,
-    downloadFiles,
     getSelectedFiles,
     getUniqueFiles,
+    handleFileOps,
     mergeMetadata,
     sortFiles,
 } from 'utils/file';
@@ -81,11 +78,11 @@ import { PAGES } from 'constants/pages';
 import {
     COLLECTION_OPS_TYPE,
     handleCollectionOps,
-    getSelectedCollection,
     getArchivedCollections,
     hasNonSystemCollections,
     splitNormalAndHiddenCollections,
     constructCollectionNameMap,
+    getSelectedCollection,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import { getLocalTrashedFiles, syncTrash } from 'services/trashService';
@@ -100,7 +97,6 @@ import {
     SelectedState,
     UploadTypeSelectorIntent,
 } from 'types/gallery';
-import { VISIBILITY_STATE } from 'types/magicMetadata';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
 import { Search, SearchResultSummary, UpdateSearch } from 'types/search';
@@ -169,7 +165,6 @@ export default function Gallery() {
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [isFirstFetch, setIsFirstFetch] = useState(false);
-    const [hasNoPersonalFiles, setHasNoPersonalFiles] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
         ownCount: 0,
         count: 0,
@@ -653,10 +648,6 @@ export default function Gallery() {
             archivedCollections
         );
         setCollectionSummaries(collectionSummaries);
-        const hasNoPersonalFiles = files.every(
-            (file) => file.ownerID !== user.id
-        );
-        setHasNoPersonalFiles(hasNoPersonalFiles);
     };
 
     const clearSelection = function () {
@@ -721,26 +712,27 @@ export default function Gallery() {
             }
         };
 
-    const changeFilesVisibilityHelper = async (
-        visibility: VISIBILITY_STATE
-    ) => {
+    const fileOpsHelper = (ops: FILE_OPS_TYPE) => async () => {
         startLoading();
         try {
             const selectedFiles = getSelectedFiles(selected, filteredData);
-            await changeFilesVisibility(selectedFiles, visibility);
-            clearSelection();
-        } catch (e) {
-            logError(e, 'change file visibility failed');
-            switch (e.status?.toString()) {
-                case ServerErrorCodes.FORBIDDEN:
-                    setDialogMessage({
-                        title: t('ERROR'),
-
-                        close: { variant: 'critical' },
-                        content: t('NOT_FILE_OWNER'),
-                    });
-                    return;
+            const toProcessFiles =
+                ops === FILE_OPS_TYPE.DOWNLOAD
+                    ? selectedFiles
+                    : selectedFiles.filter((file) => file.ownerID === user.id);
+            if (toProcessFiles.length > 0) {
+                await handleFileOps(
+                    ops,
+                    toProcessFiles,
+                    setDeletedFileIds,
+                    setHiddenFileIds,
+                    setFixCreationTimeAttributes
+                );
             }
+            clearSelection();
+            await syncWithRemote(false, true);
+        } catch (e) {
+            logError(e, 'file ops failed', { ops });
             setDialogMessage({
                 title: t('ERROR'),
 
@@ -748,7 +740,6 @@ export default function Gallery() {
                 content: t('UNKNOWN_ERROR'),
             });
         } finally {
-            await syncWithRemote(false, true);
             finishLoading();
         }
     };
@@ -780,77 +771,6 @@ export default function Gallery() {
             });
     };
 
-    const deleteFileHelper = async (permanent?: boolean) => {
-        startLoading();
-        try {
-            const selectedFiles = getSelectedFiles(selected, filteredData);
-            setDeletedFileIds((deletedFileIds) => {
-                selectedFiles.forEach((file) => deletedFileIds.add(file.id));
-                return new Set(deletedFileIds);
-            });
-            if (permanent) {
-                await deleteFromTrash(selectedFiles.map((file) => file.id));
-            } else {
-                await trashFiles(selectedFiles);
-            }
-            clearSelection();
-        } catch (e) {
-            setDeletedFileIds(new Set());
-            switch (e.status?.toString()) {
-                case ServerErrorCodes.FORBIDDEN:
-                    setDialogMessage({
-                        title: t('ERROR'),
-
-                        close: { variant: 'critical' },
-                        content: t('NOT_FILE_OWNER'),
-                    });
-            }
-            setDialogMessage({
-                title: t('ERROR'),
-
-                close: { variant: 'critical' },
-                content: t('UNKNOWN_ERROR'),
-            });
-        } finally {
-            await syncWithRemote(false, true);
-            finishLoading();
-        }
-    };
-
-    const hideFilesHelper = async () => {
-        startLoading();
-        try {
-            // passing files here instead of filteredData because we want to move all files copies to hidden collection
-            const selectedFiles = getSelectedFiles(selected, files);
-            setHiddenFileIds((hiddenFileIds) => {
-                selectedFiles.forEach((file) => hiddenFileIds.add(file.id));
-                return new Set(hiddenFileIds);
-            });
-            await moveToHiddenCollection(selectedFiles);
-            clearSelection();
-        } catch (e) {
-            setHiddenFileIds(new Set());
-            switch (e.status?.toString()) {
-                case ServerErrorCodes.FORBIDDEN:
-                    setDialogMessage({
-                        title: t('ERROR'),
-
-                        close: { variant: 'critical' },
-                        content: t('NOT_FILE_OWNER'),
-                    });
-            }
-            setDialogMessage({
-                title: t('ERROR'),
-
-                close: { variant: 'critical' },
-                content: t('UNKNOWN_ERROR'),
-            });
-        } finally {
-            await syncWithRemote(false, true);
-            finishLoading();
-        }
-    };
-
     const updateSearch: UpdateSearch = (newSearch, summary) => {
         if (newSearch?.collection) {
             setActiveCollection(newSearch?.collection);
@@ -863,20 +783,6 @@ export default function Gallery() {
         } else {
             setIsInSearchMode(false);
         }
-    };
-
-    const fixTimeHelper = async () => {
-        const selectedFiles = getSelectedFiles(selected, filteredData);
-        setFixCreationTimeAttributes({ files: selectedFiles });
-        clearSelection();
-    };
-
-    const downloadHelper = async () => {
-        const selectedFiles = getSelectedFiles(selected, filteredData);
-        clearSelection();
-        startLoading();
-        await downloadFiles(selectedFiles);
-        finishLoading();
     };
 
     const openUploader = (intent = UploadTypeSelectorIntent.normalUpload) => {
@@ -1020,7 +926,8 @@ export default function Gallery() {
                 />
                 {!isInSearchMode &&
                 !isFirstLoad &&
-                hasNoPersonalFiles &&
+                !files?.length &&
+                !hiddenFiles?.length &&
                 activeCollection === ALL_SECTION ? (
                     <GalleryEmptyState openUploader={openUploader} />
                 ) : (
@@ -1044,50 +951,22 @@ export default function Gallery() {
                 {selected.count > 0 &&
                     selected.collectionID === activeCollection && (
                         <SelectedFileOptions
-                            addToCollectionHelper={collectionOpsHelper(
-                                COLLECTION_OPS_TYPE.ADD
-                            )}
-                            archiveFilesHelper={() =>
-                                changeFilesVisibilityHelper(
-                                    VISIBILITY_STATE.ARCHIVED
-                                )
-                            }
-                            unArchiveFilesHelper={() =>
-                                changeFilesVisibilityHelper(
-                                    VISIBILITY_STATE.VISIBLE
-                                )
-                            }
-                            moveToCollectionHelper={collectionOpsHelper(
-                                COLLECTION_OPS_TYPE.MOVE
-                            )}
-                            restoreToCollectionHelper={collectionOpsHelper(
-                                COLLECTION_OPS_TYPE.RESTORE
-                            )}
-                            unhideToCollectionHelper={collectionOpsHelper(
-                                COLLECTION_OPS_TYPE.UNHIDE
-                            )}
+                            handleCollectionOps={collectionOpsHelper}
+                            handleFileOps={fileOpsHelper}
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }
                             setCollectionSelectorAttributes={
                                 setCollectionSelectorAttributes
                             }
-                            deleteFileHelper={deleteFileHelper}
-                            hideFilesHelper={hideFilesHelper}
-                            removeFromCollectionHelper={() =>
-                                collectionOpsHelper(COLLECTION_OPS_TYPE.REMOVE)(
-                                    getSelectedCollection(
-                                        activeCollection,
-                                        collections
-                                    )
-                                )
-                            }
-                            fixTimeHelper={fixTimeHelper}
-                            downloadHelper={downloadHelper}
                             count={selected.count}
                             ownCount={selected.ownCount}
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
+                            selectedCollection={getSelectedCollection(
+                                selected.collectionID,
+                                collections
+                            )}
                             isFavoriteCollection={
                                 collectionSummaries.get(activeCollection)
                                     ?.type === CollectionSummaryType.favorites

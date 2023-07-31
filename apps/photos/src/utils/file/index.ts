@@ -35,6 +35,8 @@ import { CustomError } from 'utils/error';
 import { convertBytesToHumanReadable } from './size';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import {
+    deleteFromTrash,
+    trashFiles,
     updateFileMagicMetadata,
     updateFilePublicMagicMetadata,
 } from 'services/fileService';
@@ -42,8 +44,19 @@ import isElectron from 'is-electron';
 import imageProcessor from 'services/electron/imageProcessor';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { FileTypeInfo } from 'types/upload';
+import { moveToHiddenCollection } from 'services/collectionService';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
+
+export enum FILE_OPS_TYPE {
+    DOWNLOAD,
+    FIX_TIME,
+    ARCHIVE,
+    UNARCHIVE,
+    HIDE,
+    TRASH,
+    DELETE_PERMANENTLY,
+}
 
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
@@ -690,4 +703,97 @@ export const shouldShowAvatar = (file: EnteFile, user: User) => {
     } else {
         return false;
     }
+};
+
+export const handleFileOps = async (
+    ops: FILE_OPS_TYPE,
+    files: EnteFile[],
+    setDeletedFileIds: (
+        deletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
+    ) => void,
+    setHiddenFileIds: (
+        hiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
+    ) => void,
+    setFixCreationTimeAttributes: (
+        fixCreationTimeAttributes:
+            | {
+                  files: EnteFile[];
+              }
+            | ((prev: { files: EnteFile[] }) => { files: EnteFile[] })
+    ) => void
+) => {
+    switch (ops) {
+        case FILE_OPS_TYPE.TRASH:
+            await deleteFileHelper(files, false, setDeletedFileIds);
+            break;
+        case FILE_OPS_TYPE.DELETE_PERMANENTLY:
+            await deleteFileHelper(files, true, setDeletedFileIds);
+            break;
+        case FILE_OPS_TYPE.HIDE:
+            await hideFilesHelper(files, setHiddenFileIds);
+            break;
+        case FILE_OPS_TYPE.DOWNLOAD:
+            await downloadFiles(files);
+            break;
+        case FILE_OPS_TYPE.FIX_TIME:
+            fixTimeHelper(files, setFixCreationTimeAttributes);
+            break;
+        case FILE_OPS_TYPE.ARCHIVE:
+            await changeFilesVisibility(files, VISIBILITY_STATE.ARCHIVED);
+            break;
+        case FILE_OPS_TYPE.UNARCHIVE:
+            await changeFilesVisibility(files, VISIBILITY_STATE.VISIBLE);
+            break;
+    }
+};
+
+const deleteFileHelper = async (
+    selectedFiles: EnteFile[],
+    permanent: boolean,
+    setDeletedFileIds: (
+        deletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
+    ) => void
+) => {
+    try {
+        setDeletedFileIds((deletedFileIds) => {
+            selectedFiles.forEach((file) => deletedFileIds.add(file.id));
+            return new Set(deletedFileIds);
+        });
+        if (permanent) {
+            await deleteFromTrash(selectedFiles.map((file) => file.id));
+        } else {
+            await trashFiles(selectedFiles);
+        }
+    } catch (e) {
+        setDeletedFileIds(new Set());
+        throw e;
+    }
+};
+
+const hideFilesHelper = async (
+    selectedFiles: EnteFile[],
+    setHiddenFileIds: (
+        hiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
+    ) => void
+) => {
+    try {
+        // passing files here instead of filteredData because we want to move all files copies to hidden collection
+        setHiddenFileIds((hiddenFileIds) => {
+            selectedFiles.forEach((file) => hiddenFileIds.add(file.id));
+            return new Set(hiddenFileIds);
+        });
+        await moveToHiddenCollection(selectedFiles);
+    } catch (e) {
+        setHiddenFileIds(new Set());
+        throw e;
+    }
+};
+
+const fixTimeHelper = async (
+    selectedFiles: EnteFile[],
+    setFixCreationTimeAttributes: (fixCreationTimeAttributes: {
+        files: EnteFile[];
+    }) => void
+) => {
+    setFixCreationTimeAttributes({ files: selectedFiles });
 };
