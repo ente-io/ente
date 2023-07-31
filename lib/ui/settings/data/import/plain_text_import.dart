@@ -129,9 +129,6 @@ Future<void> _pickImportFile(BuildContext context) async {
       title: context.l10n.importSuccessTitle,
       body: context.l10n.importSuccessDesc(parsedCodes.length),
       firstButtonLabel: l10n.ok,
-      firstButtonOnTap: () async {
-        Navigator.of(context, rootNavigator: true).pop('progressDialog');
-      },
       firstButtonType: ButtonType.primary,
     );
     await showConfettiDialog(
