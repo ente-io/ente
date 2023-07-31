@@ -19,7 +19,7 @@ const SRP_PARAMS = SRP.params['4096'];
 const LOGIN_SUB_KEY_LENGTH = 32;
 const LOGIN_SUB_KEY_ID = 1;
 const LOGIN_SUB_KEY_CONTEXT = 'loginctx';
-const LOGIN_SUB_KEY_SUBSTRING_LENGTH = 16;
+const LOGIN_SUB_KEY_BYTE_LENGTH = 16;
 
 export async function generateKeyAndSRPAttributes(passphrase: string): Promise<{
     keyAttributes: KeyAttributes;
@@ -271,13 +271,20 @@ export const isWeakPassword = (password: string) => {
 
 export const generateLoginSubKey = async (kek: string) => {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-    const loginSubKey = await cryptoWorker.generateSubKey(
+    const kekSubKeyString = await cryptoWorker.generateSubKey(
         kek,
         LOGIN_SUB_KEY_LENGTH,
         LOGIN_SUB_KEY_ID,
         LOGIN_SUB_KEY_CONTEXT
     );
-    return loginSubKey.substring(0, LOGIN_SUB_KEY_SUBSTRING_LENGTH);
+    const kekSubKey = await cryptoWorker.fromB64(kekSubKeyString);
+
+    // use first 16 bytes of generated kekSubKey as loginSubKey
+    const loginSubKey = await cryptoWorker.toB64(
+        kekSubKey.slice(0, LOGIN_SUB_KEY_BYTE_LENGTH)
+    );
+
+    return loginSubKey;
 };
 
 export const generateSRPSetupAttributes = async (
