@@ -1,103 +1,50 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 
-import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 
-class PlainTextImport extends StatelessWidget {
-  const PlainTextImport({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return Column(
-      children: [
-        Text(
-          l10n.importInstruction,
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        Container(
-          color: Theme.of(context).colorScheme.gNavBackgroundColor,
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Text(
-              "otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET",
-              style: TextStyle(
-                fontFeatures: const [FontFeature.tabularFigures()],
-                fontFamily: Platform.isIOS ? "Courier" : "monospace",
-                fontSize: 13,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        Text(l10n.importCodeDelimiterInfo),
-      ],
-    );
-  }
-
-}
-
-
-Future<void> showImportInstructionDialog(BuildContext context) async {
+Future<void> showRaivoImportInstruction(BuildContext context) async {
   final l10n = context.l10n;
-  final AlertDialog alert = AlertDialog(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    title: Text(
-      l10n.importCodes,
-      style: Theme.of(context).textTheme.headline6,
-    ),
-    content: const SingleChildScrollView(
-      child: PlainTextImport(),
-    ),
-    actions: [
-      TextButton(
-        child: Text(
-          l10n.cancel,
-          style: const TextStyle(
-            color: Colors.red,
-          ),
-        ),
-        onPressed: () {
-          Navigator.of(context, rootNavigator: true).pop('dialog');
-        },
+  final result = await showDialogWidget(
+    context: context,
+    title: l10n.importFromApp("Raivo OTP"),
+    body: l10n.importRaivoGuide,
+    buttons: [
+       ButtonWidget(
+        buttonType: ButtonType.primary,
+        labelText: l10n.importSelectJsonFile,
+        isInAlert: true,
+        buttonSize: ButtonSize.large,
+        buttonAction: ButtonAction.first,
       ),
-      TextButton(
-        child: Text(l10n.selectFile),
-        onPressed: () {
-          Navigator.of(context, rootNavigator: true).pop('dialog');
-          _pickImportFile(context);
-        },
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: context.l10n.cancel,
+        buttonSize: ButtonSize.large,
+        isInAlert: true,
+        buttonAction: ButtonAction.second,
       ),
     ],
   );
-
-  return showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
-    },
-    barrierColor: Colors.black12,
-  );
+  if (result?.action != null && result!.action != ButtonAction.cancel) {
+    if (result.action == ButtonAction.first) {
+      await _pickRaivoJsonFile(context);
+    } else {}
+  }
 }
 
-
-Future<void> _pickImportFile(BuildContext context) async {
+Future<void> _pickRaivoJsonFile(BuildContext context) async {
   final l10n = context.l10n;
   FilePickerResult? result = await FilePicker.platform.pickFiles();
   if (result == null) {
@@ -107,19 +54,34 @@ Future<void> _pickImportFile(BuildContext context) async {
   await progressDialog.show();
   try {
     File file = File(result.files.single.path!);
-    final codes = await file.readAsString();
-    List<String> splitCodes = codes.split(",");
-    if (splitCodes.length == 1) {
-      splitCodes = codes.split("\n");
-    }
+    final jsonString = await file.readAsString();
+    List<dynamic> jsonArray = jsonDecode(jsonString);
     final parsedCodes = [];
-    for (final code in splitCodes) {
-      try {
-        parsedCodes.add(Code.fromRawData(code));
-      } catch (e) {
-        Logger('PlainText').severe("Could not parse code", e);
+    for (var item in jsonArray) {
+      var kind = item['kind'];
+      var algorithm = item['algorithm'];
+      var timer = item['timer'];
+      var digits = item['digits'];
+      var issuer = item['issuer'];
+      var secret = item['secret'];
+      var account = item['account'];
+      var counter = item['counter'];
+
+      // Build the OTP URL
+      String otpUrl;
+
+      if (kind.toLowerCase() == 'totp') {
+        otpUrl =
+            'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&period=$timer';
+      } else if (kind.toLowerCase() == 'hotp') {
+        otpUrl =
+            'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&counter=$counter';
+      } else {
+        throw Exception('Invalid OTP type');
       }
+      parsedCodes.add(Code.fromRawData(otpUrl));
     }
+
     for (final code in parsedCodes) {
       await CodeStore.instance.addCode(code, shouldSync: false);
     }
@@ -128,11 +90,7 @@ Future<void> _pickImportFile(BuildContext context) async {
     final DialogWidget dialog = choiceDialog(
       title: context.l10n.importSuccessTitle,
       body: context.l10n.importSuccessDesc(parsedCodes.length),
-      // body: "You have imported " + parsedCodes.length.toString() + " codes!",
       firstButtonLabel: l10n.ok,
-      firstButtonOnTap: () async {
-        Navigator.of(context, rootNavigator: true).pop('progressDialog');
-      },
       firstButtonType: ButtonType.primary,
     );
     await showConfettiDialog(

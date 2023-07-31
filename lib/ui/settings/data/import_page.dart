@@ -28,11 +28,11 @@ class ImportCodePage extends StatelessWidget {
   String getTitle(BuildContext context, ImportType type) {
     switch (type) {
       case ImportType.plainText:
-        return 'Plain text';
+        return context.l10n.importTypePlainText;
       case ImportType.encrypted:
-        return 'ente Encrypted export';
+        return context.l10n.importTypeEnteEncrypted;
       case ImportType.ravio:
-        return 'Ravio';
+        return 'Ravio OTP';
     }
   }
 
