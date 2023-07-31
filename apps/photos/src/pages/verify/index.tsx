@@ -111,11 +111,13 @@ export default function Verify() {
                 }
                 clearFiles();
                 setIsFirstLogin(true);
+                const redirectURL = appContext.redirectURL;
+                appContext.setRedirectURL(null);
                 if (keyAttributes?.encryptedKey) {
                     clearKeys();
-                    router.push(PAGES.CREDENTIALS);
+                    router.push(redirectURL ?? PAGES.CREDENTIALS);
                 } else {
-                    router.push(PAGES.GENERATE);
+                    router.push(redirectURL ?? PAGES.GENERATE);
                 }
             }
         } catch (e) {
