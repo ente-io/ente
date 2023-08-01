@@ -2,13 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/ui/collections/album/row_item.dart";
@@ -54,7 +52,6 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
     });
-
   }
 
   @override
@@ -113,7 +110,8 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                                   context,
                                   CollectionListPage(
                                     collections.incoming,
-                                    sectionType: UISectionType.incomingCollections,
+                                    sectionType:
+                                        UISectionType.incomingCollections,
                                     tag: "incoming",
                                     appTitle: sharedWithYou,
                                   ),
@@ -166,7 +164,8 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                                   context,
                                   CollectionListPage(
                                     collections.outgoing,
-                                    sectionType: UISectionType.outgoingCollections,
+                                    sectionType:
+                                        UISectionType.outgoingCollections,
                                     tag: "outgoing",
                                     appTitle: sharedByYou,
                                   ),
