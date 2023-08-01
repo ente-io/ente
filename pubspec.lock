@@ -50,7 +50,7 @@ packages:
     source: hosted
     version: "2.10.0"
   base32:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: base32
       sha256: ddad4ebfedf93d4500818ed8e61443b734ffe7cf8a45c668c9b34ef6adde02e2
