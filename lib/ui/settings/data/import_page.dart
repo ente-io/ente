@@ -14,6 +14,7 @@ enum ImportType {
   plainText,
   encrypted,
   ravio,
+  googleAuthenticator,
 }
 
 class ImportCodePage extends StatelessWidget {
@@ -21,6 +22,7 @@ class ImportCodePage extends StatelessWidget {
     ImportType.plainText,
     ImportType.encrypted,
     ImportType.ravio,
+    ImportType.googleAuthenticator,
   ];
 
   ImportCodePage({super.key});
@@ -32,7 +34,9 @@ class ImportCodePage extends StatelessWidget {
       case ImportType.encrypted:
         return context.l10n.importTypeEnteEncrypted;
       case ImportType.ravio:
-        return 'Ravio OTP';
+        return 'Raivo OTP';
+      case ImportType.googleAuthenticator:
+        return 'Google Authenticator';
     }
   }
 
