@@ -19,6 +19,16 @@ void main() {
     expect(code.account, "testdata@ente.io", reason: "accountMismatch");
     expect(code.secret, "ASKZNWOU6SVYAMVS");
   });
+
+  test("validateCount", () {
+    final code = Code.fromRawData(
+      "otpauth://hotp/testdata@ente.io?secret=ASKZNWOU6SVYAMVS&issuer=GitHub&counter=15",
+    );
+    expect(code.issuer, "GitHub", reason: "issuerMismatch");
+    expect(code.account, "testdata@ente.io", reason: "accountMismatch");
+    expect(code.secret, "ASKZNWOU6SVYAMVS");
+    expect(code.counter, 15);
+  });
 //
 
   test("parseWithFunnyAccountName", () {
