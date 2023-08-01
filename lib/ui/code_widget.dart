@@ -35,10 +35,12 @@ class _CodeWidgetState extends State<CodeWidget> {
 
     _everySecondTimer =
         Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
-      String newCode = _getTotp();
+      String newCode = _getCurrentOTP();
       if (newCode != _currentCode.value) {
         _currentCode.value = newCode;
-        _nextCode.value = _getNextTotp();
+        if (widget.code.type == Type.totp) {
+          _nextCode.value = _getNextTotp();
+        }
       }
     });
   }
@@ -54,8 +56,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   @override
   Widget build(BuildContext context) {
     if (!_isInitialized) {
-      _currentCode.value = _getTotp();
-      _nextCode.value = _getNextTotp();
+      _currentCode.value = _getCurrentOTP();
+      if (widget.code.type == Type.totp) {
+        _nextCode.value = _getNextTotp();
+      }
       _isInitialized = true;
     }
     final l10n = context.l10n;
@@ -113,9 +117,10 @@ class _CodeWidgetState extends State<CodeWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CodeTimerProgress(
-                        period: widget.code.period,
-                      ),
+                      if (widget.code.type == Type.totp)
+                        CodeTimerProgress(
+                          period: widget.code.period,
+                        ),
                       const SizedBox(
                         height: 16,
                       ),
@@ -174,27 +179,47 @@ class _CodeWidgetState extends State<CodeWidget> {
                                 },
                               ),
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  l10n.nextTotpTitle,
-                                  style: Theme.of(context).textTheme.caption,
-                                ),
-                                ValueListenableBuilder<String>(
-                                  valueListenable: _nextCode,
-                                  builder: (context, value, child) {
-                                    return Text(
-                                      value,
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        color: Colors.grey,
+                            widget.code.type == Type.totp
+                                ? Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        l10n.nextTotpTitle,
+                                        style:
+                                            Theme.of(context).textTheme.caption,
                                       ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
+                                      ValueListenableBuilder<String>(
+                                        valueListenable: _nextCode,
+                                        builder: (context, value, child) {
+                                          return Text(
+                                            value,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.grey,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  )
+                                : Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        l10n.nextTotpTitle,
+                                        style:
+                                            Theme.of(context).textTheme.caption,
+                                      ),
+                                       InkWell(
+                                        onTap: _onNextHotpTapped,
+                                        child: const Icon(
+                                          Icons.forward_outlined,
+                                          size: 32,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ],
                         ),
                       ),
@@ -213,8 +238,14 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   void _copyToClipboard() {
-    FlutterClipboard.copy(_getTotp())
+    FlutterClipboard.copy(_getCurrentOTP())
         .then((value) => showToast(context, context.l10n.copiedToClipboard));
+  }
+
+  void _onNextHotpTapped() {
+    if(widget.code.type == Type.hotp) {
+     CodeStore.instance.addCode(widget.code.copyWith(counter: widget.code.counter + 1), shouldSync: true).ignore();
+    }
   }
 
   Future<void> _onEditPressed(_) async {
@@ -287,9 +318,9 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
   }
 
-  String _getTotp() {
+  String _getCurrentOTP() {
     try {
-      return getTotp(widget.code);
+      return getOTP(widget.code);
     } catch (e) {
       return context.l10n.error;
     }
@@ -297,6 +328,7 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   String _getNextTotp() {
     try {
+      assert(widget.code.type == Type.totp);
       return getNextTotp(widget.code);
     } catch (e) {
       return context.l10n.error;

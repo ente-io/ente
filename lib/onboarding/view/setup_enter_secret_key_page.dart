@@ -132,7 +132,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                                 secret: secret,
                               );
                         // Verify the validity of the code
-                        getTotp(newCode);
+                        getOTP(newCode);
                         Navigator.of(context).pop(newCode);
                       } catch (e) {
                         _showIncorrectDetailsDialog(context);

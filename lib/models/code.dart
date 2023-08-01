@@ -13,6 +13,7 @@ class Code {
   final Algorithm algorithm;
   final Type type;
   final String rawData;
+  final int counter;
   bool? hasSynced;
 
   Code(
@@ -23,6 +24,7 @@ class Code {
     this.secret,
     this.algorithm,
     this.type,
+    this.counter,
     this.rawData, {
     this.generatedID,
   });
@@ -35,6 +37,7 @@ class Code {
     String? secret,
     Algorithm? algorithm,
     Type? type,
+    int? counter,
   }) {
     final String updateAccount = account ?? this.account;
     final String updateIssuer = issuer ?? this.issuer;
@@ -43,6 +46,7 @@ class Code {
     final String updatedSecret = secret ?? this.secret;
     final Algorithm updatedAlgo = algorithm ?? this.algorithm;
     final Type updatedType = type ?? this.type;
+    final int updatedCounter = counter ?? this.counter;
 
     return Code(
       updateAccount,
@@ -52,6 +56,7 @@ class Code {
       updatedSecret,
       updatedAlgo,
       updatedType,
+      updatedCounter,
       "otpauth://${updatedType.name}/" +
           updateIssuer +
           ":" +
@@ -59,7 +64,7 @@ class Code {
           "?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=" +
           updateIssuer +
           "&period=$updatePeriod&secret=" +
-          updatedSecret,
+          updatedSecret + (updatedType == Type.hotp ? "&counter=$updatedCounter" : ""),
       generatedID: generatedID,
     );
   }
@@ -77,6 +82,7 @@ class Code {
       secret,
       Algorithm.sha1,
       Type.totp,
+      0,
       "otpauth://totp/" +
           issuer +
           ":" +
@@ -99,6 +105,7 @@ class Code {
       getSanitizedSecret(uri.queryParameters['secret']!),
       _getAlgorithm(uri),
       _getType(uri),
+      _getCounter(uri),
       rawData,
     );
     } catch(e) {
@@ -163,6 +170,18 @@ class Code {
     }
   }
 
+  static int _getCounter(Uri uri) {
+    try {
+      final bool hasCounterKey = uri.queryParameters.containsKey('counter');
+      if (!hasCounterKey) {
+        return 0;
+      }
+      return int.parse(uri.queryParameters['counter']!);
+    } catch (e) {
+      return defaultPeriod;
+    }
+  }
+
   static Algorithm _getAlgorithm(Uri uri) {
     try {
       final algorithm =
@@ -197,6 +216,7 @@ class Code {
         other.digits == digits &&
         other.period == period &&
         other.secret == secret &&
+        other.counter == counter &&
         other.type == type &&
         other.rawData == rawData;
   }
@@ -209,6 +229,7 @@ class Code {
         period.hashCode ^
         secret.hashCode ^
         type.hashCode ^
+        counter.hashCode ^
         rawData.hashCode;
   }
 }
