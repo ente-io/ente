@@ -27,12 +27,12 @@ class _CodeWidgetState extends State<CodeWidget> {
   final ValueNotifier<String> _currentCode = ValueNotifier<String>("");
   final ValueNotifier<String> _nextCode = ValueNotifier<String>("");
   final Logger logger = Logger("_CodeWidgetState");
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _currentCode.value = _getTotp();
-    _nextCode.value = _getNextTotp();
+
     _everySecondTimer =
         Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
       String newCode = _getTotp();
@@ -53,6 +53,11 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      _currentCode.value = _getTotp();
+      _nextCode.value = _getNextTotp();
+      _isInitialized = true;
+    }
     final l10n = context.l10n;
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
@@ -125,8 +130,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                               children: [
                                 Text(
                                   safeDecode(widget.code.issuer).trim(),
-                                  style:
-                                      Theme.of(context).textTheme.headline6,
+                                  style: Theme.of(context).textTheme.headline6,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(

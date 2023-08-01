@@ -53,52 +53,23 @@ Future<void> _pickRaivoJsonFile(BuildContext context) async {
   final progressDialog = createProgressDialog(context, l10n.pleaseWait);
   await progressDialog.show();
   try {
-    File file = File(result.files.single.path!);
-    final jsonString = await file.readAsString();
-    List<dynamic> jsonArray = jsonDecode(jsonString);
-    final parsedCodes = [];
-    for (var item in jsonArray) {
-      var kind = item['kind'];
-      var algorithm = item['algorithm'];
-      var timer = item['timer'];
-      var digits = item['digits'];
-      var issuer = item['issuer'];
-      var secret = item['secret'];
-      var account = item['account'];
-      var counter = item['counter'];
-
-      // Build the OTP URL
-      String otpUrl;
-
-      if (kind.toLowerCase() == 'totp') {
-        otpUrl =
-            'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&period=$timer';
-      } else if (kind.toLowerCase() == 'hotp') {
-        otpUrl =
-            'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&counter=$counter';
-      } else {
-        throw Exception('Invalid OTP type');
-      }
-      parsedCodes.add(Code.fromRawData(otpUrl));
-    }
-
-    for (final code in parsedCodes) {
-      await CodeStore.instance.addCode(code, shouldSync: false);
-    }
-    unawaited(AuthenticatorService.instance.sync());
+    String path = result.files.single.path!;
+    int? count = await _processRaivoExportFile(context, path);
     await progressDialog.hide();
-    final DialogWidget dialog = choiceDialog(
-      title: context.l10n.importSuccessTitle,
-      body: context.l10n.importSuccessDesc(parsedCodes.length),
-      firstButtonLabel: l10n.ok,
-      firstButtonType: ButtonType.primary,
-    );
-    await showConfettiDialog(
-      context: context,
-      dialogBuilder: (BuildContext context) {
-        return dialog;
-      },
-    );
+    if(count != null) {
+      final DialogWidget dialog = choiceDialog(
+        title: context.l10n.importSuccessTitle,
+        body: context.l10n.importSuccessDesc(count ?? 0),
+        firstButtonLabel: l10n.ok,
+        firstButtonType: ButtonType.primary,
+      );
+      await showConfettiDialog(
+        context: context,
+        dialogBuilder: (BuildContext context) {
+          return dialog;
+        },
+      );
+    }
   } catch (e) {
     await progressDialog.hide();
     await showErrorDialog(
@@ -107,4 +78,50 @@ Future<void> _pickRaivoJsonFile(BuildContext context) async {
       context.l10n.importFailureDesc,
     );
   }
+}
+
+Future<int?> _processRaivoExportFile(BuildContext context,String path) async {
+  File file = File(path);
+  if(path.endsWith('.zip')) {
+    await showErrorDialog(
+      context,
+      context.l10n.sorry,
+      "We don't support zip files yet. Please unzip the file and try again.",
+    );
+    return null;
+  }
+  final jsonString = await file.readAsString();
+  List<dynamic> jsonArray = jsonDecode(jsonString);
+  final parsedCodes = [];
+  for (var item in jsonArray) {
+    var kind = item['kind'];
+    var algorithm = item['algorithm'];
+    var timer = item['timer'];
+    var digits = item['digits'];
+    var issuer = item['issuer'];
+    var secret = item['secret'];
+    var account = item['account'];
+    var counter = item['counter'];
+
+    // Build the OTP URL
+    String otpUrl;
+
+    if (kind.toLowerCase() == 'totp') {
+      otpUrl =
+          'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&period=$timer';
+    } else if (kind.toLowerCase() == 'hotp') {
+      otpUrl =
+          'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&counter=$counter';
+    } else {
+      throw Exception('Invalid OTP type');
+    }
+    parsedCodes.add(Code.fromRawData(otpUrl));
+  }
+
+  for (final code in parsedCodes) {
+    await CodeStore.instance.addCode(code, shouldSync: false);
+  }
+  unawaited(AuthenticatorService.instance.sync());
+  int count = parsedCodes.length;
+  return count;
 }

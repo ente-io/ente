@@ -54,6 +54,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    super.initState();
     _textController.addListener(_applyFilteringAndRefresh);
     _loadCodes();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
@@ -64,7 +65,7 @@ class _HomePageState extends State<HomePage> {
       await autoLogoutAlert(context);
     });
     _initDeepLinks();
-    super.initState();
+
   }
 
   void _loadCodes() {
@@ -222,7 +223,11 @@ class _HomePageState extends State<HomePage> {
       } else {
         final list = ListView.builder(
           itemBuilder: ((context, index) {
-            return CodeWidget(_filteredCodes[index]);
+            try {
+              return CodeWidget(_filteredCodes[index]);
+            } catch(e) {
+              return const Text("Failed");
+            }
           }),
           itemCount: _filteredCodes.length,
         );
