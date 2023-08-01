@@ -59,6 +59,7 @@ dependencies:
   path_provider: ^2.0.11
   pinput: ^1.2.2
   pointycastle: ^3.7.3
+  protobuf: ^3.0.0
   qr_code_scanner: ^1.0.1
   sentry: ^6.12.1
   sentry_flutter: ^6.12.1
