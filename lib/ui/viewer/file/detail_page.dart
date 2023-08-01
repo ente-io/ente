@@ -72,7 +72,6 @@ class _DetailPageState extends State<DetailPage> {
   List<File>? _files;
   late PageController _pageController;
   int _selectedIndex = 0;
-  bool _hasPageChanged = false;
   bool _hasLoadedTillStart = false;
   bool _hasLoadedTillEnd = false;
   final _enableFullScreenNotifier = ValueNotifier(false);
@@ -152,7 +151,6 @@ class _DetailPageState extends State<DetailPage> {
           },
           child: FileWidget(
             file,
-            autoPlay: !_hasPageChanged,
             tagPrefix: widget.config.tagPrefix,
             shouldDisableScroll: (value) {
               if (_shouldDisableScroll != value) {
@@ -178,10 +176,9 @@ class _DetailPageState extends State<DetailPage> {
       onPageChanged: (index) {
         setState(() {
           _selectedIndex = index;
-          _hasPageChanged = true;
         });
         _preloadEntries();
-        _preloadFiles(index);
+        // _preloadFiles(index);
       },
       physics: _shouldDisableScroll
           ? const NeverScrollableScrollPhysics()
