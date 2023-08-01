@@ -1,12 +1,25 @@
 import 'package:ente_auth/models/code.dart';
 import 'package:otp/otp.dart' as otp;
 
-String getTotp(Code code) {
+String getOTP(Code code) {
+  if(code.type == Type.hotp) {
+    return _getHOTPCode(code);
+  }
   return otp.OTP.generateTOTPCodeString(
     getSanitizedSecret(code.secret),
     DateTime.now().millisecondsSinceEpoch,
     length: code.digits,
     interval: code.period,
+    algorithm: _getAlgorithm(code),
+    isGoogle: true,
+  );
+}
+
+String _getHOTPCode(Code code) {
+  return otp.OTP.generateHOTPCodeString(
+    getSanitizedSecret(code.secret),
+    code.counter,
+    length: code.digits,
     algorithm: _getAlgorithm(code),
     isGoogle: true,
   );

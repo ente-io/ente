@@ -64,7 +64,7 @@ class Code {
           "?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=" +
           updateIssuer +
           "&period=$updatePeriod&secret=" +
-          updatedSecret,
+          updatedSecret + (updatedType == Type.hotp ? "&counter=$updatedCounter" : ""),
       generatedID: generatedID,
     );
   }
@@ -216,6 +216,7 @@ class Code {
         other.digits == digits &&
         other.period == period &&
         other.secret == secret &&
+        other.counter == counter &&
         other.type == type &&
         other.rawData == rawData;
   }
@@ -228,6 +229,7 @@ class Code {
         period.hashCode ^
         secret.hashCode ^
         type.hashCode ^
+        counter.hashCode ^
         rawData.hashCode;
   }
 }
