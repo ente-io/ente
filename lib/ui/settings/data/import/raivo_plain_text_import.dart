@@ -54,20 +54,22 @@ Future<void> _pickRaivoJsonFile(BuildContext context) async {
   await progressDialog.show();
   try {
     String path = result.files.single.path!;
-    int count = await _processRaivoExportFile(path);
+    int? count = await _processRaivoExportFile(context, path);
     await progressDialog.hide();
-    final DialogWidget dialog = choiceDialog(
-      title: context.l10n.importSuccessTitle,
-      body: context.l10n.importSuccessDesc(count),
-      firstButtonLabel: l10n.ok,
-      firstButtonType: ButtonType.primary,
-    );
-    await showConfettiDialog(
-      context: context,
-      dialogBuilder: (BuildContext context) {
-        return dialog;
-      },
-    );
+    if(count != null) {
+      final DialogWidget dialog = choiceDialog(
+        title: context.l10n.importSuccessTitle,
+        body: context.l10n.importSuccessDesc(count ?? 0),
+        firstButtonLabel: l10n.ok,
+        firstButtonType: ButtonType.primary,
+      );
+      await showConfettiDialog(
+        context: context,
+        dialogBuilder: (BuildContext context) {
+          return dialog;
+        },
+      );
+    }
   } catch (e) {
     await progressDialog.hide();
     await showErrorDialog(
@@ -78,8 +80,16 @@ Future<void> _pickRaivoJsonFile(BuildContext context) async {
   }
 }
 
-Future<int?> _processRaivoExportFile(String path) async {
+Future<int?> _processRaivoExportFile(BuildContext context,String path) async {
   File file = File(path);
+  if(path.endsWith('.zip')) {
+    await showErrorDialog(
+      context,
+      context.l10n.sorry,
+      "We don't support zip files yet. Please unzip the file and try again.",
+    );
+    return null;
+  }
   final jsonString = await file.readAsString();
   List<dynamic> jsonArray = jsonDecode(jsonString);
   final parsedCodes = [];
