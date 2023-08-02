@@ -13,7 +13,7 @@ export const getComponents = (
                 fontFamily: typography.fontFamily,
                 letterSpacing: '-0.011em',
             },
-            strong: { fontWeight: 900 },
+            strong: { fontWeight: 700 },
         },
     },
 

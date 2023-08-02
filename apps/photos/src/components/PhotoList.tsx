@@ -611,10 +611,13 @@ export function PhotoList({
                         '' !== '' ? (
                             <p style={{ marginTop: '4px' }}>
                                 <Typography color={'text.muted'}>
-                                    {t(`SHARING_REFERRAL_CODE`, {
-                                        referralCode:
-                                            publicCollectionGalleryContext.referralCode,
-                                    })}
+                                    <Trans
+                                        i18nKey={'SHARING_REFERRAL_CODE'}
+                                        values={{
+                                            referralCode:
+                                                publicCollectionGalleryContext.referralCode,
+                                        }}
+                                    />
                                 </Typography>
                             </p>
                         ) : null}
