@@ -87,7 +87,7 @@ class SrpAttributes {
   final int memLimit;
   final int opsLimit;
   final String kekSalt;
-  final bool emailMFA;
+  final bool isEmailMFAEnabled;
 
   SrpAttributes({
     required this.srpUserID,
@@ -95,7 +95,7 @@ class SrpAttributes {
     required this.memLimit,
     required this.opsLimit,
     required this.kekSalt,
-    required this.emailMFA,
+    required this.isEmailMFAEnabled,
   });
 
   factory SrpAttributes.fromMap(Map<String, dynamic> map) {
@@ -105,7 +105,7 @@ class SrpAttributes {
       memLimit: map['attributes']['memLimit'],
       opsLimit: map['attributes']['opsLimit'],
       kekSalt: map['attributes']['kekSalt'],
-      emailMFA: map['attributes']['emailMFA'],
+      isEmailMFAEnabled: map['attributes']['isEmailMFAEnabled'],
     );
   }
 }

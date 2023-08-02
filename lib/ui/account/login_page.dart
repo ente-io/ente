@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
           bool isEmailVerificationEnabled = true;
           try {
             attr = await UserService.instance.getSrpAttributes(_email!);
-            isEmailVerificationEnabled = attr.emailMFA;
+            isEmailVerificationEnabled = attr.isEmailMFAEnabled;
           } catch (e) {
             if (e is! SrpSetupNotCompleteError) {
               _logger.severe('Error getting SRP attributes', e);
