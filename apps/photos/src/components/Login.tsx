@@ -28,12 +28,11 @@ export default function Login(props: LoginProps) {
             addLocalLog(
                 () => ` srpAttributes: ${JSON.stringify(srpAttributes)}`
             );
-            if (!srpAttributes) {
-                setUserSRPSetupPending(true);
+            setUserSRPSetupPending(!srpAttributes);
+            if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
                 await sendOtt(email);
                 router.push(PAGES.VERIFY);
             } else {
-                setUserSRPSetupPending(false);
                 setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
                 router.push(PAGES.CREDENTIALS);
             }

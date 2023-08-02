@@ -122,6 +122,7 @@ export interface SRPAttributes {
     memLimit: number;
     opsLimit: number;
     kekSalt: string;
+    isEmailMFAEnabled: boolean;
 }
 
 export interface GetSRPAttributesResponse {

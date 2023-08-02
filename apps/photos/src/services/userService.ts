@@ -531,7 +531,9 @@ export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
     }
 }
 
-export const getSRPAttributes = async (email: string) => {
+export const getSRPAttributes = async (
+    email: string
+): Promise<SRPAttributes | null> => {
     try {
         const resp = await HTTPService.get(`${ENDPOINT}/users/srp/attributes`, {
             email,
