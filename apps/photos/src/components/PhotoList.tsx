@@ -607,6 +607,15 @@ export function PhotoList({
                         <Link target="_blank" href={ENTE_WEBSITE_LINK}>
                             {t('ENTE_IO')}
                         </Link>
+                        {publicCollectionGalleryContext.referralCode ??
+                        '' !== '' ? (
+                            <p style={{ marginTop: '4px' }}>
+                                {t(`SHARING_REFERRAL_CODE`, {
+                                    referralCode:
+                                        publicCollectionGalleryContext.referralCode,
+                                })}
+                            </p>
+                        ) : null}
                     </Typography>
                 </AlbumFooterContainer>
             ),

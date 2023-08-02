@@ -399,6 +399,7 @@
     "COPYRIGHT": "Infringes on the copyright of someone I am authorized to represent",
     "SHARED_USING": "Shared using ",
     "ENTE_IO": "ente.io",
+    "SHARING_REFERRAL_CODE": "Use code {{referralCode}} to get 10 GB free",
     "LIVE": "LIVE",
     "DISABLE_PASSWORD": "Disable password lock",
     "DISABLE_PASSWORD_MESSAGE": "Are you sure that you want to disable the password lock?",

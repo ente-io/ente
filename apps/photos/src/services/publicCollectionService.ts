@@ -118,6 +118,17 @@ export const savePublicCollection = async (collection: Collection) => {
     );
 };
 
+export const getReferralCode = async () => {
+    return await localForage.getItem<string>('referralCode');
+};
+
+export const saveReferralCode = async (code: string) => {
+    if (!code) {
+        localForage.removeItem('referralCode');
+    }
+    await localForage.setItem('referralCode', code);
+};
+
 const dedupeCollections = (collections: Collection[]) => {
     const keySet = new Set([]);
     return collections.filter((collection) => {
@@ -296,7 +307,7 @@ const getPublicFiles = async (
 export const getPublicCollection = async (
     token: string,
     collectionKey: string
-): Promise<Collection> => {
+): Promise<[Collection, string]> => {
     try {
         if (!token) {
             return;
@@ -307,6 +318,7 @@ export const getPublicCollection = async (
             { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
         );
         const fetchedCollection = resp.data.collection;
+        const referralCode = resp.data.referralCode ?? '';
 
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
@@ -337,7 +349,8 @@ export const getPublicCollection = async (
             pubMagicMetadata: collectionPublicMagicMetadata,
         };
         await savePublicCollection(collection);
-        return collection;
+        await saveReferralCode(referralCode);
+        return [collection, referralCode];
     } catch (e) {
         logError(e, 'failed to get public collection');
         throw e;
