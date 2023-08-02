@@ -6,6 +6,7 @@ import { EnteFile } from 'types/file';
 export interface PublicCollectionGalleryContextType {
     token: string;
     passwordToken: string;
+    referralCode: string;
     accessedThroughSharedURL: boolean;
     photoListHeader: TimeStampListItem;
     photoListFooter: TimeStampListItem;
