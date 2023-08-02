@@ -8,7 +8,7 @@ import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/settings/storage_progress_widget.dart';
 import 'package:photos/utils/data_util.dart';
@@ -81,36 +81,37 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   Widget containerForUserDetails(
     UserDetails? userDetails,
   ) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 350),
-      child: AspectRatio(
-        aspectRatio: 2 / 1,
-        child: Stack(
-          children: [
-            _background,
-            userDetails is UserDetails
-                ? _userDetails(userDetails)
-                : const EnteLoadingWidget(
-                    color: strokeBaseDark,
-                  ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: ValueListenableBuilder<bool>(
-                  builder: (BuildContext context, bool value, Widget? child) {
-                    return Icon(
-                      Icons.chevron_right_outlined,
-                      color: value ? strokeMutedDark : strokeBaseDark,
-                    );
-                  },
-                  valueListenable: _isStorageCardPressed,
+    return Stack(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: _background,
+        ),
+        Positioned.fill(
+          child: userDetails is UserDetails
+              ? _userDetails(userDetails)
+              : const EnteLoadingWidget(
+                  color: strokeBaseDark,
                 ),
+        ),
+        Positioned.fill(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: ValueListenableBuilder<bool>(
+                builder: (BuildContext context, bool value, Widget? child) {
+                  return Icon(
+                    Icons.chevron_right_outlined,
+                    color: value ? strokeMutedDark : strokeBaseDark,
+                  );
+                },
+                valueListenable: _isStorageCardPressed,
               ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
