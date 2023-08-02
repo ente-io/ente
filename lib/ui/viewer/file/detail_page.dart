@@ -71,11 +71,11 @@ class _DetailPageState extends State<DetailPage> {
   bool _shouldDisableScroll = false;
   List<File>? _files;
   late PageController _pageController;
-  int _selectedIndex = 0;
-  bool _hasPageChanged = false;
+  final _selectedIndexNotifier = ValueNotifier(0);
   bool _hasLoadedTillStart = false;
   bool _hasLoadedTillEnd = false;
   final _enableFullScreenNotifier = ValueNotifier(false);
+  bool _isFirstOpened = true;
 
   @override
   void initState() {
@@ -83,15 +83,16 @@ class _DetailPageState extends State<DetailPage> {
     _files = [
       ...widget.config.files
     ]; // Make a copy since we append preceding and succeeding entries to this
-    _selectedIndex = widget.config.selectedIndex;
+    _selectedIndexNotifier.value = widget.config.selectedIndex;
     _preloadEntries();
-    _pageController = PageController(initialPage: _selectedIndex);
+    _pageController = PageController(initialPage: _selectedIndexNotifier.value);
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     _enableFullScreenNotifier.dispose();
+    _selectedIndexNotifier.dispose();
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
@@ -103,21 +104,29 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
     _logger.info(
       "Opening " +
-          _files![_selectedIndex].toString() +
+          _files![_selectedIndexNotifier.value].toString() +
           ". " +
-          (_selectedIndex + 1).toString() +
+          (_selectedIndexNotifier.value + 1).toString() +
           " / " +
           _files!.length.toString() +
           " files .",
     );
     return Scaffold(
-      appBar: FadingAppBar(
-        _files![_selectedIndex],
-        _onFileRemoved,
-        Configuration.instance.getUserID(),
-        100,
-        widget.config.mode == DetailPageMode.full,
-        enableFullScreenNotifier: _enableFullScreenNotifier,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: ValueListenableBuilder(
+          builder: (BuildContext context, int selectedIndex, _) {
+            return FadingAppBar(
+              _files![selectedIndex],
+              _onFileRemoved,
+              Configuration.instance.getUserID(),
+              100,
+              widget.config.mode == DetailPageMode.full,
+              enableFullScreenNotifier: _enableFullScreenNotifier,
+            );
+          },
+          valueListenable: _selectedIndexNotifier,
+        ),
       ),
       extendBodyBehindAppBar: true,
       resizeToAvoidBottomInset: false,
@@ -125,13 +134,18 @@ class _DetailPageState extends State<DetailPage> {
         child: Stack(
           children: [
             _buildPageView(context),
-            FadingBottomBar(
-              _files![_selectedIndex],
-              _onEditFileRequested,
-              widget.config.mode == DetailPageMode.minimalistic,
-              onFileRemoved: _onFileRemoved,
-              userID: Configuration.instance.getUserID(),
-              enableFullScreenNotifier: _enableFullScreenNotifier,
+            ValueListenableBuilder(
+              builder: (BuildContext context, int selectedIndex, _) {
+                return FadingBottomBar(
+                  _files![_selectedIndexNotifier.value],
+                  _onEditFileRequested,
+                  widget.config.mode == DetailPageMode.minimalistic,
+                  onFileRemoved: _onFileRemoved,
+                  userID: Configuration.instance.getUserID(),
+                  enableFullScreenNotifier: _enableFullScreenNotifier,
+                );
+              },
+              valueListenable: _selectedIndexNotifier,
             ),
           ],
         ),
@@ -141,7 +155,7 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget _buildPageView(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    _logger.info("Building with " + _selectedIndex.toString());
+    _logger.info("Building with " + _selectedIndexNotifier.value.toString());
     return PageView.builder(
       itemBuilder: (context, index) {
         final file = _files![index];
@@ -152,7 +166,7 @@ class _DetailPageState extends State<DetailPage> {
           },
           child: FileWidget(
             file,
-            autoPlay: !_hasPageChanged,
+            autoPlay: shouldAutoPlay(),
             tagPrefix: widget.config.tagPrefix,
             shouldDisableScroll: (value) {
               if (_shouldDisableScroll != value) {
@@ -176,12 +190,8 @@ class _DetailPageState extends State<DetailPage> {
         );
       },
       onPageChanged: (index) {
-        setState(() {
-          _selectedIndex = index;
-          _hasPageChanged = true;
-        });
+        _selectedIndexNotifier.value = index;
         _preloadEntries();
-        _preloadFiles(index);
       },
       physics: _shouldDisableScroll
           ? const NeverScrollableScrollPhysics()
@@ -189,6 +199,14 @@ class _DetailPageState extends State<DetailPage> {
       controller: _pageController,
       itemCount: _files!.length,
     );
+  }
+
+  bool shouldAutoPlay() {
+    if (_isFirstOpened) {
+      _isFirstOpened = false;
+      return true;
+    }
+    return false;
   }
 
   void _toggleFullScreen() {
@@ -208,11 +226,12 @@ class _DetailPageState extends State<DetailPage> {
 
     if (widget.config.asyncLoader == null) return;
 
-    if (_selectedIndex == 0 && !_hasLoadedTillStart) {
+    if (_selectedIndexNotifier.value == 0 && !_hasLoadedTillStart) {
       await _loadStartEntries(isSortOrderAsc);
     }
 
-    if (_selectedIndex == _files!.length - 1 && !_hasLoadedTillEnd) {
+    if (_selectedIndexNotifier.value == _files!.length - 1 &&
+        !_hasLoadedTillEnd) {
       await _loadEndEntries(isSortOrderAsc);
     }
   }
@@ -221,11 +240,11 @@ class _DetailPageState extends State<DetailPage> {
     final result = isSortOrderAsc
         ? await widget.config.asyncLoader!(
             galleryLoadStartTime,
-            _files![_selectedIndex].creationTime! - 1,
+            _files![_selectedIndexNotifier.value].creationTime! - 1,
             limit: kLoadLimit,
           )
         : await widget.config.asyncLoader!(
-            _files![_selectedIndex].creationTime! + 1,
+            _files![_selectedIndexNotifier.value].creationTime! + 1,
             DateTime.now().microsecondsSinceEpoch,
             limit: kLoadLimit,
             asc: true,
@@ -242,21 +261,21 @@ class _DetailPageState extends State<DetailPage> {
       files.addAll(_files!);
       _files = files;
       _pageController.jumpToPage(length);
-      _selectedIndex = length;
+      _selectedIndexNotifier.value = length;
     });
   }
 
   Future<void> _loadEndEntries(bool isSortOrderAsc) async {
     final result = isSortOrderAsc
         ? await widget.config.asyncLoader!(
-            _files![_selectedIndex].creationTime! + 1,
+            _files![_selectedIndexNotifier.value].creationTime! + 1,
             DateTime.now().microsecondsSinceEpoch,
             limit: kLoadLimit,
             asc: true,
           )
         : await widget.config.asyncLoader!(
             galleryLoadStartTime,
-            _files![_selectedIndex].creationTime! - 1,
+            _files![_selectedIndexNotifier.value].creationTime! - 1,
             limit: kLoadLimit,
           );
 
@@ -284,7 +303,7 @@ class _DetailPageState extends State<DetailPage> {
       Navigator.of(context).pop(); // Close pageview
       return;
     }
-    if (_selectedIndex == totalFiles - 1) {
+    if (_selectedIndexNotifier.value == totalFiles - 1) {
       // Deleted the last file
       await _pageController!.previousPage(
         duration: const Duration(milliseconds: 200),
@@ -299,7 +318,7 @@ class _DetailPageState extends State<DetailPage> {
         curve: Curves.easeInOut,
       );
       setState(() {
-        _selectedIndex--;
+        _selectedIndexNotifier.value--;
         _files!.remove(file);
       });
     }
@@ -340,7 +359,7 @@ class _DetailPageState extends State<DetailPage> {
           file,
           widget.config.copyWith(
             files: _files,
-            selectedIndex: _selectedIndex,
+            selectedIndex: _selectedIndexNotifier.value,
           ),
         ),
       );

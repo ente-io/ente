@@ -30,7 +30,7 @@ import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
 import 'package:photos/utils/toast_util.dart';
 
-class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
+class FadingAppBar extends StatefulWidget {
   final File file;
   final Function(File) onFileRemoved;
   final double height;
@@ -47,9 +47,6 @@ class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
     required this.enableFullScreenNotifier,
     Key? key,
   }) : super(key: key);
-
-  @override
-  Size get preferredSize => Size.fromHeight(height);
 
   @override
   FadingAppBarState createState() => FadingAppBarState();

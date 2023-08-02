@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 class GalleryContextState extends InheritedWidget {
+  ///Sorting by creation time
   final bool sortOrderAsc;
   final bool inSelectionMode;
 

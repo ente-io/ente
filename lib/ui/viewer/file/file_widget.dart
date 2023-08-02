@@ -36,7 +36,7 @@ class FileWidget extends StatelessWidget {
     } else if (file.fileType == FileType.video) {
       return VideoWidget(
         file,
-        autoPlay: autoPlay, // Autoplay if it was opened directly
+        autoPlay: autoPlay ?? false, // Autoplay if it was opened directly
         tagPrefix: tagPrefix,
         playbackCallback: playbackCallback,
       );
