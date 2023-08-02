@@ -300,7 +300,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           //using a hack instead of enabling this as enabling this will create other problems
           drawer: enableDrawer
               ? ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 428),
+                  constraints: const BoxConstraints(maxWidth: 430),
                   child: Drawer(
                     width: double.infinity,
                     child: _settingsPage,
