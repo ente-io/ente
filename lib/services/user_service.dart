@@ -154,7 +154,6 @@ class UserService {
           setEmail(userDetails.email);
         }
       }
-      _logger.info("Successfully fetched user details");
       return userDetails;
     } catch(e) {
       _logger.warning("Failed to fetch", e);

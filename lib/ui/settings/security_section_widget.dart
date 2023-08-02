@@ -47,6 +47,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   Widget _getSectionOptions(BuildContext context) {
     final bool? canDisableMFA = UserService.instance.canDisableEmailMFA();
     if (canDisableMFA == null) {
+      // We don't know if the user can disable MFA yet, so we fetch the info
       UserService.instance.getUserDetailsV2().then(
             (value) => {
               if (mounted) {setState(() {})}
