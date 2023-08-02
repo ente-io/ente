@@ -12,6 +12,7 @@ import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/locale.dart';
 import "package:ente_auth/onboarding/view/onboarding_page.dart";
 import 'package:ente_auth/services/update_service.dart';
+import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/settings/app_update_dialog.dart';
 import 'package:flutter/foundation.dart';
@@ -49,6 +50,7 @@ class _AppState extends State<App> {
       }
     });
     _signedInEvent = Bus.instance.on<SignedInEvent>().listen((event) {
+      UserService.instance.getUserDetailsV2().ignore();
       if (mounted) {
         setState(() {});
       }
