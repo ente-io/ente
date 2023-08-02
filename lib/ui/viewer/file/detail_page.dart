@@ -75,6 +75,7 @@ class _DetailPageState extends State<DetailPage> {
   bool _hasLoadedTillStart = false;
   bool _hasLoadedTillEnd = false;
   final _enableFullScreenNotifier = ValueNotifier(false);
+  bool _isFirstOpened = true;
 
   @override
   void initState() {
@@ -165,6 +166,7 @@ class _DetailPageState extends State<DetailPage> {
           },
           child: FileWidget(
             file,
+            autoPlay: shouldAutoPlay(),
             tagPrefix: widget.config.tagPrefix,
             shouldDisableScroll: (value) {
               if (_shouldDisableScroll != value) {
@@ -197,6 +199,14 @@ class _DetailPageState extends State<DetailPage> {
       controller: _pageController,
       itemCount: _files!.length,
     );
+  }
+
+  bool shouldAutoPlay() {
+    if (_isFirstOpened) {
+      _isFirstOpened = false;
+      return true;
+    }
+    return false;
   }
 
   void _toggleFullScreen() {
