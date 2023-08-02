@@ -610,10 +610,12 @@ export function PhotoList({
                         {publicCollectionGalleryContext.referralCode ??
                         '' !== '' ? (
                             <p style={{ marginTop: '4px' }}>
-                                {t(`SHARING_REFERRAL_CODE`, {
-                                    referralCode:
-                                        publicCollectionGalleryContext.referralCode,
-                                })}
+                                <Typography color={'text.muted'}>
+                                    {t(`SHARING_REFERRAL_CODE`, {
+                                        referralCode:
+                                            publicCollectionGalleryContext.referralCode,
+                                    })}
+                                </Typography>
                             </p>
                         ) : null}
                     </Typography>
