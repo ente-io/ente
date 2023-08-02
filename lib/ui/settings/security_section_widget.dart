@@ -45,8 +45,14 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final bool canDisableMFA = UserService.instance.canDisableEmailMFA();
-
+    final bool? canDisableMFA = UserService.instance.canDisableEmailMFA();
+    if (canDisableMFA == null) {
+      UserService.instance.getUserDetailsV2().then(
+            (value) => {
+              if (mounted) {setState(() {})}
+            },
+          );
+    }
     final l10n = context.l10n;
     final List<Widget> children = [];
     children.addAll([
@@ -70,9 +76,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           },
         ),
       ),
-      if(canDisableMFA)
+      if(canDisableMFA ?? false)
         sectionOptionSpacing,
-      if(canDisableMFA)
+      if(canDisableMFA ?? false)
         MenuItemWidget(
           captionedTextWidget:  CaptionedTextWidget(
             title: l10n.emailVerificationToggle,

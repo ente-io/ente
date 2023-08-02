@@ -896,8 +896,8 @@ class UserService {
     }
   }
 
-  bool canDisableEmailMFA() {
-    return _preferences.getBool(kCanDisableEmailMFA)  ?? false;
+  bool? canDisableEmailMFA() {
+    return _preferences.getBool(kCanDisableEmailMFA);;
   }
   bool hasEmailMFAEnabled() {
     return _preferences.getBool(kIsEmailMFAEnabled) ?? true;
