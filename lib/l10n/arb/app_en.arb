@@ -87,6 +87,8 @@
   "importInstruction": "Please select a file that contains a list of your codes in the following format",
   "importCodeDelimiterInfo": "The codes can be separated by a comma or a new line",
   "selectFile": "Select file",
+  "emailVerificationToggle": "Email verification",
+  "authToChangeEmailVerificationSetting": "Please authenticate to change email verification",
   "authToViewYourRecoveryKey": "Please authenticate to view your recovery key",
   "authToChangeYourEmail": "Please authenticate to change your email",
   "authToChangeYourPassword": "Please authenticate to change your password",

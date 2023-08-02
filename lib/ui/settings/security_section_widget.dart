@@ -74,8 +74,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         sectionOptionSpacing,
       if(canDisableMFA)
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Email MFA",
+          captionedTextWidget:  CaptionedTextWidget(
+            title: l10n.emailVerificationToggle,
           ),
           trailingWidget: ToggleSwitchWidget(
             value: () => UserService.instance.hasEmailMFAEnabled(),
@@ -84,7 +84,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                   .instance
                   .requestLocalAuthentication(
                 context,
-                "Authenticate to change your email MFA setting",
+                l10n.authToChangeEmailVerificationSetting,
               );
               final isEmailMFAEnabled =
               UserService.instance.hasEmailMFAEnabled();
