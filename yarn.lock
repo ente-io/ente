@@ -687,13 +687,13 @@
     "@types/seedrandom" "^2.4.28"
     seedrandom "^3.0.5"
 
-"@tensorflow/tfjs-backend-cpu@^3.13.0":
-  version "3.13.0"
-  resolved "https://registry.npmjs.org/@tensorflow/tfjs-backend-cpu/-/tfjs-backend-cpu-3.13.0.tgz"
-  integrity sha512-POmzUoAP8HooYYTZ72O1ZYkpVZB0f+8PeAkbTxIG0oahcJccj6a0Vovp1A6xWKfljUoPlJb3jWVC++S603ZL8w==
+"@tensorflow/tfjs-backend-cpu@^4.10.0":
+  version "4.10.0"
+  resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-backend-cpu/-/tfjs-backend-cpu-4.10.0.tgz#2f85514fd294cc2ed3b1de57c25fc0428ed0c336"
+  integrity sha512-w3f0ORR1smSpkW7om2yQVunRYMjyqWcEbWCPirR1DQ6ImgW+VWqmM2oVPQXRsFYpwg1g6bk2Jp5COafpPA+krw==
   dependencies:
-    "@types/seedrandom" "2.4.27"
-    seedrandom "2.4.3"
+    "@types/seedrandom" "^2.4.28"
+    seedrandom "^3.0.5"
 
 "@tensorflow/tfjs-backend-webgl@^4.9.0":
   version "4.9.0"
@@ -706,23 +706,23 @@
     "@types/webgl-ext" "0.0.30"
     seedrandom "^3.0.5"
 
-"@tensorflow/tfjs-converter@^3.11.0":
-  version "3.11.0"
-  resolved "https://registry.npmjs.org/@tensorflow/tfjs-converter/-/tfjs-converter-3.11.0.tgz"
-  integrity sha512-rTRIKvBoqL0qdPYpm8UXauZycOiaBHZB2E2v3OoXoHnjvle/Xn/09uZJdrixgGhR+Kahs3Vz27BEEFz6RI5j2w==
+"@tensorflow/tfjs-converter@^4.10.0":
+  version "4.10.0"
+  resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-converter/-/tfjs-converter-4.10.0.tgz#50a014ada390e28a659a004097b0d0503969324a"
+  integrity sha512-ffLpK+ismdmiDcoTID2aidP3/uJYyQPjmKdRZ3hBUkrczy7pQIcCW8blIR9Gk20htB4OLQMf74ZxbpfdQ9nYeQ==
 
-"@tensorflow/tfjs-core@^3.11.0":
-  version "3.11.0"
-  resolved "https://registry.npmjs.org/@tensorflow/tfjs-core/-/tfjs-core-3.11.0.tgz"
-  integrity sha512-JOp+1+LCd0Xg3hu7fu6iQPWZnN8Hc6ssfP7B+625XH5GYY1/OhVASa7Ahe2mJr9gZovY2lw8FUejLh1jMmBb1Q==
+"@tensorflow/tfjs-core@^4.10.0":
+  version "4.10.0"
+  resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-core/-/tfjs-core-4.10.0.tgz#73e0ad186ad27b7f73fc1c7eaa7f5cf025179b72"
+  integrity sha512-klc6lUTYRbHQLEFnVKtTICNK+WUlduUcrlXsDs6ixKAOJzLAlIR2JnmJICt2AT2Rxwu0Zj2bAYojSxgcIcUUxA==
   dependencies:
     "@types/long" "^4.0.1"
-    "@types/offscreencanvas" "~2019.3.0"
-    "@types/seedrandom" "2.4.27"
-    "@types/webgl-ext" "0.0.30"
+    "@types/offscreencanvas" "~2019.7.0"
+    "@types/seedrandom" "^2.4.28"
+    "@webgpu/types" "0.1.30"
     long "4.0.0"
     node-fetch "~2.6.1"
-    seedrandom "2.4.3"
+    seedrandom "^3.0.5"
 
 "@tensorflow/tfjs-tflite@^0.0.1-alpha.7":
   version "0.0.1-alpha.7"
@@ -814,6 +814,11 @@
   version "2019.3.0"
   resolved "https://registry.npmjs.org/@types/offscreencanvas/-/offscreencanvas-2019.3.0.tgz"
   integrity sha512-esIJx9bQg+QYF0ra8GnvfianIY8qWB0GBx54PK5Eps6m+xTj86KLavHv6qDhzKcu5UUOgNfJ2pWaIIV7TRUd9Q==
+
+"@types/offscreencanvas@~2019.7.0":
+  version "2019.7.0"
+  resolved "https://registry.yarnpkg.com/@types/offscreencanvas/-/offscreencanvas-2019.7.0.tgz#e4a932069db47bb3eabeb0b305502d01586fa90d"
+  integrity sha512-PGcyveRIpL1XIqK8eBsmRBt76eFgtzuPiSTyKHZxnGemp2yzGzWpjYKAfK3wIMiU7eH+851yEpiuP8JZerTmWg==
 
 "@types/parse-json@^4.0.0":
   version "4.0.0"
@@ -922,11 +927,6 @@
   version "0.16.2"
   resolved "https://registry.npmjs.org/@types/scheduler/-/scheduler-0.16.2.tgz"
   integrity sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==
-
-"@types/seedrandom@2.4.27":
-  version "2.4.27"
-  resolved "https://registry.npmjs.org/@types/seedrandom/-/seedrandom-2.4.27.tgz"
-  integrity sha1-nbVjk33YaRX2kJK8QyWdL0hXjkE=
 
 "@types/seedrandom@^2.4.28":
   version "2.4.30"
@@ -1085,6 +1085,11 @@
   dependencies:
     "@typescript-eslint/types" "5.59.7"
     eslint-visitor-keys "^3.3.0"
+
+"@webgpu/types@0.1.30":
+  version "0.1.30"
+  resolved "https://registry.yarnpkg.com/@webgpu/types/-/types-0.1.30.tgz#b6406dc4a1c1e0d469028ceb30ddffbbd2fa706c"
+  integrity sha512-9AXJSmL3MzY8ZL//JjudA//q+2kBRGhLBFpkdGksWIuxrMy81nFrCzj2Am+mbh8WoU6rXmv7cY5E3rdlyru2Qg==
 
 "@zip.js/zip.js@^2.4.2":
   version "2.4.2"
@@ -4009,11 +4014,6 @@ scheduler@^0.23.0:
   integrity sha512-CtuThmgHNg7zIZWAXi3AsyIzA3n4xx7aNyjwC2VJldO2LMVDhFK+63xGqq6CsJH4rTAt6/M+N4GhZiDYPx9eUw==
   dependencies:
     loose-envify "^1.1.0"
-
-seedrandom@2.4.3:
-  version "2.4.3"
-  resolved "https://registry.npmjs.org/seedrandom/-/seedrandom-2.4.3.tgz"
-  integrity sha1-JDhQTa0zkXMUv/GKxNeU8W1qrsw=
 
 seedrandom@^3.0.5:
   version "3.0.5"
