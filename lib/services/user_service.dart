@@ -45,6 +45,8 @@ import "package:uuid/uuid.dart";
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
   static const keyUserDetails = "user_details";
+  static const kCanDisableEmailMFA = "can_disable_email_mfa";
+  static const kIsEmailMFAEnabled = "is_email_mfa_enabled";
   final  SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
   final _dio = Network.instance.getDio();
   final _enteDio = Network.instance.enteDio;
@@ -131,10 +133,9 @@ class UserService {
 
 
   Future<UserDetails> getUserDetailsV2({
-    bool memoryCount = true,
-    bool shouldCache = false,
+    bool memoryCount = false,
+    bool shouldCache = true,
   }) async {
-    _logger.info("Fetching user details");
     try {
       final response = await _enteDio.get(
         "/users/details/v2",
@@ -144,14 +145,19 @@ class UserService {
       );
       final userDetails = UserDetails.fromMap(response.data);
       if (shouldCache) {
+        if(userDetails.profileData != null) {
+          _preferences.setBool(kIsEmailMFAEnabled, userDetails.profileData!.isEmailMFAEnabled);
+          _preferences.setBool(kCanDisableEmailMFA, userDetails.profileData!.canDisableEmailMFA);
+        }
         // handle email change from different client
         if (userDetails.email != _config.getEmail()) {
           setEmail(userDetails.email);
         }
       }
+      _logger.info("Successfully fetched user details");
       return userDetails;
-    } on DioError catch (e) {
-      _logger.info(e);
+    } catch(e) {
+      _logger.warning("Failed to fetch", e);
       rethrow;
     }
   }
@@ -890,7 +896,26 @@ class UserService {
     }
   }
 
+  bool canDisableEmailMFA() {
+    return _preferences.getBool(kCanDisableEmailMFA)  ?? false;
+  }
+  bool hasEmailMFAEnabled() {
+    return _preferences.getBool(kIsEmailMFAEnabled) ?? true;
+  }
 
-
+  Future<void> updateEmailMFA(bool isEnabled) async {
+    try {
+      await _enteDio.put(
+        "/users/email-mfa",
+        data: {
+          "isEnabled": isEnabled,
+        },
+      );
+      _preferences.setBool(kIsEmailMFAEnabled, isEnabled);
+    } catch (e) {
+      _logger.severe("Failed to update email mfa",e);
+      rethrow;
+    }
+  }
 }
 

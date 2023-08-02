@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/settings/about_section_widget.dart';
@@ -20,8 +21,10 @@ class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
   const SettingsPage({Key? key, required this.emailNotifier}) : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
+    UserService.instance.getUserDetailsV2().ignore();
     final enteColorScheme = getEnteColorScheme(context);
     return Scaffold(
       body: Container(
