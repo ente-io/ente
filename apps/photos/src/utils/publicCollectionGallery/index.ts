@@ -5,6 +5,7 @@ const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType 
     {
         token: null,
         passwordToken: null,
+        referralCode: null,
         accessedThroughSharedURL: false,
         photoListHeader: null,
         photoListFooter: null,
