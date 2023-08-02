@@ -190,7 +190,6 @@ class _DetailPageState extends State<DetailPage> {
       onPageChanged: (index) {
         _selectedIndexNotifier.value = index;
         _preloadEntries();
-        // _preloadFiles(index);
       },
       physics: _shouldDisableScroll
           ? const NeverScrollableScrollPhysics()
