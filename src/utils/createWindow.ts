@@ -16,8 +16,6 @@ export async function createWindow(): Promise<BrowserWindow> {
     const appIcon = nativeImage.createFromPath(appImgPath);
     // Create the browser window.
     const mainWindow = new BrowserWindow({
-        height: 600,
-        width: 800,
         webPreferences: {
             sandbox: false,
             preload: path.join(__dirname, '../preload.js'),
@@ -26,16 +24,17 @@ export async function createWindow(): Promise<BrowserWindow> {
         icon: appIcon,
         show: false, // don't show the main window on load,
     });
-    mainWindow.maximize();
     const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
+    ElectronLog.log('wasAutoLaunched', wasAutoLaunched);
 
     const splash = new BrowserWindow({
-        height: 600,
-        width: 800,
         transparent: true,
-        show: !wasAutoLaunched,
+        show: false,
     });
-    splash.maximize();
+    if (!wasAutoLaunched) {
+        splash.maximize();
+        splash.show();
+    }
 
     if (isDev) {
         splash.loadFile(`../build/splash.html`);
@@ -55,11 +54,14 @@ export async function createWindow(): Promise<BrowserWindow> {
             : splash.loadURL(
                   `file://${path.join(process.resourcesPath, 'error.html')}`
               );
+        mainWindow.maximize();
+        mainWindow.show();
     });
     mainWindow.once('ready-to-show', async () => {
         try {
             splash.destroy();
             if (!wasAutoLaunched) {
+                mainWindow.maximize();
                 mainWindow.show();
             }
         } catch (e) {
@@ -84,6 +86,7 @@ export async function createWindow(): Promise<BrowserWindow> {
         try {
             splash.destroy();
             if (!wasAutoLaunched) {
+                mainWindow.maximize();
                 mainWindow.show();
             }
         } catch (e) {
