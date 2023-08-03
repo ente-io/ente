@@ -79,7 +79,7 @@ if (!gotTheLock) {
         setupMacWindowOnDockIconClick();
         setupMainMenu();
         setupIpcComs(tray, mainWindow, watcher);
-        handleUpdates(mainWindow);
+        await handleUpdates(mainWindow);
         handleDownloads(mainWindow);
         handleExternalLinks(mainWindow);
         addAllowOriginHeader(mainWindow);
