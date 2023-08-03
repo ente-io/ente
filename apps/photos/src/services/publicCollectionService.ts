@@ -17,6 +17,7 @@ import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';
 const PUBLIC_COLLECTIONS_TABLE = 'public-collections';
+const PUBLIC_REFERRAL_CODE = 'public-referral-code';
 
 export const getPublicCollectionUID = (token: string) => `${token}`;
 
@@ -116,6 +117,17 @@ export const savePublicCollection = async (collection: Collection) => {
         PUBLIC_COLLECTIONS_TABLE,
         dedupeCollections([collection, ...publicCollections])
     );
+};
+
+export const getReferralCode = async () => {
+    return await localForage.getItem<string>(PUBLIC_REFERRAL_CODE);
+};
+
+export const saveReferralCode = async (code: string) => {
+    if (!code) {
+        localForage.removeItem(PUBLIC_REFERRAL_CODE);
+    }
+    await localForage.setItem(PUBLIC_REFERRAL_CODE, code);
 };
 
 const dedupeCollections = (collections: Collection[]) => {
@@ -296,7 +308,7 @@ const getPublicFiles = async (
 export const getPublicCollection = async (
     token: string,
     collectionKey: string
-): Promise<Collection> => {
+): Promise<[Collection, string]> => {
     try {
         if (!token) {
             return;
@@ -307,6 +319,7 @@ export const getPublicCollection = async (
             { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
         );
         const fetchedCollection = resp.data.collection;
+        const referralCode = resp.data.referralCode ?? '';
 
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
@@ -337,7 +350,8 @@ export const getPublicCollection = async (
             pubMagicMetadata: collectionPublicMagicMetadata,
         };
         await savePublicCollection(collection);
-        return collection;
+        await saveReferralCode(referralCode);
+        return [collection, referralCode];
     } catch (e) {
         logError(e, 'failed to get public collection');
         throw e;

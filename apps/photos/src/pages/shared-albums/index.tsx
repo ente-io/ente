@@ -7,6 +7,7 @@ import {
     getLocalPublicFiles,
     getPublicCollection,
     getPublicCollectionUID,
+    getReferralCode,
     removePublicCollectionWithFiles,
     removePublicFiles,
     savePublicCollectionPassword,
@@ -70,6 +71,7 @@ export default function PublicCollectionGallery() {
     const passwordJWTToken = useRef<string>(null);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
+    const referralCode = useRef<string>('');
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const [errorMessage, setErrorMessage] = useState<string>(null);
@@ -78,6 +80,7 @@ export default function PublicCollectionGallery() {
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
         useState<boolean>(false);
+
     const [photoListHeader, setPhotoListHeader] =
         useState<TimeStampListItem>(null);
 
@@ -174,6 +177,7 @@ export default function PublicCollectionGallery() {
                     collectionKey.current
                 );
                 if (localCollection) {
+                    referralCode.current = await getReferralCode();
                     const sortAsc: boolean =
                         localCollection?.pubMagicMetadata?.data.asc ?? false;
                     setPublicCollection(localCollection);
@@ -278,10 +282,12 @@ export default function PublicCollectionGallery() {
         try {
             appContext.startLoading();
             setLoading(true);
-            const collection = await getPublicCollection(
+            const [collection, userReferralCode] = await getPublicCollection(
                 token.current,
                 collectionKey.current
             );
+            referralCode.current = userReferralCode;
+
             setPublicCollection(collection);
             const isPasswordProtected =
                 collection?.publicURLs?.[0]?.passwordEnabled;
@@ -423,6 +429,7 @@ export default function PublicCollectionGallery() {
         <PublicCollectionGalleryContext.Provider
             value={{
                 token: token.current,
+                referralCode: referralCode.current,
                 passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
                 photoListHeader,
