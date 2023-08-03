@@ -20,6 +20,7 @@ export function buildContextMenu(mainWindow: BrowserWindow): Menu {
         {
             label: 'Open ente',
             click: function () {
+                mainWindow.maximize();
                 mainWindow.show();
             },
         },
