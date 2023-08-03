@@ -11,10 +11,13 @@ import { getHideDockIconPreference } from '../services/userPreference';
 import { setupAutoUpdater } from '../services/appUpdater';
 import ElectronLog from 'electron-log';
 import os from 'os';
+import util from 'util';
 import { isPlatform } from './common/platform';
+const execAsync = util.promisify(require('child_process').exec);
 
-export function handleUpdates(mainWindow: BrowserWindow) {
-    if (!isDev) {
+export async function handleUpdates(mainWindow: BrowserWindow) {
+    const isInstalledViaBrew = await checkIfInstalledViaBrew();
+    if (!isDev && !isInstalledViaBrew) {
         setupAutoUpdater(mainWindow);
     }
 }
@@ -114,4 +117,18 @@ export function handleExternalLinks(mainWindow: BrowserWindow) {
             return { action: 'allow' };
         }
     });
+}
+
+export async function checkIfInstalledViaBrew() {
+    if (!isPlatform('mac')) {
+        return false;
+    }
+    try {
+        await execAsync('brew list --cask ente');
+        ElectronLog.info('ente installed via brew');
+        return true;
+    } catch (e) {
+        ElectronLog.info('ente not installed via brew');
+        return false;
+    }
 }
