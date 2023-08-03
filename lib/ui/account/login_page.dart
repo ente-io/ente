@@ -2,6 +2,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/errors.dart';
 import "package:ente_auth/l10n/l10n.dart";
+import 'package:ente_auth/models/api/user/srp.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/account/login_pwd_verification_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
@@ -61,22 +62,27 @@ class _LoginPageState extends State<LoginPage> {
         buttonText: context.l10n.logInLabel,
         onPressedFunction: () async {
           UserService.instance.setEmail(_email!);
+          SrpAttributes? attr;
+          bool isEmailVerificationEnabled = true;
           try {
-            final attr = await UserService.instance.getSrpAttributes(_email!);
+            attr = await UserService.instance.getSrpAttributes(_email!);
+            isEmailVerificationEnabled = attr.isEmailMFAEnabled;
+          } catch (e) {
+            if (e is! SrpSetupNotCompleteError) {
+              _logger.severe('Error getting SRP attributes', e);
+            }
+          }
+          if (attr != null && !isEmailVerificationEnabled) {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
                   return LoginPasswordVerificationPage(
-                    srpAttributes: attr,
+                    srpAttributes: attr!,
                   );
                 },
               ),
             );
-          }
-          catch (e) {
-            if(e is! SrpSetupNotCompleteError) {
-              _logger.warning('Error getting SRP attributes', e);
-            }
+          } else {
             await UserService.instance
                 .sendOtt(context, _email!, isCreateAccountScreen: false);
           }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -10,6 +11,7 @@ class UserDetails {
   final int sharedCollectionsCount;
   final Subscription subscription;
   final FamilyData? familyData;
+  final ProfileData? profileData;
 
   UserDetails(
     this.email,
@@ -18,6 +20,7 @@ class UserDetails {
     this.sharedCollectionsCount,
     this.subscription,
     this.familyData,
+      this.profileData,
   );
 
   bool isPartOfFamily() {
@@ -59,8 +62,10 @@ class UserDetails {
       (map['sharedCollectionsCount'] ?? 0) as int,
       Subscription.fromMap(map['subscription']),
       FamilyData.fromMap(map['familyData']),
+      ProfileData.fromJson(map['profileData']),
     );
   }
+
 }
 
 class FamilyMember {
@@ -80,7 +85,39 @@ class FamilyMember {
     );
   }
 }
+class ProfileData {
+  bool canDisableEmailMFA;
+  bool isEmailMFAEnabled;
+  bool isTwoFactorEnabled;
 
+  // Constructor with default values
+  ProfileData({
+    this.canDisableEmailMFA = false,
+    this.isEmailMFAEnabled = false,
+    this.isTwoFactorEnabled = false,
+  });
+
+  // Factory method to create ProfileData instance from JSON
+  factory ProfileData.fromJson(Map<String, dynamic>? json) {
+    if (json == null) null;
+
+    return ProfileData(
+      canDisableEmailMFA: json!['canDisableEmailMFA'] ?? false,
+      isEmailMFAEnabled: json['isEmailMFAEnabled'] ?? false,
+      isTwoFactorEnabled: json['isTwoFactorEnabled'] ?? false,
+    );
+  }
+
+  // Method to convert ProfileData instance to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'canDisableEmailMFA': canDisableEmailMFA,
+      'isEmailMFAEnabled': isEmailMFAEnabled,
+      'isTwoFactorEnabled': isTwoFactorEnabled,
+    };
+  }
+  String toJsonString() => json.encode(toJson());
+}
 class FamilyData {
   final List<FamilyMember>? members;
 
