@@ -5,6 +5,7 @@ class SetupSRPRequest {
   final String srpA;
   final bool isUpdate;
 
+
   SetupSRPRequest({
     required this.srpUserID,
     required this.srpSalt,
@@ -87,6 +88,7 @@ class SrpAttributes {
   final int memLimit;
   final int opsLimit;
   final String kekSalt;
+  final bool isEmailMFAEnabled;
 
   SrpAttributes({
     required this.srpUserID,
@@ -94,6 +96,7 @@ class SrpAttributes {
     required this.memLimit,
     required this.opsLimit,
     required this.kekSalt,
+    required this.isEmailMFAEnabled,
   });
 
   factory SrpAttributes.fromMap(Map<String, dynamic> map) {
@@ -103,6 +106,7 @@ class SrpAttributes {
       memLimit: map['attributes']['memLimit'],
       opsLimit: map['attributes']['opsLimit'],
       kekSalt: map['attributes']['kekSalt'],
+      isEmailMFAEnabled: map['attributes']['isEmailMFAEnabled'],
     );
   }
 }

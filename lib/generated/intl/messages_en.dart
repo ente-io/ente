@@ -306,6 +306,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ask your loved ones to share"),
         "atAFalloutShelter":
             MessageLookupByLibrary.simpleMessage("at a fallout shelter"),
+        "authToChangeEmailVerificationSetting":
+            MessageLookupByLibrary.simpleMessage(
+                "Please authenticate to change email verification"),
         "authToChangeLockscreenSetting": MessageLookupByLibrary.simpleMessage(
             "Please authenticate to change lockscreen setting"),
         "authToChangeYourEmail": MessageLookupByLibrary.simpleMessage(
@@ -561,6 +564,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "email": MessageLookupByLibrary.simpleMessage("Email"),
         "emailChangedTo": m15,
         "emailNoEnteAccount": m16,
+        "emailVerificationToggle":
+            MessageLookupByLibrary.simpleMessage("Email verification"),
         "emailYourLogs":
             MessageLookupByLibrary.simpleMessage("Email your logs"),
         "empty": MessageLookupByLibrary.simpleMessage("Empty"),
