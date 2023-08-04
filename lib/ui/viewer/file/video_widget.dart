@@ -104,6 +104,8 @@ class _VideoWidgetState extends State<VideoWidget> {
       if (file != null) {
         _setVideoPlayerController(file: file);
       }
+    }).onError((error, stackTrace) {
+      showErrorDialog(context, "Error", "Failed to download the video");
     });
   }
 
