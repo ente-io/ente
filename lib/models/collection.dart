@@ -116,7 +116,8 @@ class Collection {
   }
 
   bool isQuickLinkCollection() {
-    return (magicMetadata.subType ?? 0) == subTypeSharedFilesCollection;
+    return (magicMetadata.subType ?? 0) == subTypeSharedFilesCollection &&
+        !hasSharees;
   }
 
   List<User> getSharees() {

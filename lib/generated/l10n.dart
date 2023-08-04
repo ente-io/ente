@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -5380,6 +5381,16 @@ class S {
     return Intl.message(
       'Rename album',
       name: 'renameAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Convert to album`
+  String get convertToAlbum {
+    return Intl.message(
+      'Convert to album',
+      name: 'convertToAlbum',
       desc: '',
       args: [],
     );

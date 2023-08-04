@@ -310,13 +310,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             value: AlbumPopupAction.rename,
             child: Row(
               children: [
-                const Icon(Icons.edit),
+                Icon(isQuickLink ? Icons.photo_album_outlined : Icons.edit),
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(isQuickLink
-                    ? "Convert to album"
-                    : S.of(context).renameAlbum,),
+                Text(
+                  isQuickLink
+                      ? S.of(context).convertToAlbum
+                      : S.of(context).renameAlbum,
+                ),
               ],
             ),
           ),

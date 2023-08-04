@@ -776,6 +776,7 @@
   },
   "deleteAll": "Delete All",
   "renameAlbum": "Rename album",
+  "convertToAlbum": "Convert to album",
   "setCover": "Set cover",
   "@setCover": {
     "description": "Text to set cover photo for an album"

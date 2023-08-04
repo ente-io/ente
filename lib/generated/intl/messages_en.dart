@@ -432,6 +432,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "continueLabel": MessageLookupByLibrary.simpleMessage("Continue"),
         "continueOnFreeTrial":
             MessageLookupByLibrary.simpleMessage("Continue on free trial"),
+        "convertToAlbum":
+            MessageLookupByLibrary.simpleMessage("Convert to album"),
         "copyEmailAddress":
             MessageLookupByLibrary.simpleMessage("Copy email address"),
         "copyLink": MessageLookupByLibrary.simpleMessage("Copy link"),
