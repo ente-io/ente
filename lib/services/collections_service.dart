@@ -328,9 +328,9 @@ class CollectionsService {
     final List<Collection> collections = getCollectionsForUI(includedShared: true);
     for (final c in collections) {
       if (c.owner!.id == Configuration.instance.getUserID()) {
-        if (c.hasSharees || c.hasLink && !c.isSharedFilesCollection()) {
+        if (c.hasSharees || c.hasLink && !c.isQuickLinkCollection()) {
           outgoing.add(c);
-        } else if (c.isSharedFilesCollection()) {
+        } else if (c.isQuickLinkCollection()) {
           quickLinks.add(c);
         }
       } else {
@@ -375,7 +375,7 @@ class CollectionsService {
     final List<Collection> rest = [];
     for (final collection in collections) {
       if (collection.type == CollectionType.uncategorized ||
-          collection.isSharedFilesCollection() ||
+          collection.isQuickLinkCollection() ||
           collection.isHidden()) {
         continue;
       }
@@ -638,7 +638,7 @@ class CollectionsService {
     try {
       // Note: when collection created to sharing few files is renamed
       // convert that collection to a regular collection type.
-      if (collection.isSharedFilesCollection()) {
+      if (collection.isQuickLinkCollection()) {
         await updateMagicMetadata(collection, {"subType": 0});
       }
       final encryptedName = CryptoUtil.encryptSync(

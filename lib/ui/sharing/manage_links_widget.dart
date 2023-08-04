@@ -243,6 +243,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       );
                       if (result && mounted) {
                         Navigator.of(context).pop();
+                        if(widget.collection!.isQuickLinkCollection()) {
+                          Navigator.of(context).pop();
+                        }
                       }
                     },
                   ),
