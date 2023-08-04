@@ -11,6 +11,7 @@ enum GalleryType {
   ownedCollection,
   searchResults,
   locationTag,
+  quickLink,
 }
 
 extension GalleyTypeExtension on GalleryType {
@@ -26,6 +27,7 @@ extension GalleyTypeExtension on GalleryType {
         return true;
 
       case GalleryType.hidden:
+      case GalleryType.quickLink:
       case GalleryType.uncategorized:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
@@ -37,6 +39,7 @@ extension GalleyTypeExtension on GalleryType {
     switch (this) {
       case GalleryType.ownedCollection:
       case GalleryType.uncategorized:
+      case GalleryType.quickLink:
         return true;
 
       case GalleryType.hidden:
@@ -63,6 +66,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.localFolder:
       case GalleryType.uncategorized:
       case GalleryType.locationTag:
+      case GalleryType.quickLink:
         return true;
       case GalleryType.trash:
       case GalleryType.archive:
@@ -83,6 +87,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.hidden:
       case GalleryType.localFolder:
       case GalleryType.locationTag:
+      case GalleryType.quickLink:
         return true;
       case GalleryType.trash:
       case GalleryType.sharedCollection:
@@ -104,6 +109,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
+      case GalleryType.quickLink:
         return false;
     }
   }
@@ -112,6 +118,7 @@ extension GalleyTypeExtension on GalleryType {
     switch (this) {
       case GalleryType.ownedCollection:
       case GalleryType.sharedCollection:
+      case GalleryType.quickLink:
         return true;
       case GalleryType.hidden:
       case GalleryType.uncategorized:
@@ -134,6 +141,7 @@ extension GalleyTypeExtension on GalleryType {
         return true;
 
       case GalleryType.hidden:
+      case GalleryType.quickLink:
       case GalleryType.favorite:
       case GalleryType.searchResults:
       case GalleryType.archive:
@@ -160,6 +168,7 @@ extension GalleyTypeExtension on GalleryType {
         return true;
 
       case GalleryType.hidden:
+      case GalleryType.quickLink:
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.favorite:
@@ -182,6 +191,7 @@ extension GalleyTypeExtension on GalleryType {
         return true;
 
       case GalleryType.hidden:
+      case GalleryType.quickLink:
       case GalleryType.favorite:
       case GalleryType.archive:
       case GalleryType.localFolder:

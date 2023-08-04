@@ -262,7 +262,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
     final int userID = Configuration.instance.getUserID()!;
     if ((widget.type == GalleryType.ownedCollection ||
-            widget.type == GalleryType.sharedCollection) &&
+            widget.type == GalleryType.sharedCollection ||
+            widget.type == GalleryType.quickLink) &&
         widget.collection?.type != CollectionType.favorites) {
       final bool canAddFiles = widget.type == GalleryType.ownedCollection ||
           widget.collection!.getRole(userID) ==
@@ -284,7 +285,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         Tooltip(
           message: "Share",
           child: IconButton(
-            icon: const Icon(Icons.people_outlined),
+            icon: Icon(
+              widget.type == GalleryType.quickLink
+                  ? Icons.link_outlined
+                  : Icons.people_outlined,
+            ),
             onPressed: () async {
               await _showShareCollectionDialog();
             },
@@ -624,7 +629,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     try {
       if (collection == null ||
           (widget.type != GalleryType.ownedCollection &&
-              widget.type != GalleryType.sharedCollection)) {
+              widget.type != GalleryType.sharedCollection &&
+              widget.type != GalleryType.quickLink)) {
         throw Exception(
           "Cannot share empty collection of typex ${widget.type}",
         );

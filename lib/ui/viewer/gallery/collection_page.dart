@@ -124,6 +124,8 @@ class CollectionPage extends StatelessWidget {
       return GalleryType.uncategorized;
     } else if (c.type == CollectionType.favorites) {
       return GalleryType.favorite;
+    } else if (c.isSharedFilesCollection()) {
+      return GalleryType.quickLink;
     }
     return appBarType;
   }
