@@ -127,13 +127,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<dynamic> _renameAlbum(BuildContext context) async {
-    if (widget.type != GalleryType.ownedCollection) {
+    final bool isQuickLink = widget.type == GalleryType.quickLink;
+    if (widget.type != GalleryType.ownedCollection && widget.type !=
+        GalleryType.quickLink) {
+      showToast(context, 'Type of galler ${widget.type} is not supported for '
+          'rename',);
       return;
     }
     final result = await showTextInputDialog(
       context,
-      title: S.of(context).renameAlbum,
-      submitButtonLabel: S.of(context).rename,
+      title: isQuickLink ? S.of(context).enterAlbumName :S.of(context).renameAlbum,
+      submitButtonLabel: isQuickLink ? S.of(context).done :S.of(context).rename,
       hintText: S.of(context).enterAlbumName,
       alwaysShowSuccessState: true,
       initialValue: widget.collection?.displayName ?? "",
@@ -261,6 +265,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       return actions;
     }
     final int userID = Configuration.instance.getUserID()!;
+    final bool isQuickLink = widget.type == GalleryType.quickLink;
     if ((widget.type == GalleryType.ownedCollection ||
             widget.type == GalleryType.sharedCollection ||
             widget.type == GalleryType.quickLink) &&
@@ -298,7 +303,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
     }
     final List<PopupMenuItem<AlbumPopupAction>> items = [];
-    if (widget.type == GalleryType.ownedCollection) {
+    if (widget.type == GalleryType.ownedCollection || isQuickLink) {
       if (widget.collection!.type != CollectionType.favorites) {
         items.add(
           PopupMenuItem(
@@ -309,28 +314,32 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).renameAlbum),
+                Text(isQuickLink
+                    ? "Convert to album"
+                    : S.of(context).renameAlbum,),
               ],
             ),
           ),
         );
-        items.add(
-          PopupMenuItem(
-            value: AlbumPopupAction.setCover,
-            child: Row(
-              children: [
-                const Icon(Icons.image_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(S.of(context).setCover),
-              ],
+        if(!isQuickLink) {
+          items.add(
+            PopupMenuItem(
+              value: AlbumPopupAction.setCover,
+              child: Row(
+                children: [
+                  const Icon(Icons.image_outlined),
+                  const Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text(S.of(context).setCover),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
       if (widget.type == GalleryType.ownedCollection ||
-          widget.type == GalleryType.sharedCollection) {
+          widget.type == GalleryType.sharedCollection || isQuickLink) {
         items.add(
           PopupMenuItem(
             value: AlbumPopupAction.map,
@@ -360,55 +369,68 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   padding: EdgeInsets.all(8),
                 ),
                 Text(
-                  S.of(context).sortAlbumsBy,
+                  S
+                      .of(context)
+                      .sortAlbumsBy,
                 ),
               ],
             ),
           ),
         );
-
-        items.add(
-          PopupMenuItem(
-            value: AlbumPopupAction.pinAlbum,
-            child: Row(
-              children: [
-                widget.collection!.isPinned
-                    ? const Icon(CupertinoIcons.pin_slash)
-                    : Transform.rotate(
-                        angle: 45 * math.pi / 180, // rotate by 45 degrees
-                        child: const Icon(CupertinoIcons.pin),
-                      ),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
+        if (!isQuickLink) {
+          items.add(
+            PopupMenuItem(
+              value: AlbumPopupAction.pinAlbum,
+              child: Row(
+                children: [
                   widget.collection!.isPinned
-                      ? S.of(context).unpinAlbum
-                      : S.of(context).pinAlbum,
-                ),
-              ],
+                      ? const Icon(CupertinoIcons.pin_slash)
+                      : Transform.rotate(
+                    angle: 45 * math.pi / 180, // rotate by 45 degrees
+                    child: const Icon(CupertinoIcons.pin),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text(
+                    widget.collection!.isPinned
+                        ? S
+                        .of(context)
+                        .unpinAlbum
+                        : S
+                        .of(context)
+                        .pinAlbum,
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        }
 
-        items.add(
-          PopupMenuItem(
-            value: AlbumPopupAction.ownedArchive,
-            child: Row(
-              children: [
-                Icon(isArchived ? Icons.unarchive : Icons.archive_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  isArchived
-                      ? S.of(context).unarchiveAlbum
-                      : S.of(context).archiveAlbum,
-                ),
-              ],
+        if (!isQuickLink) {
+          items.add(
+            PopupMenuItem(
+              value: AlbumPopupAction.ownedArchive,
+              child: Row(
+                children: [
+                  Icon(isArchived ? Icons.unarchive : Icons.archive_outlined),
+                  const Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text(
+                    isArchived
+                        ? S
+                        .of(context)
+                        .unarchiveAlbum
+                        : S
+                        .of(context)
+                        .archiveAlbum,
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
       if (widget.collection!.type != CollectionType.favorites) {
         items.add(
