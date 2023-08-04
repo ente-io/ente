@@ -142,8 +142,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
     final result = await showTextInputDialog(
       context,
-      title: isQuickLink ? S.of(context).enterAlbumName :S.of(context).renameAlbum,
-      submitButtonLabel: isQuickLink ? S.of(context).done :S.of(context).rename,
+      title: isQuickLink
+          ? S.of(context).enterAlbumName
+          : S.of(context).renameAlbum,
+      submitButtonLabel:
+          isQuickLink ? S.of(context).done : S.of(context).rename,
       hintText: S.of(context).enterAlbumName,
       alwaysShowSuccessState: true,
       initialValue: widget.collection?.displayName ?? "",
@@ -302,8 +305,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           message: "Share",
           child: IconButton(
             icon: Icon(
-              isQuickLink ? Icons.link_outlined
-                  : Icons.people_outlined,
+              isQuickLink ? Icons.link_outlined : Icons.people_outlined,
             ),
             onPressed: () async {
               await _showShareCollectionDialog();
@@ -333,7 +335,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             ),
           ),
         );
-        if(!isQuickLink) {
+        if (!isQuickLink) {
           items.add(
             PopupMenuItem(
               value: AlbumPopupAction.setCover,
@@ -382,9 +384,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   padding: EdgeInsets.all(8),
                 ),
                 Text(
-                  S
-                      .of(context)
-                      .sortAlbumsBy,
+                  S.of(context).sortAlbumsBy,
                 ),
               ],
             ),
@@ -399,20 +399,16 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   widget.collection!.isPinned
                       ? const Icon(CupertinoIcons.pin_slash)
                       : Transform.rotate(
-                    angle: 45 * math.pi / 180, // rotate by 45 degrees
-                    child: const Icon(CupertinoIcons.pin),
-                  ),
+                          angle: 45 * math.pi / 180, // rotate by 45 degrees
+                          child: const Icon(CupertinoIcons.pin),
+                        ),
                   const Padding(
                     padding: EdgeInsets.all(8),
                   ),
                   Text(
                     widget.collection!.isPinned
-                        ? S
-                        .of(context)
-                        .unpinAlbum
-                        : S
-                        .of(context)
-                        .pinAlbum,
+                        ? S.of(context).unpinAlbum
+                        : S.of(context).pinAlbum,
                   ),
                 ],
               ),
@@ -432,12 +428,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   ),
                   Text(
                     isArchived
-                        ? S
-                        .of(context)
-                        .unarchiveAlbum
-                        : S
-                        .of(context)
-                        .archiveAlbum,
+                        ? S.of(context).unarchiveAlbum
+                        : S.of(context).archiveAlbum,
                   ),
                 ],
               ),
@@ -453,11 +445,19 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 : AlbumPopupAction.delete,
             child: Row(
               children: [
-                const Icon(Icons.delete_outline),
+                Icon(
+                  isQuickLink
+                      ? Icons.remove_circle_outline
+                      : Icons.delete_outline,
+                ),
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).deleteAlbum),
+                Text(
+                  isQuickLink
+                      ? S.of(context).removeLink
+                      : S.of(context).deleteAlbum,
+                ),
               ],
             ),
           ),
@@ -544,6 +544,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               );
             } else if (value == AlbumPopupAction.delete) {
               await _trashCollection();
+            } else if (value == AlbumPopupAction.removeLink) {
+              await _removeQuickLink();
             } else if (value == AlbumPopupAction.leave) {
               await _leaveAlbum(context);
             } else if (value == AlbumPopupAction.freeUpSpace) {
@@ -578,8 +580,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> setCoverPhoto(BuildContext context) async {
-    final int? coverPhotoID = await showPickCoverPhotoSheet(context, widget
-        .collection!,);
+    final int? coverPhotoID = await showPickCoverPhotoSheet(
+      context,
+      widget.collection!,
+    );
     if (coverPhotoID != null) {
       changeCoverPhoto(context, widget.collection!, coverPhotoID);
     }
@@ -658,6 +662,22 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       } else {
         debugPrint("No pop");
       }
+    }
+  }
+
+  Future<void> _removeQuickLink() async {
+    try {
+      final bool result =
+          await CollectionActions(CollectionsService.instance).disableUrl(
+        context,
+        widget.collection!,
+      );
+      if (result && mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (e, s) {
+      _logger.severe("failed to trash collection", e, s);
+      showGenericErrorDialog(context: context);
     }
   }
 
