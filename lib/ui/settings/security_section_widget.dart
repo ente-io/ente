@@ -19,6 +19,7 @@ import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/toast_util.dart";
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({Key? key}) : super(key: key);
@@ -60,6 +61,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final bool canDisableMFA = UserService.instance.getCachedUserDetails()?.profileData?.canDisableEmailMFA ?? false;
     final Completer completer = Completer();
     final List<Widget> children = [];
     if (_config.hasConfiguredAccount()) {
@@ -131,6 +133,31 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               },
             ),
           ),
+          if (canDisableMFA) sectionOptionSpacing,
+          if (canDisableMFA)
+            MenuItemWidget(
+              captionedTextWidget: CaptionedTextWidget(
+                title: S.of(context).emailVerificationToggle,
+              ),
+              trailingWidget: ToggleSwitchWidget(
+                value: () => UserService.instance.hasEmailMFAEnabled(),
+                onChanged: () async {
+                  final hasAuthenticated = await LocalAuthenticationService.instance
+                      .requestLocalAuthentication(
+                    context,
+                    S.of(context).authToChangeEmailVerificationSetting,
+                  );
+                  final isEmailMFAEnabled =
+                  UserService.instance.hasEmailMFAEnabled();
+                  if (hasAuthenticated) {
+                    await updateEmailMFA(!isEmailMFAEnabled);
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  }
+                },
+              ),
+            ),
           sectionOptionSpacing,
         ],
       );
@@ -233,5 +260,12 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     return CryptoUtil.bin2hex(
       await UserService.instance.getOrCreateRecoveryKey(context),
     );
+  }
+  Future<void> updateEmailMFA(bool isEnabled) async {
+    try {
+      await UserService.instance.updateEmailMFA(isEnabled);
+    } catch (e) {
+      showToast(context, S.of(context).somethingWentWrong);
+    }
   }
 }
