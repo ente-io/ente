@@ -24,10 +24,10 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.searchResults:
       case GalleryType.favorite:
       case GalleryType.locationTag:
+      case GalleryType.quickLink:
         return true;
 
       case GalleryType.hidden:
-      case GalleryType.quickLink:
       case GalleryType.uncategorized:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
@@ -138,10 +138,11 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.ownedCollection:
       case GalleryType.homepage:
       case GalleryType.uncategorized:
+      case GalleryType.quickLink:
         return true;
 
       case GalleryType.hidden:
-      case GalleryType.quickLink:
+
       case GalleryType.favorite:
       case GalleryType.searchResults:
       case GalleryType.archive:
@@ -165,10 +166,11 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.archive:
       case GalleryType.uncategorized:
       case GalleryType.locationTag:
+      case GalleryType.quickLink:
         return true;
 
       case GalleryType.hidden:
-      case GalleryType.quickLink:
+
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.favorite:
