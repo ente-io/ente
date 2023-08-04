@@ -5,6 +5,7 @@ import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/api/user/srp.dart";
 import 'package:photos/services/user_service.dart';
 import "package:photos/ui/account/login_pwd_verification_page.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
@@ -63,22 +64,27 @@ class _LoginPageState extends State<LoginPage> {
         buttonText: S.of(context).logInLabel,
         onPressedFunction: () async {
           UserService.instance.setEmail(_email!);
+          SrpAttributes? attr;
+          bool isEmailVerificationEnabled = true;
           try {
-            final attr = await UserService.instance.getSrpAttributes(_email!);
+            attr = await UserService.instance.getSrpAttributes(_email!);
+            isEmailVerificationEnabled = attr.isEmailMFAEnabled;
+          } catch (e) {
+            if (e is! SrpSetupNotCompleteError) {
+              _logger.severe('Error getting SRP attributes', e);
+            }
+          }
+          if (attr != null && !isEmailVerificationEnabled) {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
                   return LoginPasswordVerificationPage(
-                    srpAttributes: attr,
+                    srpAttributes: attr!,
                   );
                 },
               ),
             );
-          }
-          catch (e) {
-            if(e is! SrpSetupNotCompleteError) {
-              _logger.warning('Error getting SRP attributes', e);
-            }
+          } else {
             await UserService.instance
                 .sendOtt(context, _email!, isCreateAccountScreen: false);
           }

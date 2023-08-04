@@ -13,6 +13,7 @@ class UserDetails {
   final int sharedCollectionsCount;
   final Subscription subscription;
   final FamilyData? familyData;
+  final ProfileData? profileData;
 
   const UserDetails(
     this.email,
@@ -22,6 +23,7 @@ class UserDetails {
     this.sharedCollectionsCount,
     this.subscription,
     this.familyData,
+    this.profileData,
   );
 
   bool isPartOfFamily() {
@@ -62,6 +64,7 @@ class UserDetails {
       (map['sharedCollectionsCount'] ?? 0) as int,
       Subscription.fromMap(map['subscription']),
       FamilyData.fromMap(map['familyData']),
+      ProfileData.fromJson(map['profileData']),
     );
   }
 
@@ -74,6 +77,7 @@ class UserDetails {
       'sharedCollectionsCount': sharedCollectionsCount,
       'subscription': subscription.toMap(),
       'familyData': familyData?.toMap(),
+      'profileData': profileData?.toJson(),
     };
   }
 
@@ -118,6 +122,38 @@ class FamilyMember {
 
   factory FamilyMember.fromJson(String source) =>
       FamilyMember.fromMap(json.decode(source));
+}
+class ProfileData {
+  bool canDisableEmailMFA;
+  bool isEmailMFAEnabled;
+  bool isTwoFactorEnabled;
+
+  // Constructor with default values
+  ProfileData({
+    this.canDisableEmailMFA = false,
+    this.isEmailMFAEnabled = false,
+    this.isTwoFactorEnabled = false,
+  });
+
+
+  // Factory method to create ProfileData instance from JSON
+  factory ProfileData.fromJson(Map<String, dynamic>? json) {
+    return ProfileData(
+      canDisableEmailMFA: json?['canDisableEmailMFA'] ?? false,
+      isEmailMFAEnabled: json?['isEmailMFAEnabled'] ?? false,
+      isTwoFactorEnabled: json?['isTwoFactorEnabled'] ?? false,
+    );
+  }
+
+  // Method to convert ProfileData instance to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'canDisableEmailMFA': canDisableEmailMFA,
+      'isEmailMFAEnabled': isEmailMFAEnabled,
+      'isTwoFactorEnabled': isTwoFactorEnabled,
+    };
+  }
+  String toJsonString() => json.encode(toJson());
 }
 
 class FamilyData {

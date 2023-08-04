@@ -50,6 +50,7 @@ import "package:uuid/uuid.dart";
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
   static const keyUserDetails = "user_details";
+
   final  SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
   final _dio = NetworkClient.instance.getDio();
   final _enteDio = NetworkClient.instance.enteDio;
@@ -1108,5 +1109,32 @@ class UserService {
 
   bool hasEnabledTwoFactor() {
     return _preferences.getBool(keyHasEnabledTwoFactor) ?? false;
+  }
+  bool hasEmailMFAEnabled() {
+    final UserDetails? profile = getCachedUserDetails();
+    if (profile != null && profile.profileData != null) {
+      return profile.profileData!.isEmailMFAEnabled;
+    }
+    return true;
+}
+
+  Future<void> updateEmailMFA(bool isEnabled) async {
+    try {
+      await _enteDio.put(
+        "/users/email-mfa",
+        data: {
+          "isEnabled": isEnabled,
+        },
+      );
+
+      final UserDetails? profile = getCachedUserDetails();
+      if (profile != null && profile.profileData != null) {
+        profile.profileData!.isEmailMFAEnabled = isEnabled;
+        await _preferences.setString(keyUserDetails, profile.toJson());
+      }
+    } catch (e) {
+      _logger.severe("Failed to update email mfa",e);
+      rethrow;
+    }
   }
 }

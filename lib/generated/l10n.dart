@@ -3132,6 +3132,26 @@ class S {
     );
   }
 
+  /// `Email verification`
+  String get emailVerificationToggle {
+    return Intl.message(
+      'Email verification',
+      name: 'emailVerificationToggle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to change email verification`
+  String get authToChangeEmailVerificationSetting {
+    return Intl.message(
+      'Please authenticate to change email verification',
+      name: 'authToChangeEmailVerificationSetting',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Export your data`
   String get exportYourData {
     return Intl.message(
