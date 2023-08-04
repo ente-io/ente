@@ -151,9 +151,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                   UserService.instance.hasEmailMFAEnabled();
                   if (hasAuthenticated) {
                     await updateEmailMFA(!isEmailMFAEnabled);
-                    if (mounted) {
+                    /*if (mounted) {
                       setState(() {});
-                    }
+                    }*/
                   }
                 },
               ),
