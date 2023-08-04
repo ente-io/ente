@@ -26,6 +26,7 @@ import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
 import 'package:photos/ui/sharing/album_participants_page.dart';
+import "package:photos/ui/sharing/manage_links_widget.dart";
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
 import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
@@ -305,7 +306,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           message: "Share",
           child: IconButton(
             icon: Icon(
-              isQuickLink ? Icons.link_outlined : Icons.people_outlined,
+               isQuickLink && (widget.collection!.hasLink) ? Icons
+                   .link_outlined : Icons
+                   .people_outlined,
             ),
             onPressed: () async {
               await _showShareCollectionDialog();
@@ -696,7 +699,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         unawaited(
           routeToPage(
             context,
-            ShareCollectionPage(collection),
+              (isQuickLink && (collection.hasLink)) ? ManageSharedLinkWidget(collection: collection!) :
+              ShareCollectionPage
+              (collection),
           ),
         );
       } else {
