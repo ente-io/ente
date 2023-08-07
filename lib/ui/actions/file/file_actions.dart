@@ -122,7 +122,6 @@ Future<void> showSingleFileDeleteSheet(
     actionSheetType: ActionSheetType.defaultActionSheet,
     body: body,
     bodyHighlight: bodyHighlight,
-    // isDismissible: false,
   );
   if (actionResult?.action != null &&
       actionResult!.action == ButtonAction.error) {
