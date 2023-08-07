@@ -89,6 +89,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Wprowadź hasło"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Wprowadź swój klucz odzyskiwania"),
+        "failedToDownloadVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "feedback": MessageLookupByLibrary.simpleMessage("Informacja zwrotna"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Nie pamiętam hasła"),

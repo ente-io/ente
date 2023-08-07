@@ -627,6 +627,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Der Code konnte nicht aktiviert werden"),
         "failedToCancel":
             MessageLookupByLibrary.simpleMessage("Kündigung fehlgeschlagen"),
+        "failedToDownloadVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "failedToFetchOriginalForEdit": MessageLookupByLibrary.simpleMessage(
             "Fehler beim Abrufen des Originals zur Bearbeitung"),
         "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(

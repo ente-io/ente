@@ -24,6 +24,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
             "The app or a certain feature does not behave as I think it should"),
+        "failedToDownloadVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "inviteYourFriendsToEnte":
             MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "noAlbumsSharedByYouYet":

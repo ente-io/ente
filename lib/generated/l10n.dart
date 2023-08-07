@@ -7554,6 +7554,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Failed to download video`
+  String get failedToDownloadVideo {
+    return Intl.message(
+      'Failed to download video',
+      name: 'failedToDownloadVideo',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

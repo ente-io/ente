@@ -977,7 +977,7 @@
   "centerPoint": "Center point",
   "pickCenterPoint": "Pick center point",
   "useSelectedPhoto": "Use selected photo",
-  "resetToDefault" : "Reset to default",
+  "resetToDefault": "Reset to default",
   "@resetToDefault": {
     "description": "Button text to reset cover photo to default"
   },
@@ -1100,5 +1100,6 @@
   "noAlbumsSharedByYouYet": "No albums shared by you yet",
   "sharedWithYou": "Shared with you",
   "sharedByYou": "Shared by you",
-  "inviteYourFriendsToEnte": "Invite your friends to ente"
+  "inviteYourFriendsToEnte": "Invite your friends to ente",
+  "failedToDownloadVideo": "Failed to download video"
 }

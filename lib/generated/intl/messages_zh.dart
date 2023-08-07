@@ -509,6 +509,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportYourData": MessageLookupByLibrary.simpleMessage("导出您的数据"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage("无法应用代码"),
         "failedToCancel": MessageLookupByLibrary.simpleMessage("取消失败"),
+        "failedToDownloadVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "failedToFetchOriginalForEdit":
             MessageLookupByLibrary.simpleMessage("无法获取原始编辑"),
         "failedToFetchReferralDetails":

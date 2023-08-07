@@ -41,6 +41,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Vennligst skriv inn en gyldig e-postadresse."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Skriv inn e-postadressen din"),
+        "failedToDownloadVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Ugyldig e-postadresse"),
