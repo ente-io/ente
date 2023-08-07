@@ -39,41 +39,6 @@ class AccountSectionWidget extends StatelessWidget {
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: l10n.recoveryKey,
-        ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
-        trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
-        onTap: () async {
-          final hasAuthenticated = await LocalAuthenticationService.instance
-              .requestLocalAuthentication(
-            context,
-            l10n.authToViewYourRecoveryKey,
-          );
-          if (hasAuthenticated) {
-            String recoveryKey;
-            try {
-              recoveryKey =
-                  Sodium.bin2hex(Configuration.instance.getRecoveryKey());
-            } catch (e) {
-              showGenericErrorDialog(context: context);
-              return;
-            }
-            routeToPage(
-              context,
-              RecoveryKeyPage(
-                recoveryKey,
-                l10n.ok,
-                showAppBar: true,
-                onDone: () {},
-              ),
-            );
-          }
-        },
-      ),
-      sectionOptionSpacing,
-      MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
           title: l10n.changeEmail,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
