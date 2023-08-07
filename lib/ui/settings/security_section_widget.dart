@@ -5,14 +5,18 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/account/sessions_page.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
+import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({Key? key}) : super(key: key);
@@ -57,6 +61,41 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     final l10n = context.l10n;
     final List<Widget> children = [];
     children.addAll([
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.recoveryKey,
+        ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () async {
+          final hasAuthenticated = await LocalAuthenticationService.instance
+              .requestLocalAuthentication(
+            context,
+            l10n.authToViewYourRecoveryKey,
+          );
+          if (hasAuthenticated) {
+            String recoveryKey;
+            try {
+              recoveryKey =
+                  Sodium.bin2hex(Configuration.instance.getRecoveryKey());
+            } catch (e) {
+              showGenericErrorDialog(context: context);
+              return;
+            }
+            routeToPage(
+              context,
+              RecoveryKeyPage(
+                recoveryKey,
+                l10n.ok,
+                showAppBar: true,
+                onDone: () {},
+              ),
+            );
+          }
+        },
+      ),
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: l10n.lockscreen,
