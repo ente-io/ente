@@ -90,6 +90,7 @@ interface Props {
     dragAndDropFiles: File[];
     uploadCollection?: Collection;
     uploadTypeSelectorIntent: UploadTypeSelectorIntent;
+    activeCollection?: Collection;
 }
 
 export default function Uploader(props: Props) {
@@ -134,6 +135,7 @@ export default function Uploader(props: Props) {
     const currentUploadPromise = useRef<Promise<void>>(null);
     const uploadRunning = useRef(false);
     const uploaderNameRef = useRef<string>(null);
+    const isDragAndDrop = useRef(false);
 
     const closeUploadProgress = () => setUploadProgressView(false);
     const showUserNameInputDialog = () => setUserNameInputDialogView(true);
@@ -219,6 +221,7 @@ export default function Uploader(props: Props) {
             addLogLine(`received file upload request`);
             setWebFiles(props.webFileSelectorFiles);
         } else if (props.dragAndDropFiles?.length > 0) {
+            isDragAndDrop.current = true;
             if (isElectron()) {
                 const main = async () => {
                     try {
@@ -678,6 +681,11 @@ export default function Uploader(props: Props) {
             }
             if (isFirstUpload && !importSuggestion.rootFolderName) {
                 importSuggestion.rootFolderName = FIRST_ALBUM_NAME;
+            }
+            if (isDragAndDrop.current && props.activeCollection) {
+                isDragAndDrop.current = false;
+                uploadFilesToExistingCollection(props.activeCollection);
+                return;
             }
             let showNextModal = () => {};
             if (importSuggestion.hasNestedFolders) {
