@@ -197,6 +197,11 @@ const SelectedFileOptions = ({
                                 <VisibilityOffOutlined />
                             </IconButton>
                         </Tooltip>
+                        <Tooltip title={t('DELETE')}>
+                            <IconButton onClick={trashHandler}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Tooltip>
                     </>
                 ) : activeCollection === TRASH_SECTION ? (
                     <>
