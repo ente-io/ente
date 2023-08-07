@@ -624,6 +624,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Code toepassen mislukt"),
         "failedToCancel":
             MessageLookupByLibrary.simpleMessage("Opzeggen mislukt"),
+        "failedToDownloadVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "failedToFetchOriginalForEdit": MessageLookupByLibrary.simpleMessage(
             "Fout bij ophalen origineel voor bewerking"),
         "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(

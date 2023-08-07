@@ -600,6 +600,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Error al aplicar el código"),
         "failedToCancel":
             MessageLookupByLibrary.simpleMessage("Error al cancelar"),
+        "failedToDownloadVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "failedToFetchOriginalForEdit": MessageLookupByLibrary.simpleMessage(
             "No se pudo obtener el original para editar"),
         "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(

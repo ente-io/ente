@@ -207,6 +207,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Digite sua chave de recuperação"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exportar seus dados"),
+        "failedToDownloadVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(
             "Não foi possível buscar informações do produto. Por favor, tente novamente mais tarde."),
         "faq": MessageLookupByLibrary.simpleMessage("Perguntas frequentes"),

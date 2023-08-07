@@ -42,7 +42,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   final _logger = Logger("VideoWidget");
   VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
-  double? _progress;
+  final _progressNotifier = ValueNotifier<double?>(null);
   bool _isPlaying = false;
   bool _wakeLockEnabledHere = false;
 
@@ -93,19 +93,19 @@ class _VideoWidgetState extends State<VideoWidget> {
     getFileFromServer(
       widget.file,
       progressCallback: (count, total) {
-        if (mounted) {
-          setState(() {
-            _progress = count / (widget.file.fileSize ?? total);
-            if (_progress == 1) {
-              showShortToast(context, S.of(context).decryptingVideo);
-            }
-          });
+        _progressNotifier.value = count / (widget.file.fileSize ?? total);
+        if (_progressNotifier.value == 1) {
+          if (mounted) {
+            showShortToast(context, S.of(context).decryptingVideo);
+          }
         }
       },
     ).then((file) {
       if (file != null) {
         _setVideoPlayerController(file: file);
       }
+    }).onError((error, stackTrace) {
+      showErrorDialog(context, "Error", S.of(context).failedToDownloadVideo);
     });
   }
 
@@ -198,17 +198,22 @@ class _VideoWidgetState extends State<VideoWidget> {
         Center(
           child: SizedBox.fromSize(
             size: const Size.square(20),
-            child: _progress == null || _progress == 1
-                ? const CupertinoActivityIndicator(
-                    color: Colors.white,
-                  )
-                : CircularProgressIndicator(
-                    backgroundColor: Colors.black,
-                    value: _progress,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      Color.fromRGBO(45, 194, 98, 1.0),
-                    ),
-                  ),
+            child: ValueListenableBuilder(
+              valueListenable: _progressNotifier,
+              builder: (BuildContext context, double? progress, _) {
+                return progress == null || progress == 1
+                    ? const CupertinoActivityIndicator(
+                        color: Colors.white,
+                      )
+                    : CircularProgressIndicator(
+                        backgroundColor: Colors.black,
+                        value: progress,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color.fromRGBO(45, 194, 98, 1.0),
+                        ),
+                      );
+              },
+            ),
           ),
         ),
       ],
