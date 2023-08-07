@@ -194,7 +194,7 @@ export default function Deduplicate() {
                     syncWithRemote={syncWithRemote}
                     setSelected={setSelected}
                     selected={selected}
-                    activeCollection={ALL_SECTION}
+                    activeCollectionID={ALL_SECTION}
                     fileToCollectionsMap={fileToCollectionsMap}
                     collectionNameMap={collectionNameMap}
                 />

@@ -30,7 +30,7 @@ export type GalleryContextType = {
     thumbs: Map<number, string>;
     files: Map<number, MergedSourceURL>;
     showPlanSelectorModal: () => void;
-    setActiveCollection: (collection: number) => void;
+    setActiveCollectionID: (collectionID: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setBlockingLoad: (value: boolean) => void;
     setIsInSearchMode: (value: boolean) => void;

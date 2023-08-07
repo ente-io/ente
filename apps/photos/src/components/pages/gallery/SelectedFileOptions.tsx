@@ -42,7 +42,7 @@ interface Props {
     count: number;
     ownCount: number;
     clearSelection: () => void;
-    activeCollection: number;
+    activeCollectionID: number;
     isFavoriteCollection: boolean;
     isUncategorizedCollection: boolean;
     isIncomingSharedCollection: boolean;
@@ -59,7 +59,7 @@ const SelectedFileOptions = ({
     count,
     ownCount,
     clearSelection,
-    activeCollection,
+    activeCollectionID,
     isFavoriteCollection,
     isUncategorizedCollection,
     isIncomingSharedCollection,
@@ -71,7 +71,7 @@ const SelectedFileOptions = ({
             callback: handleCollectionOps(COLLECTION_OPS_TYPE.ADD),
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
             intent: CollectionSelectorIntent.add,
-            fromCollection: !isInSearchMode ? activeCollection : undefined,
+            fromCollection: !isInSearchMode ? activeCollectionID : undefined,
         });
 
     const trashHandler = () =>
@@ -139,7 +139,7 @@ const SelectedFileOptions = ({
             callback: handleCollectionOps(COLLECTION_OPS_TYPE.MOVE),
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
             intent: CollectionSelectorIntent.move,
-            fromCollection: !isInSearchMode ? activeCollection : undefined,
+            fromCollection: !isInSearchMode ? activeCollectionID : undefined,
         });
     };
 
@@ -198,7 +198,7 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </Tooltip>
                     </>
-                ) : activeCollection === TRASH_SECTION ? (
+                ) : activeCollectionID === TRASH_SECTION ? (
                     <>
                         <Tooltip title={t('RESTORE')}>
                             <IconButton onClick={restoreHandler}>
@@ -237,7 +237,7 @@ const SelectedFileOptions = ({
                             <DownloadIcon />
                         </IconButton>
                     </Tooltip>
-                ) : activeCollection === HIDDEN_SECTION ? (
+                ) : activeCollectionID === HIDDEN_SECTION ? (
                     <>
                         <Tooltip title={t('UNHIDE')}>
                             <IconButton onClick={unhideToCollection}>
@@ -276,7 +276,7 @@ const SelectedFileOptions = ({
                                 <AddIcon />
                             </IconButton>
                         </Tooltip>
-                        {activeCollection === ARCHIVE_SECTION && (
+                        {activeCollectionID === ARCHIVE_SECTION && (
                             <Tooltip title={t('UNARCHIVE')}>
                                 <IconButton
                                     onClick={handleFileOps(
@@ -286,7 +286,7 @@ const SelectedFileOptions = ({
                                 </IconButton>
                             </Tooltip>
                         )}
-                        {activeCollection === ALL_SECTION && (
+                        {activeCollectionID === ALL_SECTION && (
                             <Tooltip title={t('ARCHIVE')}>
                                 <IconButton
                                     onClick={handleFileOps(
@@ -296,8 +296,8 @@ const SelectedFileOptions = ({
                                 </IconButton>
                             </Tooltip>
                         )}
-                        {activeCollection !== ALL_SECTION &&
-                            activeCollection !== ARCHIVE_SECTION &&
+                        {activeCollectionID !== ALL_SECTION &&
+                            activeCollectionID !== ARCHIVE_SECTION &&
                             !isFavoriteCollection && (
                                 <>
                                     <Tooltip title={t('MOVE')}>

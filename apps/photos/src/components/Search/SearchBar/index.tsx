@@ -10,7 +10,6 @@ import { UpdateSearch } from 'types/search';
 interface Props {
     updateSearch: UpdateSearch;
     collections: Collection[];
-    setActiveCollection: (id: number) => void;
     files: EnteFile[];
     isInSearchMode: boolean;
     setIsInSearchMode: (v: boolean) => void;

@@ -15,7 +15,6 @@ interface Iprops {
     setIsInSearchMode: (v: boolean) => void;
     collections: Collection[];
     files: EnteFile[];
-    setActiveCollection: (id: number) => void;
     updateSearch: UpdateSearch;
 }
 export function GalleryNavbar({
@@ -24,7 +23,6 @@ export function GalleryNavbar({
     isInSearchMode,
     collections,
     files,
-    setActiveCollection,
     updateSearch,
     setIsInSearchMode,
 }: Iprops) {
@@ -36,7 +34,6 @@ export function GalleryNavbar({
                 setIsInSearchMode={setIsInSearchMode}
                 collections={collections}
                 files={files}
-                setActiveCollection={setActiveCollection}
                 updateSearch={updateSearch}
             />
             {!isInSearchMode && <UploadButton openUploader={openUploader} />}
