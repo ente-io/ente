@@ -82,8 +82,6 @@ class SettingsPage extends StatelessWidget {
       const SocialSectionWidget(),
       sectionSpacing,
       const AboutSectionWidget(),
-      sectionSpacing,
-      const DangerSectionWidget(),
       const AppVersionWidget(),
       const SupportDevWidget(),
       const Padding(
