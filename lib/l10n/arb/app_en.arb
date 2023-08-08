@@ -1,4 +1,3 @@
-
 {
   "account": "Account",
   "recoveryKey": "Recovery key",
@@ -14,10 +13,10 @@
   "importAccountPageTitle": "Enter account details",
   "secretCanNotBeEmpty": "Secret can not be empty",
   "bothIssuerAndAccountCanNotBeEmpty": "Both issuer and account can not be empty",
-  "incorrectDetails" :"Incorrect details",
+  "incorrectDetails": "Incorrect details",
   "pleaseVerifyDetails": "Please verify the details and try again",
   "codeIssuerHint": "Issuer",
-  "codeSecretKeyHint" : "Secret Key",
+  "codeSecretKeyHint": "Secret Key",
   "codeAccountHint": "Account (you@domain.com)",
   "accountKeyType": "Type of key",
   "sessionExpired": "Session expired",
@@ -25,7 +24,7 @@
     "description": "Title of the dialog when the users current session is invalid/expired"
   },
   "pleaseLoginAgain": "Please login again",
-  "loggingOut" : "Logging out...",
+  "loggingOut": "Logging out...",
   "timeBasedKeyType": "Time based (TOTP)",
   "counterBasedKeyType": "Counter based (HOTP)",
   "saveAction": "Save",
@@ -67,15 +66,15 @@
   "incorrectPasswordTitle": "Incorrect password",
   "welcomeBack": "Welcome back!",
   "madeWithLoveAtPrefix": "made with ❤️ at ",
-  "supportDevs" : "Subscribe to <bold-green>ente</bold-green> to support this project.",
-  "supportDiscount" : "Use coupon code \"AUTH\" to get 10% off first year",
+  "supportDevs": "Subscribe to <bold-green>ente</bold-green> to support this project.",
+  "supportDiscount": "Use coupon code \"AUTH\" to get 10% off first year",
   "changeEmail": "Change email",
   "changePassword": "Change password",
-  "data" : "Data",
+  "data": "Data",
   "importCodes": "Import codes",
   "importTypePlainText": "Plain text",
   "importTypeEnteEncrypted": "ente Encrypted export",
-  "passwordForDecryptingExport" : "Password to decrypt export",
+  "passwordForDecryptingExport": "Password to decrypt export",
   "passwordEmptyError": "Password can not be empty",
   "importFromApp": "Import codes from {appName}",
   "importGoogleAuthGuide": "Export your accounts from Google Authenticator to a QR code using the \"Transfer Accounts\" option. Then using another device, scan the QR code.",
@@ -102,11 +101,22 @@
   "copied": "Copied",
   "pleaseTryAgain": "Please try again",
   "existingUser": "Existing User",
-  "newUser" : "New to ente",
+  "newUser": "New to ente",
   "delete": "Delete",
   "enterYourPasswordHint": "Enter your password",
   "forgotPassword": "Forgot password",
   "oops": "Oops",
+  "faq": "FAQ",
+  "faq_q_1": "How secure is ente Auth?",
+  "faq_a_1": "All codes you backup via ente is stored end-to-end encrypted. This means only you can access your codes. Our apps are open source and our cryptography has been externally audited.",
+  "faq_q_2": "Can I access my codes on desktop?",
+  "faq_a_2": "You can access your codes on the web @ auth.ente.io.",
+  "faq_q_3": "How can I delete codes?",
+  "faq_a_3": "You can delete a code by swiping left on that item.",
+  "faq_q_4": "How can I support this project?",
+  "faq_a_4": "You can support the development of this project by subscribing to our Photos app @ ente.io.",
+  "faq_q_5": "How can I enable FaceID lock in ente Auth",
+  "faq_a_5": "You can enable FaceID lock under Settings → Security → Lockscreen.",
   "somethingWentWrongMessage": "Something went wrong, please try again",
   "leaveFamily": "Leave family",
   "leaveFamilyMessage": "Are you sure that you want to leave the family plan?",
@@ -122,7 +132,7 @@
   "recoverAccount": "Recover account",
   "enterRecoveryKeyHint": "Enter your recovery key",
   "recover": "Recover",
-  "contactSupportViaEmailMessage":"Please drop an email to {email} from your registered email address",
+  "contactSupportViaEmailMessage": "Please drop an email to {email} from your registered email address",
   "@contactSupportViaEmailMessage": {
     "placeholders": {
       "email": {
@@ -187,7 +197,7 @@
     "message": "Password Strength: {passwordStrengthText}"
   },
   "password": "Password",
-  "signUpTerms" : "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
+  "signUpTerms": "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
   "privacyPolicyTitle": "Privacy Policy",
   "termsOfServicesTitle": "Terms",
   "encryption": "Encryption",
@@ -240,14 +250,14 @@
   "youAreOnTheLatestVersion": "You are on the latest version",
   "warning": "Warning",
   "exportWarningDesc": "The exported file contains sensitive information. Please store this safely.",
-  "iUnderStand" : "I understand",
+  "iUnderStand": "I understand",
   "@iUnderStand": {
     "description": "Text for the button to confirm the user understands the warning"
   },
   "authToExportCodes": "Please authenticate to export your codes",
   "importSuccessTitle": "Yay!",
   "importSuccessDesc": "You have imported {count} codes!",
-  "@importSuccessDesc" : {
+  "@importSuccessDesc": {
     "placeholders": {
       "count": {
         "description": "The number of codes imported",
@@ -256,9 +266,9 @@
       }
     }
   },
-  "sorry" : "Sorry",
+  "sorry": "Sorry",
   "importFailureDesc": "Could not parse the selected file.\nPlease write to support@ente.io if you need help!",
-  "pendingSyncs" : "Warning",
+  "pendingSyncs": "Warning",
   "pendingSyncsWarningBody": "Some of your codes have not been backed up.\n\nPlease ensure that you have a backup for these codes before you logout.",
   "checkInboxAndSpamFolder": "Please check your inbox (and spam) to complete verification",
   "tapToEnterCode": "Tap to enter code",
