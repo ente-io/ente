@@ -489,29 +489,37 @@ class RemoteSyncService {
   }
 
   Future<List<File>> _getFilesToBeUploaded() async {
-    final List<File> filesToBeUploaded = await _db.getFilesPendingForUpload();
-    if (!_config.shouldBackupVideos() || _shouldThrottleSync()) {
-      filesToBeUploaded
-          .removeWhere((element) => element.fileType == FileType.video);
+    final List<File> originalFiles = await _db.getFilesPendingForUpload();
+    if (originalFiles.isEmpty) {
+      return originalFiles;
     }
-    if (filesToBeUploaded.isEmpty) {
-      return filesToBeUploaded;
-    }
-    final int prevCount = filesToBeUploaded.length;
+    final bool shouldRemoveVideos =
+        !_config.shouldBackupVideos() || _shouldThrottleSync();
     final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-    filesToBeUploaded.removeWhere(
-      (file) => IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file),
-    );
-    if (prevCount != filesToBeUploaded.length) {
-      _logger.info(
-        (prevCount - filesToBeUploaded.length).toString() +
-            " files were ignored for upload",
-      );
+    bool shouldSkipUploadFunc(File file) {
+      return IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file);
+    }
+
+    final List<File> filesToBeUploaded = [];
+    int ignoredForUpload = 0;
+    int skippedVideos = 0;
+    for (var file in originalFiles) {
+      if (shouldRemoveVideos && file.fileType == FileType.video) {
+        skippedVideos++;
+        continue;
+      }
+      if (shouldSkipUploadFunc(file)) {
+        ignoredForUpload++;
+        continue;
+      }
+      filesToBeUploaded.add(file);
+    }
+    if (skippedVideos > 0 || ignoredForUpload > 0) {
+      _logger.info("Skipped $skippedVideos videos and $ignoredForUpload "
+          "ignored files for upload");
     }
     _sortByTimeAndType(filesToBeUploaded);
-    _logger.info(
-      filesToBeUploaded.length.toString() + " new files to be uploaded.",
-    );
+    _logger.info("${filesToBeUploaded.length} new files to be uploaded.");
     return filesToBeUploaded;
   }
 
