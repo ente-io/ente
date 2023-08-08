@@ -22,14 +22,16 @@ class DiffFetcher {
           "sinceTime": sinceTime,
         },
       );
-      final files = <File>[];
       int latestUpdatedAtTime = 0;
       final diff = response.data["diff"] as List;
       final bool hasMore = response.data["hasMore"] as bool;
       final startTime = DateTime.now();
-      final existingFiles =
-          await FilesDB.instance.getUploadedFileIDs(collectionID);
+      final existingUploadIDs = diff.isNotEmpty
+          ? await FilesDB.instance.getUploadedFileIDs(collectionID)
+          : <int>[];
       final deletedFiles = <File>[];
+      final updatedFiles = <File>[];
+
       for (final item in diff) {
         final file = File();
         file.uploadedFileID = item["id"];
@@ -37,12 +39,12 @@ class DiffFetcher {
         file.updationTime = item["updationTime"];
         latestUpdatedAtTime = max(latestUpdatedAtTime, file.updationTime!);
         if (item["isDeleted"]) {
-          if (existingFiles.contains(file.uploadedFileID)) {
+          if (existingUploadIDs.contains(file.uploadedFileID)) {
             deletedFiles.add(file);
           }
           continue;
         }
-        if (existingFiles.contains(file.uploadedFileID)) {
+        if (existingUploadIDs.contains(file.uploadedFileID)) {
           final existingFile = await FilesDB.instance
               .getUploadedFile(file.uploadedFileID!, file.collectionID!);
           if (existingFile != null) {
@@ -90,12 +92,12 @@ class DiffFetcher {
           file.pubMagicMetadata =
               PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
         }
-        files.add(file);
+        updatedFiles.add(file);
       }
       _logger.info('[Collection-$collectionID] parsed ${diff.length} '
-          'diff items ( ${files.length} updated) in ${DateTime.now()
+          'diff items ( ${updatedFiles.length} updated) in ${DateTime.now()
           .difference(startTime).inMilliseconds}ms');
-      return Diff(files, deletedFiles, hasMore, latestUpdatedAtTime);
+      return Diff(updatedFiles, deletedFiles, hasMore, latestUpdatedAtTime);
     } catch (e, s) {
       _logger.severe(e, s);
       rethrow;
