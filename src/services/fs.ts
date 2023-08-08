@@ -209,15 +209,22 @@ export const convertBrowserStreamToNode = (
     const rs = new Readable();
 
     rs._read = async () => {
-        const result = await reader.read();
+        try {
+            const result = await reader.read();
 
-        if (!result.done) {
-            rs.push(Buffer.from(result.value));
-        } else {
-            rs.push(null);
-            return;
+            if (!result.done) {
+                rs.push(Buffer.from(result.value));
+            } else {
+                rs.push(null);
+                return;
+            }
+        } catch (e) {
+            rs.emit('error', e);
         }
     };
+    reader.closed
+        .then(() => rs.push(null))
+        .catch((error) => rs.emit('error', error));
 
     return rs;
 };
@@ -232,6 +239,7 @@ export async function writeStream(
     await new Promise((resolve, reject) => {
         writeable.on('finish', resolve);
         writeable.on('error', reject);
+        readable.on('error', reject);
     });
 }
 
