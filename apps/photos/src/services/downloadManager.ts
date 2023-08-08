@@ -18,6 +18,7 @@ import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import { LimitedCache } from 'types/cache';
 import { retryAsyncFunction } from 'utils/network';
+import { addLogLine } from 'utils/logging';
 
 class DownloadManager {
     private fileObjectURLPromise = new Map<
@@ -204,7 +205,14 @@ class DownloadManager {
                     if (e.message === CustomError.PROCESSING_FAILED) {
                         logError(e, 'Failed to process file', {
                             fileID: file.id,
+                            fromMobile:
+                                !!file.metadata.localID ||
+                                !!file.metadata.deviceFolder ||
+                                !!file.metadata.version,
                         });
+                        addLogLine(
+                            `Failed to process file with fileID:${file.id}, localID: ${file.metadata.localID}, version: ${file.metadata.version}, deviceFolder:${file.metadata.deviceFolder} with error: ${e.message}`
+                        );
                     }
                     throw e;
                 }
@@ -273,7 +281,19 @@ class DownloadManager {
                                                     logError(
                                                         e,
                                                         'Failed to process file',
-                                                        { fileID: file.id }
+                                                        {
+                                                            fileID: file.id,
+                                                            fromMobile:
+                                                                !!file.metadata
+                                                                    .localID ||
+                                                                !!file.metadata
+                                                                    .deviceFolder ||
+                                                                !!file.metadata
+                                                                    .version,
+                                                        }
+                                                    );
+                                                    addLogLine(
+                                                        `Failed to process file ${file.id} from localID: ${file.metadata.localID} version: ${file.metadata.version} deviceFolder:${file.metadata.deviceFolder} with error: ${e.message}`
                                                     );
                                                 }
                                                 throw e;
@@ -302,7 +322,19 @@ class DownloadManager {
                                                     logError(
                                                         e,
                                                         'Failed to process file',
-                                                        { fileID: file.id }
+                                                        {
+                                                            fileID: file.id,
+                                                            fromMobile:
+                                                                !!file.metadata
+                                                                    .localID ||
+                                                                !!file.metadata
+                                                                    .deviceFolder ||
+                                                                !!file.metadata
+                                                                    .version,
+                                                        }
+                                                    );
+                                                    addLogLine(
+                                                        `Failed to process file ${file.id} from localID: ${file.metadata.localID} version: ${file.metadata.version} deviceFolder:${file.metadata.deviceFolder} with error: ${e.message}`
                                                     );
                                                 }
                                                 throw e;
