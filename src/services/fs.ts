@@ -235,11 +235,21 @@ export async function writeStream(
 ) {
     const writeable = fs.createWriteStream(filePath);
     const readable = convertBrowserStreamToNode(fileStream);
+
+    readable.on('error', (error) => {
+        writeable.destroy(error); // Close the writable stream with an error
+    });
+
     readable.pipe(writeable);
+
     await new Promise((resolve, reject) => {
         writeable.on('finish', resolve);
-        writeable.on('error', reject);
-        readable.on('error', reject);
+        writeable.on('error', async (e) => {
+            if (existsSync(filePath)) {
+                await fs.unlink(filePath);
+            }
+            reject(e);
+        });
     });
 }
 
