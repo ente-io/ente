@@ -38,7 +38,6 @@ import {
 import { FILE_TYPE } from 'constants/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import downloadManager from 'services/downloadManager';
-import { retryAsyncFunction } from 'utils/network';
 import { sleep } from 'utils/common';
 
 export async function migrateExport(
@@ -326,9 +325,7 @@ async function getFileExportNamesFromExportedFiles(
             For Live Photos we need to download the file to get the image and video name
         */
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const fileStream = await retryAsyncFunction(() =>
-                downloadManager.downloadFile(file)
-            );
+            const fileStream = await downloadManager.downloadFile(file);
             const fileBlob = await new Response(fileStream).blob();
             const livePhoto = await decodeLivePhoto(file, fileBlob);
             const imageExportName = getUniqueFileExportNameForMigration(

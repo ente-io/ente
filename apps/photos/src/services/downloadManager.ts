@@ -17,6 +17,7 @@ import { CACHES } from 'constants/cache';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import { LimitedCache } from 'types/cache';
+import { retryAsyncFunction } from 'utils/network';
 
 class DownloadManager {
     private fileObjectURLPromise = new Map<
@@ -181,11 +182,13 @@ class DownloadManager {
                 file.metadata.fileType === FILE_TYPE.IMAGE ||
                 file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
             ) {
-                const resp = await HTTPService.get(
-                    getFileURL(file.id),
-                    null,
-                    { 'X-Auth-Token': token },
-                    { responseType: 'arraybuffer', timeout }
+                const resp = await retryAsyncFunction(() =>
+                    HTTPService.get(
+                        getFileURL(file.id),
+                        null,
+                        { 'X-Auth-Token': token },
+                        { responseType: 'arraybuffer', timeout }
+                    )
                 );
                 if (typeof resp.data === 'undefined') {
                     throw Error(CustomError.REQUEST_FAILED);
@@ -197,11 +200,13 @@ class DownloadManager {
                 );
                 return generateStreamFromArrayBuffer(decrypted);
             }
-            const resp = await fetch(getFileURL(file.id), {
-                headers: {
-                    'X-Auth-Token': token,
-                },
-            });
+            const resp = await retryAsyncFunction(() =>
+                fetch(getFileURL(file.id), {
+                    headers: {
+                        'X-Auth-Token': token,
+                    },
+                })
+            );
             const reader = resp.body.getReader();
             const stream = new ReadableStream({
                 async start(controller) {

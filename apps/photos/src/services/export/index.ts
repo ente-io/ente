@@ -22,7 +22,6 @@ import {
     parseLivePhotoExportName,
     getCollectionIDFromFileUID,
 } from 'utils/export';
-import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getLocalCollections } from '../collectionService';
@@ -1055,9 +1054,7 @@ class ExportService {
                 collectionExportPath,
                 file.metadata.title
             );
-            let fileStream = await retryAsyncFunction(() =>
-                downloadManager.downloadFile(file)
-            );
+            let fileStream = await downloadManager.downloadFile(file);
             const fileType = getFileExtension(file.metadata.title);
             if (
                 file.pubMagicMetadata?.data.editedTime &&
