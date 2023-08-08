@@ -494,19 +494,19 @@ class RemoteSyncService {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);
     }
-    if (filesToBeUploaded.isNotEmpty) {
-      final int prevCount = filesToBeUploaded.length;
-      final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-      filesToBeUploaded.removeWhere(
-        (file) =>
-            IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file),
+    if (filesToBeUploaded.isEmpty) {
+      return filesToBeUploaded;
+    }
+    final int prevCount = filesToBeUploaded.length;
+    final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+    filesToBeUploaded.removeWhere(
+      (file) => IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file),
+    );
+    if (prevCount != filesToBeUploaded.length) {
+      _logger.info(
+        (prevCount - filesToBeUploaded.length).toString() +
+            " files were ignored for upload",
       );
-      if (prevCount != filesToBeUploaded.length) {
-        _logger.info(
-          (prevCount - filesToBeUploaded.length).toString() +
-              " files were ignored for upload",
-        );
-      }
     }
     _sortByTimeAndType(filesToBeUploaded);
     _logger.info(
