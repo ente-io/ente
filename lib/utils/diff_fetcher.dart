@@ -26,9 +26,10 @@ class DiffFetcher {
       final diff = response.data["diff"] as List;
       final bool hasMore = response.data["hasMore"] as bool;
       final startTime = DateTime.now();
-      final existingUploadIDs = diff.isNotEmpty
-          ? await FilesDB.instance.getUploadedFileIDs(collectionID)
-          : <int>[];
+      late Set<int> existingUploadIDs;
+      if(diff.isNotEmpty) {
+        existingUploadIDs = await FilesDB.instance.getUploadedFileIDs(collectionID);
+      }
       final deletedFiles = <File>[];
       final updatedFiles = <File>[];
 
