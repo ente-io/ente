@@ -272,7 +272,6 @@ class _CodeWidgetState extends State<CodeWidget> {
       isCritical: true,
       firstButtonOnTap: () async {
         await CodeStore.instance.removeCode(widget.code);
-        // await UserService.instance.logout(context);
       },
     );
   }
