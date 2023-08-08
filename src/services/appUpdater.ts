@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
-import semVerCmp from 'semver-compare';
+import { compareVersions } from 'compare-versions';
 import { AppUpdateInfo, GetFeatureFlagResponse } from '../types';
 import {
     getMuteUpdateNotificationVersion,
@@ -34,8 +34,10 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
         const updateCheckResult = await autoUpdater.checkForUpdates();
         log.debug('update version', updateCheckResult.updateInfo.version);
         if (
-            semVerCmp(updateCheckResult.updateInfo.version, app.getVersion()) <=
-            0
+            compareVersions(
+                updateCheckResult.updateInfo.version,
+                app.getVersion()
+            ) <= 0
         ) {
             log.debug('already at latest version');
             return;
@@ -55,7 +57,7 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
         if (
             desktopCutoffVersion &&
             isPlatform('mac') &&
-            semVerCmp(
+            compareVersions(
                 updateCheckResult.updateInfo.version,
                 desktopCutoffVersion
             ) > 0
