@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
