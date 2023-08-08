@@ -170,96 +170,119 @@ class DownloadManager {
         usingWorker?: Remote<DedicatedCryptoWorker>,
         timeout?: number
     ) {
-        const cryptoWorker =
-            usingWorker || (await ComlinkCryptoWorker.getInstance());
-        const token = tokenOverride || getToken();
-        if (!token) {
-            return null;
-        }
-        if (
-            file.metadata.fileType === FILE_TYPE.IMAGE ||
-            file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
-        ) {
-            const resp = await HTTPService.get(
-                getFileURL(file.id),
-                null,
-                { 'X-Auth-Token': token },
-                { responseType: 'arraybuffer', timeout }
-            );
-            if (typeof resp.data === 'undefined') {
-                throw Error(CustomError.REQUEST_FAILED);
+        try {
+            const cryptoWorker =
+                usingWorker || (await ComlinkCryptoWorker.getInstance());
+            const token = tokenOverride || getToken();
+            if (!token) {
+                return null;
             }
-            const decrypted = await cryptoWorker.decryptFile(
-                new Uint8Array(resp.data),
-                await cryptoWorker.fromB64(file.file.decryptionHeader),
-                file.key
-            );
-            return generateStreamFromArrayBuffer(decrypted);
-        }
-        const resp = await fetch(getFileURL(file.id), {
-            headers: {
-                'X-Auth-Token': token,
-            },
-        });
-        const reader = resp.body.getReader();
-        const stream = new ReadableStream({
-            async start(controller) {
-                const decryptionHeader = await cryptoWorker.fromB64(
-                    file.file.decryptionHeader
+            if (
+                file.metadata.fileType === FILE_TYPE.IMAGE ||
+                file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
+            ) {
+                const resp = await HTTPService.get(
+                    getFileURL(file.id),
+                    null,
+                    { 'X-Auth-Token': token },
+                    { responseType: 'arraybuffer', timeout }
                 );
-                const fileKey = await cryptoWorker.fromB64(file.key);
-                const { pullState, decryptionChunkSize } =
-                    await cryptoWorker.initChunkDecryption(
-                        decryptionHeader,
-                        fileKey
-                    );
-                let data = new Uint8Array();
-                // The following function handles each data chunk
-                function push() {
-                    // "done" is a Boolean and value a "Uint8Array"
-                    reader.read().then(async ({ done, value }) => {
-                        // Is there more data to read?
-                        if (!done) {
-                            const buffer = new Uint8Array(
-                                data.byteLength + value.byteLength
-                            );
-                            buffer.set(new Uint8Array(data), 0);
-                            buffer.set(new Uint8Array(value), data.byteLength);
-                            if (buffer.length > decryptionChunkSize) {
-                                const fileData = buffer.slice(
-                                    0,
-                                    decryptionChunkSize
-                                );
-                                const { decryptedData } =
-                                    await cryptoWorker.decryptFileChunk(
-                                        fileData,
-                                        pullState
-                                    );
-                                controller.enqueue(decryptedData);
-                                data = buffer.slice(decryptionChunkSize);
-                            } else {
-                                data = buffer;
-                            }
-                            push();
-                        } else {
-                            if (data) {
-                                const { decryptedData } =
-                                    await cryptoWorker.decryptFileChunk(
-                                        data,
-                                        pullState
-                                    );
-                                controller.enqueue(decryptedData);
-                                data = null;
-                            }
-                            controller.close();
-                        }
-                    });
+                if (typeof resp.data === 'undefined') {
+                    throw Error(CustomError.REQUEST_FAILED);
                 }
+                const decrypted = await cryptoWorker.decryptFile(
+                    new Uint8Array(resp.data),
+                    await cryptoWorker.fromB64(file.file.decryptionHeader),
+                    file.key
+                );
+                return generateStreamFromArrayBuffer(decrypted);
+            }
+            const resp = await fetch(getFileURL(file.id), {
+                headers: {
+                    'X-Auth-Token': token,
+                },
+            });
+            const reader = resp.body.getReader();
+            const stream = new ReadableStream({
+                async start(controller) {
+                    try {
+                        const decryptionHeader = await cryptoWorker.fromB64(
+                            file.file.decryptionHeader
+                        );
+                        const fileKey = await cryptoWorker.fromB64(file.key);
+                        const { pullState, decryptionChunkSize } =
+                            await cryptoWorker.initChunkDecryption(
+                                decryptionHeader,
+                                fileKey
+                            );
+                        let data = new Uint8Array();
+                        // The following function handles each data chunk
+                        const push = () => {
+                            // "done" is a Boolean and value a "Uint8Array"
+                            reader.read().then(async ({ done, value }) => {
+                                try {
+                                    // Is there more data to read?
+                                    if (!done) {
+                                        const buffer = new Uint8Array(
+                                            data.byteLength + value.byteLength
+                                        );
+                                        buffer.set(new Uint8Array(data), 0);
+                                        buffer.set(
+                                            new Uint8Array(value),
+                                            data.byteLength
+                                        );
+                                        if (
+                                            buffer.length > decryptionChunkSize
+                                        ) {
+                                            const fileData = buffer.slice(
+                                                0,
+                                                decryptionChunkSize
+                                            );
+                                            const { decryptedData } =
+                                                await cryptoWorker.decryptFileChunk(
+                                                    fileData,
+                                                    pullState
+                                                );
+                                            controller.enqueue(decryptedData);
+                                            data =
+                                                buffer.slice(
+                                                    decryptionChunkSize
+                                                );
+                                        } else {
+                                            data = buffer;
+                                        }
+                                        push();
+                                    } else {
+                                        if (data) {
+                                            const { decryptedData } =
+                                                await cryptoWorker.decryptFileChunk(
+                                                    data,
+                                                    pullState
+                                                );
+                                            controller.enqueue(decryptedData);
+                                            data = null;
+                                        }
+                                        controller.close();
+                                    }
+                                } catch (e) {
+                                    logError(e, 'Failed to download file');
+                                    controller.error(e);
+                                }
+                            });
+                        };
 
-                push();
-            },
-        });
-        return stream;
+                        push();
+                    } catch (e) {
+                        logError(e, 'Failed to download file');
+                        controller.error(e);
+                    }
+                },
+            });
+            return stream;
+        } catch (e) {
+            logError(e, 'Failed to download file');
+            throw e;
+        }
     }
 }
 
