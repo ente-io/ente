@@ -77,7 +77,7 @@
   "passwordForDecryptingExport": "Password to decrypt export",
   "passwordEmptyError": "Password can not be empty",
   "importFromApp": "Import codes from {appName}",
-  "importGoogleAuthGuide": "Export your accounts from Google Authenticator to a QR code using the \"Transfer Accounts\" option. Then using another device, scan the QR code.",
+  "importGoogleAuthGuide": "Export your accounts from Google Authenticator to a QR code using the \"Transfer Accounts\" option. Then using another device, scan the QR code.\n\nTip: You can use your laptop's webcam to take a picture of the QR code.",
   "importSelectJsonFile": "Select JSON file",
   "importEnteEncGuide": "Select the encrypted JSON file exported from ente",
   "importRaivoGuide": "Use the \"Export OTPs to Zip archive\" option in Raivo's Settings.\n\nExtract the zip file and import the JSON file.",

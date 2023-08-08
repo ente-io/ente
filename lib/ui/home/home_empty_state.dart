@@ -1,4 +1,8 @@
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/settings/data/import_page.dart';
+import 'package:ente_auth/ui/settings/faq.dart';
+import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
 
 class HomeEmptyStateWidget extends StatelessWidget {
@@ -50,6 +54,33 @@ class HomeEmptyStateWidget extends StatelessWidget {
                       child: Text(l10n.importEnterSetupKey),
                     ),
                   ),
+                  const SizedBox(height: 54),
+                  InkWell(
+                    onTap: () {
+                      routeToPage(context, ImportCodePage());
+                    },
+                    child: Text(
+                      l10n.importCodes,
+                      textAlign: TextAlign.center,
+                      style: getEnteTextTheme(context).bodyFaint.copyWith(decoration: TextDecoration.underline),
+                    ),),
+                  const SizedBox(height: 18),
+                  InkWell(
+                    onTap: () {
+                      showModalBottomSheet<void>(
+                        backgroundColor: Theme.of(context).colorScheme.background,
+                        barrierColor: Colors.black87,
+                        context: context,
+                        builder: (context) {
+                          return const FAQQuestionsWidget();
+                        },
+                      );
+                    },
+                    child: Text(
+                      l10n.faq,
+                      textAlign: TextAlign.center,
+                      style: getEnteTextTheme(context).bodyFaint.copyWith(decoration: TextDecoration.underline),
+                    ),),
                 ],
               ),
             ],
