@@ -209,13 +209,17 @@ export const convertBrowserStreamToNode = (
     const rs = new Readable();
 
     rs._read = async () => {
-        const result = await reader.read();
+        try {
+            const result = await reader.read();
 
-        if (!result.done) {
-            rs.push(Buffer.from(result.value));
-        } else {
-            rs.push(null);
-            return;
+            if (!result.done) {
+                rs.push(Buffer.from(result.value));
+            } else {
+                rs.push(null);
+                return;
+            }
+        } catch (e) {
+            rs.emit('error', e);
         }
     };
 
@@ -228,10 +232,21 @@ export async function writeStream(
 ) {
     const writeable = fs.createWriteStream(filePath);
     const readable = convertBrowserStreamToNode(fileStream);
+
+    readable.on('error', (error) => {
+        writeable.destroy(error); // Close the writable stream with an error
+    });
+
     readable.pipe(writeable);
+
     await new Promise((resolve, reject) => {
         writeable.on('finish', resolve);
-        writeable.on('error', reject);
+        writeable.on('error', async (e) => {
+            if (existsSync(filePath)) {
+                await fs.unlink(filePath);
+            }
+            reject(e);
+        });
     });
 }
 
