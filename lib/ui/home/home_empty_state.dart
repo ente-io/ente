@@ -4,7 +4,6 @@ import 'package:ente_auth/ui/settings/data/import_page.dart';
 import 'package:ente_auth/ui/settings/faq.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HomeEmptyStateWidget extends StatelessWidget {
   final VoidCallback? onScanTap;
