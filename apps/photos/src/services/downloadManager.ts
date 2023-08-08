@@ -193,12 +193,21 @@ class DownloadManager {
                 if (typeof resp.data === 'undefined') {
                     throw Error(CustomError.REQUEST_FAILED);
                 }
-                const decrypted = await cryptoWorker.decryptFile(
-                    new Uint8Array(resp.data),
-                    await cryptoWorker.fromB64(file.file.decryptionHeader),
-                    file.key
-                );
-                return generateStreamFromArrayBuffer(decrypted);
+                try {
+                    const decrypted = await cryptoWorker.decryptFile(
+                        new Uint8Array(resp.data),
+                        await cryptoWorker.fromB64(file.file.decryptionHeader),
+                        file.key
+                    );
+                    return generateStreamFromArrayBuffer(decrypted);
+                } catch (e) {
+                    if (e.message === CustomError.PROCESSING_FAILED) {
+                        logError(e, 'Failed to process file', {
+                            fileID: file.id,
+                        });
+                    }
+                    throw e;
+                }
             }
             const resp = await retryAsyncFunction(() =>
                 fetch(getFileURL(file.id), {
@@ -243,29 +252,61 @@ class DownloadManager {
                                                 0,
                                                 decryptionChunkSize
                                             );
-                                            const { decryptedData } =
-                                                await cryptoWorker.decryptFileChunk(
-                                                    fileData,
-                                                    pullState
+                                            try {
+                                                const { decryptedData } =
+                                                    await cryptoWorker.decryptFileChunk(
+                                                        fileData,
+                                                        pullState
+                                                    );
+                                                controller.enqueue(
+                                                    decryptedData
                                                 );
-                                            controller.enqueue(decryptedData);
-                                            data =
-                                                buffer.slice(
-                                                    decryptionChunkSize
-                                                );
+                                                data =
+                                                    buffer.slice(
+                                                        decryptionChunkSize
+                                                    );
+                                            } catch (e) {
+                                                if (
+                                                    e.message ===
+                                                    CustomError.PROCESSING_FAILED
+                                                ) {
+                                                    logError(
+                                                        e,
+                                                        'Failed to process file',
+                                                        { fileID: file.id }
+                                                    );
+                                                }
+                                                throw e;
+                                            }
                                         } else {
                                             data = buffer;
                                         }
                                         push();
                                     } else {
                                         if (data) {
-                                            const { decryptedData } =
-                                                await cryptoWorker.decryptFileChunk(
-                                                    data,
-                                                    pullState
+                                            try {
+                                                const { decryptedData } =
+                                                    await cryptoWorker.decryptFileChunk(
+                                                        data,
+                                                        pullState
+                                                    );
+                                                controller.enqueue(
+                                                    decryptedData
                                                 );
-                                            controller.enqueue(decryptedData);
-                                            data = null;
+                                                data = null;
+                                            } catch (e) {
+                                                if (
+                                                    e.message ===
+                                                    CustomError.PROCESSING_FAILED
+                                                ) {
+                                                    logError(
+                                                        e,
+                                                        'Failed to process file',
+                                                        { fileID: file.id }
+                                                    );
+                                                }
+                                                throw e;
+                                            }
                                         }
                                         controller.close();
                                     }
