@@ -220,9 +220,8 @@ class RemoteSyncService {
 
   Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
     _logger.info(
-      "Syncing collection #" +
-          collectionID.toString() +
-          (_isExistingSyncSilent ? " silently" : ""),
+      "[Collection-$collectionID] fetch diff silently: $_isExistingSyncSilent "
+          "since: $sinceTime",
     );
     if (!_isExistingSyncSilent) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
@@ -235,10 +234,8 @@ class RemoteSyncService {
     if (diff.updatedFiles.isNotEmpty) {
       await _storeDiff(diff.updatedFiles, collectionID);
       _logger.info(
-        "Updated " +
-            diff.updatedFiles.length.toString() +
-            " files in collection " +
-            collectionID.toString(),
+        "[Collection-$collectionID] Updated ${diff.updatedFiles.length} files"
+        " from remote",
       );
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
@@ -266,9 +263,8 @@ class RemoteSyncService {
         collectionID,
         _collectionsService.getCollectionSyncTime(collectionID),
       );
-    } else {
-      _logger.info("Collection #" + collectionID.toString() + " synced");
     }
+    _logger.info("[Collection-$collectionID] synced");
   }
 
   Future<void> _syncCollectionDiffDelete(Diff diff, int collectionID) async {

@@ -14,12 +14,6 @@ class DiffFetcher {
   final _enteDio = NetworkClient.instance.enteDio;
 
   Future<Diff> getEncryptedFilesDiff(int collectionID, int sinceTime) async {
-    _logger.info(
-      "Fetching diff in collection " +
-          collectionID.toString() +
-          " since " +
-          sinceTime.toString(),
-    );
     try {
       final response = await _enteDio.get(
         "/collections/v2/diff",
@@ -65,7 +59,6 @@ class DiffFetcher {
         if (item["info"] != null) {
           file.fileSize = item["info"]["fileSize"];
         }
-
         final fileKey = getFileKey(file);
         final encodedMetadata = await CryptoUtil.decryptChaCha(
           CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
@@ -99,19 +92,9 @@ class DiffFetcher {
         }
         files.add(file);
       }
-
-      final endTime = DateTime.now();
-      _logger.info(
-        "time for parsing " +
-            files.length.toString() +
-            " items within collection " +
-            collectionID.toString() +
-            ": " +
-            Duration(
-              microseconds: (endTime.microsecondsSinceEpoch -
-                  startTime.microsecondsSinceEpoch),
-            ).inMilliseconds.toString(),
-      );
+      _logger.info('[Collection-$collectionID] parsed ${diff.length} '
+          'diff items ( ${files.length} updated) in ${DateTime.now()
+          .difference(startTime).inMilliseconds}ms');
       return Diff(files, deletedFiles, hasMore, latestUpdatedAtTime);
     } catch (e, s) {
       _logger.severe(e, s);
