@@ -40,7 +40,6 @@ class DataSectionWidget extends StatelessWidget {
         trailingIconIsMuted: true,
         onTap: () async {
           routeToPage(context, ImportCodePage());
-          // _showImportInstructionDialog(context);
         },
       ),
       sectionOptionSpacing,
