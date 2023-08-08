@@ -311,7 +311,7 @@ class DownloadManager {
                                         controller.close();
                                     }
                                 } catch (e) {
-                                    logError(e, 'Failed to download file');
+                                    logError(e, 'Failed to process file chunk');
                                     controller.error(e);
                                 }
                             });
@@ -319,7 +319,7 @@ class DownloadManager {
 
                         push();
                     } catch (e) {
-                        logError(e, 'Failed to download file');
+                        logError(e, 'Failed to process file stream');
                         controller.error(e);
                     }
                 },

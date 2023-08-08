@@ -556,8 +556,7 @@ class ExportService {
                             collection.name
                         );
                     addLogLine(
-                        `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName}
-                         `
+                        `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName}`
                     );
                     const newCollectionExportPath = getCollectionExportPath(
                         exportFolder,
