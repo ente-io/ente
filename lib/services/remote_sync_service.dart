@@ -489,8 +489,6 @@ class RemoteSyncService {
   }
 
   Future<List<File>> _getFilesToBeUploaded() async {
-    final deviceCollections = await _db.getDeviceCollections();
-    deviceCollections.removeWhere((element) => !element.shouldBackup);
     final List<File> filesToBeUploaded = await _db.getFilesPendingForUpload();
     if (!_config.shouldBackupVideos() || _shouldThrottleSync()) {
       filesToBeUploaded
