@@ -82,7 +82,7 @@ export async function decryptFileChunk(
         data
     );
     if (!pullResult.message) {
-        throw new Error('failed to process file');
+        throw new Error(CustomError.PROCESSING_FAILED);
     }
     const newTag = pullResult.tag;
     return { decryptedData: pullResult.message, newTag };
