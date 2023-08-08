@@ -262,7 +262,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     final List<Collection> pinned = [];
     final List<Collection> unpinned = [];
     for (final collection in collections) {
-      if (collection.isSharedFilesCollection() ||
+      if (collection.isQuickLinkCollection() ||
           collection.type == CollectionType.favorites ||
           collection.type == CollectionType.uncategorized) {
         continue;

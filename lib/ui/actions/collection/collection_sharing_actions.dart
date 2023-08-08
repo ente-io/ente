@@ -70,7 +70,12 @@ class CollectionActions {
           shouldSurfaceExecutionStates: true,
           labelText: S.of(context).yesRemove,
           onTap: () async {
-            await CollectionsService.instance.disableShareUrl(collection);
+            // for quickLink collection, we need to trash the collection
+            if(collection.isQuickLinkCollection() && !collection.hasSharees) {
+              await trashCollectionKeepingPhotos(collection, context);
+            } else {
+              await CollectionsService.instance.disableShareUrl(collection);
+            }
           },
         ),
         ButtonWidget(
@@ -303,11 +308,7 @@ class CollectionActions {
           isInAlert: true,
           onTap: () async {
             try {
-              final List<File> files =
-                  await FilesDB.instance.getAllFilesCollection(collection.id);
-              await moveFilesFromCurrentCollection(bContext, collection, files);
-              // collection should be empty on server now
-              await collectionsService.trashEmptyCollection(collection);
+              await trashCollectionKeepingPhotos(collection, bContext);
             } catch (e, s) {
               logger.severe("Failed to keep photos & delete collection", e, s);
               rethrow;
@@ -361,6 +362,14 @@ class CollectionActions {
       return true;
     }
     return false;
+  }
+
+  Future<void> trashCollectionKeepingPhotos(Collection collection, BuildContext bContext) async {
+    final List<File> files =
+        await FilesDB.instance.getAllFilesCollection(collection.id);
+    await moveFilesFromCurrentCollection(bContext, collection, files);
+    // collection should be empty on server now
+    await collectionsService.trashEmptyCollection(collection);
   }
 
   // _confirmSharedAlbumDeletion should be shown when user tries to delete an

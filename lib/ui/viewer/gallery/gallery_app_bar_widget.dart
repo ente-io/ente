@@ -26,6 +26,7 @@ import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
 import 'package:photos/ui/sharing/album_participants_page.dart';
+import "package:photos/ui/sharing/manage_links_widget.dart";
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
 import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
@@ -68,6 +69,7 @@ enum AlbumPopupAction {
   setCover,
   addPhotos,
   pinAlbum,
+  removeLink,
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -77,9 +79,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   String? _appBarTitle;
   late CollectionActions collectionActions;
   final GlobalKey shareButtonKey = GlobalKey();
+  bool isQuickLink = false;
+  late GalleryType galleryType;
 
   @override
   void initState() {
+    super.initState();
     _selectedFilesListener = () {
       setState(() {});
     };
@@ -90,7 +95,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       setState(() {});
     });
     _appBarTitle = widget.title;
-    super.initState();
+    galleryType = widget.type;
   }
 
   @override
@@ -102,15 +107,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.type == GalleryType.homepage
+    return galleryType == GalleryType.homepage
         ? const SizedBox.shrink()
         : AppBar(
-            backgroundColor: widget.type == GalleryType.homepage
+            backgroundColor: galleryType == GalleryType.homepage
                 ? const Color(0x00000000)
                 : null,
             elevation: 0,
             centerTitle: false,
-            title: widget.type == GalleryType.homepage
+            title: galleryType == GalleryType.homepage
                 ? const SizedBox.shrink()
                 : TextButton(
                     child: Text(
@@ -127,13 +132,22 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<dynamic> _renameAlbum(BuildContext context) async {
-    if (widget.type != GalleryType.ownedCollection) {
+    if (galleryType != GalleryType.ownedCollection &&
+        galleryType != GalleryType.quickLink) {
+      showToast(
+        context,
+        'Type of galler $galleryType is not supported for '
+        'rename',
+      );
       return;
     }
     final result = await showTextInputDialog(
       context,
-      title: S.of(context).renameAlbum,
-      submitButtonLabel: S.of(context).rename,
+      title: isQuickLink
+          ? S.of(context).enterAlbumName
+          : S.of(context).renameAlbum,
+      submitButtonLabel:
+          isQuickLink ? S.of(context).done : S.of(context).rename,
       hintText: S.of(context).enterAlbumName,
       alwaysShowSuccessState: true,
       initialValue: widget.collection?.displayName ?? "",
@@ -148,6 +162,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           await CollectionsService.instance.rename(widget.collection!, text);
           if (mounted) {
             _appBarTitle = text;
+            if (isQuickLink) {
+              // update the gallery type to owned collection so that correct
+              // actions are shown
+              galleryType = GalleryType.ownedCollection;
+            }
             setState(() {});
           }
         } catch (e, s) {
@@ -261,10 +280,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       return actions;
     }
     final int userID = Configuration.instance.getUserID()!;
-    if ((widget.type == GalleryType.ownedCollection ||
-            widget.type == GalleryType.sharedCollection) &&
+    isQuickLink = widget.collection?.isQuickLinkCollection() ?? false;
+    if ((galleryType == GalleryType.ownedCollection ||
+            galleryType == GalleryType.sharedCollection ||
+            isQuickLink) &&
         widget.collection?.type != CollectionType.favorites) {
-      final bool canAddFiles = widget.type == GalleryType.ownedCollection ||
+      final bool canAddFiles = galleryType == GalleryType.ownedCollection ||
           widget.collection!.getRole(userID) ==
               CollectionParticipantRole.collaborator;
       if (canAddFiles) {
@@ -284,7 +305,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         Tooltip(
           message: "Share",
           child: IconButton(
-            icon: const Icon(Icons.people_outlined),
+            icon: Icon(
+               isQuickLink && (widget.collection!.hasLink) ? Icons
+                   .link_outlined : Icons
+                   .people_outlined,
+            ),
             onPressed: () async {
               await _showShareCollectionDialog();
             },
@@ -293,39 +318,46 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
     }
     final List<PopupMenuItem<AlbumPopupAction>> items = [];
-    if (widget.type == GalleryType.ownedCollection) {
+    if (galleryType == GalleryType.ownedCollection || isQuickLink) {
       if (widget.collection!.type != CollectionType.favorites) {
         items.add(
           PopupMenuItem(
             value: AlbumPopupAction.rename,
             child: Row(
               children: [
-                const Icon(Icons.edit),
+                Icon(isQuickLink ? Icons.photo_album_outlined : Icons.edit),
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).renameAlbum),
+                Text(
+                  isQuickLink
+                      ? S.of(context).convertToAlbum
+                      : S.of(context).renameAlbum,
+                ),
               ],
             ),
           ),
         );
-        items.add(
-          PopupMenuItem(
-            value: AlbumPopupAction.setCover,
-            child: Row(
-              children: [
-                const Icon(Icons.image_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(S.of(context).setCover),
-              ],
+        if (!isQuickLink) {
+          items.add(
+            PopupMenuItem(
+              value: AlbumPopupAction.setCover,
+              child: Row(
+                children: [
+                  const Icon(Icons.image_outlined),
+                  const Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text(S.of(context).setCover),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
-      if (widget.type == GalleryType.ownedCollection ||
-          widget.type == GalleryType.sharedCollection) {
+      if (galleryType == GalleryType.ownedCollection ||
+          galleryType == GalleryType.sharedCollection ||
+          isQuickLink) {
         items.add(
           PopupMenuItem(
             value: AlbumPopupAction.map,
@@ -361,61 +393,74 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             ),
           ),
         );
-
-        items.add(
-          PopupMenuItem(
-            value: AlbumPopupAction.pinAlbum,
-            child: Row(
-              children: [
-                widget.collection!.isPinned
-                    ? const Icon(CupertinoIcons.pin_slash)
-                    : Transform.rotate(
-                        angle: 45 * math.pi / 180, // rotate by 45 degrees
-                        child: const Icon(CupertinoIcons.pin),
-                      ),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
+        if (!isQuickLink) {
+          items.add(
+            PopupMenuItem(
+              value: AlbumPopupAction.pinAlbum,
+              child: Row(
+                children: [
                   widget.collection!.isPinned
-                      ? S.of(context).unpinAlbum
-                      : S.of(context).pinAlbum,
-                ),
-              ],
+                      ? const Icon(CupertinoIcons.pin_slash)
+                      : Transform.rotate(
+                          angle: 45 * math.pi / 180, // rotate by 45 degrees
+                          child: const Icon(CupertinoIcons.pin),
+                        ),
+                  const Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text(
+                    widget.collection!.isPinned
+                        ? S.of(context).unpinAlbum
+                        : S.of(context).pinAlbum,
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        }
 
-        items.add(
-          PopupMenuItem(
-            value: AlbumPopupAction.ownedArchive,
-            child: Row(
-              children: [
-                Icon(isArchived ? Icons.unarchive : Icons.archive_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  isArchived
-                      ? S.of(context).unarchiveAlbum
-                      : S.of(context).archiveAlbum,
-                ),
-              ],
+        if (!isQuickLink) {
+          items.add(
+            PopupMenuItem(
+              value: AlbumPopupAction.ownedArchive,
+              child: Row(
+                children: [
+                  Icon(isArchived ? Icons.unarchive : Icons.archive_outlined),
+                  const Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text(
+                    isArchived
+                        ? S.of(context).unarchiveAlbum
+                        : S.of(context).archiveAlbum,
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
       if (widget.collection!.type != CollectionType.favorites) {
         items.add(
           PopupMenuItem(
-            value: AlbumPopupAction.delete,
+            value: isQuickLink
+                ? AlbumPopupAction.removeLink
+                : AlbumPopupAction.delete,
             child: Row(
               children: [
-                const Icon(Icons.delete_outline),
+                Icon(
+                  isQuickLink
+                      ? Icons.remove_circle_outline
+                      : Icons.delete_outline,
+                ),
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).deleteAlbum),
+                Text(
+                  isQuickLink
+                      ? S.of(context).removeLink
+                      : S.of(context).deleteAlbum,
+                ),
               ],
             ),
           ),
@@ -423,7 +468,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       }
     } // ownedCollection open ends
 
-    if (widget.type == GalleryType.sharedCollection) {
+    if (galleryType == GalleryType.sharedCollection) {
       final bool hasShareeArchived = widget.collection!.hasShareeArchived();
       items.add(
         PopupMenuItem(
@@ -460,7 +505,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
-    if (widget.type == GalleryType.localFolder) {
+    if (galleryType == GalleryType.localFolder) {
       items.add(
         PopupMenuItem(
           value: AlbumPopupAction.freeUpSpace,
@@ -502,6 +547,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               );
             } else if (value == AlbumPopupAction.delete) {
               await _trashCollection();
+            } else if (value == AlbumPopupAction.removeLink) {
+              await _removeQuickLink();
             } else if (value == AlbumPopupAction.leave) {
               await _leaveAlbum(context);
             } else if (value == AlbumPopupAction.freeUpSpace) {
@@ -536,8 +583,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> setCoverPhoto(BuildContext context) async {
-    final int? coverPhotoID = await showPickCoverPhotoSheet(context, widget
-        .collection!,);
+    final int? coverPhotoID = await showPickCoverPhotoSheet(
+      context,
+      widget.collection!,
+    );
     if (coverPhotoID != null) {
       changeCoverPhoto(context, widget.collection!, coverPhotoID);
     }
@@ -619,21 +668,40 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
   }
 
+  Future<void> _removeQuickLink() async {
+    try {
+      final bool result =
+          await CollectionActions(CollectionsService.instance).disableUrl(
+        context,
+        widget.collection!,
+      );
+      if (result && mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (e, s) {
+      _logger.severe("failed to trash collection", e, s);
+      showGenericErrorDialog(context: context);
+    }
+  }
+
   Future<void> _showShareCollectionDialog() async {
     final collection = widget.collection;
     try {
       if (collection == null ||
-          (widget.type != GalleryType.ownedCollection &&
-              widget.type != GalleryType.sharedCollection)) {
+          (galleryType != GalleryType.ownedCollection &&
+              galleryType != GalleryType.sharedCollection &&
+              !isQuickLink)) {
         throw Exception(
-          "Cannot share empty collection of typex ${widget.type}",
+          "Cannot share empty collection of type $galleryType",
         );
       }
       if (Configuration.instance.getUserID() == widget.collection!.owner!.id) {
         unawaited(
           routeToPage(
             context,
-            ShareCollectionPage(collection),
+              (isQuickLink && (collection.hasLink)) ? ManageSharedLinkWidget(collection: collection!) :
+              ShareCollectionPage
+              (collection),
           ),
         );
       } else {
