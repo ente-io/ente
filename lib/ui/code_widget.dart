@@ -7,6 +7,7 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
+import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/material.dart';
@@ -261,50 +262,18 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
   }
 
-  void _onDeletePressed(_) {
+  void _onDeletePressed(_) async {
     final l10n = context.l10n;
-    final AlertDialog alert = AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      title: Text(
-        l10n.deleteCodeTitle,
-        style: Theme.of(context).textTheme.headline6,
-      ),
-      content: Text(
-        l10n.deleteCodeMessage,
-      ),
-      actions: [
-        TextButton(
-          child: Text(
-            l10n.delete,
-            style: const TextStyle(
-              color: Colors.red,
-            ),
-          ),
-          onPressed: () {
-            CodeStore.instance.removeCode(widget.code);
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-        TextButton(
-          child: Text(
-            l10n.cancel,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-      ],
-    );
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
+    await showChoiceActionSheet(
+      context,
+      title: l10n.deleteCodeTitle,
+      body: l10n.deleteCodeMessage,
+      firstButtonLabel: l10n.delete,
+      isCritical: true,
+      firstButtonOnTap: () async {
+        await CodeStore.instance.removeCode(widget.code);
+        // await UserService.instance.logout(context);
       },
-      barrierColor: Colors.black12,
     );
   }
 
