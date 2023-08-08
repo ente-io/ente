@@ -222,9 +222,6 @@ export const convertBrowserStreamToNode = (
             rs.emit('error', e);
         }
     };
-    reader.closed
-        .then(() => rs.push(null))
-        .catch((error) => rs.emit('error', error));
 
     return rs;
 };
