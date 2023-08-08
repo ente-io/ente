@@ -69,6 +69,7 @@ export const CustomError = {
     NOT_AVAILABLE_ON_WEB: 'not available on web',
     UNSUPPORTED_RAW_FORMAT: 'unsupported raw format',
     NON_PREVIEWABLE_FILE: 'non previewable file',
+    PROCESSING_FAILED: 'processing failed',
 };
 
 export function parseUploadErrorCodes(error) {

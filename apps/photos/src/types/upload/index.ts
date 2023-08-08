@@ -29,6 +29,9 @@ export interface Metadata {
     hash?: string;
     imageHash?: string;
     videoHash?: string;
+    localID?: number;
+    version?: number;
+    deviceFolder?: string;
 }
 
 export interface Location {
