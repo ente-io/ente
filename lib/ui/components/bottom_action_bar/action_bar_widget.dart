@@ -1,23 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
 
 class ActionBarWidget extends StatefulWidget {
-  final String? text;
-  final List<Widget> iconButtons;
   final SelectedFiles? selectedFiles;
-  final GalleryType galleryType;
-  final bool isCollaborator;
+  final VoidCallback? onCancel;
 
   const ActionBarWidget({
-    required this.iconButtons,
-    required this.galleryType,
-    this.text,
+    required this.onCancel,
     this.selectedFiles,
-    this.isCollaborator = false,
     super.key,
   });
 
@@ -38,83 +31,58 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
 
   @override
   void dispose() {
+    _selectedFilesNotifier.dispose();
+    _selectedOwnedFilesNotifier.dispose();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: _actionBarWidgets(context),
-      ),
-    );
-  }
-
-  List<Widget> _actionBarWidgets(BuildContext context) {
-    final actionBarWidgets = <Widget>[];
-    final initialLength = widget.iconButtons.length;
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-
-    actionBarWidgets.addAll(widget.iconButtons);
-    if (widget.text != null) {
-      //adds 12 px spacing at the start and between iconButton elements
-      for (var i = 0; i < initialLength; i++) {
-        actionBarWidgets.insert(
-          2 * i,
-          const SizedBox(
-            width: 12,
-          ),
-        );
-      }
-      actionBarWidgets.insertAll(0, [
-        const SizedBox(width: 20),
-        Flexible(
-          child: Row(
-            children: [
-              widget.selectedFiles != null
-                  ? ValueListenableBuilder(
-                      valueListenable: _selectedFilesNotifier,
-                      builder: (context, value, child) {
-                        return Text(
-                          _selectedOwnedFilesNotifier.value !=
-                                  _selectedFilesNotifier.value
-                              ? S.of(context).selectedPhotosWithYours(
-                                    _selectedFilesNotifier.value,
-                                    _selectedOwnedFilesNotifier.value,
-                                  )
-                              : S.of(context).selectedPhotos(
-                                    _selectedFilesNotifier.value,
-                                  ),
-                          style: textTheme.body.copyWith(
-                            color: colorScheme.blurTextBase,
+    return SizedBox(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 64),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            ValueListenableBuilder(
+              valueListenable: _selectedFilesNotifier,
+              builder: (context, value, child) {
+                return Text(
+                  _selectedOwnedFilesNotifier.value !=
+                          _selectedFilesNotifier.value
+                      ? S.of(context).selectedPhotosWithYours(
+                            _selectedFilesNotifier.value,
+                            _selectedOwnedFilesNotifier.value,
+                          )
+                      : S.of(context).selectedPhotos(
+                            _selectedFilesNotifier.value,
                           ),
-                        );
-                      },
-                    )
-                  : Text(
-                      widget.text!,
-                      style:
-                          textTheme.body.copyWith(color: colorScheme.textMuted),
-                    ),
-            ],
-          ),
+                  style: textTheme.body.copyWith(
+                    color: colorScheme.blurTextBase,
+                  ),
+                );
+              },
+            ),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                widget.onCancel?.call();
+              },
+              child: Center(
+                child: Text(
+                  S.of(context).cancel,
+                  style: textTheme.bodyBold
+                      .copyWith(color: colorScheme.blurTextBase),
+                ),
+              ),
+            ),
+          ],
         ),
-      ]);
-      //to add whitespace of 8pts or 12 pts at the end
-      if (widget.iconButtons.length > 1) {
-        actionBarWidgets.add(
-          const SizedBox(width: 8),
-        );
-      } else {
-        actionBarWidgets.add(
-          const SizedBox(width: 12),
-        );
-      }
-    }
-    return actionBarWidgets;
+      ),
+    );
   }
 
   void _selectedFilesListener() {
