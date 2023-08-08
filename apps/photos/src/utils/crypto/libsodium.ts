@@ -77,6 +77,9 @@ export async function decryptFileChunk(
         pullState,
         data
     );
+    if (!pullResult.message) {
+        throw new Error('Decryption failed');
+    }
     const newTag = pullResult.tag;
     return { decryptedData: pullResult.message, newTag };
 }
