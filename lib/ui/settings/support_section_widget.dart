@@ -7,6 +7,7 @@ import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
+import 'package:ente_auth/ui/settings/faq.dart';
 import 'package:ente_auth/utils/email_util.dart';
 import 'package:flutter/material.dart';
 
@@ -33,6 +34,27 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
     return Column(
       children: [
         sectionOptionSpacing,
+
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: l10n.faq,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            showModalBottomSheet<void>(
+              backgroundColor: Theme.of(context).colorScheme.background,
+              barrierColor: Colors.black87,
+              context: context,
+              builder: (context) {
+                return const FAQQuestionsWidget();
+              },
+            );
+          },
+        ),
+        sectionOptionSpacing,
+
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: l10n.email,
