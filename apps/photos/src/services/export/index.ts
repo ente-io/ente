@@ -578,6 +578,9 @@ class ExportService {
                         collection.id,
                         newCollectionExportName
                     );
+                    addLogLine(
+                        `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName} successful`
+                    );
                     incrementSuccess();
                 } catch (e) {
                     incrementFailed();
@@ -651,6 +654,9 @@ class ExportService {
                     await this.removeCollectionExportedRecord(
                         exportFolder,
                         collectionID
+                    );
+                    addLogLine(
+                        `removing collection with id ${collectionID} from export folder successful`
                     );
                     incrementSuccess();
                 } catch (e) {
@@ -738,6 +744,13 @@ class ExportService {
                         fileExportName
                     );
                     incrementSuccess();
+                    addLogLine(
+                        `exporting file ${file.metadata.title} with id ${
+                            file.id
+                        } from collection ${collectionIDNameMap.get(
+                            file.collectionID
+                        )} successful`
+                    );
                 } catch (e) {
                     incrementFailed();
                     logError(e, 'export failed for a file');
@@ -865,6 +878,7 @@ class ExportService {
                         );
                     }
                     await this.removeFileExportedRecord(exportDir, fileUID);
+                    addLogLine(`trashing file with id ${fileUID} successful`);
                     incrementSuccess();
                 } catch (e) {
                     incrementFailed();
