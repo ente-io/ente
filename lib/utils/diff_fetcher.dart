@@ -14,12 +14,6 @@ class DiffFetcher {
   final _enteDio = NetworkClient.instance.enteDio;
 
   Future<Diff> getEncryptedFilesDiff(int collectionID, int sinceTime) async {
-    _logger.info(
-      "Fetching diff in collection " +
-          collectionID.toString() +
-          " since " +
-          sinceTime.toString(),
-    );
     try {
       final response = await _enteDio.get(
         "/collections/v2/diff",
@@ -28,14 +22,17 @@ class DiffFetcher {
           "sinceTime": sinceTime,
         },
       );
-      final files = <File>[];
       int latestUpdatedAtTime = 0;
       final diff = response.data["diff"] as List;
       final bool hasMore = response.data["hasMore"] as bool;
       final startTime = DateTime.now();
-      final existingFiles =
-          await FilesDB.instance.getUploadedFileIDs(collectionID);
+      late Set<int> existingUploadIDs;
+      if(diff.isNotEmpty) {
+        existingUploadIDs = await FilesDB.instance.getUploadedFileIDs(collectionID);
+      }
       final deletedFiles = <File>[];
+      final updatedFiles = <File>[];
+
       for (final item in diff) {
         final file = File();
         file.uploadedFileID = item["id"];
@@ -43,12 +40,12 @@ class DiffFetcher {
         file.updationTime = item["updationTime"];
         latestUpdatedAtTime = max(latestUpdatedAtTime, file.updationTime!);
         if (item["isDeleted"]) {
-          if (existingFiles.contains(file.uploadedFileID)) {
+          if (existingUploadIDs.contains(file.uploadedFileID)) {
             deletedFiles.add(file);
           }
           continue;
         }
-        if (existingFiles.contains(file.uploadedFileID)) {
+        if (existingUploadIDs.contains(file.uploadedFileID)) {
           final existingFile = await FilesDB.instance
               .getUploadedFile(file.uploadedFileID!, file.collectionID!);
           if (existingFile != null) {
@@ -65,7 +62,6 @@ class DiffFetcher {
         if (item["info"] != null) {
           file.fileSize = item["info"]["fileSize"];
         }
-
         final fileKey = getFileKey(file);
         final encodedMetadata = await CryptoUtil.decryptChaCha(
           CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
@@ -97,22 +93,12 @@ class DiffFetcher {
           file.pubMagicMetadata =
               PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
         }
-        files.add(file);
+        updatedFiles.add(file);
       }
-
-      final endTime = DateTime.now();
-      _logger.info(
-        "time for parsing " +
-            files.length.toString() +
-            " items within collection " +
-            collectionID.toString() +
-            ": " +
-            Duration(
-              microseconds: (endTime.microsecondsSinceEpoch -
-                  startTime.microsecondsSinceEpoch),
-            ).inMilliseconds.toString(),
-      );
-      return Diff(files, deletedFiles, hasMore, latestUpdatedAtTime);
+      _logger.info('[Collection-$collectionID] parsed ${diff.length} '
+          'diff items ( ${updatedFiles.length} updated) in ${DateTime.now()
+          .difference(startTime).inMilliseconds}ms');
+      return Diff(updatedFiles, deletedFiles, hasMore, latestUpdatedAtTime);
     } catch (e, s) {
       _logger.severe(e, s);
       rethrow;

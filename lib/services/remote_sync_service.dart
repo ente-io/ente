@@ -191,7 +191,8 @@ class RemoteSyncService {
     unawaited(_notifyNewFiles(idsToRemoteUpdationTimeMap.keys.toList()));
   }
 
-  Future<void> _syncUpdatedCollections(final idsToRemoteUpdationTimeMap) async {
+  Future<void> _syncUpdatedCollections(
+      final Map<int, int> idsToRemoteUpdationTimeMap,) async {
     for (final cid in idsToRemoteUpdationTimeMap.keys) {
       await _syncCollectionDiff(
         cid,
@@ -220,9 +221,8 @@ class RemoteSyncService {
 
   Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
     _logger.info(
-      "Syncing collection #" +
-          collectionID.toString() +
-          (_isExistingSyncSilent ? " silently" : ""),
+      "[Collection-$collectionID] fetch diff silently: $_isExistingSyncSilent "
+          "since: $sinceTime",
     );
     if (!_isExistingSyncSilent) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
@@ -235,10 +235,8 @@ class RemoteSyncService {
     if (diff.updatedFiles.isNotEmpty) {
       await _storeDiff(diff.updatedFiles, collectionID);
       _logger.info(
-        "Updated " +
-            diff.updatedFiles.length.toString() +
-            " files in collection " +
-            collectionID.toString(),
+        "[Collection-$collectionID] Updated ${diff.updatedFiles.length} files"
+        " from remote",
       );
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
@@ -266,9 +264,8 @@ class RemoteSyncService {
         collectionID,
         _collectionsService.getCollectionSyncTime(collectionID),
       );
-    } else {
-      _logger.info("Collection #" + collectionID.toString() + " synced");
     }
+    _logger.info("[Collection-$collectionID] synced");
   }
 
   Future<void> _syncCollectionDiffDelete(Diff diff, int collectionID) async {
@@ -863,39 +860,43 @@ class RemoteSyncService {
     // TODO: Add option to opt out of notifications for a specific collection
     // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
     final isForeground = AppLifecycleService.instance.isForeground;
-    _logger.info(
-      "Attempting to show notification for $collectionID, isAppInForeground? $isForeground",
-    );
-    return NotificationService.instance
-            .shouldShowNotificationsForSharedPhotos() &&
+    final bool showNotification = NotificationService.instance
+        .shouldShowNotificationsForSharedPhotos() &&
         isFirstRemoteSyncDone() &&
         !isForeground;
+    _logger.info(
+      "[Collection-$collectionID] shouldShow notification: $showNotification, "
+          "isAppInForeground: $isForeground",
+    );
+    return showNotification;
   }
 
-  Future<void> _notifyNewFiles(List<int> collectionIDs) async {
+  Future<void>  _notifyNewFiles(List<int> collectionIDs) async {
     final userID = Configuration.instance.getUserID();
     final appOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
     for (final collectionID in collectionIDs) {
-      final collection = _collectionsService.getCollectionByID(collectionID);
+      if (!_shouldShowNotification(collectionID)) {
+        continue;
+      }
       final files =
           await _db.getNewFilesInCollection(collectionID, appOpenTime);
-      final sharedFiles = files.where((file) => file.ownerID != userID);
-      final collectedFiles =
-          files.where((file) => file.pubMagicMetadata!.uploaderName != null);
-      final totalCount = sharedFiles.length + collectedFiles.length;
-      if (totalCount > 0 && _shouldShowNotification(collectionID)) {
-        if (sharedFiles.isNotEmpty) {
-          _logger.info(
-            "Creating notification for shared files: " +
-                sharedFiles.map((file) => file.uploadedFileID).toString(),
-          );
+      final Set<int> sharedFilesIDs = {};
+      final Set<int> collectedFilesIDs = {};
+      for(final file in files) {
+        if (file.isUploaded && file.ownerID != userID) {
+          sharedFilesIDs.add(file.uploadedFileID!);
+        } else if (file.isUploaded && file.pubMagicMetadata!.uploaderName !=
+        null) {
+          collectedFilesIDs.add(file.uploadedFileID!);
         }
-        if (collectedFiles.isNotEmpty) {
-          _logger.info(
-            "Creating notification for collected files: " +
-                collectedFiles.map((file) => file.uploadedFileID).toString(),
-          );
-        }
+      }
+      final totalCount = sharedFilesIDs.length + collectedFilesIDs.length;
+      if (totalCount > 0) {
+        final collection = _collectionsService.getCollectionByID(collectionID);
+        _logger.finest(
+          'creating notification for ${collection?.displayName} '
+          'shared: $sharedFilesIDs, collected: $collectedFilesIDs files',
+        );
         NotificationService.instance.showNotification(
           collection!.displayName,
           totalCount.toString() + " new 📸",
