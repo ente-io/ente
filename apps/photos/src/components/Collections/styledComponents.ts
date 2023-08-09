@@ -37,7 +37,6 @@ export const CollectionTile = styled('div')`
     position: relative;
     border-radius: 4px;
     overflow: hidden;
-    user-select: none;
     cursor: pointer;
     & > img {
         object-fit: cover;

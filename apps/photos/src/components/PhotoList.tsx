@@ -31,7 +31,7 @@ import memoize from 'memoize-one';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
-const ALBUM_FOOTER_HEIGHT = 75;
+const ALBUM_FOOTER_HEIGHT = 95;
 
 export enum ITEM_TYPE {
     TIME = 'TIME',
@@ -109,7 +109,6 @@ const ListContainer = styled(Box)<{
     shrinkRatio: number;
     groups?: number[];
 }>`
-    user-select: none;
     display: grid;
     grid-template-columns: ${({ columns, shrinkRatio, groups }) =>
         getTemplateColumns(columns, shrinkRatio, groups)};
@@ -124,7 +123,6 @@ const ListContainer = styled(Box)<{
 
 const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
     grid-column: span ${(props) => props.span};
-    user-select: none;
 `;
 
 const DateContainer = styled(ListItemContainer)`
@@ -158,6 +156,18 @@ const AlbumFooterContainer = styled(ListItemContainer)`
     margin-bottom: 10px;
     text-align: center;
     justify-content: center;
+`;
+
+const FullStretchContainer = styled(Box)`
+    margin: 0 -24px;
+    width: calc(100% + 46px);
+    left: -24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        margin: 0 -4px;
+        width: calc(100% + 6px);
+        left: -4px;
+    }
+    background-color: ${({ theme }) => theme.colors.accent.A500};
 `;
 
 const NothingContainer = styled(ListItemContainer)`
@@ -602,15 +612,21 @@ export function PhotoList({
             height: ALBUM_FOOTER_HEIGHT,
             item: (
                 <AlbumFooterContainer span={columns}>
-                    <Typography variant="small">
-                        {t('SHARED_USING')}{' '}
-                        <Link target="_blank" href={ENTE_WEBSITE_LINK}>
-                            {t('ENTE_IO')}
-                        </Link>
+                    <Box width={'100%'}>
+                        <Typography variant="small" display={'block'}>
+                            {t('SHARED_USING')}{' '}
+                            <Link target="_blank" href={ENTE_WEBSITE_LINK}>
+                                {t('ENTE_IO')}
+                            </Link>
+                        </Typography>
                         {publicCollectionGalleryContext.referralCode ??
                         '' !== '' ? (
-                            <p style={{ marginTop: '4px' }}>
-                                <Typography color={'text.muted'}>
+                            <FullStretchContainer>
+                                <Typography
+                                    sx={{
+                                        marginTop: '12px',
+                                        padding: '8px',
+                                    }}>
                                     <Trans
                                         i18nKey={'SHARING_REFERRAL_CODE'}
                                         values={{
@@ -619,9 +635,9 @@ export function PhotoList({
                                         }}
                                     />
                                 </Typography>
-                            </p>
+                            </FullStretchContainer>
                         ) : null}
-                    </Typography>
+                    </Box>
                 </AlbumFooterContainer>
             ),
         };
