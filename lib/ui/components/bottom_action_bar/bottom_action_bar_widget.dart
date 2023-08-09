@@ -10,12 +10,10 @@ class BottomActionBarWidget extends StatelessWidget {
   final Widget expandedMenu;
   final SelectedFiles? selectedFiles;
   final VoidCallback? onCancel;
-  final bool hasSmallerBottomPadding;
   final Color? backgroundColor;
 
   const BottomActionBarWidget({
     required this.expandedMenu,
-    required this.hasSmallerBottomPadding,
     this.selectedFiles,
     this.onCancel,
     this.backgroundColor,
@@ -24,7 +22,7 @@ class BottomActionBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("HasSmallerBottomPadding: $hasSmallerBottomPadding");
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     final widthOfScreen = MediaQuery.of(context).size.width;
     final colorScheme = getEnteColorScheme(context);
     final double leftRightPadding = widthOfScreen > restrictedMaxWidth
@@ -41,7 +39,7 @@ class BottomActionBarWidget extends StatelessWidget {
       ),
       padding: EdgeInsets.only(
         top: 4,
-        bottom: hasSmallerBottomPadding ? 0 : 12,
+        bottom: bottomPadding,
         right: leftRightPadding,
         left: leftRightPadding,
       ),

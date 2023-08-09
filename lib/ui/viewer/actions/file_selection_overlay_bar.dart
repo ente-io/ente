@@ -60,7 +60,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           duration: const Duration(milliseconds: 400),
           firstChild: BottomActionBarWidget(
             selectedFiles: widget.selectedFiles,
-            hasSmallerBottomPadding: true,
             expandedMenu: FileSelectionActionWidget(
               widget.galleryType,
               widget.selectedFiles,
