@@ -10,6 +10,7 @@ import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/faq.dart';
 import 'package:ente_auth/utils/email_util.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class SupportSectionWidget extends StatefulWidget {
   const SupportSectionWidget({Key? key}) : super(key: key);
@@ -54,7 +55,21 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           },
         ),
         sectionOptionSpacing,
-
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: l10n.suggestFeatures,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            launchUrlString(
+              githubIssuesUrl,
+              mode: LaunchMode.externalApplication,
+            );
+          },
+        ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: l10n.email,
