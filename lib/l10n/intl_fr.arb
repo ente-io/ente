@@ -598,16 +598,6 @@
   "addToAlbum": "Ajouter à l'album",
   "delete": "Supprimer",
   "hide": "Masquer",
-  "itemSelectedCount": "{count} sélectionné",
-  "@itemSelectedCount": {
-    "description": "Text to indicate number of items selected",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "share": "Partager",
   "unhideToAlbum": "Afficher dans l'album",
   "restoreToAlbum": "Restaurer vers l'album",
