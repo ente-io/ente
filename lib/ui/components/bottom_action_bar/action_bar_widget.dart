@@ -40,42 +40,48 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
     return SizedBox(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 64),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            ValueListenableBuilder(
-              valueListenable: _selectedFilesNotifier,
-              builder: (context, value, child) {
-                return Text(
-                  _selectedOwnedFilesNotifier.value !=
-                          _selectedFilesNotifier.value
-                      ? S.of(context).selectedPhotosWithYours(
-                            _selectedFilesNotifier.value,
-                            _selectedOwnedFilesNotifier.value,
-                          )
-                      : S.of(context).selectedPhotos(
-                            _selectedFilesNotifier.value,
-                          ),
-                  style: textTheme.body.copyWith(
-                    color: colorScheme.blurTextBase,
-                  ),
-                );
-              },
+            Flexible(
+              flex: 1,
+              child: ValueListenableBuilder(
+                valueListenable: _selectedFilesNotifier,
+                builder: (context, value, child) {
+                  return Text(
+                    _selectedOwnedFilesNotifier.value !=
+                            _selectedFilesNotifier.value
+                        ? S.of(context).selectedPhotosWithYours(
+                              _selectedFilesNotifier.value,
+                              _selectedOwnedFilesNotifier.value,
+                            )
+                        : S.of(context).selectedPhotos(
+                              _selectedFilesNotifier.value,
+                            ),
+                    style: textTheme.miniMuted,
+                  );
+                },
+              ),
             ),
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                widget.onCancel?.call();
-              },
-              child: Center(
-                child: Text(
-                  S.of(context).cancel,
-                  style: textTheme.bodyBold
-                      .copyWith(color: colorScheme.blurTextBase),
+            Flexible(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    widget.onCancel?.call();
+                  },
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      S.of(context).cancel,
+                      style: textTheme.mini,
+                    ),
+                  ),
                 ),
               ),
             ),
