@@ -284,16 +284,22 @@ class _FileSelectionActionsWidgetState
     );
 
     if (items.isNotEmpty) {
-      return SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(width: 8),
-            ...items,
-            const SizedBox(width: 8),
-          ],
+      return NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (overscroll) {
+          overscroll.disallowIndicator();
+          return true;
+        },
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(width: 8),
+              ...items,
+              const SizedBox(width: 8),
+            ],
+          ),
         ),
       );
     } else {
