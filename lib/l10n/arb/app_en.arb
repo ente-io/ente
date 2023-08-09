@@ -106,6 +106,7 @@
   "enterYourPasswordHint": "Enter your password",
   "forgotPassword": "Forgot password",
   "oops": "Oops",
+  "suggestFeatures": "Suggest features",
   "faq": "FAQ",
   "faq_q_1": "How secure is ente Auth?",
   "faq_a_1": "All codes you backup via ente is stored end-to-end encrypted. This means only you can access your codes. Our apps are open source and our cryptography has been externally audited.",
