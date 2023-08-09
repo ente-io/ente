@@ -549,7 +549,7 @@ export default function Gallery() {
         archivedCollections,
     ]);
 
-    const selectAll = () => {
+    const selectAll = (e: KeyboardEvent) => {
         // if any of the modals are open, don't select all
         if (
             sidebarView ||
@@ -566,6 +566,7 @@ export default function Gallery() {
         ) {
             return;
         }
+        e.preventDefault();
         const selected = {
             ownCount: 0,
             count: 0,
@@ -678,8 +679,9 @@ export default function Gallery() {
                     break;
                 case 'a':
                     if (e.ctrlKey || e.metaKey) {
-                        e.preventDefault();
-                        selectAllKeyBoardShortcutHandlerRef.current.selectAll();
+                        selectAllKeyBoardShortcutHandlerRef.current.selectAll(
+                            e
+                        );
                     }
                     break;
             }
