@@ -550,6 +550,13 @@ export default function Gallery() {
     ]);
 
     const selectAll = (e: KeyboardEvent) => {
+        // ignore ctrl/cmd + a if the user is typing in a text field
+        if (
+            e.target instanceof HTMLInputElement ||
+            e.target instanceof HTMLTextAreaElement
+        ) {
+            return;
+        }
         // if any of the modals are open, don't select all
         if (
             sidebarView ||
@@ -666,13 +673,6 @@ export default function Gallery() {
 
     const setupSelectAllKeyBoardShortcutHandler = () => {
         const handleKeyUp = (e: KeyboardEvent) => {
-            // ignore ctrl/cmd + a if the user is typing in a text field
-            if (
-                e.target instanceof HTMLInputElement ||
-                e.target instanceof HTMLTextAreaElement
-            ) {
-                return;
-            }
             switch (e.key) {
                 case 'Escape':
                     selectAllKeyBoardShortcutHandlerRef.current.clearSelection();
