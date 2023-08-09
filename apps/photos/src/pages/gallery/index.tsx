@@ -591,16 +591,19 @@ export default function Gallery() {
     };
 
     const clearSelection = () => {
+        if (!selected?.count) {
+            return;
+        }
         setSelected({ ownCount: 0, count: 0, collectionID: 0 });
     };
 
-    const selectAllKeyBoardShortcutHandlerRef = useRef({
+    const keyboardShortcutHandlerRef = useRef({
         selectAll,
         clearSelection,
     });
 
     useEffect(() => {
-        selectAllKeyBoardShortcutHandlerRef.current = {
+        keyboardShortcutHandlerRef.current = {
             selectAll,
             clearSelection,
         };
@@ -675,13 +678,11 @@ export default function Gallery() {
         const handleKeyUp = (e: KeyboardEvent) => {
             switch (e.key) {
                 case 'Escape':
-                    selectAllKeyBoardShortcutHandlerRef.current.clearSelection();
+                    keyboardShortcutHandlerRef.current.clearSelection();
                     break;
                 case 'a':
                     if (e.ctrlKey || e.metaKey) {
-                        selectAllKeyBoardShortcutHandlerRef.current.selectAll(
-                            e
-                        );
+                        keyboardShortcutHandlerRef.current.selectAll(e);
                     }
                     break;
             }
