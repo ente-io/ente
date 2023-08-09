@@ -109,7 +109,6 @@ const ListContainer = styled(Box)<{
     shrinkRatio: number;
     groups?: number[];
 }>`
-    user-select: none;
     display: grid;
     grid-template-columns: ${({ columns, shrinkRatio, groups }) =>
         getTemplateColumns(columns, shrinkRatio, groups)};
@@ -124,7 +123,6 @@ const ListContainer = styled(Box)<{
 
 const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
     grid-column: span ${(props) => props.span};
-    user-select: none;
 `;
 
 const DateContainer = styled(ListItemContainer)`
