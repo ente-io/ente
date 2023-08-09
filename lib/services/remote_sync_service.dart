@@ -876,26 +876,25 @@ class RemoteSyncService {
       if (!_shouldShowNotification(collectionID)) {
         continue;
       }
-      final collection = _collectionsService.getCollectionByID(collectionID);
       final files =
           await _db.getNewFilesInCollection(collectionID, appOpenTime);
-      final sharedFiles = files.where((file) => file.ownerID != userID);
-      final collectedFiles =
-          files.where((file) => file.pubMagicMetadata!.uploaderName != null);
-      final totalCount = sharedFiles.length + collectedFiles.length;
+      final Set<int> sharedFilesIDs = {};
+      final Set<int> collectedFilesIDs = {};
+      for(final file in files) {
+        if (file.isUploaded && file.ownerID != userID) {
+          sharedFilesIDs.add(file.uploadedFileID!);
+        } else if (file.isUploaded && file.pubMagicMetadata!.uploaderName !=
+        null) {
+          collectedFilesIDs.add(file.uploadedFileID!);
+        }
+      }
+      final totalCount = sharedFilesIDs.length + collectedFilesIDs.length;
       if (totalCount > 0) {
-        if (sharedFiles.isNotEmpty) {
-          _logger.info(
-            "Creating notification for shared files: " +
-                sharedFiles.map((file) => file.uploadedFileID).toString(),
-          );
-        }
-        if (collectedFiles.isNotEmpty) {
-          _logger.info(
-            "Creating notification for collected files: " +
-                collectedFiles.map((file) => file.uploadedFileID).toString(),
-          );
-        }
+        final collection = _collectionsService.getCollectionByID(collectionID);
+        _logger.finest(
+          'creating notification for ${collection?.displayName} '
+          'shared: $sharedFilesIDs, collected: $collectedFilesIDs files',
+        );
         NotificationService.instance.showNotification(
           collection!.displayName,
           totalCount.toString() + " new 📸",
