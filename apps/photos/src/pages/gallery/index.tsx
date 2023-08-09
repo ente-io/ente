@@ -929,6 +929,7 @@ export default function Gallery() {
                 />
 
                 <Uploader
+                    activeCollection={activeCollection}
                     syncWithRemote={syncWithRemote}
                     showCollectionSelector={setCollectionSelectorView.bind(
                         null,
