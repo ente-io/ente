@@ -873,6 +873,9 @@ class RemoteSyncService {
     final userID = Configuration.instance.getUserID();
     final appOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
     for (final collectionID in collectionIDs) {
+      if (!_shouldShowNotification(collectionID)) {
+        continue;
+      }
       final collection = _collectionsService.getCollectionByID(collectionID);
       final files =
           await _db.getNewFilesInCollection(collectionID, appOpenTime);
@@ -880,7 +883,7 @@ class RemoteSyncService {
       final collectedFiles =
           files.where((file) => file.pubMagicMetadata!.uploaderName != null);
       final totalCount = sharedFiles.length + collectedFiles.length;
-      if (totalCount > 0 && _shouldShowNotification(collectionID)) {
+      if (totalCount > 0) {
         if (sharedFiles.isNotEmpty) {
           _logger.info(
             "Creating notification for shared files: " +
