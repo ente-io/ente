@@ -24,7 +24,6 @@ class FileSelectionOverlayBar extends StatefulWidget {
 }
 
 class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
-  final GlobalKey shareButtonKey = GlobalKey();
   final ValueNotifier<bool> _hasSelectedFilesNotifier = ValueNotifier(false);
 
   @override

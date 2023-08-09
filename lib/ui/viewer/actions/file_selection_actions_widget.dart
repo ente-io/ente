@@ -25,6 +25,7 @@ import "package:photos/ui/tools/collage/collage_creator_page.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import "package:photos/utils/share_util.dart";
 import 'package:photos/utils/toast_util.dart';
 
 class FileSelectionActionsWidget extends StatefulWidget {
@@ -57,6 +58,7 @@ class _FileSelectionActionsWidgetState
   // links if user keeps on creating Create link button after selecting
   // few files. This link is reset on any selection changed;
   Collection? _cachedCollectionForSharedLink;
+  final GlobalKey shareButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -268,6 +270,18 @@ class _FileSelectionActionsWidgetState
         ),
       );
     }
+
+    items.add(
+      SelectionActionButton(
+        labelText: "Share",
+        icon: Icons.adaptive.share_outlined,
+        onTap: () => shareSelected(
+          context,
+          shareButtonKey,
+          widget.selectedFiles.files.toList(),
+        ),
+      ),
+    );
 
     if (items.isNotEmpty) {
       return SingleChildScrollView(
