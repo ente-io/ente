@@ -191,7 +191,8 @@ class RemoteSyncService {
     unawaited(_notifyNewFiles(idsToRemoteUpdationTimeMap.keys.toList()));
   }
 
-  Future<void> _syncUpdatedCollections(final idsToRemoteUpdationTimeMap) async {
+  Future<void> _syncUpdatedCollections(
+      final Map<int, int> idsToRemoteUpdationTimeMap,) async {
     for (final cid in idsToRemoteUpdationTimeMap.keys) {
       await _syncCollectionDiff(
         cid,
@@ -868,7 +869,7 @@ class RemoteSyncService {
         !isForeground;
   }
 
-  Future<void> _notifyNewFiles(List<int> collectionIDs) async {
+  Future<void>  _notifyNewFiles(List<int> collectionIDs) async {
     final userID = Configuration.instance.getUserID();
     final appOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
     for (final collectionID in collectionIDs) {
