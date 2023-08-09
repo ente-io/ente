@@ -1,15 +1,15 @@
 import { isPlatform } from '../utils/common/platform';
 import { AutoLauncherClient } from '../types/autoLauncher';
-import linuxAutoLauncher from './autoLauncherClients/linuxAutoLauncher';
-import macAndWindowsAutoLauncher from './autoLauncherClients/macAndWindowsAutoLauncher';
+import linuxAndWinAutoLauncher from './autoLauncherClients/linuxAndWinAutoLauncher';
+import macAutoLauncher from './autoLauncherClients/macAutoLauncher';
 
 class AutoLauncher {
     private client: AutoLauncherClient;
     init() {
-        if (isPlatform('mac') || isPlatform('windows')) {
-            this.client = macAndWindowsAutoLauncher;
+        if (isPlatform('linux') || isPlatform('windows')) {
+            this.client = linuxAndWinAutoLauncher;
         } else {
-            this.client = linuxAutoLauncher;
+            this.client = macAutoLauncher;
         }
     }
     async isEnabled() {
