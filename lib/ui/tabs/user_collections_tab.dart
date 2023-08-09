@@ -188,7 +188,9 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             ),
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 48)),
+        SliverToBoxAdapter(
+          child: SizedBox(height: 64 + MediaQuery.of(context).padding.bottom),
+        ),
       ],
     );
   }
