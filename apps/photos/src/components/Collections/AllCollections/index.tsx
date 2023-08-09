@@ -14,7 +14,7 @@ interface Iprops {
     open: boolean;
     onClose: () => void;
     collectionSummaries: CollectionSummary[];
-    setActiveCollection: (id?: number) => void;
+    setActiveCollectionID: (id?: number) => void;
     collectionListSortBy: COLLECTION_LIST_SORT_BY;
     setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
 }
@@ -26,14 +26,14 @@ export default function AllCollections(props: Iprops) {
         collectionSummaries,
         open,
         onClose,
-        setActiveCollection,
+        setActiveCollectionID,
         collectionListSortBy,
         setCollectionListSortBy,
     } = props;
     const { isMobile } = useContext(AppContext);
 
     const onCollectionClick = (collectionID: number) => {
-        setActiveCollection(collectionID);
+        setActiveCollectionID(collectionID);
         onClose();
     };
 

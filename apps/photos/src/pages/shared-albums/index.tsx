@@ -453,7 +453,7 @@ export default function PublicCollectionGallery() {
                     syncWithRemote={syncWithRemote}
                     setSelected={() => null}
                     selected={{ count: 0, collectionID: null, ownCount: 0 }}
-                    activeCollection={ALL_SECTION}
+                    activeCollectionID={ALL_SECTION}
                     enableDownload={downloadEnabled}
                     fileToCollectionsMap={null}
                     collectionNameMap={null}

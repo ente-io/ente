@@ -34,7 +34,6 @@ interface Iprops {
     setIsOpen: (value: boolean) => void;
     files: EnteFile[];
     collections: Collection[];
-    setActiveCollection: (id: number) => void;
 }
 
 const createComponents = memoize((Option, ValueContainer, Menu) => ({

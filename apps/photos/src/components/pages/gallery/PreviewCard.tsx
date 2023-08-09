@@ -34,7 +34,7 @@ interface IProps {
     isRangeSelectActive: boolean;
     selectOnClick: boolean;
     isInsSelectRange: boolean;
-    activeCollection: number;
+    activeCollectionID: number;
     showPlaceholder: boolean;
 }
 
@@ -388,7 +388,7 @@ export default function PreviewCard(props: IProps) {
                     </p>
                 </FileAndCollectionNameOverlay>
             )}
-            {props?.activeCollection === TRASH_SECTION && file.isTrashed && (
+            {props?.activeCollectionID === TRASH_SECTION && file.isTrashed && (
                 <FileAndCollectionNameOverlay>
                     <p>{formatDateRelative(file.deleteBy / 1000)}</p>
                 </FileAndCollectionNameOverlay>

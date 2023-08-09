@@ -18,13 +18,13 @@ import PushPin from '@mui/icons-material/PushPin';
 
 interface Iprops {
     collectionSummary: CollectionSummary;
-    activeCollection: number;
+    activeCollectionID: number;
     onCollectionClick: (collectionID: number) => void;
     isScrolling?: boolean;
 }
 
 const CollectionListBarCard = (props: Iprops) => {
-    const { activeCollection, collectionSummary, onCollectionClick } = props;
+    const { activeCollectionID, collectionSummary, onCollectionClick } = props;
 
     return (
         <Box>
@@ -37,7 +37,7 @@ const CollectionListBarCard = (props: Iprops) => {
                 <CollectionCardText collectionName={collectionSummary.name} />
                 <CollectionCardIcon collectionType={collectionSummary.type} />
             </CollectionCard>
-            {activeCollection === collectionSummary.id && <ActiveIndicator />}
+            {activeCollectionID === collectionSummary.id && <ActiveIndicator />}
         </Box>
     );
 };
