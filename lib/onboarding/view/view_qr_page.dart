@@ -1,4 +1,6 @@
 
+import 'dart:math';
+
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -12,6 +14,8 @@ class ViewQrPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final double qrSize = min(screenWidth - 80, 300.0);
     final enteTextTheme = getEnteTextTheme(context);
     final l10n = context.l10n;
     return Scaffold(
@@ -27,7 +31,7 @@ class ViewQrPage extends StatelessWidget {
                 QrImage(
                   data: code!.rawData,
                   version: QrVersions.auto,
-                  size: 300.0,
+                  size: qrSize,
                 ),
                 const SizedBox(
                   height: 20,
