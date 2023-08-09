@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/theme/effects.dart";
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
 
 class FileSelectionOverlayBar extends StatefulWidget {
@@ -45,31 +46,36 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       '$runtimeType building with ${widget.selectedFiles.files.length}',
     );
 
-    return ValueListenableBuilder(
-      valueListenable: _hasSelectedFilesNotifier,
-      builder: (context, value, child) {
-        return AnimatedCrossFade(
-          firstCurve: Curves.easeInOutExpo,
-          secondCurve: Curves.easeInOutExpo,
-          sizeCurve: Curves.easeInOutExpo,
-          crossFadeState: _hasSelectedFilesNotifier.value
-              ? CrossFadeState.showFirst
-              : CrossFadeState.showSecond,
-          duration: const Duration(milliseconds: 400),
-          firstChild: BottomActionBarWidget(
-            selectedFiles: widget.selectedFiles,
-            galleryType: widget.galleryType,
-            collection: widget.collection,
-            onCancel: () {
-              if (widget.selectedFiles.files.isNotEmpty) {
-                widget.selectedFiles.clearAll();
-              }
-            },
-            backgroundColor: widget.backgroundColor,
-          ),
-          secondChild: const SizedBox(width: double.infinity),
-        );
-      },
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: shadowFloatFaintLight,
+      ),
+      child: ValueListenableBuilder(
+        valueListenable: _hasSelectedFilesNotifier,
+        builder: (context, value, child) {
+          return AnimatedCrossFade(
+            firstCurve: Curves.easeInOutExpo,
+            secondCurve: Curves.easeInOutExpo,
+            sizeCurve: Curves.easeInOutExpo,
+            crossFadeState: _hasSelectedFilesNotifier.value
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
+            duration: const Duration(milliseconds: 400),
+            firstChild: BottomActionBarWidget(
+              selectedFiles: widget.selectedFiles,
+              galleryType: widget.galleryType,
+              collection: widget.collection,
+              onCancel: () {
+                if (widget.selectedFiles.files.isNotEmpty) {
+                  widget.selectedFiles.clearAll();
+                }
+              },
+              backgroundColor: widget.backgroundColor,
+            ),
+            secondChild: const SizedBox(width: double.infinity),
+          );
+        },
+      ),
     );
   }
 

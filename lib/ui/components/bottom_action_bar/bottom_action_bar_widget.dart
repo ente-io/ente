@@ -3,7 +3,6 @@ import 'package:photos/core/constants.dart';
 import "package:photos/models/collection.dart";
 import "package:photos/models/gallery_type.dart";
 import 'package:photos/models/selected_files.dart';
-import "package:photos/theme/effects.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/bottom_action_bar/action_bar_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
@@ -36,7 +35,6 @@ class BottomActionBarWidget extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor ?? colorScheme.backgroundElevated2,
-        boxShadow: shadowFloatFaintLight,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(8),
           topRight: Radius.circular(8),
