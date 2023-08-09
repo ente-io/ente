@@ -44,7 +44,7 @@ interface Props {
     selected: SelectedState;
     deletedFileIds?: Set<number>;
     setDeletedFileIds?: (value: Set<number>) => void;
-    activeCollection: number;
+    activeCollectionID: number;
     enableDownload?: boolean;
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
@@ -60,7 +60,7 @@ const PhotoFrame = ({
     selected,
     deletedFileIds,
     setDeletedFileIds,
-    activeCollection,
+    activeCollectionID,
     enableDownload,
     fileToCollectionsMap,
     collectionNameMap,
@@ -264,7 +264,7 @@ const PhotoFrame = ({
                 }
             }
             setSelected((selected) => {
-                if (selected.collectionID !== activeCollection) {
+                if (selected.collectionID !== activeCollectionID) {
                     selected = { ownCount: 0, count: 0, collectionID: 0 };
                 }
 
@@ -294,7 +294,7 @@ const PhotoFrame = ({
                 return {
                     ...selected,
                     [id]: checked,
-                    collectionID: activeCollection,
+                    collectionID: activeCollectionID,
                     ...handleAllCounterChange(),
                 };
             });
@@ -351,7 +351,8 @@ const PhotoFrame = ({
                 index
             )}
             selected={
-                selected.collectionID === activeCollection && selected[item.id]
+                selected.collectionID === activeCollectionID &&
+                selected[item.id]
             }
             selectOnClick={selected.count > 0}
             onHover={onHoverOver(index)}
@@ -361,7 +362,7 @@ const PhotoFrame = ({
                 (index >= rangeStart && index <= currentHover) ||
                 (index >= currentHover && index <= rangeStart)
             }
-            activeCollection={activeCollection}
+            activeCollectionID={activeCollectionID}
             showPlaceholder={isScrolling}
         />
     );
@@ -519,7 +520,7 @@ const PhotoFrame = ({
                         height={height}
                         getThumbnail={getThumbnail}
                         displayFiles={displayFiles}
-                        activeCollection={activeCollection}
+                        activeCollectionID={activeCollectionID}
                         showAppDownloadBanner={showAppDownloadBanner}
                     />
                 )}
@@ -533,8 +534,8 @@ const PhotoFrame = ({
                 favItemIds={favItemIds}
                 deletedFileIds={deletedFileIds}
                 setDeletedFileIds={setDeletedFileIds}
-                isTrashCollection={activeCollection === TRASH_SECTION}
-                isHiddenCollection={activeCollection === HIDDEN_SECTION}
+                isTrashCollection={activeCollectionID === TRASH_SECTION}
+                isHiddenCollection={activeCollectionID === HIDDEN_SECTION}
                 enableDownload={enableDownload}
                 isSourceLoaded={isSourceLoaded}
                 conversionFailed={conversionFailed}

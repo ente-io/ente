@@ -176,7 +176,7 @@ interface Props {
         index: number,
         isScrolling?: boolean
     ) => JSX.Element;
-    activeCollection: number;
+    activeCollectionID: number;
 }
 
 interface ItemData {
@@ -233,7 +233,7 @@ export function PhotoList({
     displayFiles,
     showAppDownloadBanner,
     getThumbnail,
-    activeCollection,
+    activeCollectionID,
 }: Props) {
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
@@ -801,7 +801,7 @@ export function PhotoList({
 
     return (
         <List
-            key={`${activeCollection}`}
+            key={`${activeCollectionID}`}
             itemData={itemData}
             ref={listRef}
             itemSize={getItemSize(timeStampList)}

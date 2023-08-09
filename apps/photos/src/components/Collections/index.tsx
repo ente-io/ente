@@ -1,6 +1,6 @@
 import { Collection, CollectionSummaries } from 'types/collection';
 import CollectionListBar from 'components/Collections/CollectionListBar';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AllCollections from 'components/Collections/AllCollections';
 import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWithOptions';
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from 'constants/collection';
@@ -17,7 +17,7 @@ import { sortCollectionSummaries } from 'services/collectionService';
 import { LS_KEYS } from 'utils/storage/localStorage';
 
 interface Iprops {
-    collections: Collection[];
+    activeCollection: Collection;
     activeCollectionID?: number;
     setActiveCollectionID: (id?: number) => void;
     isInSearchMode: boolean;
@@ -28,7 +28,7 @@ interface Iprops {
 
 export default function Collections(props: Iprops) {
     const {
-        collections,
+        activeCollection,
         isInSearchMode,
         activeCollectionID,
         setActiveCollectionID,
@@ -46,8 +46,6 @@ export default function Collections(props: Iprops) {
             LS_KEYS.COLLECTION_SORT_BY,
             COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING
         );
-    const collectionsMap = useRef<Map<number, Collection>>(new Map());
-    const activeCollection = useRef<Collection>(null);
 
     const shouldBeHidden = useMemo(
         () =>
@@ -56,17 +54,6 @@ export default function Collections(props: Iprops) {
                 activeCollectionID === ALL_SECTION),
         [isInSearchMode, collectionSummaries, activeCollectionID]
     );
-
-    useEffect(() => {
-        collectionsMap.current = new Map(
-            props.collections.map((collection) => [collection.id, collection])
-        );
-    }, [collections]);
-
-    useEffect(() => {
-        activeCollection.current =
-            collectionsMap.current.get(activeCollectionID);
-    }, [activeCollectionID, collections]);
 
     const sortedCollectionSummaries = useMemo(
         () =>
@@ -87,7 +74,7 @@ export default function Collections(props: Iprops) {
                     collectionSummary={collectionSummaries.get(
                         activeCollectionID
                     )}
-                    activeCollection={activeCollection.current}
+                    activeCollection={activeCollection}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
                     showCollectionShareModal={() =>
@@ -111,8 +98,8 @@ export default function Collections(props: Iprops) {
     return (
         <>
             <CollectionListBar
-                activeCollection={activeCollectionID}
-                setActiveCollection={setActiveCollectionID}
+                activeCollectionID={activeCollectionID}
+                setActiveCollectionID={setActiveCollectionID}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
                     shouldBeShownOnCollectionBar(x.type)
                 )}
@@ -127,7 +114,7 @@ export default function Collections(props: Iprops) {
                 collectionSummaries={sortedCollectionSummaries.filter(
                     (x) => !isSystemCollection(x.type)
                 )}
-                setActiveCollection={setActiveCollectionID}
+                setActiveCollectionID={setActiveCollectionID}
                 setCollectionListSortBy={setCollectionListSortBy}
                 collectionListSortBy={collectionListSortBy}
             />
@@ -136,7 +123,7 @@ export default function Collections(props: Iprops) {
                 collectionSummary={collectionSummaries.get(activeCollectionID)}
                 open={collectionShareModalView}
                 onClose={closeCollectionShare}
-                collection={activeCollection.current}
+                collection={activeCollection}
             />
         </>
     );

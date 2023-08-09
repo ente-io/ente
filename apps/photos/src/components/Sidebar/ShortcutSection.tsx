@@ -42,23 +42,23 @@ export default function ShortcutSection({
     }, []);
 
     const openUncategorizedSection = () => {
-        galleryContext.setActiveCollection(uncategorizedCollectionId);
+        galleryContext.setActiveCollectionID(uncategorizedCollectionId);
         closeSidebar();
     };
 
     const openTrashSection = () => {
-        galleryContext.setActiveCollection(TRASH_SECTION);
+        galleryContext.setActiveCollectionID(TRASH_SECTION);
         closeSidebar();
     };
 
     const openArchiveSection = () => {
-        galleryContext.setActiveCollection(ARCHIVE_SECTION);
+        galleryContext.setActiveCollectionID(ARCHIVE_SECTION);
         closeSidebar();
     };
 
     const openHiddenSection = () => {
         galleryContext.authenticateUser(() => {
-            galleryContext.setActiveCollection(HIDDEN_SECTION);
+            galleryContext.setActiveCollectionID(HIDDEN_SECTION);
             closeSidebar();
         });
     };

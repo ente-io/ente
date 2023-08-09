@@ -22,7 +22,6 @@ import {
     parseLivePhotoExportName,
     getCollectionIDFromFileUID,
 } from 'utils/export';
-import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getLocalCollections } from '../collectionService';
@@ -435,9 +434,8 @@ class ExportService {
                 exportRecord
             );
 
-            addLocalLog(
-                () =>
-                    `personal files:${personalFiles.length} unexported files: ${filesToExport.length}, deleted exported files: ${removedFileUIDs.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedExportedCollections.length}`
+            addLogLine(
+                `personal files:${personalFiles.length} unexported files: ${filesToExport.length}, deleted exported files: ${removedFileUIDs.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedExportedCollections.length}`
             );
             let success = 0;
             let failed = 0;
@@ -557,10 +555,8 @@ class ExportService {
                             exportFolder,
                             collection.name
                         );
-                    addLocalLog(
-                        () =>
-                            `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName}
-                         `
+                    addLogLine(
+                        `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName}`
                     );
                     const newCollectionExportPath = getCollectionExportPath(
                         exportFolder,
@@ -580,6 +576,9 @@ class ExportService {
                     collectionIDExportNameMap.set(
                         collection.id,
                         newCollectionExportName
+                    );
+                    addLogLine(
+                        `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName} successful`
                     );
                     incrementSuccess();
                 } catch (e) {
@@ -626,9 +625,8 @@ class ExportService {
                         throw Error(CustomError.EXPORT_STOPPED);
                     }
                     this.verifyExportFolderExists(exportFolder);
-                    addLocalLog(
-                        () =>
-                            `removing collection with id ${collectionID} from export folder`
+                    addLogLine(
+                        `removing collection with id ${collectionID} from export folder`
                     );
                     const collectionExportName =
                         collectionIDPathMap.get(collectionID);
@@ -655,6 +653,9 @@ class ExportService {
                     await this.removeCollectionExportedRecord(
                         exportFolder,
                         collectionID
+                    );
+                    addLogLine(
+                        `removing collection with id ${collectionID} from export folder successful`
                     );
                     incrementSuccess();
                 } catch (e) {
@@ -693,13 +694,12 @@ class ExportService {
     ): Promise<void> {
         try {
             for (const file of files) {
-                addLocalLog(
-                    () =>
-                        `exporting file ${file.metadata.title} with id ${
-                            file.id
-                        } from collection ${collectionIDNameMap.get(
-                            file.collectionID
-                        )}`
+                addLogLine(
+                    `exporting file ${file.metadata.title} with id ${
+                        file.id
+                    } from collection ${collectionIDNameMap.get(
+                        file.collectionID
+                    )}`
                 );
                 if (isCanceled.status) {
                     throw Error(CustomError.EXPORT_STOPPED);
@@ -743,6 +743,13 @@ class ExportService {
                         fileExportName
                     );
                     incrementSuccess();
+                    addLogLine(
+                        `exporting file ${file.metadata.title} with id ${
+                            file.id
+                        } from collection ${collectionIDNameMap.get(
+                            file.collectionID
+                        )} successful`
+                    );
                 } catch (e) {
                     incrementFailed();
                     logError(e, 'export failed for a file');
@@ -783,7 +790,7 @@ class ExportService {
             );
             for (const fileUID of removedFileUIDs) {
                 this.verifyExportFolderExists(exportDir);
-                addLocalLog(() => `trashing file with id ${fileUID}`);
+                addLogLine(`trashing file with id ${fileUID}`);
                 if (isCanceled.status) {
                     throw Error(CustomError.EXPORT_STOPPED);
                 }
@@ -804,9 +811,8 @@ class ExportService {
                             collectionExportPath,
                             imageExportName
                         );
-                        addLocalLog(
-                            () =>
-                                `moving image file ${imageExportPath} to trash folder`
+                        addLogLine(
+                            `moving image file ${imageExportPath} to trash folder`
                         );
                         await this.electronAPIs.moveFile(
                             imageExportPath,
@@ -828,9 +834,8 @@ class ExportService {
                             collectionExportPath,
                             videoExportName
                         );
-                        addLocalLog(
-                            () =>
-                                `moving video file ${videoExportPath} to trash folder`
+                        addLogLine(
+                            `moving video file ${videoExportPath} to trash folder`
                         );
                         await this.electronAPIs.moveFile(
                             videoExportPath,
@@ -854,9 +859,8 @@ class ExportService {
                             exportDir,
                             fileExportPath
                         );
-                        addLocalLog(
-                            () =>
-                                `moving file ${fileExportPath} to ${trashedFilePath} trash folder`
+                        addLogLine(
+                            `moving file ${fileExportPath} to ${trashedFilePath} trash folder`
                         );
                         await this.electronAPIs.moveFile(
                             fileExportPath,
@@ -873,6 +877,7 @@ class ExportService {
                         );
                     }
                     await this.removeFileExportedRecord(exportDir, fileUID);
+                    addLogLine(`trashing file with id ${fileUID} successful`);
                     incrementSuccess();
                 } catch (e) {
                     incrementFailed();
@@ -1062,9 +1067,7 @@ class ExportService {
                 collectionExportPath,
                 file.metadata.title
             );
-            let fileStream = await retryAsyncFunction(() =>
-                downloadManager.downloadFile(file)
-            );
+            let fileStream = await downloadManager.downloadFile(file);
             const fileType = getFileExtension(file.metadata.title);
             if (
                 file.pubMagicMetadata?.data.editedTime &&

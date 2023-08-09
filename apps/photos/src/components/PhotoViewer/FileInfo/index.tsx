@@ -178,7 +178,7 @@ export function FileInfo({
         return <></>;
     }
     const onCollectionChipClick = (collectionID) => {
-        galleryContext.setActiveCollection(collectionID);
+        galleryContext.setActiveCollectionID(collectionID);
         galleryContext.setIsInSearchMode(false);
         closePhotoViewer();
     };

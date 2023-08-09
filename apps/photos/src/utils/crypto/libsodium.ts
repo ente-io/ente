@@ -1,6 +1,7 @@
 import sodium, { StateAddress } from 'libsodium-wrappers';
 import { ENCRYPTION_CHUNK_SIZE } from 'constants/crypto';
 import { B64EncryptionResult } from 'types/crypto';
+import { CustomError } from 'utils/error';
 
 export async function decryptChaChaOneShot(
     data: Uint8Array,
@@ -46,6 +47,9 @@ export async function decryptChaCha(
             pullState,
             buffer
         );
+        if (!pullResult.message) {
+            throw new Error(CustomError.PROCESSING_FAILED);
+        }
         for (let index = 0; index < pullResult.message.length; index++) {
             decryptedData.push(pullResult.message[index]);
         }
@@ -77,6 +81,9 @@ export async function decryptFileChunk(
         pullState,
         data
     );
+    if (!pullResult.message) {
+        throw new Error(CustomError.PROCESSING_FAILED);
+    }
     const newTag = pullResult.tag;
     return { decryptedData: pullResult.message, newTag };
 }
