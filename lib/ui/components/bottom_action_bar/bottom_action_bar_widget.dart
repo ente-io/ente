@@ -7,13 +7,13 @@ import 'package:photos/ui/components/bottom_action_bar/action_bar_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
 
 class BottomActionBarWidget extends StatelessWidget {
-  final Widget expandedMenu;
+  final Widget fileSelectionActionsWidget;
   final SelectedFiles? selectedFiles;
   final VoidCallback? onCancel;
   final Color? backgroundColor;
 
   const BottomActionBarWidget({
-    required this.expandedMenu,
+    required this.fileSelectionActionsWidget,
     this.selectedFiles,
     this.onCancel,
     this.backgroundColor,
@@ -47,38 +47,7 @@ class BottomActionBarWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: 12),
-          SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                SizedBox(width: 8),
-                SelectionOptionButton(
-                  name: "Share link",
-                  icon: Icons.link_outlined,
-                ),
-                SelectionOptionButton(name: "Add to album", icon: Icons.add),
-                SelectionOptionButton(
-                  name: "Delete",
-                  icon: Icons.delete_outline,
-                ),
-                SelectionOptionButton(
-                  name: "Hide",
-                  icon: Icons.visibility_off_outlined,
-                ),
-                SelectionOptionButton(
-                  name: "Archive",
-                  icon: Icons.archive_outlined,
-                ),
-                SelectionOptionButton(
-                  name: "Favorite",
-                  icon: Icons.favorite_border_outlined,
-                ),
-                SizedBox(width: 8),
-              ],
-            ),
-          ),
+          fileSelectionActionsWidget,
           const SizedBox(height: 20),
           const DividerWidget(dividerType: DividerType.bottomBar),
           ActionBarWidget(
@@ -93,11 +62,14 @@ class BottomActionBarWidget extends StatelessWidget {
 }
 
 class SelectionOptionButton extends StatefulWidget {
-  final String name;
+  final String labelText;
   final IconData icon;
+  final VoidCallback? onTap;
+
   const SelectionOptionButton({
-    required this.name,
+    required this.labelText,
     required this.icon,
+    required this.onTap,
     super.key,
   });
 
@@ -111,6 +83,7 @@ class _SelectionOptionButtonState extends State<SelectionOptionButton> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     return GestureDetector(
+      onTap: widget.onTap,
       onTapDown: (details) {
         setState(() {
           backgroundColor = colorScheme.fillFaintPressed;
@@ -146,7 +119,7 @@ class _SelectionOptionButtonState extends State<SelectionOptionButton> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  widget.name,
+                  widget.labelText,
                   textAlign: TextAlign.center,
                   style: getEnteTextTheme(context).miniMuted,
                 ),

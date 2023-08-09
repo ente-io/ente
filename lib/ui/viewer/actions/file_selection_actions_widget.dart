@@ -13,13 +13,11 @@ import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
-import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
-import 'package:photos/ui/components/blur_menu_item_widget.dart';
-import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart';
+import "package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
@@ -29,13 +27,13 @@ import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
-class FileSelectionActionWidget extends StatefulWidget {
+class FileSelectionActionsWidget extends StatefulWidget {
   final GalleryType type;
   final Collection? collection;
   final DeviceCollection? deviceCollection;
   final SelectedFiles selectedFiles;
 
-  const FileSelectionActionWidget(
+  const FileSelectionActionsWidget(
     this.type,
     this.selectedFiles, {
     Key? key,
@@ -44,11 +42,12 @@ class FileSelectionActionWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<FileSelectionActionWidget> createState() =>
-      _FileSelectionActionWidgetState();
+  State<FileSelectionActionsWidget> createState() =>
+      _FileSelectionActionsWidgetState();
 }
 
-class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
+class _FileSelectionActionsWidgetState
+    extends State<FileSelectionActionsWidget> {
   late int currentUserID;
   late FilesSplit split;
   late CollectionActions collectionActions;
@@ -110,27 +109,22 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
     final bool showRemoveOption = widget.type.showRemoveFromAlbum();
     debugPrint('$runtimeType building  $mounted');
-    final colorScheme = getEnteColorScheme(context);
-    final List<List<BlurMenuItemWidget>> items = [];
-    final List<BlurMenuItemWidget> firstList = [];
-    final List<BlurMenuItemWidget> secondList = [];
+    final List<SelectionOptionButton> items = [];
 
     if (widget.type.showCreateLink()) {
       if (_cachedCollectionForSharedLink != null && anyUploadedFiles) {
-        firstList.add(
-          BlurMenuItemWidget(
-            leadingIcon: Icons.copy_outlined,
+        items.add(
+          SelectionOptionButton(
+            icon: Icons.copy_outlined,
             labelText: S.of(context).copyLink,
-            menuItemColor: colorScheme.fillFaint,
             onTap: anyUploadedFiles ? _copyLink : null,
           ),
         );
       } else {
-        firstList.add(
-          BlurMenuItemWidget(
-            leadingIcon: Icons.link_outlined,
+        items.add(
+          SelectionOptionButton(
+            icon: Icons.link_outlined,
             labelText: S.of(context).shareLink + suffix,
-            menuItemColor: colorScheme.fillFaint,
             onTap: anyUploadedFiles ? _onCreatedSharedLinkClicked : null,
           ),
         );
@@ -149,11 +143,10 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
             CollageCreatorPage.collageItemsMin &&
         widget.selectedFiles.files.length <=
             CollageCreatorPage.collageItemsMax) {
-      firstList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.grid_view_outlined,
+      items.add(
+        SelectionOptionButton(
+          icon: Icons.grid_view_outlined,
           labelText: S.of(context).createCollage,
-          menuItemColor: colorScheme.fillFaint,
           onTap: _onCreateCollageClicked,
         ),
       );
@@ -162,139 +155,132 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     final showUploadIcon = widget.type == GalleryType.localFolder &&
         split.ownedByCurrentUser.isEmpty;
     if (widget.type.showAddToAlbum()) {
-      secondList.add(
-        BlurMenuItemWidget(
-          leadingIcon:
+      items.add(
+        SelectionOptionButton(
+          icon:
               showUploadIcon ? Icons.cloud_upload_outlined : Icons.add_outlined,
           labelText: showUploadIcon
               ? S.of(context).addToEnte
               : S.of(context).addToAlbum + suffixInPending,
-          menuItemColor: colorScheme.fillFaint,
           onTap: anyOwnedFiles ? _addToAlbum : null,
         ),
       );
     }
     if (widget.type.showMoveToAlbum()) {
-      secondList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.arrow_forward_outlined,
+      items.add(
+        SelectionOptionButton(
+          icon: Icons.arrow_forward_outlined,
           labelText: S.of(context).moveToAlbum + suffix,
-          menuItemColor: colorScheme.fillFaint,
           onTap: anyUploadedFiles ? _moveFiles : null,
         ),
       );
     }
 
     if (showRemoveOption) {
-      secondList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.remove_outlined,
+      items.add(
+        SelectionOptionButton(
+          icon: Icons.remove_outlined,
           labelText: "${S.of(context).removeFromAlbum}$removeSuffix",
-          menuItemColor: colorScheme.fillFaint,
           onTap: removeCount > 0 ? _removeFilesFromAlbum : null,
         ),
       );
     }
 
     if (widget.type.showDeleteOption()) {
-      secondList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.delete_outline,
+      items.add(
+        SelectionOptionButton(
+          icon: Icons.delete_outline,
           labelText: S.of(context).delete + suffixInPending,
-          menuItemColor: colorScheme.fillFaint,
           onTap: anyOwnedFiles ? _onDeleteClick : null,
         ),
       );
     }
 
     if (widget.type.showHideOption()) {
-      secondList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.visibility_off_outlined,
+      items.add(
+        SelectionOptionButton(
+          icon: Icons.visibility_off_outlined,
           labelText: S.of(context).hide + suffix,
-          menuItemColor: colorScheme.fillFaint,
           onTap: anyUploadedFiles ? _onHideClick : null,
         ),
       );
     } else if (widget.type.showUnHideOption()) {
-      secondList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.visibility_off_outlined,
+      items.add(
+        SelectionOptionButton(
+          icon: Icons.visibility_off_outlined,
           labelText: S.of(context).unhide + suffix,
-          menuItemColor: colorScheme.fillFaint,
           onTap: _onUnhideClick,
         ),
       );
     }
     if (widget.type.showArchiveOption()) {
-      secondList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.archive_outlined,
+      items.add(
+        SelectionOptionButton(
+          icon: Icons.archive_outlined,
           labelText: S.of(context).archive + suffix,
-          menuItemColor: colorScheme.fillFaint,
           onTap: anyUploadedFiles ? _onArchiveClick : null,
         ),
       );
     } else if (widget.type.showUnArchiveOption()) {
-      secondList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.unarchive,
+      items.add(
+        SelectionOptionButton(
+          icon: Icons.unarchive,
           labelText: S.of(context).unarchive + suffix,
-          menuItemColor: colorScheme.fillFaint,
           onTap: _onUnArchiveClick,
         ),
       );
     }
 
     if (widget.type.showFavoriteOption()) {
-      secondList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.favorite_border_rounded,
+      items.add(
+        SelectionOptionButton(
+          icon: Icons.favorite_border_rounded,
           labelText: S.of(context).favorite + suffix,
-          menuItemColor: colorScheme.fillFaint,
           onTap: anyUploadedFiles ? _onFavoriteClick : null,
         ),
       );
     } else if (widget.type.showUnFavoriteOption()) {
-      secondList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.favorite,
+      items.add(
+        SelectionOptionButton(
+          icon: Icons.favorite,
           labelText: S.of(context).removeFromFavorite + suffix,
-          menuItemColor: colorScheme.fillFaint,
           onTap: _onUnFavoriteClick,
         ),
       );
     }
 
     if (widget.type.showRestoreOption()) {
-      secondList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.restore_outlined,
+      items.add(
+        SelectionOptionButton(
+          icon: Icons.restore_outlined,
           labelText: S.of(context).restore,
-          menuItemColor: colorScheme.fillFaint,
           onTap: _restore,
         ),
       );
     }
 
     if (widget.type.showPermanentlyDeleteOption()) {
-      secondList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.delete_forever_outlined,
+      items.add(
+        SelectionOptionButton(
+          icon: Icons.delete_forever_outlined,
           labelText: S.of(context).permanentlyDelete,
-          menuItemColor: colorScheme.fillFaint,
           onTap: _permanentlyDelete,
         ),
       );
     }
 
-    if (firstList.isNotEmpty || secondList.isNotEmpty) {
-      if (firstList.isNotEmpty) {
-        items.add(firstList);
-      }
-      items.add(secondList);
-      return ExpandedMenuWidget(
-        items: items,
+    if (items.isNotEmpty) {
+      return SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(width: 8),
+            ...items,
+            const SizedBox(width: 8),
+          ],
+        ),
       );
     } else {
       // TODO: Return "Select All" here
