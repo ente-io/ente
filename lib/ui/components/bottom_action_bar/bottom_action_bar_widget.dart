@@ -53,6 +53,7 @@ class BottomActionBarWidget extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
+                SizedBox(width: 8),
                 SelectionOptionButton(
                   name: "Share link",
                   icon: Icons.link_outlined,
@@ -74,6 +75,7 @@ class BottomActionBarWidget extends StatelessWidget {
                   name: "Favorite",
                   icon: Icons.favorite_border_outlined,
                 ),
+                SizedBox(width: 8),
               ],
             ),
           ),
