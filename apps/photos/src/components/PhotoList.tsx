@@ -31,7 +31,7 @@ import memoize from 'memoize-one';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
-const ALBUM_FOOTER_HEIGHT = 75;
+const ALBUM_FOOTER_HEIGHT = 95;
 
 export enum ITEM_TYPE {
     TIME = 'TIME',
@@ -602,26 +602,32 @@ export function PhotoList({
             height: ALBUM_FOOTER_HEIGHT,
             item: (
                 <AlbumFooterContainer span={columns}>
-                    <Typography variant="small">
-                        {t('SHARED_USING')}{' '}
-                        <Link target="_blank" href={ENTE_WEBSITE_LINK}>
-                            {t('ENTE_IO')}
-                        </Link>
+                    <Box width={'100%'}>
+                        <Typography variant="small" display={'block'}>
+                            {t('SHARED_USING')}{' '}
+                            <Link target="_blank" href={ENTE_WEBSITE_LINK}>
+                                {t('ENTE_IO')}
+                            </Link>
+                        </Typography>
                         {publicCollectionGalleryContext.referralCode ??
                         '' !== '' ? (
-                            <p style={{ marginTop: '4px' }}>
-                                <Typography color={'text.muted'}>
-                                    <Trans
-                                        i18nKey={'SHARING_REFERRAL_CODE'}
-                                        values={{
-                                            referralCode:
-                                                publicCollectionGalleryContext.referralCode,
-                                        }}
-                                    />
-                                </Typography>
-                            </p>
+                            <Typography
+                                sx={{
+                                    marginTop: '12px',
+                                    padding: '8px',
+                                    backgroundColor: (theme) =>
+                                        theme.colors.accent.A500,
+                                }}>
+                                <Trans
+                                    i18nKey={'SHARING_REFERRAL_CODE'}
+                                    values={{
+                                        referralCode:
+                                            publicCollectionGalleryContext.referralCode,
+                                    }}
+                                />
+                            </Typography>
                         ) : null}
-                    </Typography>
+                    </Box>
                 </AlbumFooterContainer>
             ),
         };
