@@ -860,13 +860,15 @@ class RemoteSyncService {
     // TODO: Add option to opt out of notifications for a specific collection
     // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
     final isForeground = AppLifecycleService.instance.isForeground;
-    _logger.info(
-      "Attempting to show notification for $collectionID, isAppInForeground? $isForeground",
-    );
-    return NotificationService.instance
-            .shouldShowNotificationsForSharedPhotos() &&
+    final bool showNotification = NotificationService.instance
+        .shouldShowNotificationsForSharedPhotos() &&
         isFirstRemoteSyncDone() &&
         !isForeground;
+    _logger.info(
+      "[Collection-$collectionID] shouldShow notification: $showNotification, "
+          "isAppInForeground: $isForeground",
+    );
+    return showNotification;
   }
 
   Future<void>  _notifyNewFiles(List<int> collectionIDs) async {
