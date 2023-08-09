@@ -23,20 +23,6 @@ class _SelectionActionButtonState extends State<SelectionActionButton> {
   Color? backgroundColor;
 
   @override
-  void initState() {
-    super.initState();
-    // widthOfButton = getWidthOfButton();
-  }
-
-  getWidthOfButton() {
-    final widthOfWidestWord = getWidthOfLongestWord(
-      widget.labelText,
-    );
-    if (widthOfWidestWord > minWidth) return widthOfWidestWord;
-    return minWidth;
-  }
-
-  @override
   Widget build(BuildContext context) {
     widthOfButton = getWidthOfButton();
     final colorScheme = getEnteColorScheme(context);
@@ -90,7 +76,15 @@ class _SelectionActionButtonState extends State<SelectionActionButton> {
     );
   }
 
-  double getWidthOfText(String text, TextStyle style) {
+  getWidthOfButton() {
+    final widthOfWidestWord = getWidthOfWidestWord(
+      widget.labelText,
+    );
+    if (widthOfWidestWord > minWidth) return widthOfWidestWord;
+    return minWidth;
+  }
+
+  double computeWidthOfWord(String text, TextStyle style) {
     final textPainter = TextPainter(
       text: TextSpan(text: text, style: style),
       maxLines: 1,
@@ -101,13 +95,14 @@ class _SelectionActionButtonState extends State<SelectionActionButton> {
     return textPainter.size.width;
   }
 
-  double getWidthOfLongestWord(String labelText) {
+  double getWidthOfWidestWord(String labelText) {
     final words = labelText.split(RegExp(r'\s+'));
     if (words.isEmpty) return 0.0;
 
     double maxWidth = 0.0;
     for (String word in words) {
-      final width = getWidthOfText(word, getEnteTextTheme(context).miniMuted);
+      final width =
+          computeWidthOfWord(word, getEnteTextTheme(context).miniMuted);
       if (width > maxWidth) {
         maxWidth = width;
       }
