@@ -36,6 +36,7 @@ import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
+import "package:uuid/uuid.dart";
 
 class FileUploader {
   static const kMaximumConcurrentUploads = 4;
@@ -338,15 +339,9 @@ class FileUploader {
     }
 
     final tempDirectory = Configuration.instance.getTempDirectory();
-    final encryptedFilePath = tempDirectory +
-        file.generatedID.toString() +
-        (_isBackground ? "_bg" : "") +
-        ".encrypted";
-    final encryptedThumbnailPath = tempDirectory +
-        file.generatedID.toString() +
-        "_thumbnail" +
-        (_isBackground ? "_bg" : "") +
-        ".encrypted";
+    final String uniqueID = const Uuid().v4().toString();
+    final encryptedFilePath = '$tempDirectory${uniqueID}_file.encrypted';
+    final encryptedThumbnailPath = '$tempDirectory${uniqueID}_thumb.encrypted';
     MediaUploadData? mediaUploadData;
     var uploadCompleted = false;
     // This flag is used to decide whether to clear the iOS origin file cache
