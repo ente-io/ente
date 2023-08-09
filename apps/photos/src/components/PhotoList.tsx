@@ -158,6 +158,18 @@ const AlbumFooterContainer = styled(ListItemContainer)`
     justify-content: center;
 `;
 
+const FullStretchContainer = styled(Box)`
+    margin: 0 -24px;
+    width: calc(100% + 46px);
+    left: -24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        margin: 0 -4px;
+        width: calc(100% + 6px);
+        left: -4px;
+    }
+    background-color: ${({ theme }) => theme.colors.accent.A500};
+`;
+
 const NothingContainer = styled(ListItemContainer)`
     color: #979797;
     text-align: center;
@@ -609,21 +621,21 @@ export function PhotoList({
                         </Typography>
                         {publicCollectionGalleryContext.referralCode ??
                         '' !== '' ? (
-                            <Typography
-                                sx={{
-                                    marginTop: '12px',
-                                    padding: '8px',
-                                    backgroundColor: (theme) =>
-                                        theme.colors.accent.A500,
-                                }}>
-                                <Trans
-                                    i18nKey={'SHARING_REFERRAL_CODE'}
-                                    values={{
-                                        referralCode:
-                                            publicCollectionGalleryContext.referralCode,
-                                    }}
-                                />
-                            </Typography>
+                            <FullStretchContainer>
+                                <Typography
+                                    sx={{
+                                        marginTop: '12px',
+                                        padding: '8px',
+                                    }}>
+                                    <Trans
+                                        i18nKey={'SHARING_REFERRAL_CODE'}
+                                        values={{
+                                            referralCode:
+                                                publicCollectionGalleryContext.referralCode,
+                                        }}
+                                    />
+                                </Typography>
+                            </FullStretchContainer>
                         ) : null}
                     </Box>
                 </AlbumFooterContainer>
