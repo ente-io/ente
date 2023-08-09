@@ -3,7 +3,6 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
-import 'package:photos/ui/viewer/actions/file_selection_actions_widget.dart';
 
 class FileSelectionOverlayBar extends StatefulWidget {
   final GalleryType galleryType;
@@ -60,11 +59,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           duration: const Duration(milliseconds: 400),
           firstChild: BottomActionBarWidget(
             selectedFiles: widget.selectedFiles,
-            fileSelectionActionsWidget: FileSelectionActionsWidget(
-              widget.galleryType,
-              widget.selectedFiles,
-              collection: widget.collection,
-            ),
+            galleryType: widget.galleryType,
+            collection: widget.collection,
             onCancel: () {
               if (widget.selectedFiles.files.isNotEmpty) {
                 widget.selectedFiles.clearAll();

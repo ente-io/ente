@@ -17,7 +17,7 @@ import 'package:photos/ui/actions/collection/collection_file_actions.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
-import "package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart";
+import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
@@ -109,12 +109,12 @@ class _FileSelectionActionsWidgetState
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
     final bool showRemoveOption = widget.type.showRemoveFromAlbum();
     debugPrint('$runtimeType building  $mounted');
-    final List<SelectionOptionButton> items = [];
+    final List<SelectionActionButton> items = [];
 
     if (widget.type.showCreateLink()) {
       if (_cachedCollectionForSharedLink != null && anyUploadedFiles) {
         items.add(
-          SelectionOptionButton(
+          SelectionActionButton(
             icon: Icons.copy_outlined,
             labelText: S.of(context).copyLink,
             onTap: anyUploadedFiles ? _copyLink : null,
@@ -122,7 +122,7 @@ class _FileSelectionActionsWidgetState
         );
       } else {
         items.add(
-          SelectionOptionButton(
+          SelectionActionButton(
             icon: Icons.link_outlined,
             labelText: S.of(context).shareLink + suffix,
             onTap: anyUploadedFiles ? _onCreatedSharedLinkClicked : null,
@@ -144,7 +144,7 @@ class _FileSelectionActionsWidgetState
         widget.selectedFiles.files.length <=
             CollageCreatorPage.collageItemsMax) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon: Icons.grid_view_outlined,
           labelText: S.of(context).createCollage,
           onTap: _onCreateCollageClicked,
@@ -156,7 +156,7 @@ class _FileSelectionActionsWidgetState
         split.ownedByCurrentUser.isEmpty;
     if (widget.type.showAddToAlbum()) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon:
               showUploadIcon ? Icons.cloud_upload_outlined : Icons.add_outlined,
           labelText: showUploadIcon
@@ -168,7 +168,7 @@ class _FileSelectionActionsWidgetState
     }
     if (widget.type.showMoveToAlbum()) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon: Icons.arrow_forward_outlined,
           labelText: S.of(context).moveToAlbum + suffix,
           onTap: anyUploadedFiles ? _moveFiles : null,
@@ -178,7 +178,7 @@ class _FileSelectionActionsWidgetState
 
     if (showRemoveOption) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon: Icons.remove_outlined,
           labelText: "${S.of(context).removeFromAlbum}$removeSuffix",
           onTap: removeCount > 0 ? _removeFilesFromAlbum : null,
@@ -188,7 +188,7 @@ class _FileSelectionActionsWidgetState
 
     if (widget.type.showDeleteOption()) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon: Icons.delete_outline,
           labelText: S.of(context).delete + suffixInPending,
           onTap: anyOwnedFiles ? _onDeleteClick : null,
@@ -198,7 +198,7 @@ class _FileSelectionActionsWidgetState
 
     if (widget.type.showHideOption()) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon: Icons.visibility_off_outlined,
           labelText: S.of(context).hide + suffix,
           onTap: anyUploadedFiles ? _onHideClick : null,
@@ -206,7 +206,7 @@ class _FileSelectionActionsWidgetState
       );
     } else if (widget.type.showUnHideOption()) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon: Icons.visibility_off_outlined,
           labelText: S.of(context).unhide + suffix,
           onTap: _onUnhideClick,
@@ -215,7 +215,7 @@ class _FileSelectionActionsWidgetState
     }
     if (widget.type.showArchiveOption()) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon: Icons.archive_outlined,
           labelText: S.of(context).archive + suffix,
           onTap: anyUploadedFiles ? _onArchiveClick : null,
@@ -223,7 +223,7 @@ class _FileSelectionActionsWidgetState
       );
     } else if (widget.type.showUnArchiveOption()) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon: Icons.unarchive,
           labelText: S.of(context).unarchive + suffix,
           onTap: _onUnArchiveClick,
@@ -233,7 +233,7 @@ class _FileSelectionActionsWidgetState
 
     if (widget.type.showFavoriteOption()) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon: Icons.favorite_border_rounded,
           labelText: S.of(context).favorite + suffix,
           onTap: anyUploadedFiles ? _onFavoriteClick : null,
@@ -241,7 +241,7 @@ class _FileSelectionActionsWidgetState
       );
     } else if (widget.type.showUnFavoriteOption()) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon: Icons.favorite,
           labelText: S.of(context).removeFromFavorite + suffix,
           onTap: _onUnFavoriteClick,
@@ -251,7 +251,7 @@ class _FileSelectionActionsWidgetState
 
     if (widget.type.showRestoreOption()) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon: Icons.restore_outlined,
           labelText: S.of(context).restore,
           onTap: _restore,
@@ -261,7 +261,7 @@ class _FileSelectionActionsWidgetState
 
     if (widget.type.showPermanentlyDeleteOption()) {
       items.add(
-        SelectionOptionButton(
+        SelectionActionButton(
           icon: Icons.delete_forever_outlined,
           labelText: S.of(context).permanentlyDelete,
           onTap: _permanentlyDelete,
