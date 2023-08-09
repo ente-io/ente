@@ -72,16 +72,6 @@ Location? locationFromExif(Map<String, IfdTag> exif) {
   }
 }
 
-Future<Location?> tryLocationFromExif(File file) async {
-  try {
-    final exif = await getExif(file);
-    return locationFromExif(exif);
-  } catch (e) {
-    _logger.severe("failed to get location from exif", e);
-    return null;
-  }
-}
-
 GPSData _gpsDataFromExif(Map<String, IfdTag> exif) {
   final Map<String, dynamic> exifLocationData = {
     "lat": null,
