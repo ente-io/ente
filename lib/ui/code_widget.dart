@@ -5,6 +5,7 @@ import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
+import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -69,8 +70,27 @@ class _CodeWidgetState extends State<CodeWidget> {
       child: Slidable(
         key: ValueKey(widget.code.hashCode),
         endActionPane: ActionPane(
+          extentRatio: 0.60,
           motion: const ScrollMotion(),
           children: [
+            const SizedBox(
+              width: 4,
+            ),
+            SlidableAction(
+              onPressed: _onShowQrPressed,
+              backgroundColor: Colors.grey.withOpacity(0.1),
+              borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              foregroundColor:
+              Theme.of(context).colorScheme.inverseBackgroundColor,
+              icon: Icons.qr_code_2_outlined,
+              label: "QR",
+              padding: const EdgeInsets.only(left: 4, right: 0),
+              spacing: 8,
+            ),
+            const SizedBox(
+              width: 4,
+            ),
+
             SlidableAction(
               onPressed: _onEditPressed,
               backgroundColor: Colors.grey.withOpacity(0.1),
@@ -260,6 +280,16 @@ class _CodeWidgetState extends State<CodeWidget> {
     if (code != null) {
       CodeStore.instance.addCode(code);
     }
+  }
+
+  Future<void> _onShowQrPressed(_) async {
+    final Code? code = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return ViewQrPage(code: widget.code);
+        },
+      ),
+    );
   }
 
   void _onDeletePressed(_) async {

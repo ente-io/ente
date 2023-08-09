@@ -9,6 +9,7 @@
   "onBoardingGetStarted": "Get Started",
   "setupFirstAccount": "Setup your first account",
   "importScanQrCode": "Scan a QR Code",
+  "qrCode": "QR Code",
   "importEnterSetupKey": "Enter a setup key",
   "importAccountPageTitle": "Enter account details",
   "secretCanNotBeEmpty": "Secret can not be empty",
@@ -184,6 +185,7 @@
   "recoveryKeySaveDescription": "We don't store this key, please save this 24 word key in a safe place.",
   "doThisLater": "Do this later",
   "saveKey": "Save key",
+  "back": "Back",
   "createAccount": "Create account",
   "passwordStrength": "Password strength: {passwordStrengthValue}",
   "@passwordStrength": {

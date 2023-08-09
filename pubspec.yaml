@@ -62,6 +62,7 @@ dependencies:
   pointycastle: ^3.7.3
   protobuf: ^3.0.0
   qr_code_scanner: ^1.0.1
+  qr_flutter: 4.0.0
   sentry: ^6.12.1
   sentry_flutter: ^6.12.1
   share_plus: ^4.4.0
