@@ -49,6 +49,7 @@ interface Props {
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
     showAppDownloadBanner?: boolean;
+    setIsPhotoSwipeOpen?: (value: boolean) => void;
 }
 
 const PhotoFrame = ({
@@ -64,6 +65,7 @@ const PhotoFrame = ({
     fileToCollectionsMap,
     collectionNameMap,
     showAppDownloadBanner,
+    setIsPhotoSwipeOpen,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -148,8 +150,10 @@ const PhotoFrame = ({
                 PHOTOSWIPE_HASH_SUFFIX
             );
             if (shouldPhotoSwipeBeOpened) {
+                setIsPhotoSwipeOpen?.(true);
                 setOpen(true);
             } else {
+                setIsPhotoSwipeOpen?.(false);
                 setOpen(false);
             }
         });
@@ -240,11 +244,13 @@ const PhotoFrame = ({
     const handleClose = (needUpdate) => {
         setOpen(false);
         needUpdate && syncWithRemote();
+        setIsPhotoSwipeOpen?.(false);
     };
 
     const onThumbnailClick = (index: number) => () => {
         setCurrentIndex(index);
         setOpen(true);
+        setIsPhotoSwipeOpen?.(true);
     };
 
     const handleSelect =

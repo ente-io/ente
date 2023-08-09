@@ -180,6 +180,7 @@ export default function Gallery() {
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [search, setSearch] = useState<Search>(null);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
+    const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
 
     const {
         getRootProps: getDragAndDropRootProps,
@@ -276,6 +277,7 @@ export default function Gallery() {
             if (!valid) {
                 return;
             }
+            setupSelectAllKeyBoardShortcutHandler();
             setActiveCollectionID(ALL_SECTION);
             setIsFirstLoad(isFirstLogin());
             setIsFirstFetch(true);
@@ -547,9 +549,65 @@ export default function Gallery() {
         archivedCollections,
     ]);
 
+    const selectAll = (e: KeyboardEvent) => {
+        // ignore ctrl/cmd + a if the user is typing in a text field
+        if (
+            e.target instanceof HTMLInputElement ||
+            e.target instanceof HTMLTextAreaElement
+        ) {
+            return;
+        }
+        // if any of the modals are open, don't select all
+        if (
+            sidebarView ||
+            uploadTypeSelectorView ||
+            collectionSelectorView ||
+            collectionNamerView ||
+            fixCreationTimeView ||
+            planModalView ||
+            exportModalView ||
+            authenticateUserModalView ||
+            isPhotoSwipeOpen ||
+            !filteredData?.length ||
+            !user
+        ) {
+            return;
+        }
+        e.preventDefault();
+        const selected = {
+            ownCount: 0,
+            count: 0,
+            collectionID: activeCollectionID,
+        };
+
+        filteredData.forEach((item) => {
+            if (item.ownerID === user.id) {
+                selected.ownCount++;
+            }
+            selected.count++;
+            selected[item.id] = true;
+        });
+        setSelected(selected);
+    };
+
+    const clearSelection = () => {
+        if (!selected?.count) {
+            return;
+        }
+        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
+    };
+
+    const keyboardShortcutHandlerRef = useRef({
+        selectAll,
+        clearSelection,
+    });
+
     useEffect(() => {
-        return setupCtrlAHandler(filteredData);
-    }, [filteredData]);
+        keyboardShortcutHandlerRef.current = {
+            selectAll,
+            clearSelection,
+        };
+    }, [selectAll, clearSelection]);
 
     const fileToCollectionsMap = useMemoSingleThreaded(() => {
         return constructFileToCollectionMap(files);
@@ -616,22 +674,22 @@ export default function Gallery() {
         }
     };
 
-    const setupCtrlAHandler = (filteredData) => {
-        const ctrlAHandler = (e: KeyboardEvent) => {
-            // setup ctrl/cmd + a handler
-            if (
-                (e.ctrlKey || e.metaKey) &&
-                e.key.toLowerCase() === 'a' &&
-                !e.shiftKey &&
-                !e.altKey
-            ) {
-                e.preventDefault();
-                selectAll(filteredData);
+    const setupSelectAllKeyBoardShortcutHandler = () => {
+        const handleKeyUp = (e: KeyboardEvent) => {
+            switch (e.key) {
+                case 'Escape':
+                    keyboardShortcutHandlerRef.current.clearSelection();
+                    break;
+                case 'a':
+                    if (e.ctrlKey || e.metaKey) {
+                        keyboardShortcutHandlerRef.current.selectAll(e);
+                    }
+                    break;
             }
         };
-        document.addEventListener('keydown', ctrlAHandler);
+        document.addEventListener('keydown', handleKeyUp);
         return () => {
-            document.removeEventListener('keydown', ctrlAHandler);
+            document.removeEventListener('keydown', handleKeyUp);
         };
     };
 
@@ -655,27 +713,6 @@ export default function Gallery() {
             archivedCollections
         );
         setCollectionSummaries(collectionSummaries);
-    };
-
-    const clearSelection = function () {
-        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
-    };
-
-    const selectAll = function (filteredData) {
-        const selected = {
-            ownCount: 0,
-            count: 0,
-            collectionID: activeCollectionID,
-        };
-
-        filteredData.forEach((item) => {
-            if (item.ownerID === user.id) {
-                selected.ownCount++;
-            }
-            selected.count++;
-            selected[item.id] = true;
-        });
-        setSelected(selected);
     };
 
     if (!collectionSummaries || !filteredData) {
@@ -945,6 +982,7 @@ export default function Gallery() {
                         selected={selected}
                         deletedFileIds={deletedFileIds}
                         setDeletedFileIds={setDeletedFileIds}
+                        setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
