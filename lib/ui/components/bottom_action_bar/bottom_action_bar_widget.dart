@@ -90,7 +90,7 @@ class BottomActionBarWidget extends StatelessWidget {
   }
 }
 
-class SelectionOptionButton extends StatelessWidget {
+class SelectionOptionButton extends StatefulWidget {
   final String name;
   final IconData icon;
   const SelectionOptionButton({
@@ -100,27 +100,57 @@ class SelectionOptionButton extends StatelessWidget {
   });
 
   @override
+  State<SelectionOptionButton> createState() => _SelectionOptionButtonState();
+}
+
+class _SelectionOptionButtonState extends State<SelectionOptionButton> {
+  Color? backgroundColor;
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      child: SizedBox(
-        width: 64,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: getEnteColorScheme(context).textMuted,
+    final colorScheme = getEnteColorScheme(context);
+    return GestureDetector(
+      onTapDown: (details) {
+        setState(() {
+          backgroundColor = colorScheme.fillFaintPressed;
+        });
+      },
+      onTapUp: (details) {
+        setState(() {
+          backgroundColor = null;
+        });
+      },
+      onTapCancel: () {
+        setState(() {
+          backgroundColor = null;
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: backgroundColor,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          child: SizedBox(
+            width: 64,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  widget.icon,
+                  size: 24,
+                  color: getEnteColorScheme(context).textMuted,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.name,
+                  textAlign: TextAlign.center,
+                  style: getEnteTextTheme(context).miniMuted,
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              name,
-              textAlign: TextAlign.center,
-              style: getEnteTextTheme(context).miniMuted,
-            ),
-          ],
+          ),
         ),
       ),
     );
