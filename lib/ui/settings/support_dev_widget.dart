@@ -23,7 +23,7 @@ class SupportDevWidget extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final subscription = snapshot.data;
-          if (subscription != null && subscription.productID != "free") {
+          if (subscription != null && subscription.productID == "free") {
             return GestureDetector(
               onTap: () {
                 launchUrl(Uri.parse("https://ente.io"));
