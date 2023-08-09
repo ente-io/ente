@@ -5,11 +5,13 @@ class SelectionActionButton extends StatefulWidget {
   final String labelText;
   final IconData icon;
   final VoidCallback? onTap;
+  final TextStyle textStyle;
 
   const SelectionActionButton({
     required this.labelText,
     required this.icon,
     required this.onTap,
+    required this.textStyle,
     super.key,
   });
 
@@ -18,7 +20,25 @@ class SelectionActionButton extends StatefulWidget {
 }
 
 class _SelectionActionButtonState extends State<SelectionActionButton> {
+  static const minWidth = 64.0;
+  late double widthOfButton;
   Color? backgroundColor;
+
+  @override
+  void initState() {
+    super.initState();
+    widthOfButton = getWidthOfButton();
+  }
+
+  getWidthOfButton() {
+    final widthOfWidestWord = getWidthOfLongestWord(
+      widget.labelText,
+      widget.textStyle,
+    );
+    if (widthOfWidestWord > minWidth) return widthOfWidestWord;
+    return minWidth;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -47,7 +67,7 @@ class _SelectionActionButtonState extends State<SelectionActionButton> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
           child: SizedBox(
-            width: 64,
+            width: widthOfButton,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
@@ -61,7 +81,7 @@ class _SelectionActionButtonState extends State<SelectionActionButton> {
                 Text(
                   widget.labelText,
                   textAlign: TextAlign.center,
-                  style: getEnteTextTheme(context).miniMuted,
+                  style: widget.textStyle,
                 ),
               ],
             ),
@@ -69,5 +89,29 @@ class _SelectionActionButtonState extends State<SelectionActionButton> {
         ),
       ),
     );
+  }
+
+  double getWidthOfText(String text, TextStyle style) {
+    final textPainter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    return textPainter.size.width;
+  }
+
+  double getWidthOfLongestWord(String labelText, TextStyle style) {
+    final words = labelText.split(RegExp(r'\s+'));
+    if (words.isEmpty) return 0.0;
+
+    double maxWidth = 0.0;
+    for (String word in words) {
+      final width = getWidthOfText(word, style);
+      if (width > maxWidth) {
+        maxWidth = width;
+      }
+    }
+    return maxWidth;
   }
 }

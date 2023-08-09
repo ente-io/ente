@@ -13,6 +13,7 @@ import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
@@ -87,6 +88,7 @@ class _FileSelectionActionsWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final labelTextStyle = getEnteTextTheme(context).miniMuted;
     final bool showPrefix =
         split.pendingUploads.isNotEmpty || split.ownedByOtherUsers.isNotEmpty;
     final String suffix = showPrefix
@@ -118,6 +120,7 @@ class _FileSelectionActionsWidgetState
             icon: Icons.copy_outlined,
             labelText: S.of(context).copyLink,
             onTap: anyUploadedFiles ? _copyLink : null,
+            textStyle: labelTextStyle,
           ),
         );
       } else {
@@ -126,6 +129,7 @@ class _FileSelectionActionsWidgetState
             icon: Icons.link_outlined,
             labelText: S.of(context).shareLink + suffix,
             onTap: anyUploadedFiles ? _onCreatedSharedLinkClicked : null,
+            textStyle: labelTextStyle,
           ),
         );
       }
@@ -148,6 +152,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.grid_view_outlined,
           labelText: S.of(context).createCollage,
           onTap: _onCreateCollageClicked,
+          textStyle: labelTextStyle,
         ),
       );
     }
@@ -163,6 +168,7 @@ class _FileSelectionActionsWidgetState
               ? S.of(context).addToEnte
               : S.of(context).addToAlbum + suffixInPending,
           onTap: anyOwnedFiles ? _addToAlbum : null,
+          textStyle: labelTextStyle,
         ),
       );
     }
@@ -172,6 +178,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.arrow_forward_outlined,
           labelText: S.of(context).moveToAlbum + suffix,
           onTap: anyUploadedFiles ? _moveFiles : null,
+          textStyle: labelTextStyle,
         ),
       );
     }
@@ -182,6 +189,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.remove_outlined,
           labelText: "${S.of(context).removeFromAlbum}$removeSuffix",
           onTap: removeCount > 0 ? _removeFilesFromAlbum : null,
+          textStyle: labelTextStyle,
         ),
       );
     }
@@ -192,6 +200,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.delete_outline,
           labelText: S.of(context).delete + suffixInPending,
           onTap: anyOwnedFiles ? _onDeleteClick : null,
+          textStyle: labelTextStyle,
         ),
       );
     }
@@ -202,6 +211,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.visibility_off_outlined,
           labelText: S.of(context).hide + suffix,
           onTap: anyUploadedFiles ? _onHideClick : null,
+          textStyle: labelTextStyle,
         ),
       );
     } else if (widget.type.showUnHideOption()) {
@@ -210,6 +220,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.visibility_off_outlined,
           labelText: S.of(context).unhide + suffix,
           onTap: _onUnhideClick,
+          textStyle: labelTextStyle,
         ),
       );
     }
@@ -219,6 +230,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.archive_outlined,
           labelText: S.of(context).archive + suffix,
           onTap: anyUploadedFiles ? _onArchiveClick : null,
+          textStyle: labelTextStyle,
         ),
       );
     } else if (widget.type.showUnArchiveOption()) {
@@ -227,6 +239,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.unarchive,
           labelText: S.of(context).unarchive + suffix,
           onTap: _onUnArchiveClick,
+          textStyle: labelTextStyle,
         ),
       );
     }
@@ -237,6 +250,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.favorite_border_rounded,
           labelText: S.of(context).favorite + suffix,
           onTap: anyUploadedFiles ? _onFavoriteClick : null,
+          textStyle: labelTextStyle,
         ),
       );
     } else if (widget.type.showUnFavoriteOption()) {
@@ -245,6 +259,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.favorite,
           labelText: S.of(context).removeFromFavorite + suffix,
           onTap: _onUnFavoriteClick,
+          textStyle: labelTextStyle,
         ),
       );
     }
@@ -255,6 +270,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.restore_outlined,
           labelText: S.of(context).restore,
           onTap: _restore,
+          textStyle: labelTextStyle,
         ),
       );
     }
@@ -265,6 +281,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.delete_forever_outlined,
           labelText: S.of(context).permanentlyDelete,
           onTap: _permanentlyDelete,
+          textStyle: labelTextStyle,
         ),
       );
     }
