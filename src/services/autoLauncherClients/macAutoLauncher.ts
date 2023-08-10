@@ -1,7 +1,7 @@
 import { app } from 'electron';
 import { AutoLauncherClient } from '../../types/autoLauncher';
 
-class MacAndWindowsAutoLauncher implements AutoLauncherClient {
+class MacAutoLauncher implements AutoLauncherClient {
     async isEnabled() {
         return app.getLoginItemSettings().openAtLogin;
     }
@@ -25,4 +25,4 @@ class MacAndWindowsAutoLauncher implements AutoLauncherClient {
     }
 }
 
-export default new MacAndWindowsAutoLauncher();
+export default new MacAutoLauncher();
