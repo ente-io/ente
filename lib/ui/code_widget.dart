@@ -306,15 +306,6 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  String safeDecode(String value) {
-    try {
-      return Uri.decodeComponent(value);
-    } catch (e) {
-      // note: don't log the value, it might contain sensitive information
-      logger.severe("Failed to decode", e);
-      return value;
-    }
-  }
 
   String _getCurrentOTP() {
     try {
