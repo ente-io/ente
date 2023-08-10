@@ -79,35 +79,65 @@ const AuthenticatorCodesPage = () => {
                         label={t('SEARCH')}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         variant="filled"
+                        style={{ width: '350px' }}
                         value={searchTerm}
                         autoFocus
                     />
                 )}
 
                 <div style={{ marginBottom: '1rem' }} />
-                {filteredCodes.length === 0 ? (
-                    <div
-                        style={{
-                            alignItems: 'center',
-                            display: 'flex',
-                            textAlign: 'center',
-                            marginTop: '32px',
-                        }}>
-                        {searchTerm.length !== 0 ? (
-                            <p>{t('NO_RESULTS')}</p>
-                        ) : (
-                            <div />
-                        )}
-                    </div>
-                ) : (
-                    filteredCodes.map((code) => (
-                        <OTPDisplay codeInfo={code} key={code.id} />
-                    ))
-                )}
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                    }}>
+                    {filteredCodes.length === 0 ? (
+                        <div
+                            style={{
+                                alignItems: 'center',
+                                display: 'flex',
+                                textAlign: 'center',
+                                marginTop: '32px',
+                            }}>
+                            {searchTerm.length !== 0 ? (
+                                <p>{t('NO_RESULTS')}</p>
+                            ) : (
+                                <div />
+                            )}
+                        </div>
+                    ) : (
+                        filteredCodes.map((code) => (
+                            <OTPDisplay
+                                codeInfo={code}
+                                key={code.id}
+                                style={{
+                                    width: '100%',
+                                    maxWidth: '400px',
+                                    margin: '0.5rem',
+                                }}
+                            />
+                        ))
+                    )}
+                </div>
                 <div style={{ marginBottom: '2rem' }} />
                 <AuthFooter />
                 <div style={{ marginBottom: '4rem' }} />
             </div>
+            <style jsx>{`
+                @media (min-width: 800px) {
+                    .row {
+                        display: flex;
+                        flex-wrap: wrap;
+                        justify-content: center;
+                    }
+                    .col {
+                        flex: 0 0 50%;
+                        max-width: 50%;
+                    }
+                }
+            `}</style>
         </>
     );
 };
