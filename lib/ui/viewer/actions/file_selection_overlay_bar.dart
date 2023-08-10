@@ -1,31 +1,20 @@
 import 'package:flutter/material.dart';
-import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
-import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/collections/collection_action_sheet.dart';
+import "package:photos/theme/effects.dart";
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
-import 'package:photos/ui/components/buttons/icon_button_widget.dart';
-import 'package:photos/ui/viewer/actions/file_selection_actions_widget.dart';
-import 'package:photos/utils/delete_file_util.dart';
-import 'package:photos/utils/magic_util.dart';
-import 'package:photos/utils/share_util.dart';
 
 class FileSelectionOverlayBar extends StatefulWidget {
   final GalleryType galleryType;
   final SelectedFiles selectedFiles;
   final Collection? collection;
-  final DeviceCollection? deviceCollection;
   final Color? backgroundColor;
 
   const FileSelectionOverlayBar(
     this.galleryType,
     this.selectedFiles, {
     this.collection,
-    this.deviceCollection,
     this.backgroundColor,
     Key? key,
   }) : super(key: key);
@@ -36,19 +25,17 @@ class FileSelectionOverlayBar extends StatefulWidget {
 }
 
 class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
-  final GlobalKey shareButtonKey = GlobalKey();
   final ValueNotifier<bool> _hasSelectedFilesNotifier = ValueNotifier(false);
-  late bool showDeleteOption;
 
   @override
   void initState() {
     super.initState();
-    showDeleteOption = widget.galleryType.showDeleteIconOption();
     widget.selectedFiles.addListener(_selectedFilesListener);
   }
 
   @override
   void dispose() {
+    _hasSelectedFilesNotifier.dispose();
     widget.selectedFiles.removeListener(_selectedFilesListener);
     super.dispose();
   }
@@ -58,118 +45,38 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     debugPrint(
       '$runtimeType building with ${widget.selectedFiles.files.length}',
     );
-    final List<IconButtonWidget> iconsButton = [];
-    final iconColor = getEnteColorScheme(context).blurStrokeBase;
-    if (showDeleteOption) {
-      iconsButton.add(
-        IconButtonWidget(
-          icon: Icons.delete_outlined,
-          iconButtonType: IconButtonType.primary,
-          iconColor: iconColor,
-          onTap: () => showDeleteSheet(context, widget.selectedFiles),
-        ),
-      );
-    }
 
-    if (widget.galleryType.showUnArchiveOption()) {
-      iconsButton.add(
-        IconButtonWidget(
-          icon: Icons.unarchive,
-          iconButtonType: IconButtonType.primary,
-          iconColor: iconColor,
-          onTap: () => _onUnArchiveClick(),
-        ),
-      );
-    }
-    if (widget.galleryType.showUnHideOption()) {
-      iconsButton.add(
-        IconButtonWidget(
-          icon: Icons.visibility_off_outlined,
-          iconButtonType: IconButtonType.primary,
-          iconColor: iconColor,
-          onTap: () {
-            showCollectionActionSheet(
-              context,
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: shadowFloatFaintLight,
+      ),
+      child: ValueListenableBuilder(
+        valueListenable: _hasSelectedFilesNotifier,
+        builder: (context, value, child) {
+          return AnimatedCrossFade(
+            firstCurve: Curves.easeInOutExpo,
+            secondCurve: Curves.easeInOutExpo,
+            sizeCurve: Curves.easeInOutExpo,
+            crossFadeState: _hasSelectedFilesNotifier.value
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
+            duration: const Duration(milliseconds: 400),
+            firstChild: BottomActionBarWidget(
               selectedFiles: widget.selectedFiles,
-              actionType: CollectionActionType.unHide,
-            );
-          },
-        ),
-      );
-    }
-    if (widget.galleryType == GalleryType.trash) {
-      iconsButton.add(
-        IconButtonWidget(
-          icon: Icons.delete_forever_outlined,
-          iconButtonType: IconButtonType.primary,
-          iconColor: iconColor,
-          onTap: () async {
-            if (await deleteFromTrash(
-              context,
-              widget.selectedFiles.files.toList(),
-            )) {
-              widget.selectedFiles.clearAll();
-            }
-          },
-        ),
-      );
-    }
-    iconsButton.add(
-      IconButtonWidget(
-        icon: Icons.adaptive.share_outlined,
-        iconButtonType: IconButtonType.primary,
-        iconColor: iconColor,
-        onTap: () => shareSelected(
-          context,
-          shareButtonKey,
-          widget.selectedFiles.files.toList(),
-        ),
+              galleryType: widget.galleryType,
+              collection: widget.collection,
+              onCancel: () {
+                if (widget.selectedFiles.files.isNotEmpty) {
+                  widget.selectedFiles.clearAll();
+                }
+              },
+              backgroundColor: widget.backgroundColor,
+            ),
+            secondChild: const SizedBox(width: double.infinity),
+          );
+        },
       ),
     );
-    return ValueListenableBuilder(
-      valueListenable: _hasSelectedFilesNotifier,
-      builder: (context, value, child) {
-        return AnimatedCrossFade(
-          firstCurve: Curves.easeInOutExpo,
-          secondCurve: Curves.easeInOutExpo,
-          sizeCurve: Curves.easeInOutExpo,
-          crossFadeState: _hasSelectedFilesNotifier.value
-              ? CrossFadeState.showFirst
-              : CrossFadeState.showSecond,
-          duration: const Duration(milliseconds: 400),
-          firstChild: BottomActionBarWidget(
-            selectedFiles: widget.selectedFiles,
-            hasSmallerBottomPadding: true,
-            type: widget.galleryType,
-            expandedMenu: FileSelectionActionWidget(
-              widget.galleryType,
-              widget.selectedFiles,
-              collection: widget.collection,
-            ),
-            text: S
-                .of(context)
-                .itemSelectedCount(widget.selectedFiles.files.length),
-            onCancel: () {
-              if (widget.selectedFiles.files.isNotEmpty) {
-                widget.selectedFiles.clearAll();
-              }
-            },
-            iconButtons: iconsButton,
-            backgroundColor: widget.backgroundColor,
-          ),
-          secondChild: const SizedBox(width: double.infinity),
-        );
-      },
-    );
-  }
-
-  Future<void> _onUnArchiveClick() async {
-    await changeVisibility(
-      context,
-      widget.selectedFiles.files.toList(),
-      visibleVisibility,
-    );
-    widget.selectedFiles.clearAll();
   }
 
   _selectedFilesListener() {

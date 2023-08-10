@@ -695,16 +695,6 @@
   "addToAlbum": "Toevoegen aan album",
   "delete": "Verwijderen",
   "hide": "Verbergen",
-  "itemSelectedCount": "{count} geselecteerd",
-  "@itemSelectedCount": {
-    "description": "Text to indicate number of items selected",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "share": "Delen",
   "unhideToAlbum": "Zichtbaar maken in album",
   "restoreToAlbum": "Terugzetten naar album",

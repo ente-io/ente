@@ -694,16 +694,6 @@
   "addToAlbum": "添加到相册",
   "delete": "删除",
   "hide": "隐藏",
-  "itemSelectedCount": "已选择 {count} 个",
-  "@itemSelectedCount": {
-    "description": "Text to indicate number of items selected",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "share": "分享",
   "unhideToAlbum": "取消隐藏到相册",
   "restoreToAlbum": "恢复到相册",
