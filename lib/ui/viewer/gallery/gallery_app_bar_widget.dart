@@ -64,6 +64,7 @@ enum AlbumPopupAction {
   ownedArchive,
   sharedArchive,
   ownedHide,
+  sharedHide,
   sort,
   leave,
   freeUpSpace,
@@ -492,6 +493,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     if (galleryType == GalleryType.sharedCollection) {
       final bool hasShareeArchived = widget.collection!.hasShareeArchived();
+      final bool hasShareeHidden = widget.collection!.hasShareeHidden();
       items.add(
         PopupMenuItem(
           value: AlbumPopupAction.leave,
@@ -507,7 +509,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
 
-      //here
       items.add(
         PopupMenuItem(
           value: AlbumPopupAction.sharedArchive,
@@ -523,6 +524,26 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 hasShareeArchived
                     ? S.of(context).unarchiveAlbum
                     : S.of(context).archiveAlbum,
+              ),
+            ],
+          ),
+        ),
+      );
+      items.add(
+        PopupMenuItem(
+          value: AlbumPopupAction.sharedHide,
+          child: Row(
+            children: [
+              Icon(
+                hasShareeHidden
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(
+                hasShareeHidden ? S.of(context).unhide : S.of(context).hide,
               ),
             ],
           ),
@@ -605,6 +626,23 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   hasShareeArchived ? archiveVisibility : visibleVisibility;
               final int newVisiblity =
                   hasShareeArchived ? visibleVisibility : archiveVisibility;
+
+              await changeCollectionVisibility(
+                context,
+                collection: widget.collection!,
+                newVisibility: newVisiblity,
+                prevVisibility: prevVisiblity,
+                isOwner: false,
+              );
+              if (mounted) {
+                setState(() {});
+              }
+            } else if (value == AlbumPopupAction.sharedHide) {
+              final hasShareeHidden = widget.collection!.hasShareeHidden();
+              final int prevVisiblity =
+                  hasShareeHidden ? hiddenVisibility : visibleVisibility;
+              final int newVisiblity =
+                  hasShareeHidden ? visibleVisibility : hiddenVisibility;
 
               await changeCollectionVisibility(
                 context,

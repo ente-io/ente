@@ -93,6 +93,11 @@ class Collection {
         sharedMagicMetadata.visibility == archiveVisibility;
   }
 
+  bool hasShareeHidden() {
+    return sharedMmdVersion > 0 &&
+        sharedMagicMetadata.visibility == hiddenVisibility;
+  }
+
   // hasLink returns true if there's any link attached to the collection
   // including expired links
   bool get hasLink => publicURLs != null && publicURLs!.isNotEmpty;
