@@ -44,6 +44,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "failedToDownloadVideo":
             MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
+        "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Ugyldig e-postadresse"),
         "inviteYourFriendsToEnte":
@@ -59,6 +60,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
         "sharedWithYou":
             MessageLookupByLibrary.simpleMessage("Shared with you"),
+        "successfullyHid":
+            MessageLookupByLibrary.simpleMessage("Successfully hid"),
+        "successfullyUnhid":
+            MessageLookupByLibrary.simpleMessage("Successfully unhid"),
+        "unhiding": MessageLookupByLibrary.simpleMessage("Unhiding..."),
         "verify": MessageLookupByLibrary.simpleMessage("Bekreft")
       };
 }

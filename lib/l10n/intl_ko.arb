@@ -6,5 +6,9 @@
   "sharedByYou": "Shared by you",
   "inviteYourFriendsToEnte": "Invite your friends to ente",
   "deleteReason2": "The app or a certain feature does not behave as I think it should",
-  "failedToDownloadVideo": "Failed to download video"
+  "failedToDownloadVideo": "Failed to download video",
+  "hiding": "Hiding...",
+  "unhiding": "Unhiding...",
+  "successfullyHid": "Successfully hid",
+  "successfullyUnhid": "Successfully unhid"
 }

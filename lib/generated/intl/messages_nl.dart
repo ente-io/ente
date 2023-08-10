@@ -690,6 +690,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Groep foto\'s in de buurt"),
         "hidden": MessageLookupByLibrary.simpleMessage("Verborgen"),
         "hide": MessageLookupByLibrary.simpleMessage("Verbergen"),
+        "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Hoe het werkt"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
             "Vraag hen om hun e-mailadres lang in te drukken op het instellingenscherm en te controleren dat de ID\'s op beide apparaten overeenkomen."),
@@ -1184,8 +1185,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "success": MessageLookupByLibrary.simpleMessage("Succes"),
         "successfullyArchived":
             MessageLookupByLibrary.simpleMessage("Succesvol gearchiveerd"),
+        "successfullyHid":
+            MessageLookupByLibrary.simpleMessage("Successfully hid"),
         "successfullyUnarchived": MessageLookupByLibrary.simpleMessage(
             "Succesvol uit archief gehaald"),
+        "successfullyUnhid":
+            MessageLookupByLibrary.simpleMessage("Successfully unhid"),
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Features voorstellen"),
         "support": MessageLookupByLibrary.simpleMessage("Ondersteuning"),
@@ -1278,6 +1283,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unhide": MessageLookupByLibrary.simpleMessage("Zichtbaar maken"),
         "unhideToAlbum":
             MessageLookupByLibrary.simpleMessage("Zichtbaar maken in album"),
+        "unhiding": MessageLookupByLibrary.simpleMessage("Unhiding..."),
         "unhidingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Bestanden zichtbaar maken in album"),
         "unlock": MessageLookupByLibrary.simpleMessage("Ontgrendelen"),

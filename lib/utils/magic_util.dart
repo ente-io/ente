@@ -286,11 +286,11 @@ _visActionProgressDialogText(BuildContext context, _VisibilityAction action) {
     case _VisibilityAction.archive:
       return S.of(context).archiving;
     case _VisibilityAction.hide:
-      return "Hiding...";
+      return S.of(context).hiding;
     case _VisibilityAction.unarchive:
       return S.of(context).unarchiving;
     case _VisibilityAction.unHide:
-      return "Unhiding...";
+      return S.of(context).unhiding;
   }
 }
 
@@ -299,11 +299,11 @@ _visActionSuccessfulText(BuildContext context, _VisibilityAction action) {
     case _VisibilityAction.archive:
       return S.of(context).successfullyArchived;
     case _VisibilityAction.hide:
-      return "Successfully hid";
+      return S.of(context).successfullyHid;
     case _VisibilityAction.unarchive:
       return S.of(context).successfullyUnarchived;
     case _VisibilityAction.unHide:
-      return "Successfully unhid";
+      return S.of(context).successfullyUnhid;
   }
 }
 

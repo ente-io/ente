@@ -26,6 +26,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "The app or a certain feature does not behave as I think it should"),
         "failedToDownloadVideo":
             MessageLookupByLibrary.simpleMessage("Failed to download video"),
+        "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
         "inviteYourFriendsToEnte":
             MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "noAlbumsSharedByYouYet":
@@ -35,6 +36,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareYourFirstAlbum":
             MessageLookupByLibrary.simpleMessage("Share your first album"),
         "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
-        "sharedWithYou": MessageLookupByLibrary.simpleMessage("Shared with you")
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
+        "successfullyHid":
+            MessageLookupByLibrary.simpleMessage("Successfully hid"),
+        "successfullyUnhid":
+            MessageLookupByLibrary.simpleMessage("Successfully unhid"),
+        "unhiding": MessageLookupByLibrary.simpleMessage("Unhiding...")
       };
 }

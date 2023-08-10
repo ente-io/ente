@@ -524,6 +524,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Identifiant Google Play"),
         "hidden": MessageLookupByLibrary.simpleMessage("Masqué"),
         "hide": MessageLookupByLibrary.simpleMessage("Masquer"),
+        "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
         "howItWorks":
             MessageLookupByLibrary.simpleMessage("Comment ça fonctionne"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
@@ -904,8 +905,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "success": MessageLookupByLibrary.simpleMessage("Succès"),
         "successfullyArchived":
             MessageLookupByLibrary.simpleMessage("Archivé avec succès"),
+        "successfullyHid":
+            MessageLookupByLibrary.simpleMessage("Successfully hid"),
         "successfullyUnarchived":
             MessageLookupByLibrary.simpleMessage("Désarchivé avec succès"),
+        "successfullyUnhid":
+            MessageLookupByLibrary.simpleMessage("Successfully unhid"),
         "suggestFeatures": MessageLookupByLibrary.simpleMessage(
             "Suggérer des fonctionnalités"),
         "support": MessageLookupByLibrary.simpleMessage("Support"),
@@ -978,6 +983,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unhide": MessageLookupByLibrary.simpleMessage("Dévoiler"),
         "unhideToAlbum":
             MessageLookupByLibrary.simpleMessage("Afficher dans l\'album"),
+        "unhiding": MessageLookupByLibrary.simpleMessage("Unhiding..."),
         "unhidingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Démasquage des fichiers vers l\'album"),
         "unselectAll":

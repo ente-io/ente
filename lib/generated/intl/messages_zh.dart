@@ -559,6 +559,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage("将附近的照片分组"),
         "hidden": MessageLookupByLibrary.simpleMessage("已隐藏"),
         "hide": MessageLookupByLibrary.simpleMessage("隐藏"),
+        "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
         "howItWorks": MessageLookupByLibrary.simpleMessage("工作原理"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
             "请让他们在设置屏幕上长按他们的电子邮件地址，并验证两台设备上的 ID 是否匹配。"),
@@ -960,8 +961,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "subscription": MessageLookupByLibrary.simpleMessage("订阅"),
         "success": MessageLookupByLibrary.simpleMessage("成功"),
         "successfullyArchived": MessageLookupByLibrary.simpleMessage("归档成功"),
+        "successfullyHid":
+            MessageLookupByLibrary.simpleMessage("Successfully hid"),
         "successfullyUnarchived":
             MessageLookupByLibrary.simpleMessage("取消归档成功"),
+        "successfullyUnhid":
+            MessageLookupByLibrary.simpleMessage("Successfully unhid"),
         "suggestFeatures": MessageLookupByLibrary.simpleMessage("建议新功能"),
         "support": MessageLookupByLibrary.simpleMessage("支持"),
         "syncProgress": m55,
@@ -1035,6 +1040,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "uncategorized": MessageLookupByLibrary.simpleMessage("未分类的"),
         "unhide": MessageLookupByLibrary.simpleMessage("取消隐藏"),
         "unhideToAlbum": MessageLookupByLibrary.simpleMessage("取消隐藏到相册"),
+        "unhiding": MessageLookupByLibrary.simpleMessage("Unhiding..."),
         "unhidingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("正在取消隐藏文件到相册"),
         "unlock": MessageLookupByLibrary.simpleMessage("解锁"),
