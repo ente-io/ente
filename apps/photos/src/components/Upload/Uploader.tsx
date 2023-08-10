@@ -682,10 +682,15 @@ export default function Uploader(props: Props) {
             if (isFirstUpload && !importSuggestion.rootFolderName) {
                 importSuggestion.rootFolderName = FIRST_ALBUM_NAME;
             }
-            if (isDragAndDrop.current && props.activeCollection) {
+            if (isDragAndDrop.current) {
                 isDragAndDrop.current = false;
-                uploadFilesToExistingCollection(props.activeCollection);
-                return;
+                if (
+                    props.activeCollection &&
+                    props.activeCollection.owner.id === galleryContext.user?.id
+                ) {
+                    uploadFilesToExistingCollection(props.activeCollection);
+                    return;
+                }
             }
             let showNextModal = () => {};
             if (importSuggestion.hasNestedFolders) {
