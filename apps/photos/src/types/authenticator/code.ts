@@ -168,9 +168,9 @@ export class Code {
 
     private static _getType(uriPath: string): Type {
         const oauthType = uriPath.split('/')[0].substring(0);
-        if (oauthType === 'totp') {
+        if (oauthType.toLowerCase() === 'totp') {
             return 'totp';
-        } else if (oauthType === 'hotp') {
+        } else if (oauthType.toLowerCase() === 'hotp') {
             return 'hotp';
         }
         throw new Error(`Unsupported format with host ${oauthType}`);
