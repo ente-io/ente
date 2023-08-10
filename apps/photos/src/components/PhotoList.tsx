@@ -31,7 +31,8 @@ import memoize from 'memoize-one';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
-const ALBUM_FOOTER_HEIGHT = 95;
+const ALBUM_FOOTER_HEIGHT = 75;
+const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
 
 export enum ITEM_TYPE {
     TIME = 'TIME',
@@ -151,9 +152,11 @@ const FooterContainer = styled(ListItemContainer)`
     margin-top: calc(2rem + 20px);
 `;
 
-const AlbumFooterContainer = styled(ListItemContainer)`
+const AlbumFooterContainer = styled(ListItemContainer)<{
+    hasReferral: boolean;
+}>`
     margin-top: 48px;
-    margin-bottom: 10px;
+    margin-bottom: ${({ hasReferral }) => (!hasReferral ? `10px` : '0px')};
     text-align: center;
     justify-content: center;
 `;
@@ -551,11 +554,14 @@ export function PhotoList({
         };
     };
     const getVacuumItem = (timeStampList) => {
-        const footerHeight =
-            publicCollectionGalleryContext.accessedThroughSharedURL
-                ? ALBUM_FOOTER_HEIGHT +
-                  (publicCollectionGalleryContext.photoListFooter?.height ?? 0)
-                : FOOTER_HEIGHT;
+        let footerHeight;
+        if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+            footerHeight = publicCollectionGalleryContext.referralCode
+                ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
+                : ALBUM_FOOTER_HEIGHT;
+        } else {
+            footerHeight = FOOTER_HEIGHT;
+        }
         const photoFrameHeight = (() => {
             let sum = 0;
             const getCurrentItemSize = getItemSize(timeStampList);
@@ -609,9 +615,13 @@ export function PhotoList({
     const getAlbumsFooter = () => {
         return {
             itemType: ITEM_TYPE.MARKETING_FOOTER,
-            height: ALBUM_FOOTER_HEIGHT,
+            height: publicCollectionGalleryContext.referralCode
+                ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
+                : ALBUM_FOOTER_HEIGHT,
             item: (
-                <AlbumFooterContainer span={columns}>
+                <AlbumFooterContainer
+                    span={columns}
+                    hasReferral={!!publicCollectionGalleryContext.referralCode}>
                     <Box width={'100%'}>
                         <Typography variant="small" display={'block'}>
                             {t('SHARED_USING')}{' '}
@@ -619,8 +629,7 @@ export function PhotoList({
                                 {t('ENTE_IO')}
                             </Link>
                         </Typography>
-                        {publicCollectionGalleryContext.referralCode ??
-                        '' !== '' ? (
+                        {publicCollectionGalleryContext.referralCode ? (
                             <FullStretchContainer>
                                 <Typography
                                     sx={{
