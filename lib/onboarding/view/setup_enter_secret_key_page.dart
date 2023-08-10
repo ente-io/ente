@@ -23,12 +23,12 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   void initState() {
     _issuerController = TextEditingController(
       text: widget.code != null
-          ? Uri.decodeFull(widget.code!.issuer).trim()
+          ? safeDecode(widget.code!.issuer).trim()
           : null,
     );
     _accountController = TextEditingController(
       text: widget.code != null
-          ? Uri.decodeFull(widget.code!.account).trim()
+          ? safeDecode(widget.code!.account).trim()
           : null,
     );
     _secretController = TextEditingController(
