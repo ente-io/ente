@@ -31,6 +31,9 @@ export async function createWindow(): Promise<BrowserWindow> {
         transparent: true,
         show: false,
     });
+    if (isPlatform('mac') && wasAutoLaunched) {
+        app.dock.hide();
+    }
     if (!wasAutoLaunched) {
         splash.maximize();
         splash.show();
