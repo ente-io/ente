@@ -256,7 +256,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       onTap: () async {
                         await Clipboard.setData(ClipboardData(text: urlValue));
                         showShortToast(
-                            context, S.of(context).linkCopiedToClipboard);
+                          context,
+                          S.of(context).linkCopiedToClipboard,
+                        );
                       },
                       isBottomBorderRadiusRemoved: true,
                     ),

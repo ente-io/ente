@@ -63,6 +63,7 @@ enum AlbumPopupAction {
   map,
   ownedArchive,
   sharedArchive,
+  ownedHide,
   sort,
   leave,
   freeUpSpace,
@@ -306,9 +307,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           message: "Share",
           child: IconButton(
             icon: Icon(
-               isQuickLink && (widget.collection!.hasLink) ? Icons
-                   .link_outlined : Icons
-                   .people_outlined,
+              isQuickLink && (widget.collection!.hasLink)
+                  ? Icons.link_outlined
+                  : Icons.people_outlined,
             ),
             onPressed: () async {
               await _showShareCollectionDialog();
@@ -374,6 +375,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         );
       }
       final bool isArchived = widget.collection!.isArchived();
+      final bool isHidden = widget.collection!.isHidden();
       // Do not show archive option for favorite collection. If collection is
       // already archived, allow user to unarchive that collection.
       if (isArchived || widget.collection!.type != CollectionType.favorites) {
@@ -438,6 +440,26 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               ),
             ),
           );
+          items.add(
+            PopupMenuItem(
+              value: AlbumPopupAction.ownedHide,
+              child: Row(
+                children: [
+                  Icon(
+                    isHidden
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text(
+                    isHidden ? S.of(context).unhide : S.of(context).hide,
+                  ),
+                ],
+              ),
+            ),
+          );
         }
       }
       if (widget.collection!.type != CollectionType.favorites) {
@@ -484,6 +506,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           ),
         ),
       );
+
+      //here
       items.add(
         PopupMenuItem(
           value: AlbumPopupAction.sharedArchive,
@@ -544,6 +568,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 widget.collection!.isArchived()
                     ? visibleVisibility
                     : archiveVisibility,
+              );
+            } else if (value == AlbumPopupAction.ownedHide) {
+              await changeCollectionVisibility(
+                context,
+                widget.collection!,
+                widget.collection!.isHidden()
+                    ? visibleVisibility
+                    : hiddenVisibility,
               );
             } else if (value == AlbumPopupAction.delete) {
               await _trashCollection();
@@ -699,9 +731,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         unawaited(
           routeToPage(
             context,
-              (isQuickLink && (collection.hasLink)) ? ManageSharedLinkWidget(collection: collection!) :
-              ShareCollectionPage
-              (collection),
+            (isQuickLink && (collection.hasLink))
+                ? ManageSharedLinkWidget(collection: collection!)
+                : ShareCollectionPage(collection),
           ),
         );
       } else {
