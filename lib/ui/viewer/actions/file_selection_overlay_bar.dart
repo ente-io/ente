@@ -84,7 +84,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     if (widget.galleryType.showUnHideOption()) {
       iconsButton.add(
         IconButtonWidget(
-          icon: Icons.visibility_off_outlined,
+          icon: Icons.visibility_outlined,
           iconButtonType: IconButtonType.primary,
           iconColor: iconColor,
           onTap: () {

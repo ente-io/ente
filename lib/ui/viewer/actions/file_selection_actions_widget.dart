@@ -219,7 +219,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     } else if (widget.type.showUnHideOption()) {
       secondList.add(
         BlurMenuItemWidget(
-          leadingIcon: Icons.visibility_off_outlined,
+          leadingIcon: Icons.visibility_outlined,
           labelText: S.of(context).unhide + suffix,
           menuItemColor: colorScheme.fillFaint,
           onTap: _onUnhideClick,
