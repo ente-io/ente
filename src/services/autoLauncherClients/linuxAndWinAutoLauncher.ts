@@ -1,7 +1,10 @@
 import AutoLaunch from 'auto-launch';
 import { AutoLauncherClient } from '../../types/autoLauncher';
+import { app } from 'electron';
 
-class LinuxAutoLauncher implements AutoLauncherClient {
+const LAUNCHED_AS_HIDDEN_FLAG = 'hidden';
+
+class LinuxAndWinAutoLauncher implements AutoLauncherClient {
     private instance: AutoLaunch;
     constructor() {
         const autoLauncher = new AutoLaunch({
@@ -22,8 +25,7 @@ class LinuxAutoLauncher implements AutoLauncherClient {
     }
 
     async wasAutoLaunched() {
-        // can't determine if it was auto launched
-        return false;
+        return app.commandLine.hasSwitch(LAUNCHED_AS_HIDDEN_FLAG);
     }
 
     private async disableAutoLaunch() {
@@ -34,4 +36,4 @@ class LinuxAutoLauncher implements AutoLauncherClient {
     }
 }
 
-export default new LinuxAutoLauncher();
+export default new LinuxAndWinAutoLauncher();
