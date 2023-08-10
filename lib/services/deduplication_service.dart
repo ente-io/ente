@@ -104,8 +104,9 @@ class DeduplicationService {
   }
 
   Future<List<DuplicateFiles>> _getDuplicateFilesFromLocal() async {
-    final List<File> allFiles = await FilesDB.instance
-        .getAllFilesFromDB(CollectionsService.instance.getHiddenCollections());
+    final List<File> allFiles = await FilesDB.instance.getAllFilesFromDB(
+      CollectionsService.instance.getHiddenCollections(),
+    );
     final int ownerID = Configuration.instance.getUserID()!;
     allFiles.removeWhere(
       (f) =>

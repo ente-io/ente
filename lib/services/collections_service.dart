@@ -196,6 +196,13 @@ class CollectionsService {
         .toList();
   }
 
+  List<Collection> getHiddenCollectionsV2() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => element.isHidden())
+        .toList();
+  }
+
   Set<int> getHiddenCollections() {
     return _collectionIDToCollections.values
         .toList()
@@ -320,12 +327,12 @@ class CollectionsService {
         .toList();
   }
 
-
   SharedCollections getSharedCollections() {
     final List<Collection> outgoing = [];
     final List<Collection> incoming = [];
     final List<Collection> quickLinks = [];
-    final List<Collection> collections = getCollectionsForUI(includedShared: true);
+    final List<Collection> collections =
+        getCollectionsForUI(includedShared: true);
     for (final c in collections) {
       if (c.owner!.id == Configuration.instance.getUserID()) {
         if (c.hasSharees || c.hasLink && !c.isQuickLinkCollection()) {
@@ -346,15 +353,15 @@ class CollectionsService {
   Future<List<Collection>> getCollectionForOnEnteSection() async {
     final AlbumSortKey sortKey = LocalSettings.instance.albumSortKey();
     final List<Collection> collections =
-    CollectionsService.instance.getCollectionsForUI();
+        CollectionsService.instance.getCollectionsForUI();
     final bool hasFavorites = FavoritesService.instance.hasFavorites();
     late Map<int, int> collectionIDToNewestPhotoTime;
     if (sortKey == AlbumSortKey.newestPhoto) {
       collectionIDToNewestPhotoTime =
-      await CollectionsService.instance.getCollectionIDToNewestFileTime();
+          await CollectionsService.instance.getCollectionIDToNewestFileTime();
     }
     collections.sort(
-          (first, second) {
+      (first, second) {
         if (sortKey == AlbumSortKey.albumName) {
           return compareAsciiLowerCaseNatural(
             first.displayName,

@@ -8,6 +8,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/ui/collections/album/horizontal_list.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/empty_hidden_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
@@ -64,6 +65,11 @@ class HiddenPage extends StatelessWidget {
       selectedFiles: _selectedFiles,
       initialFiles: null,
       emptyState: const EmptyHiddenWidget(),
+      header: AlbumHorizontalList(
+        () async {
+          return CollectionsService.instance.getHiddenCollectionsV2();
+        },
+      ),
     );
     return Scaffold(
       appBar: PreferredSize(
