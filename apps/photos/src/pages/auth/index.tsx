@@ -109,15 +109,7 @@ const AuthenticatorCodesPage = () => {
                         </div>
                     ) : (
                         filteredCodes.map((code) => (
-                            <OTPDisplay
-                                codeInfo={code}
-                                key={code.id}
-                                style={{
-                                    width: '100%',
-                                    maxWidth: '400px',
-                                    margin: '0.5rem',
-                                }}
-                            />
+                            <OTPDisplay codeInfo={code} key={code.id} />
                         ))
                     )}
                 </div>
