@@ -562,20 +562,30 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               );
               if (mounted) setState(() {});
             } else if (value == AlbumPopupAction.ownedArchive) {
+              final isArchived = widget.collection!.isArchived();
+              final int prevVisiblity =
+                  isArchived ? archiveVisibility : visibleVisibility;
+              final int newVisiblity =
+                  isArchived ? visibleVisibility : archiveVisibility;
+
               await changeCollectionVisibility(
                 context,
-                widget.collection!,
-                widget.collection!.isArchived()
-                    ? visibleVisibility
-                    : archiveVisibility,
+                collection: widget.collection!,
+                newVisibility: newVisiblity,
+                prevVisibility: prevVisiblity,
               );
             } else if (value == AlbumPopupAction.ownedHide) {
+              final isHidden = widget.collection!.isHidden();
+              final int prevVisiblity =
+                  isHidden ? hiddenVisibility : visibleVisibility;
+              final int newVisiblity =
+                  isHidden ? visibleVisibility : hiddenVisibility;
+
               await changeCollectionVisibility(
                 context,
-                widget.collection!,
-                widget.collection!.isHidden()
-                    ? visibleVisibility
-                    : hiddenVisibility,
+                collection: widget.collection!,
+                newVisibility: newVisiblity,
+                prevVisibility: prevVisiblity,
               );
             } else if (value == AlbumPopupAction.delete) {
               await _trashCollection();
@@ -590,12 +600,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             } else if (value == AlbumPopupAction.sort) {
               await _showSortOption(context);
             } else if (value == AlbumPopupAction.sharedArchive) {
+              final hasShareeArchived = widget.collection!.hasShareeArchived();
+              final int prevVisiblity =
+                  hasShareeArchived ? archiveVisibility : visibleVisibility;
+              final int newVisiblity =
+                  hasShareeArchived ? visibleVisibility : archiveVisibility;
+
               await changeCollectionVisibility(
                 context,
-                widget.collection!,
-                widget.collection!.hasShareeArchived()
-                    ? visibleVisibility
-                    : archiveVisibility,
+                collection: widget.collection!,
+                newVisibility: newVisiblity,
+                prevVisibility: prevVisiblity,
                 isOwner: false,
               );
               if (mounted) {

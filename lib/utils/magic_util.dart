@@ -20,6 +20,8 @@ import 'package:photos/utils/toast_util.dart';
 
 final _logger = Logger('MagicUtil');
 
+enum _VisibilityAction { hide, unHide, archive, unarchive }
+
 Future<void> changeVisibility(
   BuildContext context,
   List<File> files,
@@ -50,17 +52,22 @@ Future<void> changeVisibility(
 }
 
 Future<void> changeCollectionVisibility(
-  BuildContext context,
-  Collection collection,
-  int newVisibility, {
+  BuildContext context, {
+  required Collection collection,
+  required int newVisibility,
+  required int prevVisibility,
   bool isOwner = true,
 }) async {
+  final visibilityAction =
+      _getVisibilityAction(context, newVisibility, prevVisibility);
   final dialog = createProgressDialog(
     context,
-    newVisibility == archiveVisibility
-        ? S.of(context).archiving
-        : S.of(context).unarchiving,
+    _visActionProgressDialogText(
+      context,
+      visibilityAction,
+    ),
   );
+
   await dialog.show();
   try {
     final Map<String, dynamic> update = {magicKeyVisibility: newVisibility};
@@ -74,9 +81,10 @@ Future<void> changeCollectionVisibility(
     Bus.instance.fire(ForceReloadHomeGalleryEvent("CollectionArchiveChange"));
     showShortToast(
       context,
-      newVisibility == archiveVisibility
-          ? S.of(context).successfullyArchived
-          : S.of(context).successfullyUnarchived,
+      _visActionSuccessfulText(
+        context,
+        visibilityAction,
+      ),
     );
 
     await dialog.hide();
@@ -271,4 +279,47 @@ Future<void> _updatePublicMetadata(
 
 bool _shouldReloadGallery(String key) {
   return key == editTimeKey;
+}
+
+_visActionProgressDialogText(BuildContext context, _VisibilityAction action) {
+  switch (action) {
+    case _VisibilityAction.archive:
+      return S.of(context).archiving;
+    case _VisibilityAction.hide:
+      return "Hiding...";
+    case _VisibilityAction.unarchive:
+      return S.of(context).unarchiving;
+    case _VisibilityAction.unHide:
+      return "Unhiding...";
+  }
+}
+
+_visActionSuccessfulText(BuildContext context, _VisibilityAction action) {
+  switch (action) {
+    case _VisibilityAction.archive:
+      return S.of(context).successfullyArchived;
+    case _VisibilityAction.hide:
+      return "Successfully hid";
+    case _VisibilityAction.unarchive:
+      return S.of(context).successfullyUnarchived;
+    case _VisibilityAction.unHide:
+      return "Successfully unhid";
+  }
+}
+
+_VisibilityAction _getVisibilityAction(
+  context,
+  int newVisibility,
+  int prevVisibility,
+) {
+  if (newVisibility == archiveVisibility) {
+    return _VisibilityAction.archive;
+  } else if (newVisibility == hiddenVisibility) {
+    return _VisibilityAction.hide;
+  } else if (newVisibility == visibleVisibility &&
+      prevVisibility == archiveVisibility) {
+    return _VisibilityAction.unarchive;
+  } else {
+    return _VisibilityAction.unHide;
+  }
 }
