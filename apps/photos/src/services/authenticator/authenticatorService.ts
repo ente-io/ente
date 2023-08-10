@@ -40,10 +40,12 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                         return null;
                     }
                 })
-                .filter((f) => f !== null || f !== undefined)
         );
-        // sort by issuer name which can be undefined also
-        authCodes.sort((a, b) => {
+        // Remove null and undefined values
+        const filteredAuthCodes = authCodes.filter(
+            (f) => f !== null && f !== undefined
+        );
+        filteredAuthCodes.sort((a, b) => {
             if (a.issuer && b.issuer) {
                 return a.issuer.localeCompare(b.issuer);
             }
@@ -55,7 +57,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
             }
             return 0;
         });
-        return authCodes;
+        return filteredAuthCodes;
     } catch (e) {
         if (e.message !== CustomError.AUTH_KEY_NOT_FOUND) {
             logError(e, 'get authenticator entities failed');
