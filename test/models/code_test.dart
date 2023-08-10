@@ -39,4 +39,16 @@ void main() {
     expect(code.account, "Acc !@#444", reason: "accountMismatch");
     expect(code.secret, "NI4CTTFEV4G2JFE6");
   });
+
+  test("parseAndUpdateInChinese", () {
+    const String rubberDuckQr =
+        'otpauth://totp/%E6%A9%A1%E7%9A%AE%E9%B8%AD?secret=2CWDCK4EOIN5DJDRMYUMYBBO4MKSR5AX&issuer=ente.io';
+    final code = Code.fromRawData(rubberDuckQr);
+    expect(code.account, '橡皮鸭');
+    final String updatedRawCode =
+        code.copyWith(account: '伍迪', issuer: '鸭子').rawData;
+    final updateCode = Code.fromRawData(updatedRawCode);
+    expect(updateCode.account, '伍迪', reason: 'updated accountMismatch');
+    expect(updateCode.issuer, '鸭子', reason: 'updated issuerMismatch');
+  });
 }
