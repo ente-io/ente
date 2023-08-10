@@ -20,7 +20,7 @@ const TOTPDisplay = ({ issuer, account, code, nextCode, period }) => {
                     display: 'flex',
                     alignItems: 'flex-start',
                     minWidth: '320px',
-
+                    minHeight: '120px',
                     justifyContent: 'space-between',
                 }}>
                 <div
@@ -45,6 +45,7 @@ const TOTPDisplay = ({ issuer, account, code, nextCode, period }) => {
                             textAlign: 'left',
                             fontSize: '12px',
                             maxWidth: '200px',
+                            minHeight: '16px',
                             color: 'grey',
                         }}>
                         {account}
