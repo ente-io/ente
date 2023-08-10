@@ -22,7 +22,7 @@ class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
   final GalleryType appBarType;
-  final bool hasVerifiedLock;
+  final bool? hasVerifiedLock;
 
   CollectionPage(
     this.c, {

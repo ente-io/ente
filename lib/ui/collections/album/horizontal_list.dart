@@ -12,9 +12,11 @@ import "package:photos/ui/common/loading_widget.dart";
 
 class AlbumHorizontalList extends StatefulWidget {
   final Future<List<Collection>> Function() collectionsFuture;
+  final bool? hasVerifiedLock;
 
   const AlbumHorizontalList(
     this.collectionsFuture, {
+    this.hasVerifiedLock,
     Key? key,
   }) : super(key: key);
 
@@ -86,6 +88,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                           item,
                           120,
                           showFileCount: false,
+                          hasVerifiedLock: widget.hasVerifiedLock,
                         );
                       },
                     ),

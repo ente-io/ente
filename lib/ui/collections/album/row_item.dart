@@ -20,6 +20,7 @@ class AlbumRowItemWidget extends StatelessWidget {
   final double sideOfThumbnail;
   final bool showFileCount;
   final String tag;
+  final bool? hasVerifiedLock;
 
   const AlbumRowItemWidget(
     this.c,
@@ -27,6 +28,7 @@ class AlbumRowItemWidget extends StatelessWidget {
     super.key,
     this.showFileCount = true,
     this.tag = "",
+    this.hasVerifiedLock,
   });
 
   @override
@@ -90,18 +92,18 @@ class AlbumRowItemWidget extends StatelessWidget {
                         },
                       ),
                       if (isOwner && (c.hasSharees || c.hasLink))
-                          Hero(
-                            tag: tagPrefix + "_sharees",
-                            transitionOnUserGestures: true,
-                            child: Align(
-                              alignment: Alignment.topLeft,
-                              child: AlbumSharesIcons(
-                                sharees: c.getSharees(),
-                                type: AvatarType.mini,
-                                trailingWidget: linkIcon,
-                              ),
+                        Hero(
+                          tag: tagPrefix + "_sharees",
+                          transitionOnUserGestures: true,
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: AlbumSharesIcons(
+                              sharees: c.getSharees(),
+                              type: AvatarType.mini,
+                              trailingWidget: linkIcon,
                             ),
                           ),
+                        ),
                       if (!isOwner)
                         Align(
                           alignment: Alignment.bottomRight,
@@ -198,6 +200,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                     ? GalleryType.favorite
                     : GalleryType.ownedCollection)
                 : GalleryType.sharedCollection,
+            hasVerifiedLock: hasVerifiedLock,
           ),
         );
       },

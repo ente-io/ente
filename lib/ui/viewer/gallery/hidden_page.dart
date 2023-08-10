@@ -69,6 +69,7 @@ class HiddenPage extends StatelessWidget {
         () async {
           return CollectionsService.instance.getHiddenCollectionsV2();
         },
+        hasVerifiedLock: true,
       ),
     );
     return Scaffold(
