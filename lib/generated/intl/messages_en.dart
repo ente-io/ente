@@ -445,6 +445,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "couldNotUpdateSubscription": MessageLookupByLibrary.simpleMessage(
             "Could not update subscription"),
         "count": MessageLookupByLibrary.simpleMessage("Count"),
+        "crashReporting":
+            MessageLookupByLibrary.simpleMessage("Crash reporting"),
         "create": MessageLookupByLibrary.simpleMessage("Create"),
         "createAccount": MessageLookupByLibrary.simpleMessage("Create account"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(

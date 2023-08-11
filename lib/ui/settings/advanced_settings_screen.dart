@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/user_remote_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -134,6 +135,25 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                       .setBoolValue(
                                     UserRemoteFlagService.mapEnabled,
                                     !isEnabled,
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).crashReporting,
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () => SuperLogging.shouldReportCrashes(),
+                                onChanged: () async {
+                                  await SuperLogging.setShouldReportCrashes(
+                                    !SuperLogging.shouldReportCrashes(),
                                   );
                                 },
                               ),

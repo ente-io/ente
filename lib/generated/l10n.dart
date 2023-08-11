@@ -1,7 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -7581,6 +7580,16 @@ class S {
     return Intl.message(
       'Failed to download video',
       name: 'failedToDownloadVideo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Crash reporting`
+  String get crashReporting {
+    return Intl.message(
+      'Crash reporting',
+      name: 'crashReporting',
       desc: '',
       args: [],
     );

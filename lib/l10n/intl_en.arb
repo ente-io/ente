@@ -1094,5 +1094,6 @@
   "sharedWithYou": "Shared with you",
   "sharedByYou": "Shared by you",
   "inviteYourFriendsToEnte": "Invite your friends to ente",
-  "failedToDownloadVideo": "Failed to download video"
+  "failedToDownloadVideo": "Failed to download video",
+  "crashReporting": "Crash reporting"
 }
