@@ -51,16 +51,20 @@ Future<io.File?> downloadAndDecrypt(
     final decryptedFilePath = Configuration.instance.getTempDirectory() +
         file.generatedID.toString() +
         ".decrypted";
-    final decryptedFile = io.File(decryptedFilePath);
-    await CryptoUtil.decryptFile(
-      encryptedFilePath,
-      decryptedFilePath,
-      CryptoUtil.base642bin(file.fileDecryptionHeader!),
-      getFileKey(file),
-    );
+    try {
+      await CryptoUtil.decryptFile(
+        encryptedFilePath,
+        decryptedFilePath,
+        CryptoUtil.base642bin(file.fileDecryptionHeader!),
+        getFileKey(file),
+      );
+    } catch (e, s) {
+      _logger.severe("Failed to decrypt file", e, s);
+      return null;
+    }
     _logger.info("File decrypted: " + file.uploadedFileID.toString());
     await encryptedFile.delete();
-    return decryptedFile;
+    return io.File(decryptedFilePath);
   });
 }
 
