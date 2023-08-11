@@ -63,7 +63,7 @@ Future<io.File?> downloadAndDecrypt(
         getFileKey(file),
       );
     } catch (e, s) {
-      _logger.severe("$logPrefix failed to decrypt file", e, s);
+      _logger.severe("failed to decrypt file", e, s);
       return null;
     }
     _logger.info('$logPrefix decryption completed');
