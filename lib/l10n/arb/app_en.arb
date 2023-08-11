@@ -58,6 +58,9 @@
     }
   },
   "contactSupport": "Contact support",
+  "rateUsOnStore" : "Rate us on {storeName}",
+  "blog": "Blog",
+  "merchandise": "Merchandise",
   "verifyPassword": "Verify password",
   "pleaseWait": "Please wait...",
   "generatingEncryptionKeysTitle": "Generating encryption keys...",

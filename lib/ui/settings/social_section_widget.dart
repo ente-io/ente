@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
@@ -21,8 +24,26 @@ class SocialSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final l10n = context.l10n;
+    final result = UpdateService.instance.getRateDetails();
+    final String ratePlace = result.item1;
+    final String rateUrl = result.item2;
+
     final List<Widget> options = [
       sectionOptionSpacing,
+      SocialsMenuItemWidget(l10n.rateUsOnStore(ratePlace), rateUrl),
+      sectionOptionSpacing,
+      SocialsMenuItemWidget(
+        l10n.blog,
+        "https://ente.io/blog",
+        launchInExternalApp: !Platform.isAndroid,
+      ),
+      sectionOptionSpacing,
+      SocialsMenuItemWidget(
+        l10n.merchandise,
+        "https://shop.ente.io",
+        launchInExternalApp: !Platform.isAndroid,
+      ),
       const SocialsMenuItemWidget("Mastodon", "https://mstdn.social/@ente/"),
       sectionOptionSpacing,
       const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),
@@ -40,9 +61,15 @@ class SocialSectionWidget extends StatelessWidget {
 
 class SocialsMenuItemWidget extends StatelessWidget {
   final String text;
-  final String urlSring;
-  const SocialsMenuItemWidget(this.text, this.urlSring, {Key? key})
-      : super(key: key);
+  final String url;
+  final bool launchInExternalApp;
+
+  const SocialsMenuItemWidget(
+      this.text,
+      this.url, {
+        Key? key,
+        this.launchInExternalApp = true,
+      }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +81,12 @@ class SocialsMenuItemWidget extends StatelessWidget {
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
       onTap: () async {
-        launchUrlString(urlSring);
+        launchUrlString(
+          url,
+          mode: launchInExternalApp
+              ? LaunchMode.externalApplication
+              : LaunchMode.platformDefault,
+        );
       },
     );
   }
