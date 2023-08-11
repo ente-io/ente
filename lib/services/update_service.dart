@@ -99,7 +99,7 @@ class UpdateService {
       );
     }
     return const Tuple2(
-      "app store",
+      "App Store",
       "https://apps.apple.com/in/app/ente-photos/id6444121398",
     );
   }
