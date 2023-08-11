@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tuple/tuple.dart';
 
 class UpdateService {
   UpdateService._privateConstructor();
@@ -85,6 +86,22 @@ class UpdateService {
         .getDio()
         .get("https://ente.io/release-info/auth-independent.json");
     return LatestVersionInfo.fromMap(response.data["latestVersion"]);
+  }
+
+  // getRateDetails returns details about the place
+  Tuple2<String, String> getRateDetails() {
+    // Note: in auth, currently we don't have a way to identify if the
+    // app was installed from play store, f-droid or github based on pkg name
+    if (Platform.isAndroid) {
+      return const Tuple2(
+        "AlternativeTo",
+        "https://alternativeto.net/software/ente-authenticator/about/",
+      );
+    }
+    return const Tuple2(
+      "app store",
+      "https://apps.apple.com/in/app/ente-photos/id6444121398",
+    );
   }
 
   bool isIndependent() {
