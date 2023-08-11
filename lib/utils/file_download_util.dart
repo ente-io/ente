@@ -16,7 +16,8 @@ Future<io.File?> downloadAndDecrypt(
   ente.File file, {
   ProgressCallback? progressCallback,
 }) {
-  _logger.info("Downloading file " + file.uploadedFileID.toString());
+  final String logPrefix = 'Download-file-${file.uploadedFileID}:';
+  _logger.info('$logPrefix starting download');
   final encryptedFilePath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       ".encrypted";
@@ -34,15 +35,15 @@ Future<io.File?> downloadAndDecrypt(
       )
       .then((response) async {
     if (response.statusCode != 200) {
-      _logger.warning("Could not download file: ", response.toString());
+      _logger.warning('$logPrefix download failed  ${response.toString()}');
       return null;
     } else if (!encryptedFile.existsSync()) {
-      _logger.warning("File was not downloaded correctly.");
+      _logger.warning('$logPrefix incomplete download, file not found');
       return null;
     }
-    _logger.info("File downloaded: " + file.uploadedFileID.toString());
+    _logger.info('$logPrefix download completed');
     _logger.info(
-      "Download speed: " +
+      "$logPrefix avg speed: " +
           (await io.File(encryptedFilePath).length() /
                   (DateTime.now().millisecondsSinceEpoch - startTime))
               .toString() +
@@ -59,10 +60,10 @@ Future<io.File?> downloadAndDecrypt(
         getFileKey(file),
       );
     } catch (e, s) {
-      _logger.severe("Failed to decrypt file", e, s);
+      _logger.severe("$logPrefix failed to decrypt file", e, s);
       return null;
     }
-    _logger.info("File decrypted: " + file.uploadedFileID.toString());
+    _logger.info('$logPrefix decryption completed');
     await encryptedFile.delete();
     return io.File(decryptedFilePath);
   });
