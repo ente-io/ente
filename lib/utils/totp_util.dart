@@ -1,4 +1,5 @@
 import 'package:ente_auth/models/code.dart';
+import 'package:flutter/foundation.dart';
 import 'package:otp/otp.dart' as otp;
 
 String getOTP(Code code) {
@@ -49,4 +50,14 @@ otp.Algorithm _getAlgorithm(Code code) {
 
 String getSanitizedSecret(String secret) {
   return secret.toUpperCase().trim().replaceAll(' ', '');
+}
+
+String safeDecode(String value) {
+  try {
+    return Uri.decodeComponent(value);
+  } catch (e) {
+    // note: don't log the value, it might contain sensitive information
+    debugPrint("Failed to decode $e");
+    return value;
+  }
 }
