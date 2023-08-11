@@ -41,14 +41,13 @@ Future<io.File?> downloadAndDecrypt(
       _logger.warning('$logPrefix incomplete download, file not found');
       return null;
     }
-    _logger.info('$logPrefix download completed');
+    final int sizeInBytes = await encryptedFile.length();
+    final double speedInKBps = sizeInBytes /
+        1024.0 /
+        ((DateTime.now().millisecondsSinceEpoch - startTime) / 1000);
     _logger.info(
-      "$logPrefix avg speed: " +
-          (await io.File(encryptedFilePath).length() /
-                  (DateTime.now().millisecondsSinceEpoch - startTime))
-              .toString() +
-          "kBps",
-    );
+        "$logPrefix download completed, avg speed: ${speedInKBps.toStringAsFixed(2)} KB/s",);
+
     final decryptedFilePath = Configuration.instance.getTempDirectory() +
         file.generatedID.toString() +
         ".decrypted";
