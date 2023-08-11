@@ -9,6 +9,7 @@ import 'package:photos/core/network/network.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/crypto_util.dart';
+import "package:photos/utils/data_util.dart";
 
 final _logger = Logger("file_download_util");
 
@@ -16,7 +17,7 @@ Future<io.File?> downloadAndDecrypt(
   ente.File file, {
   ProgressCallback? progressCallback,
 }) {
-  final String logPrefix = 'Download-file-${file.uploadedFileID}:';
+  final String logPrefix = 'File-${file.uploadedFileID}:';
   _logger.info('$logPrefix starting download');
   final encryptedFilePath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
@@ -46,7 +47,8 @@ Future<io.File?> downloadAndDecrypt(
         1024.0 /
         ((DateTime.now().millisecondsSinceEpoch - startTime) / 1000);
     _logger.info(
-        "$logPrefix download completed, avg speed: ${speedInKBps.toStringAsFixed(2)} KB/s",);
+        "$logPrefix download completed: ${formatBytes(sizeInBytes)}, avg speed: ${speedInKBps
+            .toStringAsFixed(2)} KB/s",);
 
     final decryptedFilePath = Configuration.instance.getTempDirectory() +
         file.generatedID.toString() +
