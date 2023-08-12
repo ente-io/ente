@@ -58,6 +58,9 @@
     }
   },
   "contactSupport": "Contatta il supporto",
+  "rateUsOnStore": "Valutaci su {storeName}",
+  "blog": "Blog",
+  "merchandise": "Prodotti",
   "verifyPassword": "Verifica la password",
   "pleaseWait": "Attendere prego...",
   "generatingEncryptionKeysTitle": "Generazione delle chiavi di crittografia...",
