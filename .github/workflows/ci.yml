@@ -41,7 +41,7 @@ jobs:
 
             # Build independent apk.
             - name: Build
-              run: flutter build apk --release --flavor independent && mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente-auth.apk
+              run: flutter build apk --release --flavor independent --dart-define=app.flavor=independent && mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente-auth.apk
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
@@ -50,7 +50,7 @@ jobs:
 
             # Build Play store aab.
             - name: Build
-              run: flutter build appbundle --release --flavor playstore
+              run: flutter build appbundle --release --flavor playstore --dart-define=app.flavor=playstore
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}

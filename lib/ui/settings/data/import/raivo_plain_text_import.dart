@@ -9,6 +9,7 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -57,18 +58,7 @@ Future<void> _pickRaivoJsonFile(BuildContext context) async {
     int? count = await _processRaivoExportFile(context, path);
     await progressDialog.hide();
     if(count != null) {
-      final DialogWidget dialog = choiceDialog(
-        title: context.l10n.importSuccessTitle,
-        body: context.l10n.importSuccessDesc(count ?? 0),
-        firstButtonLabel: l10n.ok,
-        firstButtonType: ButtonType.primary,
-      );
-      await showConfettiDialog(
-        context: context,
-        dialogBuilder: (BuildContext context) {
-          return dialog;
-        },
-      );
+      await importSuccessDialog(context, count);
     }
   } catch (e) {
     await progressDialog.hide();

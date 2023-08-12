@@ -5,17 +5,18 @@ import 'dart:io';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/services/notification_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class UpdateService {
   UpdateService._privateConstructor();
 
   static final UpdateService instance = UpdateService._privateConstructor();
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
+  static const String flavor = String.fromEnvironment('app.flavor');
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
@@ -93,6 +94,12 @@ class UpdateService {
     // Note: in auth, currently we don't have a way to identify if the
     // app was installed from play store, f-droid or github based on pkg name
     if (Platform.isAndroid) {
+      if(flavor == "playstore") {
+        return const Tuple2(
+          "Play Store",
+          "market://details??id=io.ente.auth",
+        );
+      }
       return const Tuple2(
         "AlternativeTo",
         "https://alternativeto.net/software/ente-authenticator/about/",
@@ -104,11 +111,25 @@ class UpdateService {
     );
   }
 
-  bool isIndependent() {
-    if (Platform.isIOS) {
-      return false;
+  Future<void> launchReviewUrl() async {
+    final String url = getRateDetails().item2;
+    try {
+      await launchUrlString(url, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      _logger.severe("Failed top open launch url $url", e);
+      // Fall back if we fail to open play-store market app on android
+      if (Platform.isAndroid && url.startsWith("market://")) {
+        launchUrlString(
+          "https://play.google.com/store/apps/details?id=io"
+              ".ente.auth",
+          mode: LaunchMode.externalApplication,
+        ).ignore();
+      }
     }
-    return kDebugMode || _packageInfo.packageName.endsWith("independent");
+  }
+
+  bool isIndependent() {
+    return flavor == "independent" || _packageInfo.packageName.endsWith("independent");
   }
 }
 
