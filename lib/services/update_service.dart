@@ -16,6 +16,7 @@ class UpdateService {
 
   static final UpdateService instance = UpdateService._privateConstructor();
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
+  static const String flavor = String.fromEnvironment('app.flavor');
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
@@ -105,10 +106,7 @@ class UpdateService {
   }
 
   bool isIndependent() {
-    if (Platform.isIOS) {
-      return false;
-    }
-    return kDebugMode || _packageInfo.packageName.endsWith("independent");
+    return flavor == "independent" || _packageInfo.packageName.endsWith("independent");
   }
 }
 
