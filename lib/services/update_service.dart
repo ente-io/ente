@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class UpdateService {
   UpdateService._privateConstructor();
@@ -94,6 +95,12 @@ class UpdateService {
     // Note: in auth, currently we don't have a way to identify if the
     // app was installed from play store, f-droid or github based on pkg name
     if (Platform.isAndroid) {
+      if(flavor == "playstore") {
+        return const Tuple2(
+          "Play Store",
+          "market://details??id=io.ente.auth",
+        );
+      }
       return const Tuple2(
         "AlternativeTo",
         "https://alternativeto.net/software/ente-authenticator/about/",
@@ -103,6 +110,23 @@ class UpdateService {
       "App Store",
       "https://apps.apple.com/in/app/ente-photos/id6444121398",
     );
+  }
+
+  Future<void> launchReviewUrl() async {
+    final String url = getRateDetails().item2;
+    try {
+      await launchUrlString(url, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      _logger.severe("Failed top open launch url $url", e);
+      // Fall back if we fail to open play-store market app on android
+      if (Platform.isAndroid && url.startsWith("market://")) {
+        launchUrlString(
+          "https://play.google.com/store/apps/details?id=io"
+              ".ente.auth",
+          mode: LaunchMode.externalApplication,
+        ).ignore();
+      }
+    }
   }
 
   bool isIndependent() {
