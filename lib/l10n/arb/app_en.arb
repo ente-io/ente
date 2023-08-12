@@ -309,5 +309,11 @@
   "twofactorAuthenticationSuccessfullyReset": "Two-factor authentication successfully reset",
   "incorrectRecoveryKey": "Incorrect recovery key",
   "theRecoveryKeyYouEnteredIsIncorrect": "The recovery key you entered is incorrect",
-  "enterPassword": "Enter password"
+  "enterPassword": "Enter password",
+  "selectExportFormat": "Select export format",
+  "exportDialogDesc": "Encrypted exports will be protected by a password of your choice.",
+  "encrypted": "Encrypted",
+  "plainText": "Plain text",
+  "passwordToEncryptExport": "Password to encrypt export",
+  "export": "Export"
 }
