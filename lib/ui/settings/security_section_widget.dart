@@ -52,11 +52,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     final bool? canDisableMFA = UserService.instance.canDisableEmailMFA();
     if (canDisableMFA == null) {
       // We don't know if the user can disable MFA yet, so we fetch the info
-      UserService.instance.getUserDetailsV2().then(
-            (value) => {
-              if (mounted) {setState(() {})}
-            },
-          );
+      UserService.instance.getUserDetailsV2().ignore();
     }
     final l10n = context.l10n;
     final List<Widget> children = [];
@@ -116,33 +112,29 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           },
         ),
       ),
-      if(canDisableMFA ?? false)
-        sectionOptionSpacing,
-      if(canDisableMFA ?? false)
-        MenuItemWidget(
-          captionedTextWidget:  CaptionedTextWidget(
-            title: l10n.emailVerificationToggle,
-          ),
-          trailingWidget: ToggleSwitchWidget(
-            value: () => UserService.instance.hasEmailMFAEnabled(),
-            onChanged: () async {
-              final hasAuthenticated = await LocalAuthenticationService
-                  .instance
-                  .requestLocalAuthentication(
-                context,
-                l10n.authToChangeEmailVerificationSetting,
-              );
-              final isEmailMFAEnabled =
-              UserService.instance.hasEmailMFAEnabled();
-              if (hasAuthenticated) {
-                await updateEmailMFA(!isEmailMFAEnabled);
-                if(mounted){
-                  setState(() {});
-                }
-              }
-            },
-          ),
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.emailVerificationToggle,
         ),
+        trailingWidget: ToggleSwitchWidget(
+          value: () => UserService.instance.hasEmailMFAEnabled(),
+          onChanged: () async {
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
+              context,
+              l10n.authToChangeEmailVerificationSetting,
+            );
+            final isEmailMFAEnabled = UserService.instance.hasEmailMFAEnabled();
+            if (hasAuthenticated) {
+              await updateEmailMFA(!isEmailMFAEnabled);
+              if (mounted) {
+                setState(() {});
+              }
+            }
+          },
+        ),
+      ),
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
@@ -179,7 +171,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     try {
       await UserService.instance.updateEmailMFA(isEnabled);
     } catch (e) {
-     showToast(context, context.l10n.somethingWentWrongMessage);
+      showToast(context, context.l10n.somethingWentWrongMessage);
     }
   }
 }
