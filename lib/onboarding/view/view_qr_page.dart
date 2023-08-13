@@ -30,6 +30,7 @@ class ViewQrPage extends StatelessWidget {
               children: [
                 QrImage(
                   data: code!.rawData,
+                  foregroundColor: Theme.of(context).colorScheme.onBackground,
                   version: QrVersions.auto,
                   size: qrSize,
                 ),

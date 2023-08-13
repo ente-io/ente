@@ -22,19 +22,19 @@ import 'package:share_plus/share_plus.dart';
 Future<void> handleExportClick(BuildContext context) async {
   final result = await showDialogWidget(
     context: context,
-    title: "Select export format",
-    body: "Encrypted exports will be protected by a password of your choice.",
+    title: context.l10n.selectExportFormat,
+    body: context.l10n.exportDialogDesc,
     buttons: [
-      const ButtonWidget(
+      ButtonWidget(
         buttonType: ButtonType.primary,
-        labelText: "Encrypted",
+        labelText: context.l10n.encrypted,
         isInAlert: true,
         buttonSize: ButtonSize.large,
         buttonAction: ButtonAction.first,
       ),
-      const ButtonWidget(
+      ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: "Plain text",
+        labelText: context.l10n.plainText,
         buttonSize: ButtonSize.large,
         isInAlert: true,
         buttonAction: ButtonAction.second,
@@ -50,13 +50,16 @@ Future<void> handleExportClick(BuildContext context) async {
   }
 }
 
-Future<void> _requestForEncryptionPassword(BuildContext context,
-    {String? password,}) async {
+Future<void> _requestForEncryptionPassword(
+  BuildContext context, {
+  String? password,
+}) async {
+  final l10n = context.l10n;
   await showTextInputDialog(
     context,
-    title: "Password to encrypt export",
-    submitButtonLabel: "Export",
-    hintText: "Enter password",
+    title: l10n.passwordToEncryptExport,
+    submitButtonLabel: l10n.export,
+    hintText: l10n.enterPassword,
     isPasswordInput: true,
     alwaysShowSuccessState: false,
     onSubmit: (String password) async {
@@ -77,7 +80,9 @@ Future<void> _requestForEncryptionPassword(BuildContext context,
           String exportPlainText = await _getAuthDataForExport();
           // Encrypt the key with this derived key
           final encResult = await CryptoUtil.encryptChaCha(
-            utf8.encode(exportPlainText) as Uint8List, derivedKeyResult.key,);
+            utf8.encode(exportPlainText) as Uint8List,
+            derivedKeyResult.key,
+          );
           final encContent = Sodium.bin2base64(encResult.encryptedData!);
           final encNonce = Sodium.bin2base64(encResult.header!);
           final EnteAuthExport data = EnteAuthExport(
@@ -87,11 +92,12 @@ Future<void> _requestForEncryptionPassword(BuildContext context,
             kdfParams: KDFParams(
               memLimit: derivedKeyResult.memLimit,
               opsLimit: derivedKeyResult.opsLimit,
-              salt: Sodium.bin2base64(kekSalt),),
+              salt: Sodium.bin2base64(kekSalt),
+            ),
           );
           // get json value of data
           _exportCodes(context, jsonEncode(data.toJson()));
-        } catch(e,s) {
+        } catch (e, s) {
           Logger("ExportWidget").severe(e, s);
           showToast(context, "Error while exporting codes.");
         }
@@ -128,7 +134,8 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
     await _codeFile.delete();
   }
   _codeFile.writeAsStringSync(fileContent);
-  await Share.shareFiles([_codeFile.path]);
+  final Size size = MediaQuery.of(context).size;
+  await Share.shareFiles([_codeFile.path], sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),);
   Future.delayed(const Duration(seconds: 15), () async {
     if (_codeFile.existsSync()) {
       _codeFile.deleteSync();
