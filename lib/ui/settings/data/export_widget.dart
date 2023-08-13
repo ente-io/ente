@@ -134,7 +134,8 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
     await _codeFile.delete();
   }
   _codeFile.writeAsStringSync(fileContent);
-  await Share.shareFiles([_codeFile.path]);
+  final Size size = MediaQuery.of(context).size;
+  await Share.shareFiles([_codeFile.path], sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),);
   Future.delayed(const Duration(seconds: 15), () async {
     if (_codeFile.existsSync()) {
       _codeFile.deleteSync();
