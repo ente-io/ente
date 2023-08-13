@@ -25,6 +25,7 @@ import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/account/password_reentry_page.dart';
 import 'package:ente_auth/ui/account/recovery_page.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/two_factor_authentication_page.dart';
 import 'package:ente_auth/ui/two_factor_recovery_page.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
@@ -521,14 +522,15 @@ class UserService {
       isDismissible: true,
     );
     await dialog.show();
+    late Uint8List keyEncryptionKey;
     try {
-      final kek = await CryptoUtil.deriveKey(
+      keyEncryptionKey = await CryptoUtil.deriveKey(
         utf8.encode(userPassword) as Uint8List,
         CryptoUtil.base642bin(srpAttributes.kekSalt),
         srpAttributes.memLimit,
         srpAttributes.opsLimit,
       );
-      final loginKey = await CryptoUtil.deriveLoginKey(kek);
+      final loginKey = await CryptoUtil.deriveLoginKey(keyEncryptionKey);
       final Uint8List identity = Uint8List.fromList(
         utf8.encode(srpAttributes.srpUserID),
       );
@@ -571,12 +573,16 @@ class UserService {
         final String twoFASessionID = response.data["twoFactorSessionID"];
         Configuration.instance.setVolatilePassword(userPassword);
         if (twoFASessionID.isNotEmpty) {
-
           page = TwoFactorAuthenticationPage(twoFASessionID);
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
-            page = const PasswordReentryPage();
+            await Configuration.instance.decryptSecretsAndGetKeyEncKey(
+              userPassword,
+              Configuration.instance.getKeyAttributes()!,
+              keyEncryptionKey: keyEncryptionKey,
+            );
+            page = const HomePage();
           } else {
             throw Exception("unexpected response during email verification");
           }

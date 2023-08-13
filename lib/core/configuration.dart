@@ -216,14 +216,17 @@ class Configuration {
   Future<Uint8List> decryptSecretsAndGetKeyEncKey(
     String password,
     KeyAttributes attributes,
+  {
+    Uint8List? keyEncryptionKey,
+  }
   ) async {
     _logger.info('Start decryptAndSaveSecrets');
-    final keyEncryptionKey = await CryptoUtil.deriveKey(
-      utf8.encode(password) as Uint8List,
-      Sodium.base642bin(attributes.kekSalt),
-      attributes.memLimit,
-      attributes.opsLimit,
-    );
+    keyEncryptionKey ??= await CryptoUtil.deriveKey(
+        utf8.encode(password) as Uint8List,
+        Sodium.base642bin(attributes.kekSalt),
+        attributes.memLimit,
+        attributes.opsLimit,
+      );
 
     _logger.info('user-key done');
     Uint8List key;
