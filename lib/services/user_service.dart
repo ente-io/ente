@@ -568,7 +568,6 @@ class UserService {
         },
       );
       if (response.statusCode == 200) {
-        await dialog.hide();
         Widget page;
         final String twoFASessionID = response.data["twoFactorSessionID"];
         Configuration.instance.setVolatilePassword(userPassword);
@@ -587,6 +586,7 @@ class UserService {
             throw Exception("unexpected response during email verification");
           }
         }
+        await dialog.hide();
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
