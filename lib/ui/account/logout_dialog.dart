@@ -42,6 +42,7 @@ Future<void> autoLogoutAlert(BuildContext context) async {
   );
   await showDialog(
     context: context,
+    barrierDismissible: false,
     builder: (BuildContext context) {
       return alert;
     },
