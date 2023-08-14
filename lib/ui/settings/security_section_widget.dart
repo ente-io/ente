@@ -1,17 +1,21 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/models/user_details.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/recovery_key_page.dart';
+import 'package:ente_auth/ui/account/request_pwd_verification_page.dart';
 import 'package:ente_auth/ui/account/sessions_page.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
+import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
@@ -52,11 +56,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     final bool? canDisableMFA = UserService.instance.canDisableEmailMFA();
     if (canDisableMFA == null) {
       // We don't know if the user can disable MFA yet, so we fetch the info
-      UserService.instance.getUserDetailsV2().then(
-            (value) => {
-              if (mounted) {setState(() {})}
-            },
-          );
+      UserService.instance.getUserDetailsV2().ignore();
     }
     final l10n = context.l10n;
     final List<Widget> children = [];
@@ -116,33 +116,29 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           },
         ),
       ),
-      if(canDisableMFA ?? false)
-        sectionOptionSpacing,
-      if(canDisableMFA ?? false)
-        MenuItemWidget(
-          captionedTextWidget:  CaptionedTextWidget(
-            title: l10n.emailVerificationToggle,
-          ),
-          trailingWidget: ToggleSwitchWidget(
-            value: () => UserService.instance.hasEmailMFAEnabled(),
-            onChanged: () async {
-              final hasAuthenticated = await LocalAuthenticationService
-                  .instance
-                  .requestLocalAuthentication(
-                context,
-                l10n.authToChangeEmailVerificationSetting,
-              );
-              final isEmailMFAEnabled =
-              UserService.instance.hasEmailMFAEnabled();
-              if (hasAuthenticated) {
-                await updateEmailMFA(!isEmailMFAEnabled);
-                if(mounted){
-                  setState(() {});
-                }
-              }
-            },
-          ),
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.emailVerificationToggle,
         ),
+        trailingWidget: ToggleSwitchWidget(
+          value: () => UserService.instance.hasEmailMFAEnabled(),
+          onChanged: () async {
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
+              context,
+              l10n.authToChangeEmailVerificationSetting,
+            );
+            final isEmailMFAEnabled = UserService.instance.hasEmailMFAEnabled();
+            if (hasAuthenticated) {
+              await updateEmailMFA(!isEmailMFAEnabled);
+              if (mounted) {
+                setState(() {});
+              }
+            }
+          },
+        ),
+      ),
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
@@ -177,9 +173,16 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   Future<void> updateEmailMFA(bool isEnabled) async {
     try {
+      final UserDetails details = await UserService.instance.getUserDetailsV2(memoryCount: false);
+      if(details.profileData?.canDisableEmailMFA == false) {
+        await routeToPage(context, RequestPasswordVerificationPage(onPasswordVerified: (Uint8List keyEncryptionKey) async {
+          final Uint8List loginKey = await CryptoUtil.deriveLoginKey(keyEncryptionKey);
+          await UserService.instance.registerOrUpdateSrp(loginKey);
+        },),);
+      }
       await UserService.instance.updateEmailMFA(isEnabled);
     } catch (e) {
-     showToast(context, context.l10n.somethingWentWrongMessage);
+      showToast(context, context.l10n.somethingWentWrongMessage);
     }
   }
 }
