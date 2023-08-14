@@ -32,7 +32,7 @@ class HiddenPage extends StatelessWidget {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInCollections(
-          CollectionsService.instance.getHiddenCollections().toList(),
+          CollectionsService.instance.getHiddenCollectionIds().toList(),
           creationStartTime,
           creationEndTime,
           Configuration.instance.getUserID()!,
@@ -67,7 +67,7 @@ class HiddenPage extends StatelessWidget {
       emptyState: const EmptyHiddenWidget(),
       header: AlbumHorizontalList(
         () async {
-          return CollectionsService.instance.getHiddenCollectionsV2();
+          return CollectionsService.instance.getHiddenCollections();
         },
         hasVerifiedLock: true,
       ),

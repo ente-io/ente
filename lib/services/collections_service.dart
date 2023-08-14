@@ -196,14 +196,14 @@ class CollectionsService {
         .toList();
   }
 
-  List<Collection> getHiddenCollectionsV2() {
+  List<Collection> getHiddenCollections() {
     return _collectionIDToCollections.values
         .toList()
         .where((element) => element.isHidden())
         .toList();
   }
 
-  Set<int> getHiddenCollections() {
+  Set<int> getHiddenCollectionIds() {
     return _collectionIDToCollections.values
         .toList()
         .where((element) => element.isHidden())
@@ -211,7 +211,7 @@ class CollectionsService {
         .toSet();
   }
 
-  Set<int> archivedOrHiddenCollections() {
+  Set<int> archivedOrHiddenCollectionIds() {
     return _collectionIDToCollections.values
         .toList()
         .where(

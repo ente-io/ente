@@ -40,7 +40,7 @@ class SearchService {
   }
 
   Set<int> ignoreCollections() {
-    return CollectionsService.instance.getHiddenCollections();
+    return CollectionsService.instance.getHiddenCollectionIds();
   }
 
   Future<List<File>> getAllFiles() async {

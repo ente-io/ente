@@ -18,7 +18,7 @@ class ArchivedCollectionsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Set<int> hiddenCollectionId =
-        CollectionsService.instance.getHiddenCollections();
+        CollectionsService.instance.getHiddenCollectionIds();
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.background,
