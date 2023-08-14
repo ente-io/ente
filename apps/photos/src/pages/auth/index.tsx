@@ -64,10 +64,12 @@ const AuthenticatorCodesPage = () => {
             <AuthNavbar />
             <div
                 style={{
+                    maxWidth: '800px',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'flex-start',
+                    justifyContent: 'center',
+                    margin: '0 auto', // add margin auto to center the div horizontally
                 }}>
                 <div style={{ marginBottom: '1rem' }} />
                 {filteredCodes.length === 0 && searchTerm.length === 0 ? (
@@ -118,7 +120,7 @@ const AuthenticatorCodesPage = () => {
                 <div style={{ marginBottom: '4rem' }} />
             </div>
             <style jsx>{`
-                @media (min-width: 800px) {
+                @media (min-width: 800px,) {
                     .row {
                         display: flex;
                         flex-wrap: wrap;
