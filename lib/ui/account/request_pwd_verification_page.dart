@@ -3,7 +3,6 @@ import "dart:typed_data";
 
 import 'package:ente_auth/core/configuration.dart';
 import "package:ente_auth/l10n/l10n.dart";
-import "package:ente_auth/services/user_service.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
 import "package:ente_auth/utils/crypto_util.dart";
@@ -75,7 +74,7 @@ class _RequestPasswordVerificationPageState
         key: const ValueKey("verifyPasswordButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
-        buttonText: context.l10n.logInLabel,
+        buttonText: context.l10n.verifyPassword,
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
           final dialog = createProgressDialog(context, context.l10n.pleaseWait);
@@ -96,6 +95,7 @@ class _RequestPasswordVerificationPageState
             dialog.show();
             // pop
             await widget.onPasswordVerified(keyEncryptionKey);
+            dialog.hide();
             Navigator.of(context).pop(true);
           } catch (e, s) {
             _logger.severe("Error while verifying password", e, s);
@@ -206,62 +206,6 @@ class _RequestPasswordVerificationPageState
                     thickness: 1,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
-                          await UserService.instance.sendOtt(
-                            context,
-                            email!,
-                            isResetPasswordScreen: true,
-                          );
-                        },
-                        child: Center(
-                          child: Text(
-                            context.l10n.forgotPassword,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
-                          final dialog = createProgressDialog(
-                            context,
-                            context.l10n.pleaseWait,
-                          );
-                          await dialog.show();
-                          await Configuration.instance.logout();
-                          await dialog.hide();
-                          Navigator.of(context)
-                              .popUntil((route) => route.isFirst);
-                        },
-                        child: Center(
-                          child: Text(
-                            context.l10n.changeEmail,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
               ],
             ),
           ),
