@@ -48,7 +48,7 @@ class _HiddenPageState extends State<HiddenPage> {
       setState(() {
         _defaultHiddenCollectionId = defaultHiddenCollection.id;
         for (Collection hiddenColleciton in hiddenCollections) {
-          if (hiddenColleciton != defaultHiddenCollection) {
+          if (hiddenColleciton.id != defaultHiddenCollection.id) {
             _hiddenCollectionsExcludingDefault.add(hiddenColleciton);
           }
         }
