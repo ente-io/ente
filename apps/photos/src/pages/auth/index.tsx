@@ -69,7 +69,7 @@ const AuthenticatorCodesPage = () => {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    margin: '0 auto', // add margin auto to center the div horizontally
+                    margin: '0 auto',
                 }}>
                 <div style={{ marginBottom: '1rem' }} />
                 {filteredCodes.length === 0 && searchTerm.length === 0 ? (
@@ -120,7 +120,7 @@ const AuthenticatorCodesPage = () => {
                 <div style={{ marginBottom: '4rem' }} />
             </div>
             <style jsx>{`
-                @media (min-width: 800px,) {
+                @media (min-width: 800px) {
                     .row {
                         display: flex;
                         flex-wrap: wrap;
