@@ -309,5 +309,11 @@
   "twofactorAuthenticationSuccessfullyReset": "Autenticazione a due fattori ripristinata con successo",
   "incorrectRecoveryKey": "Chiave di recupero errata",
   "theRecoveryKeyYouEnteredIsIncorrect": "La chiave di recupero che hai inserito non è corretta",
-  "enterPassword": "Inserisci la password"
+  "enterPassword": "Inserisci la password",
+  "selectExportFormat": "Seleziona formato di esportazione",
+  "exportDialogDesc": "Le esportazioni criptate saranno protette da una password a tua scelta.",
+  "encrypted": "Criptato",
+  "plainText": "Testo in chiaro",
+  "passwordToEncryptExport": "Password per criptare il file esportato",
+  "export": "Esporta"
 }
