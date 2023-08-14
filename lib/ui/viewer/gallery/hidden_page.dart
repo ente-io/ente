@@ -8,19 +8,20 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/hidden_service.dart";
 import "package:photos/ui/collections/album/horizontal_list.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/empty_hidden_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 
-class HiddenPage extends StatelessWidget {
+class HiddenPage extends StatefulWidget {
   final String tagPrefix;
   final GalleryType appBarType;
   final GalleryType overlayType;
-  final _selectedFiles = SelectedFiles();
 
-  HiddenPage({
+  const HiddenPage({
     this.tagPrefix = "hidden_page",
     this.appBarType = GalleryType.hidden,
     this.overlayType = GalleryType.hidden,
@@ -28,11 +29,33 @@ class HiddenPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<HiddenPage> createState() => _HiddenPageState();
+}
+
+class _HiddenPageState extends State<HiddenPage> {
+  int? _defaultHiddenCollectionId;
+
+  @override
+  void initState() {
+    super.initState();
+    CollectionsService.instance.getDefaultHiddenCollection().then((collection) {
+      setState(() {
+        _defaultHiddenCollectionId = collection.id;
+      });
+    });
+  }
+
+  final _selectedFiles = SelectedFiles();
+
+  @override
   Widget build(BuildContext context) {
+    if (_defaultHiddenCollectionId == null) {
+      return const EnteLoadingWidget();
+    }
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInCollections(
-          CollectionsService.instance.getHiddenCollectionIds().toList(),
+          [_defaultHiddenCollectionId!],
           creationStartTime,
           creationEndTime,
           Configuration.instance.getUserID()!,
@@ -61,7 +84,7 @@ class HiddenPage extends StatelessWidget {
                   null,
             ),
       ],
-      tagPrefix: tagPrefix,
+      tagPrefix: widget.tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: null,
       emptyState: const EmptyHiddenWidget(),
@@ -76,7 +99,7 @@ class HiddenPage extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
-          appBarType,
+          widget.appBarType,
           S.of(context).hidden,
           _selectedFiles,
         ),
@@ -86,7 +109,7 @@ class HiddenPage extends StatelessWidget {
         children: [
           gallery,
           FileSelectionOverlayBar(
-            overlayType,
+            widget.overlayType,
             _selectedFiles,
           ),
         ],
