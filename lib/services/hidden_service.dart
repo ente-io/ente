@@ -16,7 +16,6 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import "package:photos/utils/magic_util.dart";
 
 extension HiddenService on CollectionsService {
   static final _logger = Logger("HiddenCollectionService");
@@ -68,8 +67,7 @@ extension HiddenService on CollectionsService {
     bool forceHide = false,
   }) async {
     final int userID = config.getUserID()!;
-    final uploadedIDs = <int>[];
-    final finalFilesToHide = <File>[];
+    final List<int> uploadedIDs = <int>[];
     final dialog = createProgressDialog(
       context,
       "Hiding...",
@@ -84,7 +82,6 @@ extension HiddenService on CollectionsService {
           throw AssertionError("Can only hide files owned by user");
         }
         uploadedIDs.add(file.uploadedFileID!);
-        finalFilesToHide.add(file);
       }
 
       final defaultHiddenCollection = await getDefaultHiddenCollection();
@@ -96,7 +93,6 @@ extension HiddenService on CollectionsService {
           continue;
         }
         await move(defaultHiddenCollection.id, entry.key, entry.value);
-        changeVisibility(context, finalFilesToHide, hiddenVisibility);
       }
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
