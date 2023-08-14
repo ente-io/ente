@@ -64,10 +64,12 @@ const AuthenticatorCodesPage = () => {
             <AuthNavbar />
             <div
                 style={{
+                    maxWidth: '800px',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'flex-start',
+                    justifyContent: 'center',
+                    margin: '0 auto',
                 }}>
                 <div style={{ marginBottom: '1rem' }} />
                 {filteredCodes.length === 0 && searchTerm.length === 0 ? (
