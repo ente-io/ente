@@ -77,8 +77,13 @@ Future<void> changeCollectionVisibility(
       await CollectionsService.instance
           .updateShareeMagicMetadata(collection, update);
     }
-    // Force reload home gallery to pull in the now unarchived files
-    Bus.instance.fire(ForceReloadHomeGalleryEvent("CollectionArchiveChange"));
+    // Force reload home gallery to pull in/remove the now visibility changed
+    // files
+    Bus.instance.fire(
+      ForceReloadHomeGalleryEvent(
+        "CollectionVisibilityChange: $visibilityAction",
+      ),
+    );
     showShortToast(
       context,
       _visActionSuccessfulText(
