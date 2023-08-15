@@ -1,8 +1,11 @@
+import "dart:async";
+
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/events/collection_updated_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection.dart";
@@ -36,16 +39,29 @@ class HiddenPage extends StatefulWidget {
 class _HiddenPageState extends State<HiddenPage> {
   int? _defaultHiddenCollectionId;
   final _hiddenCollectionsExcludingDefault = <Collection>[];
+  late StreamSubscription<CollectionUpdatedEvent>
+      _collectionUpdatesSubscription;
 
   @override
   void initState() {
     super.initState();
+    _collectionUpdatesSubscription =
+        Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
+      setState(() {
+        getHiddenCollections();
+      });
+    });
+    getHiddenCollections();
+  }
+
+  getHiddenCollections() {
     final hiddenCollections =
         CollectionsService.instance.getHiddenCollections();
     CollectionsService.instance
         .getDefaultHiddenCollection()
         .then((defaultHiddenCollection) {
       setState(() {
+        _hiddenCollectionsExcludingDefault.clear();
         _defaultHiddenCollectionId = defaultHiddenCollection.id;
         for (Collection hiddenColleciton in hiddenCollections) {
           if (hiddenColleciton.id != defaultHiddenCollection.id) {
@@ -54,6 +70,12 @@ class _HiddenPageState extends State<HiddenPage> {
         }
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _collectionUpdatesSubscription.cancel();
+    super.dispose();
   }
 
   final _selectedFiles = SelectedFiles();

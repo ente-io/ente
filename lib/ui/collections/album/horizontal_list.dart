@@ -31,12 +31,12 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
 
   @override
   void initState() {
+    super.initState();
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       setState(() {});
     });
     _logger = Logger((_AlbumHorizontalListState).toString());
-    super.initState();
   }
 
   @override
