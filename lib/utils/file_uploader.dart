@@ -24,17 +24,19 @@ import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
-
 import 'package:photos/models/upload_url.dart';
+import "package:photos/models/user_details.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
+import "package:photos/services/user_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
+import "package:uuid/uuid.dart";
 
 class FileUploader {
   static const kMaximumConcurrentUploads = 4;
@@ -43,6 +45,7 @@ class FileUploader {
   static const kMaximumUploadAttempts = 4;
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
+  static const k20MBStorageBuffer = 20 * 1024 * 1024;
 
   final _logger = Logger("FileUploader");
   final _dio = NetworkClient.instance.getDio();
@@ -296,20 +299,26 @@ class FileUploader {
     }
   }
 
+  Future<File> forceUpload(File file, int collectionID) async {
+    return _tryToUpload(file, collectionID, true);
+  }
+
   Future<File> _tryToUpload(
     File file,
     int collectionID,
     bool forcedUpload,
   ) async {
     await checkNetworkForUpload(isForceUpload: forcedUpload);
-    final fileOnDisk = await FilesDB.instance.getFile(file.generatedID!);
-    final wasAlreadyUploaded = fileOnDisk != null &&
-        fileOnDisk.uploadedFileID != null &&
-        (fileOnDisk.updationTime ?? -1) != -1 &&
-        (fileOnDisk.collectionID ?? -1) == collectionID;
-    if (wasAlreadyUploaded) {
-      debugPrint("File is already uploaded ${fileOnDisk.tag}");
-      return fileOnDisk;
+    if (!forcedUpload) {
+      final fileOnDisk = await FilesDB.instance.getFile(file.generatedID!);
+      final wasAlreadyUploaded = fileOnDisk != null &&
+          fileOnDisk.uploadedFileID != null &&
+          (fileOnDisk.updationTime ?? -1) != -1 &&
+          (fileOnDisk.collectionID ?? -1) == collectionID;
+      if (wasAlreadyUploaded) {
+        debugPrint("File is already uploaded ${fileOnDisk.tag}");
+        return fileOnDisk;
+      }
     }
     if ((file.localID ?? '') == '') {
       _logger.severe('Trying to upload file with missing localID');
@@ -330,15 +339,9 @@ class FileUploader {
     }
 
     final tempDirectory = Configuration.instance.getTempDirectory();
-    final encryptedFilePath = tempDirectory +
-        file.generatedID.toString() +
-        (_isBackground ? "_bg" : "") +
-        ".encrypted";
-    final encryptedThumbnailPath = tempDirectory +
-        file.generatedID.toString() +
-        "_thumbnail" +
-        (_isBackground ? "_bg" : "") +
-        ".encrypted";
+    final String uniqueID = const Uuid().v4().toString();
+    final encryptedFilePath = '$tempDirectory${uniqueID}_file.encrypted';
+    final encryptedThumbnailPath = '$tempDirectory${uniqueID}_thumb.encrypted';
     MediaUploadData? mediaUploadData;
     var uploadCompleted = false;
     // This flag is used to decide whether to clear the iOS origin file cache
@@ -391,6 +394,7 @@ class FileUploader {
       if (io.File(encryptedFilePath).existsSync()) {
         await io.File(encryptedFilePath).delete();
       }
+      await _checkIfWithinStorageLimit(mediaUploadData!.sourceFile!);
       final encryptedFile = io.File(encryptedFilePath);
       final EncryptionResult fileAttributes = await CryptoUtil.encryptFile(
         mediaUploadData!.sourceFile!.path,
@@ -590,7 +594,9 @@ class FileUploader {
         "\n existing: ${sameLocalSameCollection.tag}",
       );
       // should delete the fileToUploadEntry
-      await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
+      if (fileToUpload.generatedID != null) {
+        await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
+      }
 
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
@@ -619,7 +625,11 @@ class FileUploader {
         fileMissingLocal.uploadedFileID!,
         fileToUpload.localID!,
       );
-      await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
+      // For files selected from device, during collaborative upload, we don't
+      // insert entries in the FilesDB. So, we don't need to delete the entry
+      if (fileToUpload.generatedID != null) {
+        await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
+      }
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
           [fileToUpload],
@@ -690,6 +700,39 @@ class FileUploader {
       await io.File(encryptedThumbnailPath).delete();
     }
     await _uploadLocks.releaseLock(lockKey, _processType.toString());
+  }
+
+  /*
+  _checkIfWithinStorageLimit verifies if the file size for encryption and upload
+   is within the storage limit. It throws StorageLimitExceededError if the limit
+    is exceeded. This check is best effort and may not be completely accurate
+    due to UserDetail cache. It prevents infinite loops when clients attempt to
+    upload files that exceed the server's storage limit + buffer.
+    Note: Local storageBuffer is 20MB, server storageBuffer is 50MB, and an
+    additional 30MB is reserved for thumbnails and encryption overhead.
+   */
+  Future<void> _checkIfWithinStorageLimit(io.File fileToBeUploaded) async {
+    try {
+      final UserDetails? userDetails =
+          UserService.instance.getCachedUserDetails();
+      if (userDetails == null) {
+        return;
+      }
+      // add k20MBStorageBuffer to the free storage
+      final num freeStorage = userDetails.getFreeStorage() + k20MBStorageBuffer;
+      final num fileSize = await fileToBeUploaded.length();
+      if (fileSize > freeStorage) {
+        _logger.warning('Storage limit exceeded fileSize $fileSize and '
+            'freeStorage $freeStorage');
+        throw StorageLimitExceededError();
+      }
+    } catch (e) {
+      if (e is StorageLimitExceededError) {
+        rethrow;
+      } else {
+        _logger.severe('Error checking storage limit', e);
+      }
+    }
   }
 
   Future _onInvalidFileError(File file, InvalidFileError e) async {
@@ -848,7 +891,9 @@ class FileUploader {
 
   Future<UploadURL> _getUploadURL() async {
     if (_uploadURLs.isEmpty) {
-      await fetchUploadURLs(_queue.length);
+      // the queue is empty, fetch at least for one file to handle force uploads
+      // that are not in the queue. This is to also avoid
+      await fetchUploadURLs(max(_queue.length, 1));
     }
     try {
       return _uploadURLs.removeFirst();

@@ -11,6 +11,8 @@ const subTypeKey = 'subType';
 
 const muteKey = "mute";
 
+const orderKey = "order";
+
 class CollectionMagicMetadata {
   // 0 -> visible
   // 1 -> archived
@@ -22,12 +24,21 @@ class CollectionMagicMetadata {
   // 2 -> Collections created for sharing selected files
   int? subType;
 
-  CollectionMagicMetadata({required this.visibility, this.subType});
+  /* order is initially just used for pinned collections.
+  Later it can be used for custom sort order for if needed.
+  Higher the value, higher the preference of the collection to show up first.
+  */
+  int? order;
+
+  CollectionMagicMetadata({required this.visibility, this.subType, this.order});
 
   Map<String, dynamic> toJson() {
     final result = {magicKeyVisibility: visibility};
     if (subType != null) {
       result[subTypeKey] = subType!;
+    }
+    if (order != null) {
+      result[orderKey] = order!;
     }
     return result;
   }
@@ -43,6 +54,7 @@ class CollectionMagicMetadata {
     return CollectionMagicMetadata(
       visibility: map[magicKeyVisibility] ?? visibleVisibility,
       subType: map[subTypeKey],
+      order: map[orderKey],
     );
   }
 }

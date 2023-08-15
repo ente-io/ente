@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
+import "package:photos/db/files_db.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/remote_sync_service.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 
 class DeleteEmptyAlbums extends StatefulWidget {
-  const DeleteEmptyAlbums({Key? key}) : super(key: key);
+  final List<Collection> collections;
+  const DeleteEmptyAlbums(this.collections, {Key? key}) : super(key: key);
 
   @override
   State<DeleteEmptyAlbums> createState() => _DeleteEmptyAlbumsState();
@@ -26,10 +29,39 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
     super.dispose();
   }
 
+  Future<bool> _showDeleteButton() async {
+    if (!RemoteSyncService.instance.isFirstRemoteSyncDone()) {
+      return Future.value(false);
+    }
+    final Map<int, int> collectionIDToLatestTimeCount =
+        await CollectionsService.instance.getCollectionIDToNewestFileTime();
+    final emptyAlbumCount = widget.collections
+        .where((collection) {
+          final latestTimeCount = collectionIDToLatestTimeCount[collection.id];
+          return latestTimeCount == null;
+        })
+        .toList()
+        .length;
+    debugPrint("Empty albums count $emptyAlbumCount");
+    return emptyAlbumCount > 2;
+  }
+
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _showDeleteButton(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!) {
+          return _buildDeleteButton();
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildDeleteButton() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 2, 8, 12),
+      padding: const EdgeInsets.fromLTRB(8.5, 4, 8, 12),
       child: Align(
         alignment: Alignment.centerLeft,
         child: ButtonWidget(
@@ -88,12 +120,13 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
   }
 
   Future<void> _deleteEmptyAlbums() async {
-    final collections =
-        await CollectionsService.instance.getCollectionsWithThumbnails();
+    final collections = CollectionsService.instance.getCollectionsForUI();
+    final idToFileTimeStamp =
+        await FilesDB.instance.getCollectionIDToMaxCreationTime();
+
     // remove collections which are not empty or can't be deleted
     collections.removeWhere(
-      (element) =>
-          element.thumbnail != null || !element.collection.type.canDelete,
+      (c) => !c.type.canDelete || idToFileTimeStamp.containsKey(c.id),
     );
     int failedCount = 0;
     for (int i = 0; i < collections.length; i++) {
@@ -105,7 +138,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
             S.of(context).deleteProgress(currentlyDeleting, collections.length);
         try {
           await CollectionsService.instance.trashEmptyCollection(
-            collections[i].collection,
+            collections[i],
             isBulkDelete: true,
           );
         } catch (_) {

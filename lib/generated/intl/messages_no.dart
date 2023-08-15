@@ -34,16 +34,31 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Slett konto"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
             "Vi er lei oss for at du forlater oss. Gi oss gjerne en tilbakemelding så vi kan forbedre oss."),
+        "deleteReason2": MessageLookupByLibrary.simpleMessage(
+            "The app or a certain feature does not behave as I think it should"),
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Vennligst skriv inn en gyldig e-postadresse."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Skriv inn e-postadressen din"),
+        "failedToDownloadVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Ugyldig e-postadresse"),
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Vær vennlig og hjelp oss med denne informasjonen"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
+        "nothingSharedWithYouYet":
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
+        "shareYourFirstAlbum":
+            MessageLookupByLibrary.simpleMessage("Share your first album"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "verify": MessageLookupByLibrary.simpleMessage("Bekreft")
       };
 }

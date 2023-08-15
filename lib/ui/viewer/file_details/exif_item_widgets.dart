@@ -4,7 +4,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/inline_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/viewer/file/exif_info_dialog.dart";
 import "package:photos/utils/toast_util.dart";
@@ -15,7 +14,7 @@ class BasicExifItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitleTextTheme = getEnteTextTheme(context).smallMuted;
+    final subtitleTextTheme = getEnteTextTheme(context).miniMuted;
     return InfoItemWidget(
       key: const ValueKey("Basic EXIF"),
       leadingIcon: Icons.camera_outlined,
@@ -46,7 +45,7 @@ class BasicExifItemWidget extends StatelessWidget {
   }
 }
 
-class AllExifItemWidget extends StatelessWidget {
+class AllExifItemWidget extends StatefulWidget {
   final File file;
   final Map<String, IfdTag>? exif;
   const AllExifItemWidget(
@@ -56,19 +55,32 @@ class AllExifItemWidget extends StatelessWidget {
   });
 
   @override
+  State<AllExifItemWidget> createState() => _AllExifItemWidgetState();
+}
+
+class _AllExifItemWidgetState extends State<AllExifItemWidget> {
+  VoidCallback? _onTap;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return InfoItemWidget(
       leadingIcon: Icons.text_snippet_outlined,
       title: S.of(context).exif,
-      subtitleSection: _exifButton(context, file, exif),
+      subtitleSection: _exifButton(context, widget.file, widget.exif),
+      onTap: _onTap,
     );
   }
 
-  Future<List<InlineButtonWidget>> _exifButton(
+  Future<List<Widget>> _exifButton(
     BuildContext context,
     File file,
     Map<String, IfdTag>? exif,
-  ) {
+  ) async {
     late final String label;
     late final VoidCallback? onTap;
     if (exif == null) {
@@ -88,11 +100,11 @@ class AllExifItemWidget extends StatelessWidget {
       onTap =
           () => showShortToast(context, S.of(context).thisImageHasNoExifData);
     }
+    setState(() {
+      _onTap = onTap;
+    });
     return Future.value([
-      InlineButtonWidget(
-        label,
-        onTap,
-      )
+      Text(label, style: getEnteTextTheme(context).miniBoldMuted),
     ]);
   }
 }

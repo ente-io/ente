@@ -13,6 +13,7 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
+import "package:photos/ui/viewer/gallery/empty_album_state.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -36,7 +37,7 @@ class CollectionPage extends StatelessWidget {
   final GlobalKey shareButtonKey = GlobalKey();
 
   @override
-  Widget build(Object context) {
+  Widget build(BuildContext context) {
     if (hasVerifiedLock == false && c.collection.isHidden()) {
       return const EmptyState();
     }
@@ -84,6 +85,9 @@ class CollectionPage extends StatelessWidget {
       albumName: c.collection.displayName,
       sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
       showSelectAllByDefault: galleryType != GalleryType.sharedCollection,
+      emptyState: galleryType == GalleryType.ownedCollection
+          ? EmptyAlbumState(c.collection)
+          : const EmptyState(),
     );
     return Scaffold(
       appBar: PreferredSize(
@@ -120,6 +124,8 @@ class CollectionPage extends StatelessWidget {
       return GalleryType.uncategorized;
     } else if (c.type == CollectionType.favorites) {
       return GalleryType.favorite;
+    } else if (c.isQuickLinkCollection()) {
+      return GalleryType.quickLink;
     }
     return appBarType;
   }

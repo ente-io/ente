@@ -18,7 +18,7 @@
   "yourAccountHasBeenDeleted": "您的账户已删除",
   "selectReason": "选择原因",
   "deleteReason1": "找不到我想要的功能",
-  "deleteReason2": "应用或某个功能不会有 \n行为。我认为它应该有的",
+  "deleteReason2": "应用或某个功能不会有 行为。我认为它应该有的",
   "deleteReason3": "我找到了另一个我喜欢更好的服务",
   "deleteReason4": "我的原因未被列出",
   "sendEmail": "发送电子邮件",
@@ -694,16 +694,6 @@
   "addToAlbum": "添加到相册",
   "delete": "删除",
   "hide": "隐藏",
-  "itemSelectedCount": "已选择 {count} 个",
-  "@itemSelectedCount": {
-    "description": "Text to indicate number of items selected",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "share": "分享",
   "unhideToAlbum": "取消隐藏到相册",
   "restoreToAlbum": "恢复到相册",
@@ -1042,5 +1032,11 @@
   "iOSOkButton": "好的",
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
-  }
+  },
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet",
+  "sharedWithYou": "Shared with you",
+  "sharedByYou": "Shared by you",
+  "inviteYourFriendsToEnte": "Invite your friends to ente",
+  "failedToDownloadVideo": "Failed to download video"
 }

@@ -3,10 +3,13 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/events/collection_meta_event.dart";
+import "package:photos/events/collection_updated_event.dart";
+import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
+import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/services/collections_service.dart';
@@ -98,6 +101,52 @@ Future<void> changeSortOrder(
     );
   } catch (e, s) {
     _logger.severe("failed to update collection visibility", e, s);
+    showShortToast(context, S.of(context).somethingWentWrong);
+    rethrow;
+  }
+}
+
+Future<void> updateOrder(
+  BuildContext context,
+  Collection collection,
+  int order,
+) async {
+  try {
+    final Map<String, dynamic> update = {
+      orderKey: order,
+    };
+    await CollectionsService.instance.updateMagicMetadata(collection, update);
+    Bus.instance.fire(
+      CollectionMetaEvent(collection.id, CollectionMetaEventType.orderChanged),
+    );
+  } catch (e, s) {
+    _logger.severe("failed to update order", e, s);
+    showShortToast(context, S.of(context).somethingWentWrong);
+    rethrow;
+  }
+}
+
+// changeCoverPhoto is used to change cover photo for a collection. To reset to
+// default cover photo, pass uploadedFileID as 0
+Future<void> changeCoverPhoto(
+  BuildContext context,
+  Collection collection,
+  int uploadedFileID,
+) async {
+  try {
+    final Map<String, dynamic> update = {"coverID": uploadedFileID};
+    await CollectionsService.instance
+        .updatePublicMagicMetadata(collection, update);
+    Bus.instance.fire(
+      CollectionUpdatedEvent(
+        collection.id,
+        <File>[],
+        "cover_change",
+        type: EventType.coverChanged,
+      ),
+    );
+  } catch (e, s) {
+    _logger.severe("failed to update cover", e, s);
     showShortToast(context, S.of(context).somethingWentWrong);
     rethrow;
   }

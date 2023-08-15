@@ -10,11 +10,13 @@ class OTTVerificationPage extends StatefulWidget {
   final String email;
   final bool isChangeEmail;
   final bool isCreateAccountScreen;
+  final bool isResetPasswordScreen;
 
   const OTTVerificationPage(
     this.email, {
     this.isChangeEmail = false,
     this.isCreateAccountScreen = false,
+        this.isResetPasswordScreen = false,
     Key? key,
   }) : super(key: key);
 
@@ -77,7 +79,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             );
           } else {
             UserService.instance
-                .verifyEmail(context, _verificationCodeController.text);
+                .verifyEmail(context, _verificationCodeController.text,
+              isResettingPasswordScreen: widget.isResetPasswordScreen,);
           }
           FocusScope.of(context).unfocus();
         },
@@ -127,6 +130,14 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                             },
                           ),
                         ),
+                        widget.isResetPasswordScreen ?
+                          Text(
+                            S.of(context).toResetVerifyEmail,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(fontSize: 14),
+                          ):
                         Text(
                           S.of(context).checkInboxAndSpamFolder,
                           style: Theme.of(context)
@@ -181,6 +192,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                         context,
                         widget.email,
                         isCreateAccountScreen: widget.isCreateAccountScreen,
+                        isResetPasswordScreen: widget.isResetPasswordScreen,
+                        isChangeEmail: widget.isChangeEmail,
                       );
                     },
                     child: Text(

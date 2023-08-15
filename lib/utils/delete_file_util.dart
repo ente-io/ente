@@ -339,9 +339,18 @@ Future<bool> deleteLocalFiles(
   }
   // In IOS, the library returns no error and fail to delete any file is
   // there's any shared file. As a stop-gap solution, we initiate deletion in
-  // batches
-  if (Platform.isIOS && deletedIDs.isEmpty) {
-    deletedIDs.addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
+  // batches. Similar in Android, for large number of files, we have observed
+  // that the library fails to delete any file. So, we initiate deletion in
+  // batches.
+  if (deletedIDs.isEmpty) {
+    deletedIDs.addAll(
+      await deleteLocalFilesInBatches(
+        context,
+        localAssetIDs,
+        maximumBatchSize: 1000,
+        minimumBatchSize: 10,
+      ),
+    );
     _logger
         .severe("iOS free-space fallback, deleted ${deletedIDs.length} files "
             "in batches}");
@@ -386,8 +395,11 @@ Future<List<String>> _deleteLocalFilesInOneShot(
 
 Future<List<String>> deleteLocalFilesInBatches(
   BuildContext context,
-  List<String> localIDs,
-) async {
+  List<String> localIDs, {
+  int minimumParts = 10,
+  int minimumBatchSize = 1,
+  int maximumBatchSize = 100,
+}) async {
   final dialogKey = GlobalKey<LinearProgressDialogState>();
   final dialog = LinearProgressDialog(
     "Deleting " + localIDs.length.toString() + " backed up files...",
@@ -400,9 +412,6 @@ Future<List<String>> deleteLocalFilesInBatches(
     },
     barrierColor: Colors.black.withOpacity(0.85),
   );
-  const minimumParts = 10;
-  const minimumBatchSize = 1;
-  const maximumBatchSize = 100;
   final batchSize = min(
     max(minimumBatchSize, (localIDs.length / minimumParts).round()),
     maximumBatchSize,

@@ -6,35 +6,49 @@ import 'package:photos/models/file.dart';
 
 class SelectedFiles extends ChangeNotifier {
   final files = <File>{};
-  final lastSelections = <File>{};
 
-  void toggleSelection(File file) {
+  ///This variable is used to track the files that were involved in last selection
+  ///operation (select/unselect). Each [LazyGridView] checks this variable on
+  ///change in [SelectedFiles] to see if any of it's files were involved in last
+  ///select/unselect operation. If yes, then it will rebuild itself.
+  final lastSelectionOperationFiles = <File>{};
+
+  void toggleSelection(File fileToToggle) {
     // To handle the cases, where the file might have changed due to upload
     // or any other update, using file.generatedID to track if this file was already
     // selected or not
     final File? alreadySelected = files.firstWhereOrNull(
-      (element) => _isMatch(file, element),
+      (element) => _isMatch(fileToToggle, element),
     );
     if (alreadySelected != null) {
       files.remove(alreadySelected);
     } else {
-      files.add(file);
+      files.add(fileToToggle);
     }
-    lastSelections.clear();
-    lastSelections.add(file);
+    lastSelectionOperationFiles.clear();
+    lastSelectionOperationFiles.add(fileToToggle);
     notifyListeners();
   }
 
-  void selectAll(Set<File> selectedFiles) {
-    files.addAll(selectedFiles);
-    lastSelections.clear();
-    lastSelections.addAll(selectedFiles);
+  void toggleGroupSelection(Set<File> filesToToggle) {
+    if (files.containsAll(filesToToggle)) {
+      unSelectAll(filesToToggle);
+    } else {
+      selectAll(filesToToggle);
+    }
+  }
+
+  void selectAll(Set<File> filesToSelect) {
+    files.addAll(filesToSelect);
+    lastSelectionOperationFiles.clear();
+    lastSelectionOperationFiles.addAll(filesToSelect);
     notifyListeners();
   }
 
-  void unSelectAll(Set<File> selectedFiles, {bool skipNotify = false}) {
-    files.removeWhere((file) => selectedFiles.contains(file));
-    lastSelections.clear();
+  void unSelectAll(Set<File> filesToUnselect, {bool skipNotify = false}) {
+    files.removeWhere((file) => filesToUnselect.contains(file));
+    lastSelectionOperationFiles.clear();
+    lastSelectionOperationFiles.addAll(filesToUnselect);
     if (!skipNotify) {
       notifyListeners();
     }
@@ -48,7 +62,7 @@ class SelectedFiles extends ChangeNotifier {
   }
 
   bool isPartOfLastSelected(File file) {
-    final File? matchedFile = lastSelections.firstWhereOrNull(
+    final File? matchedFile = lastSelectionOperationFiles.firstWhereOrNull(
       (element) => _isMatch(file, element),
     );
     return matchedFile != null;
@@ -67,8 +81,15 @@ class SelectedFiles extends ChangeNotifier {
 
   void clearAll() {
     Bus.instance.fire(ClearSelectionsEvent());
-    lastSelections.addAll(files);
+    lastSelectionOperationFiles.addAll(files);
     files.clear();
+    notifyListeners();
+  }
+
+  ///Retains only the files that are present in the [filesToRetain] set in
+  ///[files]. Takes the intersection of the two sets.
+  void retainFiles(Set<File> filesToRetain) {
+    files.retainAll(filesToRetain);
     notifyListeners();
   }
 }

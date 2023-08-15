@@ -9,6 +9,7 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/filter/db_filters.dart";
 import "package:photos/ui/collections/album/horizontal_list.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/empty_state.dart";
@@ -41,7 +42,11 @@ class ArchivePage extends StatelessWidget {
           visibility: archiveVisibility,
           limit: limit,
           asc: asc,
-          ignoredCollectionIDs: hiddenCollectionIDs,
+          filterOptions: DBFilterOptions(
+            hideIgnoredForUpload: true,
+            dedupeUploadID: true,
+            ignoredCollectionIDs: hiddenCollectionIDs,
+          ),
           applyOwnerCheck: true,
         );
       },
@@ -69,7 +74,7 @@ class ArchivePage extends StatelessWidget {
         text: S.of(context).youDontHaveAnyArchivedItems,
       ),
       header: AlbumHorizontalList(
-        CollectionsService.instance.getArchivedCollectionWithThumb,
+        CollectionsService.instance.getArchivedCollection,
       ),
     );
     return Scaffold(

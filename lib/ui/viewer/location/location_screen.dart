@@ -13,7 +13,7 @@ import "package:photos/models/file_load_result.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/files_service.dart";
+import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/colors.dart";
@@ -134,23 +134,24 @@ class LocationGalleryWidget extends StatefulWidget {
 
 class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
-  late Future<void> removeIgnoredFiles;
+
   late Widget galleryHeaderWidget;
   final _selectedFiles = SelectedFiles();
   @override
   void initState() {
     final collectionsToHide =
-        CollectionsService.instance.collectionsHiddenFromTimeline();
+        CollectionsService.instance.archivedOrHiddenCollections();
     fileLoadResult =
         FilesDB.instance.fetchAllUploadedAndSharedFilesWithLocation(
       galleryLoadStartTime,
       galleryLoadEndTime,
       limit: null,
       asc: false,
-      ignoredCollectionIDs: collectionsToHide,
+      filterOptions: DBFilterOptions(
+        ignoredCollectionIDs: collectionsToHide,
+        hideIgnoredForUpload: true,
+      ),
     );
-    removeIgnoredFiles =
-        FilesService.instance.removeIgnoredFiles(fileLoadResult);
     galleryHeaderWidget = const GalleryHeaderWidget();
     super.initState();
   }
@@ -172,7 +173,6 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
       //wait for ignored files to be removed after init
-      await removeIgnoredFiles;
       final stopWatch = Stopwatch()..start();
       final copyOfFiles = List<File>.from(result.files);
       copyOfFiles.removeWhere((f) {
@@ -203,6 +203,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Stack(
+            alignment: Alignment.bottomCenter,
             children: [
               Gallery(
                 loadingWidget: Column(

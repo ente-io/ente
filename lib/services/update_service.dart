@@ -16,7 +16,7 @@ class UpdateService {
   static final UpdateService instance = UpdateService._privateConstructor();
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
-  static const currentChangeLogVersion = 10;
+  static const currentChangeLogVersion = 11;
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
@@ -126,6 +126,13 @@ class UpdateService {
       return false;
     }
     return _packageInfo.packageName.startsWith("io.ente.photos.fdroid");
+  }
+
+  bool isPlayStoreFlavor() {
+    if (Platform.isIOS) {
+      return false;
+    }
+    return !isIndependentFlavor() && !isFdroidFlavor();
   }
 
   // getRateDetails returns details about the place

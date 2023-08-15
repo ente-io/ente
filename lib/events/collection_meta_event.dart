@@ -12,5 +12,6 @@ enum CollectionMetaEventType {
   deleted,
   archived,
   sortChanged,
+  orderChanged,
   thumbnailChanged,
 }

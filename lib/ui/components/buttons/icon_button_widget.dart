@@ -16,6 +16,7 @@ class IconButtonWidget extends StatefulWidget {
   final Color? defaultColor;
   final Color? pressedColor;
   final Color? iconColor;
+  final double size;
   const IconButtonWidget({
     required this.icon,
     required this.iconButtonType,
@@ -24,6 +25,7 @@ class IconButtonWidget extends StatefulWidget {
     this.defaultColor,
     this.pressedColor,
     this.iconColor,
+    this.size = 24,
     super.key,
   });
 
@@ -68,7 +70,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
         duration: const Duration(milliseconds: 20),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(widget.size),
           color: iconStateColor,
         ),
         child: Icon(
@@ -77,7 +79,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
               (widget.iconButtonType == IconButtonType.secondary
                   ? colorTheme.strokeMuted
                   : colorTheme.strokeBase),
-          size: 24,
+          size: widget.size,
         ),
       ),
     );

@@ -193,7 +193,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = const PasswordEntryPage();
+        page =  const PasswordEntryPage(mode: PasswordEntryMode.set,);
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
         page = const PasswordReentryPage();
@@ -220,7 +220,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = const PasswordEntryPage();
+        page =  const PasswordEntryPage(mode: PasswordEntryMode.set,);
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
         page = const PasswordReentryPage();
@@ -293,11 +293,13 @@ class FeatureItemWidget extends StatelessWidget {
             Text(
               featureTitleFirstLine,
               style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
             ),
             const Padding(padding: EdgeInsets.all(2)),
             Text(
               featureTitleSecondLine,
               style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
             ),
             const Padding(padding: EdgeInsets.all(12)),
             Text(

@@ -8,7 +8,6 @@ import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
-import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -32,6 +31,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import "package:tuple/tuple.dart";
 import 'package:uuid/uuid.dart';
 import 'package:wakelock/wakelock.dart';
 
@@ -43,6 +43,7 @@ class Configuration {
     "endpoint",
     defaultValue: kDefaultProductionEndpoint,
   );
+
   static const emailKey = "email";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyAttributesKey = "key_attributes";
@@ -57,7 +58,6 @@ class Configuration {
   static const keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
-  static const nameKey = "name";
   static const secretKeyKey = "secret_key";
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
@@ -201,6 +201,7 @@ class Configuration {
       utf8.encode(password) as Uint8List,
       kekSalt,
     );
+    final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
     final encryptedKeyData =
@@ -230,10 +231,12 @@ class Configuration {
       CryptoUtil.bin2hex(recoveryKey),
       CryptoUtil.bin2base64(keyPair.sk),
     );
-    return KeyGenResult(attributes, privateAttributes);
+    return KeyGenResult(attributes, privateAttributes, loginKey);
   }
 
-  Future<KeyAttributes> updatePassword(String password) async {
+  Future<Tuple2<KeyAttributes, Uint8List>> getAttributesForNewPassword(
+    String password,
+  ) async {
     // Get master key
     final masterKey = getKey();
 
@@ -244,6 +247,7 @@ class Configuration {
       utf8.encode(password) as Uint8List,
       kekSalt,
     );
+    final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
     final encryptedKeyData =
@@ -251,16 +255,21 @@ class Configuration {
 
     final existingAttributes = getKeyAttributes();
 
-    return existingAttributes!.copyWith(
+    final updatedAttributes = existingAttributes!.copyWith(
       kekSalt: CryptoUtil.bin2base64(kekSalt),
       encryptedKey: CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
       keyDecryptionNonce: CryptoUtil.bin2base64(encryptedKeyData.nonce!),
       memLimit: derivedKeyResult.memLimit,
       opsLimit: derivedKeyResult.opsLimit,
     );
+    return Tuple2(updatedAttributes, loginKey);
   }
 
-  Future<void> decryptAndSaveSecrets(
+  // decryptSecretsAndGetLoginKey decrypts the master key and recovery key
+  // with the given password and save them in local secure storage.
+  // This method also returns the keyEncKey that can be used for performing
+  // SRP setup for existing users.
+  Future<Uint8List> decryptSecretsAndGetKeyEncKey(
     String password,
     KeyAttributes attributes,
   ) async {
@@ -271,22 +280,19 @@ class Configuration {
     );
     // Derive key-encryption-key from the entered password and existing
     // mem and ops limits
-    final kek = await CryptoUtil.deriveKey(
+    final keyEncryptionKey = await CryptoUtil.deriveKey(
       utf8.encode(password) as Uint8List,
       CryptoUtil.base642bin(attributes.kekSalt),
       attributes.memLimit!,
       attributes.opsLimit!,
-    ).onError((e, s) {
-      _logger.severe('key derivation failed', e, s);
-      throw KeyDerivationError();
-    });
+    );
 
     Uint8List key;
     try {
       // Decrypt the master key with the derived key
       key = CryptoUtil.decryptSync(
         CryptoUtil.base642bin(attributes.encryptedKey),
-        kek,
+        keyEncryptionKey,
         CryptoUtil.base642bin(attributes.keyDecryptionNonce),
       );
     } catch (e) {
@@ -308,6 +314,7 @@ class Configuration {
     await setToken(
       CryptoUtil.bin2base64(token, urlSafe: true),
     );
+    return keyEncryptionKey;
   }
 
   Future<KeyAttributes> createNewRecoveryKey() async {
@@ -407,14 +414,6 @@ class Configuration {
 
   Future<void> setEmail(String email) async {
     await _preferences.setString(emailKey, email);
-  }
-
-  String? getName() {
-    return _preferences.getString(nameKey);
-  }
-
-  Future<void> setName(String name) async {
-    await _preferences.setString(nameKey, name);
   }
 
   int? getUserID() {

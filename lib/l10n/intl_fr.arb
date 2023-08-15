@@ -18,7 +18,7 @@
   "yourAccountHasBeenDeleted": "Votre compte a été supprimé",
   "selectReason": "Sélectionner une raison",
   "deleteReason1": "Il manque une fonction clé dont j'ai besoin",
-  "deleteReason2": "L'application ou une certaine fonctionnalité ne se comporte pas \ncomme je pense qu'elle devrait",
+  "deleteReason2": "L'application ou une certaine fonctionnalité ne se comporte pas comme je pense qu'elle devrait",
   "deleteReason3": "J'ai trouvé un autre service que je préfère",
   "deleteReason4": "Ma raison n'est pas listée",
   "sendEmail": "Envoyer un e-mail",
@@ -598,16 +598,6 @@
   "addToAlbum": "Ajouter à l'album",
   "delete": "Supprimer",
   "hide": "Masquer",
-  "itemSelectedCount": "{count} sélectionné",
-  "@itemSelectedCount": {
-    "description": "Text to indicate number of items selected",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "share": "Partager",
   "unhideToAlbum": "Afficher dans l'album",
   "restoreToAlbum": "Restaurer vers l'album",
@@ -726,5 +716,12 @@
   "didYouKnow": "Le savais-tu ?",
   "loadingMessage": "Chargement de vos photos...",
   "language": "Langue",
-  "edit": "Éditer"
+  "edit": "Éditer",
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "shareYourFirstAlbum": "Share your first album",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet",
+  "sharedWithYou": "Shared with you",
+  "sharedByYou": "Shared by you",
+  "inviteYourFriendsToEnte": "Invite your friends to ente",
+  "failedToDownloadVideo": "Failed to download video"
 }

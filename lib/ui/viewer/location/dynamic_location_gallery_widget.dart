@@ -7,7 +7,7 @@ import "package:photos/db/files_db.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/files_service.dart";
+import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import 'package:photos/states/location_state.dart';
 import "package:photos/ui/viewer/gallery/gallery.dart";
@@ -32,23 +32,24 @@ class DynamicLocationGalleryWidget extends StatefulWidget {
 class _DynamicLocationGalleryWidgetState
     extends State<DynamicLocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
-  late Future<void> removeIgnoredFiles;
   double heightOfGallery = 0;
 
   @override
   void initState() {
     final collectionsToHide =
-        CollectionsService.instance.collectionsHiddenFromTimeline();
+        CollectionsService.instance.archivedOrHiddenCollections();
     fileLoadResult =
         FilesDB.instance.fetchAllUploadedAndSharedFilesWithLocation(
       galleryLoadStartTime,
       galleryLoadEndTime,
       limit: null,
       asc: false,
-      ignoredCollectionIDs: collectionsToHide,
+      filterOptions: DBFilterOptions(
+        ignoredCollectionIDs: collectionsToHide,
+        hideIgnoredForUpload: true,
+      ),
     );
-    removeIgnoredFiles =
-        FilesService.instance.removeIgnoredFiles(fileLoadResult);
+
     super.initState();
   }
 
@@ -58,8 +59,6 @@ class _DynamicLocationGalleryWidgetState
     final selectedRadius = InheritedLocationTagData.of(context).selectedRadius;
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
-      //wait for ignored files to be removed after init
-      await removeIgnoredFiles;
       final stopWatch = Stopwatch()..start();
       final copyOfFiles = List<File>.from(result.files);
       copyOfFiles.removeWhere((f) {

@@ -13,7 +13,7 @@ import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/ignored_files_service.dart";
+import "package:photos/services/filter/db_filters.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
@@ -93,7 +93,7 @@ class PickCenterPointWidget extends StatelessWidget {
                             }) async {
                               final collectionsToHide = CollectionsService
                                   .instance
-                                  .collectionsHiddenFromTimeline();
+                                  .archivedOrHiddenCollections();
                               FileLoadResult result;
                               result = await FilesDB.instance
                                   .fetchAllUploadedAndSharedFilesWithLocation(
@@ -101,17 +101,10 @@ class PickCenterPointWidget extends StatelessWidget {
                                 galleryLoadEndTime,
                                 limit: null,
                                 asc: false,
-                                ignoredCollectionIDs: collectionsToHide,
-                              );
-
-                              // hide ignored files from UI
-                              final ignoredIDs =
-                                  await IgnoredFilesService.instance.ignoredIDs;
-                              result.files.removeWhere(
-                                (f) =>
-                                    f.uploadedFileID == null &&
-                                    IgnoredFilesService.instance
-                                        .shouldSkipUpload(ignoredIDs, f),
+                                filterOptions: DBFilterOptions(
+                                  ignoredCollectionIDs: collectionsToHide,
+                                  hideIgnoredForUpload: true,
+                                ),
                               );
                               return result;
                             },

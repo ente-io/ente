@@ -18,12 +18,13 @@
   "yourAccountHasBeenDeleted": "Il tuo account è stato eliminato",
   "selectReason": "Seleziona un motivo",
   "deleteReason1": "Manca una caratteristica chiave di cui ho bisogno",
-  "deleteReason2": "L'app o una determinata funzionalità\nnon si comporta come dovrebbe",
+  "deleteReason2": "L'app o una determinata funzionalità non si comporta come dovrebbe",
   "deleteReason3": "Ho trovato un altro servizio che mi piace di più",
   "deleteReason4": "Il motivo non è elencato",
   "sendEmail": "Invia email",
   "deleteRequestSLAText": "La tua richiesta verrà elaborata entro 72 ore.",
   "deleteEmailRequest": "Invia un'email a <warning>account-deletion@ente.io</warning> dal tuo indirizzo email registrato.",
+  "entePhotosPerm": "ente <i>necessita del permesso per</i> preservare le tue foto",
   "ok": "Ok",
   "createAccount": "Crea account",
   "createNewAccount": "Crea un nuovo account",
@@ -48,6 +49,7 @@
   "sorry": "Siamo spiacenti",
   "noRecoveryKeyNoDecryption": "A causa della natura del nostro protocollo di crittografia end-to-end, i tuoi dati non possono essere decifrati senza password o chiave di ripristino",
   "verifyEmail": "Verifica email",
+  "toResetVerifyEmail": "Per reimpostare la tua password, verifica prima la tua email.",
   "checkInboxAndSpamFolder": "Per favore, controlla la tua casella di posta (e lo spam) per completare la verifica",
   "tapToEnterCode": "Tocca per inserire il codice",
   "resendEmail": "Rinvia email",
@@ -417,6 +419,22 @@
   "skip": "Salta",
   "updatingFolderSelection": "Aggiornamento della selezione delle cartelle...",
   "itemCount": "{count, plural, one{{count} elemento} other{{count} elementi}}",
+  "deleteItemCount": "{count, plural, one {}=1 {Elimina {count} elemento} other {Elimina {count} elementi}}",
+  "duplicateItemsGroup": "{count} file, {formattedSize} l'uno",
+  "@duplicateItemsGroup": {
+    "description": "Display the number of duplicate files and their size",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "formattedSize": {
+        "example": "2.3 MB",
+        "type": "String"
+      }
+    }
+  },
   "yearsAgo": "{count, plural, one{{count} anno fa} other{{count} anni fa}}",
   "backupSettings": "Impostazioni backup",
   "backupOverMobileData": "Backup su dati mobili",
@@ -435,6 +453,8 @@
   "authToChangeYourEmail": "Autenticati per cambiare la tua email",
   "changePassword": "Cambia password",
   "authToChangeYourPassword": "Autenticati per cambiare la tua password",
+  "emailVerificationToggle": "Verifica Email",
+  "authToChangeEmailVerificationSetting": "Autenticati per modificare la verifica email",
   "exportYourData": "Esporta dati",
   "logout": "Disconnetti",
   "authToInitiateAccountDeletion": "Autenticati per avviare l'eliminazione dell'account",
@@ -490,6 +510,9 @@
   },
   "familyPlans": "Piano famiglia",
   "referrals": "Invita un Amico",
+  "notifications": "Notifiche",
+  "sharedPhotoNotifications": "Nuove foto condivise",
+  "sharedPhotoNotificationsExplanation": "Ricevi notifiche quando qualcuno aggiunge una foto a un album condiviso, di cui fai parte",
   "advanced": "Avanzate",
   "general": "Generali",
   "security": "Sicurezza",
@@ -538,6 +561,7 @@
   "faqs": "FAQ",
   "renewsOn": "Si rinnova il {endDate}",
   "freeTrialValidTill": "La prova gratuita termina il {endDate}",
+  "playStoreFreeTrialValidTill": "Prova gratuita valida fino al {endDate}.\nPuoi scegliere un piano a pagamento in seguito.",
   "subWillBeCancelledOn": "L'abbonamento verrà cancellato il {endDate}",
   "subscription": "Abbonamento",
   "paymentDetails": "Dettagli di Pagamento",
@@ -695,16 +719,6 @@
   "addToAlbum": "Aggiungi all'album",
   "delete": "Cancella",
   "hide": "Nascondi",
-  "itemSelectedCount": "{count} selezionati",
-  "@itemSelectedCount": {
-    "description": "Text to indicate number of items selected",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "share": "Condividi",
   "unhideToAlbum": "Non nascondere l'album",
   "restoreToAlbum": "Ripristina l'album",
@@ -752,6 +766,11 @@
   },
   "deleteAll": "Elimina tutto",
   "renameAlbum": "Rinomina album",
+  "convertToAlbum": "Converti in album",
+  "setCover": "Imposta copertina",
+  "@setCover": {
+    "description": "Text to set cover photo for an album"
+  },
   "sortAlbumsBy": "Ordina per",
   "sortNewestFirst": "Prima le più nuove",
   "sortOldestFirst": "Prima le più vecchie",
@@ -951,6 +970,10 @@
   "centerPoint": "Punto centrale",
   "pickCenterPoint": "Selezionare il punto centrale",
   "useSelectedPhoto": "Usa la foto selezionata",
+  "resetToDefault": "Ripristina predefinita",
+  "@resetToDefault": {
+    "description": "Button text to reset cover photo to default"
+  },
   "edit": "Modifica",
   "deleteLocation": "Elimina posizione",
   "rotateLeft": "Ruota a sinistra",
@@ -1044,5 +1067,33 @@
   "iOSOkButton": "OK",
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
-  }
+  },
+  "openstreetmapContributors": "Collaboratori di OpenStreetMap",
+  "hostedAtOsmFrance": "Ospitato presso OSM France",
+  "map": "Mappa",
+  "@map": {
+    "description": "Label for the map view"
+  },
+  "maps": "Mappe",
+  "enableMaps": "Abilita le Mappe",
+  "enableMapsDesc": "Questo mostrerà le tue foto su una mappa del mondo.\n\nQuesta mappa è ospitata da Open Street Map e le posizioni esatte delle tue foto non sono mai condivise.\n\nPuoi disabilitare questa funzionalità in qualsiasi momento, dalle Impostazioni.",
+  "quickLinks": "Collegamenti rapidi",
+  "selectItemsToAdd": "Seleziona gli elementi da aggiungere",
+  "addSelected": "Aggiungi selezionate",
+  "addFromDevice": "Aggiungi dal dispositivo",
+  "addPhotos": "Aggiungi foto",
+  "noPhotosFoundHere": "Nessuna foto trovata",
+  "zoomOutToSeePhotos": "Zoom indietro per visualizzare le foto",
+  "noImagesWithLocation": "Nessuna immagine con posizione",
+  "unpinAlbum": "Non fissare album",
+  "pinAlbum": "Fissa l'album",
+  "create": "Crea",
+  "viewAll": "Visualizza tutte",
+  "nothingSharedWithYouYet": "Ancora nulla di condiviso con te",
+  "noAlbumsSharedByYouYet": "Ancora nessun album condiviso da te",
+  "sharedWithYou": "Condivise con te",
+  "sharedByYou": "Condivise da te",
+  "inviteYourFriendsToEnte": "Invita i tuoi amici a ente",
+  "failedToDownloadVideo": "Download del video non riuscito",
+  "crashReporting": "Segnalazione di crash"
 }

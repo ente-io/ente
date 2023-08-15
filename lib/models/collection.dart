@@ -13,6 +13,7 @@ class Collection {
   final String? keyDecryptionNonce;
   @Deprecated("Use collectionName instead")
   String? name;
+
   // encryptedName & nameDecryptionNonce will be null for collections
   // created before we started encrypting collection name
   final String? encryptedName;
@@ -28,6 +29,7 @@ class Collection {
   // un-encrypted. decryptName will be value either decrypted value for
   // encryptedName or name itself.
   String? decryptedName;
+
   // decryptedPath will be null for collections now owned by user, deleted
   // collections, && collections which don't have a path. The path is used
   // to map local on-device album on mobile to remote collection on ente.
@@ -95,8 +97,12 @@ class Collection {
   // including expired links
   bool get hasLink => publicURLs != null && publicURLs!.isNotEmpty;
 
+  bool get hasCover => (pubMagicMetadata.coverID ?? 0) > 0;
+
   // hasSharees returns true if the collection is shared with other ente users
   bool get hasSharees => sharees != null && sharees!.isNotEmpty;
+
+  bool get isPinned => (magicMetadata.order ?? 0) != 0;
 
   bool isHidden() {
     if (isDefaultHidden()) {
@@ -109,8 +115,9 @@ class Collection {
     return (magicMetadata.subType ?? 0) == subTypeDefaultHidden;
   }
 
-  bool isSharedFilesCollection() {
-    return (magicMetadata.subType ?? 0) == subTypeSharedFilesCollection;
+  bool isQuickLinkCollection() {
+    return (magicMetadata.subType ?? 0) == subTypeSharedFilesCollection &&
+        !hasSharees;
   }
 
   List<User> getSharees() {
@@ -128,6 +135,25 @@ class Collection {
 
   bool isOwner(int userID) {
     return (owner?.id ?? 0) == userID;
+  }
+
+  CollectionParticipantRole getRole(int userID) {
+    if (isOwner(userID)) {
+      return CollectionParticipantRole.owner;
+    }
+    if (sharees == null) {
+      return CollectionParticipantRole.unknown;
+    }
+    for (final User? u in sharees!) {
+      if (u != null && u.id == userID) {
+        if (u.isViewer) {
+          return CollectionParticipantRole.viewer;
+        } else if (u.isCollaborator) {
+          return CollectionParticipantRole.collaborator;
+        }
+      }
+    }
+    return CollectionParticipantRole.unknown;
   }
 
   // canLinkToDevicePath returns true if the collection can be linked to local

@@ -30,12 +30,13 @@ import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
 import 'package:photos/utils/toast_util.dart';
 
-class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
+class FadingAppBar extends StatefulWidget {
   final File file;
   final Function(File) onFileRemoved;
   final double height;
   final bool shouldShowActions;
   final int? userID;
+  final ValueNotifier<bool> enableFullScreenNotifier;
 
   const FadingAppBar(
     this.file,
@@ -43,11 +44,9 @@ class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.userID,
     this.height,
     this.shouldShowActions, {
+    required this.enableFullScreenNotifier,
     Key? key,
   }) : super(key: key);
-
-  @override
-  Size get preferredSize => Size.fromHeight(height);
 
   @override
   FadingAppBarState createState() => FadingAppBarState();
@@ -55,49 +54,39 @@ class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class FadingAppBarState extends State<FadingAppBar> {
   final _logger = Logger("FadingAppBar");
-  bool _shouldHide = false;
 
   @override
   Widget build(BuildContext context) {
     return CustomAppBar(
-      IgnorePointer(
-        ignoring: _shouldHide,
-        child: AnimatedOpacity(
-          opacity: _shouldHide ? 0 : 1,
-          duration: const Duration(milliseconds: 150),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withOpacity(0.72),
-                  Colors.black.withOpacity(0.6),
-                  Colors.transparent,
-                ],
-                stops: const [0, 0.2, 1],
+      ValueListenableBuilder(
+        valueListenable: widget.enableFullScreenNotifier,
+        builder: (context, bool isFullScreen, _) {
+          return IgnorePointer(
+            ignoring: isFullScreen,
+            child: AnimatedOpacity(
+              opacity: isFullScreen ? 0 : 1,
+              duration: const Duration(milliseconds: 150),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.72),
+                      Colors.black.withOpacity(0.6),
+                      Colors.transparent,
+                    ],
+                    stops: const [0, 0.2, 1],
+                  ),
+                ),
+                child: _buildAppBar(),
               ),
             ),
-            child: _buildAppBar(),
-          ),
-        ),
+          );
+        },
       ),
       Size.fromHeight(Platform.isAndroid ? 80 : 96),
     );
-  }
-
-  void hide() {
-    setState(() {
-      _shouldHide = true;
-    });
-  }
-
-  void show() {
-    if (mounted) {
-      setState(() {
-        _shouldHide = false;
-      });
-    }
   }
 
   AppBar _buildAppBar() {

@@ -20,7 +20,7 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'pl';
 
-  static String m15(passwordStrengthValue) =>
+  static String m31(passwordStrengthValue) =>
       "Siła hasła: ${passwordStrengthValue}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -66,7 +66,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "Brakuje kluczowej funkcji, której potrzebuję"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
-            "Aplikacja lub określona funkcja nie \nzachowuje się tak, jak sądzę, że powinna"),
+            "Aplikacja lub określona funkcja nie zachowuje się tak, jak sądzę, że powinna"),
         "deleteReason3": MessageLookupByLibrary.simpleMessage(
             "Znalazłem inną, lepszą usługę"),
         "deleteReason4": MessageLookupByLibrary.simpleMessage(
@@ -89,6 +89,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Wprowadź hasło"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Wprowadź swój klucz odzyskiwania"),
+        "failedToDownloadVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "feedback": MessageLookupByLibrary.simpleMessage("Informacja zwrotna"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Nie pamiętam hasła"),
@@ -103,20 +105,26 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nieprawidłowy klucz odzyskiwania"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Nieprawidłowy adres e-mail"),
+        "inviteYourFriendsToEnte":
+            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "kindlyHelpUsWithThisInformation":
             MessageLookupByLibrary.simpleMessage("Pomóż nam z tą informacją"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Umiarkowana"),
+        "noAlbumsSharedByYouYet":
+            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Brak klucza odzyskiwania?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "Ze względu na charakter naszego protokołu szyfrowania end-to-end, dane nie mogą być odszyfrowane bez hasła lub klucza odzyskiwania"),
+        "nothingSharedWithYouYet":
+            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "password": MessageLookupByLibrary.simpleMessage("Hasło"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Hasło zostało pomyślnie zmienione"),
-        "passwordStrength": m15,
+        "passwordStrength": m31,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Nie przechowujemy tego hasła, więc jeśli go zapomnisz, <underline>nie będziemy w stanie odszyfrować Twoich danych</underline>"),
         "pleaseTryAgain":
@@ -143,6 +151,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectReason": MessageLookupByLibrary.simpleMessage("Wybierz powód"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Wyślij e-mail"),
         "setPasswordTitle": MessageLookupByLibrary.simpleMessage("Ustaw hasło"),
+        "shareYourFirstAlbum":
+            MessageLookupByLibrary.simpleMessage("Share your first album"),
+        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
+        "sharedWithYou":
+            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Akceptuję <u-terms>warunki korzystania z usługi</u-terms> i <u-policy>politykę prywatności</u-policy>"),
         "somethingWentWrongPleaseTryAgain":

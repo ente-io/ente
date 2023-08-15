@@ -86,7 +86,7 @@ class MemoriesService extends ChangeNotifier {
       durations.add([startCreationTime, endCreationTime]);
     }
     final ignoredCollections =
-        CollectionsService.instance.collectionsHiddenFromTimeline();
+        CollectionsService.instance.archivedOrHiddenCollections();
     final files = await _filesDB.getFilesCreatedWithinDurations(
       durations,
       ignoredCollections,

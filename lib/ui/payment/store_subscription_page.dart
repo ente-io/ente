@@ -13,6 +13,7 @@ import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
+import "package:photos/services/update_service.dart";
 import 'package:photos/services/user_service.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -405,7 +406,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               ],
             ),
           ),
-          _isFreePlanUser()
+          _isFreePlanUser() && !UpdateService.instance.isPlayStoreFlavor()
               ? Text(
                   S.of(context).twoMonthsFreeOnYearlyPlans,
                   style: getEnteTextTheme(context).miniMuted,

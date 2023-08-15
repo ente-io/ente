@@ -9,9 +9,11 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
+import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/files_service.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/video_controls.dart';
+import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:video_player/video_player.dart';
@@ -40,7 +42,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   final _logger = Logger("VideoWidget");
   VideoPlayerController? _videoPlayerController;
   ChewieController? _chewieController;
-  double? _progress;
+  final _progressNotifier = ValueNotifier<double?>(null);
   bool _isPlaying = false;
   bool _wakeLockEnabledHere = false;
 
@@ -91,30 +93,26 @@ class _VideoWidgetState extends State<VideoWidget> {
     getFileFromServer(
       widget.file,
       progressCallback: (count, total) {
-        if (mounted) {
-          setState(() {
-            _progress = count / (widget.file.fileSize ?? total);
-            if (_progress == 1) {
-              showShortToast(context, S.of(context).decryptingVideo);
-            }
-          });
+        _progressNotifier.value = count / (widget.file.fileSize ?? total);
+        if (_progressNotifier.value == 1) {
+          if (mounted) {
+            showShortToast(context, S.of(context).decryptingVideo);
+          }
         }
       },
     ).then((file) {
       if (file != null) {
         _setVideoPlayerController(file: file);
       }
+    }).onError((error, stackTrace) {
+      showErrorDialog(context, "Error", S.of(context).failedToDownloadVideo);
     });
   }
 
   @override
   void dispose() {
-    if (_videoPlayerController != null) {
-      _videoPlayerController!.dispose();
-    }
-    if (_chewieController != null) {
-      _chewieController!.dispose();
-    }
+    _videoPlayerController?.dispose();
+    _chewieController?.dispose();
     if (_wakeLockEnabledHere) {
       unawaited(
         Wakelock.enabled.then((isEnabled) {
@@ -135,12 +133,30 @@ class _VideoWidgetState extends State<VideoWidget> {
     } else {
       videoPlayerController = VideoPlayerController.file(file!);
     }
-    return _videoPlayerController = videoPlayerController
+
+    debugPrint("videoPlayerController: $videoPlayerController");
+    _videoPlayerController = videoPlayerController
       ..initialize().whenComplete(() {
         if (mounted) {
           setState(() {});
         }
-      });
+      }).onError(
+        (error, stackTrace) {
+          if (mounted &&
+              FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+            if (error is Exception) {
+              showErrorDialogForException(
+                context: context,
+                exception: error,
+                message: "Failed to play video\n ${error.toString()}",
+              );
+            } else {
+              showToast(context, "Failed to play video");
+            }
+          }
+        },
+      );
+    return videoPlayerController;
   }
 
   @override
@@ -181,18 +197,23 @@ class _VideoWidgetState extends State<VideoWidget> {
         ),
         Center(
           child: SizedBox.fromSize(
-            size: const Size.square(30),
-            child: _progress == null || _progress == 1
-                ? const CupertinoActivityIndicator(
-                    color: Colors.white,
-                  )
-                : CircularProgressIndicator(
-                    backgroundColor: Colors.black,
-                    value: _progress,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      Color.fromRGBO(45, 194, 98, 1.0),
-                    ),
-                  ),
+            size: const Size.square(20),
+            child: ValueListenableBuilder(
+              valueListenable: _progressNotifier,
+              builder: (BuildContext context, double? progress, _) {
+                return progress == null || progress == 1
+                    ? const CupertinoActivityIndicator(
+                        color: Colors.white,
+                      )
+                    : CircularProgressIndicator(
+                        backgroundColor: Colors.black,
+                        value: progress,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Color.fromRGBO(45, 194, 98, 1.0),
+                        ),
+                      );
+              },
+            ),
           ),
         ),
       ],

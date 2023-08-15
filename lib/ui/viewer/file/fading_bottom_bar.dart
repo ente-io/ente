@@ -20,12 +20,14 @@ class FadingBottomBar extends StatefulWidget {
   final Function(File) onFileRemoved;
   final bool showOnlyInfoButton;
   final int? userID;
+  final ValueNotifier<bool> enableFullScreenNotifier;
 
   const FadingBottomBar(
     this.file,
     this.onEditRequested,
     this.showOnlyInfoButton, {
     required this.onFileRemoved,
+    required this.enableFullScreenNotifier,
     this.userID,
     Key? key,
   }) : super(key: key);
@@ -35,24 +37,11 @@ class FadingBottomBar extends StatefulWidget {
 }
 
 class FadingBottomBarState extends State<FadingBottomBar> {
-  bool _shouldHide = false;
   final GlobalKey shareButtonKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     return _getBottomBar();
-  }
-
-  void hide() {
-    setState(() {
-      _shouldHide = true;
-    });
-  }
-
-  void show() {
-    setState(() {
-      _shouldHide = false;
-    });
   }
 
   void safeRefresh() {
@@ -155,60 +144,65 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       );
     }
     final safeAreaBottomPadding = MediaQuery.of(context).padding.bottom * .5;
-    return IgnorePointer(
-      ignoring: _shouldHide,
-      child: AnimatedOpacity(
-        opacity: _shouldHide ? 0 : 1,
-        duration: const Duration(milliseconds: 150),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.6),
-                  Colors.black.withOpacity(0.72),
-                ],
-                stops: const [0, 0.8, 1],
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsets.only(bottom: safeAreaBottomPadding),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  widget.file.caption?.isNotEmpty ?? false
-                      ? Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            16,
-                            28,
-                            16,
-                            12,
-                          ),
-                          child: Text(
-                            widget.file.caption!,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 4,
-                            style: getEnteTextTheme(context)
-                                .small
-                                .copyWith(color: textBaseDark),
-                            textAlign: TextAlign.center,
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: children,
+    return ValueListenableBuilder(
+      valueListenable: widget.enableFullScreenNotifier,
+      builder: (BuildContext context, bool isFullScreen, _) {
+        return IgnorePointer(
+          ignoring: isFullScreen,
+          child: AnimatedOpacity(
+            opacity: isFullScreen ? 0 : 1,
+            duration: const Duration(milliseconds: 150),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.6),
+                      Colors.black.withOpacity(0.72),
+                    ],
+                    stops: const [0, 0.8, 1],
                   ),
-                ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: safeAreaBottomPadding),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      widget.file.caption?.isNotEmpty ?? false
+                          ? Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                16,
+                                28,
+                                16,
+                                12,
+                              ),
+                              child: Text(
+                                widget.file.caption!,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 4,
+                                style: getEnteTextTheme(context)
+                                    .small
+                                    .copyWith(color: textBaseDark),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: children,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

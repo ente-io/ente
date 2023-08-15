@@ -18,7 +18,7 @@
   "yourAccountHasBeenDeleted": "Je account is verwijderd",
   "selectReason": "Selecteer reden",
   "deleteReason1": "Ik mis een belangrijke functie",
-  "deleteReason2": "De app of een bepaalde functie functioneert niet \nzoals ik verwacht",
+  "deleteReason2": "De app of een bepaalde functie functioneert niet zoals ik verwacht",
   "deleteReason3": "Ik heb een andere dienst gevonden die me beter bevalt",
   "deleteReason4": "Mijn reden wordt niet vermeld",
   "sendEmail": "E-mail versturen",
@@ -695,16 +695,6 @@
   "addToAlbum": "Toevoegen aan album",
   "delete": "Verwijderen",
   "hide": "Verbergen",
-  "itemSelectedCount": "{count} geselecteerd",
-  "@itemSelectedCount": {
-    "description": "Text to indicate number of items selected",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "share": "Delen",
   "unhideToAlbum": "Zichtbaar maken in album",
   "restoreToAlbum": "Terugzetten naar album",
@@ -1044,5 +1034,11 @@
   "iOSOkButton": "Oké",
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
-  }
+  },
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet",
+  "sharedWithYou": "Shared with you",
+  "sharedByYou": "Shared by you",
+  "inviteYourFriendsToEnte": "Invite your friends to ente",
+  "failedToDownloadVideo": "Failed to download video"
 }

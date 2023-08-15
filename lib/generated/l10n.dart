@@ -240,10 +240,10 @@ class S {
     );
   }
 
-  /// `The app or a certain feature does not \nbehave as I think it should`
+  /// `The app or a certain feature does not behave as I think it should`
   String get deleteReason2 {
     return Intl.message(
-      'The app or a certain feature does not \nbehave as I think it should',
+      'The app or a certain feature does not behave as I think it should',
       name: 'deleteReason2',
       desc: '',
       args: [],
@@ -295,6 +295,16 @@ class S {
     return Intl.message(
       'Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address.',
       name: 'deleteEmailRequest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ente <i>needs permission to</i> preserve your photos`
+  String get entePhotosPerm {
+    return Intl.message(
+      'ente <i>needs permission to</i> preserve your photos',
+      name: 'entePhotosPerm',
       desc: '',
       args: [],
     );
@@ -535,6 +545,16 @@ class S {
     return Intl.message(
       'Verify email',
       name: 'verifyEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To reset your password, please verify your email first.`
+  String get toResetVerifyEmail {
+    return Intl.message(
+      'To reset your password, please verify your email first.',
+      name: 'toResetVerifyEmail',
       desc: '',
       args: [],
     );
@@ -2908,6 +2928,28 @@ class S {
     );
   }
 
+  /// `{count, plural, =1 {Delete {count} item} other {Delete {count} items}}`
+  String deleteItemCount(num count) {
+    return Intl.plural(
+      count,
+      one: 'Delete $count item',
+      other: 'Delete $count items',
+      name: 'deleteItemCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{count} files, {formattedSize} each`
+  String duplicateItemsGroup(int count, String formattedSize) {
+    return Intl.message(
+      '$count files, $formattedSize each',
+      name: 'duplicateItemsGroup',
+      desc: 'Display the number of duplicate files and their size',
+      args: [count, formattedSize],
+    );
+  }
+
   /// `{count, plural, one{{count} year ago} other{{count} years ago}}`
   String yearsAgo(num count) {
     return Intl.plural(
@@ -3085,6 +3127,26 @@ class S {
     return Intl.message(
       'Please authenticate to change your password',
       name: 'authToChangeYourPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email verification`
+  String get emailVerificationToggle {
+    return Intl.message(
+      'Email verification',
+      name: 'emailVerificationToggle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please authenticate to change email verification`
+  String get authToChangeEmailVerificationSetting {
+    return Intl.message(
+      'Please authenticate to change email verification',
+      name: 'authToChangeEmailVerificationSetting',
       desc: '',
       args: [],
     );
@@ -3397,6 +3459,36 @@ class S {
     return Intl.message(
       'Referrals',
       name: 'referrals',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notifications`
+  String get notifications {
+    return Intl.message(
+      'Notifications',
+      name: 'notifications',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New shared photos`
+  String get sharedPhotoNotifications {
+    return Intl.message(
+      'New shared photos',
+      name: 'sharedPhotoNotifications',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Receive notifications when someone adds a photo to a shared album that you're a part of`
+  String get sharedPhotoNotificationsExplanation {
+    return Intl.message(
+      'Receive notifications when someone adds a photo to a shared album that you\'re a part of',
+      name: 'sharedPhotoNotificationsExplanation',
       desc: '',
       args: [],
     );
@@ -3807,6 +3899,16 @@ class S {
     return Intl.message(
       'Free trial valid till $endDate',
       name: 'freeTrialValidTill',
+      desc: '',
+      args: [endDate],
+    );
+  }
+
+  /// `Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.`
+  String playStoreFreeTrialValidTill(Object endDate) {
+    return Intl.message(
+      'Free trial valid till $endDate.\nYou can choose a paid plan afterwards.',
+      name: 'playStoreFreeTrialValidTill',
       desc: '',
       args: [endDate],
     );
@@ -4945,16 +5047,6 @@ class S {
     );
   }
 
-  /// `{count} selected`
-  String itemSelectedCount(int count) {
-    return Intl.message(
-      '$count selected',
-      name: 'itemSelectedCount',
-      desc: 'Text to indicate number of items selected',
-      args: [count],
-    );
-  }
-
   /// `Share`
   String get share {
     return Intl.message(
@@ -5279,6 +5371,26 @@ class S {
       'Rename album',
       name: 'renameAlbum',
       desc: '',
+      args: [],
+    );
+  }
+
+  /// `Convert to album`
+  String get convertToAlbum {
+    return Intl.message(
+      'Convert to album',
+      name: 'convertToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set cover`
+  String get setCover {
+    return Intl.message(
+      'Set cover',
+      name: 'setCover',
+      desc: 'Text to set cover photo for an album',
       args: [],
     );
   }
@@ -6777,6 +6889,16 @@ class S {
     );
   }
 
+  /// `Reset to default`
+  String get resetToDefault {
+    return Intl.message(
+      'Reset to default',
+      name: 'resetToDefault',
+      desc: 'Button text to reset cover photo to default',
+      args: [],
+    );
+  }
+
   /// `Edit`
   String get edit {
     return Intl.message(
@@ -7219,6 +7341,256 @@ class S {
       name: 'iOSOkButton',
       desc:
           'Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters.',
+      args: [],
+    );
+  }
+
+  /// `OpenStreetMap contributors`
+  String get openstreetmapContributors {
+    return Intl.message(
+      'OpenStreetMap contributors',
+      name: 'openstreetmapContributors',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hosted at OSM France`
+  String get hostedAtOsmFrance {
+    return Intl.message(
+      'Hosted at OSM France',
+      name: 'hostedAtOsmFrance',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Map`
+  String get map {
+    return Intl.message(
+      'Map',
+      name: 'map',
+      desc: 'Label for the map view',
+      args: [],
+    );
+  }
+
+  /// `Maps`
+  String get maps {
+    return Intl.message(
+      'Maps',
+      name: 'maps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable Maps`
+  String get enableMaps {
+    return Intl.message(
+      'Enable Maps',
+      name: 'enableMaps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.`
+  String get enableMapsDesc {
+    return Intl.message(
+      'This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.',
+      name: 'enableMapsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quick links`
+  String get quickLinks {
+    return Intl.message(
+      'Quick links',
+      name: 'quickLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select items to add`
+  String get selectItemsToAdd {
+    return Intl.message(
+      'Select items to add',
+      name: 'selectItemsToAdd',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add selected`
+  String get addSelected {
+    return Intl.message(
+      'Add selected',
+      name: 'addSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add from device`
+  String get addFromDevice {
+    return Intl.message(
+      'Add from device',
+      name: 'addFromDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add photos`
+  String get addPhotos {
+    return Intl.message(
+      'Add photos',
+      name: 'addPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No photos found here`
+  String get noPhotosFoundHere {
+    return Intl.message(
+      'No photos found here',
+      name: 'noPhotosFoundHere',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Zoom out to see photos`
+  String get zoomOutToSeePhotos {
+    return Intl.message(
+      'Zoom out to see photos',
+      name: 'zoomOutToSeePhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No images with location`
+  String get noImagesWithLocation {
+    return Intl.message(
+      'No images with location',
+      name: 'noImagesWithLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unpin album`
+  String get unpinAlbum {
+    return Intl.message(
+      'Unpin album',
+      name: 'unpinAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pin album`
+  String get pinAlbum {
+    return Intl.message(
+      'Pin album',
+      name: 'pinAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create`
+  String get create {
+    return Intl.message(
+      'Create',
+      name: 'create',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View all`
+  String get viewAll {
+    return Intl.message(
+      'View all',
+      name: 'viewAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing shared with you yet`
+  String get nothingSharedWithYouYet {
+    return Intl.message(
+      'Nothing shared with you yet',
+      name: 'nothingSharedWithYouYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No albums shared by you yet`
+  String get noAlbumsSharedByYouYet {
+    return Intl.message(
+      'No albums shared by you yet',
+      name: 'noAlbumsSharedByYouYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared with you`
+  String get sharedWithYou {
+    return Intl.message(
+      'Shared with you',
+      name: 'sharedWithYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared by you`
+  String get sharedByYou {
+    return Intl.message(
+      'Shared by you',
+      name: 'sharedByYou',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invite your friends to ente`
+  String get inviteYourFriendsToEnte {
+    return Intl.message(
+      'Invite your friends to ente',
+      name: 'inviteYourFriendsToEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to download video`
+  String get failedToDownloadVideo {
+    return Intl.message(
+      'Failed to download video',
+      name: 'failedToDownloadVideo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Crash reporting`
+  String get crashReporting {
+    return Intl.message(
+      'Crash reporting',
+      name: 'crashReporting',
+      desc: '',
       args: [],
     );
   }

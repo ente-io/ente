@@ -52,4 +52,6 @@ class InvalidStateError extends AssertionError {
 
 class KeyDerivationError extends Error {}
 
+class SrpSetupNotCompleteError extends Error {}
+
 class SharingNotPermittedForFreeAccountsError extends Error {}

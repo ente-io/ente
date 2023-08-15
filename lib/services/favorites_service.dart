@@ -66,6 +66,10 @@ class FavoritesService {
     }
   }
 
+  bool hasFavorites() {
+    return _cachedFavUploadedIDs.isNotEmpty;
+  }
+
   static FavoritesService instance = FavoritesService._privateConstructor();
 
   void clearCache() {

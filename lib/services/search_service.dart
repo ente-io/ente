@@ -6,7 +6,7 @@ import 'package:photos/data/years.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/collection_items.dart';
+import "package:photos/models/collection_items.dart";
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import "package:photos/models/local_entity_data.dart";
@@ -43,7 +43,7 @@ class SearchService {
     return CollectionsService.instance.getHiddenCollections();
   }
 
-  Future<List<File>> _getAllFiles() async {
+  Future<List<File>> getAllFiles() async {
     if (_cachedFilesFuture != null) {
       return _cachedFilesFuture!;
     }
@@ -62,24 +62,25 @@ class SearchService {
   Future<List<AlbumSearchResult>> getCollectionSearchResults(
     String query,
   ) async {
-    final List<CollectionWithThumbnail> collectionWithThumbnails =
-        await _collectionService.getCollectionsWithThumbnails(
-      includedOwnedByOthers: true,
+    final List<Collection> collections = _collectionService.getCollectionsForUI(
+      includedShared: true,
     );
 
     final List<AlbumSearchResult> collectionSearchResults = [];
 
-    for (var c in collectionWithThumbnails) {
+    for (var c in collections) {
       if (collectionSearchResults.length >= _maximumResultsLimit) {
         break;
       }
 
-      if (!c.collection.isHidden() &&
-          c.collection.type != CollectionType.uncategorized &&
-          c.collection.displayName.toLowerCase().contains(
+      if (!c.isHidden() &&
+          c.type != CollectionType.uncategorized &&
+          c.displayName.toLowerCase().contains(
                 query.toLowerCase(),
               )) {
-        collectionSearchResults.add(AlbumSearchResult(c));
+        final File? thumbnail = await _collectionService.getCover(c);
+        collectionSearchResults
+            .add(AlbumSearchResult(CollectionWithThumbnail(c, thumbnail)));
       }
     }
 
@@ -134,7 +135,7 @@ class SearchService {
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
-    final List<File> allFiles = await _getAllFiles();
+    final List<File> allFiles = await getAllFiles();
     for (var fileType in FileType.values) {
       final String fileTypeString = getHumanReadableString(fileType);
       if (fileTypeString.toLowerCase().startsWith(query.toLowerCase())) {
@@ -162,7 +163,7 @@ class SearchService {
       return searchResults;
     }
     final RegExp pattern = RegExp(query, caseSensitive: false);
-    final List<File> allFiles = await _getAllFiles();
+    final List<File> allFiles = await getAllFiles();
     final List<File> captionMatch = <File>[];
     final List<File> displayNameMatch = <File>[];
     for (File eachFile in allFiles) {
@@ -202,7 +203,7 @@ class SearchService {
       return searchResults;
     }
 
-    final List<File> allFiles = await _getAllFiles();
+    final List<File> allFiles = await getAllFiles();
     final Map<String, List<File>> resultMap = <String, List<File>>{};
 
     for (File eachFile in allFiles) {
@@ -246,7 +247,7 @@ class SearchService {
     if (result.isEmpty && !showNoLocationTag) {
       return searchResults;
     }
-    final allFiles = await _getAllFiles();
+    final allFiles = await getAllFiles();
     for (File file in allFiles) {
       if (file.hasLocation) {
         for (LocalEntity<LocationTag> tag in result.keys) {

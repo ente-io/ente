@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
@@ -25,6 +24,7 @@ class ThumbnailWidget extends StatefulWidget {
   final BoxFit fit;
   final bool shouldShowSyncStatus;
   final bool shouldShowArchiveStatus;
+  final bool shouldShowPinIcon;
   final bool showFavForAlbumOnly;
   final bool shouldShowLivePhotoOverlay;
   final Duration? diskLoadDeferDuration;
@@ -39,6 +39,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.shouldShowSyncStatus = true,
     this.shouldShowLivePhotoOverlay = false,
     this.shouldShowArchiveStatus = false,
+    this.shouldShowPinIcon = false,
     this.showFavForAlbumOnly = false,
     this.shouldShowOwnerAvatar = false,
     this.diskLoadDeferDuration,
@@ -175,21 +176,16 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     if (widget.shouldShowSyncStatus && widget.file!.uploadedFileID == null) {
       viewChildren.add(const UnSyncedIcon());
     }
-    if (kDebugMode &&
-        widget.shouldShowSyncStatus &&
-        widget.file!.uploadedFileID != null) {
-      if (widget.file!.localID != null) {
-        viewChildren.add(const DeviceIcon());
-      } else {
-        viewChildren.add(const CloudOnlyIcon());
-      }
-    }
+
     if (widget.file is TrashFile) {
       viewChildren.add(TrashedFileOverlayText(widget.file as TrashFile));
     }
     // todo: Move this icon overlay to the collection widget.
     if (widget.shouldShowArchiveStatus) {
       viewChildren.add(const ArchiveOverlayIcon());
+    }
+    if (widget.shouldShowPinIcon) {
+      viewChildren.add(const PinOverlayIcon());
     }
 
     return Stack(

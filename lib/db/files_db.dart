@@ -1,16 +1,17 @@
-import 'dart:developer' as dev;
 import 'dart:io' as io;
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/common_keys.dart";
+import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
@@ -49,6 +50,7 @@ class FilesDB {
   static const columnCreationTime = 'creation_time';
   static const columnModificationTime = 'modification_time';
   static const columnUpdationTime = 'updation_time';
+  static const columnAddedTime = 'added_time';
   static const columnEncryptedKey = 'encrypted_key';
   static const columnKeyDecryptionNonce = 'key_decryption_nonce';
   static const columnFileDecryptionHeader = 'file_decryption_header';
@@ -81,6 +83,7 @@ class FilesDB {
     ...addFileSizeColumn(),
     ...updateIndexes(),
     ...createEntityDataTable(),
+    ...addAddedTime(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -366,6 +369,17 @@ class FilesDB {
     ];
   }
 
+  static List<String> addAddedTime() {
+    return [
+      '''
+        ALTER TABLE $filesTable ADD COLUMN $columnAddedTime INTEGER NOT NULL DEFAULT -1;
+      ''',
+      '''
+        CREATE INDEX IF NOT EXISTS added_time_index ON $filesTable($columnAddedTime);
+      '''
+    ];
+  }
+
   Future<void> clearTable() async {
     final db = await instance.database;
     await db.delete(filesTable);
@@ -390,7 +404,7 @@ class FilesDB {
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
   }) async {
     final startTime = DateTime.now();
-    final db = await instance.database;
+    final db = await database;
     var batch = db.batch();
     int batchCounter = 0;
     for (File file in files) {
@@ -507,10 +521,10 @@ class FilesDB {
     int? limit,
     bool? asc,
     int visibility = visibleVisibility,
-    Set<int>? ignoredCollectionIDs,
+    DBFilterOptions? filterOptions,
     bool applyOwnerCheck = false,
   }) async {
-    final stopWatch = Stopwatch()..start();
+    final stopWatch = EnteWatch('getAllPendingOrUploadedFiles')..start();
     late String whereQuery;
     late List<Object?>? whereArgs;
     if (applyOwnerCheck) {
@@ -530,22 +544,19 @@ class FilesDB {
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       filesTable,
-      where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-          ' AND $columnMMdVisibility = ?',
-      whereArgs: [startTime, endTime, visibility],
+      where: whereQuery,
+      whereArgs: whereArgs,
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
     );
+    stopWatch.log('queryDone');
     final files = convertToFiles(results);
-    final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
-    dev.log(
-      "getAllPendingOrUploadedFiles time taken: ${stopWatch.elapsedMilliseconds} ms",
-    );
+    stopWatch.log('convertDone');
+    final filteredFiles = await applyDBFilters(files, filterOptions);
+    stopWatch.log('filteringDone');
     stopWatch.stop();
-    return FileLoadResult(deduplicatedFiles, files.length == limit);
+    return FileLoadResult(filteredFiles, files.length == limit);
   }
 
   Future<FileLoadResult> getAllLocalAndUploadedFiles(
@@ -554,7 +565,7 @@ class FilesDB {
     int ownerID, {
     int? limit,
     bool? asc,
-    Set<int>? ignoredCollectionIDs,
+    required DBFilterOptions filterOptions,
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -569,9 +580,8 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
-    return FileLoadResult(deduplicatedFiles, files.length == limit);
+    final List<File> filteredFiles = await applyDBFilters(files, filterOptions);
+    return FileLoadResult(filteredFiles, files.length == limit);
   }
 
   List<File> deduplicateByLocalID(List<File> files) {
@@ -586,43 +596,6 @@ class FilesDB {
         continue;
       }
       localIDs.add(id);
-      deduplicatedFiles.add(file);
-    }
-    return deduplicatedFiles;
-  }
-
-  List<File> _deduplicatedAndFilterIgnoredFiles(
-    List<File> files,
-    Set<int>? ignoredCollectionIDs,
-  ) {
-    final Set<int> uploadedFileIDs = <int>{};
-    // ignoredFileUploadIDs is to keep a track of files which are part of
-    // archived collection
-    final Set<int> ignoredFileUploadIDs = <int>{};
-    final List<File> deduplicatedFiles = [];
-    for (final file in files) {
-      final id = file.uploadedFileID;
-      final bool isFileUploaded = id != null && id != -1;
-      final bool isCollectionIgnored = ignoredCollectionIDs != null &&
-          ignoredCollectionIDs.contains(file.collectionID);
-      if (isCollectionIgnored || ignoredFileUploadIDs.contains(id)) {
-        if (isFileUploaded) {
-          ignoredFileUploadIDs.add(id);
-          // remove the file from the list of deduplicated files
-          if (uploadedFileIDs.contains(id)) {
-            deduplicatedFiles
-                .removeWhere((element) => element.uploadedFileID == id);
-            uploadedFileIDs.remove(id);
-          }
-        }
-        continue;
-      }
-      if (isFileUploaded && uploadedFileIDs.contains(id)) {
-        continue;
-      }
-      if (isFileUploaded) {
-        uploadedFileIDs.add(id);
-      }
       deduplicatedFiles.add(file);
     }
     return deduplicatedFiles;
@@ -667,6 +640,23 @@ class FilesDB {
     return files;
   }
 
+  Future<List<File>> getNewFilesInCollection(
+    int collectionID,
+    int addedTime,
+  ) async {
+    final db = await instance.database;
+    const String whereClause =
+        '$columnCollectionID = ? AND $columnAddedTime > ?';
+    final List<Object> whereArgs = [collectionID, addedTime];
+    final results = await db.query(
+      filesTable,
+      where: whereClause,
+      whereArgs: whereArgs,
+    );
+    final files = convertToFiles(results);
+    return files;
+  }
+
   Future<FileLoadResult> getFilesInCollections(
     List<int> collectionIDs,
     int startTime,
@@ -699,7 +689,8 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final dedupeResult = _deduplicatedAndFilterIgnoredFiles(files, {});
+    final dedupeResult =
+        await applyDBFilters(files, DBFilterOptions.dedupeOption);
     _logger.info("Fetched " + dedupeResult.length.toString() + " files");
     return FileLoadResult(files, files.length == limit);
   }
@@ -731,7 +722,10 @@ class FilesDB {
       orderBy: '$columnCreationTime ' + order,
     );
     final files = convertToFiles(results);
-    return _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+    return applyDBFilters(
+      files,
+      DBFilterOptions(ignoredCollectionIDs: ignoredCollectionIDs),
+    );
   }
 
   // Files which user added to a collection manually but they are not
@@ -1213,41 +1207,50 @@ class FilesDB {
     return result;
   }
 
-  Future<List<File>> getLatestCollectionFiles() async {
-    debugPrint("Fetching latestCollectionFiles from db");
-    const String query = '''
-      SELECT $filesTable.*
-      FROM $filesTable
-      INNER JOIN
-        (
-          SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
-          FROM $filesTable
-          WHERE 
-          ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1
-           AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS 
-           NOT -1)
-          GROUP BY $columnCollectionID
-        ) latest_files
-        ON $filesTable.$columnCollectionID = latest_files.$columnCollectionID
-        AND $filesTable.$columnCreationTime = latest_files.max_creation_time;
-  ''';
+  // getCollectionLatestFileTime returns map of collectionID to the max
+  // creationTime of the files in the collection.
+  Future<Map<int, int>> getCollectionIDToMaxCreationTime() async {
+    final enteWatch = EnteWatch("getCollectionIDToMaxCreationTime")..start();
     final db = await instance.database;
     final rows = await db.rawQuery(
-      query,
+      '''
+      SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
+      FROM $filesTable
+      WHERE 
+      ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1
+       AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS 
+       NOT -1)
+      GROUP BY $columnCollectionID;
+    ''',
     );
-    final files = convertToFiles(rows);
-    // TODO: Do this de-duplication within the SQL Query
-    final collectionMap = <int, File>{};
-    for (final file in files) {
-      if (collectionMap.containsKey(file.collectionID)) {
-        if (collectionMap[file.collectionID]!.updationTime! <
-            file.updationTime!) {
-          continue;
-        }
-      }
-      collectionMap[file.collectionID!] = file;
+    final result = <int, int>{};
+    for (final row in rows) {
+      result[row[columnCollectionID] as int] = row['max_creation_time'] as int;
     }
-    return collectionMap.values.toList();
+    enteWatch.log("query done");
+    return result;
+  }
+
+  // getCollectionFileFirstOrLast returns the first or last uploaded file in
+  // the collection based on the given collectionID and the order.
+  Future<File?> getCollectionFileFirstOrLast(
+    int collectionID,
+    bool sortAsc,
+  ) async {
+    final db = await instance.database;
+    final order = sortAsc ? 'ASC' : 'DESC';
+    final rows = await db.query(
+      filesTable,
+      where: '$columnCollectionID = ? AND $columnUploadedFileID IS NOT NULL',
+      whereArgs: [collectionID],
+      orderBy:
+          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+      limit: 1,
+    );
+    if (rows.isEmpty) {
+      return null;
+    }
+    return convertToFiles(rows).first;
   }
 
   Future<void> markForReUploadIfLocationMissing(List<String> localIDs) async {
@@ -1421,22 +1424,6 @@ class FilesDB {
     return result;
   }
 
-  // For given list of localIDs and ownerID, get a list of uploaded files
-  // owned by given user
-  Future<List<File>> getFilesForLocalIDs(
-    List<String> localIDs,
-    int ownerID,
-  ) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      filesTable,
-      where:
-          '$columnLocalID IN (${localIDs.map((e) => "'$e'").join(',')}) AND $columnOwnerID = ?',
-      whereArgs: [ownerID],
-    );
-    return _deduplicatedAndFilterIgnoredFiles(convertToFiles(rows), {});
-  }
-
   // For a given userID, return unique uploadedFileId for the given userID
   Future<List<int>> getUploadIDsWithMissingSize(int userId) async {
     final db = await instance.database;
@@ -1480,8 +1467,10 @@ class FilesDB {
     final List<Map<String, dynamic>> result =
         await db.query(filesTable, orderBy: '$columnCreationTime DESC');
     final List<File> files = convertToFiles(result);
-    final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, collectionsToIgnore);
+    final List<File> deduplicatedFiles = await applyDBFilters(
+      files,
+      DBFilterOptions(ignoredCollectionIDs: collectionsToIgnore),
+    );
     return deduplicatedFiles;
   }
 
@@ -1505,7 +1494,7 @@ class FilesDB {
     int endTime, {
     int? limit,
     bool? asc,
-    Set<int>? ignoredCollectionIDs,
+    required DBFilterOptions? filterOptions,
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -1521,9 +1510,8 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
-    return FileLoadResult(deduplicatedFiles, files.length == limit);
+    final List<File> filteredFiles = await applyDBFilters(files, filterOptions);
+    return FileLoadResult(filteredFiles, files.length == limit);
   }
 
   Map<String, dynamic> _getRowForFile(File file) {
@@ -1549,6 +1537,8 @@ class FilesDB {
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
+    row[columnAddedTime] =
+        file.addedTime ?? DateTime.now().microsecondsSinceEpoch;
     row[columnEncryptedKey] = file.encryptedKey;
     row[columnKeyDecryptionNonce] = file.keyDecryptionNonce;
     row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
@@ -1594,6 +1584,8 @@ class FilesDB {
     row[columnCreationTime] = file.creationTime;
     row[columnModificationTime] = file.modificationTime;
     row[columnUpdationTime] = file.updationTime;
+    row[columnAddedTime] =
+        file.addedTime ?? DateTime.now().microsecondsSinceEpoch;
     row[columnFileDecryptionHeader] = file.fileDecryptionHeader;
     row[columnThumbnailDecryptionHeader] = file.thumbnailDecryptionHeader;
     row[columnMetadataDecryptionHeader] = file.metadataDecryptionHeader;
@@ -1639,6 +1631,7 @@ class FilesDB {
     file.creationTime = row[columnCreationTime];
     file.modificationTime = row[columnModificationTime];
     file.updationTime = row[columnUpdationTime] ?? -1;
+    file.addedTime = row[columnAddedTime];
     file.encryptedKey = row[columnEncryptedKey];
     file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
     file.fileDecryptionHeader = row[columnFileDecryptionHeader];

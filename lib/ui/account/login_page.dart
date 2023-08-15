@@ -1,9 +1,13 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/errors.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/api/user/srp.dart";
 import 'package:photos/services/user_service.dart';
+import "package:photos/ui/account/login_pwd_verification_page.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
 import "package:styled_text/styled_text.dart";
@@ -20,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _emailIsValid = false;
   String? _email;
   Color? _emailInputFieldColor;
+  final Logger _logger = Logger('_LoginPageState');
 
   @override
   void initState() {
@@ -57,10 +62,32 @@ class _LoginPageState extends State<LoginPage> {
         isKeypadOpen: isKeypadOpen,
         isFormValid: _emailIsValid,
         buttonText: S.of(context).logInLabel,
-        onPressedFunction: () {
+        onPressedFunction: () async {
           UserService.instance.setEmail(_email!);
-          UserService.instance
-              .sendOtt(context, _email!, isCreateAccountScreen: false);
+          SrpAttributes? attr;
+          bool isEmailVerificationEnabled = true;
+          try {
+            attr = await UserService.instance.getSrpAttributes(_email!);
+            isEmailVerificationEnabled = attr.isEmailMFAEnabled;
+          } catch (e) {
+            if (e is! SrpSetupNotCompleteError) {
+              _logger.severe('Error getting SRP attributes', e);
+            }
+          }
+          if (attr != null && !isEmailVerificationEnabled) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return LoginPasswordVerificationPage(
+                    srpAttributes: attr!,
+                  );
+                },
+              ),
+            );
+          } else {
+            await UserService.instance
+                .sendOtt(context, _email!, isCreateAccountScreen: false);
+          }
           FocusScope.of(context).unfocus();
         },
       ),

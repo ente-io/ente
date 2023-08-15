@@ -125,11 +125,10 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
         filled: true,
         fillColor: colorScheme.fillFaint,
         hintText: hintText,
-        hintStyle: hintText == defaultHintText
-            ? textTheme.small.copyWith(color: colorScheme.textMuted)
-            : textTheme.small,
+        hintStyle:
+            hintText == defaultHintText ? textTheme.miniMuted : textTheme.mini,
       ),
-      style: textTheme.small,
+      style: textTheme.mini,
       cursorWidth: 1.5,
       maxLength: maxLength,
       minLines: 1,

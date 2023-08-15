@@ -18,7 +18,7 @@
   "yourAccountHasBeenDeleted": "Sua conta foi deletada",
   "selectReason": "Selecione o motivo",
   "deleteReason1": "Está faltando um recurso-chave que eu preciso",
-  "deleteReason2": "O aplicativo ou um determinado recurso não\nestá funcionando como eu acredito que deveria",
+  "deleteReason2": "O aplicativo ou um determinado recurso não está funcionando como eu acredito que deveria",
   "deleteReason3": "Encontrei outro serviço que gosto mais",
   "deleteReason4": "Meu motivo não está listado",
   "sendEmail": "Enviar e-mail",
@@ -266,5 +266,12 @@
   "update": "Atualização",
   "installManually": "Instalar manualmente",
   "criticalUpdateAvailable": "Atualização crítica disponível",
-  "updateAvailable": "Atualização disponível"
+  "updateAvailable": "Atualização disponível",
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "shareYourFirstAlbum": "Share your first album",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet",
+  "sharedWithYou": "Shared with you",
+  "sharedByYou": "Shared by you",
+  "inviteYourFriendsToEnte": "Invite your friends to ente",
+  "failedToDownloadVideo": "Failed to download video"
 }

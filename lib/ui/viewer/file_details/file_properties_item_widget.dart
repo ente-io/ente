@@ -56,7 +56,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
         Text(
           "${widget.exifData["megaPixels"]}MP  "
           "${widget.exifData["resolution"]}  ",
-          style: getEnteTextTheme(context).smallMuted,
+          style: getEnteTextTheme(context).miniMuted,
         ),
       );
     }
@@ -70,7 +70,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
     subSectionWidgets.add(
       Text(
         (fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB",
-        style: getEnteTextTheme(context).smallMuted,
+        style: getEnteTextTheme(context).miniMuted,
       ),
     );
 
@@ -80,7 +80,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
         subSectionWidgets.add(
           Text(
             secondsToHHMMSS(widget.file.duration!),
-            style: getEnteTextTheme(context).smallMuted,
+            style: getEnteTextTheme(context).miniMuted,
           ),
         );
       } else {
@@ -88,7 +88,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
         subSectionWidgets.add(
           Text(
             asset?.videoDuration.toString().split(".")[0] ?? "",
-            style: getEnteTextTheme(context).smallMuted,
+            style: getEnteTextTheme(context).miniMuted,
           ),
         );
       }

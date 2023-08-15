@@ -3,7 +3,6 @@ import "package:photos/app.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/billing_service.dart';
-import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
@@ -13,6 +12,7 @@ import "package:photos/ui/growth/referral_screen.dart";
 import 'package:photos/ui/settings/advanced_settings_screen.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/ui/settings/language_picker.dart";
+import "package:photos/ui/settings/notification_settings_screen.dart";
 import 'package:photos/utils/navigation_util.dart';
 
 class GeneralSectionWidget extends StatelessWidget {
@@ -28,8 +28,6 @@ class GeneralSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final bool showLanguageChangeOption =
-        FeatureFlagService.instance.isInternalUserOrDebugBuild();
     return Column(
       children: [
         sectionOptionSpacing,
@@ -87,6 +85,18 @@ class GeneralSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).notifications,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            _onNotificationsTapped(context);
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).advanced,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
@@ -105,6 +115,13 @@ class GeneralSectionWidget extends StatelessWidget {
     final userDetails =
         await UserService.instance.getUserDetailsV2(memoryCount: false);
     BillingService.instance.launchFamilyPortal(context, userDetails);
+  }
+
+  void _onNotificationsTapped(BuildContext context) {
+    routeToPage(
+      context,
+      const NotificationSettingsScreen(),
+    );
   }
 
   void _onAdvancedTapped(BuildContext context) {

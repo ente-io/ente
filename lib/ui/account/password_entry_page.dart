@@ -7,6 +7,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/key_gen_result.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
@@ -26,7 +27,8 @@ enum PasswordEntryMode {
 class PasswordEntryPage extends StatefulWidget {
   final PasswordEntryMode mode;
 
-  const PasswordEntryPage({this.mode = PasswordEntryMode.set, Key? key})
+  const PasswordEntryPage({required this.mode, Key?
+  key,})
       : super(key: key);
 
   @override
@@ -381,9 +383,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         createProgressDialog(context, S.of(context).generatingEncryptionKeys);
     await dialog.show();
     try {
-      final keyAttributes = await Configuration.instance
-          .updatePassword(_passwordController1.text);
-      await UserService.instance.updateKeyAttributes(keyAttributes);
+      final result = await Configuration.instance
+          .getAttributesForNewPassword(_passwordController1.text);
+      await UserService.instance.updateKeyAttributes(result.item1, result.item2);
       await dialog.hide();
       showShortToast(context, S.of(context).passwordChangedSuccessfully);
       Navigator.of(context).pop();
@@ -403,7 +405,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         createProgressDialog(context, S.of(context).generatingEncryptionKeys);
     await dialog.show();
     try {
-      final result = await Configuration.instance.generateKey(password);
+      final KeyGenResult result = await Configuration.instance.generateKey(password);
       Configuration.instance.setVolatilePassword(null);
       await dialog.hide();
       onDone() async {
@@ -412,6 +414,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         try {
           await UserService.instance.setAttributes(result);
           await dialog.hide();
+          Configuration.instance.setVolatilePassword(null);
           Bus.instance.fire(AccountConfiguredEvent());
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
