@@ -158,11 +158,18 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
     return;
   }
   final thumbnailDecryptionKey = await getFileKeyUsingBgWorker(file);
-  var data = await CryptoUtil.decryptChaCha(
-    encryptedThumbnail,
-    thumbnailDecryptionKey,
-    CryptoUtil.base642bin(file.thumbnailDecryptionHeader!),
-  );
+  Uint8List data;
+  try {
+    data = await CryptoUtil.decryptChaCha(
+      encryptedThumbnail,
+      thumbnailDecryptionKey,
+      CryptoUtil.base642bin(file.thumbnailDecryptionHeader!),
+    );
+  } catch (e, s) {
+    _logger.severe("Failed to decrypt thumbnail", e, s);
+    item.completer.completeError(e);
+    return;
+  }
   final thumbnailSize = data.length;
   if (thumbnailSize > thumbnailDataLimit) {
     data = await compressThumbnail(data);

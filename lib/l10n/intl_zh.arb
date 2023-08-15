@@ -24,6 +24,7 @@
   "sendEmail": "发送电子邮件",
   "deleteRequestSLAText": "您的请求将在 72 小时内处理。",
   "deleteEmailRequest": "请从您注册的电子邮件地址发送电子邮件到 <warning>account-delettion@ente.io</warning>。",
+  "entePhotosPerm": "ente <i>需要许可</i>才能保存您的照片",
   "ok": "OK",
   "createAccount": "创建账户",
   "createNewAccount": "创建新账号",
@@ -48,6 +49,7 @@
   "sorry": "抱歉",
   "noRecoveryKeyNoDecryption": "由于我们端到端加密协议的性质，如果没有您的密码或恢复密钥，您的数据将无法解密",
   "verifyEmail": "验证电子邮件",
+  "toResetVerifyEmail": "要重置您的密码，请先验证您的电子邮件。",
   "checkInboxAndSpamFolder": "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证",
   "tapToEnterCode": "点击以输入代码",
   "resendEmail": "重新发送电子邮件",
@@ -417,6 +419,22 @@
   "skip": "略过",
   "updatingFolderSelection": "正在更新文件夹选择...",
   "itemCount": "{count, plural, one{{count} 个项目} other{{count} 个项目}}",
+  "deleteItemCount": "{count, plural, =1 {删除 {count} 个项目} other {删除 {count} 个项目}}",
+  "duplicateItemsGroup": "{count} 个文件，每个文件 {formattedSize}",
+  "@duplicateItemsGroup": {
+    "description": "Display the number of duplicate files and their size",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "formattedSize": {
+        "example": "2.3 MB",
+        "type": "String"
+      }
+    }
+  },
   "yearsAgo": "{count, plural, one{{count} 年前} other{{count} 年前}}",
   "backupSettings": "备份设置",
   "backupOverMobileData": "通过移动数据备份",
@@ -435,6 +453,8 @@
   "authToChangeYourEmail": "请验证以更改您的电子邮件",
   "changePassword": "修改密码",
   "authToChangeYourPassword": "请验证以更改密码",
+  "emailVerificationToggle": "电子邮件验证",
+  "authToChangeEmailVerificationSetting": "请进行身份验证以更改电子邮件验证",
   "exportYourData": "导出您的数据",
   "logout": "退出登录",
   "authToInitiateAccountDeletion": "请进行身份验证以启动账户删除",
@@ -445,6 +465,7 @@
   "installManually": "手动安装",
   "criticalUpdateAvailable": "可用的关键更新",
   "updateAvailable": "有可用的更新",
+  "ignoreUpdate": "忽略",
   "downloading": "正在下载...",
   "theDownloadCouldNotBeCompleted": "未能完成下载",
   "retry": "重试",
@@ -489,6 +510,9 @@
   },
   "familyPlans": "家庭计划",
   "referrals": "推荐人",
+  "notifications": "通知",
+  "sharedPhotoNotifications": "新共享的照片",
+  "sharedPhotoNotificationsExplanation": "当有人将照片添加到您所属的共享相册时收到通知",
   "advanced": "高级设置",
   "general": "通用",
   "security": "安全",
@@ -537,6 +561,7 @@
   "faqs": "常见问题",
   "renewsOn": "在 {endDate} 前续费",
   "freeTrialValidTill": "免费试用有效期至 {endDate}",
+  "playStoreFreeTrialValidTill": "免费试用有效期至 {endDate}。\n之后您可以选择付费计划。",
   "subWillBeCancelledOn": "您的订阅将于 {endDate} 取消",
   "subscription": "订阅",
   "paymentDetails": "付款明细",
@@ -694,16 +719,6 @@
   "addToAlbum": "添加到相册",
   "delete": "删除",
   "hide": "隐藏",
-  "itemSelectedCount": "已选择 {count} 个",
-  "@itemSelectedCount": {
-    "description": "Text to indicate number of items selected",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "share": "分享",
   "unhideToAlbum": "取消隐藏到相册",
   "restoreToAlbum": "恢复到相册",
@@ -751,6 +766,11 @@
   },
   "deleteAll": "全部删除",
   "renameAlbum": "重命名相册",
+  "convertToAlbum": "转换为相册",
+  "setCover": "设置封面",
+  "@setCover": {
+    "description": "Text to set cover photo for an album"
+  },
   "sortAlbumsBy": "排序方式",
   "sortNewestFirst": "最新在前",
   "sortOldestFirst": "最旧在前",
@@ -798,6 +818,7 @@
   "deselectAll": "取消全选",
   "reviewDeduplicateItems": "请检查并删除您认为重复的项目。",
   "clubByCaptureTime": "按抓取时间断开",
+  "clubByFileName": "按文件名排序",
   "count": "计数",
   "totalSize": "总大小",
   "time": "时间",
@@ -949,6 +970,10 @@
   "centerPoint": "中心点",
   "pickCenterPoint": "选择中心点",
   "useSelectedPhoto": "使用所选照片",
+  "resetToDefault": "重置为默认设置",
+  "@resetToDefault": {
+    "description": "Button text to reset cover photo to default"
+  },
   "edit": "编辑",
   "deleteLocation": "删除位置",
   "rotateLeft": "向左旋转",
@@ -1043,14 +1068,36 @@
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
-  "nothingSharedWithYouYet": "Nothing shared with you yet",
-  "noAlbumsSharedByYouYet": "No albums shared by you yet",
-  "sharedWithYou": "Shared with you",
-  "sharedByYou": "Shared by you",
-  "inviteYourFriendsToEnte": "Invite your friends to ente",
-  "failedToDownloadVideo": "Failed to download video",
   "hiding": "Hiding...",
   "unhiding": "Unhiding...",
   "successfullyHid": "Successfully hid",
-  "successfullyUnhid": "Successfully unhid"
+  "successfullyUnhid": "Successfully unhid",
+  "openstreetmapContributors": "OpenStreetMap 贡献者",
+  "hostedAtOsmFrance": "法国 OSM 主办",
+  "map": "地图",
+  "@map": {
+    "description": "Label for the map view"
+  },
+  "maps": "地图",
+  "enableMaps": "启用地图",
+  "enableMapsDesc": "这将在世界地图上显示您的照片。\n\n该地图由 Open Street Map 托管，并且您的照片的确切位置永远不会共享。\n\n您可以随时从“设置”中禁用此功能。",
+  "quickLinks": "快速链接",
+  "selectItemsToAdd": "选择要添加的项目",
+  "addSelected": "添加所选项",
+  "addFromDevice": "从设备添加",
+  "addPhotos": "添加照片",
+  "noPhotosFoundHere": "这里没有找到照片",
+  "zoomOutToSeePhotos": "缩小以查看照片",
+  "noImagesWithLocation": "没有带有位置的图像",
+  "unpinAlbum": "取消置顶相册",
+  "pinAlbum": "置顶相册",
+  "create": "创建",
+  "viewAll": "查看全部",
+  "nothingSharedWithYouYet": "尚未与您共享任何内容",
+  "noAlbumsSharedByYouYet": "您尚未共享任何相册",
+  "sharedWithYou": "已与您共享",
+  "sharedByYou": "您共享的",
+  "inviteYourFriendsToEnte": "邀请您的好友加入ente",
+  "failedToDownloadVideo": "视频下载失败",
+  "crashReporting": "崩溃报告"
 }

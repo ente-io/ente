@@ -36,7 +36,6 @@ import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
-import "package:photos/ui/common/bottom_shadow.dart";
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/home/grant_permissions_widget.dart';
 import 'package:photos/ui/home/header_widget.dart';
@@ -404,12 +403,6 @@ class _HomeWidgetState extends State<HomeWidget> {
               ],
             );
           },
-        ),
-        const Align(
-          alignment: Alignment.bottomCenter,
-          child: BottomShadowWidget(
-            offsetDy: 36,
-          ),
         ),
         Align(
           alignment: Alignment.bottomCenter,

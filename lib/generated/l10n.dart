@@ -5047,16 +5047,6 @@ class S {
     );
   }
 
-  /// `{count} selected`
-  String itemSelectedCount(int count) {
-    return Intl.message(
-      '$count selected',
-      name: 'itemSelectedCount',
-      desc: 'Text to indicate number of items selected',
-      args: [count],
-    );
-  }
-
   /// `Share`
   String get share {
     return Intl.message(
@@ -7630,6 +7620,16 @@ class S {
     return Intl.message(
       'Successfully unhid',
       name: 'successfullyUnhid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Crash reporting`
+  String get crashReporting {
+    return Intl.message(
+      'Crash reporting',
+      name: 'crashReporting',
       desc: '',
       args: [],
     );

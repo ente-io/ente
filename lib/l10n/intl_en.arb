@@ -719,16 +719,6 @@
   "addToAlbum": "Add to album",
   "delete": "Delete",
   "hide": "Hide",
-  "itemSelectedCount": "{count} selected",
-  "@itemSelectedCount": {
-    "description": "Text to indicate number of items selected",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "share": "Share",
   "unhideToAlbum": "Unhide to album",
   "restoreToAlbum": "Restore to album",
@@ -1108,5 +1098,6 @@
   "hiding": "Hiding...",
   "unhiding": "Unhiding...",
   "successfullyHid": "Successfully hid",
-  "successfullyUnhid": "Successfully unhid"
+  "successfullyUnhid": "Successfully unhid",
+  "crashReporting": "Crash reporting"
 }

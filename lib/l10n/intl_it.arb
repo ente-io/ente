@@ -49,6 +49,7 @@
   "sorry": "Siamo spiacenti",
   "noRecoveryKeyNoDecryption": "A causa della natura del nostro protocollo di crittografia end-to-end, i tuoi dati non possono essere decifrati senza password o chiave di ripristino",
   "verifyEmail": "Verifica email",
+  "toResetVerifyEmail": "Per reimpostare la tua password, verifica prima la tua email.",
   "checkInboxAndSpamFolder": "Per favore, controlla la tua casella di posta (e lo spam) per completare la verifica",
   "tapToEnterCode": "Tocca per inserire il codice",
   "resendEmail": "Rinvia email",
@@ -452,6 +453,8 @@
   "authToChangeYourEmail": "Autenticati per cambiare la tua email",
   "changePassword": "Cambia password",
   "authToChangeYourPassword": "Autenticati per cambiare la tua password",
+  "emailVerificationToggle": "Verifica Email",
+  "authToChangeEmailVerificationSetting": "Autenticati per modificare la verifica email",
   "exportYourData": "Esporta dati",
   "logout": "Disconnetti",
   "authToInitiateAccountDeletion": "Autenticati per avviare l'eliminazione dell'account",
@@ -716,16 +719,6 @@
   "addToAlbum": "Aggiungi all'album",
   "delete": "Cancella",
   "hide": "Nascondi",
-  "itemSelectedCount": "{count} selezionati",
-  "@itemSelectedCount": {
-    "description": "Text to indicate number of items selected",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "share": "Condividi",
   "unhideToAlbum": "Non nascondere l'album",
   "restoreToAlbum": "Ripristina l'album",
@@ -773,6 +766,7 @@
   },
   "deleteAll": "Elimina tutto",
   "renameAlbum": "Rinomina album",
+  "convertToAlbum": "Converti in album",
   "setCover": "Imposta copertina",
   "@setCover": {
     "description": "Text to set cover photo for an album"
@@ -976,6 +970,10 @@
   "centerPoint": "Punto centrale",
   "pickCenterPoint": "Selezionare il punto centrale",
   "useSelectedPhoto": "Usa la foto selezionata",
+  "resetToDefault": "Ripristina predefinita",
+  "@resetToDefault": {
+    "description": "Button text to reset cover photo to default"
+  },
   "edit": "Modifica",
   "deleteLocation": "Elimina posizione",
   "rotateLeft": "Ruota a sinistra",
@@ -1079,16 +1077,27 @@
   "maps": "Mappe",
   "enableMaps": "Abilita le Mappe",
   "enableMapsDesc": "Questo mostrerà le tue foto su una mappa del mondo.\n\nQuesta mappa è ospitata da Open Street Map e le posizioni esatte delle tue foto non sono mai condivise.\n\nPuoi disabilitare questa funzionalità in qualsiasi momento, dalle Impostazioni.",
+  "quickLinks": "Collegamenti rapidi",
+  "selectItemsToAdd": "Seleziona gli elementi da aggiungere",
+  "addSelected": "Aggiungi selezionate",
+  "addFromDevice": "Aggiungi dal dispositivo",
+  "addPhotos": "Aggiungi foto",
+  "noPhotosFoundHere": "Nessuna foto trovata",
+  "zoomOutToSeePhotos": "Zoom indietro per visualizzare le foto",
+  "noImagesWithLocation": "Nessuna immagine con posizione",
   "unpinAlbum": "Non fissare album",
   "pinAlbum": "Fissa l'album",
-  "nothingSharedWithYouYet": "Nothing shared with you yet",
-  "noAlbumsSharedByYouYet": "No albums shared by you yet",
-  "sharedWithYou": "Shared with you",
-  "sharedByYou": "Shared by you",
-  "inviteYourFriendsToEnte": "Invite your friends to ente",
-  "failedToDownloadVideo": "Failed to download video",
   "hiding": "Hiding...",
   "unhiding": "Unhiding...",
   "successfullyHid": "Successfully hid",
-  "successfullyUnhid": "Successfully unhid"
+  "successfullyUnhid": "Successfully unhid",
+  "create": "Crea",
+  "viewAll": "Visualizza tutte",
+  "nothingSharedWithYouYet": "Ancora nulla di condiviso con te",
+  "noAlbumsSharedByYouYet": "Ancora nessun album condiviso da te",
+  "sharedWithYou": "Condivise con te",
+  "sharedByYou": "Condivise da te",
+  "inviteYourFriendsToEnte": "Invita i tuoi amici a ente",
+  "failedToDownloadVideo": "Download del video non riuscito",
+  "crashReporting": "Segnalazione di crash"
 }
