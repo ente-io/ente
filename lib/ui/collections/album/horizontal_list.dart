@@ -6,6 +6,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection.dart";
+import "package:photos/models/gallery_type.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -13,10 +14,12 @@ import "package:photos/ui/common/loading_widget.dart";
 class AlbumHorizontalList extends StatefulWidget {
   final Future<List<Collection>> Function() collectionsFuture;
   final bool? hasVerifiedLock;
+  final GalleryType? galleryType;
 
   const AlbumHorizontalList(
     this.collectionsFuture, {
     this.hasVerifiedLock,
+    this.galleryType,
     Key? key,
   }) : super(key: key);
 
@@ -89,6 +92,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                           120,
                           showFileCount: false,
                           hasVerifiedLock: widget.hasVerifiedLock,
+                          galleryType: widget.galleryType,
                         );
                       },
                     ),
