@@ -36,11 +36,13 @@ class IconButtonWidget extends StatefulWidget {
 class _IconButtonWidgetState extends State<IconButtonWidget> {
   Color? iconStateColor;
   @override
-  void didChangeDependencies() {
-    setState(() {
-      iconStateColor = null;
-    });
-    super.didChangeDependencies();
+  void didUpdateWidget(IconButtonWidget oldWidget) {
+    if (oldWidget.icon != widget.icon && mounted) {
+      setState(() {
+        iconStateColor = null;
+      });
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
