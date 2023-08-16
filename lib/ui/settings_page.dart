@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -18,12 +19,15 @@ import 'package:flutter/material.dart';
 
 class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
-  const SettingsPage({Key? key, required this.emailNotifier}) : super(key: key);
+  final _hasLoggedIn = Configuration.instance.hasConfiguredAccount();
 
+  SettingsPage({Key? key, required this.emailNotifier}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    UserService.instance.getUserDetailsV2().ignore();
+    if (_hasLoggedIn) {
+      UserService.instance.getUserDetailsV2().ignore();
+    }
     final enteColorScheme = getEnteColorScheme(context);
     return Scaffold(
       body: Container(
@@ -35,33 +39,37 @@ class SettingsPage extends StatelessWidget {
 
   Widget _getBody(BuildContext context, EnteColorScheme colorScheme) {
     final enteTextTheme = getEnteTextTheme(context);
+    const sectionSpacing = SizedBox(height: 8);
     final List<Widget> contents = [];
-    contents.add(
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: AnimatedBuilder(
-            // [AnimatedBuilder] accepts any [Listenable] subtype.
-            animation: emailNotifier,
-            builder: (BuildContext context, Widget? child) {
-              return Text(
-                emailNotifier.value!,
-                style: enteTextTheme.body.copyWith(
-                  color: colorScheme.textMuted,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              );
-            },
+    if (_hasLoggedIn) {
+      contents.add(
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: AnimatedBuilder(
+              // [AnimatedBuilder] accepts any [Listenable] subtype.
+              animation: emailNotifier,
+              builder: (BuildContext context, Widget? child) {
+                return Text(
+                  emailNotifier.value!,
+                  style: enteTextTheme.body.copyWith(
+                    color: colorScheme.textMuted,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
-    const sectionSpacing = SizedBox(height: 8);
-    contents.add(const SizedBox(height: 12));
+      );
+      contents.addAll([
+        const SizedBox(height: 12),
+        AccountSectionWidget(),
+        sectionSpacing,
+      ]);
+    }
     contents.addAll([
-      AccountSectionWidget(),
-      sectionSpacing,
       DataSectionWidget(),
       sectionSpacing,
       const SecuritySectionWidget(),
