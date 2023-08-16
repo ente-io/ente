@@ -221,7 +221,7 @@
   "after1Month": "Dopo un mese",
   "after1Year": "Dopo un anno",
   "manageParticipants": "Gestisci",
-  "albumParticipantsCount": "{count, plural, one {}=0 {Nessun partecipante} =1 {1 Partecipante} other {{count} Partecipanti}}",
+  "albumParticipantsCount": "{count, plural, =0 {Nessun partecipante} =1 {1 Partecipante} other {{count} Partecipanti}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -242,7 +242,7 @@
   "publicLinkEnabled": "Link pubblico abilitato",
   "shareALink": "Condividi un link",
   "sharedAlbumSectionDescription": "Crea album condivisi e collaborativi con altri utenti ente, inclusi utenti su piani gratuiti.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Condividi con persone specifiche} =1 {Condividi con una persona} other {Condividi con {numberOfPeople} persone}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Condividi con persone specifiche} =1 {Condividi con una persona} other {Condividi con {numberOfPeople} persone}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
