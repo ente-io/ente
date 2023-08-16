@@ -478,7 +478,7 @@ class _FileSelectionActionsWidgetState
         );
       }
     }
-
+    widget.selectedFiles.clearAll();
     if (mounted) {
       setState(() => {});
     }
