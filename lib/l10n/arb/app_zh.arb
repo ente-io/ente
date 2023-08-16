@@ -313,5 +313,7 @@
   "selectExportFormat": "选择导出格式",
   "exportDialogDesc": "加密导出将由您选择的密码保护。",
   "encrypted": "已加密",
-  "plainText": "纯文本"
+  "plainText": "纯文本",
+  "passwordToEncryptExport": "用来加密导出的密码",
+  "export": "导出"
 }
